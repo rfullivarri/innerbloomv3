@@ -5,8 +5,11 @@
   "scripts": {
     "build:web": "VITE_BUILD_TARGET=native pnpm --dir ../web build",
     "sync": "cap sync",
+    "sync:android": "pnpm run build:web && cap sync android",
     "sync:ios": "pnpm run build:web && cap sync ios",
+    "sync:all": "pnpm run build:web && cap sync",
     "open:ios": "cap open ios",
+    "open:android": "cap open android",
     "doctor": "cap doctor"
   },
   "dependencies": {
