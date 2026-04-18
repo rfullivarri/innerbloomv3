@@ -607,10 +607,10 @@ function TaskItem({
               )}
             />
             <div className="min-w-0 flex-1">
-              <div className="h-2.5 overflow-hidden rounded-full bg-violet-400/20">
+              <div className="h-2.5 overflow-hidden rounded-full" style={{ background: 'var(--gradient-innerbloom-soft)' }}>
                 <div
-                  className="h-2.5 rounded-full bg-gradient-to-r from-violet-400 via-fuchsia-400 to-sky-300 transition-all"
-                  style={{ width: `${pct}%` }}
+                  className="h-2.5 rounded-full transition-all"
+                  style={{ width: `${pct}%`, background: 'var(--gradient-innerbloom)' }}
                 />
               </div>
             </div>

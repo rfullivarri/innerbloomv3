@@ -71,6 +71,18 @@ Primary color is used for emphasis, interactive focus, active controls, and key 
 
 Accent color is used for secondary gradients, celebratory states, and mixed accent surfaces.
 
+### Inner Bloom gradient
+
+The **Inner Bloom gradient** is the canonical brand progress/CTA gradient taken from the onboarding GP bar.
+
+- CSS token: `--gradient-innerbloom`
+- Stops: `#a770ef 0%` -> `#cf8bf3 52%` -> `#fdb99b 100%`
+- Direction: `90deg`
+- Soft track token: `--gradient-innerbloom-soft`
+- CTA shadow token: `--shadow-innerbloom-cta`
+
+Use this gradient for primary brand progress bars, GP/onboarding-aligned progress fills, and primary Daily Quest CTAs. Avoid replacing it with cyan/sky/indigo gradients in core product progress surfaces unless the component is intentionally representing a separate metric color system.
+
 ### Neutral surfaces
 
 Use neutral stacks per theme:
@@ -362,4 +374,3 @@ If an implementation requires a new visual pattern, Codex must update this UI Sy
 - [ ] Uses existing token categories (surface, border, text, accent, overlay).
 - [ ] Reuses existing Dashboard-v3 card/chip/button/input structure.
 - [ ] No undocumented one-off style introduced.
-

@@ -1374,7 +1374,8 @@ function DailyQuestView({
             <button
               type="button"
               onClick={onOpenDailyQuest}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-[0_12px_28px_rgba(99,102,241,0.28)] transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+              style={{ background: 'var(--gradient-innerbloom)', boxShadow: 'var(--shadow-innerbloom-cta)' }}
             >
               Abrir Daily Quest
             </button>
@@ -1393,7 +1394,8 @@ function DailyQuestView({
               ].map((tip) => (
                 <li key={tip} className="flex items-start gap-2 text-[color:var(--color-text-muted)]">
                   <span
-                    className="mt-1 inline-block h-2 w-2 rounded-full bg-gradient-to-br from-sky-300 via-indigo-300 to-fuchsia-300 shadow-[0_0_12px_rgba(99,102,241,0.45)]"
+                    className="mt-1 inline-block h-2 w-2 rounded-full shadow-[0_0_12px_rgba(207,139,243,0.45)]"
+                    style={{ background: 'var(--gradient-innerbloom)' }}
                     aria-hidden
                   />
                   <span>{tip}</span>
