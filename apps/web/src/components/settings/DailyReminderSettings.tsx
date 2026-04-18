@@ -516,10 +516,14 @@ export function DailyReminderSettings({
               }))
             }
             disabled={isSaving}
-            className="reminder-scheduler-form__control w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-base text-white outline-none transition focus:border-white/40"
+            className="reminder-scheduler-form__control reminder-scheduler-form__time-select w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-base text-white outline-none transition focus:border-white/40"
           >
             {TIME_OPTIONS.map((time) => (
-              <option key={time} value={time}>
+              <option
+                key={time}
+                value={time}
+                className="reminder-scheduler-form__time-option"
+              >
                 {time}
               </option>
             ))}
