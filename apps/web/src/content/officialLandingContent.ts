@@ -62,7 +62,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
         'La mayoría de las apps de hábitos están diseñadas para una versión de vos que no existe: siempre con la misma energía, el mismo foco y la misma disciplina.\n\nPero la vida cambia. Y cuando el sistema no cambia con vos, no parece que falló el sistema: parece que fallaste vos.'
     },
     pillars: {
-      kicker: 'PILARES DE INNERBLOOM',
+      kicker: 'PROGRESO EN EQUILIBRIO',
       title: 'Crecer en una sola dirección desequilibra.',
       intro:
         'Innerbloom organiza tus hábitos en Body, Mind y Soul para que tu progreso no dependa solo de una parte de vos.',
@@ -299,7 +299,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
         'Most habit apps are designed for a version of you that doesn’t exist: always with the same energy, the same focus, and the same discipline.\n\nBut life changes. And when the system doesn’t change with you, it doesn’t feel like the system failed — it feels like you did.'
     },
     pillars: {
-      kicker: 'INNERBLOOM PILLARS',
+      kicker: 'PROGRESS IN BALANCE',
       title: 'Growing in only one direction creates imbalance.',
       intro:
         'Innerbloom organizes your habits across Body, Mind, and Soul so your progress doesn’t depend on only one part of you.',
