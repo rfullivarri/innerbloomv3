@@ -5312,6 +5312,58 @@
     color: #cbd5e1;
   }
 
+  .create-task-modal__dialog {
+    border-color: var(--color-border-subtle);
+    background: var(--color-slate-900-95);
+    color: var(--color-slate-100);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.65);
+  }
+
+  .create-task-modal__badge,
+  .create-task-modal__section-label,
+  .create-task-modal__field-label,
+  .create-task-modal__hint {
+    color: var(--color-slate-400);
+  }
+
+  .create-task-modal__title {
+    color: #ffffff;
+  }
+
+  .create-task-modal__description {
+    color: var(--color-slate-300);
+  }
+
+  .create-task-modal__control {
+    border-color: var(--color-border-subtle);
+    background-color: var(--color-overlay-1);
+    color: var(--color-slate-100);
+  }
+
+  .create-task-modal__control::placeholder {
+    color: var(--color-slate-400);
+  }
+
+  .create-task-modal__control:focus {
+    border-color: var(--color-border-soft);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+  }
+
+  .create-task-modal__option {
+    background: #0f172a;
+    color: var(--color-slate-100);
+  }
+
+  .create-task-modal__button-secondary {
+    border-color: var(--color-border-subtle);
+    color: var(--color-slate-200);
+  }
+
+  .create-task-modal__button-secondary:hover {
+    border-color: var(--color-border-soft);
+    color: #ffffff;
+  }
+
   .edit-task-modal__title {
     color: var(--color-text);
   }
@@ -5502,6 +5554,88 @@
     background: var(--editor-modal-primary-gradient);
     color: var(--editor-modal-primary-text);
     box-shadow: var(--editor-modal-primary-shadow);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-modal__dialog {
+    border-color: var(--editor-modal-secondary-border);
+    background: var(--editor-modal-surface);
+    color: var(--editor-modal-text);
+    box-shadow: var(--editor-modal-shadow);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-modal__badge,
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-modal__section-label,
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-modal__field-label {
+    color: var(--editor-modal-editable-label);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-modal__hint {
+    color: var(--editor-modal-label-muted);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-modal__title {
+    color: var(--editor-modal-text);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-modal__description {
+    color: var(--editor-modal-text-muted);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-modal__control {
+    background-color: var(--editor-modal-input-bg);
+    border-color: var(--editor-modal-input-border);
+    color: var(--editor-modal-text);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-modal__control::placeholder {
+    color: var(--editor-modal-input-placeholder);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-modal__control:focus {
+    border-color: var(--editor-modal-input-focus-border);
+    box-shadow: 0 0 0 3px var(--editor-modal-input-focus-ring);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-modal__option {
+    background: #ffffff;
+    color: var(--editor-modal-text);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-modal__button-secondary {
+    border-color: var(--editor-modal-secondary-border);
+    color: var(--editor-modal-secondary-text);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-modal__button-secondary:hover {
+    border-color: var(--editor-modal-secondary-hover-border);
+    background: var(--editor-modal-secondary-hover-bg);
+    color: var(--editor-modal-text);
   }
 
   :root[data-theme="dark"]

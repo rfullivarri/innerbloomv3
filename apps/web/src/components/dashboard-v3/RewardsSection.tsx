@@ -1164,10 +1164,10 @@ function AchievedShelf({
                           </div>
                           <div className="mt-auto space-y-1 pb-2">
                             <p className="text-lg font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</p>
-                            <p className="line-clamp-1 text-sm font-medium text-[color:var(--color-text)]/95">
+                            <p className="line-clamp-1 text-sm font-medium text-[color:var(--color-text-muted)]">
                               {habit.trait?.name ?? (language === 'es' ? 'Rasgo en progreso' : 'Trait in progress')}
                             </p>
-                            <p className="text-[11px] text-[color:var(--color-text-muted)]/75">
+                            <p className="text-[11px] text-[color:var(--color-text-subtle)]">
                               {language === 'es'
                                 ? 'Toca para ver más'
                                 : 'Tap to see more'}

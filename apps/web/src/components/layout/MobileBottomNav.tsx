@@ -88,7 +88,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                               ? "bg-[color:color-mix(in_srgb,var(--color-accent-secondary)_18%,var(--color-surface)_82%)] text-[color:color-mix(in_srgb,var(--color-accent-primary)_72%,var(--color-text)_28%)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-accent-secondary)_36%,transparent),0_12px_24px_color-mix(in_srgb,var(--color-accent-secondary)_20%,transparent)] dark:bg-[color:color-mix(in_srgb,var(--color-accent-secondary)_28%,var(--color-surface)_72%)] dark:text-[color:color-mix(in_srgb,#ffffff_86%,var(--color-accent-secondary)_14%)] dark:shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-accent-secondary)_42%,transparent),0_12px_26px_color-mix(in_srgb,var(--color-accent-secondary)_34%,transparent)]"
                               : "bg-transparent text-[color:color-mix(in_srgb,var(--color-text-muted)_86%,transparent)] shadow-none"
                             : isActive
-                              ? "bg-[color:rgba(255,255,255,0.92)] text-[color:var(--color-surface)]"
+                              ? "bg-[color:color-mix(in_srgb,var(--color-accent-primary)_18%,var(--color-surface)_82%)] text-[color:color-mix(in_srgb,var(--color-accent-primary)_76%,var(--color-text)_24%)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-accent-primary)_30%,transparent),0_10px_22px_color-mix(in_srgb,var(--color-accent-primary)_18%,transparent)] dark:bg-[color:color-mix(in_srgb,var(--color-accent-primary)_28%,var(--color-surface)_72%)] dark:text-[color:color-mix(in_srgb,#ffffff_84%,var(--color-accent-primary)_16%)] dark:shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-accent-primary)_36%,transparent),0_10px_24px_color-mix(in_srgb,var(--color-accent-primary)_30%,transparent)]"
                               : "bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]",
                         )}
                       >
@@ -100,7 +100,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                                 ? "text-[color:color-mix(in_srgb,var(--color-accent-primary)_72%,var(--color-text)_28%)] dark:text-[color:color-mix(in_srgb,#ffffff_86%,var(--color-accent-secondary)_14%)]"
                                 : "text-[color:color-mix(in_srgb,var(--color-text-muted)_92%,transparent)] dark:text-[color:color-mix(in_srgb,var(--color-text-muted)_86%,transparent)]"
                               : isActive
-                                ? "text-[color:var(--color-surface)]"
+                                ? "text-[color:color-mix(in_srgb,var(--color-accent-primary)_76%,var(--color-text)_24%)] dark:text-[color:color-mix(in_srgb,#ffffff_84%,var(--color-accent-primary)_16%)]"
                                 : "text-[color:var(--color-text-muted)] group-hover:text-[color:var(--color-text)]",
                           )}
                         >
