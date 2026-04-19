@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { BrandWordmark } from '../../components/layout/BrandWordmark';
 import { LabsWeeklyRhythmSystemSection } from '../../components/labs/LabsWeeklyRhythmSystemSection';
 import { OFFICIAL_DESIGN_TOKENS } from '../../content/officialDesignTokens';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 
 const CONTEXT_BLOCKS = {
   before: {
@@ -27,6 +28,7 @@ function ContextPreviewCard({ kicker, title, body }: { kicker: string; title: st
 }
 
 export default function LandingRhythmSectionMvpPage() {
+  const { language } = usePostLoginLanguage();
   const purpleAfternoon = OFFICIAL_DESIGN_TOKENS.gradients.find((gradient) => gradient.name === 'purple_afternoon');
   const landingBackground = purpleAfternoon
     ? {
@@ -71,7 +73,7 @@ export default function LandingRhythmSectionMvpPage() {
         </section>
 
         <ContextPreviewCard {...CONTEXT_BLOCKS.before} />
-        <LabsWeeklyRhythmSystemSection />
+        <LabsWeeklyRhythmSystemSection language={language} />
         <ContextPreviewCard {...CONTEXT_BLOCKS.after} />
       </div>
     </main>
