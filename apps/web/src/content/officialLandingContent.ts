@@ -25,8 +25,8 @@ export type LandingCopy = {
     alt: string;
   };
   problem: { title: string; body: string };
-  pillars: { title: string; intro: string; highlightLeadIn: string; highlight: string; items: Pillar[] };
-  modes: { title: string; intro: string; items: Mode[] };
+  pillars: { kicker: string; title: string; intro: string; highlightLeadIn: string; highlight: string; items: Pillar[] };
+  modes: { kicker: string; title: string; intro: string; items: Mode[] };
   how: { kicker: string; title: string; intro: string; closingLine: string; steps: HowTimelineStep[] };
   featureShowcase: { kicker: string; title: string; intro: string; items: FeatureShowcaseItem[] };
   demo: { title: string; text: string; banner: string; cta: string };
@@ -62,6 +62,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
         'La mayoría de las apps de hábitos están diseñadas para una versión de vos que no existe: siempre con la misma energía, el mismo foco y la misma disciplina.\n\nPero la vida cambia. Y cuando el sistema no cambia con vos, no parece que falló el sistema: parece que fallaste vos.'
     },
     pillars: {
+      kicker: 'PILARES DE INNERBLOOM',
       title: 'Crecer en una sola dirección desequilibra.',
       intro:
         'Innerbloom organiza tus hábitos en Body, Mind y Soul para que tu progreso no dependa solo de una parte de vos.',
@@ -86,32 +87,33 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     modes: {
-      title: 'Elige el ritmo que hoy puedes sostener',
-      intro: 'No todas las personas pueden sostener la misma frecuencia. Innerbloom ajusta la intensidad semanal de tu plan según tu capacidad actual: desde reconstruir tu base hasta avanzar con más carga y constancia.',
+      kicker: 'AVATARES DE INNERBLOOM',
+      title: 'Elige tu avatar dentro de Innerbloom',
+      intro: 'Tu avatar representa cómo te ves y te expresas dentro del sistema de Innerbloom. Elige el que mejor conecte con tu identidad hoy.',
       items: [
         {
           id: 'low',
-          title: '🪫 LOW MOOD',
-          state: 'sin energía, sobrecargado.',
-          goal: 'reconstruir tu base con la menor carga posible y hábitos fáciles de sostener.'
+          title: '🐈 RED CAT',
+          state: '',
+          goal: 'Un avatar vibrante para quienes quieren mostrarse con presencia y personalidad.'
         },
         {
           id: 'chill',
-          title: '🍃 CHILL MOOD',
-          state: 'relajado y estable.',
-          goal: 'mantener una constancia ligera y estable con una frecuencia que se sienta posible.'
+          title: '🐻 GREEN BEAR',
+          state: '',
+          goal: 'Un avatar sereno y cercano para quienes priorizan calidez y estabilidad.'
         },
         {
           id: 'flow',
-          title: '🌊 FLOW MOOD',
-          state: 'enfocado y en movimiento.',
-          goal: 'aprovechar tu impulso con una intensidad sostenible y dirección clara.'
+          title: '🦎 BLUE AMPHIBIAN',
+          state: '',
+          goal: 'Un avatar adaptable para quienes disfrutan explorar y moverse entre contextos.'
         },
         {
           id: 'evolve',
-          title: '🧬 EVOLVE MOOD',
-          state: 'ambicioso y determinado.',
-          goal: 'subir la intensidad con más estructura sin romper la consistencia que ya construiste.'
+          title: '🦉 VIOLET OWL',
+          state: '',
+          goal: 'Un avatar con carácter y visión para quienes quieren proyectar claridad y criterio.'
         }
       ]
     },
@@ -297,6 +299,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
         'Most habit apps are designed for a version of you that doesn’t exist: always with the same energy, the same focus, and the same discipline.\n\nBut life changes. And when the system doesn’t change with you, it doesn’t feel like the system failed — it feels like you did.'
     },
     pillars: {
+      kicker: 'INNERBLOOM PILLARS',
       title: 'Growing in only one direction creates imbalance.',
       intro:
         'Innerbloom organizes your habits across Body, Mind, and Soul so your progress doesn’t depend on only one part of you.',
@@ -321,32 +324,33 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     modes: {
-      title: 'Choose the pace you can sustain today',
-      intro: 'Not everyone can sustain the same frequency. Innerbloom adjusts your plan’s weekly intensity based on your current capacity: from rebuilding your base to moving forward with more load and consistency.',
+      kicker: 'INNERBLOOM AVATARS',
+      title: 'Choose your Innerbloom avatar',
+      intro: 'Your avatar represents how you show up inside the Innerbloom system. Pick the one that best reflects your identity right now.',
       items: [
         {
           id: 'low',
-          title: '🪫 LOW MOOD',
-          state: 'low energy, overwhelmed.',
-          goal: 'rebuild your base with the lightest possible load and habits you can actually sustain.'
+          title: '🐈 RED CAT',
+          state: '',
+          goal: 'A vibrant avatar for people who want to show up with presence and personality.'
         },
         {
           id: 'chill',
-          title: '🍃 CHILL MOOD',
-          state: 'relaxed and stable.',
-          goal: 'maintain light, steady consistency with a frequency that feels realistic.'
+          title: '🐻 GREEN BEAR',
+          state: '',
+          goal: 'A calm, friendly avatar for people who value warmth and steadiness.'
         },
         {
           id: 'flow',
-          title: '🌊 FLOW MOOD',
-          state: 'focused and moving.',
-          goal: 'use your momentum with sustainable intensity and clear direction.'
+          title: '🦎 BLUE AMPHIBIAN',
+          state: '',
+          goal: 'An adaptable avatar for people who like moving across contexts with ease.'
         },
         {
           id: 'evolve',
-          title: '🧬 EVOLVE MOOD',
-          state: 'ambitious and determined.',
-          goal: 'increase intensity with more structure without breaking the consistency you already built.'
+          title: '🦉 VIOLET OWL',
+          state: '',
+          goal: 'A thoughtful avatar for people who want to project clarity and perspective.'
         }
       ]
     },

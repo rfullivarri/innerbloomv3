@@ -70,28 +70,28 @@ const MODE_VISUALS: Record<Language, Record<'low' | 'chill' | 'flow' | 'evolve',
       avatarVideo: '/avatars/low-basic.mp4',
       avatarImage: '/LowMood.jpg',
       thumbImage: '/LowVertical.png',
-      avatarAlt: 'Low mode avatar with a resting facial expression.',
+      avatarAlt: 'Red Cat avatar in Innerbloom.',
       avatarLabel: 'Aligned with your energy'
     },
     chill: {
       avatarVideo: '/avatars/chill-basic.mp4',
       avatarImage: '/Chill-Mood.jpg',
       thumbImage: '/ChillVertical.png',
-      avatarAlt: 'Chill mode avatar with a calm expression.',
+      avatarAlt: 'Green Bear avatar in Innerbloom.',
       avatarLabel: 'Aligned with your energy'
     },
     flow: {
       avatarVideo: '/avatars/flow-basic.mp4',
       avatarImage: '/FlowMood.jpg',
       thumbImage: '/FlowVertical.png',
-      avatarAlt: 'Flow mode avatar in action with a focused expression.',
+      avatarAlt: 'Blue Amphibian avatar in Innerbloom.',
       avatarLabel: 'Aligned with your energy'
     },
     evolve: {
       avatarVideo: '/avatars/evolve-basic.mp4',
       avatarImage: '/Evolve-Mood.jpg',
       thumbImage: '/EvolveVertical.png',
-      avatarAlt: 'Evolve mode avatar with a determined expression.',
+      avatarAlt: 'Violet Owl avatar in Innerbloom.',
       avatarLabel: 'Aligned with your energy'
     }
   },
@@ -100,28 +100,28 @@ const MODE_VISUALS: Record<Language, Record<'low' | 'chill' | 'flow' | 'evolve',
       avatarVideo: '/avatars/low-basic.mp4',
       avatarImage: '/LowMood.jpg',
       thumbImage: '/LowVertical.png',
-      avatarAlt: 'Avatar del modo Low con expresión de descanso.',
+      avatarAlt: 'Avatar Red Cat dentro de Innerbloom.',
       avatarLabel: 'Alineado a tu energía'
     },
     chill: {
       avatarVideo: '/avatars/chill-basic.mp4',
       avatarImage: '/Chill-Mood.jpg',
       thumbImage: '/ChillVertical.png',
-      avatarAlt: 'Avatar del modo Chill con expresión de calma.',
+      avatarAlt: 'Avatar Green Bear dentro de Innerbloom.',
       avatarLabel: 'Alineado a tu energía'
     },
     flow: {
       avatarVideo: '/avatars/flow-basic.mp4',
       avatarImage: '/FlowMood.jpg',
       thumbImage: '/FlowVertical.png',
-      avatarAlt: 'Avatar del modo Flow en movimiento y enfocado.',
+      avatarAlt: 'Avatar Blue Amphibian dentro de Innerbloom.',
       avatarLabel: 'Alineado a tu energía'
     },
     evolve: {
       avatarVideo: '/avatars/evolve-basic.mp4',
       avatarImage: '/Evolve-Mood.jpg',
       thumbImage: '/EvolveVertical.png',
-      avatarAlt: 'Avatar del modo Evolve con expresión determinada.',
+      avatarAlt: 'Avatar Violet Owl dentro de Innerbloom.',
       avatarLabel: 'Alineado a tu energía'
     }
   }
@@ -283,24 +283,6 @@ export default function LandingPage() {
   const modeCount = copy.modes.items.length;
   const activeMode = copy.modes.items[activeModeIndex] ?? copy.modes.items[0];
   const activeVisual = MODE_VISUALS[language][activeMode.id];
-  const frequencyByMode: Record<Language, Record<typeof activeMode.id, string>> = {
-    es: {
-      low: '1×/semana',
-      chill: '2×/semana',
-      flow: '3×/semana',
-      evolve: '4×/semana'
-    },
-    en: {
-      low: '1×/week',
-      chill: '2×/week',
-      flow: '3×/week',
-      evolve: '4×/week'
-    }
-  };
-  const modeFrequency = frequencyByMode[language][activeMode.id];
-  const modeStateLabel = language === 'es' ? 'Estado' : 'State';
-  const modeObjectiveLabel = language === 'es' ? 'Objetivo' : 'Objective';
-
   useEffect(() => {
     console.info('[landing][ga4-debug] cookie consent read on load', initialCookieConsentStateRef.current);
   }, []);
@@ -830,6 +812,7 @@ export default function LandingPage() {
 
         <section className="why section-pad reveal-on-scroll" id="pillars">
           <div className="container narrow">
+            <p className="section-kicker">{copy.pillars.kicker}</p>
             <AdaptiveText as="h2" className="pillars-title">{copy.pillars.title}</AdaptiveText>
             <AdaptiveText as="p" className="section-sub pillars-intro">{copy.pillars.intro}</AdaptiveText>
             <div className="cards grid-3">
@@ -874,8 +857,9 @@ export default function LandingPage() {
 
         <section ref={modesSectionRef} className="modes section-pad reveal-on-scroll" id="modes">
           <div className="container">
-            <AdaptiveText as="h2">{copy.modes.title}</AdaptiveText>
-            <AdaptiveText as="p" className="section-sub">{copy.modes.intro}</AdaptiveText>
+            <p className="section-kicker">{copy.modes.kicker}</p>
+            <AdaptiveText as="h2" className="modes-title">{copy.modes.title}</AdaptiveText>
+            <AdaptiveText as="p" className="section-sub modes-intro">{copy.modes.intro}</AdaptiveText>
             <div
               className="modes-carousel"
               aria-live="polite"
@@ -884,7 +868,7 @@ export default function LandingPage() {
               <div
                 className="mode-thumbs"
                 role="listbox"
-                aria-label={language === 'es' ? 'Elegir modo' : 'Choose mode'}
+                aria-label={language === 'es' ? 'Elegir avatar' : 'Choose avatar'}
                 onTouchStart={handleModeThumbTouchStart}
                 onTouchEnd={handleModeThumbTouchEnd}
               >
@@ -911,13 +895,6 @@ export default function LandingPage() {
               <article className={`card mode mode-main mode-${activeMode.id} fade-item`}>
                 <header className="mode-header">
                   <div className="mode-title">{activeMode.title}</div>
-                  <div className="mode-meta">
-                    <p className="mode-meta-item">
-                      <span className="mode-meta-label">{modeStateLabel}</span>
-                      <span className="mode-meta-copy">{activeMode.state}</span>
-                    </p>
-                    <span className="mode-frequency-chip">{modeFrequency}</span>
-                  </div>
                 </header>
                 <figure className="mode-media">
                   <video
@@ -932,10 +909,7 @@ export default function LandingPage() {
                   />
                   <figcaption className="mode-media-caption">{activeVisual.avatarLabel}</figcaption>
                 </figure>
-                <div className="mode-goal-block">
-                  <p className="mode-goal-label">{modeObjectiveLabel}</p>
-                  <p className="mode-goal-copy">{activeMode.goal}</p>
-                </div>
+                <p className="mode-avatar-copy">{activeMode.goal}</p>
               </article>
             </div>
           </div>
