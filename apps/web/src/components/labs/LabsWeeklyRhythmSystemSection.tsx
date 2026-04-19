@@ -1,5 +1,7 @@
 import type { PostLoginLanguage } from '../../i18n/postLoginLanguage';
 
+type RhythmSectionLanguage = Extract<PostLoginLanguage, 'en' | 'es'>;
+
 const INNERBLOOM_PREMIUM_GRADIENT =
   'linear-gradient(90deg, rgba(164, 109, 255, 0.98) 0%, rgba(204, 141, 255, 0.97) 52%, rgba(246, 187, 164, 0.96) 100%)';
 
@@ -99,18 +101,23 @@ const RHYTHM_SECTION_COPY = {
 } as const;
 
 interface LabsWeeklyRhythmSystemSectionProps {
-  language?: PostLoginLanguage;
+  language?: RhythmSectionLanguage;
+  headingAlignment?: 'left' | 'center';
 }
 
-export function LabsWeeklyRhythmSystemSection({ language = 'en' }: LabsWeeklyRhythmSystemSectionProps) {
+export function LabsWeeklyRhythmSystemSection({
+  language = 'en',
+  headingAlignment = 'left',
+}: LabsWeeklyRhythmSystemSectionProps) {
   const copy = RHYTHM_SECTION_COPY[language];
+  const isCentered = headingAlignment === 'center';
 
   return (
     <section aria-labelledby="labs-weekly-rhythm-title" className="relative py-2">
       <div className="pointer-events-none absolute -top-12 left-1/2 h-36 w-[80%] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(176,122,255,0.24),rgba(176,122,255,0.06)_52%,transparent_78%)] blur-2xl" />
 
       <div className="relative space-y-8">
-        <header className="max-w-3xl space-y-3">
+        <header className={`max-w-3xl space-y-3 ${isCentered ? 'mx-auto text-center' : ''}`}>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">{copy.kicker}</p>
           <h2 id="labs-weekly-rhythm-title" className="text-3xl font-semibold tracking-[-0.03em] text-white md:text-4xl">
             {copy.title}
