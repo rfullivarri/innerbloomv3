@@ -641,6 +641,22 @@ export function DailyReminderSettings({
         <ToastBanner tone="error" message={LOAD_STALE_MESSAGE} />
       ) : null}
 
+      {shouldShowNativeTestNotification ? (
+        <button
+          type="button"
+          disabled={isSendingTestNotification || isSaving}
+          onClick={handleSendTestNotification}
+          className={combine(
+            "reminder-scheduler-form__test-button inline-flex w-full items-center justify-center rounded-full border px-5 py-3 text-xs font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+            isSendingTestNotification || isSaving
+              ? "cursor-not-allowed border-white/10 bg-white/5 text-text-subtle"
+              : "border-cyan-200/60 bg-cyan-400/10 text-cyan-100 shadow-[0_12px_30px_rgba(34,211,238,0.16)] hover:border-cyan-200/90 hover:bg-cyan-400/20",
+          )}
+        >
+          {isSendingTestNotification ? "Probando…" : "Probar notificación"}
+        </button>
+      ) : null}
+
       <div className="reminder-scheduler-form__footer flex flex-wrap items-center justify-between gap-4 border-t border-white/5 pt-4 text-sm text-text-subtle">
         <p className="reminder-scheduler-form__footer-note">
           {isNativeApp
@@ -648,21 +664,6 @@ export function DailyReminderSettings({
             : "Los cambios se aplican solo cuando presionás guardar."}
         </p>
         <div className="flex flex-wrap items-center gap-3">
-          {shouldShowNativeTestNotification ? (
-            <button
-              type="button"
-              disabled={isSendingTestNotification || isSaving}
-              onClick={handleSendTestNotification}
-              className={combine(
-                "inline-flex items-center rounded-full border px-5 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
-                isSendingTestNotification || isSaving
-                  ? "cursor-not-allowed border-white/10 bg-white/5 text-text-subtle"
-                  : "border-cyan-200/60 bg-cyan-400/10 text-cyan-100 hover:border-cyan-200/90 hover:bg-cyan-400/20",
-              )}
-            >
-              {isSendingTestNotification ? "Probando…" : "Probar notificación"}
-            </button>
-          ) : null}
           <button
             type="submit"
             disabled={!canSubmit}
