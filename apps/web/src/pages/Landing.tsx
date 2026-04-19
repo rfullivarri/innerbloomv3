@@ -820,13 +820,13 @@ export default function LandingPage() {
                 const { definition, examples } = splitPillarCopy(pillar.copy, language);
                 return (
                   <article
-                    className="card pillar-card fade-item"
+                    className="card card--hero-glass pillar-card fade-item"
                     key={pillar.title}
                     style={{ '--delay': `${index * 90}ms` } as CSSProperties}
                   >
                     <h3 className="pillar-heading">
                       <span className="pillar-emoji" aria-hidden>{pillar.emoji}</span>
-                      <span>{pillar.title}</span>
+                      <span className="concept-term concept-term--pillar">{pillar.title}</span>
                     </h3>
                     <p className="pillar-definition">{definition}</p>
                     {examples.length > 0 ? (
@@ -892,7 +892,7 @@ export default function LandingPage() {
                 })}
               </div>
 
-              <article className={`card mode mode-main mode-${activeMode.id} fade-item`}>
+              <article className={`card card--hero-glass mode mode-main mode-${activeMode.id} fade-item`}>
                 <header className="mode-header">
                   <div className="mode-title">{activeMode.title}</div>
                 </header>
