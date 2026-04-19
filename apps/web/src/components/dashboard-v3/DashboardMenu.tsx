@@ -240,6 +240,7 @@ export function DashboardMenu({
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const toastTimeoutRef = useRef<number | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const avatarScrollRef = useRef<HTMLDivElement | null>(null);
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
   const [isPlansOpen, setIsPlansOpen] = useState(false);
   const [isModerationOpen, setIsModerationOpen] = useState(true);
@@ -450,6 +451,18 @@ export function DashboardMenu({
     setAvatarError(null);
     setIsAvatarOpen(true);
   }, [currentAvatarSelection.avatarId]);
+
+  useEffect(() => {
+    if (!isAvatarOpen) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      avatarScrollRef.current?.scrollTo({ top: 0 });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [isAvatarOpen]);
 
   const handleCloseAvatar = useCallback(() => {
     if (isSavingAvatar) {
@@ -1258,7 +1271,7 @@ export function DashboardMenu({
                         </button>
                       </div>
 
-                      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 [-webkit-overflow-scrolling:touch]">
+                      <div ref={avatarScrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 [-webkit-overflow-scrolling:touch]">
                         <div className="space-y-3">
                           <div className="px-1 py-2 text-center">
                             <img
