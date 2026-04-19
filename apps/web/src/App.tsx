@@ -31,7 +31,7 @@ import { useGa4FunnelTracking } from './hooks/useGa4FunnelTracking';
 import { isNativeCapacitorPlatform } from './mobile/capacitor';
 import { writeMobileDebug } from './mobile/mobileDebug';
 import { MobileAppEntry } from './mobile/MobileAppEntry';
-import { cancelNativeDailyReminderNotification, syncNativeDailyReminderNotification } from './mobile/localNotifications';
+import { syncNativeDailyReminderNotification } from './mobile/localNotifications';
 import {
   ensureFreshMobileAuthSession,
   getMobileAuthSession,
@@ -173,7 +173,15 @@ function NativeDailyReminderSyncBridge() {
 
     void (async () => {
       if (!hasSession || forceNativeWelcome) {
-        await cancelNativeDailyReminderNotification();
+        console.info('[mobile-reminder] sync skipped without clearing scheduled reminder', {
+          hasSession,
+          forceNativeWelcome,
+        });
+        writeMobileDebug('mobile-reminder:sync-skip-no-session-preserve', {
+          hasSession,
+          forceNativeWelcome,
+          at: Date.now(),
+        });
         return;
       }
 

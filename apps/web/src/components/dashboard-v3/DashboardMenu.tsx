@@ -570,7 +570,6 @@ export function DashboardMenu({
   const handleSignOut = useCallback(async () => {
     handleClose();
     if (isNativeCapacitorPlatform()) {
-      await cancelNativeDailyReminderNotification();
       clearMobileAuthSession("manual-sign-out");
       setForceNativeWelcome(true);
       setApiAuthTokenProvider(null);
