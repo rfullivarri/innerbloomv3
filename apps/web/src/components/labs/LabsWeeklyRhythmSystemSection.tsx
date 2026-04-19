@@ -118,11 +118,11 @@ export function LabsWeeklyRhythmSystemSection({
 
       <div className="relative space-y-8">
         <header className={`max-w-3xl space-y-3 ${isCentered ? 'mx-auto text-center' : ''}`}>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">{copy.kicker}</p>
-          <h2 id="labs-weekly-rhythm-title" className="text-3xl font-semibold tracking-[-0.03em] text-white md:text-4xl">
+          <p className="section-kicker">{copy.kicker}</p>
+          <h2 id="labs-weekly-rhythm-title" className="rhythm-heading-title text-3xl font-semibold tracking-[-0.03em] text-white md:text-4xl">
             {copy.title}
           </h2>
-          <p className="text-sm leading-relaxed text-white/84 md:text-base">{copy.description}</p>
+          <p className="rhythm-heading-sub text-sm leading-relaxed text-white/84 md:text-base">{copy.description}</p>
         </header>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -161,7 +161,7 @@ export function LabsWeeklyRhythmSystemSection({
                 {card.chips.map((chip) => (
                   <li
                     key={chip}
-                    className="rounded-full bg-[linear-gradient(140deg,rgba(177,121,255,0.24),rgba(255,255,255,0.08))] px-2.5 py-1 text-[0.64rem] font-semibold uppercase tracking-[0.08em] text-[#f2e4ff]"
+                    className="rhythm-lower-chip rounded-full px-2.5 py-1 text-[0.64rem] font-semibold uppercase tracking-[0.08em]"
                   >
                     {chip}
                   </li>

@@ -540,6 +540,16 @@
   margin: 0 0 24px;
 }
 
+.landing .section-kicker {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(186, 201, 229, 0.88);
+  text-align: center;
+}
+
 .landing .truth-problem {
   position: relative;
   padding: clamp(78px, 8.8vw, 116px) 0 clamp(58px, 6.9vw, 90px);
@@ -657,13 +667,14 @@
 }
 
 .landing .pillars-title {
-  font-size: clamp(2.2rem, 1.8vw + 1.5rem, 3rem);
+  font-size: clamp(2rem, 1.2vw + 1.5rem, 2.5rem);
   font-weight: 600;
 }
 
 .landing .pillars-intro {
-  font-size: clamp(1rem, 0.4vw + 0.95rem, 1.2rem);
-  color: rgba(215, 231, 255, 0.88);
+  font-size: clamp(0.96rem, 0.35vw + 0.92rem, 1.06rem);
+  color: rgba(214, 229, 255, 0.88);
+  margin: 0 auto 24px;
 }
 
 .landing .grid-3 {
@@ -742,6 +753,8 @@
   min-height: 390px;
   border-radius: var(--landing-glass-radius-lg);
   padding: 18.15px;
+  display: flex;
+  flex-direction: column;
 }
 
 .landing .pillar-heading {
@@ -774,10 +787,11 @@
   line-height: 1.55;
   text-align: left;
   color: rgba(232, 242, 255, 0.97);
+  flex: 1;
 }
 
 .landing .pillar-examples {
-  margin-top: 14px;
+  margin-top: auto;
   padding-top: 14px;
   display: grid;
   gap: 10px;
@@ -828,6 +842,14 @@
   margin: 8px auto 0;
 }
 
+.landing .modes-title {
+  font-size: clamp(2rem, 1.2vw + 1.5rem, 2.5rem);
+}
+
+.landing .modes-intro {
+  font-size: clamp(0.96rem, 0.35vw + 0.92rem, 1.06rem);
+}
+
 .landing .mode-main {
   border-radius: var(--landing-glass-radius-lg);
   border-left-width: 4px;
@@ -846,36 +868,7 @@
 
 .landing .mode-header {
   display: grid;
-  gap: 10px;
-}
-
-.landing .mode-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.landing .mode-meta-item {
-  margin: 0;
-  display: grid;
-  gap: 2px;
-}
-
-.landing .mode-meta-label {
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #9aa9c8;
-  font-size: 0.64rem;
-  font-weight: 700;
-}
-
-.landing .mode-meta-copy {
-  margin: 0;
-  color: #e8f1ff;
-  font-size: 0.85rem;
-  line-height: 1.3;
+  gap: 4px;
 }
 
 .landing .mode-media {
@@ -946,77 +939,31 @@
   transform: scale(1.03);
 }
 
-.landing .mode-frequency-chip {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  margin-left: auto;
-  border-radius: 999px;
-  border: 1px solid rgba(125, 211, 252, 0.42);
-  background: rgba(56, 189, 248, 0.14);
-  color: #dff4ff;
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 5px 10px;
-}
-
-.landing .mode-goal-block {
-  border-top: 1px solid rgba(191, 219, 254, 0.14);
-  padding-top: 12px;
-  display: grid;
-  gap: 6px;
-}
-
-.landing .mode-goal-label {
+.landing .mode-avatar-copy {
   margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: #b7bfd4;
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.landing .mode-goal-copy {
-  margin: 0;
-  color: #e8f1ff;
-  line-height: 1.45;
+  color: rgba(226, 236, 252, 0.94);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-wrap: pretty;
 }
 
 .landing .mode-low {
   border-left: 3px solid var(--low);
 }
 
-.landing .mode-low .mode-frequency-chip {
-  border-color: color-mix(in oklab, var(--low) 72%, #ffffff 28%);
-  background: color-mix(in oklab, var(--low) 22%, transparent);
-}
-
 .landing .mode-chill {
   border-left: 3px solid var(--chill);
-}
-
-.landing .mode-chill .mode-frequency-chip {
-  border-color: color-mix(in oklab, var(--chill) 72%, #ffffff 28%);
-  background: color-mix(in oklab, var(--chill) 22%, transparent);
 }
 
 .landing .mode-flow {
   border-left: 3px solid var(--flow);
 }
 
-.landing .mode-flow .mode-frequency-chip {
-  border-color: color-mix(in oklab, var(--flow) 72%, #ffffff 28%);
-  background: color-mix(in oklab, var(--flow) 22%, transparent);
-}
 
 .landing .mode-evolve {
   border-left: 3px solid var(--evolve);
 }
 
-.landing .mode-evolve .mode-frequency-chip {
-  border-color: color-mix(in oklab, var(--evolve) 72%, #ffffff 28%);
-  background: color-mix(in oklab, var(--evolve) 22%, transparent);
-}
 .landing .mode-title {
   font-weight: 900;
   display: flex;
@@ -1049,6 +996,25 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(186, 201, 229, 0.88);
+}
+
+.landing .rhythm-lower-chip {
+  border: 1px solid rgba(211, 226, 255, 0.28);
+  background: rgba(186, 206, 255, 0.12);
+  color: rgba(235, 245, 255, 0.94);
+  font-size: 0.68rem;
+  line-height: 1.2;
+}
+
+.landing .rhythm-heading-title {
+  margin: 0 0 8px;
+  font-size: clamp(2rem, 1.2vw + 1.5rem, 2.5rem);
+}
+
+.landing .rhythm-heading-sub {
+  margin: 0 0 24px;
+  font-size: clamp(0.96rem, 0.35vw + 0.92rem, 1.06rem);
+  color: rgba(214, 229, 255, 0.88);
 }
 
 .landing .how-intro {
@@ -2634,6 +2600,31 @@
   .landing .grid-2,
   .landing .pricing-grid {
     grid-template-columns: 1fr;
+  }
+
+  .landing .pillar-card {
+    min-height: 0;
+    padding: 20px 18px;
+    gap: 8px;
+  }
+
+  .landing .pillar-heading {
+    font-size: clamp(1.48rem, 2.6vw + 0.95rem, 1.7rem);
+  }
+
+  .landing .pillar-definition {
+    font-size: clamp(1rem, 1.8vw + 0.8rem, 1.1rem);
+    line-height: 1.58;
+  }
+
+  .landing .pillar-examples-label {
+    font-size: 0.78rem;
+    letter-spacing: 0.13em;
+  }
+
+  .landing .pillar-chip {
+    font-size: 0.84rem;
+    padding: 5px 12px;
   }
 
   .landing .modes-carousel {
