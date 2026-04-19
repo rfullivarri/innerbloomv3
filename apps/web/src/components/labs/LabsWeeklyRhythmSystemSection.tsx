@@ -129,7 +129,7 @@ export function LabsWeeklyRhythmSystemSection({
           {copy.cards.map((card) => (
             <article
               key={card.id}
-              className="group relative flex min-h-[20.5rem] h-full flex-col gap-5 rounded-3xl bg-[linear-gradient(168deg,rgba(255,255,255,0.09),rgba(15,12,34,0.26))] p-5 shadow-[0_16px_36px_rgba(17,10,37,0.24),inset_0_1px_0_rgba(255,255,255,0.12)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(17,10,37,0.3),inset_0_1px_0_rgba(255,255,255,0.14)]"
+              className="card rhythm-system-card group relative flex min-h-[20.5rem] h-full flex-col gap-5 p-5 transition duration-200 hover:-translate-y-0.5"
             >
               <div className="space-y-3">
                 <p className="text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white/56">{copy.rhythmLabel}</p>
