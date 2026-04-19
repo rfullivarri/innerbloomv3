@@ -9,6 +9,7 @@ import PremiumTimeline from '../components/PremiumTimeline';
 import { AdaptiveText } from '../components/landing/AdaptiveText';
 import { CookieConsentBanner } from '../components/landing/CookieConsentBanner';
 import { useLandingAnalytics } from '../components/landing/useLandingAnalytics';
+import { LabsWeeklyRhythmSystemSection } from '../components/labs/LabsWeeklyRhythmSystemSection';
 import { buildOnboardingPath } from '../onboarding/i18n';
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 import { persistCookieConsentState, readCookieConsentState } from '../lib/cookieConsent';
@@ -862,6 +863,12 @@ export default function LandingPage() {
               })}
             </div>
             <AdaptiveText as="p" className="section-sub highlight">{copy.pillars.highlight}</AdaptiveText>
+          </div>
+        </section>
+
+        <section className="section-pad reveal-on-scroll" id="rhythms">
+          <div className="container">
+            <LabsWeeklyRhythmSystemSection language={language} headingAlignment="center" />
           </div>
         </section>
 
