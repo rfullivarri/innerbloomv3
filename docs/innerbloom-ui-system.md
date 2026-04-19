@@ -22,7 +22,8 @@ The app uses global theme tokens and Dashboard-v3 scoped behavior (`data-light-s
 ### Light Mode rules
 
 - Use bright neutral surfaces (`--color-surface`, `--color-surface-elevated`) and low-noise overlays.
-- Prefer subtle borders (`--color-border-subtle`) over heavy outlines.
+- For **macro dashboard surfaces** (large cards/sections), prefer **shadow/elevation-first** separation and keep perimeter borders imperceptible (`--color-card-border` can be transparent in scoped light surfaces like dashboard-v3).
+- Keep **micro surfaces** (chips, pills, mini-panels, form controls) with subtle borders when they improve hierarchy.
 - Use short, soft shadows (`--shadow-elev-1`, `--color-card-shadow`) to separate layers.
 - For dashboard card parity (task cards + emotion surfaces), use `--IB_SURFACE_CARD_LIGHT` (`0 6px 20px rgba(15, 23, 42, 0.3)`) in Light Mode only.
 - Keep text contrast hierarchy clear:
@@ -42,7 +43,8 @@ The app uses global theme tokens and Dashboard-v3 scoped behavior (`data-light-s
 #### Light Mode
 
 - **Light surfaces** first.
-- **Subtle borders** second.
+- **Macro surfaces:** shadow/elevation second.
+- **Micro surfaces:** subtle borders second.
 - **Short shadows** third.
 
 #### Dark Mode
@@ -139,7 +141,8 @@ Do not hardcode `slate-*`, `white`, or `emerald-*` utility colors in this area; 
 **Visual structure**
 
 - Rounded corners (typically 2xl/3xl or project-specific rounded token).
-- Subtle border using `--color-border-subtle`.
+- Macro cards in Light Mode can use `--color-card-border` with near-transparent/transparent values when scoped (e.g., `data-light-scope="dashboard-v3"`).
+- Nested and micro containers should keep subtle border tokens (`--color-border-subtle`, `--color-border-soft`) when needed for legibility.
 - Surface from card/surface gradient tokens (`--color-card-gradient`, `--color-card-highlight-gradient`) or `--color-overlay-1`.
 
 **Elevation style**
@@ -149,8 +152,8 @@ Do not hardcode `slate-*`, `white`, or `emerald-*` utility colors in this area; 
 
 **Border usage**
 
-- Always present on floating cards in both themes.
-- Do not replace border with shadow-only in Light Mode.
+- Dark Mode floating cards keep visible soft borders.
+- Light Mode macro cards may rely primarily on elevation and keep border fully subtle/imperceptible; avoid hard gray outlines.
 
 **When to use**
 
