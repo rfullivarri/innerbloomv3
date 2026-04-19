@@ -3,6 +3,7 @@ import { resolvePostLoginTranslation } from '../i18n/post-login';
 import { type PostLoginLanguage, POSTLOGIN_LANGUAGE_STORAGE_KEY, detectDeviceLanguage } from '../i18n/postLoginLanguage';
 import { AUTH_LANGUAGE_STORAGE_KEY } from '../lib/authLanguage';
 import { getCapacitorLocalNotificationsPlugin, isNativeCapacitorPlatform } from './capacitor';
+import { writeMobileDebug } from './mobileDebug';
 
 export const DAILY_REMINDER_NOTIFICATION_ID = 41001;
 export const DAILY_REMINDER_TEST_NOTIFICATION_ID = 41002;
@@ -46,6 +47,15 @@ function tNotification(key: string): string {
   return resolvePostLoginTranslation(resolveNotificationLanguage(), key);
 }
 
+function logNativeReminder(event: string, payload: Record<string, unknown> = {}): void {
+  const nextPayload = {
+    ...payload,
+    at: Date.now(),
+  };
+  console.info(`[mobile-reminder] ${event}`, nextPayload);
+  writeMobileDebug(`mobile-reminder:${event}`, nextPayload);
+}
+
 function normalizeLocalTimeParts(value?: string | null): { hour: number; minute: number; second: number } {
   const [rawHour = '9', rawMinute = '0', rawSecond = '0'] = (value ?? '09:00:00').split(':');
   const hour = Math.min(23, Math.max(0, Number.parseInt(rawHour, 10) || 0));
@@ -69,20 +79,24 @@ function isReminderEnabled(reminder: DailyReminderSettingsResponse | null | unde
 
 export async function ensureNativeDailyReminderNotificationPermissions(): Promise<DailyReminderNotificationPermissionResult> {
   if (!isNativeCapacitorPlatform()) {
+    logNativeReminder('permission-skip-not-native');
     return { granted: false };
   }
 
   const plugin = getCapacitorLocalNotificationsPlugin();
   if (!plugin) {
+    logNativeReminder('permission-plugin-missing');
     return { granted: false };
   }
 
   const existing = await plugin.checkPermissions();
+  logNativeReminder('permission-check', { display: existing.display });
   if (existing.display === 'granted') {
     return { granted: true };
   }
 
   const requested = await plugin.requestPermissions();
+  logNativeReminder('permission-request', { display: requested.display });
   return { granted: requested.display === 'granted' };
 }
 
@@ -93,27 +107,41 @@ export async function cancelNativeDailyReminderNotification(): Promise<void> {
 
   const plugin = getCapacitorLocalNotificationsPlugin();
   if (!plugin) {
+    logNativeReminder('cancel-plugin-missing');
     return;
   }
 
   await plugin.cancel({
     notifications: [{ id: DAILY_REMINDER_NOTIFICATION_ID }],
   });
+  logNativeReminder('cancel-scheduled', { id: DAILY_REMINDER_NOTIFICATION_ID });
 }
 
 export async function sendNativeDailyReminderTestNotification(): Promise<void> {
   if (!isNativeCapacitorPlatform()) {
+    logNativeReminder('test-skip-not-native');
     return;
   }
 
   const plugin = getCapacitorLocalNotificationsPlugin();
   if (!plugin) {
+    logNativeReminder('test-plugin-missing');
     return;
   }
 
+  logNativeReminder('test-start');
   const permissions = await ensureNativeDailyReminderNotificationPermissions();
   if (!permissions.granted) {
+    logNativeReminder('test-permission-denied');
     throw new Error(tNotification('dailyQuest.mobile.permissionRequired'));
+  }
+
+  const exactAlarm = await plugin.checkExactNotificationSetting?.().catch((error) => {
+    logNativeReminder('test-exact-alarm-check-failed', { error: error instanceof Error ? error.message : String(error) });
+    return null;
+  });
+  if (exactAlarm) {
+    logNativeReminder('test-exact-alarm-check', { exactAlarm: exactAlarm.exact_alarm });
   }
 
   await plugin.cancel({
@@ -137,6 +165,15 @@ export async function sendNativeDailyReminderTestNotification(): Promise<void> {
       },
     ],
   });
+  const pending = await plugin.getPending?.().catch((error) => {
+    logNativeReminder('test-pending-check-failed', { error: error instanceof Error ? error.message : String(error) });
+    return null;
+  });
+  logNativeReminder('test-scheduled', {
+    id: DAILY_REMINDER_TEST_NOTIFICATION_ID,
+    pendingCount: pending?.notifications?.length ?? null,
+    pendingIds: pending?.notifications?.map((notification) => notification.id).filter(Boolean) ?? null,
+  });
 }
 
 export async function syncNativeDailyReminderNotification(
@@ -144,15 +181,21 @@ export async function syncNativeDailyReminderNotification(
   options?: { requestPermissions?: boolean },
 ): Promise<void> {
   if (!isNativeCapacitorPlatform()) {
+    logNativeReminder('sync-skip-not-native');
     return;
   }
 
   const plugin = getCapacitorLocalNotificationsPlugin();
   if (!plugin) {
+    logNativeReminder('sync-plugin-missing');
     return;
   }
 
   if (!isReminderEnabled(reminder)) {
+    logNativeReminder('sync-reminder-disabled', {
+      status: reminder?.status ?? null,
+      enabled: reminder?.enabled ?? null,
+    });
     await cancelNativeDailyReminderNotification();
     return;
   }
@@ -162,6 +205,7 @@ export async function syncNativeDailyReminderNotification(
     : await plugin.checkPermissions().then((result) => ({ granted: result.display === 'granted' }));
 
   if (!permissions.granted) {
+    logNativeReminder('sync-permission-denied', { requestPermissions: options?.requestPermissions === true });
     await cancelNativeDailyReminderNotification();
     if (options?.requestPermissions) {
       throw new Error(tNotification('dailyQuest.mobile.permissionRequired'));
@@ -170,6 +214,22 @@ export async function syncNativeDailyReminderNotification(
   }
 
   const { hour, minute, second } = normalizeLocalTimeParts(reminder?.local_time ?? reminder?.localTime ?? '09:00:00');
+  const exactAlarm = await plugin.checkExactNotificationSetting?.().catch((error) => {
+    logNativeReminder('sync-exact-alarm-check-failed', { error: error instanceof Error ? error.message : String(error) });
+    return null;
+  });
+  if (exactAlarm) {
+    logNativeReminder('sync-exact-alarm-check', { exactAlarm: exactAlarm.exact_alarm });
+  }
+  logNativeReminder('sync-schedule-start', {
+    id: DAILY_REMINDER_NOTIFICATION_ID,
+    hour,
+    minute,
+    second,
+    status: reminder?.status ?? null,
+    enabled: reminder?.enabled ?? null,
+    channel: reminder?.channel ?? null,
+  });
 
   await cancelNativeDailyReminderNotification();
   await plugin.schedule({
@@ -188,5 +248,14 @@ export async function syncNativeDailyReminderNotification(
         },
       },
     ],
+  });
+  const pending = await plugin.getPending?.().catch((error) => {
+    logNativeReminder('sync-pending-check-failed', { error: error instanceof Error ? error.message : String(error) });
+    return null;
+  });
+  logNativeReminder('sync-scheduled', {
+    id: DAILY_REMINDER_NOTIFICATION_ID,
+    pendingCount: pending?.notifications?.length ?? null,
+    pendingIds: pending?.notifications?.map((notification) => notification.id).filter(Boolean) ?? null,
   });
 }

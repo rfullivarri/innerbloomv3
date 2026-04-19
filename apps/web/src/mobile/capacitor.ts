@@ -49,6 +49,7 @@ type CapacitorLocalNotificationPermissionState = 'prompt' | 'prompt-with-rationa
 type CapacitorLocalNotificationsPlugin = {
   checkPermissions: () => Promise<{ display: CapacitorLocalNotificationPermissionState }>;
   requestPermissions: () => Promise<{ display: CapacitorLocalNotificationPermissionState }>;
+  checkExactNotificationSetting?: () => Promise<{ exact_alarm: CapacitorLocalNotificationPermissionState }>;
   schedule: (options: {
     notifications: Array<{
       id: number;
@@ -66,6 +67,7 @@ type CapacitorLocalNotificationsPlugin = {
       extra?: Record<string, unknown>;
     }>;
   }) => Promise<unknown>;
+  getPending?: () => Promise<{ notifications: Array<Record<string, unknown>> }>;
   cancel: (options: { notifications: Array<{ id: number }> }) => Promise<unknown>;
   addListener: (
     eventName: 'localNotificationActionPerformed',

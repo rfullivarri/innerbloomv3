@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useId, useMemo, useState } from "react";
+import { FormEvent, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useRequest } from "../../hooks/useRequest";
 import {
   DailyReminderSettingsResponse,
@@ -164,6 +164,7 @@ export function DailyReminderSettings({
   const defaultTimezone = useMemo(() => resolveDefaultTimezone(), []);
   const timeFieldId = useId();
   const timezoneFieldId = useId();
+  const timePickerRef = useRef<HTMLDivElement | null>(null);
   const [formState, setFormState] = useState<ReminderFormState>({
     enabled: false,
     localTime: DEFAULT_TIME,
@@ -178,6 +179,7 @@ export function DailyReminderSettings({
   const [testNotificationStatus, setTestNotificationStatus] =
     useState<TestNotificationStatus>("idle");
   const [testNotificationError, setTestNotificationError] = useState<string | null>(null);
+  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
   const { data, status, error, reload } = useRequest(
     async (): Promise<ReminderLoadResult> => {
       if (isNativeApp) {
@@ -228,12 +230,45 @@ export function DailyReminderSettings({
     return () => window.clearTimeout(timeoutId);
   }, [testNotificationStatus]);
 
+  useEffect(() => {
+    if (!isTimePickerOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Node && timePickerRef.current?.contains(target)) {
+        return;
+      }
+      setIsTimePickerOpen(false);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsTimePickerOpen(false);
+      }
+    };
+    const frame = window.requestAnimationFrame(() => {
+      timePickerRef.current
+        ?.querySelector(`[data-time-option="${formState.localTime}"]`)
+        ?.scrollIntoView({ block: "center" });
+    });
+
+    document.addEventListener("pointerdown", handlePointerDown, true);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.removeEventListener("pointerdown", handlePointerDown, true);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [formState.localTime, isTimePickerOpen]);
+
   const isInitialLoading =
     (status === "idle" || status === "loading") && !data && !error;
   const hasBlockingError = status === "error" && !data;
   const isSaving = submitStatus === "saving";
   const isSendingTestNotification = testNotificationStatus === "sending";
-  const shouldShowNativeTestNotification = isNativeApp && SHOW_NATIVE_TEST_NOTIFICATION;
+  const shouldShowNativeTestNotification = isNativeApp || SHOW_NATIVE_TEST_NOTIFICATION;
   const canSubmit =
     !isInitialLoading &&
     !isSaving &&
@@ -506,28 +541,84 @@ export function DailyReminderSettings({
           <span className="reminder-scheduler-form__field-label block text-xs uppercase tracking-[0.3em] text-text-subtle">
             Hora local
           </span>
-          <select
-            id={timeFieldId}
-            value={formState.localTime}
-            onChange={(event) =>
-              setFormState((previous) => ({
-                ...previous,
-                localTime: event.target.value,
-              }))
-            }
-            disabled={isSaving}
-            className="reminder-scheduler-form__control reminder-scheduler-form__time-select w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-base text-white outline-none transition focus:border-white/40"
-          >
-            {TIME_OPTIONS.map((time) => (
-              <option
-                key={time}
-                value={time}
-                className="reminder-scheduler-form__time-option"
+          {isNativeApp ? (
+            <div ref={timePickerRef} className="relative">
+              <button
+                id={timeFieldId}
+                type="button"
+                disabled={isSaving}
+                aria-haspopup="listbox"
+                aria-expanded={isTimePickerOpen}
+                onClick={() => setIsTimePickerOpen((previous) => !previous)}
+                className={combine(
+                  "reminder-scheduler-form__control reminder-scheduler-form__time-trigger flex w-full items-center justify-between rounded-2xl border border-white/10 bg-surface px-4 py-3 text-left text-base text-white outline-none transition focus:border-white/40 focus-visible:ring-2 focus-visible:ring-white/50",
+                  isSaving && "cursor-not-allowed opacity-60",
+                )}
               >
-                {time}
-              </option>
-            ))}
-          </select>
+                <span>{formState.localTime}</span>
+                <span aria-hidden="true" className="text-white/45">⌄</span>
+              </button>
+              {isTimePickerOpen ? (
+                <div
+                  role="listbox"
+                  aria-labelledby={timeFieldId}
+                  className="reminder-scheduler-form__time-list absolute left-0 right-0 top-[calc(100%+0.5rem)] z-[90] max-h-72 overflow-y-auto rounded-2xl border border-white/12 bg-[#101a2f] p-1 shadow-[0_22px_60px_rgba(2,6,23,0.55)]"
+                >
+                  {TIME_OPTIONS.map((time) => {
+                    const selected = formState.localTime === time;
+                    return (
+                      <button
+                        key={time}
+                        type="button"
+                        role="option"
+                        aria-selected={selected}
+                        data-time-option={time}
+                        onClick={() => {
+                          setFormState((previous) => ({
+                            ...previous,
+                            localTime: time,
+                          }));
+                          setIsTimePickerOpen(false);
+                        }}
+                        className={combine(
+                          "flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-base font-semibold transition",
+                          selected
+                            ? "bg-emerald-400/18 text-emerald-100"
+                            : "text-white hover:bg-white/8",
+                        )}
+                      >
+                        <span>{time}</span>
+                        {selected ? <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-emerald-300" /> : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <select
+              id={timeFieldId}
+              value={formState.localTime}
+              onChange={(event) =>
+                setFormState((previous) => ({
+                  ...previous,
+                  localTime: event.target.value,
+                }))
+              }
+              disabled={isSaving}
+              className="reminder-scheduler-form__control reminder-scheduler-form__time-select w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-base text-white outline-none transition focus:border-white/40"
+            >
+              {TIME_OPTIONS.map((time) => (
+                <option
+                  key={time}
+                  value={time}
+                  className="reminder-scheduler-form__time-option"
+                >
+                  {time}
+                </option>
+              ))}
+            </select>
+          )}
         </label>
 
         <label className="space-y-2 text-sm" htmlFor={timezoneFieldId}>
