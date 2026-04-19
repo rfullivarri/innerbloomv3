@@ -129,32 +129,32 @@ export function LabsWeeklyRhythmSystemSection({
           {copy.cards.map((card) => (
             <article
               key={card.id}
-              className="card rhythm-system-card group relative flex min-h-[20.5rem] h-full flex-col gap-5 p-5 transition duration-200 hover:-translate-y-0.5"
+              className="card card--hero-glass rhythm-system-card group relative flex min-h-[20.5rem] h-full flex-col gap-5 p-5 transition duration-200 hover:-translate-y-0.5"
             >
               <div className="space-y-3">
-                <p className="text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white/56">{copy.rhythmLabel}</p>
+                <p className="rhythm-card-label">{copy.rhythmLabel}</p>
 
                 <div className="flex items-start justify-between gap-3">
-                  <h3 className="text-[1.65rem] leading-none font-semibold tracking-[-0.03em] text-white">{card.name}</h3>
-                  <span className="inline-flex shrink-0 items-center self-start rounded-full bg-[linear-gradient(140deg,rgba(208,154,255,0.42),rgba(244,192,177,0.3))] px-3.5 py-1.5 text-[0.74rem] font-semibold uppercase tracking-[0.14em] leading-none text-[#fff6ff] shadow-[0_8px_20px_rgba(176,108,255,0.32)]">
+                  <h3 className="rhythm-card-title concept-term concept-term--rhythm">{card.name}</h3>
+                  <span className="rhythm-frequency-chip">
                     {card.frequency}
                   </span>
                 </div>
 
                 <div
-                  className="h-[1.2rem] overflow-hidden rounded-full bg-white/[0.08]"
+                  className="rhythm-intensity-track"
                   aria-label={`${card.name} ${copy.intensityAria} ${card.intensity}%`}
                 >
                   <div
-                    className="h-full rounded-full shadow-[0_0_16px_rgba(201,150,255,0.36)]"
+                    className="rhythm-intensity-fill"
                     style={{ width: `${card.intensity}%`, backgroundImage: INNERBLOOM_PREMIUM_GRADIENT }}
                   />
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <p className="text-sm text-white/74">{card.state}</p>
-                <p className="text-base font-medium text-white/94">{card.micro}</p>
+              <div className="rhythm-card-copy">
+                <p className="rhythm-card-state">{card.state}</p>
+                <p className="rhythm-card-micro">{card.micro}</p>
               </div>
 
               <ul className="mt-auto flex flex-wrap gap-1.5">
