@@ -980,24 +980,27 @@
 }
 
 .lv2-mode-mini {
-  border: 1px solid color-mix(in srgb, var(--line) 76%, rgba(255, 255, 255, 0.14));
+  border: 1px solid color-mix(in srgb, var(--line) 70%, rgba(255, 255, 255, 0.05));
   border-radius: 16px;
-  background: color-mix(in srgb, var(--card) 72%, rgba(15, 23, 42, 0.4));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 88%, rgba(56, 189, 248, 0.1)),
+      color-mix(in srgb, var(--bg-2) 90%, rgba(139, 92, 246, 0.12)));
   padding: 10px;
   display: grid;
   gap: 10px;
   justify-items: center;
-  color: #e3f2ff;
+  color: color-mix(in srgb, var(--ink) 94%, #dce8ff 6%);
   opacity: 0.9;
   /* Miniaturas laterales más pequeñas y siempre dentro del viewport para preservar jerarquía visual. */
   inline-size: min(100%, clamp(110px, 10vw, 160px));
-  transition: transform 180ms ease, opacity 180ms ease, border-color 180ms ease;
+  box-shadow: 0 16px 60px rgba(6, 28, 52, 0.32);
+  transition: transform 180ms ease, opacity 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .lv2-mode-mini:hover {
   opacity: 1;
   transform: translateY(-4px) scale(1.02);
   border-color: color-mix(in srgb, var(--color-accent-primary) 60%, rgba(255, 255, 255, 0.2));
+  box-shadow: 0 22px 68px rgba(6, 28, 52, 0.45);
 }
 
 .lv2-mode-mini img {
@@ -1093,11 +1096,22 @@
 
 .lv2-mode-thumb {
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--line) 74%, rgba(255, 255, 255, 0.2));
-  background: color-mix(in srgb, var(--card) 72%, rgba(15, 23, 42, 0.45));
-  color: #cfe2ff;
+  border: 1px solid color-mix(in srgb, var(--line) 70%, rgba(255, 255, 255, 0.05));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 88%, rgba(56, 189, 248, 0.08)),
+      color-mix(in srgb, var(--bg-2) 90%, rgba(139, 92, 246, 0.1)));
+  color: color-mix(in srgb, var(--ink) 92%, #dce8ff 8%);
   padding: 8px 14px;
   font-weight: 700;
+  box-shadow: 0 10px 30px rgba(6, 28, 52, 0.28);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.lv2-mode-thumb:hover,
+.lv2-mode-thumb:focus-visible {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--color-accent-primary) 45%, rgba(255, 255, 255, 0.15));
+  box-shadow: 0 14px 34px rgba(6, 28, 52, 0.36);
+  outline: none;
 }
 
 .lv2-mode-thumb.is-active {
