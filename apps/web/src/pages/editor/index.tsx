@@ -477,9 +477,9 @@ export default function TaskEditorPage() {
         />
         <main className="flex-1 pb-[calc(env(safe-area-inset-bottom,0px)+10.25rem)] md:pb-0" data-light-scope="editor">
           <div ref={editorTopRef} className="scroll-mt-24" />
-          <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
+          <div className="mx-auto w-full max-w-7xl px-2 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             <SectionHeader section={taskEditorSection} />
-            <Card>
+            <Card className="px-4 py-5 md:p-6">
               <div className="flex flex-col gap-5">
                 {pageToast && (
                   <div className="fixed inset-x-3 top-[calc(env(safe-area-inset-top,0px)+4.5rem)] z-[70] md:inset-x-auto md:right-8 md:top-24 md:w-[24rem]">
@@ -573,7 +573,7 @@ export default function TaskEditorPage() {
           <button
             type="button"
             onClick={handleCreateClick}
-            className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+9.25rem)] right-4 z-40 inline-flex items-center gap-1.5 rounded-full bg-violet-500 px-3.5 py-2 text-[0.72rem] font-semibold text-white shadow-[0_10px_26px_rgba(139,92,246,0.42)] transition hover:bg-violet-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 md:bottom-10 md:right-8 md:gap-2 md:px-5 md:py-3 md:text-sm"
+            className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+7.25rem)] right-4 z-40 inline-flex items-center gap-1.5 rounded-full bg-violet-500 px-3.5 py-2 text-[0.72rem] font-semibold text-white shadow-[0_10px_26px_rgba(139,92,246,0.42)] transition hover:bg-violet-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 md:bottom-10 md:right-8 md:gap-2 md:px-5 md:py-3 md:text-sm"
           >
             <span aria-hidden className="text-sm leading-none md:text-lg">＋</span>
             {t('editor.button.newTask')}
@@ -708,11 +708,8 @@ function TaskFilters({
   return (
     <div className="flex flex-col gap-4">
       <div className="md:hidden">
-        <div className="editor-filters-mobile-panel sticky -mx-6 -mt-6 top-[4.5rem] z-30 space-y-3 rounded-t-2xl px-6 pt-6 pb-3 bg-[color:var(--color-slate-900-95)]">
+        <div className="editor-filters-mobile-panel sticky -mx-4 -mt-5 top-[4.5rem] z-30 space-y-3 rounded-t-2xl px-4 pt-5 pb-3 bg-[color:var(--color-slate-900-95)]">
           <label className="flex flex-col gap-1">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">
-              {t('editor.filters.search.mobileLabel')}
-            </span>
             <input
               type="search"
               value={searchTerm}
@@ -722,9 +719,6 @@ function TaskFilters({
             />
           </label>
           <div className="space-y-2">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-              {t('editor.filters.pillar.mobileLabel')}
-            </span>
             <div className="flex gap-2 overflow-x-auto pb-1 [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
               {pillars.map((pillar) => {
                 const isActive = pillar.value === selectedPillar;
@@ -970,20 +964,20 @@ function TaskListMobile({
             <button
               type="button"
               onClick={() => onEditTask(task)}
-              className="flex w-full flex-col gap-2 px-4 py-2.5 text-left transition hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+              className="flex w-full flex-col gap-2 px-3 py-2.5 text-left transition hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
             >
               <div className="flex items-start justify-between gap-3">
                 <p className="line-clamp-1 pr-8 text-sm font-semibold text-white">{task.title}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-[11px] text-[color:var(--color-slate-300)]">
-                <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-2 py-0.5 font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-100)]">
-                  <span className={`h-1.5 w-1.5 rounded-full ${tone}`} aria-hidden />
+                <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.15em] text-[color:var(--color-slate-100)]">
+                  <span className={`h-1 w-1 rounded-full ${tone}`} aria-hidden />
                   <span>{difficultyLabel}</span>
                 </span>
               </div>
             </button>
             <div
-              className="pointer-events-auto absolute right-2 bottom-2"
+              className="pointer-events-auto absolute right-1.5 bottom-2"
               ref={(node) => {
                 if (isMenuOpen) {
                   menuContainerRef.current = node;
