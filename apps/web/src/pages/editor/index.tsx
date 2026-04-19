@@ -1673,7 +1673,7 @@ function CreateTaskModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
+    <div className="create-task-modal__overlay fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center" data-light-scope="editor">
       <button
         type="button"
         aria-label={t('editor.button.close')}
@@ -1683,21 +1683,21 @@ function CreateTaskModal({
       <div className="relative z-10 w-full max-w-2xl p-4">
         <form
           onSubmit={handleSubmit}
-          className="max-h-[90vh] overflow-y-auto rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] p-6 text-[color:var(--color-slate-100)] shadow-[0_18px_40px_rgba(15,23,42,0.65)]"
+          className="create-task-modal__dialog max-h-[90vh] overflow-y-auto rounded-2xl border p-6"
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="space-y-6">
+          <div className="create-task-modal space-y-6">
             <header className="space-y-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">{t('editor.modal.create.badge')}</p>
-              <h2 className="text-xl font-semibold text-white">{t('editor.modal.create.title')}</h2>
-              <p className="text-sm text-[color:var(--color-slate-300)]">
+              <p className="create-task-modal__badge text-[11px] font-semibold uppercase tracking-[0.24em]">{t('editor.modal.create.badge')}</p>
+              <h2 className="create-task-modal__title text-xl font-semibold">{t('editor.modal.create.title')}</h2>
+              <p className="create-task-modal__description text-sm">
                 {t('editor.modal.create.description')}
               </p>
             </header>
 
             <section className="space-y-4">
               <div className="space-y-1.5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{t('editor.modal.create.step1')}</p>
+                <p className="create-task-modal__section-label text-[11px] font-semibold uppercase tracking-[0.24em]">{t('editor.modal.create.step1')}</p>
                 <div className="flex flex-col gap-2">
                   <select
                     value={selectedPillarId}
@@ -1705,21 +1705,21 @@ function CreateTaskModal({
                       setSelectedPillarId(event.target.value);
                       clearError('pillar');
                     }}
-                    className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
+                    className="create-task-modal__control create-task-modal__control--pill w-full appearance-none rounded-full border px-4 py-2.5 text-sm ios-touch-input focus:outline-none disabled:cursor-not-allowed"
                     disabled={isLoadingPillars || pillarsError != null}
                   >
-                    <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                    <option value="" className="create-task-modal__option">
                       {t('editor.modal.create.selectPillarPlaceholder')}
                     </option>
                     {sortedPillars.map((pillar) => (
-                      <option key={pillar.id} value={pillar.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                      <option key={pillar.id} value={pillar.id} className="create-task-modal__option">
                         {localizePillarLabel(pillar.name, language)}
                       </option>
                     ))}
                   </select>
                 </div>
                 {isLoadingPillars && (
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.loading.pillars')}</p>
+                  <p className="create-task-modal__hint text-[11px] uppercase tracking-[0.2em]">{t('editor.loading.pillars')}</p>
                 )}
                 {pillarsError && (
                   <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
@@ -1735,12 +1735,12 @@ function CreateTaskModal({
                 )}
                 {errors.pillar && <p className="text-xs text-rose-300">{errors.pillar}</p>}
                 {!isLoadingPillars && !pillarsError && sortedPillars.length === 0 && (
-                  <p className="text-xs text-[color:var(--color-slate-400)]">No encontramos pilares disponibles por ahora.</p>
+                  <p className="create-task-modal__hint text-xs">No encontramos pilares disponibles por ahora.</p>
                 )}
               </div>
 
               <div className="space-y-1.5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{t('editor.modal.create.step2')}</p>
+                <p className="create-task-modal__section-label text-[11px] font-semibold uppercase tracking-[0.24em]">{t('editor.modal.create.step2')}</p>
                 <div className="flex flex-col gap-2">
                   <select
                     value={selectedTraitId}
@@ -1748,21 +1748,21 @@ function CreateTaskModal({
                       setSelectedTraitId(event.target.value);
                       clearError('trait');
                     }}
-                    className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
+                    className="create-task-modal__control create-task-modal__control--pill w-full appearance-none rounded-full border px-4 py-2.5 text-sm ios-touch-input focus:outline-none disabled:cursor-not-allowed"
                     disabled={!selectedPillarId || isLoadingTraits}
                   >
-                    <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                    <option value="" className="create-task-modal__option">
                       {selectedPillarId ? t('editor.modal.create.selectTraitPlaceholder') : t('editor.modal.create.selectPillarFirst')}
                     </option>
                     {filteredTraits.map((trait) => (
-                      <option key={trait.id} value={trait.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                      <option key={trait.id} value={trait.id} className="create-task-modal__option">
                         {localizeTraitLabel({ name: trait.name, code: trait.code, fallback: trait.id }, language)}
                       </option>
                     ))}
                   </select>
                 </div>
                 {isLoadingTraits && (
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.loading.traits')}</p>
+                  <p className="create-task-modal__hint text-[11px] uppercase tracking-[0.2em]">{t('editor.loading.traits')}</p>
                 )}
                 {traitsError && (
                   <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
@@ -1778,7 +1778,7 @@ function CreateTaskModal({
                 )}
                 {errors.trait && <p className="text-xs text-rose-300">{errors.trait}</p>}
                 {selectedPillarId && !isLoadingTraits && filteredTraits.length === 0 && !traitsError && (
-                  <p className="text-xs text-[color:var(--color-slate-400)]">{t('editor.empty.noTraits')}</p>
+                  <p className="create-task-modal__hint text-xs">{t('editor.empty.noTraits')}</p>
                 )}
               </div>
 
@@ -1787,7 +1787,7 @@ function CreateTaskModal({
             <section className="space-y-4">
               <div className="space-y-2">
                 <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('editor.modal.create.taskTitleLabel')}</span>
+                  <span className="create-task-modal__field-label text-xs font-semibold uppercase tracking-[0.18em]">{t('editor.modal.create.taskTitleLabel')}</span>
                   <input
                     type="text"
                     value={title}
@@ -1796,7 +1796,7 @@ function CreateTaskModal({
                       clearError('title');
                     }}
                     placeholder={t('editor.modal.taskTitle.placeholder')}
-                    className="w-full rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="create-task-modal__control w-full rounded-2xl border px-4 py-3 text-sm ios-touch-input focus:outline-none"
                   />
                 </label>
                 {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
@@ -1804,25 +1804,25 @@ function CreateTaskModal({
 
               <div className="space-y-2">
                 <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('editor.field.difficulty')}</span>
+                  <span className="create-task-modal__field-label text-xs font-semibold uppercase tracking-[0.18em]">{t('editor.field.difficulty')}</span>
                   <select
                     value={difficultyId}
                     onChange={(event) => setDifficultyId(event.target.value)}
-                    className="w-full appearance-none rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
+                    className="create-task-modal__control w-full appearance-none rounded-2xl border px-4 py-3 text-sm ios-touch-input focus:outline-none disabled:cursor-not-allowed"
                     disabled={isLoadingDifficulties}
                   >
-                    <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                    <option value="" className="create-task-modal__option">
                       {t('editor.modal.create.selectDifficultyPlaceholder')}
                     </option>
                     {sortedDifficulties.map((difficulty) => (
-                      <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                      <option key={difficulty.id} value={difficulty.id} className="create-task-modal__option">
                         {localizeDifficultyLabel(difficulty.name, language)}
                       </option>
                     ))}
                   </select>
                 </label>
                 {isLoadingDifficulties && (
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.loading.difficulties')}</p>
+                  <p className="create-task-modal__hint text-[11px] uppercase tracking-[0.2em]">{t('editor.loading.difficulties')}</p>
                 )}
                 {difficultiesError && (
                   <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
@@ -1848,7 +1848,7 @@ function CreateTaskModal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-white"
+                className="create-task-modal__button-secondary inline-flex items-center justify-center rounded-full border px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition"
               >
                 {t('editor.button.cancel')}
               </button>

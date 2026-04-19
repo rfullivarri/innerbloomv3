@@ -17,7 +17,7 @@ When there is doubt, compare the component against Dashboard-v3 behavior and sty
 
 ## 2) Theming System
 
-The app uses global theme tokens and Dashboard-v3 scoped behavior (`data-light-scope="dashboard-v3"`) to keep parity between themes.
+The app uses global theme tokens and scoped behavior (`data-light-scope="dashboard-v3"` and `data-light-scope="editor"`) to keep parity between themes.
 
 ### Light Mode rules
 
@@ -30,6 +30,7 @@ The app uses global theme tokens and Dashboard-v3 scoped behavior (`data-light-s
   - Primary text: `--color-text`
   - Secondary text: `--color-text-muted`
   - Tertiary/meta text: `--color-text-subtle`
+- When a modal can render outside the page-level container (fixed overlays/portals), apply the corresponding `data-light-scope` on the modal overlay/root so light-mode scoped rules still apply.
 
 ### Dark Mode rules
 
