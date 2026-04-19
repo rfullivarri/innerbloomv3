@@ -1526,7 +1526,7 @@ export function DashboardMenu({
                             </p>
                           ) : null}
 
-                          <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] p-3">
+                          <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-transparent p-3">
                             <div className="flex flex-col gap-3">
                               <button
                                 type="button"
