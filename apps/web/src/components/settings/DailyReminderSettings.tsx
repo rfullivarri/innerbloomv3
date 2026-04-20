@@ -311,7 +311,9 @@ export function DailyReminderSettings({
         formState.deliveryMode === "email_and_notification";
 
       if (isNativeApp && formState.enabled && wantsNotification) {
-        const permission = await ensureNativeDailyReminderNotificationPermissions();
+        const permission = await ensureNativeDailyReminderNotificationPermissions({
+          requestExactAlarm: true,
+        });
         if (!permission.granted) {
           throw new Error("Necesitamos permiso para enviarte notificaciones en este dispositivo.");
         }

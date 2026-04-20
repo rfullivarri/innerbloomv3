@@ -50,11 +50,24 @@ type CapacitorLocalNotificationsPlugin = {
   checkPermissions: () => Promise<{ display: CapacitorLocalNotificationPermissionState }>;
   requestPermissions: () => Promise<{ display: CapacitorLocalNotificationPermissionState }>;
   checkExactNotificationSetting?: () => Promise<{ exact_alarm: CapacitorLocalNotificationPermissionState }>;
+  changeExactNotificationSetting?: () => Promise<{ exact_alarm: CapacitorLocalNotificationPermissionState }>;
+  createChannel?: (channel: {
+    id: string;
+    name: string;
+    description?: string;
+    importance?: number;
+    visibility?: number;
+    lights?: boolean;
+    vibration?: boolean;
+  }) => Promise<void>;
   schedule: (options: {
     notifications: Array<{
       id: number;
       title: string;
       body?: string;
+      channelId?: string;
+      smallIcon?: string;
+      iconColor?: string;
       schedule?: {
         at?: Date;
         on?: {

@@ -19,10 +19,37 @@ import {
   shouldOpenExternalUrl,
 } from './capacitor';
 import { DAILY_REMINDER_NOTIFICATION_TARGET_PATH } from './localNotifications';
-import { resolveMobileAuthSessionFromCallback } from './mobileAuthSession';
+import {
+  getMobileAuthSession,
+  resolveMobileAuthSessionFromCallback,
+  shouldForceNativeWelcome,
+} from './mobileAuthSession';
 
 const MOBILE_AUTH_CONSUMED_LAUNCH_FINGERPRINT_KEY = 'innerbloom.mobile.auth.launch-consumed.v1';
 const MOBILE_AUTH_PENDING_CALLBACK_URL_KEY = 'innerbloom.mobile.auth.pending-callback-url.v1';
+const MOBILE_PENDING_NOTIFICATION_TARGET_KEY = 'innerbloom.mobile.pending-notification-target.v1';
+
+function isSafeInternalPath(path: string): boolean {
+  return path.startsWith('/') && !path.startsWith('//');
+}
+
+function setPendingNotificationTargetPath(path: string): void {
+  if (typeof window === 'undefined' || !isSafeInternalPath(path)) {
+    return;
+  }
+
+  window.localStorage.setItem(MOBILE_PENDING_NOTIFICATION_TARGET_KEY, path);
+}
+
+function consumePendingNotificationTargetPath(): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const raw = window.localStorage.getItem(MOBILE_PENDING_NOTIFICATION_TARGET_KEY);
+  window.localStorage.removeItem(MOBILE_PENDING_NOTIFICATION_TARGET_KEY);
+  return typeof raw === 'string' && isSafeInternalPath(raw) ? raw : null;
+}
 
 function getConsumedLaunchFingerprint(): string | null {
   if (typeof window === 'undefined') {
@@ -120,7 +147,7 @@ function resolveCallbackTargetPath(
   const dashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
 
   if (authMode === 'sign-in') {
-    return dashboardPath;
+    return consumePendingNotificationTargetPath() ?? dashboardPath;
   }
 
   if (authMode === 'sign-up') {
@@ -405,8 +432,14 @@ function useDeepLinkNavigation(enabled: boolean) {
           const nextPath = typeof rawTarget === 'string' && rawTarget.trim().length > 0
             ? rawTarget
             : DAILY_REMINDER_NOTIFICATION_TARGET_PATH;
-          console.info('[mobile-reminder] local notification action', { nextPath, at: Date.now() });
-          navigateRef.current(nextPath, { replace: false });
+          setPendingNotificationTargetPath(nextPath);
+          const hasNativeSession = Boolean(getMobileAuthSession()?.token) && !shouldForceNativeWelcome();
+          console.info('[mobile-reminder] local notification action', {
+            nextPath,
+            hasNativeSession,
+            at: Date.now(),
+          });
+          navigateRef.current(hasNativeSession ? nextPath : '/', { replace: false });
         }),
       ).then((handle) => {
         localNotificationHandle = handle;

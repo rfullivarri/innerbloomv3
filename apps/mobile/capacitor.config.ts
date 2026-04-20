@@ -12,6 +12,12 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
     iosScheme: 'capacitor',
   },
+  plugins: {
+    LocalNotifications: {
+      smallIcon: 'ic_stat_innerbloom',
+      iconColor: '#A855F7',
+    },
+  },
 };
 
 export default config;
