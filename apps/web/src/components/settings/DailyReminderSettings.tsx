@@ -507,10 +507,10 @@ export function DailyReminderSettings({
                     }))
                   }
                   className={combine(
-                    "rounded-2xl border px-4 py-3 text-sm font-semibold transition",
+                    "reminder-scheduler-form__channel-button rounded-2xl border px-4 py-3 text-sm font-semibold transition",
                     active
-                      ? "border-fuchsia-300/70 bg-fuchsia-500/20 text-white shadow-[0_12px_32px_rgba(192,132,252,0.22)]"
-                      : "border-white/10 bg-white/5 text-white/70 hover:border-white/25 hover:bg-white/10 hover:text-white",
+                      ? "reminder-scheduler-form__channel-button--active border-fuchsia-300/70 bg-fuchsia-500/20 text-white shadow-[0_12px_32px_rgba(192,132,252,0.22)]"
+                      : "reminder-scheduler-form__channel-button--inactive border-white/10 bg-white/5 text-white/70 hover:border-white/25 hover:bg-white/10 hover:text-white",
                     isSaving && "cursor-not-allowed opacity-60",
                   )}
                 >

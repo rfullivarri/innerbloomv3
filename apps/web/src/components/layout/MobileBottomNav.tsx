@@ -34,10 +34,12 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-transparent px-3 pb-1.5 md:hidden"
+      className="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-transparent px-3 pb-1.5 md:hidden"
       aria-label="Navegación principal en vista móvil"
       style={{
-        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.56rem)",
+        paddingBottom:
+          "var(--mobile-bottom-nav-padding-bottom, calc(env(safe-area-inset-bottom, 0px) + 0.56rem))",
+        transform: "var(--mobile-bottom-nav-transform, none)",
       }}
     >
       <ul className="flex w-full max-w-xl items-center justify-between gap-1 rounded-[1.75rem] border border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] px-2 py-1 shadow-[var(--shadow-elev-2)] backdrop-blur-2xl backdrop-saturate-150">
