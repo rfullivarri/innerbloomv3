@@ -5780,8 +5780,8 @@
   :root[data-theme="light"]
     [data-light-scope="reminder-scheduler"]
     .reminder-scheduler-form__switch-track--enabled {
-    border-color: #6ee7b7;
-    background: #a7f3d0;
+    border-color: #c4b5fd;
+    background: #c4b5fd;
   }
 
   :root[data-theme="light"]
@@ -5794,7 +5794,7 @@
   :root[data-theme="light"]
     [data-light-scope="reminder-scheduler"]
     .reminder-scheduler-form__switch-thumb--enabled {
-    background: #ecfdf5;
+    background: #ffffff;
   }
 
   :root[data-theme="light"]
@@ -5840,11 +5840,11 @@
   :root[data-theme="light"]
     [data-light-scope="reminder-scheduler"]
     .reminder-scheduler-form__channel-button--active {
-    border-color: #7c3aed;
-    background: linear-gradient(135deg, #6d28d9 0%, #c026d3 100%);
+    border-color: #d946ef;
+    background: linear-gradient(90deg, #a855f7 0%, #ec4899 55%, #fbbf24 100%);
     color: #ffffff;
     box-shadow:
-      0 12px 28px rgba(124, 58, 237, 0.24),
+      0 12px 28px rgba(217, 70, 239, 0.24),
       inset 0 0 0 1px rgba(255, 255, 255, 0.18);
   }
 

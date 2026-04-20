@@ -115,9 +115,19 @@ function isReminderResponseEnabled(response: DailyReminderSettingsResponse | nul
   return response.status === "active";
 }
 
+function isReminderResponsePersisted(response: DailyReminderSettingsResponse | null): boolean {
+  return Boolean(response?.user_daily_reminder_id ?? response?.reminder_id);
+}
+
 function deriveDeliveryMode(loadResult: ReminderLoadResult): DeliveryMode {
   const emailEnabled = isReminderResponseEnabled(loadResult.email);
   const notificationEnabled = isReminderResponseEnabled(loadResult.notification);
+  const hasPersistedEmail = isReminderResponsePersisted(loadResult.email);
+  const hasPersistedNotification = isReminderResponsePersisted(loadResult.notification);
+
+  if (!hasPersistedEmail && !hasPersistedNotification) {
+    return "email_and_notification";
+  }
 
   if (emailEnabled && notificationEnabled) {
     return "email_and_notification";
@@ -157,6 +167,32 @@ function combine(...classes: Array<string | null | false | undefined>): string {
   return classes.filter(Boolean).join(" ");
 }
 
+function getDeliverySelections(deliveryMode: DeliveryMode): {
+  email: boolean;
+  notification: boolean;
+} {
+  return {
+    email: deliveryMode === "email" || deliveryMode === "email_and_notification",
+    notification:
+      deliveryMode === "notification" || deliveryMode === "email_and_notification",
+  };
+}
+
+function resolveDeliveryModeFromSelections(input: {
+  email: boolean;
+  notification: boolean;
+}): DeliveryMode {
+  if (input.email && input.notification) {
+    return "email_and_notification";
+  }
+
+  if (input.notification) {
+    return "notification";
+  }
+
+  return "email";
+}
+
 export function DailyReminderSettings({
   onSaveSuccess,
 }: DailyReminderSettingsProps) {
@@ -169,7 +205,7 @@ export function DailyReminderSettings({
     enabled: false,
     localTime: DEFAULT_TIME,
     timezone: defaultTimezone,
-    deliveryMode: "email",
+    deliveryMode: isNativeApp ? "email_and_notification" : "email",
   });
   const [initialState, setInitialState] = useState<ReminderFormState | null>(
     null,
@@ -268,7 +304,7 @@ export function DailyReminderSettings({
   const hasBlockingError = status === "error" && !data;
   const isSaving = submitStatus === "saving";
   const isSendingTestNotification = testNotificationStatus === "sending";
-  const shouldShowNativeTestNotification = isNativeApp || SHOW_NATIVE_TEST_NOTIFICATION;
+  const shouldShowNativeTestNotification = false && (isNativeApp || SHOW_NATIVE_TEST_NOTIFICATION);
   const canSubmit =
     !isInitialLoading &&
     !isSaving &&
@@ -286,6 +322,29 @@ export function DailyReminderSettings({
       return;
     }
     setFormState((previous) => ({ ...previous, enabled: !previous.enabled }));
+  };
+
+  const handleDeliveryToggle = (channel: "email" | "notification") => {
+    if (isSaving) {
+      return;
+    }
+
+    setFormState((previous) => {
+      const current = getDeliverySelections(previous.deliveryMode);
+      const next = {
+        ...current,
+        [channel]: !current[channel],
+      };
+
+      if (!next.email && !next.notification) {
+        next[channel] = true;
+      }
+
+      return {
+        ...previous,
+        deliveryMode: resolveDeliveryModeFromSelections(next),
+      };
+    });
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -466,7 +525,7 @@ export function DailyReminderSettings({
             className={combine(
               "reminder-scheduler-form__switch-track relative inline-flex h-7 w-14 shrink-0 items-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
               formState.enabled
-                ? "reminder-scheduler-form__switch-track--enabled border-emerald-300/60 bg-emerald-400/30"
+                ? "reminder-scheduler-form__switch-track--enabled border-violet-200/45 bg-violet-300/70"
                 : "reminder-scheduler-form__switch-track--disabled border-white/15 bg-white/5",
               (isSaving || isInitialLoading) && "cursor-not-allowed opacity-60",
             )}
@@ -475,7 +534,7 @@ export function DailyReminderSettings({
               className={combine(
                 "reminder-scheduler-form__switch-thumb inline-block h-5 w-5 rounded-full bg-white shadow transition",
                 formState.enabled
-                  ? "reminder-scheduler-form__switch-thumb--enabled translate-x-7 bg-emerald-100"
+                  ? "reminder-scheduler-form__switch-thumb--enabled translate-x-7 bg-white"
                   : "reminder-scheduler-form__switch-thumb--disabled translate-x-2",
               )}
             />
@@ -488,28 +547,24 @@ export function DailyReminderSettings({
           <span className="reminder-scheduler-form__field-label block text-xs uppercase tracking-[0.3em] text-text-subtle">
             Canal
           </span>
-          <div className="grid gap-2 md:grid-cols-3">
+          <div className="reminder-scheduler-form__channel-grid grid grid-cols-2 gap-2">
             {[
-              { id: "email", label: "Email" },
-              { id: "notification", label: "Notificación" },
-              { id: "email_and_notification", label: "Email + notificación" },
+              { id: "email" as const, label: "Email" },
+              { id: "notification" as const, label: "Notificación" },
             ].map((option) => {
-              const active = formState.deliveryMode === option.id;
+              const selections = getDeliverySelections(formState.deliveryMode);
+              const active = selections[option.id];
               return (
                 <button
                   key={option.id}
                   type="button"
+                  aria-pressed={active}
                   disabled={isSaving}
-                  onClick={() =>
-                    setFormState((previous) => ({
-                      ...previous,
-                      deliveryMode: option.id as DeliveryMode,
-                    }))
-                  }
+                  onClick={() => handleDeliveryToggle(option.id)}
                   className={combine(
                     "reminder-scheduler-form__channel-button rounded-2xl border px-4 py-3 text-sm font-semibold transition",
                     active
-                      ? "reminder-scheduler-form__channel-button--active border-fuchsia-300/70 bg-fuchsia-500/20 text-white shadow-[0_12px_32px_rgba(192,132,252,0.22)]"
+                      ? "reminder-scheduler-form__channel-button--active border-fuchsia-200/70 bg-gradient-to-r from-fuchsia-500 via-pink-500 to-amber-300 text-white shadow-[0_12px_32px_rgba(217,70,239,0.24)]"
                       : "reminder-scheduler-form__channel-button--inactive border-white/10 bg-white/5 text-white/70 hover:border-white/25 hover:bg-white/10 hover:text-white",
                     isSaving && "cursor-not-allowed opacity-60",
                   )}
