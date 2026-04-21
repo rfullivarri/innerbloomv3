@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { DEMO_GUIDED_STEPS, type DemoLanguage, type GuidedStep } from '../../config/demoGuidedTour';
 
 type Props = {
@@ -154,6 +154,7 @@ export function GuidedDemoOverlay({
   onFinalPrimaryAction,
   onFinalSecondaryAction,
 }: Props) {
+  const overlayRef = useRef<HTMLDivElement | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -163,6 +164,90 @@ export function GuidedDemoOverlay({
   const isDailyQuestStep = walkthroughMode === 'daily-quest-modal';
   const isLogrosModalStep = LABS_LOGROS_MODAL_STEP_IDS.has(step.id);
   const isCompactMobile = viewport.width <= 390 || viewport.height <= 740;
+
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const dailyQuestScroller = getDailyQuestScrollContainer();
+    const scrollY = window.scrollY;
+
+    const previousHtmlOverflow = html.style.overflow;
+    const previousHtmlOverscrollBehavior = html.style.overscrollBehavior;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyOverscrollBehavior = body.style.overscrollBehavior;
+    const previousBodyPosition = body.style.position;
+    const previousBodyTop = body.style.top;
+    const previousBodyLeft = body.style.left;
+    const previousBodyRight = body.style.right;
+    const previousBodyWidth = body.style.width;
+    const previousBodyTouchAction = body.style.touchAction;
+
+    const previousDailyQuestOverflow = dailyQuestScroller?.style.overflow;
+    const previousDailyQuestOverscrollBehavior = dailyQuestScroller?.style.overscrollBehavior;
+    const previousDailyQuestTouchAction = dailyQuestScroller?.style.touchAction;
+    const previousDailyQuestWebkitOverflowScrolling = dailyQuestScroller?.style.getPropertyValue('-webkit-overflow-scrolling');
+
+    html.style.overflow = 'hidden';
+    html.style.overscrollBehavior = 'none';
+
+    body.style.overflow = 'hidden';
+    body.style.overscrollBehavior = 'none';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+    body.style.touchAction = 'none';
+
+    if (dailyQuestScroller) {
+      dailyQuestScroller.style.overflow = 'hidden';
+      dailyQuestScroller.style.overscrollBehavior = 'none';
+      dailyQuestScroller.style.touchAction = 'none';
+      dailyQuestScroller.style.setProperty('-webkit-overflow-scrolling', 'auto');
+    }
+
+    const preventManualScroll = (event: WheelEvent | TouchEvent) => {
+      event.preventDefault();
+    };
+
+    const overlayNode = overlayRef.current;
+    overlayNode?.addEventListener('wheel', preventManualScroll, { passive: false });
+    overlayNode?.addEventListener('touchmove', preventManualScroll, { passive: false });
+    window.addEventListener('wheel', preventManualScroll, { passive: false });
+    window.addEventListener('touchmove', preventManualScroll, { passive: false });
+
+    return () => {
+      overlayNode?.removeEventListener('wheel', preventManualScroll);
+      overlayNode?.removeEventListener('touchmove', preventManualScroll);
+      window.removeEventListener('wheel', preventManualScroll);
+      window.removeEventListener('touchmove', preventManualScroll);
+
+      html.style.overflow = previousHtmlOverflow;
+      html.style.overscrollBehavior = previousHtmlOverscrollBehavior;
+
+      body.style.overflow = previousBodyOverflow;
+      body.style.overscrollBehavior = previousBodyOverscrollBehavior;
+      body.style.position = previousBodyPosition;
+      body.style.top = previousBodyTop;
+      body.style.left = previousBodyLeft;
+      body.style.right = previousBodyRight;
+      body.style.width = previousBodyWidth;
+      body.style.touchAction = previousBodyTouchAction;
+
+      if (dailyQuestScroller) {
+        dailyQuestScroller.style.overflow = previousDailyQuestOverflow ?? '';
+        dailyQuestScroller.style.overscrollBehavior = previousDailyQuestOverscrollBehavior ?? '';
+        dailyQuestScroller.style.touchAction = previousDailyQuestTouchAction ?? '';
+        if (previousDailyQuestWebkitOverflowScrolling != null && previousDailyQuestWebkitOverflowScrolling.length > 0) {
+          dailyQuestScroller.style.setProperty('-webkit-overflow-scrolling', previousDailyQuestWebkitOverflowScrolling);
+        } else {
+          dailyQuestScroller.style.removeProperty('-webkit-overflow-scrolling');
+        }
+      }
+
+      window.scrollTo({ top: scrollY, behavior: 'auto' });
+    };
+  }, []);
 
   useEffect(() => {
     if (isDailyQuestStep) {
@@ -446,7 +531,12 @@ export function GuidedDemoOverlay({
   const overlayMaskClass = 'bg-slate-950/80 backdrop-blur-[7px]';
 
   return (
-    <div className={`pointer-events-none fixed inset-0 ${overlayZClass}`}>
+    <div
+      ref={overlayRef}
+      className={`pointer-events-auto fixed inset-0 ${overlayZClass}`}
+      onWheel={(event) => event.preventDefault()}
+      onTouchMove={(event) => event.preventDefault()}
+    >
       {targetRect ? (
         <>
           <div className={`absolute left-0 right-0 top-0 ${overlayMaskClass}`} style={{ height: targetRect.top }} />
