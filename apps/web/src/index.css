@@ -6365,4 +6365,145 @@
     color: rgba(30, 41, 59, 0.9);
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
   }
+
+  .ib-onboarding-alert {
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8fafc;
+  }
+
+  .ib-onboarding-alert--warning {
+    border-color: rgba(251, 191, 36, 0.35);
+    background: rgba(245, 158, 11, 0.14);
+  }
+
+  .ib-onboarding-alert--info {
+    border-color: rgba(56, 189, 248, 0.35);
+    background: rgba(14, 165, 233, 0.14);
+  }
+
+  .ib-onboarding-alert--progress {
+    border-color: rgba(232, 121, 249, 0.35);
+    background: rgba(217, 70, 239, 0.12);
+  }
+
+  .ib-onboarding-alert--success {
+    border-color: rgba(129, 140, 248, 0.35);
+    background: rgba(99, 102, 241, 0.14);
+  }
+
+  .ib-onboarding-alert__title {
+    color: #ffffff;
+  }
+
+  .ib-onboarding-alert__body {
+    color: rgba(241, 245, 249, 0.9);
+  }
+
+  .ib-onboarding-alert__dot {
+    background: rgba(226, 232, 240, 0.9);
+  }
+
+  .ib-onboarding-alert--warning .ib-onboarding-alert__dot {
+    background: #fcd34d;
+  }
+
+  .ib-onboarding-alert--info .ib-onboarding-alert__dot {
+    background: #7dd3fc;
+  }
+
+  .ib-onboarding-alert--success .ib-onboarding-alert__dot {
+    background: #a5b4fc;
+  }
+
+  .ib-onboarding-alert--progress .ib-onboarding-alert__dot--spinner {
+    border-color: rgba(250, 232, 255, 0.3);
+    border-top-color: #f5d0fe;
+    background: transparent;
+  }
+
+  .ib-onboarding-alert__cta {
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+
+  .ib-onboarding-alert__cta:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  :root[data-theme="light"]
+    :is([data-light-scope="dashboard-v3"], [data-light-scope="editor"])
+    .ib-onboarding-alert {
+    border-color: rgba(148, 163, 184, 0.32);
+    background: linear-gradient(
+      140deg,
+      rgba(255, 255, 255, 0.97),
+      rgba(248, 250, 255, 0.93)
+    );
+    color: #0f172a;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  }
+
+  :root[data-theme="light"]
+    :is([data-light-scope="dashboard-v3"], [data-light-scope="editor"])
+    .ib-onboarding-alert--warning {
+    border-color: rgba(251, 191, 36, 0.5);
+    background: linear-gradient(140deg, #fff7ed 0%, #ffedd5 100%);
+  }
+
+  :root[data-theme="light"]
+    :is([data-light-scope="dashboard-v3"], [data-light-scope="editor"])
+    .ib-onboarding-alert--info {
+    border-color: rgba(56, 189, 248, 0.5);
+    background: linear-gradient(140deg, #f0f9ff 0%, #e0f2fe 100%);
+  }
+
+  :root[data-theme="light"]
+    :is([data-light-scope="dashboard-v3"], [data-light-scope="editor"])
+    .ib-onboarding-alert--progress {
+    border-color: rgba(217, 70, 239, 0.42);
+    background: linear-gradient(140deg, #fdf4ff 0%, #fae8ff 100%);
+  }
+
+  :root[data-theme="light"]
+    :is([data-light-scope="dashboard-v3"], [data-light-scope="editor"])
+    .ib-onboarding-alert--success {
+    border-color: rgba(129, 140, 248, 0.44);
+    background: linear-gradient(140deg, #eef2ff 0%, #e0e7ff 100%);
+  }
+
+  :root[data-theme="light"]
+    :is([data-light-scope="dashboard-v3"], [data-light-scope="editor"])
+    .ib-onboarding-alert__title,
+  :root[data-theme="light"]
+    :is([data-light-scope="dashboard-v3"], [data-light-scope="editor"])
+    .ib-onboarding-alert__body {
+    color: #0f172a;
+  }
+
+  :root[data-theme="light"]
+    :is([data-light-scope="dashboard-v3"], [data-light-scope="editor"])
+    .ib-onboarding-alert--progress
+    .ib-onboarding-alert__dot--spinner {
+    border-color: rgba(192, 38, 211, 0.24);
+    border-top-color: rgba(162, 28, 175, 0.85);
+  }
+
+  :root[data-theme="light"]
+    :is([data-light-scope="dashboard-v3"], [data-light-scope="editor"])
+    .ib-onboarding-alert__cta {
+    border-color: rgba(148, 163, 184, 0.56);
+    background: rgba(255, 255, 255, 0.78);
+    color: #0f172a;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.75);
+  }
+
+  :root[data-theme="light"]
+    :is([data-light-scope="dashboard-v3"], [data-light-scope="editor"])
+    .ib-onboarding-alert__cta:hover {
+    background: rgba(241, 245, 249, 0.98);
+    border-color: rgba(100, 116, 139, 0.5);
+  }
 }
