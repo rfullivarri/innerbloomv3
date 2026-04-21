@@ -56,16 +56,16 @@ export function Alerts({
 
   if (tasksStatus === 'success' && shouldShowOnboardingGuidance && !hasTasks && !showJourneyPreparing) {
     return (
-      <div className="rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4 text-sm text-sky-100">
+      <div className="ib-onboarding-alert ib-onboarding-alert--info rounded-2xl p-4 text-sm">
         <div className="flex items-start gap-3">
-          <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-sky-300" aria-hidden />
+          <span className="ib-onboarding-alert__dot mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full" aria-hidden />
           <div className="space-y-1">
-            <p className="font-semibold text-white">Completá tu onboarding</p>
-            <p className="text-sky-100/80">Necesitamos generar tus tareas para habilitar Innerbloom.</p>
+            <p className="ib-onboarding-alert__title font-semibold">Completá tu onboarding</p>
+            <p className="ib-onboarding-alert__body">Necesitamos generar tus tareas para habilitar Innerbloom.</p>
           </div>
           <Link
             to="/intro-journey"
-            className="ib-chip-solid ml-auto inline-flex rounded-full px-3 py-1 text-xs font-semibold"
+            className="ib-onboarding-alert__cta ib-chip-solid ml-auto inline-flex rounded-full px-3 py-1 text-xs font-semibold"
           >
             Hacer onboarding
           </Link>
@@ -77,34 +77,34 @@ export function Alerts({
   return (
     <div className="space-y-4">
       {showJourneyPreparing && !suppressJourneyPreparing && (
-        <div className="rounded-2xl border border-fuchsia-400/30 bg-fuchsia-500/10 p-4 text-sm text-fuchsia-100">
+        <div className="ib-onboarding-alert ib-onboarding-alert--progress rounded-2xl p-4 text-sm">
           <div className="flex items-start gap-3">
             <span
-              className="mt-0.5 inline-flex h-4 w-4 flex-none animate-spin rounded-full border-2 border-fuchsia-200/30 border-t-fuchsia-200"
+              className="ib-onboarding-alert__dot ib-onboarding-alert__dot--spinner mt-0.5 inline-flex h-4 w-4 flex-none animate-spin rounded-full border-2"
               aria-hidden
             />
             <div className="space-y-1">
-              <p className="font-semibold text-white">Tu Journey se está preparando</p>
-              <p className="text-fuchsia-100/80">Estamos generando tus primeras misiones personalizadas.</p>
-              <p className="text-fuchsia-100/80">Esto puede tardar unos minutos.</p>
+              <p className="ib-onboarding-alert__title font-semibold">Tu Journey se está preparando</p>
+              <p className="ib-onboarding-alert__body">Estamos generando tus primeras misiones personalizadas.</p>
+              <p className="ib-onboarding-alert__body">Esto puede tardar unos minutos.</p>
             </div>
           </div>
         </div>
       )}
 
       {!showJourneyPreparing && hasTasks && !firstTasksConfirmed && (
-        <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4 text-sm text-amber-100">
+        <div className="ib-onboarding-alert ib-onboarding-alert--warning rounded-2xl p-4 text-sm">
           <div className="flex items-start gap-3">
-            <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-amber-300" aria-hidden />
+            <span className="ib-onboarding-alert__dot mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full" aria-hidden />
             <div className="space-y-1">
-              <p className="font-semibold text-white">Confirmá tu base</p>
-              <p className="text-amber-100/80">
+              <p className="ib-onboarding-alert__title font-semibold">Confirmá tu base</p>
+              <p className="ib-onboarding-alert__body">
                 Editá al menos una tarea para confirmar tu base y desbloquear el siguiente paso.
               </p>
             </div>
             <Link
               to="/editor"
-              className="ib-chip-solid ib-chip-solid--warning ml-auto inline-flex rounded-full px-3 py-1 text-xs font-semibold"
+              className="ib-onboarding-alert__cta ib-chip-solid ib-chip-solid--warning ml-auto inline-flex rounded-full px-3 py-1 text-xs font-semibold"
             >
               Editar tareas
             </Link>
@@ -113,12 +113,12 @@ export function Alerts({
       )}
 
       {!showJourneyPreparing && hasTasks && firstTasksConfirmed && !completedFirstDailyQuest && showFirstDailyQuestCta && (
-        <div className="rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4 text-sm text-sky-100">
+        <div className="ib-onboarding-alert ib-onboarding-alert--info rounded-2xl p-4 text-sm">
           <div className="flex items-start gap-3">
-            <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-sky-300" aria-hidden />
+            <span className="ib-onboarding-alert__dot mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full" aria-hidden />
             <div className="space-y-1">
-              <p className="font-semibold text-white">Realizá tu primer Daily Quest</p>
-              <p className="text-sky-100/80">
+              <p className="ib-onboarding-alert__title font-semibold">Realizá tu primer Daily Quest</p>
+              <p className="ib-onboarding-alert__body">
                 Completá tu primer check-in diario para activar tu progreso y tus rachas.
               </p>
             </div>
@@ -126,7 +126,7 @@ export function Alerts({
               <button
                 type="button"
                 onClick={onOpenFirstDailyQuest}
-                className="ml-auto inline-flex rounded-full border border-white/60 bg-white/5 px-3 py-1 text-xs font-semibold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] transition hover:bg-white/10"
+                className="ib-onboarding-alert__cta ml-auto inline-flex rounded-full px-3 py-1 text-xs font-semibold transition"
               >
                 Daily Quest
               </button>
@@ -136,12 +136,12 @@ export function Alerts({
       )}
 
       {!showJourneyPreparing && showScheduler && (
-        <div className="rounded-2xl border border-indigo-400/30 bg-indigo-500/10 p-4 text-sm text-indigo-100">
+        <div className="ib-onboarding-alert ib-onboarding-alert--success rounded-2xl p-4 text-sm">
           <div className="flex items-start gap-3">
-            <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-indigo-300" aria-hidden />
+            <span className="ib-onboarding-alert__dot mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full" aria-hidden />
             <div className="space-y-1">
-              <p className="font-semibold text-white">Último paso! Programa tu Daily Quest</p>
-              <p className="text-indigo-100/80">
+              <p className="ib-onboarding-alert__title font-semibold">Último paso! Programa tu Daily Quest</p>
+              <p className="ib-onboarding-alert__body">
                 Programá tu recordatorio para recibirlo automáticamente cada día
               </p>
             </div>
@@ -149,7 +149,7 @@ export function Alerts({
               <button
                 type="button"
                 onClick={onScheduleClick}
-                className="ml-auto inline-flex rounded-full border border-white/60 bg-white/5 px-3 py-1 text-xs font-semibold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] transition hover:bg-white/10"
+                className="ib-onboarding-alert__cta ml-auto inline-flex rounded-full px-3 py-1 text-xs font-semibold transition"
               >
                 Programar
               </button>
