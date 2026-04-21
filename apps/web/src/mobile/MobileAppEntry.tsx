@@ -16,6 +16,31 @@ import {
 } from './mobileAuthSession';
 import type { OnboardingProgress } from '../lib/api';
 
+type MobileEntryCopy = {
+  loadingTitle: string;
+  loadingDescription: string;
+  errorTitle: string;
+  errorDescription: string;
+  retry: string;
+};
+
+const MOBILE_ENTRY_COPY: Record<'es' | 'en', MobileEntryCopy> = {
+  es: {
+    loadingTitle: 'Cargando tu perfil',
+    loadingDescription: 'Estamos comprobando tu estado de cuenta antes de enviarte a la experiencia correcta.',
+    errorTitle: 'No pudimos cargar tu perfil',
+    errorDescription: 'La sesión existe, pero no pudimos conectarnos. Vuelve a intentar.',
+    retry: 'Reintentar',
+  },
+  en: {
+    loadingTitle: 'Loading your profile',
+    loadingDescription: 'We are checking your account status before sending you to the right experience.',
+    errorTitle: 'We could not load your profile',
+    errorDescription: 'The session exists, but we could not connect. Try again.',
+    retry: 'Retry',
+  },
+};
+
 function MobileEntryShell({
   title,
   description,
@@ -27,7 +52,7 @@ function MobileEntryShell({
 }) {
   return (
     <div className="flex min-h-screen items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+2rem)] pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] text-white">
-      <div className="w-full max-w-md rounded-[2rem] border border-white/12 bg-[linear-gradient(180deg,rgba(36,59,112,0.96),rgba(20,29,72,0.98))] p-6 shadow-[0_24px_80px_rgba(7,14,40,0.44)] backdrop-blur-2xl">
+      <div className="w-full max-w-md rounded-[2rem] bg-[linear-gradient(180deg,rgba(36,59,112,0.96),rgba(20,29,72,0.98))] p-6 shadow-[0_24px_80px_rgba(7,14,40,0.44)] backdrop-blur-2xl">
         <div className="text-center">
           <div className="flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.4em] text-white/58">
             <BrandWordmark className="gap-2" textClassName="tracking-[0.4em]" iconClassName="h-[1.8em]" />
@@ -48,16 +73,25 @@ function MobileEntryLoading({
   title: string;
   description: string;
 }) {
-  return <MobileEntryShell title={title} description={description} />;
+  return (
+    <MobileEntryShell title={title} description={description}>
+      <div
+        aria-hidden="true"
+        className="mx-auto h-5 w-5 animate-spin rounded-full border-2 border-white/18 border-t-white/80"
+      />
+    </MobileEntryShell>
+  );
 }
 
 function MobileEntryError({
   title,
   description,
+  retryLabel,
   onRetry,
 }: {
   title: string;
   description: string;
+  retryLabel: string;
   onRetry: () => void;
 }) {
   return (
@@ -67,7 +101,7 @@ function MobileEntryError({
         onClick={onRetry}
         className="inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(124,58,237,0.35)] transition hover:bg-[#8b5cf6]"
       >
-        Reintentar
+        {retryLabel}
       </button>
     </MobileEntryShell>
   );
@@ -205,6 +239,8 @@ export function MobileAppEntry() {
   const backendUser = useBackendUser();
   const mobileAuthSession = useMobileAuthSession();
   const isNativeApp = isNativeCapacitorPlatform();
+  const language = resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
+  const entryCopy = MOBILE_ENTRY_COPY[language];
   const forceNativeWelcome = isNativeApp && shouldForceNativeWelcome();
   const hasNativeCallbackSession = isNativeApp && Boolean(mobileAuthSession?.token) && !forceNativeWelcome;
   const hasEffectiveSession = isSignedIn || hasNativeCallbackSession;
@@ -273,8 +309,8 @@ export function MobileAppEntry() {
   if (!isLoaded && !hasNativeCallbackSession) {
     return (
       <MobileEntryLoading
-        title="Preparando Innerbloom"
-        description="Estamos cargando tu sesión y el estado base de la app."
+        title={entryCopy.loadingTitle}
+        description={entryCopy.loadingDescription}
       />
     );
   }
@@ -286,8 +322,9 @@ export function MobileAppEntry() {
   if (backendUser.status === 'error') {
     return (
       <MobileEntryError
-        title="No pudimos cargar tu perfil"
-        description="La sesión existe, pero no pudimos resolver tu estado de app. Reintenta y, si persiste, revisa la conexión con la API."
+        title={entryCopy.errorTitle}
+        description={entryCopy.errorDescription}
+        retryLabel={entryCopy.retry}
         onRetry={backendUser.reload}
       />
     );
@@ -296,8 +333,8 @@ export function MobileAppEntry() {
   if (backendUser.status !== 'success') {
     return (
       <MobileEntryLoading
-        title="Cargando tu perfil"
-        description="Estamos comprobando tu estado de cuenta antes de enviarte a la experiencia correcta."
+        title={entryCopy.loadingTitle}
+        description={entryCopy.loadingDescription}
       />
     );
   }
@@ -305,8 +342,9 @@ export function MobileAppEntry() {
   if (onboarding.status === 'error') {
     return (
       <MobileEntryError
-        title="No pudimos revisar tu onboarding"
-        description="Necesitamos saber si ya terminaste la configuración inicial para enviarte al lugar correcto."
+        title={entryCopy.errorTitle}
+        description={entryCopy.errorDescription}
+        retryLabel={entryCopy.retry}
         onRetry={() => {
           void onboarding.reload();
         }}
@@ -317,8 +355,8 @@ export function MobileAppEntry() {
   if (onboarding.status !== 'success') {
     return (
       <MobileEntryLoading
-        title="Revisando tu recorrido"
-        description="Estamos verificando si ya completaste el onboarding."
+        title={entryCopy.loadingTitle}
+        description={entryCopy.loadingDescription}
       />
     );
   }
