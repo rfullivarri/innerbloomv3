@@ -8,6 +8,18 @@ import {
 } from "./guideConfig";
 
 type Rect = { top: number; left: number; width: number; height: number };
+const INTERACTIVE_ELEMENT_SELECTOR = [
+  "button",
+  "a",
+  "input",
+  "select",
+  "textarea",
+  "label",
+  "[role='button']",
+  "[role='link']",
+  "[contenteditable='true']",
+  ".editor-guide-panel",
+].join(",");
 
 function findVisibleTarget(selector: string): Rect | null {
   const candidates = Array.from(
@@ -109,6 +121,42 @@ export function EditorGuideOverlay({
   const canGoBack = stepIndex > 0;
   const isLast = stepIndex === guideSteps.length - 1;
 
+  const goToPreviousStep = () => {
+    setStepIndex((current) => Math.max(0, current - 1));
+  };
+
+  const goToNextStep = () => {
+    if (isLast) {
+      onClose();
+      return;
+    }
+    setStepIndex((current) => Math.min(guideSteps.length - 1, current + 1));
+  };
+
+  const handleBackgroundTouchNavigation = (
+    event: React.PointerEvent<HTMLDivElement>,
+  ) => {
+    if (event.pointerType !== "touch" && event.pointerType !== "pen") {
+      return;
+    }
+
+    if ((event.target as Element).closest(INTERACTIVE_ELEMENT_SELECTOR)) {
+      return;
+    }
+
+    const midpoint = window.innerWidth / 2;
+    const tappedLeftSide = event.clientX < midpoint;
+
+    if (tappedLeftSide) {
+      if (canGoBack) {
+        goToPreviousStep();
+      }
+      return;
+    }
+
+    goToNextStep();
+  };
+
   const copy = locale === "es"
     ? { aria: "Guía", back: "Anterior", skip: "Saltar", finish: "Finalizar", next: "Siguiente", label: "Guía" }
     : { aria: "Guide", back: "Previous", skip: "Skip", finish: "Finish", next: "Next", label: "Guide" };
@@ -138,6 +186,7 @@ export function EditorGuideOverlay({
       role="dialog"
       aria-modal="true"
       aria-label={copy.aria}
+      onPointerUp={handleBackgroundTouchNavigation}
     >
       {frame && !isWheelStep ? (
         <>
@@ -195,9 +244,7 @@ export function EditorGuideOverlay({
           {canGoBack && (
             <button
               type="button"
-              onClick={() =>
-                setStepIndex((current) => Math.max(0, current - 1))
-              }
+              onClick={goToPreviousStep}
               className="inline-flex rounded-full border border-white/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--color-slate-100)]"
             >
               {copy.back}
@@ -212,15 +259,7 @@ export function EditorGuideOverlay({
           </button>
           <button
             type="button"
-            onClick={() => {
-              if (isLast) {
-                onClose();
-                return;
-              }
-              setStepIndex((current) =>
-                Math.min(guideSteps.length - 1, current + 1),
-              );
-            }}
+            onClick={goToNextStep}
             className="ml-auto inline-flex rounded-full bg-violet-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
           >
             {nextLabel}
