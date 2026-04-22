@@ -113,6 +113,8 @@ export default function EditorLabPage() {
     null,
   );
   const [showGuideModal, setShowGuideModal] = useState(false);
+  const [activeGuideStepId, setActiveGuideStepId] =
+    useState<EditorGuideStepId>("wheel-core");
   const [showSuggestionsModal, setShowSuggestionsModal] = useState(false);
   const [isApplyingSuggestions, setIsApplyingSuggestions] = useState(false);
 
@@ -394,20 +396,16 @@ export default function EditorLabPage() {
   };
 
   const handleGuideStepChange = useCallback((stepId: EditorGuideStepId) => {
+    setActiveGuideStepId(stepId);
+
     const modalSteps = new Set<EditorGuideStepId>([
+      "modal-entry",
       "modal-input",
-      "modal-ai-action",
-      "modal-ai-result",
+      "modal-difficulty",
+      "modal-ai-thinking",
     ]);
 
-    if (modalSteps.has(stepId)) {
-      setShowCreateModal(true);
-      return;
-    }
-
-    if (stepId === "modal-entry") {
-      setShowCreateModal(false);
-    }
+    setShowCreateModal(modalSteps.has(stepId));
   }, []);
 
   const handleDeleteModalClose = useCallback(() => {
@@ -820,6 +818,7 @@ export default function EditorLabPage() {
           isLoadingPillars={isLoadingPillars}
           pillarsError={pillarsError}
           onRetryPillars={reloadPillars}
+          guideStepId={showGuideModal ? activeGuideStepId : null}
         />
         <EditTaskModal
           open={taskToEdit != null}
@@ -1928,6 +1927,7 @@ interface CreateTaskModalProps {
   isLoadingPillars: boolean;
   pillarsError: Error | null;
   onRetryPillars: () => void;
+  guideStepId: EditorGuideStepId | null;
 }
 
 type SuggestedPillarGroup = "body" | "mind" | "soul";
@@ -2092,6 +2092,7 @@ function CreateTaskModal({
   isLoadingPillars,
   pillarsError,
   onRetryPillars,
+  guideStepId,
 }: CreateTaskModalProps) {
   const { language, t } = usePostLoginLanguage();
   const activeLocale = language === "es" ? "es" : "en";
@@ -2234,13 +2235,29 @@ function CreateTaskModal({
 
   const isSubmitting = createStatus === "loading";
   const isAnalyzing = suggestionStatus === "analyzing";
+  const isGuideAIThinkingStep = guideStepId === "modal-ai-thinking";
+  const guideSuggestion =
+    isGuideAIThinkingStep && sortedPillars.length > 0
+      ? {
+          pillarId: sortedPillars[0].id,
+          pillarLabel: localizePillarLabel(sortedPillars[0].name, language),
+          traitId: "guide-trait",
+          traitLabel: language === "es" ? "Enfoque" : "Focus",
+          rationale:
+            language === "es"
+              ? "La guía simula cómo la IA propone automáticamente pilar + rasgo."
+              : "The guide simulates how AI automatically proposes pillar + trait.",
+        }
+      : null;
+  const visibleSuggestion = suggestion ?? guideSuggestion;
+  const showAnalyzingCard = isAnalyzing || isGuideAIThinkingStep;
   const isSubmitDisabled =
     isSubmitting ||
     (!suggestion && !(manualCategoryEnabled && manualPillarId && manualTraitId)) ||
     title.trim().length === 0 ||
     !userId;
   const isSuggestDisabled =
-    isAnalyzing ||
+    (isAnalyzing && !isGuideAIThinkingStep) ||
     title.trim().length === 0 ||
     isLoadingPillars ||
     Boolean(pillarsError);
@@ -2454,6 +2471,7 @@ function CreateTaskModal({
                     {t("editor.field.difficulty")}
                   </span>
                   <select
+                    data-editor-guide-target="new-task-modal-difficulty"
                     value={difficultyId}
                     onChange={(event) => setDifficultyId(event.target.value)}
                     className="create-task-ai-modal__control w-full appearance-none rounded-2xl border px-4 py-3 text-sm ios-touch-input focus:outline-none disabled:cursor-not-allowed"
@@ -2525,7 +2543,7 @@ function CreateTaskModal({
               )}
             </section>
 
-            {isAnalyzing && (
+            {showAnalyzingCard && (
               <section className="create-task-ai-modal__analysis-card space-y-2 rounded-xl border p-3">
                 <div className="create-task-ai-modal__pulse h-2 w-24 rounded-full" />
                 <p className="text-sm font-semibold">
@@ -2537,7 +2555,8 @@ function CreateTaskModal({
               </section>
             )}
 
-            {suggestion && suggestionStatus === "ready" && (
+            {visibleSuggestion &&
+              (suggestionStatus === "ready" || isGuideAIThinkingStep) && (
               <section
                 className="create-task-ai-modal__suggestion-strip space-y-3.5 py-2"
                 data-editor-guide-target="new-task-modal-ai-result"

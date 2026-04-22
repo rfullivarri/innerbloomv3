@@ -3,7 +3,7 @@ import type { EditorGuideStepId } from "./guideConfig";
 type Locale = "es" | "en";
 type PillarKey = "Body" | "Mind" | "Soul";
 
-const PILLARS: PillarKey[] = ["Body", "Mind", "Soul"];
+const PILLARS: PillarKey[] = ["Soul", "Mind", "Body"];
 
 const TRAITS_BY_PILLAR: Record<Locale, Record<PillarKey, string[]>> = {
   es: {
@@ -98,18 +98,18 @@ const PILLAR_META: Record<
   Soul: {
     icon: "🏵️",
     label: { es: "Alma", en: "Soul" },
-    glow: "rgba(250, 205, 95, 0.45)",
-    segment: "rgba(250, 205, 95, 0.55)",
-    text: "rgba(255, 242, 204, 0.96)",
-    line: "rgba(250, 205, 95, 0.74)",
+    glow: "rgba(245, 192, 72, 0.52)",
+    segment: "rgba(245, 192, 72, 0.56)",
+    text: "rgba(255, 236, 170, 0.98)",
+    line: "rgba(245, 192, 72, 0.78)",
   },
   Body: {
     icon: "🫀",
     label: { es: "Cuerpo", en: "Body" },
-    glow: "rgba(98, 225, 232, 0.43)",
-    segment: "rgba(98, 225, 232, 0.52)",
+    glow: "rgba(89, 224, 236, 0.45)",
+    segment: "rgba(89, 224, 236, 0.55)",
     text: "rgba(224, 252, 255, 0.95)",
-    line: "rgba(98, 225, 232, 0.7)",
+    line: "rgba(89, 224, 236, 0.74)",
   },
   Mind: {
     icon: "🧠",
@@ -128,7 +128,7 @@ function levelFromStep(stepId: EditorGuideStepId): 1 | 2 | 3 {
 }
 
 function compactTraitLabel(label: string): string {
-  return label.length > 11 ? `${label.slice(0, 10)}…` : label;
+  return label.length > 13 ? `${label.slice(0, 12)}…` : label;
 }
 
 function polarToCartesian(angleDeg: number, radius: number) {
@@ -156,16 +156,16 @@ export function EditorGuideWheel({
     })),
   );
 
-  const size = 320;
+  const size = 332;
   const center = size / 2;
-  const ringSize = 196;
-  const traitRingSize = 272;
-  const pillarLabelRadius = 72;
-  const traitTickRadius = 129;
-  const traitLabelRadius = 147;
+  const ringSize = 206;
+  const traitRingSize = 244;
+  const pillarLabelRadius = 68;
+  const traitTickRadius = 110;
+  const traitLabelRadius = 126;
 
   return (
-    <div className="relative mx-auto h-[20.5rem] w-full max-w-[21.75rem] overflow-visible">
+    <div className="relative mx-auto h-[21.5rem] w-full max-w-[22.5rem] overflow-visible">
       <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.19),transparent_72%)]" />
 
       <div
@@ -189,7 +189,7 @@ export function EditorGuideWheel({
         style={{
           width: `${ringSize}px`,
           height: `${ringSize}px`,
-          background: `conic-gradient(from -90deg, ${PILLAR_META.Body.segment} 0deg 120deg, ${PILLAR_META.Mind.segment} 120deg 240deg, ${PILLAR_META.Soul.segment} 240deg 360deg)`,
+          background: `conic-gradient(from -90deg, ${PILLAR_META.Soul.segment} 0deg 120deg, ${PILLAR_META.Mind.segment} 120deg 240deg, ${PILLAR_META.Body.segment} 240deg 360deg)`,
           mask: "radial-gradient(circle, transparent 33%, black 34%, black 74%, transparent 75%)",
           opacity: level >= 2 ? 1 : 0,
           transform: `translate(-50%, -50%) scale(${level >= 2 ? 1 : 0.82})`,
@@ -210,7 +210,7 @@ export function EditorGuideWheel({
             }}
           >
             <div
-              className="inline-flex min-w-[84px] items-center justify-center gap-1.5 rounded-full bg-black/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.13em] backdrop-blur-[1px]"
+              className="inline-flex min-w-[70px] max-w-[76px] items-center justify-center gap-1 rounded-full bg-black/20 px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.1em] backdrop-blur-[1px]"
               style={{ color: PILLAR_META[pillar].text, textShadow: `0 0 14px ${PILLAR_META[pillar].glow}` }}
             >
               <span className="text-[13px] leading-none">{PILLAR_META[pillar].icon}</span>
@@ -259,7 +259,7 @@ export function EditorGuideWheel({
                 x={center + labelPoint.x}
                 y={center + labelPoint.y}
                 fill={PILLAR_META[pillar].text}
-                fontSize="9"
+                fontSize="8"
                 fontWeight="500"
                 letterSpacing="0.01em"
                 textAnchor={textAnchor}
