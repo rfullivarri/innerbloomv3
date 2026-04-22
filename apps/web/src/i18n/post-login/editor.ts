@@ -122,6 +122,10 @@ export const editorTranslations = {
     es: 'Reintentar sugerencia',
     en: 'Retry suggestion',
   },
+  'editor.modal.aiCreate.manualCategory': {
+    es: 'Elegir manualmente',
+    en: 'Set manually',
+  },
   'editor.modal.aiCreate.confirmButton': {
     es: 'Confirmar tarea',
     en: 'Confirm task',

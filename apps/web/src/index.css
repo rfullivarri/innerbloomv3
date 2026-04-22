@@ -5411,14 +5411,20 @@
 
   .create-task-ai-modal__suggest-button {
     color: #ffffff;
-    background: linear-gradient(125deg, #7066ff 0%, #b577ff 52%, #ff98ad 100%);
-    box-shadow: 0 16px 36px rgba(167, 112, 239, 0.35);
+    background: linear-gradient(128deg, #6f67ff 0%, #ad78ff 62%, #f197c4 100%);
+    box-shadow: 0 10px 24px rgba(153, 101, 233, 0.34);
+    letter-spacing: 0.01em;
   }
 
   .create-task-ai-modal__analysis-card,
-  .create-task-ai-modal__suggestion-card {
+  .create-task-ai-modal__manual-grid {
     border-color: var(--color-border-subtle);
     background: color-mix(in srgb, var(--color-overlay-2) 80%, transparent);
+  }
+
+  .create-task-ai-modal__suggestion-strip {
+    border-top: 1px solid color-mix(in srgb, var(--color-border-subtle) 62%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border-subtle) 50%, transparent);
   }
 
   .create-task-ai-modal__pulse {
@@ -5784,9 +5790,16 @@
     .create-task-ai-modal__analysis-card,
   :root[data-theme="light"]
     [data-light-scope="editor"]
-    .create-task-ai-modal__suggestion-card {
+    .create-task-ai-modal__manual-grid {
     border-color: var(--editor-modal-secondary-border);
     background: color-mix(in srgb, var(--editor-modal-input-bg) 84%, #f8fafc);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__suggestion-strip {
+    border-top-color: color-mix(in srgb, var(--editor-modal-secondary-border) 68%, transparent);
+    border-bottom-color: color-mix(in srgb, var(--editor-modal-secondary-border) 58%, transparent);
   }
 
   :root[data-theme="light"]
