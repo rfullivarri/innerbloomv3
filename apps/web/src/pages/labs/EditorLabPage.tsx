@@ -55,7 +55,7 @@ import {
 } from "../dashboardSections";
 
 export const FEATURE_TASK_EDITOR_MOBILE_LIST_V1 = true;
-const ENABLE_EDITOR_GUIDE_AUTO_OPEN = false;
+const ENABLE_EDITOR_GUIDE_AUTO_OPEN = true;
 
 export default function EditorLabPage() {
   const location = useLocation();
@@ -146,7 +146,7 @@ export default function EditorLabPage() {
   }, [taskToDelete]);
 
   useEffect(() => {
-    if (!ENABLE_EDITOR_GUIDE_AUTO_OPEN || !FEATURE_TASK_EDITOR_MOBILE_LIST_V1) {
+    if (!ENABLE_EDITOR_GUIDE_AUTO_OPEN) {
       return;
     }
     if (shouldAutoOpenEditorGuide()) {
@@ -850,14 +850,17 @@ function SectionHeader({ section }: { section: DashboardSectionConfig }) {
   }
 
   return (
-    <header className="mb-6 space-y-2 md:mb-8">
+    <header className="mb-6 space-y-3 md:mb-8">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-violet-200/85">
+        Editor Lab
+      </p>
       {shouldShowTitle && (
-        <h1 className="font-display text-2xl font-semibold text-[color:var(--color-text)] sm:text-3xl">
+        <h1 className="font-display text-2xl font-semibold tracking-[-0.02em] text-[color:var(--color-text)] sm:text-3xl">
           {normalizedTitle}
         </h1>
       )}
       {shouldShowDescription && (
-        <p className="text-sm text-[color:var(--color-slate-400)]">
+        <p className="max-w-3xl text-sm leading-relaxed text-[color:var(--color-slate-400)]">
           {normalizedDescription}
         </p>
       )}
@@ -948,7 +951,7 @@ function TaskFilters({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
+      <div className="hidden items-center gap-2 md:flex">
         <button
           type="button"
           onClick={onOpenGuide}
@@ -967,6 +970,23 @@ function TaskFilters({
       </div>
       <div className="md:hidden">
         <div className="editor-filters-mobile-panel sticky -mx-4 -mt-5 top-[4.5rem] z-30 space-y-3 rounded-t-2xl px-4 pt-5 pb-3 bg-[color:var(--color-slate-900-95)]">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={onOpenGuide}
+              className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white"
+            >
+              Guía
+            </button>
+            <button
+              type="button"
+              onClick={onOpenSuggestions}
+              data-editor-guide-target="suggestions"
+              className="inline-flex items-center justify-center rounded-full border border-violet-400/35 bg-violet-500/10 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-100 transition hover:bg-violet-500/20"
+            >
+              Sugerencias
+            </button>
+          </div>
           <label className="flex flex-col gap-1">
             <input
               type="search"
@@ -2782,6 +2802,11 @@ function SuggestionsLabModal({
       ),
     };
   }, []);
+  const totalAvailableSuggestions = EDITOR_LAB_QUICK_START_SEED.length;
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const selectedCount = selectedIds.length;
+  const hasSelectedSuggestions = selectedCount > 0;
+  const isEverythingSelected = selectedCount === totalAvailableSuggestions;
 
   useEffect(() => {
     if (!isOpen) {
@@ -2805,29 +2830,57 @@ function SuggestionsLabModal({
         <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-200/80">
           Sugerencias
         </p>
-        <h2 className="mt-1 text-lg font-semibold text-white">
-          Elegí tareas base para sumar al editor
+        <h2 className="mt-2 text-lg font-semibold text-white md:text-xl">
+          Sumá tareas base a tu sistema
         </h2>
-        <p className="mt-2 text-sm text-[color:var(--color-slate-300)]">
-          Selección inicial basada en el Quick Start por pilar.
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-[color:var(--color-slate-300)]">
+          Elegí múltiples tareas del Quick Start por pilar para incorporarlas directamente a tu editor.
         </p>
-        <div className="mt-4 max-h-[58vh] space-y-4 overflow-y-auto pr-1">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2">
+          <p className="text-xs text-[color:var(--color-slate-300)]">
+            {selectedCount} de {totalAvailableSuggestions} seleccionadas
+          </p>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() =>
+                setSelectedIds(
+                  isEverythingSelected
+                    ? []
+                    : EDITOR_LAB_QUICK_START_SEED.map((task) => task.id),
+                )
+              }
+              className="rounded-full border border-white/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white"
+            >
+              {isEverythingSelected ? "Limpiar" : "Seleccionar todo"}
+            </button>
+          </div>
+        </div>
+        <div className="mt-4 max-h-[58vh] space-y-5 overflow-y-auto pr-1">
           {(
             Object.entries(grouped) as Array<
               [keyof typeof grouped, typeof EDITOR_LAB_QUICK_START_SEED]
             >
           ).map(([pillar, tasks]) => (
-            <div key={pillar} className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-slate-400)]">
-                {pillar}
-              </h3>
+            <div key={pillar} className="space-y-2.5">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-slate-400)]">
+                  {pillar}
+                </h3>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[color:var(--color-slate-500)]">
+                  {
+                    tasks.filter((task) => selectedSet.has(task.id)).length
+                  }{" "}
+                  / {tasks.length}
+                </p>
+              </div>
               <div className="space-y-2">
                 {tasks.map((task) => {
-                  const checked = selectedIds.includes(task.id);
+                  const checked = selectedSet.has(task.id);
                   return (
                     <label
                       key={task.id}
-                      className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-3 py-2 ${checked ? "border-violet-300/50 bg-violet-500/10" : "border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]"}`}
+                      className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-3 py-2.5 transition ${checked ? "border-violet-300/60 bg-violet-500/15 shadow-[0_10px_24px_rgba(139,92,246,0.2)]" : "border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-white/25"}`}
                     >
                       <input
                         type="checkbox"
@@ -2841,9 +2894,11 @@ function SuggestionsLabModal({
                         }
                         className="mt-1 h-4 w-4 rounded border-white/30 bg-transparent text-violet-400"
                       />
-                      <span className="flex-1 text-sm text-[color:var(--color-slate-100)]">
-                        {task.title}
-                        <span className="ml-2 inline-flex rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.14em] text-[color:var(--color-slate-400)]">
+                      <span className="flex-1">
+                        <span className="block text-sm font-medium text-[color:var(--color-slate-100)]">
+                          {task.title}
+                        </span>
+                        <span className="mt-1 inline-flex rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.14em] text-[color:var(--color-slate-400)]">
                           {task.trait}
                         </span>
                       </span>
@@ -2854,17 +2909,23 @@ function SuggestionsLabModal({
             </div>
           ))}
         </div>
-        <div className="mt-5 flex items-center justify-between gap-3">
+        <div className="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
           <p className="text-xs text-[color:var(--color-slate-400)]">
-            {selectedIds.length} seleccionada(s)
+            {hasSelectedSuggestions
+              ? `Listo para sumar ${selectedCount} tarea(s) a tu sistema.`
+              : "Seleccioná tareas para empezar a construir tu sistema."}
           </p>
           <button
             type="button"
-            disabled={selectedIds.length === 0 || isApplying}
+            disabled={!hasSelectedSuggestions || isApplying}
             onClick={() => onApply(selectedIds)}
-            className="inline-flex rounded-full bg-violet-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex rounded-full bg-violet-500 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-[0_12px_30px_rgba(139,92,246,0.35)] transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isApplying ? "Agregando…" : "Agregar a mi sistema"}
+            {isApplying
+              ? "Sumando tareas…"
+              : hasSelectedSuggestions
+                ? `Sumar ${selectedCount} a mi sistema`
+                : "Sumar a mi sistema"}
           </button>
         </div>
       </section>
