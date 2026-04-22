@@ -31,6 +31,7 @@ import {
   fetchCatalogStats,
   fetchCatalogTraits,
   type Pillar,
+  type Trait,
 } from "../../lib/api/catalogs";
 import { useAppMode } from "../../hooks/useAppMode";
 import { useDailyQuestReadiness } from "../../hooks/useDailyQuestReadiness";
@@ -1909,6 +1910,160 @@ interface CreateTaskModalProps {
   onRetryPillars: () => void;
 }
 
+type SuggestedPillarGroup = "body" | "mind" | "soul";
+
+type TaskCategorySuggestion = {
+  pillarId: string;
+  pillarLabel: string;
+  traitId: string;
+  traitLabel: string;
+  rationale: string;
+};
+
+const CATEGORY_KEYWORDS: Record<SuggestedPillarGroup, string[]> = {
+  body: [
+    "caminar",
+    "walk",
+    "run",
+    "correr",
+    "train",
+    "entren",
+    "gym",
+    "agua",
+    "water",
+    "hidr",
+    "sleep",
+    "dorm",
+    "stretch",
+    "mov",
+    "exercise",
+    "comer",
+    "eat",
+  ],
+  mind: [
+    "leer",
+    "read",
+    "study",
+    "estudi",
+    "focus",
+    "foco",
+    "trabajo",
+    "work",
+    "plan",
+    "organ",
+    "deep work",
+    "learn",
+    "aprender",
+  ],
+  soul: [
+    "hablar",
+    "talk",
+    "call",
+    "llamar",
+    "agradec",
+    "gratitude",
+    "medit",
+    "rez",
+    "pray",
+    "connect",
+    "conectar",
+    "friend",
+    "famil",
+    "journal",
+    "respirar",
+    "breathe",
+  ],
+};
+
+function normalizeForMatching(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+}
+
+function detectSuggestedPillarGroup(taskTitle: string): SuggestedPillarGroup {
+  const normalizedTitle = normalizeForMatching(taskTitle);
+  const scores = (Object.keys(CATEGORY_KEYWORDS) as SuggestedPillarGroup[]).map(
+    (group) => ({
+      group,
+      score: CATEGORY_KEYWORDS[group].reduce(
+        (total, keyword) =>
+          normalizedTitle.includes(normalizeForMatching(keyword))
+            ? total + 1
+            : total,
+        0,
+      ),
+    }),
+  );
+
+  const topScore = scores.reduce(
+    (best, current) => (current.score > best.score ? current : best),
+    { group: "mind" as SuggestedPillarGroup, score: 0 },
+  );
+
+  if (topScore.score === 0) {
+    return "mind";
+  }
+
+  return topScore.group;
+}
+
+function resolvePillarFromCatalog(
+  pillars: Pillar[],
+  group: SuggestedPillarGroup,
+): Pillar | null {
+  const byCode = pillars.find((pillar) =>
+    normalizeForMatching(pillar.code).includes(group),
+  );
+  if (byCode) {
+    return byCode;
+  }
+
+  const labelHints: Record<SuggestedPillarGroup, string[]> = {
+    body: ["body", "cuerpo", "salud", "fisico", "physical"],
+    mind: ["mind", "mente", "focus", "foco", "mental"],
+    soul: ["soul", "alma", "conexion", "connection", "spirit"],
+  };
+
+  const byName = pillars.find((pillar) =>
+    labelHints[group].some((hint) =>
+      normalizeForMatching(pillar.name).includes(hint),
+    ),
+  );
+
+  return byName ?? pillars[0] ?? null;
+}
+
+function resolveSuggestedTrait(traits: Trait[], group: SuggestedPillarGroup): Trait | null {
+  const traitHints: Record<SuggestedPillarGroup, string[]> = {
+    body: ["hydr", "sleep", "movement", "fitness", "energia", "energy", "health"],
+    mind: ["focus", "clarity", "learn", "discipline", "product", "study"],
+    soul: ["connection", "gratitude", "mindful", "calm", "compassion", "bond"],
+  };
+
+  const hinted = traits.find((trait) => {
+    const searchable = `${trait.name} ${trait.code}`;
+    return traitHints[group].some((hint) =>
+      normalizeForMatching(searchable).includes(hint),
+    );
+  });
+
+  return hinted ?? traits[0] ?? null;
+}
+
+function buildSuggestionRationale(
+  language: "es" | "en",
+  taskTitle: string,
+  pillarLabel: string,
+  traitLabel: string,
+): string {
+  if (language === "es") {
+    return `“${taskTitle}” se alinea con ${pillarLabel} > ${traitLabel}.`;
+  }
+  return `“${taskTitle}” aligns with ${pillarLabel} > ${traitLabel}.`;
+}
+
 function CreateTaskModal({
   open,
   onClose,
@@ -1920,10 +2075,14 @@ function CreateTaskModal({
 }: CreateTaskModalProps) {
   const { language, t } = usePostLoginLanguage();
   const activeLocale = language === "es" ? "es" : "en";
-  const [selectedPillarId, setSelectedPillarId] = useState("");
-  const [selectedTraitId, setSelectedTraitId] = useState("");
   const [title, setTitle] = useState("");
   const [difficultyId, setDifficultyId] = useState("");
+  const [suggestionStatus, setSuggestionStatus] = useState<
+    "idle" | "analyzing" | "ready"
+  >("idle");
+  const [suggestion, setSuggestion] = useState<TaskCategorySuggestion | null>(
+    null,
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
@@ -1940,12 +2099,6 @@ function CreateTaskModal({
 
   const { createTask, status: createStatus } = useCreateTask();
   const {
-    data: traits,
-    isLoading: isLoadingTraits,
-    error: traitsError,
-    reload: reloadTraits,
-  } = useTraits(open ? selectedPillarId : null);
-  const {
     data: difficulties,
     isLoading: isLoadingDifficulties,
     error: difficultiesError,
@@ -1958,10 +2111,10 @@ function CreateTaskModal({
 
   useEffect(() => {
     if (!open) {
-      setSelectedPillarId("");
-      setSelectedTraitId("");
       setTitle("");
       setDifficultyId("");
+      setSuggestionStatus("idle");
+      setSuggestion(null);
       setErrors({});
       setToast(null);
     }
@@ -1993,20 +2146,11 @@ function CreateTaskModal({
     return undefined;
   }, [toast]);
 
-  useEffect(() => {
-    setSelectedTraitId("");
-    clearError("trait");
-  }, [selectedPillarId, clearError]);
-
   const sortedPillars = useMemo(() => {
     return [...pillars].sort((a, b) =>
       a.name.localeCompare(b.name, activeLocale, { sensitivity: "base" }),
     );
   }, [activeLocale, pillars]);
-
-  const filteredTraits = useMemo(() => {
-    return traits.filter((trait) => trait.pillarId === selectedPillarId);
-  }, [traits, selectedPillarId]);
 
   const sortedDifficulties = useMemo(() => {
     return [...difficulties].sort((a, b) =>
@@ -2015,25 +2159,109 @@ function CreateTaskModal({
   }, [activeLocale, difficulties]);
 
   const isSubmitting = createStatus === "loading";
+  const isAnalyzing = suggestionStatus === "analyzing";
   const isSubmitDisabled =
     isSubmitting ||
-    !selectedPillarId ||
-    !selectedTraitId ||
+    !suggestion ||
     title.trim().length === 0 ||
     !userId;
+  const isSuggestDisabled =
+    isAnalyzing ||
+    title.trim().length === 0 ||
+    isLoadingPillars ||
+    Boolean(pillarsError);
+
+  const handleSuggestCategory = useCallback(async () => {
+    const validationErrors: Record<string, string> = {};
+    if (title.trim().length === 0) {
+      validationErrors.title = t("editor.validation.titleRequired");
+    }
+    if (sortedPillars.length === 0) {
+      validationErrors.suggestion = t("editor.modal.aiCreate.catalogFallback");
+    }
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      return;
+    }
+
+    const pillarGroup = detectSuggestedPillarGroup(title);
+    const selectedPillar = resolvePillarFromCatalog(sortedPillars, pillarGroup);
+    if (!selectedPillar) {
+      setErrors((previous) => ({
+        ...previous,
+        suggestion: t("editor.modal.aiCreate.catalogFallback"),
+      }));
+      return;
+    }
+
+    setSuggestionStatus("analyzing");
+    setSuggestion(null);
+    clearError("suggestion");
+    await new Promise((resolve) => window.setTimeout(resolve, 1200));
+
+    try {
+      const pillarTraits = await fetchCatalogTraits(selectedPillar.id);
+      const selectedTrait = resolveSuggestedTrait(pillarTraits, pillarGroup);
+      if (!selectedTrait) {
+        setSuggestionStatus("idle");
+        setErrors((previous) => ({
+          ...previous,
+          suggestion: t("editor.modal.aiCreate.noTraits"),
+        }));
+        return;
+      }
+
+      const localizedPillar = localizePillarLabel(selectedPillar.name, language);
+      const localizedTrait = localizeTraitLabel(
+        {
+          name: selectedTrait.name,
+          code: selectedTrait.code,
+          fallback: selectedTrait.id,
+        },
+        language,
+      );
+
+      setSuggestion({
+        pillarId: selectedPillar.id,
+        pillarLabel: localizedPillar,
+        traitId: selectedTrait.id,
+        traitLabel: localizedTrait,
+        rationale: buildSuggestionRationale(
+          activeLocale,
+          title.trim(),
+          localizedPillar,
+          localizedTrait,
+        ),
+      });
+      setSuggestionStatus("ready");
+    } catch (error) {
+      console.error("Failed to resolve AI suggestion for lab editor", error);
+      setSuggestionStatus("idle");
+      setErrors((previous) => ({
+        ...previous,
+        suggestion: t("editor.modal.aiCreate.suggestionError"),
+      }));
+    }
+  }, [
+    activeLocale,
+    clearError,
+    language,
+    sortedPillars,
+    t,
+    title,
+  ]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const validationErrors: Record<string, string> = {};
-    if (!selectedPillarId) {
-      validationErrors.pillar = t("editor.validation.selectPillar");
-    }
-    if (!selectedTraitId) {
-      validationErrors.trait = t("editor.validation.selectTrait");
-    }
     if (title.trim().length === 0) {
       validationErrors.title = t("editor.validation.titleRequired");
+    }
+    if (!suggestion) {
+      validationErrors.suggestion = t(
+        "editor.modal.aiCreate.confirmationRequired",
+      );
     }
     if (!userId) {
       validationErrors.user = t("editor.validation.userNotFound");
@@ -2048,14 +2276,16 @@ function CreateTaskModal({
     try {
       await createTask(userId!, {
         title: title.trim(),
-        pillarId: selectedPillarId,
-        traitId: selectedTraitId,
+        pillarId: suggestion!.pillarId,
+        traitId: suggestion!.traitId,
         statId: null,
         difficultyId: difficultyId || null,
       });
       setToast({ type: "success", text: t("editor.toast.create.success") });
       setTitle("");
       setDifficultyId("");
+      setSuggestionStatus("idle");
+      setSuggestion(null);
       setErrors({});
     } catch (error) {
       const message =
@@ -2087,158 +2317,47 @@ function CreateTaskModal({
         >
           <div className="create-task-modal space-y-6">
             <header className="space-y-1">
-              <p className="create-task-modal__badge text-[11px] font-semibold uppercase tracking-[0.24em]">
-                {t("editor.modal.create.badge")}
-              </p>
-              <h2 className="create-task-modal__title text-xl font-semibold">
-                {t("editor.modal.create.title")}
-              </h2>
-              <p className="create-task-modal__description text-sm">
-                {t("editor.modal.create.description")}
-              </p>
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <p className="create-task-ai-modal__badge text-[11px] font-semibold uppercase tracking-[0.24em]">
+                    {t("editor.modal.aiCreate.badge")}
+                  </p>
+                  <h2 className="create-task-ai-modal__title text-xl font-semibold">
+                    {t("editor.modal.aiCreate.title")}
+                  </h2>
+                  <p className="create-task-ai-modal__description text-sm">
+                    {t("editor.modal.aiCreate.description")}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  aria-label={t("editor.button.close")}
+                  className="create-task-ai-modal__close inline-flex h-9 w-9 items-center justify-center rounded-full border text-lg transition"
+                  onClick={handleClose}
+                >
+                  ×
+                </button>
+              </div>
             </header>
-
-            <section className="space-y-4">
-              <div className="space-y-1.5">
-                <p className="create-task-modal__section-label text-[11px] font-semibold uppercase tracking-[0.24em]">
-                  {t("editor.modal.create.step1")}
-                </p>
-                <div className="flex flex-col gap-2">
-                  <select
-                    value={selectedPillarId}
-                    onChange={(event) => {
-                      setSelectedPillarId(event.target.value);
-                      clearError("pillar");
-                    }}
-                    className="create-task-modal__control create-task-modal__control--pill w-full appearance-none rounded-full border px-4 py-2.5 text-sm ios-touch-input focus:outline-none disabled:cursor-not-allowed"
-                    disabled={isLoadingPillars || pillarsError != null}
-                  >
-                    <option value="" className="create-task-modal__option">
-                      {t("editor.modal.create.selectPillarPlaceholder")}
-                    </option>
-                    {sortedPillars.map((pillar) => (
-                      <option
-                        key={pillar.id}
-                        value={pillar.id}
-                        className="create-task-modal__option"
-                      >
-                        {localizePillarLabel(pillar.name, language)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {isLoadingPillars && (
-                  <p className="create-task-modal__hint text-[11px] uppercase tracking-[0.2em]">
-                    {t("editor.loading.pillars")}
-                  </p>
-                )}
-                {pillarsError && (
-                  <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
-                    <p>{t("editor.error.pillars.load")}</p>
-                    <button
-                      type="button"
-                      onClick={onRetryPillars}
-                      className="font-semibold text-rose-200 underline decoration-dotted"
-                    >
-                      {t("editor.button.retry")}
-                    </button>
-                  </div>
-                )}
-                {errors.pillar && (
-                  <p className="text-xs text-rose-300">{errors.pillar}</p>
-                )}
-                {!isLoadingPillars &&
-                  !pillarsError &&
-                  sortedPillars.length === 0 && (
-                    <p className="create-task-modal__hint text-xs">
-                      No encontramos pilares disponibles por ahora.
-                    </p>
-                  )}
-              </div>
-
-              <div className="space-y-1.5">
-                <p className="create-task-modal__section-label text-[11px] font-semibold uppercase tracking-[0.24em]">
-                  {t("editor.modal.create.step2")}
-                </p>
-                <div className="flex flex-col gap-2">
-                  <select
-                    value={selectedTraitId}
-                    onChange={(event) => {
-                      setSelectedTraitId(event.target.value);
-                      clearError("trait");
-                    }}
-                    className="create-task-modal__control create-task-modal__control--pill w-full appearance-none rounded-full border px-4 py-2.5 text-sm ios-touch-input focus:outline-none disabled:cursor-not-allowed"
-                    disabled={!selectedPillarId || isLoadingTraits}
-                  >
-                    <option value="" className="create-task-modal__option">
-                      {selectedPillarId
-                        ? t("editor.modal.create.selectTraitPlaceholder")
-                        : t("editor.modal.create.selectPillarFirst")}
-                    </option>
-                    {filteredTraits.map((trait) => (
-                      <option
-                        key={trait.id}
-                        value={trait.id}
-                        className="create-task-modal__option"
-                      >
-                        {localizeTraitLabel(
-                          {
-                            name: trait.name,
-                            code: trait.code,
-                            fallback: trait.id,
-                          },
-                          language,
-                        )}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {isLoadingTraits && (
-                  <p className="create-task-modal__hint text-[11px] uppercase tracking-[0.2em]">
-                    {t("editor.loading.traits")}
-                  </p>
-                )}
-                {traitsError && (
-                  <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
-                    <p>{t("editor.error.traits.load")}</p>
-                    <button
-                      type="button"
-                      onClick={reloadTraits}
-                      className="font-semibold text-rose-200 underline decoration-dotted"
-                    >
-                      {t("editor.button.retry")}
-                    </button>
-                  </div>
-                )}
-                {errors.trait && (
-                  <p className="text-xs text-rose-300">{errors.trait}</p>
-                )}
-                {selectedPillarId &&
-                  !isLoadingTraits &&
-                  filteredTraits.length === 0 &&
-                  !traitsError && (
-                    <p className="create-task-modal__hint text-xs">
-                      {t("editor.empty.noTraits")}
-                    </p>
-                  )}
-              </div>
-            </section>
 
             <section className="space-y-4">
               <div className="space-y-2">
                 <label className="flex flex-col gap-2">
-                  <span className="create-task-modal__field-label text-xs font-semibold uppercase tracking-[0.18em]">
-                    {t("editor.modal.create.taskTitleLabel")}
+                  <span className="create-task-ai-modal__field-label text-xs font-semibold uppercase tracking-[0.18em]">
+                    {t("editor.modal.aiCreate.taskTitleLabel")}
                   </span>
-                  <input
-                    type="text"
+                  <textarea
                     value={title}
                     onChange={(event) => {
                       setTitle(event.target.value);
                       clearError("title");
+                      clearError("suggestion");
+                      setSuggestionStatus("idle");
+                      setSuggestion(null);
                     }}
-                    placeholder={t("editor.modal.taskTitle.placeholder")}
-                    className="create-task-modal__control w-full rounded-2xl border px-4 py-3 text-sm ios-touch-input focus:outline-none"
+                    placeholder={t("editor.modal.aiCreate.taskTitlePlaceholder")}
+                    className="create-task-ai-modal__control w-full rounded-2xl border px-4 py-3 text-sm ios-touch-input focus:outline-none"
+                    rows={3}
                   />
                 </label>
                 {errors.title && (
@@ -2248,23 +2367,23 @@ function CreateTaskModal({
 
               <div className="space-y-2">
                 <label className="flex flex-col gap-2">
-                  <span className="create-task-modal__field-label text-xs font-semibold uppercase tracking-[0.18em]">
+                  <span className="create-task-ai-modal__field-label text-xs font-semibold uppercase tracking-[0.18em]">
                     {t("editor.field.difficulty")}
                   </span>
                   <select
                     value={difficultyId}
                     onChange={(event) => setDifficultyId(event.target.value)}
-                    className="create-task-modal__control w-full appearance-none rounded-2xl border px-4 py-3 text-sm ios-touch-input focus:outline-none disabled:cursor-not-allowed"
+                    className="create-task-ai-modal__control w-full appearance-none rounded-2xl border px-4 py-3 text-sm ios-touch-input focus:outline-none disabled:cursor-not-allowed"
                     disabled={isLoadingDifficulties}
                   >
-                    <option value="" className="create-task-modal__option">
+                    <option value="" className="create-task-ai-modal__option">
                       {t("editor.modal.create.selectDifficultyPlaceholder")}
                     </option>
                     {sortedDifficulties.map((difficulty) => (
                       <option
                         key={difficulty.id}
                         value={difficulty.id}
-                        className="create-task-modal__option"
+                        className="create-task-ai-modal__option"
                       >
                         {localizeDifficultyLabel(difficulty.name, language)}
                       </option>
@@ -2291,6 +2410,80 @@ function CreateTaskModal({
               </div>
             </section>
 
+            <section className="space-y-3">
+              <button
+                type="button"
+                className="create-task-ai-modal__suggest-button inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={() => void handleSuggestCategory()}
+                disabled={isSuggestDisabled}
+              >
+                {isAnalyzing
+                  ? t("editor.modal.aiCreate.analyzing")
+                  : t("editor.modal.aiCreate.suggestButton")}
+              </button>
+              {isLoadingPillars && (
+                <p className="create-task-ai-modal__hint text-[11px] uppercase tracking-[0.2em]">
+                  {t("editor.loading.pillars")}
+                </p>
+              )}
+              {pillarsError && (
+                <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                  <p>{t("editor.error.pillars.load")}</p>
+                  <button
+                    type="button"
+                    onClick={onRetryPillars}
+                    className="font-semibold text-rose-200 underline decoration-dotted"
+                  >
+                    {t("editor.button.retry")}
+                  </button>
+                </div>
+              )}
+            </section>
+
+            {isAnalyzing && (
+              <section className="create-task-ai-modal__analysis-card space-y-2 rounded-2xl border p-4">
+                <div className="create-task-ai-modal__pulse h-2 w-24 rounded-full" />
+                <p className="text-sm font-semibold">
+                  {t("editor.modal.aiCreate.analyzing")}
+                </p>
+                <p className="create-task-ai-modal__hint text-xs">
+                  {t("editor.modal.aiCreate.analyzingHint")}
+                </p>
+              </section>
+            )}
+
+            {suggestion && suggestionStatus === "ready" && (
+              <section className="create-task-ai-modal__suggestion-card space-y-3 rounded-2xl border p-4">
+                <p className="create-task-ai-modal__field-label text-[11px] font-semibold uppercase tracking-[0.24em]">
+                  {t("editor.modal.aiCreate.suggestedCategory")}
+                </p>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="rounded-full border px-3 py-1 font-semibold">
+                    {suggestion.pillarLabel}
+                  </span>
+                  <span className="create-task-ai-modal__hint">/</span>
+                  <span className="rounded-full border px-3 py-1 font-semibold">
+                    {suggestion.traitLabel}
+                  </span>
+                </div>
+                <p className="create-task-ai-modal__hint text-sm">
+                  {suggestion.rationale}
+                </p>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    className="create-task-ai-modal__retry text-xs font-semibold underline decoration-dotted underline-offset-4"
+                    onClick={() => void handleSuggestCategory()}
+                  >
+                    {t("editor.modal.aiCreate.retrySuggestion")}
+                  </button>
+                </div>
+              </section>
+            )}
+
+            {errors.suggestion && (
+              <p className="text-xs text-rose-300">{errors.suggestion}</p>
+            )}
             {errors.user && (
               <p className="text-xs text-rose-300">{errors.user}</p>
             )}
@@ -2322,7 +2515,7 @@ function CreateTaskModal({
               >
                 {isSubmitting
                   ? t("editor.button.creating")
-                  : t("editor.button.createTask")}
+                  : t("editor.modal.aiCreate.confirmButton")}
               </button>
             </div>
           </div>

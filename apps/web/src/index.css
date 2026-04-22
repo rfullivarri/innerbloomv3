@@ -5364,6 +5364,84 @@
     color: #ffffff;
   }
 
+  .create-task-ai-modal__badge,
+  .create-task-ai-modal__field-label,
+  .create-task-ai-modal__hint {
+    color: var(--color-slate-400);
+  }
+
+  .create-task-ai-modal__title {
+    color: #ffffff;
+  }
+
+  .create-task-ai-modal__description {
+    color: var(--color-slate-300);
+  }
+
+  .create-task-ai-modal__close {
+    border-color: var(--color-border-subtle);
+    color: var(--color-slate-200);
+    background: var(--color-overlay-1);
+  }
+
+  .create-task-ai-modal__close:hover {
+    border-color: var(--color-border-soft);
+    color: #ffffff;
+  }
+
+  .create-task-ai-modal__control {
+    border-color: var(--color-border-subtle);
+    background: color-mix(in srgb, var(--color-overlay-2) 78%, transparent);
+    color: var(--color-slate-100);
+  }
+
+  .create-task-ai-modal__control::placeholder {
+    color: var(--color-slate-400);
+  }
+
+  .create-task-ai-modal__control:focus {
+    border-color: var(--color-border-soft);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+  }
+
+  .create-task-ai-modal__option {
+    background: #0f172a;
+    color: var(--color-slate-100);
+  }
+
+  .create-task-ai-modal__suggest-button {
+    color: #ffffff;
+    background: linear-gradient(125deg, #7066ff 0%, #b577ff 52%, #ff98ad 100%);
+    box-shadow: 0 16px 36px rgba(167, 112, 239, 0.35);
+  }
+
+  .create-task-ai-modal__analysis-card,
+  .create-task-ai-modal__suggestion-card {
+    border-color: var(--color-border-subtle);
+    background: color-mix(in srgb, var(--color-overlay-2) 80%, transparent);
+  }
+
+  .create-task-ai-modal__pulse {
+    background: linear-gradient(90deg, #a770ef 0%, #cf8bf3 50%, #fdb99b 100%);
+    animation: create-task-ai-pulse 1.3s ease-in-out infinite;
+  }
+
+  @keyframes create-task-ai-pulse {
+    0%,
+    100% {
+      opacity: 0.35;
+      transform: scaleX(0.94);
+    }
+    50% {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+
+  .create-task-ai-modal__retry {
+    color: var(--color-slate-300);
+  }
+
   .edit-task-modal__title {
     color: var(--color-text);
   }
@@ -5636,6 +5714,85 @@
     border-color: var(--editor-modal-secondary-hover-border);
     background: var(--editor-modal-secondary-hover-bg);
     color: var(--editor-modal-text);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__badge,
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__field-label {
+    color: var(--editor-modal-editable-label);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__hint {
+    color: var(--editor-modal-label-muted);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__title {
+    color: var(--editor-modal-text);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__description {
+    color: var(--editor-modal-text-muted);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__close {
+    border-color: var(--editor-modal-secondary-border);
+    color: var(--editor-modal-secondary-text);
+    background: #ffffff;
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__control {
+    background-color: var(--editor-modal-input-bg);
+    border-color: var(--editor-modal-input-border);
+    color: var(--editor-modal-text);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__control::placeholder {
+    color: var(--editor-modal-input-placeholder);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__control:focus {
+    border-color: var(--editor-modal-input-focus-border);
+    box-shadow: 0 0 0 3px var(--editor-modal-input-focus-ring);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__option {
+    background: #ffffff;
+    color: var(--editor-modal-text);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__analysis-card,
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__suggestion-card {
+    border-color: var(--editor-modal-secondary-border);
+    background: color-mix(in srgb, var(--editor-modal-input-bg) 84%, #f8fafc);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__retry {
+    color: var(--editor-modal-secondary-text);
   }
 
   :root[data-theme="dark"]

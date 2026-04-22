@@ -88,6 +88,60 @@ export const editorTranslations = {
     es: 'Selecciona una dificultad…',
     en: 'Select a difficulty…',
   },
+  'editor.modal.aiCreate.badge': { es: 'Asistente IA', en: 'AI Assistant' },
+  'editor.modal.aiCreate.title': { es: 'Nueva tarea guiada', en: 'Guided new task' },
+  'editor.modal.aiCreate.description': {
+    es: 'Escribe tu intención y deja que la IA sugiera la mejor categoría.',
+    en: 'Write your intent and let AI suggest the best category.',
+  },
+  'editor.modal.aiCreate.taskTitleLabel': {
+    es: '¿Qué tarea querés sumar?',
+    en: 'What task do you want to add?',
+  },
+  'editor.modal.aiCreate.taskTitlePlaceholder': {
+    es: 'Ej. Caminar 30 minutos',
+    en: 'E.g. Walk for 30 minutes',
+  },
+  'editor.modal.aiCreate.suggestButton': {
+    es: 'Sugerir categoría',
+    en: 'Suggest category',
+  },
+  'editor.modal.aiCreate.analyzing': {
+    es: 'Analizando tarea…',
+    en: 'Analyzing task…',
+  },
+  'editor.modal.aiCreate.analyzingHint': {
+    es: 'Revisando intención, contexto y patrón de hábito.',
+    en: 'Reviewing intent, context, and habit pattern.',
+  },
+  'editor.modal.aiCreate.suggestedCategory': {
+    es: 'Categoría sugerida',
+    en: 'Suggested category',
+  },
+  'editor.modal.aiCreate.retrySuggestion': {
+    es: 'Reintentar sugerencia',
+    en: 'Retry suggestion',
+  },
+  'editor.modal.aiCreate.confirmButton': {
+    es: 'Confirmar tarea',
+    en: 'Confirm task',
+  },
+  'editor.modal.aiCreate.confirmationRequired': {
+    es: 'Primero usa “Sugerir categoría”.',
+    en: 'Please use “Suggest category” first.',
+  },
+  'editor.modal.aiCreate.catalogFallback': {
+    es: 'No hay catálogo suficiente para sugerir una categoría por ahora.',
+    en: 'Catalog data is not enough to suggest a category right now.',
+  },
+  'editor.modal.aiCreate.noTraits': {
+    es: 'No encontramos rasgos para el pilar sugerido.',
+    en: 'No traits were found for the suggested pillar.',
+  },
+  'editor.modal.aiCreate.suggestionError': {
+    es: 'No pudimos sugerir categoría. Intenta nuevamente.',
+    en: 'Could not suggest a category. Please try again.',
+  },
   'editor.modal.edit.badge': { es: 'Editar tarea', en: 'Edit task' },
   'editor.modal.edit.panelTitle': { es: 'Editar tarea', en: 'Edit task' },
   'editor.modal.edit.title': { es: 'Actualiza los detalles de tu tarea', en: 'Update your task details' },
