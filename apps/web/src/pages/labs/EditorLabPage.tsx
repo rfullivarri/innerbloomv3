@@ -6,44 +6,80 @@ import {
   useState,
   type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
-} from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { DevErrorBoundary } from '../../components/DevErrorBoundary';
-import { Navbar } from '../../components/layout/Navbar';
-import { MobileBottomNav } from '../../components/layout/MobileBottomNav';
-import { Card } from '../../components/common/Card';
-import { ToastBanner } from '../../components/common/ToastBanner';
-import { useBackendUser } from '../../hooks/useBackendUser';
-import { useCreateTask, useDeleteTask, useUpdateTask, useUserTasks } from '../../hooks/useUserTasks';
-import { useDifficulties, usePillars, useStats, useTraits } from '../../hooks/useCatalogs';
-import { type UserTask } from '../../lib/api';
-import { fetchCatalogStats, fetchCatalogTraits, type Pillar } from '../../lib/api/catalogs';
-import { useAppMode } from '../../hooks/useAppMode';
-import { useDailyQuestReadiness } from '../../hooks/useDailyQuestReadiness';
-import { useOnboardingEditorNudge } from '../../hooks/useOnboardingEditorNudge';
-import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
-import { localizeDifficultyLabel, localizePillarLabel, localizeTraitLabel } from '../editor/labelLocalization';
-import { EDITOR_LAB_QUICK_START_SEED } from './editorLabSeed';
+} from "react";
+import { Link, useLocation } from "react-router-dom";
+import { DevErrorBoundary } from "../../components/DevErrorBoundary";
+import { Navbar } from "../../components/layout/Navbar";
+import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
+import { Card } from "../../components/common/Card";
+import { ToastBanner } from "../../components/common/ToastBanner";
+import { useBackendUser } from "../../hooks/useBackendUser";
+import {
+  useCreateTask,
+  useDeleteTask,
+  useUpdateTask,
+  useUserTasks,
+} from "../../hooks/useUserTasks";
+import {
+  useDifficulties,
+  usePillars,
+  useStats,
+  useTraits,
+} from "../../hooks/useCatalogs";
+import { type UserTask } from "../../lib/api";
+import {
+  fetchCatalogStats,
+  fetchCatalogTraits,
+  type Pillar,
+} from "../../lib/api/catalogs";
+import { useAppMode } from "../../hooks/useAppMode";
+import { useDailyQuestReadiness } from "../../hooks/useDailyQuestReadiness";
+import { useOnboardingEditorNudge } from "../../hooks/useOnboardingEditorNudge";
+import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
+import {
+  localizeDifficultyLabel,
+  localizePillarLabel,
+  localizeTraitLabel,
+} from "../editor/labelLocalization";
+import { EDITOR_LAB_QUICK_START_SEED } from "./editorLabSeed";
+import {
+  EditorGuideOverlay,
+  markEditorGuideAsSeen,
+  shouldAutoOpenEditorGuide,
+} from "./editor-guide/EditorGuideOverlay";
 import {
   getActiveSection,
   getDashboardSectionConfig,
   getDashboardSections,
   type DashboardSectionConfig,
-} from '../dashboardSections';
+} from "../dashboardSections";
 
 export const FEATURE_TASK_EDITOR_MOBILE_LIST_V1 = true;
+const ENABLE_EDITOR_GUIDE_AUTO_OPEN = false;
 
 export default function EditorLabPage() {
   const location = useLocation();
   const { language, t } = usePostLoginLanguage();
-  const activeLocale = language === 'es' ? 'es' : 'en';
+  const activeLocale = language === "es" ? "es" : "en";
   const sections = getDashboardSections(location.pathname, language);
   const activeSection = getActiveSection(location.pathname, sections, language);
-  const taskEditorSection = getDashboardSectionConfig('editor', location.pathname, language);
-  const { backendUserId, status: backendStatus, error: backendError, reload: reloadProfile } =
-    useBackendUser();
-  const { tasks, status: tasksStatus, error: tasksError, reload: reloadTasks } =
-    useUserTasks(backendUserId);
+  const taskEditorSection = getDashboardSectionConfig(
+    "editor",
+    location.pathname,
+    language,
+  );
+  const {
+    backendUserId,
+    status: backendStatus,
+    error: backendError,
+    reload: reloadProfile,
+  } = useBackendUser();
+  const {
+    tasks,
+    status: tasksStatus,
+    error: tasksError,
+    reload: reloadTasks,
+  } = useUserTasks(backendUserId);
   const {
     data: pillars,
     isLoading: isLoadingPillars,
@@ -53,39 +89,54 @@ export default function EditorLabPage() {
   const { data: difficulties } = useDifficulties();
   const isAppMode = useAppMode();
 
-  const [traitCatalogById, setTraitCatalogById] = useState<Record<string, { name: string; code: string }>>({});
-  const [statNamesById, setStatNamesById] = useState<Record<string, string>>({});
+  const [traitCatalogById, setTraitCatalogById] = useState<
+    Record<string, { name: string; code: string }>
+  >({});
+  const [statNamesById, setStatNamesById] = useState<Record<string, string>>(
+    {},
+  );
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedPillar, setSelectedPillar] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedPillar, setSelectedPillar] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<UserTask | null>(null);
-  const [editVariant, setEditVariant] = useState<'modal' | 'panel'>('modal');
+  const [editVariant, setEditVariant] = useState<"modal" | "panel">("modal");
   const [editGroupKey, setEditGroupKey] = useState<string | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<UserTask | null>(null);
-  const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(null);
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(
+    null,
+  );
   const [pageToast, setPageToast] = useState<ToastMessage | null>(null);
-  const [duplicatingTaskId, setDuplicatingTaskId] = useState<string | null>(null);
+  const [duplicatingTaskId, setDuplicatingTaskId] = useState<string | null>(
+    null,
+  );
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [showSuggestionsModal, setShowSuggestionsModal] = useState(false);
   const [isApplyingSuggestions, setIsApplyingSuggestions] = useState(false);
 
   const editorTopRef = useRef<HTMLDivElement | null>(null);
-  const dailyQuestReadiness = useDailyQuestReadiness(backendUserId ?? '', {
+  const dailyQuestReadiness = useDailyQuestReadiness(backendUserId ?? "", {
     enabled: Boolean(backendUserId),
   });
   const onboardingEditorNudge = useOnboardingEditorNudge({
     completedFirstDailyQuest: dailyQuestReadiness.completedFirstDailyQuest,
   });
-  const { firstEditDone, shouldShowInlineNotice, shouldShowDashboardDot, markFirstEditDone } = onboardingEditorNudge;
+  const {
+    firstEditDone,
+    shouldShowInlineNotice,
+    shouldShowDashboardDot,
+    markFirstEditDone,
+  } = onboardingEditorNudge;
 
   const { deleteTask, status: deleteStatus } = useDeleteTask();
   const { createTask } = useCreateTask();
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
-  const isBackendReady = backendStatus === 'success' && Boolean(backendUserId);
+  const isBackendReady = backendStatus === "success" && Boolean(backendUserId);
   const isLoadingTasks =
-    !isBackendReady || tasksStatus === 'loading' || (isBackendReady && tasksStatus === 'idle');
+    !isBackendReady ||
+    tasksStatus === "loading" ||
+    (isBackendReady && tasksStatus === "idle");
   const combinedError = backendError ?? tasksError;
 
   useEffect(() => {
@@ -93,6 +144,15 @@ export default function EditorLabPage() {
       setDeleteErrorMessage(null);
     }
   }, [taskToDelete]);
+
+  useEffect(() => {
+    if (!ENABLE_EDITOR_GUIDE_AUTO_OPEN || !FEATURE_TASK_EDITOR_MOBILE_LIST_V1) {
+      return;
+    }
+    if (shouldAutoOpenEditorGuide()) {
+      setShowGuideModal(true);
+    }
+  }, []);
 
   useEffect(() => {
     const missingTraitsByPillar = new Map<string, Set<string>>();
@@ -126,7 +186,7 @@ export default function EditorLabPage() {
             updates[trait.id] = { name: trait.name, code: trait.code };
           }
         } catch (error) {
-          console.error('Failed to load traits for pillar', pillarId, error);
+          console.error("Failed to load traits for pillar", pillarId, error);
         }
       }
 
@@ -174,7 +234,7 @@ export default function EditorLabPage() {
             updates[stat.id] = stat.name;
           }
         } catch (error) {
-          console.error('Failed to load stats for trait', traitId, error);
+          console.error("Failed to load stats for trait", traitId, error);
         }
       }
 
@@ -192,7 +252,7 @@ export default function EditorLabPage() {
 
   const pillarOptions = useMemo(() => {
     return [
-      { value: '', label: t('editor.filters.pillars.all') },
+      { value: "", label: t("editor.filters.pillars.all") },
       ...pillars.map((pillar) => ({
         value: pillar.id,
         label: localizePillarLabel(pillar.name, language),
@@ -213,16 +273,25 @@ export default function EditorLabPage() {
     for (const [traitId, trait] of Object.entries(traitCatalogById)) {
       map.set(
         traitId,
-        localizeTraitLabel({ name: trait.name, code: trait.code, fallback: traitId }, language),
+        localizeTraitLabel(
+          { name: trait.name, code: trait.code, fallback: traitId },
+          language,
+        ),
       );
     }
     return map;
   }, [language, traitCatalogById]);
-  const statNamesMap = useMemo(() => new Map(Object.entries(statNamesById)), [statNamesById]);
+  const statNamesMap = useMemo(
+    () => new Map(Object.entries(statNamesById)),
+    [statNamesById],
+  );
   const difficultyNamesById = useMemo(() => {
     const map = new Map<string, string>();
     for (const difficulty of difficulties) {
-      map.set(difficulty.id, localizeDifficultyLabel(difficulty.name, language));
+      map.set(
+        difficulty.id,
+        localizeDifficultyLabel(difficulty.name, language),
+      );
     }
     return map;
   }, [difficulties, language]);
@@ -256,9 +325,11 @@ export default function EditorLabPage() {
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
       const matchesSearch =
-        normalizedSearch.length === 0 || task.title.toLowerCase().includes(normalizedSearch);
+        normalizedSearch.length === 0 ||
+        task.title.toLowerCase().includes(normalizedSearch);
       const matchesPillar =
-        selectedPillar.length === 0 || (task.pillarId ?? '').toLowerCase() === selectedPillar.toLowerCase();
+        selectedPillar.length === 0 ||
+        (task.pillarId ?? "").toLowerCase() === selectedPillar.toLowerCase();
       return matchesSearch && matchesPillar;
     });
   }, [normalizedSearch, selectedPillar, tasks]);
@@ -270,12 +341,14 @@ export default function EditorLabPage() {
 
     const entries = filteredTasks.map((task) => ({
       task,
-      pillarName: pillarNamesById.get(task.pillarId ?? '') ?? '',
+      pillarName: pillarNamesById.get(task.pillarId ?? "") ?? "",
     }));
 
     entries.sort((a, b) => {
       if (a.pillarName === b.pillarName) {
-        return a.task.title.localeCompare(b.task.title, activeLocale, { sensitivity: 'base' });
+        return a.task.title.localeCompare(b.task.title, activeLocale, {
+          sensitivity: "base",
+        });
       }
 
       if (!a.pillarName) {
@@ -286,19 +359,28 @@ export default function EditorLabPage() {
         return -1;
       }
 
-      return a.pillarName.localeCompare(b.pillarName, activeLocale, { sensitivity: 'base' });
+      return a.pillarName.localeCompare(b.pillarName, activeLocale, {
+        sensitivity: "base",
+      });
     });
 
     return entries.map((entry) => entry.task);
   }, [activeLocale, filteredTasks, pillarNamesById]);
 
-  const hasActiveFilters = normalizedSearch.length > 0 || selectedPillar.length > 0;
-  const isDeletingTask = deleteStatus === 'loading';
+  const hasActiveFilters =
+    normalizedSearch.length > 0 || selectedPillar.length > 0;
+  const isDeletingTask = deleteStatus === "loading";
 
-  const isTaskListEmpty = !isLoadingTasks && !combinedError && tasks.length === 0;
-  const visibleTasks = FEATURE_TASK_EDITOR_MOBILE_LIST_V1 ? sortedTasks : filteredTasks;
+  const isTaskListEmpty =
+    !isLoadingTasks && !combinedError && tasks.length === 0;
+  const visibleTasks = FEATURE_TASK_EDITOR_MOBILE_LIST_V1
+    ? sortedTasks
+    : filteredTasks;
   const isFilteredEmpty =
-    !isLoadingTasks && !combinedError && tasks.length > 0 && visibleTasks.length === 0;
+    !isLoadingTasks &&
+    !combinedError &&
+    tasks.length > 0 &&
+    visibleTasks.length === 0;
 
   const handleRetry = () => {
     reloadProfile();
@@ -318,12 +400,12 @@ export default function EditorLabPage() {
 
   const handleConfirmDelete = useCallback(async () => {
     if (!taskToDelete) {
-      setDeleteErrorMessage(t('editor.validation.taskNotFound'));
+      setDeleteErrorMessage(t("editor.validation.taskNotFound"));
       return;
     }
 
     if (!backendUserId) {
-      setDeleteErrorMessage(t('editor.validation.userNotFound'));
+      setDeleteErrorMessage(t("editor.validation.userNotFound"));
       return;
     }
 
@@ -333,9 +415,10 @@ export default function EditorLabPage() {
       await deleteTask(backendUserId, taskToDelete.id);
       setTaskToDelete(null);
     } catch (error) {
-      const message = error instanceof Error ? error.message : t('editor.toast.delete.error');
+      const message =
+        error instanceof Error ? error.message : t("editor.toast.delete.error");
       setDeleteErrorMessage(message);
-      setPageToast({ type: 'error', text: message });
+      setPageToast({ type: "error", text: message });
     }
   }, [backendUserId, deleteTask, t, taskToDelete]);
 
@@ -352,8 +435,8 @@ export default function EditorLabPage() {
     async (task: UserTask) => {
       if (!backendUserId) {
         setPageToast({
-          type: 'error',
-          text: t('editor.validation.userNotFound'),
+          type: "error",
+          text: t("editor.validation.userNotFound"),
         });
         return;
       }
@@ -361,8 +444,11 @@ export default function EditorLabPage() {
       setDuplicatingTaskId(task.id);
 
       try {
-        const normalizedTitle = task.title?.trim() ?? '';
-        const title = normalizedTitle.length > 0 ? `${normalizedTitle} ${t('editor.duplicate.copySuffix')}` : t('editor.duplicate.fallbackTitle');
+        const normalizedTitle = task.title?.trim() ?? "";
+        const title =
+          normalizedTitle.length > 0
+            ? `${normalizedTitle} ${t("editor.duplicate.copySuffix")}`
+            : t("editor.duplicate.fallbackTitle");
         await createTask(backendUserId, {
           title,
           pillarId: task.pillarId ?? null,
@@ -371,10 +457,16 @@ export default function EditorLabPage() {
           difficultyId: task.difficultyId ?? null,
           isActive: task.isActive ?? true,
         });
-        setPageToast({ type: 'success', text: t('editor.toast.duplicate.success') });
+        setPageToast({
+          type: "success",
+          text: t("editor.toast.duplicate.success"),
+        });
       } catch (error) {
-        const message = error instanceof Error ? error.message : t('editor.toast.duplicate.error');
-        setPageToast({ type: 'error', text: message });
+        const message =
+          error instanceof Error
+            ? error.message
+            : t("editor.toast.duplicate.error");
+        setPageToast({ type: "error", text: message });
       } finally {
         setDuplicatingTaskId(null);
       }
@@ -385,7 +477,10 @@ export default function EditorLabPage() {
   const handleApplySuggestions = useCallback(
     async (selectedTaskIds: string[]) => {
       if (!backendUserId) {
-        setPageToast({ type: 'error', text: t('editor.validation.userNotFound') });
+        setPageToast({
+          type: "error",
+          text: t("editor.validation.userNotFound"),
+        });
         return;
       }
       if (selectedTaskIds.length === 0) {
@@ -393,22 +488,36 @@ export default function EditorLabPage() {
       }
 
       setIsApplyingSuggestions(true);
-      const selectedTasks = EDITOR_LAB_QUICK_START_SEED.filter((task) => selectedTaskIds.includes(task.id));
+      const selectedTasks = EDITOR_LAB_QUICK_START_SEED.filter((task) =>
+        selectedTaskIds.includes(task.id),
+      );
 
       try {
         const normalizeValue = (value: string) => value.trim().toLowerCase();
         const pillarIdBySeedPillar = new Map<string, string>();
         for (const pillar of pillars) {
           const name = normalizeValue(pillar.name);
-          const code = normalizeValue(pillar.code ?? '');
-          if (name.includes('body') || name.includes('cuerpo') || code.includes('body')) {
-            pillarIdBySeedPillar.set('Body', pillar.id);
+          const code = normalizeValue(pillar.code ?? "");
+          if (
+            name.includes("body") ||
+            name.includes("cuerpo") ||
+            code.includes("body")
+          ) {
+            pillarIdBySeedPillar.set("Body", pillar.id);
           }
-          if (name.includes('mind') || name.includes('mente') || code.includes('mind')) {
-            pillarIdBySeedPillar.set('Mind', pillar.id);
+          if (
+            name.includes("mind") ||
+            name.includes("mente") ||
+            code.includes("mind")
+          ) {
+            pillarIdBySeedPillar.set("Mind", pillar.id);
           }
-          if (name.includes('soul') || name.includes('alma') || code.includes('soul')) {
-            pillarIdBySeedPillar.set('Soul', pillar.id);
+          if (
+            name.includes("soul") ||
+            name.includes("alma") ||
+            code.includes("soul")
+          ) {
+            pillarIdBySeedPillar.set("Soul", pillar.id);
           }
         }
 
@@ -424,7 +533,9 @@ export default function EditorLabPage() {
         let createdCount = 0;
         for (const task of selectedTasks) {
           const pillarId = pillarIdBySeedPillar.get(task.pillar) ?? null;
-          const traitId = traitLookup.get(`${task.pillar}:${normalizeValue(task.trait)}`) ?? null;
+          const traitId =
+            traitLookup.get(`${task.pillar}:${normalizeValue(task.trait)}`) ??
+            null;
           await createTask(backendUserId, {
             title: task.title,
             pillarId,
@@ -439,14 +550,18 @@ export default function EditorLabPage() {
         await reloadTasks();
         setShowSuggestionsModal(false);
         setPageToast({
-          type: 'success',
-          text: language === 'es'
-            ? `Se agregaron ${createdCount} sugerencia(s) a tu sistema.`
-            : `Added ${createdCount} suggestion(s) to your system.`,
+          type: "success",
+          text:
+            language === "es"
+              ? `Se agregaron ${createdCount} sugerencia(s) a tu sistema.`
+              : `Added ${createdCount} suggestion(s) to your system.`,
         });
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Could not apply suggestions.';
-        setPageToast({ type: 'error', text: message });
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Could not apply suggestions.";
+        setPageToast({ type: "error", text: message });
       } finally {
         setIsApplyingSuggestions(false);
       }
@@ -455,7 +570,7 @@ export default function EditorLabPage() {
   );
 
   const navigationTasks = useMemo(() => {
-    if (editVariant !== 'panel') {
+    if (editVariant !== "panel") {
       return [] as UserTask[];
     }
 
@@ -464,12 +579,12 @@ export default function EditorLabPage() {
 
   const handleCloseEdit = useCallback(() => {
     setTaskToEdit(null);
-    setEditVariant('modal');
+    setEditVariant("modal");
     setEditGroupKey(null);
   }, []);
 
   const scrollToEditorTop = useCallback(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return;
     }
 
@@ -479,8 +594,9 @@ export default function EditorLabPage() {
     }
 
     const headerOffset = 92;
-    const target = anchor.getBoundingClientRect().top + window.scrollY - headerOffset;
-    window.scrollTo({ top: Math.max(target, 0), behavior: 'smooth' });
+    const target =
+      anchor.getBoundingClientRect().top + window.scrollY - headerOffset;
+    window.scrollTo({ top: Math.max(target, 0), behavior: "smooth" });
   }, []);
 
   const handleEditSuccess = useCallback(() => {
@@ -494,8 +610,8 @@ export default function EditorLabPage() {
 
     if (!isFirstOnboardingEdit) {
       setPageToast({
-        type: 'success',
-        text: t('editor.toast.edit.saved'),
+        type: "success",
+        text: t("editor.toast.edit.saved"),
       });
     }
 
@@ -514,7 +630,7 @@ export default function EditorLabPage() {
 
   const handleNavigatePanelTask = useCallback(
     (taskId: string) => {
-      if (editVariant !== 'panel') {
+      if (editVariant !== "panel") {
         return;
       }
 
@@ -533,10 +649,13 @@ export default function EditorLabPage() {
           title={activeSection.pageTitle}
           sections={sections.map((section) => ({
             ...section,
-            showPulseDot: section.key === 'dashboard' && shouldShowDashboardDot,
+            showPulseDot: section.key === "dashboard" && shouldShowDashboardDot,
           }))}
         />
-        <main className="flex-1 pb-[calc(env(safe-area-inset-bottom,0px)+10.25rem)] md:pb-0" data-light-scope="editor">
+        <main
+          className="flex-1 pb-[calc(env(safe-area-inset-bottom,0px)+10.25rem)] md:pb-0"
+          data-light-scope="editor"
+        >
           <div ref={editorTopRef} className="scroll-mt-24" />
           <div className="mx-auto w-full max-w-7xl px-2 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             <SectionHeader section={taskEditorSection} />
@@ -555,13 +674,22 @@ export default function EditorLabPage() {
                   <div className="ib-onboarding-alert ib-onboarding-alert--progress mb-2 rounded-2xl px-3 py-2.5 md:mb-3 md:px-4">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <p className="ib-onboarding-alert__body text-xs leading-snug md:text-sm">
-                        {t('editor.onboarding.banner.message')}
+                        {t("editor.onboarding.banner.message")}
                       </p>
                       <Link
-                        to={getDashboardSectionConfig('dashboard', location.pathname, language).to}
+                        to={
+                          getDashboardSectionConfig(
+                            "dashboard",
+                            location.pathname,
+                            language,
+                          ).to
+                        }
                         className="ib-onboarding-alert__cta inline-flex shrink-0 items-center justify-center rounded-full px-3 py-1.5 text-xs font-semibold tracking-wide transition focus-visible:outline-none focus-visible:ring-2"
                       >
-                        {t('editor.onboarding.banner.cta')} <span className="ml-1.5" aria-hidden>→</span>
+                        {t("editor.onboarding.banner.cta")}{" "}
+                        <span className="ml-1.5" aria-hidden>
+                          →
+                        </span>
                       </Link>
                     </div>
                   </div>
@@ -583,36 +711,51 @@ export default function EditorLabPage() {
                 {isLoadingTasks && <TaskListSkeleton />}
 
                 {combinedError && !isLoadingTasks && (
-                  <TaskListError message={combinedError.message} onRetry={handleRetry} />
+                  <TaskListError
+                    message={combinedError.message}
+                    onRetry={handleRetry}
+                  />
                 )}
 
                 {isTaskListEmpty && (
-                  <TaskListEmpty message={t('editor.empty.noTasks')} />
+                  <TaskListEmpty message={t("editor.empty.noTasks")} />
                 )}
 
                 {isFilteredEmpty && (
                   <TaskListEmpty
                     message={
                       hasActiveFilters
-                        ? t('editor.empty.noMatches')
-                        : t('editor.empty.noVisibleTasks')
+                        ? t("editor.empty.noMatches")
+                        : t("editor.empty.noVisibleTasks")
                     }
                   />
                 )}
 
-                {!isLoadingTasks && !combinedError && visibleTasks.length > 0 && (
-                  <TaskList
-                    tasks={visibleTasks}
-                    pillarNamesById={pillarNamesById}
-                    traitNamesById={traitNamesMap}
-                    statNamesById={statNamesMap}
-                    difficultyNamesById={difficultyNamesById}
-                    onEditTask={(task) => setTaskToEdit(task)}
-                    onDeleteTask={(task) => setTaskToDelete(task)}
-                    onDuplicateTask={FEATURE_TASK_EDITOR_MOBILE_LIST_V1 ? handleDuplicateTask : undefined}
-                    duplicatingTaskId={FEATURE_TASK_EDITOR_MOBILE_LIST_V1 ? duplicatingTaskId : null}
-                  />
-                )}
+                {!isLoadingTasks &&
+                  !combinedError &&
+                  visibleTasks.length > 0 && (
+                    <div data-editor-guide-target="task-list">
+                      <TaskList
+                        tasks={visibleTasks}
+                        pillarNamesById={pillarNamesById}
+                        traitNamesById={traitNamesMap}
+                        statNamesById={statNamesMap}
+                        difficultyNamesById={difficultyNamesById}
+                        onEditTask={(task) => setTaskToEdit(task)}
+                        onDeleteTask={(task) => setTaskToDelete(task)}
+                        onDuplicateTask={
+                          FEATURE_TASK_EDITOR_MOBILE_LIST_V1
+                            ? handleDuplicateTask
+                            : undefined
+                        }
+                        duplicatingTaskId={
+                          FEATURE_TASK_EDITOR_MOBILE_LIST_V1
+                            ? duplicatingTaskId
+                            : null
+                        }
+                      />
+                    </div>
+                  )}
               </div>
             </Card>
           </div>
@@ -624,11 +767,15 @@ export default function EditorLabPage() {
 
               return {
                 key: section.key,
-                label: section.key === 'editor' ? t('editor.navigation.label') : section.label,
+                label:
+                  section.key === "editor"
+                    ? t("editor.navigation.label")
+                    : section.label,
                 to: section.to,
                 icon: <Icon className="h-4 w-4" />,
                 end: section.end,
-                showPulseDot: section.key === 'dashboard' && shouldShowDashboardDot,
+                showPulseDot:
+                  section.key === "dashboard" && shouldShowDashboardDot,
               };
             })}
           />
@@ -637,10 +784,13 @@ export default function EditorLabPage() {
           <button
             type="button"
             onClick={handleCreateClick}
+            data-editor-guide-target="new-task"
             className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+7.25rem)] right-4 z-40 inline-flex items-center gap-1.5 rounded-full bg-violet-500 px-3.5 py-2 text-[0.72rem] font-semibold text-white shadow-[0_10px_26px_rgba(139,92,246,0.42)] transition hover:bg-violet-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 md:bottom-10 md:right-8 md:gap-2 md:px-5 md:py-3 md:text-sm"
           >
-            <span aria-hidden className="text-sm leading-none md:text-lg">＋</span>
-            {t('editor.button.newTask')}
+            <span aria-hidden className="text-sm leading-none md:text-lg">
+              ＋
+            </span>
+            {t("editor.button.newTask")}
           </button>
         )}
         <CreateTaskModal
@@ -671,7 +821,13 @@ export default function EditorLabPage() {
           errorMessage={deleteErrorMessage}
           onConfirm={handleConfirmDelete}
         />
-        <GuideLabModal isOpen={showGuideModal} onClose={() => setShowGuideModal(false)} />
+        <EditorGuideOverlay
+          isOpen={showGuideModal}
+          onClose={() => {
+            markEditorGuideAsSeen();
+            setShowGuideModal(false);
+          }}
+        />
         <SuggestionsLabModal
           isOpen={showSuggestionsModal}
           isApplying={isApplyingSuggestions}
@@ -685,7 +841,7 @@ export default function EditorLabPage() {
 
 function SectionHeader({ section }: { section: DashboardSectionConfig }) {
   const normalizedTitle = section.contentTitle.trim();
-  const normalizedDescription = section.description?.trim() ?? '';
+  const normalizedDescription = section.description?.trim() ?? "";
   const shouldShowTitle = normalizedTitle.length > 0;
   const shouldShowDescription = normalizedDescription.length > 0;
 
@@ -700,7 +856,11 @@ function SectionHeader({ section }: { section: DashboardSectionConfig }) {
           {normalizedTitle}
         </h1>
       )}
-      {shouldShowDescription && <p className="text-sm text-[color:var(--color-slate-400)]">{normalizedDescription}</p>}
+      {shouldShowDescription && (
+        <p className="text-sm text-[color:var(--color-slate-400)]">
+          {normalizedDescription}
+        </p>
+      )}
     </header>
   );
 }
@@ -736,21 +896,21 @@ function TaskFilters({
       <div className="flex flex-col gap-3 md:flex-row md:items-end">
         <label className="flex w-full flex-col gap-2">
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
-            {t('editor.filters.search.label')}
+            {t("editor.filters.search.label")}
           </span>
           <div className="relative flex items-center">
             <input
               type="search"
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
-              placeholder={t('editor.filters.search.placeholder')}
+              placeholder={t("editor.filters.search.placeholder")}
               className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </div>
         </label>
         <label className="flex w-full flex-col gap-2 md:max-w-xs">
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
-            {t('editor.filters.pillar.label')}
+            {t("editor.filters.pillar.label")}
           </span>
           <select
             value={selectedPillar}
@@ -758,13 +918,19 @@ function TaskFilters({
             className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             {pillars.map((pillar) => (
-              <option key={pillar.value || 'all'} value={pillar.value} className="bg-slate-900 text-[color:var(--color-slate-100)]">
+              <option
+                key={pillar.value || "all"}
+                value={pillar.value}
+                className="bg-slate-900 text-[color:var(--color-slate-100)]"
+              >
                 {pillar.label}
               </option>
             ))}
           </select>
           {isLoadingPillars && (
-            <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.filters.pillar.loading')}</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
+              {t("editor.filters.pillar.loading")}
+            </span>
           )}
           {pillarsError && !isLoadingPillars && (
             <button
@@ -772,7 +938,7 @@ function TaskFilters({
               onClick={onRetryPillars}
               className="self-start text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-300"
             >
-              {t('editor.filters.pillar.retry')}
+              {t("editor.filters.pillar.retry")}
             </button>
           )}
         </label>
@@ -793,6 +959,7 @@ function TaskFilters({
         <button
           type="button"
           onClick={onOpenSuggestions}
+          data-editor-guide-target="suggestions"
           className="inline-flex items-center justify-center rounded-full border border-violet-400/35 bg-violet-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-violet-100 transition hover:bg-violet-500/20"
         >
           Sugerencias
@@ -803,19 +970,23 @@ function TaskFilters({
           <label className="flex flex-col gap-1">
             <input
               type="search"
+              data-editor-guide-target="search"
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
-              placeholder={t('editor.filters.search.placeholder')}
+              placeholder={t("editor.filters.search.placeholder")}
               className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </label>
           <div className="space-y-2">
-            <div className="flex gap-2 overflow-x-auto pb-1 [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
+            <div
+              data-editor-guide-target="pillars"
+              className="flex gap-2 overflow-x-auto pb-1 [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]"
+            >
               {pillars.map((pillar) => {
                 const isActive = pillar.value === selectedPillar;
                 return (
                   <button
-                    key={pillar.value || 'all'}
+                    key={pillar.value || "all"}
                     type="button"
                     onClick={() => onPillarChange(pillar.value)}
                     className="editor-pillar-chip inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
@@ -830,7 +1001,9 @@ function TaskFilters({
           </div>
         </div>
         {isLoadingPillars && (
-          <p className="px-1 text-[10px] uppercase tracking-[0.28em] text-slate-500">{t('editor.filters.pillar.loading')}</p>
+          <p className="px-1 text-[10px] uppercase tracking-[0.28em] text-slate-500">
+            {t("editor.filters.pillar.loading")}
+          </p>
         )}
         {pillarsError && !isLoadingPillars && (
           <button
@@ -838,42 +1011,50 @@ function TaskFilters({
             onClick={onRetryPillars}
             className="px-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-300"
           >
-            {t('editor.filters.pillar.retry')}
+            {t("editor.filters.pillar.retry")}
           </button>
         )}
       </div>
       <div className="hidden flex-col gap-3 md:flex md:flex-row md:items-end">
         <label className="flex w-full flex-col gap-2">
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
-            {t('editor.filters.search.label')}
+            {t("editor.filters.search.label")}
           </span>
           <div className="relative flex items-center">
             <input
               type="search"
+              data-editor-guide-target="search"
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
-              placeholder={t('editor.filters.search.placeholder')}
+              placeholder={t("editor.filters.search.placeholder")}
               className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </div>
         </label>
         <label className="flex w-full flex-col gap-2 md:max-w-xs">
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
-            {t('editor.filters.pillar.label')}
+            {t("editor.filters.pillar.label")}
           </span>
           <select
+            data-editor-guide-target="pillars"
             value={selectedPillar}
             onChange={(event) => onPillarChange(event.target.value)}
             className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             {pillars.map((pillar) => (
-              <option key={pillar.value || 'all'} value={pillar.value} className="bg-slate-900 text-[color:var(--color-slate-100)]">
+              <option
+                key={pillar.value || "all"}
+                value={pillar.value}
+                className="bg-slate-900 text-[color:var(--color-slate-100)]"
+              >
                 {pillar.label}
               </option>
             ))}
           </select>
           {isLoadingPillars && (
-            <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.filters.pillar.loading')}</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
+              {t("editor.filters.pillar.loading")}
+            </span>
           )}
           {pillarsError && !isLoadingPillars && (
             <button
@@ -881,7 +1062,7 @@ function TaskFilters({
               onClick={onRetryPillars}
               className="self-start text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-300"
             >
-              {t('editor.filters.pillar.retry')}
+              {t("editor.filters.pillar.retry")}
             </button>
           )}
         </label>
@@ -918,10 +1099,18 @@ function TaskList({
           <TaskCard
             key={task.id}
             task={task}
-            pillarName={pillarNamesById.get(task.pillarId ?? '') ?? null}
-            traitName={task.traitId ? traitNamesById.get(task.traitId) ?? null : null}
-            statName={task.statId ? statNamesById.get(task.statId) ?? null : null}
-            difficultyName={task.difficultyId ? difficultyNamesById.get(task.difficultyId) ?? null : null}
+            pillarName={pillarNamesById.get(task.pillarId ?? "") ?? null}
+            traitName={
+              task.traitId ? (traitNamesById.get(task.traitId) ?? null) : null
+            }
+            statName={
+              task.statId ? (statNamesById.get(task.statId) ?? null) : null
+            }
+            difficultyName={
+              task.difficultyId
+                ? (difficultyNamesById.get(task.difficultyId) ?? null)
+                : null
+            }
             onEdit={() => onEditTask(task)}
             onDelete={() => onDeleteTask(task)}
           />
@@ -948,10 +1137,18 @@ function TaskList({
           <TaskCard
             key={task.id}
             task={task}
-            pillarName={pillarNamesById.get(task.pillarId ?? '') ?? null}
-            traitName={task.traitId ? traitNamesById.get(task.traitId) ?? null : null}
-            statName={task.statId ? statNamesById.get(task.statId) ?? null : null}
-            difficultyName={task.difficultyId ? difficultyNamesById.get(task.difficultyId) ?? null : null}
+            pillarName={pillarNamesById.get(task.pillarId ?? "") ?? null}
+            traitName={
+              task.traitId ? (traitNamesById.get(task.traitId) ?? null) : null
+            }
+            statName={
+              task.statId ? (statNamesById.get(task.statId) ?? null) : null
+            }
+            difficultyName={
+              task.difficultyId
+                ? (difficultyNamesById.get(task.difficultyId) ?? null)
+                : null
+            }
             onEdit={() => onEditTask(task)}
             onDelete={() => onDeleteTask(task)}
           />
@@ -999,16 +1196,16 @@ function TaskListMobile({
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setOpenMenuTaskId(null);
       }
     };
 
-    window.addEventListener('pointerdown', handlePointerDown);
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener('pointerdown', handlePointerDown);
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [openMenuTaskId]);
 
@@ -1020,19 +1217,29 @@ function TaskListMobile({
 
   const resolveDifficulty = useCallback(
     (task: UserTask) => {
-      const difficultyId = task.difficultyId ?? '';
-      const name = difficultyId ? difficultyNamesById.get(difficultyId) ?? difficultyId : t('editor.field.noDifficulty');
+      const difficultyId = task.difficultyId ?? "";
+      const name = difficultyId
+        ? (difficultyNamesById.get(difficultyId) ?? difficultyId)
+        : t("editor.field.noDifficulty");
       const reference = (difficultyId || name).toLowerCase();
-      let tone = 'bg-slate-400';
-      if (reference.includes('easy') || reference.includes('baja') || reference.includes('low')) {
-        tone = 'bg-emerald-400';
-      } else if (reference.includes('medium') || reference.includes('media')) {
-        tone = 'bg-amber-400';
-      } else if (reference.includes('hard') || reference.includes('alta') || reference.includes('high')) {
-        tone = 'bg-rose-400';
+      let tone = "bg-slate-400";
+      if (
+        reference.includes("easy") ||
+        reference.includes("baja") ||
+        reference.includes("low")
+      ) {
+        tone = "bg-emerald-400";
+      } else if (reference.includes("medium") || reference.includes("media")) {
+        tone = "bg-amber-400";
+      } else if (
+        reference.includes("hard") ||
+        reference.includes("alta") ||
+        reference.includes("high")
+      ) {
+        tone = "bg-rose-400";
       }
 
-      return { label: name || t('editor.field.noDifficulty'), tone };
+      return { label: name || t("editor.field.noDifficulty"), tone };
     },
     [difficultyNamesById],
   );
@@ -1053,11 +1260,16 @@ function TaskListMobile({
               className="flex w-full flex-col gap-2 px-3 py-2.5 text-left transition hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
             >
               <div className="flex items-start justify-between gap-3">
-                <p className="line-clamp-1 pr-8 text-sm font-semibold text-white">{task.title}</p>
+                <p className="line-clamp-1 pr-8 text-sm font-semibold text-white">
+                  {task.title}
+                </p>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-[11px] text-[color:var(--color-slate-400)]">
                 <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-1.5 py-px text-[9px] font-medium uppercase tracking-[0.1em] text-[color:var(--color-slate-400)]">
-                  <span className={`h-1 w-1 rounded-full ${tone}`} aria-hidden />
+                  <span
+                    className={`h-1 w-1 rounded-full ${tone}`}
+                    aria-hidden
+                  />
                   <span>{difficultyLabel}</span>
                 </span>
               </div>
@@ -1076,12 +1288,14 @@ function TaskListMobile({
                 aria-expanded={isMenuOpen}
                 onClick={(event) => {
                   event.stopPropagation();
-                  setOpenMenuTaskId((current) => (current === task.id ? null : task.id));
+                  setOpenMenuTaskId((current) =>
+                    current === task.id ? null : task.id,
+                  );
                 }}
                 className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-base text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
               >
                 <span aria-hidden>⋯</span>
-                <span className="sr-only">{t('editor.task.actions.more')}</span>
+                <span className="sr-only">{t("editor.task.actions.more")}</span>
               </button>
               {isMenuOpen && (
                 <div className="absolute right-0 top-10 z-40 w-44 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] p-1 shadow-[0_10px_30px_rgba(15,23,42,0.6)]">
@@ -1094,7 +1308,7 @@ function TaskListMobile({
                     }}
                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-[color:var(--color-slate-100)] transition hover:bg-[color:var(--color-overlay-2)]"
                   >
-                    {t('editor.button.edit')}
+                    {t("editor.button.edit")}
                   </button>
                   <button
                     type="button"
@@ -1108,11 +1322,13 @@ function TaskListMobile({
                     }}
                     className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
                       !onDuplicateTask
-                        ? 'cursor-not-allowed text-slate-500'
-                        : 'text-[color:var(--color-slate-100)] hover:bg-[color:var(--color-overlay-2)]'
-                    } ${isDuplicating ? 'opacity-70' : ''}`.trim()}
+                        ? "cursor-not-allowed text-slate-500"
+                        : "text-[color:var(--color-slate-100)] hover:bg-[color:var(--color-overlay-2)]"
+                    } ${isDuplicating ? "opacity-70" : ""}`.trim()}
                   >
-                    {isDuplicating ? t('editor.button.duplicating') : t('editor.button.duplicate')}
+                    {isDuplicating
+                      ? t("editor.button.duplicating")
+                      : t("editor.button.duplicate")}
                   </button>
                   <button
                     type="button"
@@ -1122,7 +1338,9 @@ function TaskListMobile({
                       onDeleteTask(task);
                     }}
                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-rose-200 transition hover:bg-rose-500/10"
-                  >{t('editor.modal.delete.confirm')}</button>
+                  >
+                    {t("editor.modal.delete.confirm")}
+                  </button>
                 </div>
               )}
             </div>
@@ -1155,55 +1373,82 @@ function TaskCard({
   return (
     <article className="group relative flex flex-col gap-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 shadow-[0_8px_24px_rgba(15,23,42,0.35)] transition hover:border-[color:var(--color-border-soft)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <h3 className="font-semibold text-[color:var(--color-slate-100)]">{task.title}</h3>
+        <h3 className="font-semibold text-[color:var(--color-slate-100)]">
+          {task.title}
+        </h3>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
           <span
             className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
               task.isActive
-                ? 'bg-emerald-500/15 text-emerald-300'
-                : 'bg-slate-500/20 text-[color:var(--color-slate-300)]'
+                ? "bg-emerald-500/15 text-emerald-300"
+                : "bg-slate-500/20 text-[color:var(--color-slate-300)]"
             }`}
           >
-            {task.isActive ? t('editor.task.status.active') : t('editor.task.status.inactive')}
+            {task.isActive
+              ? t("editor.task.status.active")
+              : t("editor.task.status.inactive")}
           </span>
           <button
             type="button"
             onClick={onEdit}
             className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white"
           >
-            {t('editor.button.edit')}
+            {t("editor.button.edit")}
           </button>
           <button
             type="button"
             onClick={onDelete}
             className="rounded-full border border-rose-500/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-200 transition hover:border-rose-400 hover:text-rose-100"
-          >{t('editor.modal.delete.confirm')}</button>
+          >
+            {t("editor.modal.delete.confirm")}
+          </button>
         </div>
       </div>
       <dl className="grid gap-1 text-xs text-[color:var(--color-slate-400)]">
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-[color:var(--color-slate-300)]">{t('editor.field.pillar')}</dt>
-          <dd className="truncate text-right text-[color:var(--color-slate-200)]">{pillarName ?? task.pillarId ?? '—'}</dd>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">
+            {t("editor.field.pillar")}
+          </dt>
+          <dd className="truncate text-right text-[color:var(--color-slate-200)]">
+            {pillarName ?? task.pillarId ?? "—"}
+          </dd>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-[color:var(--color-slate-300)]">{t('editor.field.trait')}</dt>
-          <dd className="truncate text-right">{traitName ?? task.traitId ?? '—'}</dd>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">
+            {t("editor.field.trait")}
+          </dt>
+          <dd className="truncate text-right">
+            {traitName ?? task.traitId ?? "—"}
+          </dd>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-[color:var(--color-slate-300)]">{t('editor.field.stat')}</dt>
-          <dd className="truncate text-right">{statName ?? task.statId ?? '—'}</dd>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">
+            {t("editor.field.stat")}
+          </dt>
+          <dd className="truncate text-right">
+            {statName ?? task.statId ?? "—"}
+          </dd>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-[color:var(--color-slate-300)]">{t('editor.field.difficulty')}</dt>
-          <dd className="truncate text-right">{difficultyName ?? task.difficultyId ?? '—'}</dd>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">
+            {t("editor.field.difficulty")}
+          </dt>
+          <dd className="truncate text-right">
+            {difficultyName ?? task.difficultyId ?? "—"}
+          </dd>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-[color:var(--color-slate-300)]">{t('editor.field.baseGp')}</dt>
-          <dd className="truncate text-right">{task.xp != null ? task.xp : '—'}</dd>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">
+            {t("editor.field.baseGp")}
+          </dt>
+          <dd className="truncate text-right">
+            {task.xp != null ? task.xp : "—"}
+          </dd>
         </div>
       </dl>
       <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
-        {t('editor.field.updatedAt')}: {formatDateLabel(task.updatedAt, language)}
+        {t("editor.field.updatedAt")}:{" "}
+        {formatDateLabel(task.updatedAt, language)}
       </p>
     </article>
   );
@@ -1225,37 +1470,45 @@ interface TaskBoardProps {
   onDeleteTask: (task: UserTask) => void;
 }
 
-const PILLAR_STYLE_MAP: Record<string, { headerText: string; badgeBg: string; badgeText: string; bullet: string; ring: string }>
- = {
+const PILLAR_STYLE_MAP: Record<
+  string,
+  {
+    headerText: string;
+    badgeBg: string;
+    badgeText: string;
+    bullet: string;
+    ring: string;
+  }
+> = {
   BODY: {
-    headerText: 'text-emerald-300',
-    badgeBg: 'bg-emerald-500/15 border border-emerald-400/40',
-    badgeText: 'text-emerald-100',
-    bullet: 'text-emerald-300',
-    ring: 'ring-emerald-400/40',
+    headerText: "text-emerald-300",
+    badgeBg: "bg-emerald-500/15 border border-emerald-400/40",
+    badgeText: "text-emerald-100",
+    bullet: "text-emerald-300",
+    ring: "ring-emerald-400/40",
   },
   MIND: {
-    headerText: 'text-sky-300',
-    badgeBg: 'bg-sky-500/15 border border-sky-400/40',
-    badgeText: 'text-sky-100',
-    bullet: 'text-sky-300',
-    ring: 'ring-sky-400/40',
+    headerText: "text-sky-300",
+    badgeBg: "bg-sky-500/15 border border-sky-400/40",
+    badgeText: "text-sky-100",
+    bullet: "text-sky-300",
+    ring: "ring-sky-400/40",
   },
   SOUL: {
-    headerText: 'text-violet-300',
-    badgeBg: 'bg-violet-500/15 border border-violet-400/40',
-    badgeText: 'text-violet-100',
-    bullet: 'text-violet-300',
-    ring: 'ring-violet-400/40',
+    headerText: "text-violet-300",
+    badgeBg: "bg-violet-500/15 border border-violet-400/40",
+    badgeText: "text-violet-100",
+    bullet: "text-violet-300",
+    ring: "ring-violet-400/40",
   },
 };
 
 const DEFAULT_PILLAR_STYLE = {
-  headerText: 'text-indigo-300',
-  badgeBg: 'bg-indigo-500/15 border border-indigo-400/40',
-  badgeText: 'text-indigo-100',
-  bullet: 'text-indigo-300',
-  ring: 'ring-indigo-400/40',
+  headerText: "text-indigo-300",
+  badgeBg: "bg-indigo-500/15 border border-indigo-400/40",
+  badgeText: "text-indigo-100",
+  bullet: "text-indigo-300",
+  ring: "ring-indigo-400/40",
 };
 
 function resolvePillarStyle(code: string | undefined) {
@@ -1283,7 +1536,8 @@ function TaskBoard({
     <div className="hidden gap-4 lg:grid lg:grid-cols-3">
       {groups.map((group) => {
         const style = resolvePillarStyle(group.code);
-        const displayCode = group.code === 'UNKNOWN' ? t('editor.field.noPillar') : group.code;
+        const displayCode =
+          group.code === "UNKNOWN" ? t("editor.field.noPillar") : group.code;
 
         return (
           <section
@@ -1292,10 +1546,14 @@ function TaskBoard({
           >
             <header className="flex items-center justify-between border-b border-white/5 pb-3">
               <div className="space-y-1">
-                <p className={`text-xs font-semibold uppercase tracking-[0.24em] ${style.headerText}`}>
+                <p
+                  className={`text-xs font-semibold uppercase tracking-[0.24em] ${style.headerText}`}
+                >
                   {group.name}
                 </p>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{displayCode}</p>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                  {displayCode}
+                </p>
               </div>
               <span
                 className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${style.badgeBg} ${style.badgeText}`}
@@ -1306,7 +1564,7 @@ function TaskBoard({
             <div className="mt-3 flex-1 space-y-2">
               {group.tasks.length === 0 ? (
                 <p className="rounded-xl border border-white/5 bg-[color:var(--color-overlay-1)] px-3 py-6 text-center text-xs text-slate-500">
-                  {t('editor.board.emptyPillar')}
+                  {t("editor.board.emptyPillar")}
                 </p>
               ) : (
                 group.tasks.map((task: UserTask) => (
@@ -1314,11 +1572,17 @@ function TaskBoard({
                     key={task.id}
                     task={task}
                     groupKey={group.key}
-                    pillarName=
-                      {group.key === '__unknown__'
-                        ? pillarNamesById.get(task.pillarId ?? '') ?? t('editor.field.noPillar')
-                        : group.name}
-                    difficultyName={task.difficultyId ? difficultyNamesById.get(task.difficultyId) ?? null : null}
+                    pillarName={
+                      group.key === "__unknown__"
+                        ? (pillarNamesById.get(task.pillarId ?? "") ??
+                          t("editor.field.noPillar"))
+                        : group.name
+                    }
+                    difficultyName={
+                      task.difficultyId
+                        ? (difficultyNamesById.get(task.difficultyId) ?? null)
+                        : null
+                    }
                     isActiveTask={activeTaskId === task.id}
                     onSelectTask={onSelectTask}
                     onDeleteTask={onDeleteTask}
@@ -1365,18 +1629,18 @@ function TaskBoardItem({
   };
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       onSelectTask(task, groupKey);
     }
   };
 
   const containerClasses = [
-    'group relative cursor-pointer rounded-xl border border-[color:var(--color-border-subtle)] bg-slate-900/60 p-3 transition hover:border-white/25 hover:bg-slate-900/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30',
-    isActiveTask ? `border-white/30 bg-slate-900/80 ring-2 ${ringClass}` : '',
+    "group relative cursor-pointer rounded-xl border border-[color:var(--color-border-subtle)] bg-slate-900/60 p-3 transition hover:border-white/25 hover:bg-slate-900/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30",
+    isActiveTask ? `border-white/30 bg-slate-900/80 ring-2 ${ringClass}` : "",
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 
   return (
     <div
@@ -1389,18 +1653,24 @@ function TaskBoardItem({
     >
       <div className="flex items-start justify-between gap-2">
         <div className="space-y-2">
-          <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">{task.title}</p>
+          <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">
+            {task.title}
+          </p>
           <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
             <span
               className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] ${
-                task.isActive ? 'bg-emerald-500/10 text-emerald-200' : 'bg-slate-700/20 text-[color:var(--color-slate-300)]'
+                task.isActive
+                  ? "bg-emerald-500/10 text-emerald-200"
+                  : "bg-slate-700/20 text-[color:var(--color-slate-300)]"
               }`}
             >
-              {task.isActive ? t('editor.task.status.active') : t('editor.task.status.inactive')}
+              {task.isActive
+                ? t("editor.task.status.active")
+                : t("editor.task.status.inactive")}
             </span>
             <span className="flex items-center gap-1 text-[color:var(--color-slate-400)]">
               <span className={`text-base leading-none ${bulletClass}`}>•</span>
-              {difficultyName ?? t('editor.field.noDifficulty')}
+              {difficultyName ?? t("editor.field.noDifficulty")}
             </span>
             <span className="text-slate-500">{pillarName}</span>
           </div>
@@ -1412,7 +1682,9 @@ function TaskBoardItem({
             onDeleteTask(task);
           }}
           className="rounded-full border border-rose-500/40 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-200 transition hover:border-rose-400 hover:text-rose-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/50"
-        >{t('editor.modal.delete.confirm')}</button>
+        >
+          {t("editor.modal.delete.confirm")}
+        </button>
       </div>
     </div>
   );
@@ -1427,7 +1699,14 @@ interface DeleteTaskModalProps {
   onConfirm: () => Promise<void>;
 }
 
-function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConfirm }: DeleteTaskModalProps) {
+function DeleteTaskModal({
+  open,
+  onClose,
+  task,
+  isDeleting,
+  errorMessage,
+  onConfirm,
+}: DeleteTaskModalProps) {
   const { t } = usePostLoginLanguage();
   useEffect(() => {
     if (!open) {
@@ -1435,15 +1714,15 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isDeleting) {
+      if (event.key === "Escape" && !isDeleting) {
         event.preventDefault();
         onClose();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [open, isDeleting, onClose]);
 
@@ -1458,14 +1737,17 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
     await onConfirm();
   };
 
-  const normalizedTitle = task?.title?.trim() ?? '';
-  const displayTitle = normalizedTitle.length > 0 ? `“${normalizedTitle}”` : t('editor.modal.delete.thisTask');
+  const normalizedTitle = task?.title?.trim() ?? "";
+  const displayTitle =
+    normalizedTitle.length > 0
+      ? `“${normalizedTitle}”`
+      : t("editor.modal.delete.thisTask");
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
       <button
         type="button"
-        aria-label={t('editor.button.close')}
+        aria-label={t("editor.button.close")}
         onClick={() => {
           if (!isDeleting) {
             onClose();
@@ -1481,11 +1763,15 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
           onClick={(event) => event.stopPropagation()}
         >
           <header className="space-y-1">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">{t('editor.modal.delete.heading')}</p>
-            <h2 className="text-xl font-semibold text-white">{t('editor.modal.delete.title')}</h2>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">
+              {t("editor.modal.delete.heading")}
+            </p>
+            <h2 className="text-xl font-semibold text-white">
+              {t("editor.modal.delete.title")}
+            </h2>
           </header>
           <p className="text-sm text-[color:var(--color-slate-300)]">
-            {t('editor.modal.delete.message', { title: displayTitle })}
+            {t("editor.modal.delete.message", { title: displayTitle })}
           </p>
           {errorMessage && (
             <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">
@@ -1503,7 +1789,7 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
               disabled={isDeleting}
               className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {t('editor.button.cancel')}
+              {t("editor.button.cancel")}
             </button>
             <button
               type="button"
@@ -1511,7 +1797,9 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
               disabled={isDeleting}
               className="inline-flex items-center justify-center rounded-full bg-rose-600/90 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(225,29,72,0.3)] transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isDeleting ? t('editor.modal.delete.loading') : t('editor.modal.delete.confirm')}
+              {isDeleting
+                ? t("editor.modal.delete.loading")
+                : t("editor.modal.delete.confirm")}
             </button>
           </div>
         </div>
@@ -1524,7 +1812,10 @@ function TaskListSkeleton() {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="h-40 animate-pulse rounded-2xl border border-white/5 bg-[color:var(--color-overlay-1)]" />
+        <div
+          key={index}
+          className="h-40 animate-pulse rounded-2xl border border-white/5 bg-[color:var(--color-overlay-1)]"
+        />
       ))}
     </div>
   );
@@ -1541,38 +1832,47 @@ function TaskListEmpty({ message }: { message: string }) {
   );
 }
 
-function TaskListError({ message, onRetry }: { message: string; onRetry: () => void }) {
+function TaskListError({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
   const { t } = usePostLoginLanguage();
 
   return (
     <div className="flex flex-col items-center gap-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-6 py-8 text-center text-sm text-rose-100">
-      <p className="font-semibold">{t('editor.error.loadTasks.title')}</p>
+      <p className="font-semibold">{t("editor.error.loadTasks.title")}</p>
       <p className="max-w-sm text-rose-200/80">{message}</p>
       <button
         type="button"
         onClick={onRetry}
         className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:border-[color:var(--color-border-strong)]"
       >
-        {t('editor.button.retry')}
+        {t("editor.button.retry")}
       </button>
     </div>
   );
 }
 
-function formatDateLabel(value: string | null, locale: 'es' | 'en' = 'es'): string {
+function formatDateLabel(
+  value: string | null,
+  locale: "es" | "en" = "es",
+): string {
   if (!value) {
-    return '—';
+    return "—";
   }
 
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {
-    return '—';
+    return "—";
   }
 
   return parsed.toLocaleDateString(locale);
 }
 
-type ToastMessage = { type: 'success' | 'error' | 'info'; text: string };
+type ToastMessage = { type: "success" | "error" | "info"; text: string };
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -1594,11 +1894,11 @@ function CreateTaskModal({
   onRetryPillars,
 }: CreateTaskModalProps) {
   const { language, t } = usePostLoginLanguage();
-  const activeLocale = language === 'es' ? 'es' : 'en';
-  const [selectedPillarId, setSelectedPillarId] = useState('');
-  const [selectedTraitId, setSelectedTraitId] = useState('');
-  const [title, setTitle] = useState('');
-  const [difficultyId, setDifficultyId] = useState('');
+  const activeLocale = language === "es" ? "es" : "en";
+  const [selectedPillarId, setSelectedPillarId] = useState("");
+  const [selectedTraitId, setSelectedTraitId] = useState("");
+  const [title, setTitle] = useState("");
+  const [difficultyId, setDifficultyId] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
@@ -1633,10 +1933,10 @@ function CreateTaskModal({
 
   useEffect(() => {
     if (!open) {
-      setSelectedPillarId('');
-      setSelectedTraitId('');
-      setTitle('');
-      setDifficultyId('');
+      setSelectedPillarId("");
+      setSelectedTraitId("");
+      setTitle("");
+      setDifficultyId("");
       setErrors({});
       setToast(null);
     }
@@ -1644,16 +1944,16 @@ function CreateTaskModal({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         event.preventDefault();
         handleClose();
       }
     };
 
     if (open) {
-      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener("keydown", handleKeyDown);
       return () => {
-        window.removeEventListener('keydown', handleKeyDown);
+        window.removeEventListener("keydown", handleKeyDown);
       };
     }
 
@@ -1669,12 +1969,14 @@ function CreateTaskModal({
   }, [toast]);
 
   useEffect(() => {
-    setSelectedTraitId('');
-    clearError('trait');
+    setSelectedTraitId("");
+    clearError("trait");
   }, [selectedPillarId, clearError]);
 
   const sortedPillars = useMemo(() => {
-    return [...pillars].sort((a, b) => a.name.localeCompare(b.name, activeLocale, { sensitivity: 'base' }));
+    return [...pillars].sort((a, b) =>
+      a.name.localeCompare(b.name, activeLocale, { sensitivity: "base" }),
+    );
   }, [activeLocale, pillars]);
 
   const filteredTraits = useMemo(() => {
@@ -1682,28 +1984,34 @@ function CreateTaskModal({
   }, [traits, selectedPillarId]);
 
   const sortedDifficulties = useMemo(() => {
-    return [...difficulties].sort((a, b) => a.name.localeCompare(b.name, activeLocale, { sensitivity: 'base' }));
+    return [...difficulties].sort((a, b) =>
+      a.name.localeCompare(b.name, activeLocale, { sensitivity: "base" }),
+    );
   }, [activeLocale, difficulties]);
 
-  const isSubmitting = createStatus === 'loading';
+  const isSubmitting = createStatus === "loading";
   const isSubmitDisabled =
-    isSubmitting || !selectedPillarId || !selectedTraitId || title.trim().length === 0 || !userId;
+    isSubmitting ||
+    !selectedPillarId ||
+    !selectedTraitId ||
+    title.trim().length === 0 ||
+    !userId;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const validationErrors: Record<string, string> = {};
     if (!selectedPillarId) {
-      validationErrors.pillar = t('editor.validation.selectPillar');
+      validationErrors.pillar = t("editor.validation.selectPillar");
     }
     if (!selectedTraitId) {
-      validationErrors.trait = t('editor.validation.selectTrait');
+      validationErrors.trait = t("editor.validation.selectTrait");
     }
     if (title.trim().length === 0) {
-      validationErrors.title = t('editor.validation.titleRequired');
+      validationErrors.title = t("editor.validation.titleRequired");
     }
     if (!userId) {
-      validationErrors.user = t('editor.validation.userNotFound');
+      validationErrors.user = t("editor.validation.userNotFound");
     }
 
     setErrors(validationErrors);
@@ -1720,13 +2028,14 @@ function CreateTaskModal({
         statId: null,
         difficultyId: difficultyId || null,
       });
-      setToast({ type: 'success', text: t('editor.toast.create.success') });
-      setTitle('');
-      setDifficultyId('');
+      setToast({ type: "success", text: t("editor.toast.create.success") });
+      setTitle("");
+      setDifficultyId("");
       setErrors({});
     } catch (error) {
-      const message = error instanceof Error ? error.message : t('editor.toast.create.error');
-      setToast({ type: 'error', text: message });
+      const message =
+        error instanceof Error ? error.message : t("editor.toast.create.error");
+      setToast({ type: "error", text: message });
     }
   };
 
@@ -1735,10 +2044,13 @@ function CreateTaskModal({
   }
 
   return (
-    <div className="create-task-modal__overlay fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center" data-light-scope="editor">
+    <div
+      className="create-task-modal__overlay fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center"
+      data-light-scope="editor"
+    >
       <button
         type="button"
-        aria-label={t('editor.button.close')}
+        aria-label={t("editor.button.close")}
         onClick={handleClose}
         className="absolute inset-0 h-full w-full"
       />
@@ -1750,123 +2062,170 @@ function CreateTaskModal({
         >
           <div className="create-task-modal space-y-6">
             <header className="space-y-1">
-              <p className="create-task-modal__badge text-[11px] font-semibold uppercase tracking-[0.24em]">{t('editor.modal.create.badge')}</p>
-              <h2 className="create-task-modal__title text-xl font-semibold">{t('editor.modal.create.title')}</h2>
+              <p className="create-task-modal__badge text-[11px] font-semibold uppercase tracking-[0.24em]">
+                {t("editor.modal.create.badge")}
+              </p>
+              <h2 className="create-task-modal__title text-xl font-semibold">
+                {t("editor.modal.create.title")}
+              </h2>
               <p className="create-task-modal__description text-sm">
-                {t('editor.modal.create.description')}
+                {t("editor.modal.create.description")}
               </p>
             </header>
 
             <section className="space-y-4">
               <div className="space-y-1.5">
-                <p className="create-task-modal__section-label text-[11px] font-semibold uppercase tracking-[0.24em]">{t('editor.modal.create.step1')}</p>
+                <p className="create-task-modal__section-label text-[11px] font-semibold uppercase tracking-[0.24em]">
+                  {t("editor.modal.create.step1")}
+                </p>
                 <div className="flex flex-col gap-2">
                   <select
                     value={selectedPillarId}
                     onChange={(event) => {
                       setSelectedPillarId(event.target.value);
-                      clearError('pillar');
+                      clearError("pillar");
                     }}
                     className="create-task-modal__control create-task-modal__control--pill w-full appearance-none rounded-full border px-4 py-2.5 text-sm ios-touch-input focus:outline-none disabled:cursor-not-allowed"
                     disabled={isLoadingPillars || pillarsError != null}
                   >
                     <option value="" className="create-task-modal__option">
-                      {t('editor.modal.create.selectPillarPlaceholder')}
+                      {t("editor.modal.create.selectPillarPlaceholder")}
                     </option>
                     {sortedPillars.map((pillar) => (
-                      <option key={pillar.id} value={pillar.id} className="create-task-modal__option">
+                      <option
+                        key={pillar.id}
+                        value={pillar.id}
+                        className="create-task-modal__option"
+                      >
                         {localizePillarLabel(pillar.name, language)}
                       </option>
                     ))}
                   </select>
                 </div>
                 {isLoadingPillars && (
-                  <p className="create-task-modal__hint text-[11px] uppercase tracking-[0.2em]">{t('editor.loading.pillars')}</p>
+                  <p className="create-task-modal__hint text-[11px] uppercase tracking-[0.2em]">
+                    {t("editor.loading.pillars")}
+                  </p>
                 )}
                 {pillarsError && (
                   <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
-                    <p>{t('editor.error.pillars.load')}</p>
+                    <p>{t("editor.error.pillars.load")}</p>
                     <button
                       type="button"
                       onClick={onRetryPillars}
                       className="font-semibold text-rose-200 underline decoration-dotted"
                     >
-                      {t('editor.button.retry')}
+                      {t("editor.button.retry")}
                     </button>
                   </div>
                 )}
-                {errors.pillar && <p className="text-xs text-rose-300">{errors.pillar}</p>}
-                {!isLoadingPillars && !pillarsError && sortedPillars.length === 0 && (
-                  <p className="create-task-modal__hint text-xs">No encontramos pilares disponibles por ahora.</p>
+                {errors.pillar && (
+                  <p className="text-xs text-rose-300">{errors.pillar}</p>
                 )}
+                {!isLoadingPillars &&
+                  !pillarsError &&
+                  sortedPillars.length === 0 && (
+                    <p className="create-task-modal__hint text-xs">
+                      No encontramos pilares disponibles por ahora.
+                    </p>
+                  )}
               </div>
 
               <div className="space-y-1.5">
-                <p className="create-task-modal__section-label text-[11px] font-semibold uppercase tracking-[0.24em]">{t('editor.modal.create.step2')}</p>
+                <p className="create-task-modal__section-label text-[11px] font-semibold uppercase tracking-[0.24em]">
+                  {t("editor.modal.create.step2")}
+                </p>
                 <div className="flex flex-col gap-2">
                   <select
                     value={selectedTraitId}
                     onChange={(event) => {
                       setSelectedTraitId(event.target.value);
-                      clearError('trait');
+                      clearError("trait");
                     }}
                     className="create-task-modal__control create-task-modal__control--pill w-full appearance-none rounded-full border px-4 py-2.5 text-sm ios-touch-input focus:outline-none disabled:cursor-not-allowed"
                     disabled={!selectedPillarId || isLoadingTraits}
                   >
                     <option value="" className="create-task-modal__option">
-                      {selectedPillarId ? t('editor.modal.create.selectTraitPlaceholder') : t('editor.modal.create.selectPillarFirst')}
+                      {selectedPillarId
+                        ? t("editor.modal.create.selectTraitPlaceholder")
+                        : t("editor.modal.create.selectPillarFirst")}
                     </option>
                     {filteredTraits.map((trait) => (
-                      <option key={trait.id} value={trait.id} className="create-task-modal__option">
-                        {localizeTraitLabel({ name: trait.name, code: trait.code, fallback: trait.id }, language)}
+                      <option
+                        key={trait.id}
+                        value={trait.id}
+                        className="create-task-modal__option"
+                      >
+                        {localizeTraitLabel(
+                          {
+                            name: trait.name,
+                            code: trait.code,
+                            fallback: trait.id,
+                          },
+                          language,
+                        )}
                       </option>
                     ))}
                   </select>
                 </div>
                 {isLoadingTraits && (
-                  <p className="create-task-modal__hint text-[11px] uppercase tracking-[0.2em]">{t('editor.loading.traits')}</p>
+                  <p className="create-task-modal__hint text-[11px] uppercase tracking-[0.2em]">
+                    {t("editor.loading.traits")}
+                  </p>
                 )}
                 {traitsError && (
                   <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
-                    <p>{t('editor.error.traits.load')}</p>
+                    <p>{t("editor.error.traits.load")}</p>
                     <button
                       type="button"
                       onClick={reloadTraits}
                       className="font-semibold text-rose-200 underline decoration-dotted"
                     >
-                      {t('editor.button.retry')}
+                      {t("editor.button.retry")}
                     </button>
                   </div>
                 )}
-                {errors.trait && <p className="text-xs text-rose-300">{errors.trait}</p>}
-                {selectedPillarId && !isLoadingTraits && filteredTraits.length === 0 && !traitsError && (
-                  <p className="create-task-modal__hint text-xs">{t('editor.empty.noTraits')}</p>
+                {errors.trait && (
+                  <p className="text-xs text-rose-300">{errors.trait}</p>
                 )}
+                {selectedPillarId &&
+                  !isLoadingTraits &&
+                  filteredTraits.length === 0 &&
+                  !traitsError && (
+                    <p className="create-task-modal__hint text-xs">
+                      {t("editor.empty.noTraits")}
+                    </p>
+                  )}
               </div>
-
             </section>
 
             <section className="space-y-4">
               <div className="space-y-2">
                 <label className="flex flex-col gap-2">
-                  <span className="create-task-modal__field-label text-xs font-semibold uppercase tracking-[0.18em]">{t('editor.modal.create.taskTitleLabel')}</span>
+                  <span className="create-task-modal__field-label text-xs font-semibold uppercase tracking-[0.18em]">
+                    {t("editor.modal.create.taskTitleLabel")}
+                  </span>
                   <input
                     type="text"
                     value={title}
                     onChange={(event) => {
                       setTitle(event.target.value);
-                      clearError('title');
+                      clearError("title");
                     }}
-                    placeholder={t('editor.modal.taskTitle.placeholder')}
+                    placeholder={t("editor.modal.taskTitle.placeholder")}
                     className="create-task-modal__control w-full rounded-2xl border px-4 py-3 text-sm ios-touch-input focus:outline-none"
                   />
                 </label>
-                {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
+                {errors.title && (
+                  <p className="text-xs text-rose-300">{errors.title}</p>
+                )}
               </div>
 
               <div className="space-y-2">
                 <label className="flex flex-col gap-2">
-                  <span className="create-task-modal__field-label text-xs font-semibold uppercase tracking-[0.18em]">{t('editor.field.difficulty')}</span>
+                  <span className="create-task-modal__field-label text-xs font-semibold uppercase tracking-[0.18em]">
+                    {t("editor.field.difficulty")}
+                  </span>
                   <select
                     value={difficultyId}
                     onChange={(event) => setDifficultyId(event.target.value)}
@@ -1874,37 +2233,50 @@ function CreateTaskModal({
                     disabled={isLoadingDifficulties}
                   >
                     <option value="" className="create-task-modal__option">
-                      {t('editor.modal.create.selectDifficultyPlaceholder')}
+                      {t("editor.modal.create.selectDifficultyPlaceholder")}
                     </option>
                     {sortedDifficulties.map((difficulty) => (
-                      <option key={difficulty.id} value={difficulty.id} className="create-task-modal__option">
+                      <option
+                        key={difficulty.id}
+                        value={difficulty.id}
+                        className="create-task-modal__option"
+                      >
                         {localizeDifficultyLabel(difficulty.name, language)}
                       </option>
                     ))}
                   </select>
                 </label>
                 {isLoadingDifficulties && (
-                  <p className="create-task-modal__hint text-[11px] uppercase tracking-[0.2em]">{t('editor.loading.difficulties')}</p>
+                  <p className="create-task-modal__hint text-[11px] uppercase tracking-[0.2em]">
+                    {t("editor.loading.difficulties")}
+                  </p>
                 )}
                 {difficultiesError && (
                   <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
-                    <p>{t('editor.error.difficulties.load')}</p>
+                    <p>{t("editor.error.difficulties.load")}</p>
                     <button
                       type="button"
                       onClick={reloadDifficulties}
                       className="font-semibold text-rose-200 underline decoration-dotted"
                     >
-                      {t('editor.button.retry')}
+                      {t("editor.button.retry")}
                     </button>
                   </div>
                 )}
               </div>
-
             </section>
 
-            {errors.user && <p className="text-xs text-rose-300">{errors.user}</p>}
+            {errors.user && (
+              <p className="text-xs text-rose-300">{errors.user}</p>
+            )}
 
-            {toast && <ToastBanner tone={toast.type} message={toast.text} className="px-3" />}
+            {toast && (
+              <ToastBanner
+                tone={toast.type}
+                message={toast.text}
+                className="px-3"
+              />
+            )}
 
             <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
               <button
@@ -1912,15 +2284,20 @@ function CreateTaskModal({
                 onClick={handleClose}
                 className="create-task-modal__button-secondary inline-flex items-center justify-center rounded-full border px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition"
               >
-                {t('editor.button.cancel')}
+                {t("editor.button.cancel")}
               </button>
               <button
                 type="submit"
                 disabled={isSubmitDisabled}
                 className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[#121212] transition disabled:cursor-not-allowed disabled:opacity-60"
-                style={{ background: 'var(--gradient-innerbloom)', boxShadow: 'var(--shadow-innerbloom-cta)' }}
+                style={{
+                  background: "var(--gradient-innerbloom)",
+                  boxShadow: "var(--shadow-innerbloom-cta)",
+                }}
               >
-                {isSubmitting ? t('editor.button.creating') : t('editor.button.createTask')}
+                {isSubmitting
+                  ? t("editor.button.creating")
+                  : t("editor.button.createTask")}
               </button>
             </div>
           </div>
@@ -1937,7 +2314,7 @@ interface EditTaskModalProps {
   userId: string | null;
   task: UserTask | null;
   pillars: Pillar[];
-  variant?: 'modal' | 'panel';
+  variant?: "modal" | "panel";
   navigationTasks?: UserTask[];
   onNavigateTask?: (taskId: string) => void;
 }
@@ -1949,14 +2326,14 @@ function EditTaskModal({
   userId,
   task,
   pillars,
-  variant = 'modal',
+  variant = "modal",
   navigationTasks = [],
   onNavigateTask,
 }: EditTaskModalProps) {
   const { language, t } = usePostLoginLanguage();
-  const activeLocale = language === 'es' ? 'es' : 'en';
-  const [title, setTitle] = useState('');
-  const [difficultyId, setDifficultyId] = useState('');
+  const activeLocale = language === "es" ? "es" : "en";
+  const [title, setTitle] = useState("");
+  const [difficultyId, setDifficultyId] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [toast, setToast] = useState<ToastMessage | null>(null);
@@ -1973,27 +2350,35 @@ function EditTaskModal({
   }, []);
 
   const { updateTask, status: updateStatus } = useUpdateTask();
-  const { data: difficulties, isLoading: isLoadingDifficulties, error: difficultiesError, reload: reloadDifficulties } =
-    useDifficulties();
+  const {
+    data: difficulties,
+    isLoading: isLoadingDifficulties,
+    error: difficultiesError,
+    reload: reloadDifficulties,
+  } = useDifficulties();
 
   const currentPillarId = open && task?.pillarId ? task.pillarId : null;
   const { data: traits } = useTraits(currentPillarId);
 
   const sortedDifficulties = useMemo(() => {
-    return [...difficulties].sort((a, b) => a.name.localeCompare(b.name, activeLocale, { sensitivity: 'base' }));
+    return [...difficulties].sort((a, b) =>
+      a.name.localeCompare(b.name, activeLocale, { sensitivity: "base" }),
+    );
   }, [activeLocale, difficulties]);
 
   const pillarName = useMemo(() => {
     if (!task?.pillarId) {
-      return t('editor.symbol.empty');
+      return t("editor.symbol.empty");
     }
-    const sourceLabel = pillars.find((pillar) => pillar.id === task.pillarId)?.name ?? task.pillarId;
+    const sourceLabel =
+      pillars.find((pillar) => pillar.id === task.pillarId)?.name ??
+      task.pillarId;
     return localizePillarLabel(sourceLabel, language);
   }, [language, pillars, task?.pillarId, t]);
 
   const traitName = useMemo(() => {
     if (!task?.traitId) {
-      return t('editor.symbol.empty');
+      return t("editor.symbol.empty");
     }
     const trait = traits.find((entry) => entry.id === task.traitId);
     return localizeTraitLabel(
@@ -2002,7 +2387,7 @@ function EditTaskModal({
     );
   }, [language, t, task?.traitId, traits]);
 
-  const isSubmitting = updateStatus === 'loading';
+  const isSubmitting = updateStatus === "loading";
 
   const handleClose = useCallback(() => {
     onClose();
@@ -2010,8 +2395,8 @@ function EditTaskModal({
 
   useEffect(() => {
     if (!open) {
-      setTitle('');
-      setDifficultyId('');
+      setTitle("");
+      setDifficultyId("");
       setIsActive(true);
       setErrors({});
       setToast(null);
@@ -2019,8 +2404,8 @@ function EditTaskModal({
     }
 
     if (task) {
-      setTitle(task.title ?? '');
-      setDifficultyId(task.difficultyId ?? '');
+      setTitle(task.title ?? "");
+      setDifficultyId(task.difficultyId ?? "");
       setIsActive(Boolean(task.isActive));
       setErrors({});
       setToast(null);
@@ -2029,16 +2414,16 @@ function EditTaskModal({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         event.preventDefault();
         handleClose();
       }
     };
 
     if (open) {
-      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener("keydown", handleKeyDown);
       return () => {
-        window.removeEventListener('keydown', handleKeyDown);
+        window.removeEventListener("keydown", handleKeyDown);
       };
     }
 
@@ -2059,15 +2444,15 @@ function EditTaskModal({
     const validationErrors: Record<string, string> = {};
 
     if (!title.trim()) {
-      validationErrors.title = t('editor.validation.titleRequired');
+      validationErrors.title = t("editor.validation.titleRequired");
     }
 
     if (!userId) {
-      validationErrors.user = t('editor.validation.userNotFound');
+      validationErrors.user = t("editor.validation.userNotFound");
     }
 
     if (!task) {
-      validationErrors.task = t('editor.validation.taskNotFoundEdit');
+      validationErrors.task = t("editor.validation.taskNotFoundEdit");
     }
 
     setErrors(validationErrors);
@@ -2088,10 +2473,11 @@ function EditTaskModal({
         return;
       }
 
-      setToast({ type: 'success', text: t('editor.toast.update.success') });
+      setToast({ type: "success", text: t("editor.toast.update.success") });
     } catch (error) {
-      const message = error instanceof Error ? error.message : t('editor.toast.update.error');
-      setToast({ type: 'error', text: message });
+      const message =
+        error instanceof Error ? error.message : t("editor.toast.update.error");
+      setToast({ type: "error", text: message });
     }
   };
 
@@ -2108,103 +2494,133 @@ function EditTaskModal({
     return null;
   }
 
-  const showNavigation = variant === 'panel' && navigationTasks.length > 0 && task != null;
-  const activeIndex = showNavigation ? navigationTasks.findIndex((entry) => entry.id === task.id) : -1;
-  const previousTask = showNavigation && activeIndex > 0 ? navigationTasks[activeIndex - 1] : null;
+  const showNavigation =
+    variant === "panel" && navigationTasks.length > 0 && task != null;
+  const activeIndex = showNavigation
+    ? navigationTasks.findIndex((entry) => entry.id === task.id)
+    : -1;
+  const previousTask =
+    showNavigation && activeIndex > 0 ? navigationTasks[activeIndex - 1] : null;
   const nextTask =
-    showNavigation && activeIndex >= 0 && activeIndex < navigationTasks.length - 1
+    showNavigation &&
+    activeIndex >= 0 &&
+    activeIndex < navigationTasks.length - 1
       ? navigationTasks[activeIndex + 1]
       : null;
   const navigationLabel = showNavigation
     ? `${activeIndex + 1}/${navigationTasks.length}`
     : navigationTasks.length > 0
       ? `—/${navigationTasks.length}`
-      : '—';
+      : "—";
 
   const formBody = (
     <div className="edit-task-modal space-y-6">
       <header className="space-y-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">{t('editor.modal.edit.badge')}</p>
-        <h2 className="edit-task-modal__title text-xl font-semibold">{t('editor.modal.edit.title')}</h2>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">
+          {t("editor.modal.edit.badge")}
+        </p>
+        <h2 className="edit-task-modal__title text-xl font-semibold">
+          {t("editor.modal.edit.title")}
+        </h2>
         <p className="edit-task-modal__description text-sm">
-          {t('editor.modal.edit.description')}
+          {t("editor.modal.edit.description")}
         </p>
       </header>
 
       <section className="space-y-4">
         <div className="space-y-2">
           <span className="edit-task-modal__locked-section-label text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-            {t('editor.modal.edit.context')}
+            {t("editor.modal.edit.context")}
           </span>
           <div className="grid gap-3 md:grid-cols-2">
-            <ReadOnlyField label={t('editor.field.pillar')} value={pillarName} />
-            <ReadOnlyField label={t('editor.field.trait')} value={traitName} />
+            <ReadOnlyField
+              label={t("editor.field.pillar")}
+              value={pillarName}
+            />
+            <ReadOnlyField label={t("editor.field.trait")} value={traitName} />
           </div>
           <p className="edit-task-modal__locked-section-label text-[11px] uppercase tracking-[0.2em] text-slate-500">
-            {t('editor.modal.edit.lockedHint')}
+            {t("editor.modal.edit.lockedHint")}
           </p>
         </div>
       </section>
 
       <section className="space-y-4">
         <p className="edit-task-modal__editable-section-label text-[11px] font-semibold uppercase tracking-[0.2em]">
-          {t('editor.modal.edit.editableFields')}
+          {t("editor.modal.edit.editableFields")}
         </p>
         <div className="space-y-2">
           <label className="flex flex-col gap-2">
-            <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">{t('editor.modal.create.taskTitleLabel')}</span>
+            <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">
+              {t("editor.modal.create.taskTitleLabel")}
+            </span>
             <input
               type="text"
               value={title}
               onChange={(event) => {
                 setTitle(event.target.value);
-                clearError('title');
+                clearError("title");
               }}
-              placeholder={t('editor.modal.taskTitle.placeholder')}
+              placeholder={t("editor.modal.taskTitle.placeholder")}
               className="edit-task-modal__editable-control w-full rounded-2xl border px-4 py-3 text-sm ios-touch-input transition focus:outline-none"
             />
           </label>
-          {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
+          {errors.title && (
+            <p className="text-xs text-rose-300">{errors.title}</p>
+          )}
         </div>
 
         <div className="space-y-2">
           <label className="flex flex-col gap-2">
-            <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">{t('editor.field.difficulty')}</span>
+            <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">
+              {t("editor.field.difficulty")}
+            </span>
             <select
               value={difficultyId}
               onChange={(event) => setDifficultyId(event.target.value)}
               className="edit-task-modal__editable-control w-full appearance-none rounded-2xl border px-4 py-3 text-sm ios-touch-input transition focus:outline-none disabled:cursor-not-allowed"
               disabled={isLoadingDifficulties}
             >
-              <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
-                {t('editor.modal.edit.noDifficultyAssigned')}
+              <option
+                value=""
+                className="bg-slate-900 text-[color:var(--color-slate-100)]"
+              >
+                {t("editor.modal.edit.noDifficultyAssigned")}
               </option>
               {sortedDifficulties.map((difficulty) => (
-                <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                <option
+                  key={difficulty.id}
+                  value={difficulty.id}
+                  className="bg-slate-900 text-[color:var(--color-slate-100)]"
+                >
                   {localizeDifficultyLabel(difficulty.name, language)}
                 </option>
               ))}
             </select>
           </label>
           {isLoadingDifficulties && (
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.loading.difficulties')}</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
+              {t("editor.loading.difficulties")}
+            </p>
           )}
           {difficultiesError && (
             <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
-              <p>{t('editor.error.difficulties.load')}</p>
+              <p>{t("editor.error.difficulties.load")}</p>
               <button
                 type="button"
                 onClick={reloadDifficulties}
                 className="font-semibold text-rose-200 underline decoration-dotted"
               >
-                {t('editor.button.retry')}
+                {t("editor.button.retry")}
               </button>
             </div>
           )}
         </div>
 
         <div className="space-y-2">
-          <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">{t('editor.field.status')}</span>
+          <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">
+            {t("editor.field.status")}
+          </span>
           <label className="flex items-center gap-3">
             <input
               type="checkbox"
@@ -2212,7 +2628,11 @@ function EditTaskModal({
               onChange={(event) => setIsActive(event.target.checked)}
               className="edit-task-modal__status-checkbox h-4 w-4 rounded"
             />
-            <span className="edit-task-modal__status-label text-sm">{isActive ? t('editor.task.status.active') : t('editor.task.status.inactive')}</span>
+            <span className="edit-task-modal__status-label text-sm">
+              {isActive
+                ? t("editor.task.status.active")
+                : t("editor.task.status.inactive")}
+            </span>
           </label>
         </div>
       </section>
@@ -2220,7 +2640,9 @@ function EditTaskModal({
       {errors.user && <p className="text-xs text-rose-300">{errors.user}</p>}
       {errors.task && <p className="text-xs text-rose-300">{errors.task}</p>}
 
-      {toast && <ToastBanner tone={toast.type} message={toast.text} className="px-3" />}
+      {toast && (
+        <ToastBanner tone={toast.type} message={toast.text} className="px-3" />
+      )}
 
       <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
         <button
@@ -2228,30 +2650,35 @@ function EditTaskModal({
           onClick={handleClose}
           className="edit-task-modal__button-secondary inline-flex items-center justify-center rounded-full border px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition"
         >
-          {t('editor.button.cancel')}
+          {t("editor.button.cancel")}
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
           className="edit-task-modal__button-primary inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? t('editor.button.saving') : t('editor.button.saveChanges')}
+          {isSubmitting
+            ? t("editor.button.saving")
+            : t("editor.button.saveChanges")}
         </button>
       </div>
     </div>
   );
 
-  if (variant === 'panel') {
+  if (variant === "panel") {
     return (
       <div className="fixed inset-0 z-[60] flex">
         <button
           type="button"
-          aria-label={t('editor.button.close')}
+          aria-label={t("editor.button.close")}
           onClick={handleClose}
           className="flex-1 bg-slate-950/60 backdrop-blur-sm"
         />
         <aside className="flex h-full w-full max-w-xl flex-col border-l border-[color:var(--color-border-subtle)] bg-slate-950/95 text-[color:var(--color-slate-100)] shadow-[0_18px_40px_rgba(15,23,42,0.65)]">
-          <form onSubmit={handleSubmit} className="flex h-full flex-col overflow-hidden">
+          <form
+            onSubmit={handleSubmit}
+            className="flex h-full flex-col overflow-hidden"
+          >
             <div className="flex items-center justify-between gap-3 border-b border-[color:var(--color-border-subtle)] px-6 py-4">
               {showNavigation ? (
                 <div className="flex items-center gap-2">
@@ -2261,7 +2688,7 @@ function EditTaskModal({
                     disabled={!previousTask}
                     className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    {t('editor.button.previous')}
+                    {t("editor.button.previous")}
                   </button>
                   <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-400)]">
                     {navigationLabel}
@@ -2272,18 +2699,20 @@ function EditTaskModal({
                     disabled={!nextTask}
                     className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    {t('editor.button.next')}
+                    {t("editor.button.next")}
                   </button>
                 </div>
               ) : (
-                <p className="text-sm font-semibold text-[color:var(--color-slate-200)]">{t('editor.modal.edit.panelTitle')}</p>
+                <p className="text-sm font-semibold text-[color:var(--color-slate-200)]">
+                  {t("editor.modal.edit.panelTitle")}
+                </p>
               )}
               <button
                 type="button"
                 onClick={handleClose}
                 className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white"
               >
-                {t('editor.button.close')}
+                {t("editor.button.close")}
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-6">{formBody}</div>
@@ -2297,7 +2726,7 @@ function EditTaskModal({
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
       <button
         type="button"
-        aria-label={t('editor.button.close')}
+        aria-label={t("editor.button.close")}
         onClick={handleClose}
         className="absolute inset-0 h-full w-full"
       />
@@ -2328,37 +2757,6 @@ function ReadOnlyField({ label, value }: { label: string; value: string }) {
   );
 }
 
-function GuideLabModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  if (!isOpen) {
-    return null;
-  }
-
-  return (
-    <div className="fixed inset-0 z-[75] flex items-end justify-center bg-slate-950/75 backdrop-blur-sm md:items-center">
-      <button type="button" aria-label="Cerrar guía" onClick={onClose} className="absolute inset-0 h-full w-full" />
-      <section className="relative z-10 w-full max-w-lg rounded-t-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] p-5 md:rounded-3xl">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">Guía (Labs)</p>
-        <h2 className="mt-1 text-lg font-semibold text-white">Próxima iteración de la guía</h2>
-        <p className="mt-2 text-sm text-[color:var(--color-slate-300)]">
-          Este espacio ya está preparado para sumar la guía completa. En la próxima iteración vamos a incluir pasos, ejemplos y atajos por pilar.
-        </p>
-        <ul className="mt-4 space-y-2 text-sm text-[color:var(--color-slate-300)]">
-          <li>• Contexto rápido del Editor Lab</li>
-          <li>• Recomendaciones para elegir tareas</li>
-          <li>• Buenas prácticas para ajustar dificultad</li>
-        </ul>
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-5 inline-flex rounded-full border border-white/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-100)]"
-        >
-          Cerrar
-        </button>
-      </section>
-    </div>
-  );
-}
-
 function SuggestionsLabModal({
   isOpen,
   isApplying,
@@ -2373,9 +2771,15 @@ function SuggestionsLabModal({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const grouped = useMemo(() => {
     return {
-      Body: EDITOR_LAB_QUICK_START_SEED.filter((task) => task.pillar === 'Body'),
-      Mind: EDITOR_LAB_QUICK_START_SEED.filter((task) => task.pillar === 'Mind'),
-      Soul: EDITOR_LAB_QUICK_START_SEED.filter((task) => task.pillar === 'Soul'),
+      Body: EDITOR_LAB_QUICK_START_SEED.filter(
+        (task) => task.pillar === "Body",
+      ),
+      Mind: EDITOR_LAB_QUICK_START_SEED.filter(
+        (task) => task.pillar === "Mind",
+      ),
+      Soul: EDITOR_LAB_QUICK_START_SEED.filter(
+        (task) => task.pillar === "Soul",
+      ),
     };
   }, []);
 
@@ -2391,24 +2795,50 @@ function SuggestionsLabModal({
 
   return (
     <div className="fixed inset-0 z-[75] flex items-end justify-center bg-slate-950/75 backdrop-blur-sm md:items-center">
-      <button type="button" aria-label="Cerrar sugerencias" onClick={onClose} className="absolute inset-0 h-full w-full" />
+      <button
+        type="button"
+        aria-label="Cerrar sugerencias"
+        onClick={onClose}
+        className="absolute inset-0 h-full w-full"
+      />
       <section className="relative z-10 w-full max-w-2xl rounded-t-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] p-4 md:rounded-3xl md:p-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-200/80">Sugerencias</p>
-        <h2 className="mt-1 text-lg font-semibold text-white">Elegí tareas base para sumar al editor</h2>
-        <p className="mt-2 text-sm text-[color:var(--color-slate-300)]">Selección inicial basada en el Quick Start por pilar.</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-200/80">
+          Sugerencias
+        </p>
+        <h2 className="mt-1 text-lg font-semibold text-white">
+          Elegí tareas base para sumar al editor
+        </h2>
+        <p className="mt-2 text-sm text-[color:var(--color-slate-300)]">
+          Selección inicial basada en el Quick Start por pilar.
+        </p>
         <div className="mt-4 max-h-[58vh] space-y-4 overflow-y-auto pr-1">
-          {(Object.entries(grouped) as Array<[keyof typeof grouped, typeof EDITOR_LAB_QUICK_START_SEED]>).map(([pillar, tasks]) => (
+          {(
+            Object.entries(grouped) as Array<
+              [keyof typeof grouped, typeof EDITOR_LAB_QUICK_START_SEED]
+            >
+          ).map(([pillar, tasks]) => (
             <div key={pillar} className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-slate-400)]">{pillar}</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-slate-400)]">
+                {pillar}
+              </h3>
               <div className="space-y-2">
                 {tasks.map((task) => {
                   const checked = selectedIds.includes(task.id);
                   return (
-                    <label key={task.id} className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-3 py-2 ${checked ? 'border-violet-300/50 bg-violet-500/10' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]'}`}>
+                    <label
+                      key={task.id}
+                      className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-3 py-2 ${checked ? "border-violet-300/50 bg-violet-500/10" : "border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]"}`}
+                    >
                       <input
                         type="checkbox"
                         checked={checked}
-                        onChange={() => setSelectedIds((current) => current.includes(task.id) ? current.filter((id) => id !== task.id) : [...current, task.id])}
+                        onChange={() =>
+                          setSelectedIds((current) =>
+                            current.includes(task.id)
+                              ? current.filter((id) => id !== task.id)
+                              : [...current, task.id],
+                          )
+                        }
                         className="mt-1 h-4 w-4 rounded border-white/30 bg-transparent text-violet-400"
                       />
                       <span className="flex-1 text-sm text-[color:var(--color-slate-100)]">
@@ -2425,14 +2855,16 @@ function SuggestionsLabModal({
           ))}
         </div>
         <div className="mt-5 flex items-center justify-between gap-3">
-          <p className="text-xs text-[color:var(--color-slate-400)]">{selectedIds.length} seleccionada(s)</p>
+          <p className="text-xs text-[color:var(--color-slate-400)]">
+            {selectedIds.length} seleccionada(s)
+          </p>
           <button
             type="button"
             disabled={selectedIds.length === 0 || isApplying}
             onClick={() => onApply(selectedIds)}
             className="inline-flex rounded-full bg-violet-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isApplying ? 'Agregando…' : 'Agregar a mi sistema'}
+            {isApplying ? "Agregando…" : "Agregar a mi sistema"}
           </button>
         </div>
       </section>
