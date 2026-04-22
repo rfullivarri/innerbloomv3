@@ -397,15 +397,26 @@ export default function EditorLabPage() {
 
   const handleGuideStepChange = useCallback((stepId: EditorGuideStepId) => {
     setActiveGuideStepId(stepId);
+    setTaskToEdit(null);
+    setShowSuggestionsModal(false);
 
-    const modalSteps = new Set<EditorGuideStepId>([
-      "modal-entry",
-      "modal-input",
-      "modal-difficulty",
-      "modal-ai-thinking",
-    ]);
-
-    setShowCreateModal(modalSteps.has(stepId));
+    switch (stepId) {
+      case "modal-entry":
+      case "modal-input":
+      case "modal-difficulty":
+      case "modal-ai-thinking":
+        setShowCreateModal(true);
+        break;
+      case "filters":
+      case "task-list":
+      case "suggestions":
+      case "wheel-core":
+      case "wheel-pillars":
+      case "wheel-traits":
+      default:
+        setShowCreateModal(false);
+        break;
+    }
   }, []);
 
   const handleDeleteModalClose = useCallback(() => {
@@ -2566,15 +2577,15 @@ function CreateTaskModal({
                 </p>
                 <div className="flex items-center justify-center gap-2 text-base">
                   <span className="create-task-ai-modal__result-pill rounded-full border px-4 py-1.5 font-semibold">
-                    {suggestion.pillarLabel}
+                    {visibleSuggestion.pillarLabel}
                   </span>
                   <span className="create-task-ai-modal__hint">/</span>
                   <span className="create-task-ai-modal__result-pill rounded-full border px-4 py-1.5 font-semibold">
-                    {suggestion.traitLabel}
+                    {visibleSuggestion.traitLabel}
                   </span>
                 </div>
                 <p className="create-task-ai-modal__hint text-center text-sm">
-                  {suggestion.rationale}
+                  {visibleSuggestion.rationale}
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-4 pt-1">
                   <button

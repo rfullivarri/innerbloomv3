@@ -159,10 +159,10 @@ export function EditorGuideWheel({
   const size = 332;
   const center = size / 2;
   const ringSize = 206;
-  const traitRingSize = 244;
+  const traitRingSize = 228;
   const pillarLabelRadius = 68;
-  const traitTickRadius = 110;
-  const traitLabelRadius = 126;
+  const traitTickRadius = 96;
+  const traitLabelRadius = 108;
 
   return (
     <div className="relative mx-auto h-[21.5rem] w-full max-w-[22.5rem] overflow-visible">
@@ -210,7 +210,7 @@ export function EditorGuideWheel({
             }}
           >
             <div
-              className="inline-flex min-w-[70px] max-w-[76px] items-center justify-center gap-1 rounded-full bg-black/20 px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.1em] backdrop-blur-[1px]"
+              className="inline-flex min-w-[58px] max-w-[64px] items-center justify-center gap-1 rounded-full border border-white/10 bg-black/[0.12] px-1.5 py-0.5 text-[7px] font-medium uppercase tracking-[0.06em] backdrop-blur-[1px]"
               style={{ color: PILLAR_META[pillar].text, textShadow: `0 0 14px ${PILLAR_META[pillar].glow}` }}
             >
               <span className="text-[13px] leading-none">{PILLAR_META[pillar].icon}</span>

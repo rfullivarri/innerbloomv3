@@ -45,8 +45,8 @@ const EDITOR_GUIDE_STEPS_BY_LOCALE: Record<"es" | "en", EditorGuideStep[]> = {
     {
       id: "modal-input",
       title: "Descripción / input",
-      copy: "Acá definís el contexto de la tarea. Luego elegís dificultad para calibrar el esfuerzo.",
-      targetSelector: '[data-editor-guide-target="new-task-modal-difficulty"]',
+      copy: "Acá escribís la tarea y el contexto para que la clasificación tenga sentido.",
+      targetSelector: '[data-editor-guide-target="new-task-modal-input"]',
       panelPlacement: "top",
     },
     {
@@ -59,7 +59,7 @@ const EDITOR_GUIDE_STEPS_BY_LOCALE: Record<"es" | "en", EditorGuideStep[]> = {
     {
       id: "modal-ai-thinking",
       title: "Sugerencia IA",
-      copy: "Con un click, la IA analiza la tarea y sugiere automáticamente pilar + rasgo.",
+      copy: "Tocás la acción de IA, la guía muestra el análisis y ves la sugerencia automática de pilar + rasgo en este mismo paso.",
       targetSelector: '[data-editor-guide-target="new-task-modal-dialog"]',
       panelPlacement: "top",
     },
@@ -111,8 +111,8 @@ const EDITOR_GUIDE_STEPS_BY_LOCALE: Record<"es" | "en", EditorGuideStep[]> = {
     {
       id: "modal-input",
       title: "Description / input",
-      copy: "Set the task context first, then define difficulty to size the effort.",
-      targetSelector: '[data-editor-guide-target="new-task-modal-difficulty"]',
+      copy: "Write the task context here so the classification has clear intent.",
+      targetSelector: '[data-editor-guide-target="new-task-modal-input"]',
       panelPlacement: "top",
     },
     {
@@ -125,7 +125,7 @@ const EDITOR_GUIDE_STEPS_BY_LOCALE: Record<"es" | "en", EditorGuideStep[]> = {
     {
       id: "modal-ai-thinking",
       title: "AI suggestion",
-      copy: "With one action, AI analyzes the task and suggests pillar + trait automatically.",
+      copy: "Tap the AI action, see the analysis state, and review the automatic pillar + trait suggestion in this same step.",
       targetSelector: '[data-editor-guide-target="new-task-modal-dialog"]',
       panelPlacement: "top",
     },
