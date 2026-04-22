@@ -87,7 +87,6 @@ const TRAITS_BY_PILLAR: Record<Locale, Record<PillarKey, string[]>> = {
 const PILLAR_META: Record<
   PillarKey,
   {
-    icon: string;
     label: Record<Locale, string>;
     glow: string;
     segment: string;
@@ -96,23 +95,20 @@ const PILLAR_META: Record<
   }
 > = {
   Soul: {
-    icon: "🏵️",
     label: { es: "Alma", en: "Soul" },
-    glow: "rgba(245, 192, 72, 0.52)",
-    segment: "rgba(245, 192, 72, 0.56)",
+    glow: "rgba(245, 198, 79, 0.5)",
+    segment: "rgba(245, 198, 79, 0.56)",
     text: "rgba(255, 236, 170, 0.98)",
-    line: "rgba(245, 192, 72, 0.78)",
+    line: "rgba(245, 198, 79, 0.78)",
   },
   Body: {
-    icon: "🫀",
     label: { es: "Cuerpo", en: "Body" },
-    glow: "rgba(89, 224, 236, 0.45)",
-    segment: "rgba(89, 224, 236, 0.55)",
+    glow: "rgba(88, 219, 255, 0.45)",
+    segment: "rgba(88, 219, 255, 0.55)",
     text: "rgba(224, 252, 255, 0.95)",
-    line: "rgba(89, 224, 236, 0.74)",
+    line: "rgba(88, 219, 255, 0.74)",
   },
   Mind: {
-    icon: "🧠",
     label: { es: "Mente", en: "Mind" },
     glow: "rgba(184, 141, 255, 0.45)",
     segment: "rgba(184, 141, 255, 0.54)",
@@ -160,7 +156,7 @@ export function EditorGuideWheel({
   const center = size / 2;
   const ringSize = 190;
   const traitRingSize = 256;
-  const pillarLabelRadius = 61;
+  const pillarLabelRadius = 52;
   const traitTickRadius = 116;
   const traitLabelRadius = 129;
 
@@ -203,19 +199,18 @@ export function EditorGuideWheel({
         return (
           <div
             key={pillar}
-            className="pointer-events-none absolute left-1/2 top-1/2 transition-all duration-700"
+            className="pointer-events-none absolute left-1/2 top-1/2 w-[68px] -translate-x-1/2 -translate-y-1/2 text-center transition-all duration-700"
             style={{
-              transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px)) scale(${level >= 2 ? 1 : 0.75})`,
+              transform: `translate(${position.x}px, ${position.y}px) scale(${level >= 2 ? 1 : 0.75})`,
               opacity: level >= 2 ? 1 : 0,
             }}
           >
-            <div
-              className="inline-flex min-w-[58px] max-w-[64px] items-center justify-center gap-1 rounded-full border border-white/10 bg-black/[0.12] px-1.5 py-0.5 text-[7px] font-medium uppercase tracking-[0.06em] backdrop-blur-[1px]"
-              style={{ color: PILLAR_META[pillar].text, textShadow: `0 0 14px ${PILLAR_META[pillar].glow}` }}
+            <span
+              className="block text-[10px] font-semibold uppercase tracking-[0.06em]"
+              style={{ color: PILLAR_META[pillar].text, textShadow: `0 0 12px ${PILLAR_META[pillar].glow}` }}
             >
-              <span className="text-[13px] leading-none">{PILLAR_META[pillar].icon}</span>
-              <span>{PILLAR_META[pillar].label[locale]}</span>
-            </div>
+              {PILLAR_META[pillar].label[locale]}
+            </span>
           </div>
         );
       })}
