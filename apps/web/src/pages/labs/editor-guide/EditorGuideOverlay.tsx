@@ -38,6 +38,7 @@ export function EditorGuideOverlay({
 
   const step = EDITOR_GUIDE_STEPS[stepIndex];
   const isWheelStep = step.id.startsWith("wheel");
+  const panelPlacement = step.panelPlacement ?? (isWheelStep ? "center" : "bottom");
 
   useEffect(() => {
     if (!isOpen) {
@@ -109,7 +110,7 @@ export function EditorGuideOverlay({
 
   return (
     <div
-      className="fixed inset-0 z-[90]"
+      className="editor-guide-overlay fixed inset-0 z-[90]"
       role="dialog"
       aria-modal="true"
       aria-label="Guía del editor"
@@ -117,15 +118,15 @@ export function EditorGuideOverlay({
       {frame && !isWheelStep ? (
         <>
           <div
-            className="absolute left-0 right-0 top-0 bg-slate-950/76 backdrop-blur-[1px] transition-all duration-500"
+            className="absolute left-0 right-0 top-0 bg-slate-950/82 backdrop-blur-[5px] transition-all duration-500"
             style={{ height: frame.top }}
           />
           <div
-            className="absolute left-0 bg-slate-950/76 transition-all duration-500"
+            className="absolute left-0 bg-slate-950/82 backdrop-blur-[5px] transition-all duration-500"
             style={{ top: frame.top, width: frame.left, height: frame.height }}
           />
           <div
-            className="absolute right-0 bg-slate-950/76 transition-all duration-500"
+            className="absolute right-0 bg-slate-950/82 backdrop-blur-[5px] transition-all duration-500"
             style={{
               top: frame.top,
               left: frame.left + frame.width,
@@ -133,11 +134,11 @@ export function EditorGuideOverlay({
             }}
           />
           <div
-            className="absolute left-0 right-0 bg-slate-950/76 transition-all duration-500"
+            className="absolute left-0 right-0 bg-slate-950/82 backdrop-blur-[5px] transition-all duration-500"
             style={{ top: frame.top + frame.height, bottom: 0 }}
           />
           <div
-            className="pointer-events-none absolute rounded-2xl border border-violet-300/70 shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_0_42px_rgba(139,92,246,0.4)] transition-all duration-500"
+            className="pointer-events-none absolute rounded-2xl border border-violet-200/65 shadow-[0_0_0_1px_rgba(255,255,255,0.26),0_0_0_9999px_rgba(2,6,23,0.18),0_0_46px_rgba(139,92,246,0.38)] transition-all duration-500"
             style={{
               top: frame.top,
               left: frame.left,
@@ -147,10 +148,18 @@ export function EditorGuideOverlay({
           />
         </>
       ) : (
-        <div className="absolute inset-0 bg-slate-950/78 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-slate-950/82 backdrop-blur-[5px]" />
       )}
 
-      <section className="absolute inset-x-3 bottom-4 mx-auto flex w-full max-w-xl flex-col rounded-3xl border border-white/15 bg-[color:var(--color-slate-900-95)] px-5 py-4 text-white shadow-[0_20px_55px_rgba(15,23,42,0.6)] md:inset-x-0 md:bottom-6">
+      <section
+        className={`editor-guide-panel absolute inset-x-3 mx-auto flex w-full max-w-xl flex-col rounded-3xl border border-white/15 bg-[color:var(--color-slate-900-95)] px-5 py-4 text-white shadow-[0_20px_55px_rgba(15,23,42,0.6)] md:inset-x-0 ${
+          panelPlacement === "top"
+            ? "top-3 md:top-6"
+            : panelPlacement === "center"
+              ? "top-1/2 -translate-y-1/2"
+              : "bottom-4 md:bottom-6"
+        }`}
+      >
         {isWheelStep && (
           <div className="mb-3 rounded-2xl border border-white/10 bg-white/[0.02] px-2 py-3">
             <EditorGuideWheel stepId={step.id} />

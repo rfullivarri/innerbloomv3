@@ -951,57 +951,60 @@ function TaskFilters({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="hidden items-center gap-2 md:flex">
+      <div className="hidden items-center justify-end gap-2 md:flex">
         <button
           type="button"
           onClick={onOpenGuide}
-          className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white"
+          aria-label="Abrir guía"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[linear-gradient(170deg,rgba(255,255,255,0.12),rgba(148,163,184,0.02))] text-[color:var(--color-slate-100)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_8px_18px_rgba(15,23,42,0.24)] transition hover:border-violet-200/40 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-200/60"
         >
-          Guía
+          <GuideCompassIcon className="h-3.5 w-3.5" />
         </button>
         <button
           type="button"
           onClick={onOpenSuggestions}
+          aria-label="Abrir sugerencias"
           data-editor-guide-target="suggestions"
-          className="inline-flex items-center justify-center rounded-full border border-violet-400/35 bg-violet-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-violet-100 transition hover:bg-violet-500/20"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-violet-300/40 bg-[linear-gradient(170deg,rgba(167,139,250,0.26),rgba(129,140,248,0.08))] text-violet-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_10px_18px_rgba(76,29,149,0.3)] transition hover:border-violet-200/70 hover:bg-violet-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-200/65"
         >
-          Sugerencias
+          <SuggestionsMagicIcon className="h-3.5 w-3.5" />
         </button>
       </div>
       <div className="md:hidden">
         <div className="editor-filters-mobile-panel sticky -mx-4 -mt-5 top-[4.5rem] z-30 space-y-3 rounded-t-2xl px-4 pt-5 pb-3 bg-[color:var(--color-slate-900-95)]">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onOpenGuide}
-              className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white"
+              aria-label="Abrir guía"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[linear-gradient(170deg,rgba(255,255,255,0.12),rgba(148,163,184,0.02))] text-[color:var(--color-slate-100)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_8px_18px_rgba(15,23,42,0.24)] transition hover:border-violet-200/40 hover:text-white"
             >
-              Guía
+              <GuideCompassIcon className="h-3.5 w-3.5" />
             </button>
             <button
               type="button"
               onClick={onOpenSuggestions}
+              aria-label="Abrir sugerencias"
               data-editor-guide-target="suggestions"
-              className="inline-flex items-center justify-center rounded-full border border-violet-400/35 bg-violet-500/10 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-100 transition hover:bg-violet-500/20"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-violet-300/40 bg-[linear-gradient(170deg,rgba(167,139,250,0.26),rgba(129,140,248,0.08))] text-violet-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_10px_18px_rgba(76,29,149,0.3)] transition hover:border-violet-200/70 hover:bg-violet-500/20"
             >
-              Sugerencias
+              <SuggestionsMagicIcon className="h-3.5 w-3.5" />
             </button>
           </div>
-          <label className="flex flex-col gap-1">
-            <input
-              type="search"
-              data-editor-guide-target="search"
-              value={searchTerm}
-              onChange={(event) => onSearchChange(event.target.value)}
-              placeholder={t("editor.filters.search.placeholder")}
-              className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
-            />
-          </label>
-          <div className="space-y-2">
-            <div
-              data-editor-guide-target="pillars"
-              className="flex gap-2 overflow-x-auto pb-1 [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]"
-            >
+          <div
+            data-editor-guide-target="search-pillar-zone"
+            className="space-y-2 rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.48),rgba(30,41,59,0.28))] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+          >
+            <label className="flex flex-col gap-1">
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={(event) => onSearchChange(event.target.value)}
+                placeholder={t("editor.filters.search.placeholder")}
+                className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
+              />
+            </label>
+            <div className="flex gap-2 overflow-x-auto pb-1 [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
               {pillars.map((pillar) => {
                 const isActive = pillar.value === selectedPillar;
                 return (
@@ -1035,7 +1038,10 @@ function TaskFilters({
           </button>
         )}
       </div>
-      <div className="hidden flex-col gap-3 md:flex md:flex-row md:items-end">
+      <div
+        data-editor-guide-target="search-pillar-zone"
+        className="hidden flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3 md:flex md:flex-row md:items-end"
+      >
         <label className="flex w-full flex-col gap-2">
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
             {t("editor.filters.search.label")}
@@ -1043,7 +1049,6 @@ function TaskFilters({
           <div className="relative flex items-center">
             <input
               type="search"
-              data-editor-guide-target="search"
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder={t("editor.filters.search.placeholder")}
@@ -1056,7 +1061,6 @@ function TaskFilters({
             {t("editor.filters.pillar.label")}
           </span>
           <select
-            data-editor-guide-target="pillars"
             value={selectedPillar}
             onChange={(event) => onPillarChange(event.target.value)}
             className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
@@ -2819,23 +2823,35 @@ function SuggestionsLabModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[75] flex items-end justify-center bg-slate-950/75 backdrop-blur-sm md:items-center">
+    <div className="editor-suggestions-overlay fixed inset-0 z-[75] flex items-end justify-center bg-slate-950/80 backdrop-blur-md md:items-center">
       <button
         type="button"
         aria-label="Cerrar sugerencias"
         onClick={onClose}
         className="absolute inset-0 h-full w-full"
       />
-      <section className="relative z-10 w-full max-w-2xl rounded-t-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] p-4 md:rounded-3xl md:p-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-200/80">
-          Sugerencias
-        </p>
-        <h2 className="mt-2 text-lg font-semibold text-white md:text-xl">
-          Sumá tareas base a tu sistema
-        </h2>
-        <p className="mt-2 max-w-xl text-sm leading-relaxed text-[color:var(--color-slate-300)]">
-          Elegí múltiples tareas del Quick Start por pilar para incorporarlas directamente a tu editor.
-        </p>
+      <section className="editor-suggestions-modal relative z-10 w-full max-w-3xl rounded-t-3xl border border-[color:var(--color-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.95),rgba(15,23,42,0.92))] p-4 shadow-[0_28px_80px_rgba(2,6,23,0.5)] md:rounded-3xl md:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-200/85">
+              Sugerencias
+            </p>
+            <h2 className="mt-2 text-lg font-semibold text-white md:text-xl">
+              Activá tareas recomendadas
+            </h2>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-[color:var(--color-slate-300)]">
+              Seleccioná varias sugerencias por pilar y agregalas en lote a tu sistema.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar sugerencias"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-[color:var(--color-slate-200)] transition hover:border-white/35 hover:text-white"
+          >
+            <CloseTinyIcon className="h-4 w-4" />
+          </button>
+        </div>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2">
           <p className="text-xs text-[color:var(--color-slate-300)]">
             {selectedCount} de {totalAvailableSuggestions} seleccionadas
@@ -2856,7 +2872,7 @@ function SuggestionsLabModal({
             </button>
           </div>
         </div>
-        <div className="mt-4 max-h-[58vh] space-y-5 overflow-y-auto pr-1">
+        <div className="mt-4 max-h-[58vh] space-y-5 overflow-y-auto pr-1 pb-24 md:pb-20">
           {(
             Object.entries(grouped) as Array<
               [keyof typeof grouped, typeof EDITOR_LAB_QUICK_START_SEED]
@@ -2874,42 +2890,44 @@ function SuggestionsLabModal({
                   / {tasks.length}
                 </p>
               </div>
-              <div className="space-y-2">
+              <div className="grid gap-2 sm:grid-cols-2">
                 {tasks.map((task) => {
                   const checked = selectedSet.has(task.id);
                   return (
-                    <label
+                    <button
                       key={task.id}
-                      className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-3 py-2.5 transition ${checked ? "border-violet-300/60 bg-violet-500/15 shadow-[0_10px_24px_rgba(139,92,246,0.2)]" : "border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-white/25"}`}
+                      type="button"
+                      onClick={() =>
+                        setSelectedIds((current) =>
+                          current.includes(task.id)
+                            ? current.filter((id) => id !== task.id)
+                            : [...current, task.id],
+                        )
+                      }
+                      aria-pressed={checked}
+                      className={`group flex items-start gap-3 rounded-2xl border px-3 py-3 text-left transition ${checked ? "border-violet-300/60 bg-[linear-gradient(155deg,rgba(167,139,250,0.25),rgba(129,140,248,0.12))] shadow-[0_10px_24px_rgba(139,92,246,0.24)]" : "border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-white/25"}`}
                     >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() =>
-                          setSelectedIds((current) =>
-                            current.includes(task.id)
-                              ? current.filter((id) => id !== task.id)
-                              : [...current, task.id],
-                          )
-                        }
-                        className="mt-1 h-4 w-4 rounded border-white/30 bg-transparent text-violet-400"
-                      />
+                      <span
+                        className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] transition ${checked ? "border-violet-100 bg-violet-200/90 text-violet-700" : "border-white/25 text-transparent group-hover:border-white/40"}`}
+                      >
+                        ✓
+                      </span>
                       <span className="flex-1">
                         <span className="block text-sm font-medium text-[color:var(--color-slate-100)]">
                           {task.title}
                         </span>
-                        <span className="mt-1 inline-flex rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.14em] text-[color:var(--color-slate-400)]">
+                        <span className="mt-1 inline-flex rounded-full border border-violet-200/20 bg-violet-400/10 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.14em] text-violet-100/85">
                           {task.trait}
                         </span>
                       </span>
-                    </label>
+                    </button>
                   );
                 })}
               </div>
             </div>
           ))}
         </div>
-        <div className="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
+        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 border-t border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.05),rgba(15,23,42,0.96)_24%)] px-4 py-4 backdrop-blur-md md:px-6">
           <p className="text-xs text-[color:var(--color-slate-400)]">
             {hasSelectedSuggestions
               ? `Listo para sumar ${selectedCount} tarea(s) a tu sistema.`
@@ -2930,6 +2948,44 @@ function SuggestionsLabModal({
         </div>
       </section>
     </div>
+  );
+}
+
+function GuideCompassIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.8" opacity="0.75" />
+      <path
+        d="M9.2 14.8 10.8 9.2 14.8 10.8 13.2 14.8 9.2 14.8Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path d="M10.8 9.2 14.8 10.8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function SuggestionsMagicIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
+      <path
+        d="M12 4.4 13.3 7.2 16.2 8.5 13.3 9.8 12 12.6 10.7 9.8 7.8 8.5 10.7 7.2 12 4.4Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path d="m18.2 13.3.7 1.5 1.5.7-1.5.7-.7 1.5-.7-1.5-1.5-.7 1.5-.7.7-1.5Z" fill="currentColor" />
+      <path d="m5.8 14.6.55 1.1 1.1.55-1.1.55-.55 1.1-.55-1.1-1.1-.55 1.1-.55.55-1.1Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function CloseTinyIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
+      <path d="m7 7 10 10M17 7 7 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
   );
 }
 
