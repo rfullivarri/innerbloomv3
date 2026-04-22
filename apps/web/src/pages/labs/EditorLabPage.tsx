@@ -823,6 +823,7 @@ export default function EditorLabPage() {
         />
         <EditorGuideOverlay
           isOpen={showGuideModal}
+          locale={language === "es" ? "es" : "en"}
           onClose={() => {
             markEditorGuideAsSeen();
             setShowGuideModal(false);
@@ -893,7 +894,7 @@ function TaskFilters({
   onOpenGuide,
   onOpenSuggestions,
 }: TaskFiltersProps) {
-  const { t } = usePostLoginLanguage();
+  const { t, language } = usePostLoginLanguage();
   if (!FEATURE_TASK_EDITOR_MOBILE_LIST_V1) {
     return (
       <div className="flex flex-col gap-3 md:flex-row md:items-end">
@@ -955,19 +956,19 @@ function TaskFilters({
         <button
           type="button"
           onClick={onOpenGuide}
-          aria-label="Abrir guía"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[linear-gradient(170deg,rgba(255,255,255,0.12),rgba(148,163,184,0.02))] text-[color:var(--color-slate-100)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_8px_18px_rgba(15,23,42,0.24)] transition hover:border-violet-200/40 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-200/60"
+          aria-label={language === "es" ? "Abrir guía" : "Open guide"}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[linear-gradient(170deg,rgba(255,255,255,0.12),rgba(148,163,184,0.02))] text-[color:var(--color-slate-100)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_8px_18px_rgba(15,23,42,0.24)] transition hover:border-violet-200/40 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-200/60"
         >
-          <GuideCompassIcon className="h-3.5 w-3.5" />
+          <GuideCompassIcon className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={onOpenSuggestions}
-          aria-label="Abrir sugerencias"
+          aria-label={language === "es" ? "Abrir sugerencias" : "Open suggestions"}
           data-editor-guide-target="suggestions"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-violet-300/40 bg-[linear-gradient(170deg,rgba(167,139,250,0.26),rgba(129,140,248,0.08))] text-violet-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_10px_18px_rgba(76,29,149,0.3)] transition hover:border-violet-200/70 hover:bg-violet-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-200/65"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-violet-300/40 bg-[linear-gradient(170deg,rgba(167,139,250,0.26),rgba(129,140,248,0.08))] text-violet-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_10px_18px_rgba(76,29,149,0.3)] transition hover:border-violet-200/70 hover:bg-violet-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-200/65"
         >
-          <SuggestionsMagicIcon className="h-3.5 w-3.5" />
+          <SuggestionsMagicIcon className="h-4 w-4" />
         </button>
       </div>
       <div className="md:hidden">
@@ -976,19 +977,19 @@ function TaskFilters({
             <button
               type="button"
               onClick={onOpenGuide}
-              aria-label="Abrir guía"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[linear-gradient(170deg,rgba(255,255,255,0.12),rgba(148,163,184,0.02))] text-[color:var(--color-slate-100)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_8px_18px_rgba(15,23,42,0.24)] transition hover:border-violet-200/40 hover:text-white"
+              aria-label={language === "es" ? "Abrir guía" : "Open guide"}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[linear-gradient(170deg,rgba(255,255,255,0.12),rgba(148,163,184,0.02))] text-[color:var(--color-slate-100)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_8px_18px_rgba(15,23,42,0.24)] transition hover:border-violet-200/40 hover:text-white"
             >
-              <GuideCompassIcon className="h-3.5 w-3.5" />
+              <GuideCompassIcon className="h-4 w-4" />
             </button>
             <button
               type="button"
               onClick={onOpenSuggestions}
-              aria-label="Abrir sugerencias"
+              aria-label={language === "es" ? "Abrir sugerencias" : "Open suggestions"}
               data-editor-guide-target="suggestions"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-violet-300/40 bg-[linear-gradient(170deg,rgba(167,139,250,0.26),rgba(129,140,248,0.08))] text-violet-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_10px_18px_rgba(76,29,149,0.3)] transition hover:border-violet-200/70 hover:bg-violet-500/20"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-violet-300/40 bg-[linear-gradient(170deg,rgba(167,139,250,0.26),rgba(129,140,248,0.08))] text-violet-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_10px_18px_rgba(76,29,149,0.3)] transition hover:border-violet-200/70 hover:bg-violet-500/20"
             >
-              <SuggestionsMagicIcon className="h-3.5 w-3.5" />
+              <SuggestionsMagicIcon className="h-4 w-4" />
             </button>
           </div>
           <div
