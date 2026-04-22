@@ -158,11 +158,11 @@ export function EditorGuideWheel({
 
   const size = 332;
   const center = size / 2;
-  const ringSize = 206;
-  const traitRingSize = 228;
-  const pillarLabelRadius = 68;
-  const traitTickRadius = 96;
-  const traitLabelRadius = 108;
+  const ringSize = 190;
+  const traitRingSize = 256;
+  const pillarLabelRadius = 61;
+  const traitTickRadius = 116;
+  const traitLabelRadius = 129;
 
   return (
     <div className="relative mx-auto h-[21.5rem] w-full max-w-[22.5rem] overflow-visible">

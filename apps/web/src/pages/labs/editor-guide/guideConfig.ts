@@ -3,8 +3,7 @@ export type EditorGuideStepId =
   | "wheel-pillars"
   | "wheel-traits"
   | "modal-entry"
-  | "modal-input"
-  | "modal-difficulty"
+  | "modal-core"
   | "modal-ai-thinking"
   | "filters"
   | "task-list"
@@ -38,29 +37,22 @@ const EDITOR_GUIDE_STEPS_BY_LOCALE: Record<"es" | "en", EditorGuideStep[]> = {
     {
       id: "modal-entry",
       title: "Nueva tarea",
-      copy: "Este modal concentra todo el flujo para crear una nueva tarea.",
-      targetSelector: '[data-editor-guide-target="new-task-modal-dialog"]',
+      copy: "Este chip flotante es el punto de entrada para iniciar una nueva tarea.",
+      targetSelector: '[data-editor-guide-target="new-task-trigger"]',
       panelPlacement: "top",
     },
     {
-      id: "modal-input",
-      title: "Descripción / input",
-      copy: "Acá escribís la tarea y el contexto para que la clasificación tenga sentido.",
-      targetSelector: '[data-editor-guide-target="new-task-modal-input"]',
-      panelPlacement: "top",
-    },
-    {
-      id: "modal-difficulty",
-      title: "Dificultad",
-      copy: "Seleccionás la dificultad esperada antes de pedir la sugerencia.",
-      targetSelector: '[data-editor-guide-target="new-task-modal-difficulty"]',
+      id: "modal-core",
+      title: "Descripción + dificultad",
+      copy: "Primero describís la tarea y definís la dificultad esperada para contextualizar la clasificación.",
+      targetSelector: '[data-editor-guide-target="new-task-modal-core"]',
       panelPlacement: "top",
     },
     {
       id: "modal-ai-thinking",
       title: "Sugerencia IA",
-      copy: "Tocás la acción de IA, la guía muestra el análisis y ves la sugerencia automática de pilar + rasgo en este mismo paso.",
-      targetSelector: '[data-editor-guide-target="new-task-modal-dialog"]',
+      copy: "Acá ves solo el flujo IA: generar categoría, análisis, resultado coherente pilar + rasgo y acciones secundarias.",
+      targetSelector: '[data-editor-guide-target="new-task-modal-ai-zone"]',
       panelPlacement: "top",
     },
     {
@@ -104,29 +96,22 @@ const EDITOR_GUIDE_STEPS_BY_LOCALE: Record<"es" | "en", EditorGuideStep[]> = {
     {
       id: "modal-entry",
       title: "New task",
-      copy: "This modal contains the full flow to create a new task.",
-      targetSelector: '[data-editor-guide-target="new-task-modal-dialog"]',
+      copy: "This floating chip is the entry point to start a new task.",
+      targetSelector: '[data-editor-guide-target="new-task-trigger"]',
       panelPlacement: "top",
     },
     {
-      id: "modal-input",
-      title: "Description / input",
-      copy: "Write the task context here so the classification has clear intent.",
-      targetSelector: '[data-editor-guide-target="new-task-modal-input"]',
-      panelPlacement: "top",
-    },
-    {
-      id: "modal-difficulty",
-      title: "Difficulty",
-      copy: "Choose the expected challenge before requesting the suggestion.",
-      targetSelector: '[data-editor-guide-target="new-task-modal-difficulty"]',
+      id: "modal-core",
+      title: "Description + difficulty",
+      copy: "First describe the task, then set the expected difficulty to frame the classification.",
+      targetSelector: '[data-editor-guide-target="new-task-modal-core"]',
       panelPlacement: "top",
     },
     {
       id: "modal-ai-thinking",
       title: "AI suggestion",
-      copy: "Tap the AI action, see the analysis state, and review the automatic pillar + trait suggestion in this same step.",
-      targetSelector: '[data-editor-guide-target="new-task-modal-dialog"]',
+      copy: "This zone shows the AI flow only: generate category, analysis state, coherent pillar + trait result, and secondary actions.",
+      targetSelector: '[data-editor-guide-target="new-task-modal-ai-zone"]',
       panelPlacement: "top",
     },
     {
