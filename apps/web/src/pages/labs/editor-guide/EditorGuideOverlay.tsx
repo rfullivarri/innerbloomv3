@@ -85,10 +85,17 @@ export function EditorGuideOverlay({
     update();
     window.addEventListener("resize", update);
     window.addEventListener("scroll", update, true);
+    const observer = new MutationObserver(update);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    });
 
     return () => {
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update, true);
+      observer.disconnect();
     };
   }, [isOpen, step]);
 
