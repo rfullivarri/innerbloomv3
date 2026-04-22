@@ -2393,6 +2393,7 @@ function CreateTaskModal({
       <div className="relative z-10 w-full max-w-2xl p-4">
         <form
           onSubmit={handleSubmit}
+          data-editor-guide-target="new-task-modal-dialog"
           className="create-task-modal__dialog max-h-[90vh] overflow-y-auto rounded-2xl border p-6"
           onClick={(event) => event.stopPropagation()}
         >
