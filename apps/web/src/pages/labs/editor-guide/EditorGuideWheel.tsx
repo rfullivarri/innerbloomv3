@@ -159,13 +159,13 @@ export function EditorGuideWheel({
   const size = 320;
   const center = size / 2;
   const ringSize = 196;
-  const traitRingSize = 252;
+  const traitRingSize = 272;
   const pillarLabelRadius = 72;
-  const traitTickRadius = 126;
-  const traitLabelRadius = 142;
+  const traitTickRadius = 129;
+  const traitLabelRadius = 147;
 
   return (
-    <div className="relative mx-auto h-[20.5rem] w-full max-w-[20.5rem] overflow-hidden">
+    <div className="relative mx-auto h-[20.5rem] w-full max-w-[21.75rem] overflow-visible">
       <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.19),transparent_72%)]" />
 
       <div
@@ -221,13 +221,12 @@ export function EditorGuideWheel({
       })}
 
       <div
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 transition-all duration-700"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-700"
         style={{
           width: `${traitRingSize}px`,
           height: `${traitRingSize}px`,
           background:
-            "repeating-conic-gradient(from -90deg, rgba(248,250,252,0.36) 0deg 0.9deg, rgba(148,163,184,0.06) 0.9deg 12deg)",
-          mask: "radial-gradient(circle, transparent 65%, black 66%, black 89%, transparent 90%)",
+            "radial-gradient(circle, transparent 62%, rgba(255,255,255,0.1) 63%, rgba(255,255,255,0.08) 64%, transparent 65%)",
           opacity: level >= 3 ? 1 : 0,
           transform: `translate(-50%, -50%) scale(${level >= 3 ? 1 : 0.86})`,
         }}

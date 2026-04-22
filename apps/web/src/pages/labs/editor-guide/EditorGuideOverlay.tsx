@@ -178,7 +178,7 @@ export function EditorGuideOverlay({
         }`}
       >
         {isWheelStep && (
-          <div className="mb-3 rounded-2xl border border-white/10 bg-white/[0.02] px-2 py-3">
+          <div className="mb-2 px-1 py-1">
             <EditorGuideWheel stepId={step.id} locale={locale} />
           </div>
         )}
