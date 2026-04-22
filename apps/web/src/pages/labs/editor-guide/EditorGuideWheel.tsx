@@ -4,6 +4,11 @@ type Locale = "es" | "en";
 type PillarKey = "Body" | "Mind" | "Soul";
 
 const PILLARS: PillarKey[] = ["Soul", "Mind", "Body"];
+const PILLAR_LABEL_ANGLES: Record<PillarKey, number> = {
+  Soul: 225,
+  Mind: 345,
+  Body: 105,
+};
 
 const TRAITS_BY_PILLAR: Record<Locale, Record<PillarKey, string[]>> = {
   es: {
@@ -192,8 +197,8 @@ export function EditorGuideWheel({
         }}
       />
 
-      {PILLARS.map((pillar, index) => {
-        const angle = -90 + index * 120 + 60;
+      {PILLARS.map((pillar) => {
+        const angle = PILLAR_LABEL_ANGLES[pillar];
         const position = polarToCartesian(angle, pillarLabelRadius);
 
         return (
@@ -207,7 +212,10 @@ export function EditorGuideWheel({
           >
             <span
               className="block text-[10px] font-semibold uppercase tracking-[0.06em]"
-              style={{ color: PILLAR_META[pillar].text, textShadow: `0 0 12px ${PILLAR_META[pillar].glow}` }}
+              style={{
+                color: PILLAR_META[pillar].text,
+                textShadow: `0 0 12px ${PILLAR_META[pillar].glow}`,
+              }}
             >
               {PILLAR_META[pillar].label[locale]}
             </span>
