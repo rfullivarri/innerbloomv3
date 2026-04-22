@@ -987,9 +987,11 @@ function TaskFilters({
           type="button"
           onClick={onOpenGuide}
           aria-label={language === "es" ? "Abrir guía" : "Open guide"}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[linear-gradient(170deg,rgba(255,255,255,0.12),rgba(148,163,184,0.02))] text-[color:var(--color-slate-100)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_8px_18px_rgba(15,23,42,0.24)] transition hover:border-violet-200/40 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-200/60"
+          title={language === "es" ? "Ver guía" : "View guide"}
+          className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/55 bg-violet-100/95 px-2.5 py-1 text-xs font-semibold text-violet-700 shadow-[0_4px_12px_rgba(124,58,237,0.16)] transition hover:border-violet-500/60 hover:bg-violet-200/90 hover:text-violet-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 disabled:cursor-not-allowed disabled:opacity-45 dark:border-violet-300/55 dark:bg-violet-500/35 dark:text-violet-50 dark:shadow-[0_6px_18px_rgba(124,58,237,0.35)] dark:hover:border-violet-200/80 dark:hover:bg-violet-500/45 dark:hover:text-white dark:focus-visible:outline-violet-200"
         >
-          <GuideCompassIcon className="h-[18px] w-[18px]" />
+          <GuideCompassIcon className="h-3.5 w-3.5" />
+          <span>{language === "es" ? "Ver guía" : "View guide"}</span>
         </button>
         <button
           type="button"
@@ -1008,9 +1010,11 @@ function TaskFilters({
               type="button"
               onClick={onOpenGuide}
               aria-label={language === "es" ? "Abrir guía" : "Open guide"}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[linear-gradient(170deg,rgba(255,255,255,0.12),rgba(148,163,184,0.02))] text-[color:var(--color-slate-100)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_8px_18px_rgba(15,23,42,0.24)] transition hover:border-violet-200/40 hover:text-white"
+              title={language === "es" ? "Ver guía" : "View guide"}
+              className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/55 bg-violet-100/95 px-2.5 py-1 text-xs font-semibold text-violet-700 shadow-[0_4px_12px_rgba(124,58,237,0.16)] transition hover:border-violet-500/60 hover:bg-violet-200/90 hover:text-violet-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 disabled:cursor-not-allowed disabled:opacity-45 dark:border-violet-300/55 dark:bg-violet-500/35 dark:text-violet-50 dark:shadow-[0_6px_18px_rgba(124,58,237,0.35)] dark:hover:border-violet-200/80 dark:hover:bg-violet-500/45 dark:hover:text-white dark:focus-visible:outline-violet-200"
             >
-              <GuideCompassIcon className="h-[18px] w-[18px]" />
+              <GuideCompassIcon className="h-3.5 w-3.5" />
+              <span>{language === "es" ? "Ver guía" : "View guide"}</span>
             </button>
             <button
               type="button"
