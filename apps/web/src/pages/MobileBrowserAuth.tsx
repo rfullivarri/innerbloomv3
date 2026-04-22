@@ -299,7 +299,7 @@ export default function MobileBrowserAuthPage() {
 
     browserSessionResetStartedRef.current = true;
     setIsResettingBrowserSession(true);
-    void signOut()
+    void signOut({ redirectUrl: currentUrl })
       .catch((cause) => {
         console.warn('[mobile-auth-page] browser-session-reset-failed', {
           at: Date.now(),
@@ -315,7 +315,7 @@ export default function MobileBrowserAuthPage() {
       .finally(() => {
         setIsResettingBrowserSession(false);
       });
-  }, [isLoaded, language, mode, shouldResetBrowserSession, signOut]);
+  }, [currentUrl, isLoaded, language, mode, shouldResetBrowserSession, signOut]);
 
   useEffect(() => {
     if (
