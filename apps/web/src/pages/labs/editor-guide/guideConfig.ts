@@ -31,7 +31,7 @@ const EDITOR_GUIDE_STEPS_BY_LOCALE: Record<"es" | "en", EditorGuideStep[]> = {
     },
     {
       id: "wheel-traits",
-      title: "30 rasgos",
+      title: "Rasgos",
       copy: "Cada pilar se divide en 10 rasgos para ubicar mejor tus tareas.",
     },
     {
@@ -90,7 +90,7 @@ const EDITOR_GUIDE_STEPS_BY_LOCALE: Record<"es" | "en", EditorGuideStep[]> = {
     },
     {
       id: "wheel-traits",
-      title: "30 traits",
+      title: "Traits",
       copy: "Each pillar is divided into 10 traits so you can place tasks with precision.",
     },
     {
