@@ -3,6 +3,7 @@ import { EditorGuideWheel } from "./EditorGuideWheel";
 import { EditorGuideStep } from "./EditorGuideStep";
 import {
   EDITOR_GUIDE_FIRST_TIME_STORAGE_KEY,
+  type EditorGuideStepId,
   getEditorGuideSteps,
 } from "./guideConfig";
 
@@ -30,10 +31,12 @@ export function EditorGuideOverlay({
   isOpen,
   onClose,
   locale,
+  onStepChange,
 }: {
   isOpen: boolean;
   onClose: () => void;
   locale: "es" | "en";
+  onStepChange?: (stepId: EditorGuideStepId) => void;
 }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
@@ -88,6 +91,13 @@ export function EditorGuideOverlay({
       window.removeEventListener("scroll", update, true);
     };
   }, [isOpen, step]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+    onStepChange?.(step.id);
+  }, [isOpen, onStepChange, step.id]);
 
   const canGoBack = stepIndex > 0;
   const isLast = stepIndex === guideSteps.length - 1;

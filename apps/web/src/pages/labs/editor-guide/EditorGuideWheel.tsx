@@ -131,6 +131,14 @@ function compactTraitLabel(label: string): string {
   return label.length > 11 ? `${label.slice(0, 10)}…` : label;
 }
 
+function polarToCartesian(angleDeg: number, radius: number) {
+  const radians = (angleDeg * Math.PI) / 180;
+  return {
+    x: Math.cos(radians) * radius,
+    y: Math.sin(radians) * radius,
+  };
+}
+
 export function EditorGuideWheel({
   stepId,
   locale,
@@ -148,8 +156,16 @@ export function EditorGuideWheel({
     })),
   );
 
+  const size = 320;
+  const center = size / 2;
+  const ringSize = 196;
+  const traitRingSize = 252;
+  const pillarLabelRadius = 72;
+  const traitTickRadius = 126;
+  const traitLabelRadius = 142;
+
   return (
-    <div className="relative mx-auto h-[21.5rem] w-[21.5rem] max-w-full">
+    <div className="relative mx-auto h-[20.5rem] w-full max-w-[20.5rem] overflow-hidden">
       <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.19),transparent_72%)]" />
 
       <div
@@ -169,8 +185,10 @@ export function EditorGuideWheel({
       </div>
 
       <div
-        className="absolute left-1/2 top-1/2 h-52 w-52 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/15 transition-all duration-700"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/15 transition-all duration-700"
         style={{
+          width: `${ringSize}px`,
+          height: `${ringSize}px`,
           background: `conic-gradient(from -90deg, ${PILLAR_META.Body.segment} 0deg 120deg, ${PILLAR_META.Mind.segment} 120deg 240deg, ${PILLAR_META.Soul.segment} 240deg 360deg)`,
           mask: "radial-gradient(circle, transparent 33%, black 34%, black 74%, transparent 75%)",
           opacity: level >= 2 ? 1 : 0,
@@ -180,21 +198,19 @@ export function EditorGuideWheel({
 
       {PILLARS.map((pillar, index) => {
         const angle = -90 + index * 120 + 60;
-        const radius = 76;
-        const x = Math.cos((angle * Math.PI) / 180) * radius;
-        const y = Math.sin((angle * Math.PI) / 180) * radius;
+        const position = polarToCartesian(angle, pillarLabelRadius);
 
         return (
           <div
             key={pillar}
             className="pointer-events-none absolute left-1/2 top-1/2 transition-all duration-700"
             style={{
-              transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${level >= 2 ? 1 : 0.75})`,
+              transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px)) scale(${level >= 2 ? 1 : 0.75})`,
               opacity: level >= 2 ? 1 : 0,
             }}
           >
             <div
-              className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.14em]"
+              className="inline-flex min-w-[84px] items-center justify-center gap-1.5 rounded-full bg-black/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.13em] backdrop-blur-[1px]"
               style={{ color: PILLAR_META[pillar].text, textShadow: `0 0 14px ${PILLAR_META[pillar].glow}` }}
             >
               <span className="text-[13px] leading-none">{PILLAR_META[pillar].icon}</span>
@@ -205,8 +221,10 @@ export function EditorGuideWheel({
       })}
 
       <div
-        className="absolute left-1/2 top-1/2 h-[17rem] w-[17rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 transition-all duration-700"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 transition-all duration-700"
         style={{
+          width: `${traitRingSize}px`,
+          height: `${traitRingSize}px`,
           background:
             "repeating-conic-gradient(from -90deg, rgba(248,250,252,0.36) 0deg 0.9deg, rgba(148,163,184,0.06) 0.9deg 12deg)",
           mask: "radial-gradient(circle, transparent 65%, black 66%, black 89%, transparent 90%)",
@@ -215,47 +233,46 @@ export function EditorGuideWheel({
         }}
       />
 
-      {traitSegments.map(({ trait, index, pillar }) => {
-        const angle = -90 + index * 12 + 6;
-        const radius = 131;
-        const x = Math.cos((angle * Math.PI) / 180) * radius;
-        const y = Math.sin((angle * Math.PI) / 180) * radius;
-        const textAnchor = angle > 90 && angle < 270 ? "end" : "start";
-        const rotate = textAnchor === "end" ? angle + 180 : angle;
+      <svg
+        viewBox={`0 0 ${size} ${size}`}
+        className="pointer-events-none absolute inset-0 h-full w-full overflow-hidden transition-all duration-700"
+        style={{ opacity: level >= 3 ? 1 : 0 }}
+      >
+        {traitSegments.map(({ trait, index, pillar }) => {
+          const angle = -90 + index * 12 + 6;
+          const tickStart = polarToCartesian(angle, traitTickRadius);
+          const tickEnd = polarToCartesian(angle, traitTickRadius + 8);
+          const labelPoint = polarToCartesian(angle, traitLabelRadius);
+          const textAnchor = angle > 90 && angle < 270 ? "end" : "start";
+          const rotate = textAnchor === "end" ? angle + 180 : angle;
 
-        return (
-          <svg
-            key={`${pillar}-${trait}`}
-            className="pointer-events-none absolute left-1/2 top-1/2 overflow-visible transition-all duration-700"
-            style={{
-              transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
-              opacity: level >= 3 ? 1 : 0,
-            }}
-          >
-            <line
-              x1="0"
-              y1="0"
-              x2="0"
-              y2="7"
-              stroke={PILLAR_META[pillar].line}
-              strokeWidth="1"
-              transform={`rotate(${angle + 90})`}
-            />
-            <text
-              x="0"
-              y="-1"
-              fill={PILLAR_META[pillar].text}
-              fontSize="9.4"
-              fontWeight="500"
-              letterSpacing="0.02em"
-              textAnchor={textAnchor}
-              transform={`rotate(${rotate}) translate(0, -7)`}
-            >
-              {trait}
-            </text>
-          </svg>
-        );
-      })}
+          return (
+            <g key={`${pillar}-${trait}`}>
+              <line
+                x1={center + tickStart.x}
+                y1={center + tickStart.y}
+                x2={center + tickEnd.x}
+                y2={center + tickEnd.y}
+                stroke={PILLAR_META[pillar].line}
+                strokeWidth="1"
+              />
+              <text
+                x={center + labelPoint.x}
+                y={center + labelPoint.y}
+                fill={PILLAR_META[pillar].text}
+                fontSize="9"
+                fontWeight="500"
+                letterSpacing="0.01em"
+                textAnchor={textAnchor}
+                dominantBaseline="central"
+                transform={`rotate(${rotate} ${center + labelPoint.x} ${center + labelPoint.y})`}
+              >
+                {trait}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
     </div>
   );
 }
