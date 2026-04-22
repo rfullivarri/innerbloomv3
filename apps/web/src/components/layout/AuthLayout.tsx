@@ -34,7 +34,7 @@ export function AuthLayout({
       {secondaryActionLabel && secondaryActionHref ? (
         <a
           href={secondaryActionHref}
-          className="absolute left-4 top-[calc(env(safe-area-inset-top,0px)+0.45rem)] z-20 inline-flex items-center justify-center gap-2 rounded-full px-1 py-1 text-sm font-semibold text-white/62 transition-colors duration-200 hover:text-white sm:left-6 lg:left-8"
+          className="absolute left-4 top-[calc(env(safe-area-inset-top,0px)+0.45rem)] z-20 inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.055] px-3 py-2 text-sm font-semibold text-white/68 shadow-[0_12px_28px_rgba(0,0,0,0.16)] backdrop-blur transition-colors duration-200 hover:border-white/18 hover:bg-white/[0.08] hover:text-white sm:left-6 lg:left-8"
         >
           <span aria-hidden="true" className="text-base leading-none">←</span>
           {secondaryActionLabel}

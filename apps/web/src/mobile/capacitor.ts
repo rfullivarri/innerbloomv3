@@ -11,7 +11,7 @@ type CapacitorAppPlugin = {
 };
 
 type CapacitorBrowserPlugin = {
-  open: (options: { url: string }) => Promise<void>;
+  open: (options: { url: string; toolbarColor?: string }) => Promise<void>;
   close?: () => Promise<void>;
 };
 
@@ -230,7 +230,7 @@ export async function openUrlInCapacitorBrowser(url: string): Promise<void> {
   if (browser) {
     const startedAt = Date.now();
     console.info('[mobile-auth] Browser.open() start', { url, startedAt });
-    await browser.open({ url });
+    await browser.open({ url, toolbarColor: '#050b2f' });
     console.info('[mobile-auth] Browser.open() end', { url, finishedAt: Date.now() });
     return;
   }
