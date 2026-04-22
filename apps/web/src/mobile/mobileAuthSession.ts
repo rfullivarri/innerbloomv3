@@ -257,6 +257,7 @@ export function buildNativeMobileAuthUrl(
   language?: string,
   options?: {
     provider?: 'google';
+    hideGoogle?: boolean;
   },
 ): string {
   const resolvedLanguage =
@@ -271,6 +272,12 @@ export function buildNativeMobileAuthUrl(
   );
   if (options?.provider === 'google') {
     mobileAuthUrl.searchParams.set('provider', 'google');
+  }
+  if (options?.hideGoogle) {
+    mobileAuthUrl.searchParams.set('hide_google', '1');
+  }
+  if (mode === 'sign-in' || mode === 'sign-up') {
+    mobileAuthUrl.searchParams.set('fresh', '1');
   }
   return mobileAuthUrl.toString();
 }

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { useAuth } from '../auth/runtimeAuth';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
@@ -108,7 +108,6 @@ function MobileEntryError({
 }
 
 function MobileWelcome() {
-  const navigate = useNavigate();
   const language = resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
   const copy = language === 'en'
     ? {
@@ -124,9 +123,14 @@ function MobileWelcome() {
         signUp: 'Crear cuenta',
       };
 
-  const openEmbeddedAuth = (mode: 'sign-in' | 'sign-up') => {
+  const openNativeAuth = async (mode: 'sign-in' | 'sign-up') => {
     setForceNativeWelcome(false);
-    navigate(mode === 'sign-up' ? `/sign-up?lang=${language}` : `/login?lang=${language}`);
+    const mobileAuthUrl = buildNativeMobileAuthUrl(
+      mode,
+      language,
+      mode === 'sign-in' ? { hideGoogle: true } : undefined,
+    );
+    await openUrlInCapacitorBrowser(mobileAuthUrl);
   };
 
   const openNativeGoogleAuth = async () => {
@@ -161,7 +165,7 @@ function MobileWelcome() {
             <div className="mt-auto space-y-[clamp(0.55rem,1.5dvh,0.75rem)] px-2 pt-[clamp(1rem,4dvh,2.5rem)]">
               <button
                 type="button"
-                onClick={() => openEmbeddedAuth('sign-up')}
+                onClick={() => void openNativeAuth('sign-up')}
                 className="inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-[clamp(0.75rem,1.8dvh,0.875rem)] text-sm font-semibold text-white shadow-[0_20px_44px_rgba(124,58,237,0.35)] transition hover:bg-[#8b5cf6]"
               >
                 {copy.signUp}
@@ -187,7 +191,7 @@ function MobileWelcome() {
               </button>
               <button
                 type="button"
-                onClick={() => openEmbeddedAuth('sign-in')}
+                onClick={() => void openNativeAuth('sign-in')}
                 className="inline-flex w-full items-center justify-center rounded-full border border-white/18 bg-white/8 px-5 py-[clamp(0.75rem,1.8dvh,0.875rem)] text-sm font-semibold text-white transition hover:bg-white/12"
               >
                 {copy.signIn}

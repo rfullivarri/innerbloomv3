@@ -11,6 +11,8 @@ Estado de este checklist: auditoría operativa sobre `main` revisada el 2026-04-
 - Receiving email del dominio: activo y verificado en Resend para `innerbloomjourney.org`
 - Remitente operativo de emails automáticos: `notifications@innerbloomjourney.org`
 - Login nativo con Clerk: funcionando
+- Login/logout nativo: la entrada por `/mobile-auth` usa `fresh=1` para limpiar sesiones web viejas de Clerk antes de iniciar login o registro; Google OAuth pide selector de cuenta con `oidcPrompt: "select_account"` para evitar reutilizar automáticamente el usuario anterior del navegador del sistema
+- Los botones nativos `Crear cuenta` y `Iniciar sesión` abren `/mobile-auth` en el browser del sistema; no usan los componentes prebuilt de Clerk dentro del WebView de Capacitor, porque pueden fallar validaciones de seguridad en Android
 - Deep link de callback móvil: funcionando
 - API Android por transporte nativo: funcionando
 - Icono Android: actualizado para parecerse al de iOS

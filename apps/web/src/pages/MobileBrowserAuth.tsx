@@ -102,9 +102,14 @@ function buildModeUrl(language: AuthLanguage, mode: 'sign-in' | 'sign-up', searc
   const url = new URL(buildWebAbsoluteUrl(buildLocalizedAuthPath('/mobile-auth', language)));
   const params = new URLSearchParams(search);
   url.searchParams.set('mode', mode);
-  const returnTo = params.get('return_to')?.trim();
-  if (returnTo) {
-    url.searchParams.set('return_to', returnTo);
+  for (const key of ['return_to', 'fresh']) {
+    const value = params.get(key)?.trim();
+    if (value) {
+      url.searchParams.set(key, value);
+    }
+  }
+  if (mode === 'sign-in' && params.get('hide_google') === '1') {
+    url.searchParams.set('hide_google', '1');
   }
   return `${url.pathname}${url.search}${url.hash}`;
 }
@@ -143,8 +148,10 @@ export default function MobileBrowserAuthPage() {
   const { isLoaded: signUpLoaded, signUp } = useSignUp();
   const { user } = useUser();
   const [error, setError] = useState<string | null>(null);
+  const [isResettingBrowserSession, setIsResettingBrowserSession] = useState(false);
   const redirectStartedRef = useRef(false);
   const googleRedirectStartedRef = useRef(false);
+  const browserSessionResetStartedRef = useRef(false);
   const mode = useMemo<BrowserAuthMode>(() => {
     const params = new URLSearchParams(location.search);
     const raw = params.get('mode');
@@ -175,6 +182,15 @@ export default function MobileBrowserAuthPage() {
     const params = new URLSearchParams(location.search);
     return params.get('provider') === 'google';
   }, [location.search]);
+  const shouldHideGoogleButton = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('hide_google') === '1';
+  }, [location.search]);
+  const shouldUseFreshBrowserSession = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('fresh') === '1';
+  }, [location.search]);
+  const shouldResetBrowserSession = shouldUseFreshBrowserSession && !isHandoffStep && isSignedIn;
   const createdSessionId = signIn?.createdSessionId ?? signUp?.createdSessionId ?? null;
 
   useEffect(() => {
@@ -277,7 +293,39 @@ export default function MobileBrowserAuthPage() {
   }, []);
 
   useEffect(() => {
-    if (!shouldStartGoogleOAuth || googleRedirectStartedRef.current || isSignedIn || createdSessionId) {
+    if (!shouldResetBrowserSession || browserSessionResetStartedRef.current || !isLoaded) {
+      return;
+    }
+
+    browserSessionResetStartedRef.current = true;
+    setIsResettingBrowserSession(true);
+    void signOut()
+      .catch((cause) => {
+        console.warn('[mobile-auth-page] browser-session-reset-failed', {
+          at: Date.now(),
+          mode,
+          error: cause instanceof Error ? cause.message : String(cause),
+        });
+        setError(
+          language === 'en'
+            ? 'We could not clear the previous browser session. Please try again.'
+            : 'No pudimos limpiar la sesión anterior del navegador. Intentá de nuevo.',
+        );
+      })
+      .finally(() => {
+        setIsResettingBrowserSession(false);
+      });
+  }, [isLoaded, language, mode, shouldResetBrowserSession, signOut]);
+
+  useEffect(() => {
+    if (
+      !shouldStartGoogleOAuth
+      || googleRedirectStartedRef.current
+      || isSignedIn
+      || createdSessionId
+      || shouldResetBrowserSession
+      || isResettingBrowserSession
+    ) {
       return;
     }
 
@@ -294,6 +342,9 @@ export default function MobileBrowserAuthPage() {
         strategy: 'oauth_google',
         redirectUrl: '/sso-callback',
         redirectUrlComplete: handoffUrl,
+        continueSignIn: false,
+        continueSignUp: false,
+        oidcPrompt: 'select_account',
       })
       .catch((cause) => {
         googleRedirectStartedRef.current = false;
@@ -316,14 +367,16 @@ export default function MobileBrowserAuthPage() {
     language,
     mode,
     shouldStartGoogleOAuth,
+    shouldResetBrowserSession,
     signIn,
     signInLoaded,
     signUp,
     signUpLoaded,
+    isResettingBrowserSession,
   ]);
 
   useEffect(() => {
-    if (!isLoaded || redirectStartedRef.current) {
+    if (!isLoaded || redirectStartedRef.current || shouldResetBrowserSession || isResettingBrowserSession) {
       return;
     }
 
@@ -463,12 +516,14 @@ export default function MobileBrowserAuthPage() {
     getToken,
     isLoaded,
     isSignedIn,
+    isResettingBrowserSession,
     mode,
     returnTo,
     isHandoffStep,
     includeLegacyImageUrl,
     session?.id,
     signOut,
+    shouldResetBrowserSession,
     signedOutUrl,
     user,
   ]);
@@ -491,7 +546,7 @@ export default function MobileBrowserAuthPage() {
     );
   }
 
-  if (!isLoaded) {
+  if (!isLoaded || isResettingBrowserSession || shouldResetBrowserSession) {
     return (
       <AuthLayout
         title={language === 'en' ? 'Preparing secure access' : 'Preparando acceso seguro'}
@@ -499,10 +554,10 @@ export default function MobileBrowserAuthPage() {
         secondaryActionHref={signedOutUrl}
       >
         <RedirectingState
-          title={language === 'en' ? 'Loading Clerk' : 'Cargando Clerk'}
+          title={language === 'en' ? 'Preparing sign-in' : 'Preparando acceso'}
           description={language === 'en'
-            ? 'Checking whether you already have an active session in the system browser.'
-            : 'Comprobando si ya existe una sesión activa en el navegador del sistema.'}
+            ? 'Opening a fresh session for this device.'
+            : 'Abriendo una sesión limpia para este dispositivo.'}
         />
       </AuthLayout>
     );
@@ -552,16 +607,21 @@ export default function MobileBrowserAuthPage() {
           />
         ) : (
           <>
-            <GoogleOAuthButton
-              language={language}
-              mode={mode === 'sign-up' ? 'sign-up' : 'sign-in'}
-              redirectUrlComplete={handoffUrl}
-            />
-            <div className={AUTH_DIVIDER_CLASS}>
-              <span className="h-px flex-1 bg-white/12" aria-hidden />
-              <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
-              <span className="h-px flex-1 bg-white/12" aria-hidden />
-            </div>
+            {!shouldHideGoogleButton ? (
+              <>
+                <GoogleOAuthButton
+                  language={language}
+                  mode={mode === 'sign-up' ? 'sign-up' : 'sign-in'}
+                  redirectUrlComplete={handoffUrl}
+                  forceAccountSelection
+                />
+                <div className={AUTH_DIVIDER_CLASS}>
+                  <span className="h-px flex-1 bg-white/12" aria-hidden />
+                  <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
+                  <span className="h-px flex-1 bg-white/12" aria-hidden />
+                </div>
+              </>
+            ) : null}
           </>
         )}
         {mode === 'sign-up' ? (

@@ -8,6 +8,7 @@ type GoogleOAuthButtonProps = {
   mode: GoogleOAuthMode;
   redirectUrlComplete: string;
   className?: string;
+  forceAccountSelection?: boolean;
 };
 
 const SSO_CALLBACK_PATH = '/sso-callback';
@@ -17,6 +18,7 @@ export function GoogleOAuthButton({
   mode,
   redirectUrlComplete,
   className = '',
+  forceAccountSelection = false,
 }: GoogleOAuthButtonProps) {
   const { isLoaded: isSignInLoaded, signIn } = useSignIn();
   const { isLoaded: isSignUpLoaded, signUp } = useSignUp();
@@ -61,6 +63,9 @@ export function GoogleOAuthButton({
           strategy: 'oauth_google',
           redirectUrl: SSO_CALLBACK_PATH,
           redirectUrlComplete,
+          continueSignIn: false,
+          continueSignUp: false,
+          oidcPrompt: forceAccountSelection ? 'select_account' : undefined,
         });
       } else {
         if (!signIn) {
@@ -70,13 +75,16 @@ export function GoogleOAuthButton({
           strategy: 'oauth_google',
           redirectUrl: SSO_CALLBACK_PATH,
           redirectUrlComplete,
+          continueSignIn: false,
+          continueSignUp: false,
+          oidcPrompt: forceAccountSelection ? 'select_account' : undefined,
         });
       }
     } catch (error) {
       console.error('[auth] Google OAuth redirect failed', error);
       setIsRedirecting(false);
     }
-  }, [isLoaded, isRedirecting, mode, redirectUrlComplete, signIn, signUp]);
+  }, [forceAccountSelection, isLoaded, isRedirecting, mode, redirectUrlComplete, signIn, signUp]);
 
   return (
     <button
