@@ -30,6 +30,8 @@ const SAVE_ERROR_MESSAGE =
   "No pudimos guardar tus recordatorios. Intentá nuevamente.";
 const SAVE_SUCCESS_MESSAGE = "Guardamos tus recordatorios.";
 const TIME_OPTIONS = buildTimeOptions();
+const INNERBLOOM_GRADIENT_CLASS =
+  "bg-[linear-gradient(90deg,#a770ef_0%,#cf8bf3_52%,#fdb99b_100%)]";
 
 type DeliveryMode = "email" | "notification" | "email_and_notification";
 
@@ -50,6 +52,42 @@ type TestNotificationStatus = "idle" | "sending" | "success" | "error";
 
 interface DailyReminderSettingsProps {
   onSaveSuccess?: (response: DailyReminderSettingsResponse) => void;
+}
+
+function DeliveryModeIcon({ channel }: { channel: "email" | "notification" }) {
+  if (channel === "email") {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        className="h-4 w-4 shrink-0"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      >
+        <rect x="3.5" y="5.5" width="17" height="13" rx="2.4" />
+        <path d="m4.25 7 7.1 5.4a1.05 1.05 0 0 0 1.3 0L19.75 7" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="h-4 w-4 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+    >
+      <path d="M18 9.5a6 6 0 0 0-12 0c0 7-2.5 7.5-2.5 7.5h17S18 16.5 18 9.5Z" />
+      <path d="M9.8 20a2.4 2.4 0 0 0 4.4 0" />
+    </svg>
+  );
 }
 
 function buildTimeOptions(): string[] {
@@ -562,14 +600,15 @@ export function DailyReminderSettings({
                   disabled={isSaving}
                   onClick={() => handleDeliveryToggle(option.id)}
                   className={combine(
-                    "reminder-scheduler-form__channel-button rounded-2xl border px-4 py-3 text-sm font-semibold transition",
+                    "reminder-scheduler-form__channel-button inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition",
                     active
-                      ? "reminder-scheduler-form__channel-button--active border-fuchsia-200/70 bg-gradient-to-r from-fuchsia-500 via-pink-500 to-amber-300 text-white shadow-[0_12px_32px_rgba(217,70,239,0.24)]"
+                      ? `reminder-scheduler-form__channel-button--active border-[#fdb99b]/80 ${INNERBLOOM_GRADIENT_CLASS} text-white shadow-[0_12px_32px_rgba(167,112,239,0.28)] hover:brightness-105`
                       : "reminder-scheduler-form__channel-button--inactive border-white/10 bg-white/5 text-white/70 hover:border-white/25 hover:bg-white/10 hover:text-white",
                     isSaving && "cursor-not-allowed opacity-60",
                   )}
                 >
-                  {option.label}
+                  <DeliveryModeIcon channel={option.id} />
+                  <span>{option.label}</span>
                 </button>
               );
             })}
@@ -727,7 +766,7 @@ export function DailyReminderSettings({
             className={combine(
               "reminder-scheduler-form__save-button inline-flex items-center rounded-full border px-5 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
               canSubmit
-                ? "reminder-scheduler-form__save-button--enabled border-fuchsia-200/70 bg-gradient-to-r from-fuchsia-500 via-pink-500 to-amber-300 text-white shadow-[0_12px_36px_rgba(217,70,239,0.34)] hover:from-fuchsia-400 hover:via-pink-500 hover:to-amber-200"
+                ? `reminder-scheduler-form__save-button--enabled border-[#fdb99b]/80 ${INNERBLOOM_GRADIENT_CLASS} text-white shadow-[0_12px_36px_rgba(167,112,239,0.34)] hover:brightness-105 active:scale-[0.98]`
                 : "reminder-scheduler-form__save-button--disabled cursor-not-allowed border-white/10 bg-white/5 text-text-subtle",
             )}
           >

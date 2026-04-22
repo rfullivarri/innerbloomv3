@@ -5840,11 +5840,11 @@
   :root[data-theme="light"]
     [data-light-scope="reminder-scheduler"]
     .reminder-scheduler-form__channel-button--active {
-    border-color: #d946ef;
-    background: linear-gradient(90deg, #a855f7 0%, #ec4899 55%, #fbbf24 100%);
+    border-color: color-mix(in srgb, #fdb99b 82%, white 18%);
+    background: linear-gradient(90deg, #a770ef 0%, #cf8bf3 52%, #fdb99b 100%);
     color: #ffffff;
     box-shadow:
-      0 12px 28px rgba(217, 70, 239, 0.24),
+      0 12px 28px rgba(167, 112, 239, 0.28),
       inset 0 0 0 1px rgba(255, 255, 255, 0.18);
   }
 
@@ -5857,17 +5857,19 @@
   :root[data-theme="light"]
     [data-light-scope="reminder-scheduler"]
     .reminder-scheduler-form__save-button--enabled {
-    border-color: var(--scheduler-cta-border);
-    background: var(--scheduler-cta-bg);
-    color: var(--scheduler-cta-text);
+    border-color: color-mix(in srgb, #fdb99b 80%, white 20%);
+    background: linear-gradient(90deg, #a770ef 0%, #cf8bf3 52%, #fdb99b 100%);
+    color: #ffffff;
+    box-shadow: 0 12px 36px rgba(167, 112, 239, 0.28);
   }
 
   :root[data-theme="light"]
     [data-light-scope="reminder-scheduler"]
     .reminder-scheduler-form__save-button--enabled:hover {
-    border-color: var(--editor-modal-secondary-hover-border, #c5d0df);
-    background: #eef2f7;
-    color: var(--scheduler-text);
+    border-color: color-mix(in srgb, #fdb99b 88%, white 12%);
+    background: linear-gradient(90deg, #a770ef 0%, #cf8bf3 52%, #fdb99b 100%);
+    color: #ffffff;
+    filter: brightness(1.05);
   }
 
   :root[data-theme="light"]
