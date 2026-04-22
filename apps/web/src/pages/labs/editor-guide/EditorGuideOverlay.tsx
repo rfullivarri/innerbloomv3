@@ -8,6 +8,10 @@ import {
 } from "./guideConfig";
 
 type Rect = { top: number; left: number; width: number; height: number };
+type ModalCoreFocusPhase = "overview" | "detail";
+
+const MODAL_CORE_OVERVIEW_SELECTOR =
+  '[data-editor-guide-target="new-task-modal-dialog"]';
 const INTERACTIVE_ELEMENT_SELECTOR = [
   "button",
   "a",
@@ -52,6 +56,8 @@ export function EditorGuideOverlay({
 }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
+  const [modalCoreFocusPhase, setModalCoreFocusPhase] =
+    useState<ModalCoreFocusPhase>("detail");
 
   const guideSteps = getEditorGuideSteps(locale);
   const step = guideSteps[stepIndex];
@@ -81,16 +87,44 @@ export function EditorGuideOverlay({
     if (!isOpen) {
       setStepIndex(0);
       setTargetRect(null);
+      setModalCoreFocusPhase("detail");
       return;
     }
 
-    if (!step.targetSelector) {
+    if (step.id !== "modal-core") {
+      setModalCoreFocusPhase("detail");
+      return;
+    }
+
+    setModalCoreFocusPhase("overview");
+    const timeoutId = window.setTimeout(() => {
+      setModalCoreFocusPhase("detail");
+    }, 320);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isOpen, step.id]);
+
+  const activeTargetSelector = useMemo(() => {
+    if (step.id === "modal-core" && modalCoreFocusPhase === "overview") {
+      return MODAL_CORE_OVERVIEW_SELECTOR;
+    }
+    return step.targetSelector;
+  }, [modalCoreFocusPhase, step.id, step.targetSelector]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    if (!activeTargetSelector) {
       setTargetRect(null);
       return;
     }
 
     const update = () => {
-      const nextRect = findVisibleTarget(step.targetSelector!);
+      const nextRect = findVisibleTarget(activeTargetSelector);
       setTargetRect(nextRect);
     };
 
@@ -109,7 +143,7 @@ export function EditorGuideOverlay({
       window.removeEventListener("scroll", update, true);
       observer.disconnect();
     };
-  }, [isOpen, step]);
+  }, [activeTargetSelector, isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
