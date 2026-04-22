@@ -2497,7 +2497,7 @@ function CreateTaskModal({
               <button
                 type="button"
                 data-editor-guide-target="new-task-modal-ai-action"
-                className="create-task-ai-modal__suggest-button inline-flex w-full items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                className="create-task-ai-modal__suggest-button inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                 onClick={() => void handleSuggestCategory()}
                 disabled={isSuggestDisabled}
               >
@@ -2539,25 +2539,25 @@ function CreateTaskModal({
 
             {suggestion && suggestionStatus === "ready" && (
               <section
-                className="create-task-ai-modal__suggestion-strip space-y-2.5 py-1"
+                className="create-task-ai-modal__suggestion-strip space-y-3.5 py-2"
                 data-editor-guide-target="new-task-modal-ai-result"
               >
-                <p className="create-task-ai-modal__field-label text-[11px] font-semibold uppercase tracking-[0.24em]">
+                <p className="create-task-ai-modal__field-label text-center text-[11px] font-semibold uppercase tracking-[0.24em]">
                   {t("editor.modal.aiCreate.suggestedCategory")}
                 </p>
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="rounded-full border px-3 py-1 font-semibold">
+                <div className="flex items-center justify-center gap-2 text-base">
+                  <span className="create-task-ai-modal__result-pill rounded-full border px-4 py-1.5 font-semibold">
                     {suggestion.pillarLabel}
                   </span>
                   <span className="create-task-ai-modal__hint">/</span>
-                  <span className="rounded-full border px-3 py-1 font-semibold">
+                  <span className="create-task-ai-modal__result-pill rounded-full border px-4 py-1.5 font-semibold">
                     {suggestion.traitLabel}
                   </span>
                 </div>
-                <p className="create-task-ai-modal__hint text-sm">
+                <p className="create-task-ai-modal__hint text-center text-sm">
                   {suggestion.rationale}
                 </p>
-                <div className="flex flex-wrap items-center justify-end gap-3 pt-1">
+                <div className="flex flex-wrap items-center justify-center gap-4 pt-1">
                   <button
                     type="button"
                     className="create-task-ai-modal__retry text-xs font-semibold underline decoration-dotted underline-offset-4"

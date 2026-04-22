@@ -103,8 +103,8 @@ export const editorTranslations = {
     en: 'E.g. Walk for 30 minutes',
   },
   'editor.modal.aiCreate.suggestButton': {
-    es: 'Sugerir categoría',
-    en: 'Suggest category',
+    es: 'Generar categoría',
+    en: 'Generate category',
   },
   'editor.modal.aiCreate.analyzing': {
     es: 'Analizando tarea…',
@@ -115,8 +115,8 @@ export const editorTranslations = {
     en: 'Reviewing intent, context, and habit pattern.',
   },
   'editor.modal.aiCreate.suggestedCategory': {
-    es: 'Categoría sugerida',
-    en: 'Suggested category',
+    es: 'Categoría generada',
+    en: 'Generated category',
   },
   'editor.modal.aiCreate.retrySuggestion': {
     es: 'Reintentar sugerencia',
@@ -131,8 +131,8 @@ export const editorTranslations = {
     en: 'Confirm task',
   },
   'editor.modal.aiCreate.confirmationRequired': {
-    es: 'Primero usa “Sugerir categoría”.',
-    en: 'Please use “Suggest category” first.',
+    es: 'Primero usa “Generar categoría”.',
+    en: 'Please use “Generate category” first.',
   },
   'editor.modal.aiCreate.catalogFallback': {
     es: 'No hay catálogo suficiente para sugerir una categoría por ahora.',

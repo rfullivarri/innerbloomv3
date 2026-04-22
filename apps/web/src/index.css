@@ -5411,9 +5411,17 @@
 
   .create-task-ai-modal__suggest-button {
     color: #ffffff;
-    background: linear-gradient(128deg, #6f67ff 0%, #ad78ff 62%, #f197c4 100%);
-    box-shadow: 0 10px 24px rgba(153, 101, 233, 0.34);
+    border: 1px solid color-mix(in srgb, #b287ff 56%, rgba(255, 255, 255, 0.18));
+    background:
+      linear-gradient(140deg, rgba(22, 27, 52, 0.88) 0%, rgba(37, 31, 66, 0.86) 58%, rgba(49, 36, 74, 0.84) 100%),
+      color-mix(in srgb, var(--color-overlay-2) 88%, transparent);
+    box-shadow: 0 8px 20px rgba(128, 92, 211, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     letter-spacing: 0.01em;
+  }
+
+  .create-task-ai-modal__suggest-button:hover {
+    border-color: color-mix(in srgb, #c2a2ff 62%, rgba(255, 255, 255, 0.22));
+    box-shadow: 0 10px 24px rgba(132, 97, 213, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
   .create-task-ai-modal__analysis-card,
@@ -5425,6 +5433,13 @@
   .create-task-ai-modal__suggestion-strip {
     border-top: 1px solid color-mix(in srgb, var(--color-border-subtle) 62%, transparent);
     border-bottom: 1px solid color-mix(in srgb, var(--color-border-subtle) 50%, transparent);
+  }
+
+  .create-task-ai-modal__result-pill {
+    border-color: color-mix(in srgb, var(--color-border-soft) 78%, transparent);
+    background: color-mix(in srgb, var(--color-overlay-2) 72%, #0b1120);
+    color: #f8f9ff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
   .create-task-ai-modal__pulse {
@@ -5787,6 +5802,24 @@
 
   :root[data-theme="light"]
     [data-light-scope="editor"]
+    .create-task-ai-modal__suggest-button {
+    border-color: color-mix(in srgb, #8a5bff 44%, #ffffff);
+    background:
+      linear-gradient(145deg, #f7f6ff 0%, #f0ecff 55%, #ece7ff 100%),
+      color-mix(in srgb, var(--editor-modal-input-bg) 90%, #f8fafc);
+    color: #2f2362;
+    box-shadow: 0 8px 18px rgba(112, 84, 196, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__suggest-button:hover {
+    border-color: color-mix(in srgb, #7d4dff 55%, #ffffff);
+    box-shadow: 0 10px 20px rgba(115, 89, 198, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
     .create-task-ai-modal__analysis-card,
   :root[data-theme="light"]
     [data-light-scope="editor"]
@@ -5800,6 +5833,15 @@
     .create-task-ai-modal__suggestion-strip {
     border-top-color: color-mix(in srgb, var(--editor-modal-secondary-border) 68%, transparent);
     border-bottom-color: color-mix(in srgb, var(--editor-modal-secondary-border) 58%, transparent);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="editor"]
+    .create-task-ai-modal__result-pill {
+    border-color: color-mix(in srgb, #8a5bff 32%, var(--editor-modal-secondary-border));
+    background: color-mix(in srgb, #ece6ff 62%, #ffffff);
+    color: #2a2158;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
   }
 
   :root[data-theme="light"]
