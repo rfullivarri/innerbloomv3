@@ -532,7 +532,7 @@ export default function MobileBrowserAuthPage() {
     return (
       <AuthLayout
         title={language === 'en' ? 'Signing out' : 'Cerrando sesión'}
-        secondaryActionLabel="Back"
+        secondaryActionLabel={language === 'en' ? 'Back' : 'Volver'}
         secondaryActionHref={signedOutUrl}
       >
         <RedirectingState
@@ -550,7 +550,7 @@ export default function MobileBrowserAuthPage() {
     return (
       <AuthLayout
         title={language === 'en' ? 'Preparing secure access' : 'Preparando acceso seguro'}
-        secondaryActionLabel="Back"
+        secondaryActionLabel={language === 'en' ? 'Back' : 'Volver'}
         secondaryActionHref={signedOutUrl}
       >
         <RedirectingState
@@ -567,7 +567,7 @@ export default function MobileBrowserAuthPage() {
     return (
       <AuthLayout
         title={language === 'en' ? 'Returning to the app' : 'Volviendo a la app'}
-        secondaryActionLabel="Back"
+        secondaryActionLabel={language === 'en' ? 'Back' : 'Volver'}
         secondaryActionHref={callbackUrl}
       >
         <RedirectingState
@@ -596,7 +596,7 @@ export default function MobileBrowserAuthPage() {
               ? 'Sign in'
               : 'Iniciar sesión'
       }
-      secondaryActionLabel="Back"
+      secondaryActionLabel={language === 'en' ? 'Back' : 'Volver'}
       secondaryActionHref={signedOutUrl}
     >
       <div className={AUTH_STACK_CLASS}>

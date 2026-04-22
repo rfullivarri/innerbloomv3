@@ -140,8 +140,12 @@ function MobileWelcome() {
   };
 
   return (
-    <div className="flex h-dvh max-h-dvh min-h-dvh items-center justify-center overflow-hidden px-5 pb-[calc(env(safe-area-inset-bottom,0px)+0.85rem)] pt-[calc(env(safe-area-inset-top,0px)+0.65rem)] text-white">
-      <div className="flex h-full w-full max-w-md flex-col">
+    <div className="relative flex h-dvh max-h-dvh min-h-dvh items-center justify-center overflow-hidden bg-[#050b2f] bg-[url('/native-welcome-bg.png')] bg-cover bg-center px-5 pb-[calc(env(safe-area-inset-bottom,0px)+0.85rem)] pt-[calc(env(safe-area-inset-top,0px)+0.65rem)] text-white">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(5,11,47,0.18)_0%,rgba(5,11,47,0.1)_38%,rgba(5,11,47,0.68)_100%)]"
+      />
+      <div className="relative z-10 flex h-full w-full max-w-md flex-col">
         <div className="shrink-0 pt-[clamp(0.25rem,1.1dvh,0.75rem)] text-center">
           <div className="flex items-center justify-center text-[clamp(0.82rem,2.1dvh,1.06rem)] font-semibold uppercase tracking-[0.42em] text-white/66">
             <BrandWordmark className="gap-3.5" textClassName="tracking-[0.42em]" iconClassName="h-[3.2em]" />
@@ -149,16 +153,8 @@ function MobileWelcome() {
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col px-1 pb-[clamp(0.25rem,1.2dvh,0.75rem)] pt-[clamp(1rem,3dvh,1.5rem)]">
-          <div className="min-h-0 shrink px-2">
-            <img
-              src="/og/neneOG4.jpg"
-              alt="Innerbloom hero"
-              className="h-[min(34dvh,300px)] min-h-[210px] w-full rounded-[1.65rem] object-cover object-center shadow-[0_24px_70px_rgba(15,23,42,0.38)]"
-            />
-          </div>
-
           <div className="flex min-h-0 flex-1 flex-col pt-[clamp(1rem,3.2dvh,1.75rem)]">
-            <div className="text-center">
+            <div className="pt-[clamp(11rem,31dvh,17rem)] text-center">
               <h1 className="text-[clamp(2rem,5.2dvh,2.4rem)] font-semibold tracking-tight text-white">{copy.title}</h1>
             </div>
 
