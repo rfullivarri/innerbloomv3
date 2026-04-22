@@ -401,12 +401,11 @@ export default function EditorLabPage() {
     setShowSuggestionsModal(false);
 
     switch (stepId) {
-      case "modal-entry":
-      case "modal-input":
-      case "modal-difficulty":
+      case "modal-core":
       case "modal-ai-thinking":
         setShowCreateModal(true);
         break;
+      case "modal-entry":
       case "filters":
       case "task-list":
       case "suggestions":
@@ -812,7 +811,7 @@ export default function EditorLabPage() {
           <button
             type="button"
             onClick={handleCreateClick}
-            data-editor-guide-target="new-task"
+            data-editor-guide-target="new-task-trigger"
             className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+7.25rem)] right-4 z-40 inline-flex items-center gap-1.5 rounded-full bg-violet-500 px-3.5 py-2 text-[0.72rem] font-semibold text-white shadow-[0_10px_26px_rgba(139,92,246,0.42)] transition hover:bg-violet-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 md:bottom-10 md:right-8 md:gap-2 md:px-5 md:py-3 md:text-sm"
           >
             <span aria-hidden className="text-sm leading-none md:text-lg">
@@ -2247,20 +2246,49 @@ function CreateTaskModal({
   const isSubmitting = createStatus === "loading";
   const isAnalyzing = suggestionStatus === "analyzing";
   const isGuideAIThinkingStep = guideStepId === "modal-ai-thinking";
-  const guideSuggestion =
-    isGuideAIThinkingStep && sortedPillars.length > 0
-      ? {
-          pillarId: sortedPillars[0].id,
-          pillarLabel: localizePillarLabel(sortedPillars[0].name, language),
-          traitId: "guide-trait",
-          traitLabel: language === "es" ? "Enfoque" : "Focus",
-          rationale:
-            language === "es"
-              ? "La guía simula cómo la IA propone automáticamente pilar + rasgo."
-              : "The guide simulates how AI automatically proposes pillar + trait.",
-        }
-      : null;
+  const [guideSimulationPhase, setGuideSimulationPhase] = useState<
+    "idle" | "analyzing" | "pillar" | "trait"
+  >("idle");
+
+  useEffect(() => {
+    if (!isGuideAIThinkingStep) {
+      setGuideSimulationPhase("idle");
+      return;
+    }
+
+    setGuideSimulationPhase("analyzing");
+    const toPillar = window.setTimeout(
+      () => setGuideSimulationPhase("pillar"),
+      720,
+    );
+    const toTrait = window.setTimeout(
+      () => setGuideSimulationPhase("trait"),
+      1320,
+    );
+
+    return () => {
+      window.clearTimeout(toPillar);
+      window.clearTimeout(toTrait);
+    };
+  }, [isGuideAIThinkingStep]);
+
+  const guideSuggestion = isGuideAIThinkingStep
+    ? {
+        pillarId: "guide-soul",
+        pillarLabel: language === "es" ? "Alma" : "Soul",
+        traitId: "guide-trait-gratitude",
+        traitLabel: language === "es" ? "Gratitud" : "Gratitude",
+        rationale:
+          language === "es"
+            ? "La simulación muestra una clasificación coherente: Alma + Gratitud."
+            : "The simulation shows a coherent classification: Soul + Gratitude.",
+      }
+    : null;
   const visibleSuggestion = suggestion ?? guideSuggestion;
+  const shouldShowGuidePillar =
+    isGuideAIThinkingStep && guideSimulationPhase !== "analyzing";
+  const shouldShowGuideTrait =
+    isGuideAIThinkingStep && guideSimulationPhase === "trait";
   const showAnalyzingCard = isAnalyzing || isGuideAIThinkingStep;
   const isSubmitDisabled =
     isSubmitting ||
@@ -2450,7 +2478,10 @@ function CreateTaskModal({
               </div>
             </header>
 
-            <section className="space-y-4">
+            <section
+              className="space-y-4"
+              data-editor-guide-target="new-task-modal-core"
+            >
               <div className="space-y-2">
                 <label className="flex flex-col gap-2">
                   <span className="create-task-ai-modal__field-label text-xs font-semibold uppercase tracking-[0.18em]">
@@ -2522,7 +2553,10 @@ function CreateTaskModal({
               </div>
             </section>
 
-            <section className="space-y-3">
+            <section
+              className="space-y-3"
+              data-editor-guide-target="new-task-modal-ai-zone"
+            >
               <button
                 type="button"
                 data-editor-guide-target="new-task-modal-ai-action"
@@ -2552,122 +2586,139 @@ function CreateTaskModal({
                   </button>
                 </div>
               )}
-            </section>
+              {showAnalyzingCard && (
+                <section className="create-task-ai-modal__analysis-card space-y-2 rounded-xl border p-3">
+                  <div className="create-task-ai-modal__pulse h-2 w-24 rounded-full" />
+                  <p className="text-sm font-semibold">
+                    {t("editor.modal.aiCreate.analyzing")}
+                  </p>
+                  <p className="create-task-ai-modal__hint text-xs">
+                    {t("editor.modal.aiCreate.analyzingHint")}
+                  </p>
+                </section>
+              )}
 
-            {showAnalyzingCard && (
-              <section className="create-task-ai-modal__analysis-card space-y-2 rounded-xl border p-3">
-                <div className="create-task-ai-modal__pulse h-2 w-24 rounded-full" />
-                <p className="text-sm font-semibold">
-                  {t("editor.modal.aiCreate.analyzing")}
-                </p>
-                <p className="create-task-ai-modal__hint text-xs">
-                  {t("editor.modal.aiCreate.analyzingHint")}
-                </p>
-              </section>
-            )}
-
-            {visibleSuggestion &&
-              (suggestionStatus === "ready" || isGuideAIThinkingStep) && (
-              <section
-                className="create-task-ai-modal__suggestion-strip space-y-3.5 py-2"
-                data-editor-guide-target="new-task-modal-ai-result"
-              >
-                <p className="create-task-ai-modal__field-label text-center text-[11px] font-semibold uppercase tracking-[0.24em]">
-                  {t("editor.modal.aiCreate.suggestedCategory")}
-                </p>
-                <div className="flex items-center justify-center gap-2 text-base">
-                  <span className="create-task-ai-modal__result-pill rounded-full border px-4 py-1.5 font-semibold">
-                    {visibleSuggestion.pillarLabel}
-                  </span>
-                  <span className="create-task-ai-modal__hint">/</span>
-                  <span className="create-task-ai-modal__result-pill rounded-full border px-4 py-1.5 font-semibold">
-                    {visibleSuggestion.traitLabel}
-                  </span>
-                </div>
-                <p className="create-task-ai-modal__hint text-center text-sm">
-                  {visibleSuggestion.rationale}
-                </p>
-                <div className="flex flex-wrap items-center justify-center gap-4 pt-1">
-                  <button
-                    type="button"
-                    className="create-task-ai-modal__retry text-xs font-semibold underline decoration-dotted underline-offset-4"
-                    onClick={() => void handleSuggestCategory()}
+              {visibleSuggestion &&
+                (suggestionStatus === "ready" || isGuideAIThinkingStep) && (
+                  <section
+                    className="create-task-ai-modal__suggestion-strip space-y-3.5 py-2"
+                    data-editor-guide-target="new-task-modal-ai-result"
                   >
-                    {t("editor.modal.aiCreate.retrySuggestion")}
-                  </button>
-                  <button
-                    type="button"
-                    className="create-task-ai-modal__retry text-xs font-semibold underline decoration-dotted underline-offset-4"
-                    onClick={() => {
-                      setManualCategoryEnabled(true);
-                      clearError("suggestion");
-                    }}
-                  >
-                    {t("editor.modal.aiCreate.manualCategory")}
-                  </button>
-                </div>
-              </section>
-            )}
-
-            {manualCategoryEnabled && (
-              <section
-                className="create-task-ai-modal__manual-grid grid gap-3 rounded-xl border p-3"
-                data-editor-guide-target="new-task-modal-ai-result"
-              >
-                <label className="flex flex-col gap-2">
-                  <span className="create-task-ai-modal__field-label text-[11px] font-semibold uppercase tracking-[0.2em]">
-                    {t("editor.field.pillar")}
-                  </span>
-                  <select
-                    value={manualPillarId}
-                    onChange={(event) => {
-                      setManualPillarId(event.target.value);
-                      setManualTraitId("");
-                      clearError("suggestion");
-                    }}
-                    className="create-task-ai-modal__control w-full appearance-none rounded-xl border px-3 py-2 text-sm ios-touch-input focus:outline-none"
-                  >
-                    <option value="">{t("editor.modal.create.selectPillarPlaceholder")}</option>
-                    {sortedPillars.map((pillar) => (
-                      <option key={pillar.id} value={pillar.id}>
-                        {localizePillarLabel(pillar.name, language)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="flex flex-col gap-2">
-                  <span className="create-task-ai-modal__field-label text-[11px] font-semibold uppercase tracking-[0.2em]">
-                    {t("editor.field.trait")}
-                  </span>
-                  <select
-                    value={manualTraitId}
-                    onChange={(event) => {
-                      setManualTraitId(event.target.value);
-                      clearError("suggestion");
-                    }}
-                    className="create-task-ai-modal__control w-full appearance-none rounded-xl border px-3 py-2 text-sm ios-touch-input focus:outline-none"
-                    disabled={!selectedManualPillar || isLoadingManualTraits}
-                  >
-                    <option value="">
-                      {selectedManualPillar
-                        ? t("editor.modal.create.selectTraitPlaceholder")
-                        : t("editor.modal.create.selectPillarFirst")}
-                    </option>
-                    {manualTraits.map((trait) => (
-                      <option key={trait.id} value={trait.id}>
-                        {localizeTraitLabel(
-                          { name: trait.name, code: trait.code, fallback: trait.id },
-                          language,
-                        )}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                {manualTraitsError && (
-                  <p className="text-xs text-rose-300">{manualTraitsError}</p>
+                    <p className="create-task-ai-modal__field-label text-center text-[11px] font-semibold uppercase tracking-[0.24em]">
+                      {t("editor.modal.aiCreate.suggestedCategory")}
+                    </p>
+                    <div className="flex items-center justify-center gap-2 text-base">
+                      {shouldShowGuidePillar ? (
+                        <span className="create-task-ai-modal__result-pill rounded-full border px-4 py-1.5 font-semibold">
+                          {visibleSuggestion.pillarLabel}
+                        </span>
+                      ) : (
+                        <span className="create-task-ai-modal__hint text-xs">
+                          {language === "es"
+                            ? "Detectando pilar…"
+                            : "Detecting pillar…"}
+                        </span>
+                      )}
+                      <span className="create-task-ai-modal__hint">/</span>
+                      {shouldShowGuideTrait ? (
+                        <span className="create-task-ai-modal__result-pill rounded-full border px-4 py-1.5 font-semibold">
+                          {visibleSuggestion.traitLabel}
+                        </span>
+                      ) : (
+                        <span className="create-task-ai-modal__hint text-xs">
+                          {language === "es"
+                            ? "Detectando rasgo…"
+                            : "Detecting trait…"}
+                        </span>
+                      )}
+                    </div>
+                    <p className="create-task-ai-modal__hint text-center text-sm">
+                      {visibleSuggestion.rationale}
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-4 pt-1">
+                      <button
+                        type="button"
+                        className="create-task-ai-modal__retry text-xs font-semibold underline decoration-dotted underline-offset-4"
+                        onClick={() => void handleSuggestCategory()}
+                      >
+                        {t("editor.modal.aiCreate.retrySuggestion")}
+                      </button>
+                      <button
+                        type="button"
+                        className="create-task-ai-modal__retry text-xs font-semibold underline decoration-dotted underline-offset-4"
+                        onClick={() => {
+                          setManualCategoryEnabled(true);
+                          clearError("suggestion");
+                        }}
+                      >
+                        {t("editor.modal.aiCreate.manualCategory")}
+                      </button>
+                    </div>
+                  </section>
                 )}
-              </section>
-            )}
+
+              {manualCategoryEnabled && (
+                <section
+                  className="create-task-ai-modal__manual-grid grid gap-3 rounded-xl border p-3"
+                  data-editor-guide-target="new-task-modal-ai-result"
+                >
+                  <label className="flex flex-col gap-2">
+                    <span className="create-task-ai-modal__field-label text-[11px] font-semibold uppercase tracking-[0.2em]">
+                      {t("editor.field.pillar")}
+                    </span>
+                    <select
+                      value={manualPillarId}
+                      onChange={(event) => {
+                        setManualPillarId(event.target.value);
+                        setManualTraitId("");
+                        clearError("suggestion");
+                      }}
+                      className="create-task-ai-modal__control w-full appearance-none rounded-xl border px-3 py-2 text-sm ios-touch-input focus:outline-none"
+                    >
+                      <option value="">
+                        {t("editor.modal.create.selectPillarPlaceholder")}
+                      </option>
+                      {sortedPillars.map((pillar) => (
+                        <option key={pillar.id} value={pillar.id}>
+                          {localizePillarLabel(pillar.name, language)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="flex flex-col gap-2">
+                    <span className="create-task-ai-modal__field-label text-[11px] font-semibold uppercase tracking-[0.2em]">
+                      {t("editor.field.trait")}
+                    </span>
+                    <select
+                      value={manualTraitId}
+                      onChange={(event) => {
+                        setManualTraitId(event.target.value);
+                        clearError("suggestion");
+                      }}
+                      className="create-task-ai-modal__control w-full appearance-none rounded-xl border px-3 py-2 text-sm ios-touch-input focus:outline-none"
+                      disabled={!selectedManualPillar || isLoadingManualTraits}
+                    >
+                      <option value="">
+                        {selectedManualPillar
+                          ? t("editor.modal.create.selectTraitPlaceholder")
+                          : t("editor.modal.create.selectPillarFirst")}
+                      </option>
+                      {manualTraits.map((trait) => (
+                        <option key={trait.id} value={trait.id}>
+                          {localizeTraitLabel(
+                            { name: trait.name, code: trait.code, fallback: trait.id },
+                            language,
+                          )}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {manualTraitsError && (
+                    <p className="text-xs text-rose-300">{manualTraitsError}</p>
+                  )}
+                </section>
+              )}
+            </section>
 
             {errors.suggestion && (
               <p className="text-xs text-rose-300">{errors.suggestion}</p>
