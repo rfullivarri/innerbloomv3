@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DEMO_GUIDED_STEPS, type DemoLanguage, type GuidedStep } from '../../config/demoGuidedTour';
 
 type Props = {
@@ -154,8 +154,9 @@ export function GuidedDemoOverlay({
   onFinalPrimaryAction,
   onFinalSecondaryAction,
 }: Props) {
-  const overlayRef = useRef<HTMLDivElement | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
+  const [isTransitioningStep, setIsTransitioningStep] = useState(true);
+  const [isInteractionLocked, setIsInteractionLocked] = useState(false);
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
   const step = steps[stepIndex];
@@ -165,89 +166,68 @@ export function GuidedDemoOverlay({
   const isLogrosModalStep = LABS_LOGROS_MODAL_STEP_IDS.has(step.id);
   const isCompactMobile = viewport.width <= 390 || viewport.height <= 740;
 
+  const lockManualScroll = () => {
+    setIsInteractionLocked(true);
+  };
+
+  const unlockManualScroll = () => {
+    setIsInteractionLocked(false);
+  };
+
+  const goToStep = (nextIndex: number) => {
+    const boundedIndex = clamp(nextIndex, 0, steps.length - 1);
+    if (boundedIndex === stepIndex) {
+      return;
+    }
+    unlockManualScroll();
+    setIsTransitioningStep(true);
+    setStepIndex(boundedIndex);
+  };
+
   useEffect(() => {
+    if (!isInteractionLocked) {
+      return;
+    }
+
     const html = document.documentElement;
     const body = document.body;
     const dailyQuestScroller = getDailyQuestScrollContainer();
-    const scrollY = window.scrollY;
 
-    const previousHtmlOverflow = html.style.overflow;
     const previousHtmlOverscrollBehavior = html.style.overscrollBehavior;
-    const previousBodyOverflow = body.style.overflow;
     const previousBodyOverscrollBehavior = body.style.overscrollBehavior;
-    const previousBodyPosition = body.style.position;
-    const previousBodyTop = body.style.top;
-    const previousBodyLeft = body.style.left;
-    const previousBodyRight = body.style.right;
-    const previousBodyWidth = body.style.width;
-    const previousBodyTouchAction = body.style.touchAction;
 
     const previousDailyQuestOverflow = dailyQuestScroller?.style.overflow;
     const previousDailyQuestOverscrollBehavior = dailyQuestScroller?.style.overscrollBehavior;
-    const previousDailyQuestTouchAction = dailyQuestScroller?.style.touchAction;
-    const previousDailyQuestWebkitOverflowScrolling = dailyQuestScroller?.style.getPropertyValue('-webkit-overflow-scrolling');
 
-    html.style.overflow = 'hidden';
     html.style.overscrollBehavior = 'none';
-
-    body.style.overflow = 'hidden';
     body.style.overscrollBehavior = 'none';
-    body.style.position = 'fixed';
-    body.style.top = `-${scrollY}px`;
-    body.style.left = '0';
-    body.style.right = '0';
-    body.style.width = '100%';
-    body.style.touchAction = 'none';
 
     if (dailyQuestScroller) {
       dailyQuestScroller.style.overflow = 'hidden';
       dailyQuestScroller.style.overscrollBehavior = 'none';
-      dailyQuestScroller.style.touchAction = 'none';
-      dailyQuestScroller.style.setProperty('-webkit-overflow-scrolling', 'auto');
     }
 
     const preventManualScroll = (event: WheelEvent | TouchEvent) => {
       event.preventDefault();
     };
 
-    const overlayNode = overlayRef.current;
-    overlayNode?.addEventListener('wheel', preventManualScroll, { passive: false });
-    overlayNode?.addEventListener('touchmove', preventManualScroll, { passive: false });
     window.addEventListener('wheel', preventManualScroll, { passive: false });
     window.addEventListener('touchmove', preventManualScroll, { passive: false });
 
     return () => {
-      overlayNode?.removeEventListener('wheel', preventManualScroll);
-      overlayNode?.removeEventListener('touchmove', preventManualScroll);
       window.removeEventListener('wheel', preventManualScroll);
       window.removeEventListener('touchmove', preventManualScroll);
 
-      html.style.overflow = previousHtmlOverflow;
       html.style.overscrollBehavior = previousHtmlOverscrollBehavior;
 
-      body.style.overflow = previousBodyOverflow;
       body.style.overscrollBehavior = previousBodyOverscrollBehavior;
-      body.style.position = previousBodyPosition;
-      body.style.top = previousBodyTop;
-      body.style.left = previousBodyLeft;
-      body.style.right = previousBodyRight;
-      body.style.width = previousBodyWidth;
-      body.style.touchAction = previousBodyTouchAction;
 
       if (dailyQuestScroller) {
         dailyQuestScroller.style.overflow = previousDailyQuestOverflow ?? '';
         dailyQuestScroller.style.overscrollBehavior = previousDailyQuestOverscrollBehavior ?? '';
-        dailyQuestScroller.style.touchAction = previousDailyQuestTouchAction ?? '';
-        if (previousDailyQuestWebkitOverflowScrolling != null && previousDailyQuestWebkitOverflowScrolling.length > 0) {
-          dailyQuestScroller.style.setProperty('-webkit-overflow-scrolling', previousDailyQuestWebkitOverflowScrolling);
-        } else {
-          dailyQuestScroller.style.removeProperty('-webkit-overflow-scrolling');
-        }
       }
-
-      window.scrollTo({ top: scrollY, behavior: 'auto' });
     };
-  }, []);
+  }, [isInteractionLocked]);
 
   useEffect(() => {
     if (isDailyQuestStep) {
@@ -256,6 +236,10 @@ export function GuidedDemoOverlay({
 
     if (!step?.targetSelector) {
       setTargetRect(null);
+      void waitForLayoutSettle(1).then(() => {
+        lockManualScroll();
+        setIsTransitioningStep(false);
+      });
       return;
     }
 
@@ -386,30 +370,38 @@ export function GuidedDemoOverlay({
       await alignDashboardStepMobile(target);
     };
 
-    void alignForStep().then(() => {
-      void waitForLayoutSettle(2).then(() => {
-        updateRect();
-      });
-    });
+    let isCancelled = false;
+
+    const completeStepTransition = () => {
+      if (isCancelled) {
+        return;
+      }
+      updateRect();
+      lockManualScroll();
+      setIsTransitioningStep(false);
+    };
+
+    const runStepAlignment = async (settleFrames: number) => {
+      await alignForStep();
+      await waitForLayoutSettle(settleFrames);
+      completeStepTransition();
+    };
+
+    void runStepAlignment(2);
 
     const timeout = window.setTimeout(() => {
-      void alignForStep().then(() => {
-        void waitForLayoutSettle(1).then(() => {
-          updateRect();
-        });
-      });
+      void runStepAlignment(1);
     }, 220);
     const handleResize = () => {
       setViewport({ width: window.innerWidth, height: window.innerHeight });
-      void alignForStep().then(() => {
-        void waitForLayoutSettle(2).then(() => {
-          updateRect();
-        });
-      });
+      unlockManualScroll();
+      setIsTransitioningStep(true);
+      void runStepAlignment(2);
     };
     window.addEventListener('resize', handleResize);
     window.addEventListener('scroll', updateRect, true);
     return () => {
+      isCancelled = true;
       window.clearTimeout(timeout);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', updateRect, true);
@@ -532,10 +524,17 @@ export function GuidedDemoOverlay({
 
   return (
     <div
-      ref={overlayRef}
       className={`pointer-events-auto fixed inset-0 ${overlayZClass}`}
-      onWheel={(event) => event.preventDefault()}
-      onTouchMove={(event) => event.preventDefault()}
+      onWheel={(event) => {
+        if (isInteractionLocked) {
+          event.preventDefault();
+        }
+      }}
+      onTouchMove={(event) => {
+        if (isInteractionLocked) {
+          event.preventDefault();
+        }
+      }}
     >
       {targetRect ? (
         <>
@@ -622,8 +621,8 @@ export function GuidedDemoOverlay({
           {!isLast ? (
             <button
               type="button"
-              onClick={() => setStepIndex((current) => Math.max(0, current - 1))}
-              disabled={stepIndex === 0}
+              onClick={() => goToStep(stepIndex - 1)}
+              disabled={stepIndex === 0 || isTransitioningStep}
               className={secondaryButtonClass}
             >
               {language === 'es' ? 'Anterior' : 'Back'}
@@ -632,7 +631,8 @@ export function GuidedDemoOverlay({
           {!isLast ? (
             <button
               type="button"
-              onClick={() => setStepIndex((current) => Math.min(steps.length - 1, current + 1))}
+              onClick={() => goToStep(stepIndex + 1)}
+              disabled={isTransitioningStep}
               className={primaryButtonClass}
             >
               {language === 'es' ? 'Siguiente' : 'Next'}
@@ -646,8 +646,9 @@ export function GuidedDemoOverlay({
                     onFinalSecondaryAction();
                     return;
                   }
-                  setStepIndex((current) => Math.max(0, current - 1));
+                  goToStep(stepIndex - 1);
                 }}
+                disabled={isTransitioningStep}
                 className={secondaryButtonClass}
               >
                 {finalSecondaryLabel}
