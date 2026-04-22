@@ -4,8 +4,8 @@ export type EditorGuideStepId =
   | "wheel-traits"
   | "modal-entry"
   | "modal-input"
-  | "modal-ai-action"
-  | "modal-ai-result"
+  | "modal-difficulty"
+  | "modal-ai-thinking"
   | "filters"
   | "task-list"
   | "suggestions";
@@ -38,28 +38,28 @@ const EDITOR_GUIDE_STEPS_BY_LOCALE: Record<"es" | "en", EditorGuideStep[]> = {
     {
       id: "modal-entry",
       title: "Nueva tarea",
-      copy: "Desde acá creás tareas nuevas.",
-      targetSelector: '[data-editor-guide-target="new-task"]',
+      copy: "Este modal concentra todo el flujo para crear una nueva tarea.",
+      targetSelector: '[data-editor-guide-target="new-task-modal-dialog"]',
       panelPlacement: "top",
     },
     {
       id: "modal-input",
-      title: "Descripción",
-      copy: "Escribís la tarea que querés sumar.",
-      targetSelector: '[data-editor-guide-target="new-task-modal-dialog"]',
+      title: "Descripción / input",
+      copy: "Acá definís el contexto de la tarea. Luego elegís dificultad para calibrar el esfuerzo.",
+      targetSelector: '[data-editor-guide-target="new-task-modal-difficulty"]',
       panelPlacement: "top",
     },
     {
-      id: "modal-ai-action",
+      id: "modal-difficulty",
+      title: "Dificultad",
+      copy: "Seleccionás la dificultad esperada antes de pedir la sugerencia.",
+      targetSelector: '[data-editor-guide-target="new-task-modal-difficulty"]',
+      panelPlacement: "top",
+    },
+    {
+      id: "modal-ai-thinking",
       title: "Sugerencia IA",
-      copy: "Innerbloom puede sugerirte automáticamente pilar y rasgo.",
-      targetSelector: '[data-editor-guide-target="new-task-modal-dialog"]',
-      panelPlacement: "top",
-    },
-    {
-      id: "modal-ai-result",
-      title: "Resultado sugerido",
-      copy: "Si te sirve, confirmás; si no, reintentás o elegís manualmente.",
+      copy: "Con un click, la IA analiza la tarea y sugiere automáticamente pilar + rasgo.",
       targetSelector: '[data-editor-guide-target="new-task-modal-dialog"]',
       panelPlacement: "top",
     },
@@ -104,28 +104,28 @@ const EDITOR_GUIDE_STEPS_BY_LOCALE: Record<"es" | "en", EditorGuideStep[]> = {
     {
       id: "modal-entry",
       title: "New task",
-      copy: "Create new tasks from this button.",
-      targetSelector: '[data-editor-guide-target="new-task"]',
+      copy: "This modal contains the full flow to create a new task.",
+      targetSelector: '[data-editor-guide-target="new-task-modal-dialog"]',
       panelPlacement: "top",
     },
     {
       id: "modal-input",
-      title: "Task input",
-      copy: "Write the task you want to add.",
-      targetSelector: '[data-editor-guide-target="new-task-modal-dialog"]',
+      title: "Description / input",
+      copy: "Set the task context first, then define difficulty to size the effort.",
+      targetSelector: '[data-editor-guide-target="new-task-modal-difficulty"]',
       panelPlacement: "top",
     },
     {
-      id: "modal-ai-action",
+      id: "modal-difficulty",
+      title: "Difficulty",
+      copy: "Choose the expected challenge before requesting the suggestion.",
+      targetSelector: '[data-editor-guide-target="new-task-modal-difficulty"]',
+      panelPlacement: "top",
+    },
+    {
+      id: "modal-ai-thinking",
       title: "AI suggestion",
-      copy: "Innerbloom can suggest a pillar and trait automatically.",
-      targetSelector: '[data-editor-guide-target="new-task-modal-dialog"]',
-      panelPlacement: "top",
-    },
-    {
-      id: "modal-ai-result",
-      title: "Suggested result",
-      copy: "If it fits, confirm it; if not, retry or set it manually.",
+      copy: "With one action, AI analyzes the task and suggests pillar + trait automatically.",
       targetSelector: '[data-editor-guide-target="new-task-modal-dialog"]',
       panelPlacement: "top",
     },
