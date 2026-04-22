@@ -989,7 +989,7 @@ function TaskFilters({
           aria-label={language === "es" ? "Abrir guía" : "Open guide"}
           className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[linear-gradient(170deg,rgba(255,255,255,0.12),rgba(148,163,184,0.02))] text-[color:var(--color-slate-100)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_8px_18px_rgba(15,23,42,0.24)] transition hover:border-violet-200/40 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-200/60"
         >
-          <GuideCompassIcon className="h-4 w-4" />
+          <GuideCompassIcon className="h-[18px] w-[18px]" />
         </button>
         <button
           type="button"
@@ -998,7 +998,7 @@ function TaskFilters({
           data-editor-guide-target="suggestions"
           className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-violet-300/40 bg-[linear-gradient(170deg,rgba(167,139,250,0.26),rgba(129,140,248,0.08))] text-violet-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_10px_18px_rgba(76,29,149,0.3)] transition hover:border-violet-200/70 hover:bg-violet-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-200/65"
         >
-          <SuggestionsMagicIcon className="h-4 w-4" />
+          <SuggestionsMagicIcon className="h-[18px] w-[18px]" />
         </button>
       </div>
       <div className="md:hidden">
@@ -1010,7 +1010,7 @@ function TaskFilters({
               aria-label={language === "es" ? "Abrir guía" : "Open guide"}
               className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[linear-gradient(170deg,rgba(255,255,255,0.12),rgba(148,163,184,0.02))] text-[color:var(--color-slate-100)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_8px_18px_rgba(15,23,42,0.24)] transition hover:border-violet-200/40 hover:text-white"
             >
-              <GuideCompassIcon className="h-4 w-4" />
+              <GuideCompassIcon className="h-[18px] w-[18px]" />
             </button>
             <button
               type="button"
@@ -1019,7 +1019,7 @@ function TaskFilters({
               data-editor-guide-target="suggestions"
               className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-violet-300/40 bg-[linear-gradient(170deg,rgba(167,139,250,0.26),rgba(129,140,248,0.08))] text-violet-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_10px_18px_rgba(76,29,149,0.3)] transition hover:border-violet-200/70 hover:bg-violet-500/20"
             >
-              <SuggestionsMagicIcon className="h-4 w-4" />
+              <SuggestionsMagicIcon className="h-[18px] w-[18px]" />
             </button>
           </div>
           <div
@@ -2290,9 +2290,12 @@ function CreateTaskModal({
   const shouldShowGuideTrait =
     isGuideAIThinkingStep && guideSimulationPhase === "trait";
   const showAnalyzingCard = isAnalyzing || isGuideAIThinkingStep;
+  const hasManualCategorySelection = Boolean(manualPillarId && manualTraitId);
+  const shouldUseManualCategory =
+    manualCategoryEnabled && hasManualCategorySelection;
   const isSubmitDisabled =
     isSubmitting ||
-    (!suggestion && !(manualCategoryEnabled && manualPillarId && manualTraitId)) ||
+    (!suggestion && !hasManualCategorySelection) ||
     title.trim().length === 0 ||
     !userId;
   const isSuggestDisabled =
@@ -2389,7 +2392,7 @@ function CreateTaskModal({
       validationErrors.title = t("editor.validation.titleRequired");
     }
     if (!suggestion) {
-      if (!(manualCategoryEnabled && manualPillarId && manualTraitId)) {
+      if (!hasManualCategorySelection) {
         validationErrors.suggestion = t(
           "editor.modal.aiCreate.confirmationRequired",
         );
@@ -2406,8 +2409,12 @@ function CreateTaskModal({
     }
 
     try {
-      const resolvedPillarId = suggestion?.pillarId ?? manualPillarId;
-      const resolvedTraitId = suggestion?.traitId ?? manualTraitId;
+      const resolvedPillarId = shouldUseManualCategory
+        ? manualPillarId
+        : suggestion?.pillarId ?? manualPillarId;
+      const resolvedTraitId = shouldUseManualCategory
+        ? manualTraitId
+        : suggestion?.traitId ?? manualTraitId;
       await createTask(userId!, {
         title: title.trim(),
         pillarId: resolvedPillarId,
@@ -2647,11 +2654,19 @@ function CreateTaskModal({
                         type="button"
                         className="create-task-ai-modal__retry text-xs font-semibold underline decoration-dotted underline-offset-4"
                         onClick={() => {
-                          setManualCategoryEnabled(true);
+                          setManualCategoryEnabled((previous) => {
+                            if (previous) {
+                              setManualPillarId("");
+                              setManualTraitId("");
+                            }
+                            return !previous;
+                          });
                           clearError("suggestion");
                         }}
                       >
-                        {t("editor.modal.aiCreate.manualCategory")}
+                        {manualCategoryEnabled
+                          ? t("editor.modal.aiCreate.useAiSuggestion")
+                          : t("editor.modal.aiCreate.manualCategory")}
                       </button>
                     </div>
                   </section>
@@ -2662,6 +2677,20 @@ function CreateTaskModal({
                   className="create-task-ai-modal__manual-grid grid gap-3 rounded-xl border p-3"
                   data-editor-guide-target="new-task-modal-ai-result"
                 >
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      className="create-task-ai-modal__retry text-xs font-semibold underline decoration-dotted underline-offset-4"
+                      onClick={() => {
+                        setManualCategoryEnabled(false);
+                        setManualPillarId("");
+                        setManualTraitId("");
+                        clearError("suggestion");
+                      }}
+                    >
+                      {t("editor.modal.aiCreate.useAiSuggestion")}
+                    </button>
+                  </div>
                   <label className="flex flex-col gap-2">
                     <span className="create-task-ai-modal__field-label text-[11px] font-semibold uppercase tracking-[0.2em]">
                       {t("editor.field.pillar")}
