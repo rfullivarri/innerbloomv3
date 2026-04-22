@@ -3436,13 +3436,13 @@ function SuggestionsMagicIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
       <path
-        d="M12 4.4 13.3 7.2 16.2 8.5 13.3 9.8 12 12.6 10.7 9.8 7.8 8.5 10.7 7.2 12 4.4Z"
+        d="M12 4.5a5.5 5.5 0 0 0-3.3 9.9c.5.37.8.94.8 1.56V17h5v-1.04c0-.62.3-1.19.8-1.56A5.5 5.5 0 0 0 12 4.5Z"
         stroke="currentColor"
         strokeWidth="1.6"
         strokeLinejoin="round"
       />
-      <path d="m18.2 13.3.7 1.5 1.5.7-1.5.7-.7 1.5-.7-1.5-1.5-.7 1.5-.7.7-1.5Z" fill="currentColor" />
-      <path d="m5.8 14.6.55 1.1 1.1.55-1.1.55-.55 1.1-.55-1.1-1.1-.55 1.1-.55.55-1.1Z" fill="currentColor" />
+      <path d="M9.7 17h4.6v1.45a1.15 1.15 0 0 1-1.15 1.15h-2.3a1.15 1.15 0 0 1-1.15-1.15V17Z" fill="currentColor" />
+      <path d="M10.1 21h3.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }
