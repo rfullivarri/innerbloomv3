@@ -848,8 +848,6 @@ function TaskList({
       <div className="md:hidden">
         <TaskListMobile
           tasks={tasks}
-          pillarNamesById={pillarNamesById}
-          difficultyNamesById={difficultyNamesById}
           onEditTask={onEditTask}
           onDeleteTask={onDeleteTask}
           onDuplicateTask={onDuplicateTask}
@@ -877,8 +875,6 @@ function TaskList({
 
 function TaskListMobile({
   tasks,
-  pillarNamesById,
-  difficultyNamesById,
   onEditTask,
   onDeleteTask,
   onDuplicateTask,
@@ -886,8 +882,6 @@ function TaskListMobile({
   duplicatingTaskId,
 }: {
   tasks: UserTask[];
-  pillarNamesById: Map<string, string>;
-  difficultyNamesById: Map<string, string>;
   onEditTask: (task: UserTask) => void;
   onDeleteTask: (task: UserTask) => void;
   onDuplicateTask?: (task: UserTask) => void;
@@ -934,30 +928,10 @@ function TaskListMobile({
     }
   }, [openMenuTaskId]);
 
-  const resolveDifficulty = useCallback(
-    (task: UserTask) => {
-      const difficultyId = task.difficultyId ?? '';
-      const name = difficultyId ? difficultyNamesById.get(difficultyId) ?? difficultyId : t('editor.field.noDifficulty');
-      const reference = (difficultyId || name).toLowerCase();
-      let tone = 'bg-slate-400';
-      if (reference.includes('easy') || reference.includes('baja') || reference.includes('low')) {
-        tone = 'bg-emerald-400';
-      } else if (reference.includes('medium') || reference.includes('media')) {
-        tone = 'bg-amber-400';
-      } else if (reference.includes('hard') || reference.includes('alta') || reference.includes('high')) {
-        tone = 'bg-rose-400';
-      }
-
-      return { label: name || t('editor.field.noDifficulty'), tone };
-    },
-    [difficultyNamesById],
-  );
-
   // TODO: incorporar gestos de swipe cuando exista infraestructura compartida en el proyecto.
   return (
     <ul className="divide-y divide-white/5 overflow-visible rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]">
       {tasks.map((task) => {
-        const { label: difficultyLabel, tone } = resolveDifficulty(task);
         const isMenuOpen = openMenuTaskId === task.id;
         const isDuplicating = duplicatingTaskId === task.id;
 
@@ -970,12 +944,6 @@ function TaskListMobile({
             >
               <div className="flex items-start justify-between gap-3">
                 <p className="line-clamp-1 pr-8 text-sm font-semibold text-white">{task.title}</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 text-[11px] text-[color:var(--color-slate-300)]">
-                <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.15em] text-[color:var(--color-slate-100)]">
-                  <span className={`h-1 w-1 rounded-full ${tone}`} aria-hidden />
-                  <span>{difficultyLabel}</span>
-                </span>
               </div>
             </button>
             <div
