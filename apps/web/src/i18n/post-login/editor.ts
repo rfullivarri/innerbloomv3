@@ -126,6 +126,10 @@ export const editorTranslations = {
     es: 'Elegir manualmente',
     en: 'Set manually',
   },
+  'editor.modal.aiCreate.useAiSuggestion': {
+    es: 'Usar sugerencia IA',
+    en: 'Use AI suggestion',
+  },
   'editor.modal.aiCreate.confirmButton': {
     es: 'Confirmar tarea',
     en: 'Confirm task',
