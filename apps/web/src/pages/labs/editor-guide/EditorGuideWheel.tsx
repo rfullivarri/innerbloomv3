@@ -143,10 +143,6 @@ function levelFromStep(stepId: EditorGuideStepId): 1 | 2 | 3 {
   return 3;
 }
 
-function compactTraitLabel(label: string): string {
-  return label.length > 13 ? `${label.slice(0, 12)}…` : label;
-}
-
 function polarToCartesian(angleDeg: number, radius: number) {
   const radians = (angleDeg * Math.PI) / 180;
   return {
@@ -171,21 +167,21 @@ export function EditorGuideWheel({
 
     return traits.map((trait, index) => ({
       pillar,
-      trait: compactTraitLabel(trait),
+      trait,
       angle: startAngle + traitSlotAngle * (index + 0.5),
     }));
   });
 
-  const size = 332;
+  const size = 356;
   const center = size / 2;
-  const ringSize = 190;
-  const traitRingSize = 256;
-  const pillarLabelRadius = 52;
-  const traitTickRadius = 116;
-  const traitLabelRadius = 129;
+  const ringSize = 204;
+  const traitRingSize = 276;
+  const pillarLabelRadius = 66;
+  const traitTickRadius = 126;
+  const traitLabelRadius = 141;
 
   return (
-    <div className="relative mx-auto h-[21.5rem] w-full max-w-[22.5rem] overflow-visible">
+    <div className="relative mx-auto h-[23rem] w-full max-w-[24.5rem] overflow-visible">
       <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.19),transparent_72%)]" />
 
       <div
@@ -257,7 +253,7 @@ export function EditorGuideWheel({
 
       <svg
         viewBox={`0 0 ${size} ${size}`}
-        className="pointer-events-none absolute inset-0 h-full w-full overflow-hidden transition-all duration-700"
+        className="pointer-events-none absolute inset-0 h-full w-full overflow-visible transition-all duration-700"
         style={{ opacity: level >= 3 ? 1 : 0 }}
       >
         {traitSegments.map(({ trait, angle, pillar }) => {
