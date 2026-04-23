@@ -1,35 +1,11 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type MutableRefObject,
-  type ReactNode,
-} from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useReducedMotion } from 'framer-motion';
 import { DashboardOverview } from '../DashboardV3';
 import { getDashboardSectionConfig } from '../dashboardSections';
-import TaskEditorPage from '../editor';
-import { RewardsSection, type RewardsSectionDemoControls } from '../../components/dashboard-v3/RewardsSection';
-import { getDemoLogrosData, getDemoLogrosPreviewByTaskId } from '../../data/demoLogrosData';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { setDashboardDemoModeEnabled } from '../../lib/demoMode';
 import styles from './HeroPhoneShowcaseLabPage.module.css';
-
-type SceneKey =
-  | 'dashboardStill'
-  | 'dashboardDrift'
-  | 'toAchievements'
-  | 'achievementsShowcase'
-  | 'toTaskEditor'
-  | 'taskEditorStory'
-  | 'backToDashboard';
-
-type SceneDefinition = {
-  key: SceneKey;
-  durationMs: number;
-};
 
 const DEMO_DAILY_QUEST_READINESS = {
   hasTasks: true,
@@ -53,76 +29,8 @@ const DEMO_DAILY_QUEST_READINESS = {
   reload: () => undefined,
 };
 
-const SCENE_TIMELINE: SceneDefinition[] = [
-  { key: 'dashboardStill', durationMs: 600 },
-  { key: 'dashboardDrift', durationMs: 1800 },
-  { key: 'toAchievements', durationMs: 550 },
-  { key: 'achievementsShowcase', durationMs: 1800 },
-  { key: 'toTaskEditor', durationMs: 550 },
-  { key: 'taskEditorStory', durationMs: 2200 },
-  { key: 'backToDashboard', durationMs: 500 },
-];
-
-const LOOP_MS = SCENE_TIMELINE.reduce((total, scene) => total + scene.durationMs, 0);
-
-function useLoopTimeline(isReady: boolean) {
-  const prefersReducedMotion = useReducedMotion();
-  const [elapsedMs, setElapsedMs] = useState(0);
-
-  useEffect(() => {
-    if (prefersReducedMotion || !isReady) {
-      setElapsedMs(0);
-      return;
-    }
-
-    let rafId = 0;
-    const start = performance.now();
-
-    const tick = (now: number) => {
-      setElapsedMs((now - start) % LOOP_MS);
-      rafId = window.requestAnimationFrame(tick);
-    };
-
-    rafId = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(rafId);
-  }, [isReady, prefersReducedMotion]);
-
-  if (prefersReducedMotion || !isReady) {
-    return {
-      scene: 'dashboardStill' as SceneKey,
-      sceneProgress: 0,
-      panelTranslatePercent: 0,
-    };
-  }
-
-  let cursor = 0;
-  let current = SCENE_TIMELINE[0];
-  for (const scene of SCENE_TIMELINE) {
-    if (elapsedMs < cursor + scene.durationMs) {
-      current = scene;
-      break;
-    }
-    cursor += scene.durationMs;
-  }
-
-  const sceneProgress = Math.min(1, Math.max(0, (elapsedMs - cursor) / current.durationMs));
-  const easeInOut = sceneProgress * sceneProgress * (3 - 2 * sceneProgress);
-
-  const panelTranslatePercent = (() => {
-    if (current.key === 'toAchievements') return -100 * easeInOut;
-    if (current.key === 'achievementsShowcase') return -100;
-    if (current.key === 'toTaskEditor') return -100 - 100 * easeInOut;
-    if (current.key === 'taskEditorStory') return -200;
-    if (current.key === 'backToDashboard') return -200 + 200 * easeInOut;
-    return 0;
-  })();
-
-  return {
-    scene: current.key,
-    sceneProgress,
-    panelTranslatePercent,
-  };
-}
+const INITIAL_PAUSE_MS = 400;
+const SCROLL_DURATION_MS = 3000;
 
 function PhoneFrame({ children }: { children: ReactNode }) {
   return (
@@ -133,18 +41,18 @@ function PhoneFrame({ children }: { children: ReactNode }) {
   );
 }
 
-function RealDashboardScene({
-  scene,
-  sceneProgress,
-  onReady,
-}: {
-  scene: SceneKey;
-  sceneProgress: number;
-  onReady: () => void;
-}) {
+function easeInOutCubic(value: number) {
+  return value < 0.5
+    ? 4 * value * value * value
+    : 1 - Math.pow(-2 * value + 2, 3) / 2;
+}
+
+function DashboardOnlyScene() {
   const { language } = usePostLoginLanguage();
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const readyReportedRef = useRef(false);
+  const [isReady, setIsReady] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+
   const section = useMemo(
     () => getDashboardSectionConfig('dashboard', '/dashboard', language),
     [language],
@@ -154,57 +62,102 @@ function RealDashboardScene({
     const viewport = viewportRef.current;
     if (!viewport) return;
 
-    const maxScroll = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
-    const dashboardScrollCap = 0.08;
-    const driftProgress =
-      scene === 'dashboardDrift'
-        ? Math.max(0, Math.min(1, (sceneProgress - 0.2) / 0.8))
-        : scene === 'toAchievements' || scene === 'achievementsShowcase' || scene === 'toTaskEditor'
-          ? 1
-          : scene === 'backToDashboard'
-            ? 1 - sceneProgress
-            : 0;
-
-    viewport.scrollTop = maxScroll * dashboardScrollCap * driftProgress;
-  }, [scene, sceneProgress]);
-
-  useEffect(() => {
-    const viewport = viewportRef.current;
-    if (!viewport || readyReportedRef.current) return;
-
-    const hasCriticalBlocks = () => {
+    let intervalId = 0;
+    const hasAnchors = () => {
       const hasAvatar = viewport.querySelector('[data-demo-anchor="overall-progress"]');
       const hasEmotionChart = viewport.querySelector('[data-demo-anchor="emotion-chart"]');
       const hasStreaks = viewport.querySelector('[data-demo-anchor="streaks"]');
       return Boolean(hasAvatar && hasEmotionChart && hasStreaks);
     };
 
-    const markReadyIfStable = () => {
-      if (!hasCriticalBlocks() || readyReportedRef.current) {
-        return false;
-      }
-
-      window.setTimeout(() => {
-        if (readyReportedRef.current || !hasCriticalBlocks()) return;
-        readyReportedRef.current = true;
-        onReady();
-      }, 120);
+    const markIfReady = () => {
+      if (!hasAnchors()) return false;
+      window.setTimeout(() => setIsReady(true), 120);
       return true;
     };
 
-    if (markReadyIfStable()) return;
+    if (!markIfReady()) {
+      intervalId = window.setInterval(() => {
+        if (markIfReady()) {
+          window.clearInterval(intervalId);
+        }
+      }, 80);
+    }
 
-    const intervalId = window.setInterval(() => {
-      if (markReadyIfStable()) {
+    return () => {
+      if (intervalId) {
         window.clearInterval(intervalId);
       }
-    }, 80);
+    };
+  }, []);
 
-    return () => window.clearInterval(intervalId);
-  }, [onReady]);
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport || !isReady || prefersReducedMotion) {
+      if (viewport) viewport.scrollTop = 0;
+      return;
+    }
+
+    const avatarNode = viewport.querySelector('[data-demo-anchor="overall-progress"]') as HTMLElement | null;
+    const emotionNode = viewport.querySelector('[data-demo-anchor="emotion-chart"]') as HTMLElement | null;
+    const streaksNode = viewport.querySelector('[data-demo-anchor="streaks"]') as HTMLElement | null;
+
+    if (!avatarNode || !emotionNode || !streaksNode) {
+      viewport.scrollTop = 0;
+      return;
+    }
+
+    const maxScroll = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
+    const avatarTop = avatarNode.offsetTop;
+    const emotionTop = emotionNode.offsetTop;
+    const streaksTop = streaksNode.offsetTop;
+
+    const startScroll = Math.max(0, avatarTop - 32);
+    const emotionFocusScroll = Math.max(startScroll + 60, emotionTop - viewport.clientHeight * 0.28);
+    const finalScroll = Math.min(
+      maxScroll,
+      Math.max(emotionFocusScroll + 80, streaksTop - viewport.clientHeight * 0.5),
+    );
+
+    let rafId = 0;
+    const animationStart = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - animationStart;
+
+      if (elapsed <= INITIAL_PAUSE_MS) {
+        viewport.scrollTop = startScroll;
+        rafId = window.requestAnimationFrame(tick);
+        return;
+      }
+
+      const progress = Math.min(1, (elapsed - INITIAL_PAUSE_MS) / SCROLL_DURATION_MS);
+      const eased = easeInOutCubic(progress);
+
+      // Coreografía en dos tramos para mantener avatar/progreso al inicio,
+      // luego enfocar Emotion Chart y terminar mostrando streaks.
+      if (eased <= 0.58) {
+        const t = eased / 0.58;
+        viewport.scrollTop = startScroll + (emotionFocusScroll - startScroll) * t;
+      } else {
+        const t = (eased - 0.58) / 0.42;
+        viewport.scrollTop = emotionFocusScroll + (finalScroll - emotionFocusScroll) * t;
+      }
+
+      if (progress < 1) {
+        rafId = window.requestAnimationFrame(tick);
+      }
+    };
+
+    rafId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(rafId);
+  }, [isReady, prefersReducedMotion]);
 
   return (
-    <section className={`${styles.scenePanel} ${styles.sceneDashboard}`} data-light-scope="dashboard-v3">
+    <section
+      className={`${styles.scenePanel} ${styles.scenePanelSingle} ${styles.sceneDashboard}`}
+      data-light-scope="dashboard-v3"
+    >
       <div ref={viewportRef} className={styles.realViewport}>
         <div className={`${styles.realSceneScale} ${styles.dashboardSceneScale}`}>
           <DashboardOverview
@@ -229,163 +182,7 @@ function RealDashboardScene({
   );
 }
 
-function RealAchievementsScene({
-  scene,
-  sceneProgress,
-  controlsRef,
-  onReady,
-}: {
-  scene: SceneKey;
-  sceneProgress: number;
-  controlsRef: MutableRefObject<RewardsSectionDemoControls | null>;
-  onReady: () => void;
-}) {
-  const { language } = usePostLoginLanguage();
-
-  useEffect(() => {
-    const controls = controlsRef.current;
-    if (!controls) return;
-
-    if (scene === 'achievementsShowcase') {
-      controls.closeAllOverlays();
-      if (sceneProgress < 0.68) {
-        controls.focusCarouselCard('task-dinner-before-22');
-      } else {
-        controls.focusCarouselCard('task-gym');
-      }
-    }
-
-    if (scene === 'toTaskEditor') {
-      controls.closeAllOverlays();
-    }
-  }, [controlsRef, scene, sceneProgress]);
-
-  const demoConfig = useMemo(
-    () => ({
-      disableRemote: true,
-      forceAchievementsViewMode: 'carousel' as const,
-      mockPreviewAchievementByTaskId: getDemoLogrosPreviewByTaskId(language),
-      controls: {
-        onReady: (controls: RewardsSectionDemoControls) => {
-          controlsRef.current = controls;
-          window.setTimeout(() => {
-            onReady();
-          }, 140);
-        },
-      },
-    }),
-    [controlsRef, language, onReady],
-  );
-
-  return (
-    <section className={`${styles.scenePanel} ${styles.sceneAchievements}`} data-light-scope="dashboard-v3">
-      <div className={`${styles.realViewport} ${styles.achievementsViewport}`}>
-        <div className={`${styles.realSceneScale} ${styles.achievementsSceneScale}`}>
-          <RewardsSection
-            userId=""
-            initialData={getDemoLogrosData(language)}
-            demoConfig={demoConfig}
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function RealEditorScene({
-  scene,
-  sceneProgress,
-  onReady,
-}: {
-  scene: SceneKey;
-  sceneProgress: number;
-  onReady: () => void;
-}) {
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const readyReportedRef = useRef(false);
-  const storyStepsRef = useRef({
-    triggerPressed: false,
-    aiRequested: false,
-  });
-
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root || readyReportedRef.current) return;
-
-    const notifyReadyIfMounted = () => {
-      const cta = root.querySelector('[data-editor-guide-target="new-task-trigger"]');
-      if (!cta || readyReportedRef.current) return false;
-      readyReportedRef.current = true;
-      onReady();
-      return true;
-    };
-
-    if (notifyReadyIfMounted()) return;
-
-    const intervalId = window.setInterval(() => {
-      if (notifyReadyIfMounted()) {
-        window.clearInterval(intervalId);
-      }
-    }, 80);
-
-    return () => window.clearInterval(intervalId);
-  }, [onReady]);
-
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-
-    if (scene !== 'taskEditorStory') {
-      if (scene === 'backToDashboard') {
-        const closeButton = root.querySelector<HTMLButtonElement>('.create-task-ai-modal__close');
-        closeButton?.click();
-      }
-      storyStepsRef.current = {
-        triggerPressed: false,
-        aiRequested: false,
-      };
-      return;
-    }
-
-    if (sceneProgress >= 0.32 && !storyStepsRef.current.triggerPressed) {
-      const createTrigger = root.querySelector<HTMLButtonElement>('[data-editor-guide-target="new-task-trigger"]');
-      if (createTrigger) {
-        createTrigger.click();
-        storyStepsRef.current.triggerPressed = true;
-      }
-    }
-
-    if (sceneProgress >= 0.64 && !storyStepsRef.current.aiRequested) {
-      const aiButton = root.querySelector<HTMLButtonElement>('[data-editor-guide-target="new-task-modal-ai-action"]');
-      if (aiButton) {
-        aiButton.click();
-        storyStepsRef.current.aiRequested = true;
-      }
-    }
-  }, [scene, sceneProgress]);
-
-  return (
-    <section className={`${styles.scenePanel} ${styles.sceneEditor}`} data-light-scope="dashboard-v3">
-      <div className={`${styles.realViewport} ${styles.editorViewport}`}>
-        <div ref={rootRef} className={`${styles.realSceneScale} ${styles.editorSceneScale}`}>
-          <TaskEditorPage publicDemo />
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function HeroPhoneShowcase() {
-  const [sceneReadyMap, setSceneReadyMap] = useState({
-    dashboard: false,
-    achievements: false,
-    editor: false,
-  });
-  const [loopCanStart, setLoopCanStart] = useState(false);
-  const timeline = useLoopTimeline(loopCanStart);
-  const achievementsControlsRef = useRef<RewardsSectionDemoControls | null>(null);
-  const allScenesReady = sceneReadyMap.dashboard && sceneReadyMap.achievements && sceneReadyMap.editor;
-
   useEffect(() => {
     setDashboardDemoModeEnabled(true);
     return () => {
@@ -393,43 +190,9 @@ function HeroPhoneShowcase() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!allScenesReady) {
-      setLoopCanStart(false);
-      return;
-    }
-
-    const settleId = window.setTimeout(() => {
-      setLoopCanStart(true);
-    }, 320);
-
-    return () => window.clearTimeout(settleId);
-  }, [allScenesReady]);
-
-  const markReady = (scene: 'dashboard' | 'achievements' | 'editor') => {
-    setSceneReadyMap((prev) => (prev[scene] ? prev : { ...prev, [scene]: true }));
-  };
-
   return (
     <PhoneFrame>
-      <div className={styles.phoneViewportTrack} style={{ transform: `translateX(${timeline.panelTranslatePercent}%)` }}>
-        <RealDashboardScene
-          scene={timeline.scene}
-          sceneProgress={timeline.sceneProgress}
-          onReady={() => markReady('dashboard')}
-        />
-        <RealAchievementsScene
-          scene={timeline.scene}
-          sceneProgress={timeline.sceneProgress}
-          controlsRef={achievementsControlsRef}
-          onReady={() => markReady('achievements')}
-        />
-        <RealEditorScene
-          scene={timeline.scene}
-          sceneProgress={timeline.sceneProgress}
-          onReady={() => markReady('editor')}
-        />
-      </div>
+      <DashboardOnlyScene />
     </PhoneFrame>
   );
 }
@@ -443,10 +206,7 @@ export default function HeroPhoneShowcaseLabPage() {
           <h1>
             Tu progreso, <span>en tiempo real.</span>
           </h1>
-          <p>
-            Showcase dentro de móvil usando vistas reales de Innerbloom: dashboard real, logros reales y editor real
-            con flujo de creación asistida.
-          </p>
+          <p>Demo móvil del dashboard con estado mock limpio y recorrido visual enfocado.</p>
           <div className={styles.ctaRow}>
             <Link className={styles.primaryCta} to="/onboarding">Comenzar ahora</Link>
             <a className={styles.secondaryCta} href="/landing-v2#highlights">Ver dashboard</a>
