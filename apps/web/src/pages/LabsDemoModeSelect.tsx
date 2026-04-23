@@ -56,21 +56,28 @@ export default function LabsDemoModeSelectPage({ legacyLabsPath = false }: DemoM
     {
       id: 'dashboard',
       title: language === 'es' ? 'Dashboard' : 'Dashboard',
-      description: language === 'es' ? 'Vista general de progreso, foco y energía diaria.' : 'A guided overview of progress, focus, and daily energy.',
+      description:
+        language === 'es'
+          ? 'Panorama de progreso, foco y energía diaria.'
+          : 'A clear view of progress, focus, and daily energy.',
       href: buildDemoUrl({ language, source: legacyLabsPath ? 'labs' : source }),
       Icon: Target,
     },
     {
       id: 'logros',
       title: language === 'es' ? 'Logros' : 'Achievements',
-      description: language === 'es' ? 'Explora badges, sellos y recompensas desbloqueables.' : 'Explore badges, seals, and unlockable reward cards.',
+      description:
+        language === 'es'
+          ? 'Badges, sellos y recompensas desbloqueables.'
+          : 'Badges, seals, and unlockable reward moments.',
       href: `${legacyLabsPath ? '/labs/logros' : '/demo/logros'}?lang=${language}&source=${legacyLabsPath ? 'labs' : source}`,
       Icon: Sparkles,
     },
     {
       id: 'tareas',
       title: language === 'es' ? 'Tareas' : 'Tasks',
-      description: language === 'es' ? 'Editor público con datos mock y guía de uso incluida.' : 'Public editor preview with mock data and built-in guidance.',
+      description:
+        language === 'es' ? 'Editor público con datos mock y guía rápida.' : 'Public editor preview with mock data and quick guidance.',
       href: `${legacyLabsPath ? '/labs/tasks-demo' : '/demo/tasks'}?lang=${language}&source=${legacyLabsPath ? 'labs' : source}`,
       Icon: WandSparkles,
     },
@@ -98,29 +105,60 @@ export default function LabsDemoModeSelectPage({ legacyLabsPath = false }: DemoM
               </h1>
               <p className="mx-auto max-w-[58ch] text-sm leading-[1.5] text-white/78 sm:text-[0.96rem] md:text-[1.02rem]">
                 {language === 'es'
-                  ? 'Elige una demo pública para recorrer Dashboard, Logros o Tareas con una experiencia guiada y visual consistente.'
-                  : 'Choose a public demo to explore Dashboard, Achievements, or Tasks with a guided and consistent product experience.'}
+                  ? 'Abre una sección y entra directo a la experiencia.'
+                  : 'Pick a section and jump straight into the experience.'}
               </p>
             </div>
           </div>
 
-          <div className="relative mt-6 grid grid-cols-1 gap-3 md:mt-8 md:grid-cols-3 md:gap-4">
-            {cards.map(({ id, title, description, href, Icon }) => (
+          <div className="relative mt-5 flex flex-col overflow-hidden rounded-[1.4rem] border border-white/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.055),rgba(132,98,204,0.04)_60%,rgba(48,28,86,0.03))] shadow-[0_18px_36px_rgba(26,12,52,0.16),inset_0_1px_0_rgba(255,255,255,0.1)] md:mt-8 md:grid md:min-h-[24rem] md:grid-cols-[1.14fr_0.86fr] md:grid-rows-2 md:rounded-[1.9rem]">
+            <div className="pointer-events-none absolute inset-x-8 top-0 h-20 bg-[radial-gradient(circle_at_50%_0%,rgba(198,153,255,0.24),transparent_68%)] blur-xl md:inset-x-10 md:h-24" />
+            {cards.map(({ id, title, description, href, Icon }, index) => (
               <Link
                 key={id}
                 to={href}
-                className="group relative flex min-h-[15rem] flex-col justify-between rounded-[1.5rem] border border-white/12 bg-white/[0.045] p-5 shadow-[0_14px_30px_rgba(26,12,52,0.14),inset_0_1px_0_rgba(255,255,255,0.08)] transition duration-200 ease-out hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.07] hover:shadow-[0_18px_36px_rgba(26,12,52,0.2),inset_0_1px_0_rgba(255,255,255,0.14)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
+                className={`group relative z-[1] flex min-h-[4.75rem] items-center gap-3.5 px-4 py-3 transition duration-300 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white/70 md:gap-5 md:px-6 md:py-6 ${
+                  index === 0
+                    ? 'md:row-span-2 md:min-h-full md:flex-col md:items-start md:justify-center md:px-8 md:py-8'
+                    : 'md:min-h-0 md:py-5'
+                } ${
+                  index < cards.length - 1 ? 'border-b border-white/10 md:border-b-0' : ''
+                } ${
+                  index === 1
+                    ? 'md:border-b md:border-l md:border-white/10'
+                    : index === 2
+                      ? 'md:border-l md:border-white/10'
+                      : ''
+                } hover:bg-white/[0.06] active:bg-white/[0.08]`}
               >
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-white/[0.08] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition group-hover:scale-[1.03]">
-                  <Icon className="h-7 w-7" strokeWidth={2.1} />
+                <div
+                  className={`inline-flex shrink-0 items-center justify-center rounded-[1.2rem] border border-white/20 bg-white/[0.09] text-white shadow-[0_14px_28px_rgba(28,14,56,0.2),inset_0_1px_0_rgba(255,255,255,0.2)] transition duration-300 group-hover:scale-[1.02] group-hover:bg-white/[0.14] ${
+                    index === 0 ? 'h-[4.15rem] w-[4.15rem] md:h-[6.4rem] md:w-[6.4rem] md:rounded-[1.7rem]' : 'h-[3.5rem] w-[3.5rem] md:h-[4.25rem] md:w-[4.25rem]'
+                  }`}
+                >
+                  <Icon className={index === 0 ? 'h-9 w-9 md:h-14 md:w-14' : 'h-7 w-7 md:h-9 md:w-9'} strokeWidth={2} />
                 </div>
-                <div className="space-y-2">
-                  <h2 className="text-xl font-semibold tracking-[-0.02em] text-white">{title}</h2>
-                  <p className="text-sm leading-relaxed text-white/78">{description}</p>
+                <div className={`min-w-0 flex-1 ${index === 0 ? 'md:mt-7 md:space-y-3' : 'space-y-1.5'}`}>
+                  <h2
+                    className={`text-balance font-semibold tracking-[-0.02em] text-white ${
+                      index === 0 ? 'text-[1.2rem] md:text-[1.82rem] md:leading-[1.05]' : 'text-[1.03rem] md:text-[1.22rem]'
+                    }`}
+                  >
+                    {title}
+                  </h2>
+                  <p className={`text-white/76 ${index === 0 ? 'text-[0.92rem] leading-[1.55] md:max-w-[28ch] md:text-[1rem]' : 'text-[0.8rem] leading-[1.45] md:text-[0.9rem]'}`}>
+                    {description}
+                  </p>
                 </div>
-                <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/82 transition group-hover:text-white">
-                  {language === 'es' ? 'Abrir demo' : 'Open demo'}
-                  <span aria-hidden>→</span>
+                <span
+                  className={`inline-flex shrink-0 items-center gap-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-white/80 transition group-hover:text-white md:text-[0.66rem] ${
+                    index === 0 ? 'md:mt-7' : ''
+                  }`}
+                >
+                  {language === 'es' ? 'Entrar' : 'Enter'}
+                  <span aria-hidden className="text-sm leading-none">
+                    →
+                  </span>
                 </span>
               </Link>
             ))}
