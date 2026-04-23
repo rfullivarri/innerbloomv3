@@ -61,6 +61,7 @@ import {
 
 export const FEATURE_TASK_EDITOR_MOBILE_LIST_V1 = true;
 const ENABLE_EDITOR_GUIDE_AUTO_OPEN = true;
+const PUBLIC_DEMO_EDITOR_GUIDE_AUTO_OPEN_DELAY_MS = 700;
 
 type TaskEditorPageProps = {
   publicDemo?: boolean;
@@ -251,9 +252,10 @@ export default function TaskEditorPage({ publicDemo = false }: TaskEditorPagePro
       return;
     }
 
+    setShowGuideModal(false);
     const timeoutId = window.setTimeout(() => {
       setShowGuideModal(true);
-    }, 650);
+    }, PUBLIC_DEMO_EDITOR_GUIDE_AUTO_OPEN_DELAY_MS);
 
     return () => {
       window.clearTimeout(timeoutId);
