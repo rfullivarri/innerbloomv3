@@ -99,7 +99,10 @@ export default function LabsLogrosDemoPage() {
       <header className="sticky top-0 z-40 border-b border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] px-3 py-3 backdrop-blur-xl md:px-6">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-text-subtle)] md:text-xs">Innerbloom</p>
+            <p className="inline-flex items-center gap-1.5 text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-text-subtle)] md:text-xs">
+              <span>INNERBLOOM</span>
+              <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logomark" className="h-[0.95rem] w-auto shrink-0" />
+            </p>
             <h1 className="font-display text-[1.05rem] font-semibold text-[color:var(--color-text)] md:text-xl">{language === 'es' ? 'Logros' : 'Achievements'}</h1>
           </div>
           <Link
