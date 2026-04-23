@@ -5839,19 +5839,22 @@
   :root[data-theme="light"]
     [data-light-scope="editor"]
     .create-task-ai-modal__suggest-button {
-    border-color: color-mix(in srgb, #8a5bff 44%, #ffffff);
+    border-color: color-mix(in srgb, #7b4dff 52%, #ffffff);
     background:
-      linear-gradient(145deg, #f7f6ff 0%, #f0ecff 55%, #ece7ff 100%),
-      color-mix(in srgb, var(--editor-modal-input-bg) 90%, #f8fafc);
-    color: #2f2362;
-    box-shadow: 0 8px 18px rgba(112, 84, 196, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      linear-gradient(148deg, #f6f3ff 0%, #ede7ff 56%, #e8e0ff 100%),
+      color-mix(in srgb, var(--editor-modal-input-bg) 88%, #f8fafc);
+    color: #261a59;
+    box-shadow: 0 6px 14px rgba(112, 84, 196, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.92);
   }
 
   :root[data-theme="light"]
     [data-light-scope="editor"]
     .create-task-ai-modal__suggest-button:hover {
-    border-color: color-mix(in srgb, #7d4dff 55%, #ffffff);
-    box-shadow: 0 10px 20px rgba(115, 89, 198, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    border-color: color-mix(in srgb, #6f3dff 62%, #ffffff);
+    background:
+      linear-gradient(148deg, #f3eeff 0%, #e8deff 56%, #e4d9ff 100%),
+      color-mix(in srgb, var(--editor-modal-input-bg) 86%, #f8fafc);
+    box-shadow: 0 8px 16px rgba(112, 84, 196, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
   :root[data-theme="light"]
