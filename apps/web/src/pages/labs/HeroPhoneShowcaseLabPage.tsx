@@ -32,6 +32,43 @@ const DEMO_DAILY_QUEST_READINESS = {
 const INITIAL_PAUSE_MS = 400;
 const SCROLL_DURATION_MS = 3000;
 
+function easeInOut(progress: number) {
+  return progress < 0.5
+    ? 4 * progress * progress * progress
+    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+}
+
+function useDashboardScrollProgress(isReady: boolean) {
+  const prefersReducedMotion = useReducedMotion();
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (prefersReducedMotion || !isReady) {
+      setProgress(0);
+      return;
+    }
+
+    let rafId = 0;
+    const start = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const movementElapsed = Math.max(0, elapsed - INITIAL_PAUSE_MS);
+      const nextProgress = Math.min(1, movementElapsed / SCROLL_DURATION_MS);
+      setProgress(nextProgress);
+
+      if (nextProgress < 1) {
+        rafId = window.requestAnimationFrame(tick);
+      }
+    };
+
+    rafId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(rafId);
+  }, [isReady, prefersReducedMotion]);
+
+  return prefersReducedMotion || !isReady ? 0 : easeInOut(progress);
+}
+
 function PhoneFrame({ children }: { children: ReactNode }) {
   return (
     <div className={styles.phoneFrame}>
@@ -41,18 +78,17 @@ function PhoneFrame({ children }: { children: ReactNode }) {
   );
 }
 
-function easeInOutCubic(value: number) {
-  return value < 0.5
-    ? 4 * value * value * value
-    : 1 - Math.pow(-2 * value + 2, 3) / 2;
-}
-
-function DashboardOnlyScene() {
+function RealDashboardScene({
+  scrollProgress,
+  onReady,
+}: {
+  scrollProgress: number;
+  onReady: () => void;
+}) {
   const { language } = usePostLoginLanguage();
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const [isReady, setIsReady] = useState(false);
-  const prefersReducedMotion = useReducedMotion();
-
+  const readyReportedRef = useRef(false);
+  const scrollRangeRef = useRef({ start: 0, end: 0 });
   const section = useMemo(
     () => getDashboardSectionConfig('dashboard', '/dashboard', language),
     [language],
@@ -62,12 +98,39 @@ function DashboardOnlyScene() {
     const viewport = viewportRef.current;
     if (!viewport) return;
 
-    let intervalId = 0;
-    const hasAnchors = () => {
-      const hasAvatar = viewport.querySelector('[data-demo-anchor="overall-progress"]');
-      const hasEmotionChart = viewport.querySelector('[data-demo-anchor="emotion-chart"]');
-      const hasStreaks = viewport.querySelector('[data-demo-anchor="streaks"]');
-      return Boolean(hasAvatar && hasEmotionChart && hasStreaks);
+    const { start, end } = scrollRangeRef.current;
+    viewport.scrollTop = start + (end - start) * scrollProgress;
+  }, [scrollProgress]);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport || readyReportedRef.current) return;
+
+    const hasCriticalBlocks = () => {
+      const avatar = viewport.querySelector<HTMLElement>('[data-demo-anchor="overall-progress"]');
+      const emotionChart = viewport.querySelector<HTMLElement>('[data-demo-anchor="emotion-chart"]');
+      const streaks = viewport.querySelector<HTMLElement>('[data-demo-anchor="streaks"]');
+      if (!avatar || !emotionChart || !streaks) {
+        return false;
+      }
+
+      const viewportRect = viewport.getBoundingClientRect();
+      const resolveTop = (element: HTMLElement) =>
+        element.getBoundingClientRect().top - viewportRect.top + viewport.scrollTop;
+      const maxScroll = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
+      const avatarTop = resolveTop(avatar);
+      const emotionTop = resolveTop(emotionChart);
+      const streakTop = resolveTop(streaks);
+      const start = Math.max(0, Math.min(maxScroll, avatarTop - 18));
+      const endTarget = Math.max(
+        emotionTop - viewport.clientHeight * 0.42,
+        streakTop - viewport.clientHeight * 0.28,
+      );
+      const end = Math.max(start, Math.min(maxScroll, endTarget));
+      scrollRangeRef.current = { start, end };
+      viewport.scrollTop = start;
+
+      return true;
     };
 
     const markIfReady = () => {
@@ -183,6 +246,9 @@ function DashboardOnlyScene() {
 }
 
 function HeroPhoneShowcase() {
+  const [dashboardReady, setDashboardReady] = useState(false);
+  const scrollProgress = useDashboardScrollProgress(dashboardReady);
+
   useEffect(() => {
     setDashboardDemoModeEnabled(true);
     return () => {
@@ -192,7 +258,7 @@ function HeroPhoneShowcase() {
 
   return (
     <PhoneFrame>
-      <DashboardOnlyScene />
+      <RealDashboardScene scrollProgress={scrollProgress} onReady={() => setDashboardReady(true)} />
     </PhoneFrame>
   );
 }
@@ -206,7 +272,10 @@ export default function HeroPhoneShowcaseLabPage() {
           <h1>
             Tu progreso, <span>en tiempo real.</span>
           </h1>
-          <p>Demo móvil del dashboard con estado mock limpio y recorrido visual enfocado.</p>
+          <p>
+            Iteración del experimento móvil enfocada solo en el dashboard demo, con encuadre deliberado y scroll
+            suave para mostrar señales clave de progreso.
+          </p>
           <div className={styles.ctaRow}>
             <Link className={styles.primaryCta} to="/onboarding">Comenzar ahora</Link>
             <a className={styles.secondaryCta} href="/landing-v2#highlights">Ver dashboard</a>
