@@ -277,6 +277,8 @@ export default function App() {
         <Route path="/labs/demo-mode-select" element={<LabsDemoModeSelectPage legacyLabsPath />} />
         <Route path="/labs/logros" element={<LabsLogrosDemoPage />} />
         <Route path="/labs/tasks-demo" element={<PublicTasksDemoPage />} />
+        <Route path="/demo/logros" element={<LabsLogrosDemoPage />} />
+        <Route path="/demo/tasks" element={<PublicTasksDemoPage />} />
         <Route path="/labs/landing-rhythm-section" element={<LandingRhythmSectionMvpPage />} />
         <Route
           path="/labs/editor"

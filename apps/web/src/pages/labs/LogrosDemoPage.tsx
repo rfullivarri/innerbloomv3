@@ -1,10 +1,11 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { GuidedDemoOverlay } from '../../components/demo/GuidedDemoOverlay';
 import { RewardsSection, type RewardsSectionDemoControls } from '../../components/dashboard-v3/RewardsSection';
 import { LABS_LOGROS_GUIDED_STEPS } from '../../config/labsLogrosGuidedTour';
 import { getDemoLogrosData, getDemoLogrosPreviewByTaskId } from '../../data/demoLogrosData';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
+import { getPublicDemoHubPath } from '../../lib/demoEntry';
 
 const DEMO_ANCHORS = {
   shelves: 'logros-shelves',
@@ -28,7 +29,9 @@ const DEMO_ANCHORS = {
 } as const;
 
 export default function LabsLogrosDemoPage() {
+  const location = useLocation();
   const { language } = usePostLoginLanguage();
+  const demoHubPath = getPublicDemoHubPath(location.search);
   const [showGuidedTour, setShowGuidedTour] = useState(true);
   const [activeStepId, setActiveStepId] = useState<string | null>(LABS_LOGROS_GUIDED_STEPS[0]?.id ?? null);
   const demoControlsRef = useRef<RewardsSectionDemoControls | null>(null);
@@ -100,8 +103,8 @@ export default function LabsLogrosDemoPage() {
             <h1 className="font-display text-[1.05rem] font-semibold text-[color:var(--color-text)] md:text-xl">{language === 'es' ? 'Logros' : 'Achievements'}</h1>
           </div>
           <Link
-            to="/dashboard-v3/rewards"
-            aria-label={language === 'es' ? 'Cerrar demo de Logros y volver al dashboard' : 'Close Achievements demo and return to dashboard'}
+            to={demoHubPath}
+            aria-label={language === 'es' ? 'Cerrar demo de Logros y volver al hub público' : 'Close Achievements demo and return to the public hub'}
             className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--glass-border)] bg-[color:var(--color-surface-soft)] text-lg font-semibold leading-none text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-surface-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-bg)]"
           >
             <span aria-hidden>×</span>

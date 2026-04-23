@@ -12,10 +12,9 @@ import { setDashboardDemoModeEnabled } from '../lib/demoMode';
 import { GuidedDemoOverlay } from '../components/demo/GuidedDemoOverlay';
 import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
 import { buildGuidedSteps } from '../config/demoGuidedTour';
-import { resolveDemoEntryContext } from '../lib/demoEntry';
+import { getPublicDemoHubPath, resolveDemoEntryContext } from '../lib/demoEntry';
 import { getLabsGameModeConfig } from '../config/labsGameModes';
 import { DASHBOARD_PATH } from '../config/auth';
-import { buildLocalizedAuthPath } from '../lib/authLanguage';
 import { usePageMeta } from '../lib/seo';
 
 const DEMO_USER_ID = 'demo-public-user';
@@ -57,6 +56,7 @@ export default function DemoDashboardPage() {
   const navigate = useNavigate();
   const { userId } = useAuth();
   const demoContext = resolveDemoEntryContext(location.search);
+  const demoHubPath = getPublicDemoHubPath(location.search);
   const { theme, setPreference } = useThemePreference();
   const [showGuidedTour, setShowGuidedTour] = useState(true);
   const hasLoggedGuidedStart = useRef(false);
@@ -96,8 +96,8 @@ export default function DemoDashboardPage() {
       return;
     }
 
-    navigate(buildLocalizedAuthPath('/', demoContext.language));
-  }, [dashboardPath, demoContext.fromOnboarding, demoContext.language, demoContext.mode, navigate, userId]);
+    navigate(demoHubPath);
+  }, [dashboardPath, demoContext.fromOnboarding, demoContext.mode, demoHubPath, navigate, userId]);
 
   useEffect(() => {
     if (language !== demoContext.language) {
@@ -185,7 +185,7 @@ export default function DemoDashboardPage() {
             <Link
               to={demoContext.fromOnboarding
                 ? dashboardPath
-                : buildLocalizedAuthPath('/', demoContext.language)}
+                : demoHubPath}
               onClick={(event) => {
                 event.preventDefault();
                 handleDemoExit();
