@@ -1,11 +1,12 @@
 .page {
   min-height: 100vh;
   padding: clamp(1.4rem, 2.8vw, 3rem);
-  color: #eef0ff;
+  color: #f2f1fb;
   background:
-    radial-gradient(circle at 85% 14%, rgba(122, 93, 255, 0.2), transparent 34%),
-    radial-gradient(circle at 20% 12%, rgba(78, 128, 255, 0.24), transparent 32%),
-    linear-gradient(180deg, #0b0b16 0%, #090911 100%);
+    radial-gradient(circle at 80% 10%, rgba(153, 111, 244, 0.2), transparent 37%),
+    radial-gradient(circle at 17% 13%, rgba(117, 142, 252, 0.16), transparent 33%),
+    radial-gradient(circle at 52% 82%, rgba(253, 173, 124, 0.08), transparent 52%),
+    linear-gradient(180deg, #0f0f19 0%, #0a0a12 100%);
 }
 
 .hero {
@@ -14,7 +15,7 @@
   min-height: calc(100vh - 3rem);
   display: grid;
   gap: clamp(1.3rem, 3vw, 2.6rem);
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 430px);
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 390px);
   align-items: center;
 }
 
@@ -26,13 +27,13 @@
 }
 
 .copyCol h1 span {
-  color: #af9dff;
+  color: #c8a6ff;
 }
 
 .copyCol > p {
   margin: 0.95rem 0 0;
   max-width: 55ch;
-  color: rgba(232, 233, 255, 0.82);
+  color: rgba(237, 236, 250, 0.84);
   line-height: 1.6;
 }
 
@@ -41,7 +42,7 @@
   font-size: 0.72rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(219, 210, 255, 0.65);
+  color: rgba(236, 205, 183, 0.72);
 }
 
 .ctaRow {
@@ -64,14 +65,15 @@
 }
 
 .primaryCta {
-  background: linear-gradient(135deg, #8f78ff, #5c7fff);
+  background: linear-gradient(135deg, #9a78f6, #6f84f7);
   color: #fbfbff;
+  box-shadow: 0 8px 24px rgba(116, 107, 216, 0.36);
 }
 
 .secondaryCta {
-  border: 1px solid rgba(198, 203, 255, 0.25);
-  color: rgba(239, 241, 255, 0.92);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(220, 216, 243, 0.24);
+  color: rgba(243, 239, 255, 0.92);
+  background: rgba(255, 245, 236, 0.03);
 }
 
 .visualCol {
@@ -80,19 +82,25 @@
 }
 
 .phoneFrame {
-  width: min(100%, 365px);
+  width: min(100%, 342px);
   aspect-ratio: 9 / 18.5;
-  border-radius: 38px;
-  background: linear-gradient(145deg, #202230, #060709);
+  border-radius: 40px;
+  background: linear-gradient(145deg, #2a2536 0%, #0a0910 48%, #141b30 100%);
   padding: 10px;
-  box-shadow: 0 24px 64px rgba(9, 7, 26, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 26px 72px rgba(8, 8, 18, 0.6),
+    0 8px 24px rgba(84, 61, 142, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    inset 0 -7px 14px rgba(0, 0, 0, 0.32);
+  transform: perspective(1200px) rotateY(-5deg) rotateX(1.5deg);
+  transform-origin: center right;
 }
 
 .phoneNotch {
   width: 36%;
   height: 19px;
   margin: 0 auto 8px;
-  background: #080910;
+  background: linear-gradient(180deg, #05060b, #141724);
   border-radius: 0 0 14px 14px;
 }
 
@@ -100,15 +108,18 @@
   height: calc(100% - 27px);
   border-radius: 30px;
   overflow: hidden;
-  background: #0b1020;
-  border: 1px solid rgba(169, 173, 226, 0.23);
+  background: radial-gradient(circle at 76% 18%, rgba(247, 193, 151, 0.07), transparent 30%), #101322;
+  border: 1px solid rgba(216, 194, 246, 0.24);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -14px 36px rgba(4, 5, 10, 0.48);
 }
 
 .phoneViewportTrack {
   width: 300%;
   height: 100%;
   display: flex;
-  transition: transform 760ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
 }
 
 .scenePanel {
@@ -141,7 +152,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
-  transition: transform 600ms ease;
+  will-change: transform;
 }
 
 .heroCard,
@@ -150,8 +161,9 @@
 .modalCard,
 .sealCard {
   border-radius: 14px;
-  background: rgba(44, 50, 88, 0.35);
-  border: 1px solid rgba(167, 171, 233, 0.2);
+  background: rgba(44, 49, 82, 0.4);
+  border: 1px solid rgba(205, 190, 235, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .heroCard {
@@ -208,8 +220,8 @@
   display: block;
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #75a0ff, #a48bff);
-  transition: width 500ms ease;
+  background: linear-gradient(90deg, #7a9bf3, #b58ff1);
+  transition: width 580ms cubic-bezier(0.2, 0.65, 0.2, 1);
 }
 
 .miniBars {
@@ -226,7 +238,7 @@
 }
 
 .activeBar {
-  background: linear-gradient(90deg, #7d8fff, #c08aff);
+  background: linear-gradient(90deg, #8898f0, #c89af1);
 }
 
 .sealGrid {
@@ -243,6 +255,7 @@
   align-items: flex-start;
   gap: 0.42rem;
   transform: translateY(0);
+  will-change: transform;
 }
 
 .sealCard span {
@@ -255,7 +268,7 @@
 }
 
 .sealCardActive {
-  animation: sealFloat 2.1s ease-in-out infinite;
+  animation: sealFloat var(--seal-duration, 3.8s) cubic-bezier(0.42, 0, 0.22, 1) infinite;
 }
 
 .editorCard,
@@ -272,14 +285,7 @@
 }
 
 .modalCard {
-  opacity: 0;
-  transform: translateY(14px) scale(0.96);
-  transition: opacity 440ms ease, transform 440ms ease;
-}
-
-.modalCardVisible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
+  will-change: transform, opacity;
 }
 
 .inputRow {
@@ -295,7 +301,7 @@
 @keyframes sealFloat {
   0%,
   100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  50% { transform: translateY(calc(var(--seal-motion, 2px) * -1)); }
 }
 
 @media (max-width: 980px) {
@@ -311,10 +317,15 @@
 
   .phoneFrame {
     width: min(100%, 340px);
+    transform: none;
   }
 }
 
 @media (max-width: 560px), (prefers-reduced-motion: reduce) {
+  .phoneFrame {
+    transform: none;
+  }
+
   .phoneViewportTrack,
   .dashboardViewport,
   .modalCard,
