@@ -28,6 +28,7 @@ import LabsLogrosDemoPage from './pages/labs/LogrosDemoPage';
 import LabsIndexPage from './pages/labs/LabsIndexPage';
 import LandingRhythmSectionMvpPage from './pages/labs/LandingRhythmSectionMvpPage';
 import EditorLabPage from './pages/labs/EditorLabPage';
+import PublicTasksDemoPage from './pages/labs/PublicTasksDemoPage';
 import { useGa4FunnelTracking } from './hooks/useGa4FunnelTracking';
 import { isNativeCapacitorPlatform } from './mobile/capacitor';
 import { writeMobileDebug } from './mobile/mobileDebug';
@@ -275,6 +276,7 @@ export default function App() {
         <Route path="/labs" element={<LabsIndexPage />} />
         <Route path="/labs/demo-mode-select" element={<LabsDemoModeSelectPage legacyLabsPath />} />
         <Route path="/labs/logros" element={<LabsLogrosDemoPage />} />
+        <Route path="/labs/tasks-demo" element={<PublicTasksDemoPage />} />
         <Route path="/labs/landing-rhythm-section" element={<LandingRhythmSectionMvpPage />} />
         <Route
           path="/labs/editor"
