@@ -2,9 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { useAuth } from '@clerk/clerk-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/layout/Navbar';
-import { DashboardOverview } from './DashboardV3';
-import type { DailyQuestReadiness } from '../hooks/useDailyQuestReadiness';
-import { getDashboardSectionConfig } from './dashboardSections';
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 import { useThemePreference } from '../theme/ThemePreferenceProvider';
 import { emitDemoEvent } from '../lib/telemetry';
@@ -16,32 +13,9 @@ import { getPublicDemoHubPath, resolveDemoEntryContext } from '../lib/demoEntry'
 import { getLabsGameModeConfig } from '../config/labsGameModes';
 import { DASHBOARD_PATH } from '../config/auth';
 import { usePageMeta } from '../lib/seo';
-
-const DEMO_USER_ID = 'demo-public-user';
+import { DemoDashboardOverviewScene } from '../components/demo/DemoDashboardOverviewScene';
 
 const DEMO_SHARE_IMAGE = 'https://innerbloomjourney.org/og/neneOGP.png';
-
-const DEMO_DAILY_QUEST_READINESS: DailyQuestReadiness = {
-  hasTasks: true,
-  firstTasksConfirmed: true,
-  completedFirstDailyQuest: true,
-  canOpenDailyQuest: true,
-  canShowDailyQuestPopup: true,
-  canAutoOpenDailyQuestPopup: false,
-  showOnboardingGuidance: false,
-  showJourneyPreparing: false,
-  tasksStatus: 'success',
-  journeyStatus: 'success',
-  journey: {
-    first_date_log: null,
-    days_of_journey: 0,
-    quantity_daily_logs: 0,
-    first_programmed: true,
-    first_tasks_confirmed: true,
-    completed_first_daily_quest: true,
-  },
-  reload: () => undefined,
-};
 
 const DAILY_QUEST_STEP_IDS = new Set([
   'daily-quest-intro',
@@ -139,8 +113,6 @@ export default function DemoDashboardPage() {
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [dashboardPath, demoContext.fromOnboarding, demoContext.mode, demoContext.source, guidedSteps.length, navigate, userId]);
-
-  const overviewSection = getDashboardSectionConfig('dashboard', '/dashboard', language);
 
   return (
     <div className="min-h-screen bg-transparent" data-light-scope="dashboard-v3">
@@ -242,21 +214,9 @@ export default function DemoDashboardPage() {
         data-demo-mode={demoContext.mode}
         style={{ '--demo-mode-accent': selectedModeConfig.accentColor } as CSSProperties}
       >
-        <DashboardOverview
-          userId={DEMO_USER_ID}
+        <DemoDashboardOverviewScene
           gameMode={demoContext.gameMode}
-          avatarProfile={null}
-          weeklyTarget={3}
-          isJourneyGenerating={false}
-          dailyQuestReadiness={DEMO_DAILY_QUEST_READINESS}
-          showOnboardingGuidance={false}
-          section={overviewSection}
-          onOpenReminderScheduler={() => undefined}
-          onOpenModerationEdit={() => undefined}
-          shouldShowFirstDailyQuestCta={false}
           onOpenDailyQuest={() => dailyQuestModalRef.current?.open()}
-          showOnboardingCompletionBanner={false}
-          onUpgradeAccepted={() => undefined}
         />
       </main>
     </div>
