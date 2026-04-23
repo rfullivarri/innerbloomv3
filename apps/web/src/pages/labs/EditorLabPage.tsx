@@ -2130,22 +2130,24 @@ function CreateTaskModal({
       if (!classification.pillarId || !classification.traitId) {
         return null;
       }
+      const resolvedPillarId = String(classification.pillarId);
+      const resolvedTraitId = String(classification.traitId);
 
       const pillarFromCatalog = sortedPillars.find(
-        (pillar) => pillar.id === classification.pillarId,
+        (pillar) => pillar.id === resolvedPillarId,
       );
       const traitFromManualList = manualTraits.find(
-        (trait) => trait.id === classification.traitId,
+        (trait) => trait.id === resolvedTraitId,
       );
 
       return {
-        pillarId: classification.pillarId,
-        traitId: classification.traitId,
+        pillarId: resolvedPillarId,
+        traitId: resolvedTraitId,
         pillarLabel:
           classification.pillarName
           ?? (pillarFromCatalog
             ? localizePillarLabel(pillarFromCatalog.name, language)
-            : classification.pillarCode ?? classification.pillarId),
+            : classification.pillarCode ?? resolvedPillarId),
         traitLabel:
           classification.traitName
           ?? (traitFromManualList
@@ -2157,7 +2159,7 @@ function CreateTaskModal({
               },
               language,
             )
-            : classification.traitCode ?? classification.traitId),
+            : classification.traitCode ?? resolvedTraitId),
         rationale:
           classification.rationale
           ?? t("editor.modal.aiCreate.suggestedCategory"),

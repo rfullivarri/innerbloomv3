@@ -1756,8 +1756,8 @@ export type ClassifyUserTaskInput = {
 };
 
 export type UserTaskClassification = {
-  pillarId: string | null;
-  traitId: string | null;
+  pillarId: number | null;
+  traitId: number | null;
   pillarCode: string | null;
   pillarName: string | null;
   traitCode: string | null;
@@ -1871,8 +1871,10 @@ export async function createUserTask(userId: string, payload: CreateUserTaskInpu
 }
 
 function normalizeUserTaskClassification(source: unknown): UserTaskClassification {
-  const record = isRecord(source) ? source : {};
-  const confidenceRaw = record.confidence;
+  const envelope = isRecord(source) ? source : {};
+  const record = isRecord(envelope.classification) ? envelope.classification : envelope;
+  const meta = isRecord(envelope.meta) ? envelope.meta : {};
+  const confidenceRaw = record.confidence ?? meta.confidence;
   const confidence =
     typeof confidenceRaw === 'number'
       ? confidenceRaw
@@ -1880,9 +1882,9 @@ function normalizeUserTaskClassification(source: unknown): UserTaskClassificatio
         ? Number.parseFloat(confidenceRaw)
         : null;
 
-  const pillarId = pickString(record.pillar_id);
-  const traitId = pickString(record.trait_id);
-  const requiresManualSelectionRaw = record.requires_manual_selection;
+  const pillarId = pickNumber(record.pillar_id);
+  const traitId = pickNumber(record.trait_id);
+  const requiresManualSelectionRaw = record.requires_manual_selection ?? envelope.requires_manual_selection;
   const requiresManualSelection =
     typeof requiresManualSelectionRaw === 'boolean'
       ? requiresManualSelectionRaw
@@ -1895,7 +1897,7 @@ function normalizeUserTaskClassification(source: unknown): UserTaskClassificatio
     pillarName: pickString(record.pillar_name),
     traitCode: pickString(record.trait_code),
     traitName: pickString(record.trait_name),
-    rationale: pickString(record.rationale),
+    rationale: pickString(record.rationale ?? meta.rationale),
     confidence: Number.isFinite(confidence) ? confidence : null,
     requiresManualSelection,
   };
