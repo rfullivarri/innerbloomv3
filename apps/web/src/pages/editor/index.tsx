@@ -686,17 +686,23 @@ export default function TaskEditorPage() {
           <div ref={editorTopRef} className="scroll-mt-24" />
           <div className="mx-auto w-full max-w-7xl px-2 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             <SectionHeader section={taskEditorSection} showLabBadge={location.pathname.startsWith("/labs/")} />
+            <div
+              className={`overflow-hidden transition-[max-height,margin,opacity] duration-200 ${
+                pageToast
+                  ? "mb-3 max-h-28 opacity-100 md:mb-4"
+                  : "max-h-0 opacity-0"
+              }`}
+            >
+              {pageToast && (
+                <ToastBanner
+                  tone={pageToast.type}
+                  message={pageToast.text}
+                  className="border-emerald-300/70 bg-emerald-500 text-white shadow-[0_14px_36px_rgba(16,185,129,0.45)]"
+                />
+              )}
+            </div>
             <Card className="px-4 py-5 md:p-6">
               <div className="flex flex-col gap-5">
-                {pageToast && (
-                  <div className="fixed inset-x-3 top-[calc(env(safe-area-inset-top,0px)+4.5rem)] z-[70] md:inset-x-auto md:right-8 md:top-24 md:w-[24rem]">
-                    <ToastBanner
-                      tone={pageToast.type}
-                      message={pageToast.text}
-                      className="border-emerald-300/70 bg-emerald-500 text-white shadow-[0_14px_36px_rgba(16,185,129,0.45)]"
-                    />
-                  </div>
-                )}
                 {shouldShowInlineNotice && (
                   <div className="ib-onboarding-alert ib-onboarding-alert--progress mb-2 rounded-2xl px-3 py-2.5 md:mb-3 md:px-4">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
