@@ -176,7 +176,7 @@ export function EditorGuideWheel({
   const center = size / 2;
   const ringSize = 204;
   const traitRingSize = 276;
-  const pillarLabelRadius = 66;
+  const pillarLabelRadius = 70;
   const traitTickRadius = 126;
   const traitLabelRadius = 141;
 
