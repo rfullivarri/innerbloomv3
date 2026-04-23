@@ -1154,13 +1154,13 @@ function TaskFilters({
           onClick={onOpenSuggestions}
           aria-label={language === "es" ? "Abrir sugerencias" : "Open suggestions"}
           data-editor-guide-target="suggestions"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-violet-300/40 bg-[linear-gradient(170deg,rgba(167,139,250,0.26),rgba(129,140,248,0.08))] text-violet-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_10px_18px_rgba(76,29,149,0.3)] transition hover:border-violet-200/70 hover:bg-violet-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-200/65"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-violet-300/45 bg-[linear-gradient(170deg,rgba(167,139,250,0.24),rgba(129,140,248,0.1))] text-violet-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_8px_14px_rgba(76,29,149,0.2)] transition hover:border-violet-400/60 hover:bg-violet-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70 dark:border-violet-300/40 dark:text-violet-100 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_10px_18px_rgba(76,29,149,0.3)] dark:hover:border-violet-200/70 dark:focus-visible:outline-violet-200/65"
         >
           <SuggestionsMagicIcon className="h-[18px] w-[18px]" />
         </button>
       </div>
       <div className="md:hidden">
-        <div className="editor-filters-mobile-panel sticky -mx-4 -mt-5 top-[4.5rem] z-30 space-y-3 rounded-t-2xl px-4 pt-5 pb-3 bg-[color:var(--color-slate-900-95)]">
+        <div className="editor-filters-mobile-panel sticky -mx-4 -mt-5 top-[4.5rem] z-30 space-y-3 rounded-t-2xl px-4 pt-5 pb-3">
           <div className="flex items-center justify-end gap-2">
             <button
               type="button"
@@ -1177,14 +1177,14 @@ function TaskFilters({
               onClick={onOpenSuggestions}
               aria-label={language === "es" ? "Abrir sugerencias" : "Open suggestions"}
               data-editor-guide-target="suggestions"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-violet-300/40 bg-[linear-gradient(170deg,rgba(167,139,250,0.26),rgba(129,140,248,0.08))] text-violet-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_10px_18px_rgba(76,29,149,0.3)] transition hover:border-violet-200/70 hover:bg-violet-500/20"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-violet-300/45 bg-[linear-gradient(170deg,rgba(167,139,250,0.24),rgba(129,140,248,0.1))] text-violet-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_8px_14px_rgba(76,29,149,0.2)] transition hover:border-violet-400/60 hover:bg-violet-500/20 dark:border-violet-300/40 dark:text-violet-100 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_10px_18px_rgba(76,29,149,0.3)] dark:hover:border-violet-200/70"
             >
               <SuggestionsMagicIcon className="h-[18px] w-[18px]" />
             </button>
           </div>
           <div
             data-editor-guide-target="search-pillar-zone"
-            className="space-y-2 rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.48),rgba(30,41,59,0.28))] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+            className="space-y-2"
           >
             <label className="flex flex-col gap-1">
               <input
@@ -1231,7 +1231,7 @@ function TaskFilters({
       </div>
       <div
         data-editor-guide-target="search-pillar-zone"
-        className="hidden flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3 md:flex md:flex-row md:items-end"
+        className="hidden flex-col gap-3 md:flex md:flex-row md:items-end"
       >
         <label className="flex w-full flex-col gap-2">
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">

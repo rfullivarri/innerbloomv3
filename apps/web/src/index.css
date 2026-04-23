@@ -5208,9 +5208,9 @@
   :root[data-theme="light"]
     [data-light-scope="editor"]
     .editor-filters-mobile-panel {
-    background: var(--color-surface-elevated);
-    border-bottom: 1px solid var(--color-border-subtle);
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+    background: transparent;
+    border-bottom: 0;
+    box-shadow: none;
     backdrop-filter: none;
   }
 
