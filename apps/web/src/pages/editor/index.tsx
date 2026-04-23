@@ -61,7 +61,7 @@ import {
 
 export const FEATURE_TASK_EDITOR_MOBILE_LIST_V1 = true;
 const ENABLE_EDITOR_GUIDE_AUTO_OPEN = true;
-const PUBLIC_DEMO_EDITOR_GUIDE_AUTO_OPEN_DELAY_MS = 700;
+const PUBLIC_DEMO_EDITOR_GUIDE_AUTO_OPEN_DELAY_MS = 1500;
 
 type TaskEditorPageProps = {
   publicDemo?: boolean;
@@ -248,12 +248,15 @@ export default function TaskEditorPage({ publicDemo = false }: TaskEditorPagePro
     }
 
     if (!publicDemo) {
+      setActiveGuideStepId("wheel-core");
       setShowGuideModal(true);
       return;
     }
 
     setShowGuideModal(false);
+    setActiveGuideStepId("wheel-core");
     const timeoutId = window.setTimeout(() => {
+      setActiveGuideStepId("wheel-core");
       setShowGuideModal(true);
     }, PUBLIC_DEMO_EDITOR_GUIDE_AUTO_OPEN_DELAY_MS);
 
