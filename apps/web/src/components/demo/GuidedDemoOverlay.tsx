@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { DEMO_GUIDED_STEPS, type DemoLanguage, type GuidedStep } from '../../config/demoGuidedTour';
 
 type Props = {
@@ -81,6 +81,18 @@ const LABS_LOGROS_MOBILE_TOP_RATIO_BY_STEP: Record<string, number> = {
   'logros-seal-months': 0.04,
   'logros-monthly': 0.06,
 };
+const INTERACTIVE_ELEMENT_SELECTOR = [
+  "button",
+  "a",
+  "input",
+  "select",
+  "textarea",
+  "label",
+  "[role='button']",
+  "[role='link']",
+  "[contenteditable='true']",
+  ".guided-demo-panel",
+].join(',');
 
 type Placement = 'top' | 'right' | 'bottom' | 'left';
 type WalkthroughMode = 'dashboard' | 'daily-quest-modal';
@@ -505,6 +517,7 @@ export function GuidedDemoOverlay({
   }, [isCompactMobile, isIntroModalStep, isLogrosModalStep, step.id, step.tooltipPlacement, targetRect, viewport.height, viewport.width]);
 
   const isLast = stepIndex === steps.length - 1;
+  const canGoBack = stepIndex > 0;
   const finalPrimaryLabel = finalPrimaryActionLabel?.[language]
     ?? (step.id === 'tour-end'
       ? (language === 'es' ? 'Comenzar mi Journey' : 'Start my Journey')
@@ -520,11 +533,42 @@ export function GuidedDemoOverlay({
   const primaryButtonClass = `ib-primary-button !min-h-0 !px-4 !py-2 !font-semibold !text-xs !uppercase !tracking-[0.16em] focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${walkthroughButtonSizeClass}`;
   const tertiaryButtonClass = `ml-auto inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)]/70 font-semibold uppercase tracking-[0.14em] text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-1)] hover:text-[color:var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${walkthroughButtonSizeClass}`;
   const overlayZClass = isDailyQuestStep ? 'z-[10020]' : 'z-[520]';
-  const overlayMaskClass = 'bg-slate-950/80 backdrop-blur-[7px]';
+  const overlayMaskClass = 'bg-slate-950/88 backdrop-blur-[6px] backdrop-saturate-[0.82]';
+
+  const goToPreviousStep = () => {
+    if (canGoBack && !isTransitioningStep) {
+      goToStep(stepIndex - 1);
+    }
+  };
+
+  const goToNextStep = () => {
+    if (!isTransitioningStep) {
+      goToStep(stepIndex + 1);
+    }
+  };
+
+  const handleBackgroundTouchNavigation = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'touch' && event.pointerType !== 'pen') {
+      return;
+    }
+
+    if ((event.target as Element).closest(INTERACTIVE_ELEMENT_SELECTOR)) {
+      return;
+    }
+
+    const tappedLeftSide = event.clientX < window.innerWidth / 2;
+    if (tappedLeftSide) {
+      goToPreviousStep();
+      return;
+    }
+
+    goToNextStep();
+  };
 
   return (
     <div
       className={`pointer-events-auto fixed inset-0 ${overlayZClass}`}
+      onPointerUp={handleBackgroundTouchNavigation}
       onWheel={(event) => {
         if (isInteractionLocked) {
           event.preventDefault();
@@ -562,13 +606,13 @@ export function GuidedDemoOverlay({
 
       {targetRect ? (
         <div
-          className="absolute rounded-2xl border border-[color:var(--color-accent-primary)]/90 bg-white/[0.025] shadow-[0_0_0_2px_rgba(56,189,248,0.58),0_0_34px_rgba(56,189,248,0.28),0_20px_45px_rgba(0,0,0,0.45)] transition-all"
+          className="pointer-events-none absolute rounded-2xl border border-violet-200/70 shadow-[0_0_0_1px_rgba(255,255,255,0.3),0_0_0_9999px_rgba(2,6,23,0.28),0_0_52px_rgba(139,92,246,0.42)] transition-all"
           style={{ top: targetRect.top, left: targetRect.left, width: targetRect.width, height: targetRect.height }}
         />
       ) : null}
 
       <aside
-        className={`pointer-events-auto absolute rounded-2xl border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface-elevated)] text-[color:var(--color-text)] shadow-2xl ${isCompactMobile ? 'p-3' : 'p-4'} ${isIntroModalStep ? 'max-w-lg overflow-hidden border-white/20 bg-[#0a133d]/92 text-center text-white shadow-[0_0_45px_rgba(79,70,229,0.22)] backdrop-blur-xl' : ''}`}
+        className={`guided-demo-panel pointer-events-auto absolute rounded-2xl border border-violet-200/60 bg-slate-950/92 text-[color:var(--color-text)] shadow-[0_24px_60px_rgba(2,6,23,0.55)] backdrop-blur-xl ${isCompactMobile ? 'p-3' : 'p-4'} ${isIntroModalStep ? 'max-w-lg overflow-hidden border-white/20 bg-[#0a133d]/92 text-center text-white shadow-[0_0_45px_rgba(79,70,229,0.22)]' : ''}`}
         style={tooltipStyle}
       >
         {isIntroModalStep ? (
@@ -621,7 +665,7 @@ export function GuidedDemoOverlay({
           {!isLast ? (
             <button
               type="button"
-              onClick={() => goToStep(stepIndex - 1)}
+              onClick={goToPreviousStep}
               disabled={stepIndex === 0 || isTransitioningStep}
               className={secondaryButtonClass}
             >
@@ -631,7 +675,7 @@ export function GuidedDemoOverlay({
           {!isLast ? (
             <button
               type="button"
-              onClick={() => goToStep(stepIndex + 1)}
+              onClick={goToNextStep}
               disabled={isTransitioningStep}
               className={primaryButtonClass}
             >
