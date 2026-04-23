@@ -1,0 +1,30 @@
+{
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "TaskClassification",
+      "schema": {
+        "type": "object",
+        "required": ["pillar_code", "trait_code"],
+        "properties": {
+          "pillar_code": { "type": "string", "minLength": 1 },
+          "trait_code": { "type": "string", "minLength": 1 },
+          "rationale": { "type": "string" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "additionalProperties": false
+      },
+      "strict": true
+    }
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "You classify one task into exactly one valid pillar and one valid trait from the provided catalogs. Use only provided codes. The trait must belong to the selected pillar. Return JSON only."
+    },
+    {
+      "role": "user",
+      "content": "Task title: {{TASK_TITLE}}\n\nValid pillars from DB:\n{{CATALOG_PILLARS}}\n\nValid traits from DB:\n{{CATALOG_TRAITS}}\n\nReturn JSON with:\n- pillar_code\n- trait_code\n- rationale (optional, concise)\n- confidence (optional, number between 0 and 1)"
+    }
+  ]
+}

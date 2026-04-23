@@ -3,6 +3,7 @@ import { getUserEmotions } from '../controllers/emotions/get-user-emotions.js';
 import { getUserDailyXp } from '../controllers/logs/get-user-daily-xp.js';
 import { getUserJourney } from '../controllers/logs/get-user-journey.js';
 import { createUserTask } from '../controllers/tasks/create-user-task.js';
+import { classifyUserTask } from '../controllers/tasks/classify-user-task.js';
 import { getUserTasks } from '../controllers/tasks/get-user-tasks.js';
 import { getCurrentUser } from '../controllers/users/get-user-me.js';
 import { getUserSubscription } from '../controllers/users/get-user-subscription.js';
@@ -40,6 +41,7 @@ const userScopedRoutes = Router({ mergeParams: true });
 
 userScopedRoutes.get('/tasks', asyncHandler(getUserTasks));
 userScopedRoutes.post('/tasks', asyncHandler(createUserTask));
+userScopedRoutes.post('/tasks/classify', asyncHandler(classifyUserTask));
 userScopedRoutes.patch('/tasks/:taskId', asyncHandler(updateUserTask));
 userScopedRoutes.delete('/tasks/:taskId', asyncHandler(deleteUserTask));
 userScopedRoutes.get('/xp/daily', asyncHandler(getUserDailyXp));
