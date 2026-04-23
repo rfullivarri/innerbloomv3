@@ -4,10 +4,25 @@ type Locale = "es" | "en";
 type PillarKey = "Body" | "Mind" | "Soul";
 
 const PILLARS: PillarKey[] = ["Soul", "Mind", "Body"];
-const PILLAR_LABEL_ANGLES: Record<PillarKey, number> = {
-  Soul: 240,
-  Mind: 0,
-  Body: 120,
+const PILLAR_LAYOUT: Record<
+  PillarKey,
+  {
+    startAngle: number;
+    sweepAngle: number;
+  }
+> = {
+  Mind: {
+    startAngle: -60,
+    sweepAngle: 120,
+  },
+  Body: {
+    startAngle: 60,
+    sweepAngle: 120,
+  },
+  Soul: {
+    startAngle: 180,
+    sweepAngle: 120,
+  },
 };
 
 const TRAITS_BY_PILLAR: Record<Locale, Record<PillarKey, string[]>> = {
@@ -149,13 +164,17 @@ export function EditorGuideWheel({
 }) {
   const level = levelFromStep(stepId);
 
-  const traitSegments = PILLARS.flatMap((pillar) =>
-    TRAITS_BY_PILLAR[locale][pillar].map((trait, index) => ({
+  const traitSegments = PILLARS.flatMap((pillar) => {
+    const { startAngle, sweepAngle } = PILLAR_LAYOUT[pillar];
+    const traits = TRAITS_BY_PILLAR[locale][pillar];
+    const traitSlotAngle = sweepAngle / traits.length;
+
+    return traits.map((trait, index) => ({
       pillar,
       trait: compactTraitLabel(trait),
-      index: PILLARS.indexOf(pillar) * 10 + index,
-    })),
-  );
+      angle: startAngle + traitSlotAngle * (index + 0.5),
+    }));
+  });
 
   const size = 332;
   const center = size / 2;
@@ -198,7 +217,8 @@ export function EditorGuideWheel({
       />
 
       {PILLARS.map((pillar) => {
-        const angle = PILLAR_LABEL_ANGLES[pillar];
+        const { startAngle, sweepAngle } = PILLAR_LAYOUT[pillar];
+        const angle = startAngle + sweepAngle / 2;
         const position = polarToCartesian(angle, pillarLabelRadius);
 
         return (
@@ -206,7 +226,7 @@ export function EditorGuideWheel({
             key={pillar}
             className="pointer-events-none absolute left-1/2 top-1/2 w-[68px] -translate-x-1/2 -translate-y-1/2 text-center transition-all duration-700"
             style={{
-              transform: `translate(${position.x}px, ${position.y}px) scale(${level >= 2 ? 1 : 0.75})`,
+              transform: `translate(-50%, -50%) translate(${position.x}px, ${position.y}px) scale(${level >= 2 ? 1 : 0.75})`,
               opacity: level >= 2 ? 1 : 0,
             }}
           >
@@ -240,8 +260,7 @@ export function EditorGuideWheel({
         className="pointer-events-none absolute inset-0 h-full w-full overflow-hidden transition-all duration-700"
         style={{ opacity: level >= 3 ? 1 : 0 }}
       >
-        {traitSegments.map(({ trait, index, pillar }) => {
-          const angle = -90 + index * 12 + 6;
+        {traitSegments.map(({ trait, angle, pillar }) => {
           const tickStart = polarToCartesian(angle, traitTickRadius);
           const tickEnd = polarToCartesian(angle, traitTickRadius + 8);
           const labelPoint = polarToCartesian(angle, traitLabelRadius);
