@@ -627,6 +627,9 @@ export function GuidedDemoOverlay({
           <div className="mb-5 space-y-4">
             <div className="flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.34em] text-white/70 sm:text-xs">
               <span>Innerbloom</span>
+              {step.id === 'logros-intro' ? (
+                <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logomark" className="h-[0.95rem] w-auto shrink-0" />
+              ) : null}
             </div>
           </div>
         ) : null}
