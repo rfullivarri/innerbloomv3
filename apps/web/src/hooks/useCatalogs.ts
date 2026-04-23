@@ -34,21 +34,35 @@ function createDisabledResult<T>(): CatalogHookResult<T> {
   };
 }
 
-export function usePillars(): CatalogHookResult<Pillar> {
-  const { data, status, error, reload } = useRequest(fetchCatalogPillars, []);
+export function usePillars(options?: { enabled?: boolean }): CatalogHookResult<Pillar> {
+  const enabled = options?.enabled ?? true;
+  const { data, status, error, reload } = useRequest(fetchCatalogPillars, [], { enabled });
+  const disabledResult = useMemo(() => createDisabledResult<Pillar>(), []);
 
   const isLoading = status === 'loading';
   const pillars = (data ?? EMPTY_ARRAY) as Pillar[];
 
+  const guardedReload = useCallback(() => {
+    if (!enabled) {
+      return;
+    }
+    reload();
+  }, [enabled, reload]);
+
   return useMemo(
-    () => ({
-      data: pillars,
-      status,
-      error,
-      isLoading,
-      reload,
-    }),
-    [pillars, status, error, isLoading, reload],
+    () => {
+      if (!enabled) {
+        return disabledResult;
+      }
+      return {
+        data: pillars,
+        status,
+        error,
+        isLoading,
+        reload: guardedReload,
+      } satisfies CatalogHookResult<Pillar>;
+    },
+    [disabledResult, enabled, pillars, status, error, isLoading, guardedReload],
   );
 }
 
@@ -132,20 +146,34 @@ export function useStats(traitId?: string | null): CatalogHookResult<Stat> {
   );
 }
 
-export function useDifficulties(): CatalogHookResult<Difficulty> {
-  const { data, status, error, reload } = useRequest(fetchCatalogDifficulties, []);
+export function useDifficulties(options?: { enabled?: boolean }): CatalogHookResult<Difficulty> {
+  const enabled = options?.enabled ?? true;
+  const { data, status, error, reload } = useRequest(fetchCatalogDifficulties, [], { enabled });
+  const disabledResult = useMemo(() => createDisabledResult<Difficulty>(), []);
 
   const isLoading = status === 'loading';
   const difficulties = (data ?? EMPTY_ARRAY) as Difficulty[];
 
+  const guardedReload = useCallback(() => {
+    if (!enabled) {
+      return;
+    }
+    reload();
+  }, [enabled, reload]);
+
   return useMemo(
-    () => ({
-      data: difficulties,
-      status,
-      error,
-      isLoading,
-      reload,
-    }),
-    [difficulties, status, error, isLoading, reload],
+    () => {
+      if (!enabled) {
+        return disabledResult;
+      }
+      return {
+        data: difficulties,
+        status,
+        error,
+        isLoading,
+        reload: guardedReload,
+      } satisfies CatalogHookResult<Difficulty>;
+    },
+    [disabledResult, enabled, difficulties, status, error, isLoading, guardedReload],
   );
 }

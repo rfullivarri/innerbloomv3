@@ -89,6 +89,27 @@ const PUBLIC_DEMO_PILLARS: Pillar[] = [
   { id: "soul", code: "SOUL", name: "Soul" },
 ];
 
+const PUBLIC_DEMO_DIFFICULTIES = [
+  { id: "easy", code: "EASY", name: "Low" },
+  { id: "medium", code: "MEDIUM", name: "Medium" },
+  { id: "hard", code: "HARD", name: "High" },
+];
+
+const PUBLIC_DEMO_TRAITS_BY_PILLAR: Record<string, Trait[]> = {
+  body: [
+    { id: "energy", pillarId: "body", code: "ENERGY", name: "Energy" },
+    { id: "strength", pillarId: "body", code: "STRENGTH", name: "Strength" },
+  ],
+  mind: [
+    { id: "focus", pillarId: "mind", code: "FOCUS", name: "Focus" },
+    { id: "clarity", pillarId: "mind", code: "CLARITY", name: "Clarity" },
+  ],
+  soul: [
+    { id: "gratitude", pillarId: "soul", code: "GRATITUDE", name: "Gratitude" },
+    { id: "presence", pillarId: "soul", code: "PRESENCE", name: "Presence" },
+  ],
+};
+
 export default function TaskEditorPage({ publicDemo = false }: TaskEditorPageProps = {}) {
   const location = useLocation();
   const { language, t, syncLocaleLanguage } = usePostLoginLanguage();
@@ -126,8 +147,8 @@ export default function TaskEditorPage({ publicDemo = false }: TaskEditorPagePro
     isLoading: isLoadingPillars,
     error: pillarsError,
     reload: reloadPillars,
-  } = usePillars();
-  const { data: difficulties } = useDifficulties();
+  } = usePillars({ enabled: !publicDemo });
+  const { data: difficulties } = useDifficulties({ enabled: !publicDemo });
   const isAppMode = useAppMode();
 
   const [traitCatalogById, setTraitCatalogById] = useState<
@@ -181,11 +202,21 @@ export default function TaskEditorPage({ publicDemo = false }: TaskEditorPagePro
   const effectiveBackendUserId = publicDemo ? "public-demo-user" : backendUserId;
   const effectivePillars = publicDemo ? PUBLIC_DEMO_PILLARS : pillars;
   const effectiveDifficulties = publicDemo
-    ? [
-        { id: "easy", code: "EASY", name: language === "es" ? "Baja" : "Low" },
-        { id: "medium", code: "MEDIUM", name: language === "es" ? "Media" : "Medium" },
-        { id: "hard", code: "HARD", name: language === "es" ? "Alta" : "High" },
-      ]
+    ? PUBLIC_DEMO_DIFFICULTIES.map((difficulty) => ({
+        ...difficulty,
+        name:
+          difficulty.id === "easy"
+            ? language === "es"
+              ? "Baja"
+              : "Low"
+            : difficulty.id === "hard"
+              ? language === "es"
+                ? "Alta"
+                : "High"
+              : language === "es"
+                ? "Media"
+                : "Medium",
+      }))
     : difficulties;
   const isLoadingTasks = publicDemo
     ? false
@@ -461,6 +492,34 @@ export default function TaskEditorPage({ publicDemo = false }: TaskEditorPagePro
   const handleCreateClick = () => {
     setShowCreateModal(true);
   };
+
+  const handleCreatePublicDemoTask = useCallback(
+    (input: {
+      title: string;
+      difficultyId: string | null;
+      pillarId: string;
+      traitId: string;
+    }) => {
+      const createdAt = new Date().toISOString();
+      const newTask: UserTask = {
+        id: `public-demo-created-${Date.now()}`,
+        title: input.title.trim(),
+        pillarId: input.pillarId,
+        traitId: input.traitId,
+        statId: `${input.traitId}-progress`,
+        difficultyId: input.difficultyId,
+        isActive: true,
+        xp: 30,
+        createdAt,
+        updatedAt: createdAt,
+        completedAt: null,
+        archivedAt: null,
+      };
+
+      setDemoTasks((previous) => [newTask, ...previous]);
+    },
+    [],
+  );
 
   const handleGuideStepChange = useCallback((stepId: EditorGuideStepId) => {
     setActiveGuideStepId(stepId);
@@ -972,6 +1031,10 @@ export default function TaskEditorPage({ publicDemo = false }: TaskEditorPagePro
           isLoadingPillars={isLoadingPillars}
           pillarsError={pillarsError}
           onRetryPillars={reloadPillars}
+          publicDemo={publicDemo}
+          demoDifficulties={effectiveDifficulties}
+          demoTraitsByPillar={PUBLIC_DEMO_TRAITS_BY_PILLAR}
+          onCreatePublicDemoTask={handleCreatePublicDemoTask}
           guideStepId={showGuideModal ? activeGuideStepId : null}
         />
         {!publicDemo && <EditTaskModal
@@ -2061,6 +2124,15 @@ interface CreateTaskModalProps {
   isLoadingPillars: boolean;
   pillarsError: Error | null;
   onRetryPillars: () => void;
+  publicDemo?: boolean;
+  demoDifficulties?: Array<{ id: string; code: string; name: string }>;
+  demoTraitsByPillar?: Record<string, Trait[]>;
+  onCreatePublicDemoTask?: (input: {
+    title: string;
+    difficultyId: string | null;
+    pillarId: string;
+    traitId: string;
+  }) => void;
   guideStepId?: EditorGuideStepId | null;
 }
 
@@ -2081,6 +2153,10 @@ function CreateTaskModal({
   isLoadingPillars,
   pillarsError,
   onRetryPillars,
+  publicDemo = false,
+  demoDifficulties = PUBLIC_DEMO_DIFFICULTIES,
+  demoTraitsByPillar = PUBLIC_DEMO_TRAITS_BY_PILLAR,
+  onCreatePublicDemoTask,
   guideStepId = null,
 }: CreateTaskModalProps) {
   const { language, t } = usePostLoginLanguage();
@@ -2125,7 +2201,7 @@ function CreateTaskModal({
     isLoading: isLoadingDifficulties,
     error: difficultiesError,
     reload: reloadDifficulties,
-  } = useDifficulties();
+  } = useDifficulties({ enabled: !publicDemo });
 
   const handleClose = useCallback(() => {
     onClose();
@@ -2145,6 +2221,15 @@ function CreateTaskModal({
       setToast(null);
     }
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !publicDemo) {
+      return;
+    }
+
+    setTitle(language === "es" ? "Caminar durante 30 minutos" : "Walk for 30 minutes");
+    setDifficultyId("medium");
+  }, [language, open, publicDemo]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -2179,10 +2264,11 @@ function CreateTaskModal({
   }, [activeLocale, pillars]);
 
   const sortedDifficulties = useMemo(() => {
-    return [...difficulties].sort((a, b) =>
+    const source = publicDemo ? demoDifficulties : difficulties;
+    return [...source].sort((a, b) =>
       a.name.localeCompare(b.name, activeLocale, { sensitivity: "base" }),
     );
-  }, [activeLocale, difficulties]);
+  }, [activeLocale, demoDifficulties, difficulties, publicDemo]);
 
   const selectedManualPillar = useMemo(
     () => sortedPillars.find((pillar) => pillar.id === manualPillarId) ?? null,
@@ -2200,6 +2286,13 @@ function CreateTaskModal({
       setManualTraits([]);
       setManualTraitsError(null);
       setManualTraitId("");
+      return;
+    }
+
+    if (publicDemo) {
+      setManualTraits(demoTraitsByPillar[manualPillarId] ?? []);
+      setManualTraitsError(null);
+      setIsLoadingManualTraits(false);
       return;
     }
 
@@ -2230,7 +2323,7 @@ function CreateTaskModal({
     return () => {
       cancelled = true;
     };
-  }, [manualCategoryEnabled, manualPillarId, t]);
+  }, [demoTraitsByPillar, manualCategoryEnabled, manualPillarId, publicDemo, t]);
 
   const isSubmitting = createStatus === "loading";
   const isAnalyzing = suggestionStatus === "analyzing";
@@ -2320,14 +2413,14 @@ function CreateTaskModal({
 
   const guideSuggestion = isGuideAIThinkingStep
     ? {
-        pillarId: "guide-soul",
-        pillarLabel: language === "es" ? "Alma" : "Soul",
-        traitId: "guide-trait-gratitude",
-        traitLabel: language === "es" ? "Gratitud" : "Gratitude",
+        pillarId: "body",
+        pillarLabel: language === "es" ? "Cuerpo" : "Body",
+        traitId: "energy",
+        traitLabel: language === "es" ? "Energía" : "Energy",
         rationale:
           language === "es"
-            ? "La simulación muestra una clasificación coherente: Alma + Gratitud."
-            : "The simulation shows a coherent classification: Soul + Gratitude.",
+            ? "La simulación sugiere una clasificación coherente: Cuerpo + Energía."
+            : "The simulation suggests a coherent classification: Body + Energy.",
         confidence: null,
       }
     : null;
@@ -2370,6 +2463,29 @@ function CreateTaskModal({
     clearError("suggestion");
 
     try {
+      if (publicDemo) {
+        await new Promise<void>((resolve) => {
+          window.setTimeout(() => resolve(), 900);
+        });
+        setSuggestion({
+          pillarId: "body",
+          pillarLabel: language === "es" ? "Cuerpo" : "Body",
+          traitId: "energy",
+          traitLabel: language === "es" ? "Energía" : "Energy",
+          rationale:
+            language === "es"
+              ? "Sugerencia demo: caminar activa el pilar Cuerpo y el rasgo Energía."
+              : "Demo suggestion: walking maps to the Body pillar and Energy trait.",
+          confidence: 0.92,
+        });
+        setSuggestionStatus("ready");
+        setFlowState("suggestion-ready");
+        if (manualCategoryEnabled) {
+          setManualCategoryEnabled(false);
+        }
+        return;
+      }
+
       const classification = await classifyUserTask(userId!, {
         title: title.trim(),
       });
@@ -2404,8 +2520,10 @@ function CreateTaskModal({
     }
   }, [
     clearError,
+    language,
     manualCategoryEnabled,
     mapClassificationToSuggestion,
+    publicDemo,
     t,
     title,
     userId,
@@ -2442,6 +2560,18 @@ function CreateTaskModal({
       const resolvedTraitId = shouldUseManualCategory
         ? manualTraitId
         : suggestion?.traitId ?? manualTraitId;
+      if (publicDemo) {
+        onCreatePublicDemoTask?.({
+          title: title.trim(),
+          pillarId: resolvedPillarId,
+          traitId: resolvedTraitId,
+          difficultyId: difficultyId || null,
+        });
+        setToast({ type: "success", text: t("editor.toast.create.success") });
+        setFlowState("created");
+        handleClose();
+        return;
+      }
       await createTask(userId!, {
         title: title.trim(),
         pillarId: resolvedPillarId,
@@ -2570,12 +2700,12 @@ function CreateTaskModal({
                     ))}
                   </select>
                 </label>
-                {isLoadingDifficulties && (
+                {!publicDemo && isLoadingDifficulties && (
                   <p className="create-task-modal__hint text-[11px] uppercase tracking-[0.2em]">
                     {t("editor.loading.difficulties")}
                   </p>
                 )}
-                {difficultiesError && (
+                {!publicDemo && difficultiesError && (
                   <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
                     <p>{t("editor.error.difficulties.load")}</p>
                     <button
@@ -2606,12 +2736,12 @@ function CreateTaskModal({
                   ? t("editor.modal.aiCreate.analyzing")
                   : t("editor.modal.aiCreate.suggestButton")}
               </button>
-              {isLoadingPillars && (
+              {!publicDemo && isLoadingPillars && (
                 <p className="create-task-ai-modal__hint text-[11px] uppercase tracking-[0.2em]">
                   {t("editor.loading.pillars")}
                 </p>
               )}
-              {pillarsError && (
+              {!publicDemo && pillarsError && (
                 <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
                   <p>{t("editor.error.pillars.load")}</p>
                   <button
