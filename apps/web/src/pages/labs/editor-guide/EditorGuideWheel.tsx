@@ -1,4 +1,5 @@
 import type { EditorGuideStepId } from "./guideConfig";
+import { useEffect, useState } from "react";
 
 type Locale = "es" | "en";
 type PillarKey = "Body" | "Mind" | "Soul";
@@ -108,32 +109,44 @@ const PILLAR_META: Record<
   PillarKey,
   {
     label: Record<Locale, string>;
-    glow: string;
+    glowLight: string;
+    glowDark: string;
     segment: string;
-    text: string;
-    line: string;
+    textLight: string;
+    textDark: string;
+    lineLight: string;
+    lineDark: string;
   }
 > = {
   Soul: {
     label: { es: "Alma", en: "Soul" },
-    glow: "rgba(245, 198, 79, 0.5)",
+    glowLight: "rgba(166, 114, 26, 0.28)",
+    glowDark: "rgba(245, 198, 79, 0.5)",
     segment: "rgba(245, 198, 79, 0.56)",
-    text: "rgba(255, 236, 170, 0.98)",
-    line: "rgba(245, 198, 79, 0.78)",
+    textLight: "rgba(146, 97, 24, 0.98)",
+    textDark: "rgba(255, 236, 170, 0.98)",
+    lineLight: "rgba(168, 112, 26, 0.9)",
+    lineDark: "rgba(245, 198, 79, 0.78)",
   },
   Body: {
     label: { es: "Cuerpo", en: "Body" },
-    glow: "rgba(88, 219, 255, 0.45)",
+    glowLight: "rgba(13, 112, 137, 0.28)",
+    glowDark: "rgba(88, 219, 255, 0.45)",
     segment: "rgba(88, 219, 255, 0.55)",
-    text: "rgba(224, 252, 255, 0.95)",
-    line: "rgba(88, 219, 255, 0.74)",
+    textLight: "rgba(16, 98, 122, 0.98)",
+    textDark: "rgba(224, 252, 255, 0.95)",
+    lineLight: "rgba(17, 118, 144, 0.9)",
+    lineDark: "rgba(88, 219, 255, 0.74)",
   },
   Mind: {
     label: { es: "Mente", en: "Mind" },
-    glow: "rgba(184, 141, 255, 0.45)",
+    glowLight: "rgba(93, 63, 150, 0.28)",
+    glowDark: "rgba(184, 141, 255, 0.45)",
     segment: "rgba(184, 141, 255, 0.54)",
-    text: "rgba(240, 231, 255, 0.96)",
-    line: "rgba(184, 141, 255, 0.76)",
+    textLight: "rgba(85, 57, 136, 0.98)",
+    textDark: "rgba(240, 231, 255, 0.96)",
+    lineLight: "rgba(101, 67, 160, 0.9)",
+    lineDark: "rgba(184, 141, 255, 0.76)",
   },
 };
 
@@ -159,6 +172,27 @@ export function EditorGuideWheel({
   locale: Locale;
 }) {
   const level = levelFromStep(stepId);
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const root = document.documentElement;
+    const setFromRoot = () => {
+      setIsDarkMode(root.classList.contains("dark"));
+    };
+
+    setFromRoot();
+    const observer = new MutationObserver(setFromRoot);
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const traitSegments = PILLARS.flatMap((pillar) => {
     const { startAngle, sweepAngle } = PILLAR_LAYOUT[pillar];
@@ -229,8 +263,12 @@ export function EditorGuideWheel({
             <span
               className="block text-[10px] font-semibold uppercase tracking-[0.06em]"
               style={{
-                color: PILLAR_META[pillar].text,
-                textShadow: `0 0 12px ${PILLAR_META[pillar].glow}`,
+                color: isDarkMode
+                  ? PILLAR_META[pillar].textDark
+                  : PILLAR_META[pillar].textLight,
+                textShadow: `0 0 12px ${
+                  isDarkMode ? PILLAR_META[pillar].glowDark : PILLAR_META[pillar].glowLight
+                }`,
               }}
             >
               {PILLAR_META[pillar].label[locale]}
@@ -270,13 +308,13 @@ export function EditorGuideWheel({
                 y1={center + tickStart.y}
                 x2={center + tickEnd.x}
                 y2={center + tickEnd.y}
-                stroke={PILLAR_META[pillar].line}
+                stroke={isDarkMode ? PILLAR_META[pillar].lineDark : PILLAR_META[pillar].lineLight}
                 strokeWidth="1"
               />
               <text
                 x={center + labelPoint.x}
                 y={center + labelPoint.y}
-                fill={PILLAR_META[pillar].text}
+                fill={isDarkMode ? PILLAR_META[pillar].textDark : PILLAR_META[pillar].textLight}
                 fontSize="8"
                 fontWeight="500"
                 letterSpacing="0.01em"
