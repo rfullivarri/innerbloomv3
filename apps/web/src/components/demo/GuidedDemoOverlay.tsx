@@ -25,7 +25,7 @@ const MOBILE_TOOLTIP_BOTTOM_GAP_LOWER = 2;
 const TOOLTIP_HEIGHT_DESKTOP = 252;
 const TOOLTIP_HEIGHT_MOBILE = 238;
 const TOOLTIP_HEIGHT_MOBILE_COMPACT = 210;
-const MOBILE_DASHBOARD_FOCUS_DEFAULT_OFFSET = 8;
+const MOBILE_DASHBOARD_FOCUS_DEFAULT_OFFSET = 2;
 const MOBILE_MODAL_FOCUS_DEFAULT_OFFSET = 6;
 const DAILY_QUEST_MODAL_EXTRA_HEADER_GAP = 8;
 const DAILY_QUEST_INTRO_STEP_ID = 'daily-quest-intro';
@@ -33,13 +33,21 @@ const DAILY_QUEST_FOOTER_STEP_ID = 'daily-quest-footer';
 const DAILY_QUEST_MODERATION_STEP_ID = 'daily-quest-moderation';
 
 const MOBILE_DASHBOARD_STEP_FOCUS_OFFSET: Record<string, number> = {
-  'overall-progress': 12,
-  'streaks-top': 4,
-  'streaks-bottom': 4,
-  balance: 6,
-  'emotion-chart': 6,
-  'daily-energy': 18,
-  'info-dot': 18,
+  'overall-progress': 6,
+  'streaks-top': 2,
+  'streaks-bottom': 2,
+  balance: 4,
+  'emotion-chart': 4,
+  'daily-energy': 12,
+  'info-dot': 12,
+  'logros-shelves': 0,
+  'logros-carousel-structure': 0,
+  'logros-pillar-selector': 0,
+  'logros-carousel-track': 0,
+  'logros-achieved-card': 0,
+  'logros-blocked-card': 0,
+  'logros-weekly': 0,
+  'logros-monthly': 0,
 };
 
 const MOBILE_DAILY_QUEST_STEP_FOCUS_OFFSET: Record<string, number> = {

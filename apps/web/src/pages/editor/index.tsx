@@ -242,10 +242,23 @@ export default function TaskEditorPage({ publicDemo = false }: TaskEditorPagePro
     if (!ENABLE_EDITOR_GUIDE_AUTO_OPEN) {
       return;
     }
-    if (shouldAutoOpenEditorGuide()) {
-      setShowGuideModal(true);
+    if (!shouldAutoOpenEditorGuide()) {
+      return;
     }
-  }, []);
+
+    if (!publicDemo) {
+      setShowGuideModal(true);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setShowGuideModal(true);
+    }, 650);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [publicDemo]);
 
   useEffect(() => {
     const missingTraitsByPillar = new Map<string, Set<string>>();

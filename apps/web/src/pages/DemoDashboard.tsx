@@ -190,9 +190,10 @@ export default function DemoDashboardPage() {
                 event.preventDefault();
                 handleDemoExit();
               }}
-              className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-1.5 text-xs font-semibold text-[color:var(--color-text)]"
+              aria-label={language === 'es' ? 'Cerrar demo del Dashboard y volver al hub público' : 'Close Dashboard demo and return to the public hub'}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-lg font-semibold leading-none text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-overlay-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-bg)]"
             >
-              {language === 'es' ? 'Salir demo' : 'Exit demo'}
+              <span aria-hidden>×</span>
             </Link>
           </div>
         }
