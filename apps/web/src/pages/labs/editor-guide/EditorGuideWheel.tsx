@@ -5,9 +5,9 @@ type PillarKey = "Body" | "Mind" | "Soul";
 
 const PILLARS: PillarKey[] = ["Soul", "Mind", "Body"];
 const PILLAR_LABEL_ANGLES: Record<PillarKey, number> = {
-  Soul: 225,
-  Mind: 345,
-  Body: 105,
+  Soul: 240,
+  Mind: 0,
+  Body: 120,
 };
 
 const TRAITS_BY_PILLAR: Record<Locale, Record<PillarKey, string[]>> = {
@@ -190,7 +190,7 @@ export function EditorGuideWheel({
         style={{
           width: `${ringSize}px`,
           height: `${ringSize}px`,
-          background: `conic-gradient(from -90deg, ${PILLAR_META.Soul.segment} 0deg 120deg, ${PILLAR_META.Mind.segment} 120deg 240deg, ${PILLAR_META.Body.segment} 240deg 360deg)`,
+          background: `conic-gradient(from 30deg, ${PILLAR_META.Mind.segment} 0deg 120deg, ${PILLAR_META.Body.segment} 120deg 240deg, ${PILLAR_META.Soul.segment} 240deg 360deg)`,
           mask: "radial-gradient(circle, transparent 33%, black 34%, black 74%, transparent 75%)",
           opacity: level >= 2 ? 1 : 0,
           transform: `translate(-50%, -50%) scale(${level >= 2 ? 1 : 0.82})`,
