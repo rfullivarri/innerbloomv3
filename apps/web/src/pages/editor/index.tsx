@@ -459,10 +459,6 @@ export default function TaskEditorPage({ publicDemo = false }: TaskEditorPagePro
   };
 
   const handleCreateClick = () => {
-    if (publicDemo) {
-      setShowGuideModal(true);
-      return;
-    }
     setShowCreateModal(true);
   };
 
@@ -968,7 +964,7 @@ export default function TaskEditorPage({ publicDemo = false }: TaskEditorPagePro
             {t("editor.button.newTask")}
           </button>
         )}
-        {!publicDemo && <CreateTaskModal
+        <CreateTaskModal
           open={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           userId={effectiveBackendUserId ?? null}
@@ -977,7 +973,7 @@ export default function TaskEditorPage({ publicDemo = false }: TaskEditorPagePro
           pillarsError={pillarsError}
           onRetryPillars={reloadPillars}
           guideStepId={showGuideModal ? activeGuideStepId : null}
-        />}
+        />
         {!publicDemo && <EditTaskModal
           open={taskToEdit != null}
           onClose={handleCloseEdit}
