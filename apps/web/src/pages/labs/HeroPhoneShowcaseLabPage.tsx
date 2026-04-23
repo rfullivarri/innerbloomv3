@@ -19,14 +19,14 @@ type SceneDefinition = {
 };
 
 const SCENE_TIMELINE: SceneDefinition[] = [
-  { key: 'dashboardIdle', durationMs: 2500 },
-  { key: 'dashboardScroll', durationMs: 1700 },
-  { key: 'toAchievements', durationMs: 1400 },
-  { key: 'achievementsIdle', durationMs: 2200 },
-  { key: 'toTaskEditor', durationMs: 1400 },
-  { key: 'taskModalOpen', durationMs: 1400 },
-  { key: 'taskAiCreate', durationMs: 2200 },
-  { key: 'backToDashboard', durationMs: 1600 },
+  { key: 'dashboardIdle', durationMs: 2300 },
+  { key: 'dashboardScroll', durationMs: 1900 },
+  { key: 'toAchievements', durationMs: 1250 },
+  { key: 'achievementsIdle', durationMs: 2000 },
+  { key: 'toTaskEditor', durationMs: 1250 },
+  { key: 'taskModalOpen', durationMs: 1300 },
+  { key: 'taskAiCreate', durationMs: 2300 },
+  { key: 'backToDashboard', durationMs: 1700 },
 ];
 
 const LOOP_MS = SCENE_TIMELINE.reduce((total, scene) => total + scene.durationMs, 0);
@@ -57,8 +57,8 @@ function useLoopTimeline() {
     return {
       panelTranslatePercent: 0,
       dashboardScrollOffset: 0,
-      sealsActive: false,
-      modalVisible: false,
+      sealsProgress: 0,
+      modalProgress: 0,
       aiProgress: 0,
     };
   }
@@ -74,31 +74,53 @@ function useLoopTimeline() {
   }
 
   const sceneProgress = Math.min(1, Math.max(0, (elapsedMs - cursor) / current.durationMs));
+  const easeInOut = sceneProgress * sceneProgress * (3 - 2 * sceneProgress);
+  const easeOut = 1 - Math.pow(1 - sceneProgress, 3);
 
   const panelTranslatePercent = (() => {
-    if (current.key === 'toAchievements') return -100 * sceneProgress;
+    if (current.key === 'toAchievements') return -100 * easeInOut;
     if (current.key === 'achievementsIdle') return -100;
-    if (current.key === 'toTaskEditor') return -100 - 100 * sceneProgress;
+    if (current.key === 'toTaskEditor') return -100 - 100 * easeInOut;
     if (current.key === 'taskModalOpen' || current.key === 'taskAiCreate') return -200;
-    if (current.key === 'backToDashboard') return -200 + 200 * sceneProgress;
+    if (current.key === 'backToDashboard') return -200 + 200 * easeInOut;
     return 0;
   })();
 
   const dashboardScrollOffset =
     current.key === 'dashboardScroll'
-      ? -20 * sceneProgress
+      ? -16 * easeInOut
       : current.key === 'toAchievements'
-        ? -20
+        ? -16
         : 0;
 
-  const modalVisible = current.key === 'taskModalOpen' || current.key === 'taskAiCreate';
-  const aiProgress = current.key === 'taskAiCreate' ? sceneProgress : current.key === 'backToDashboard' ? 1 : 0;
+  const modalProgress =
+    current.key === 'taskModalOpen'
+      ? easeOut
+      : current.key === 'taskAiCreate'
+        ? 1
+        : current.key === 'backToDashboard'
+          ? 1 - easeOut
+          : 0;
+
+  const aiProgress =
+    current.key === 'taskAiCreate'
+      ? 0.18 + easeInOut * 0.82
+      : current.key === 'backToDashboard'
+        ? 1 - easeInOut
+        : 0;
+
+  const sealsProgress =
+    current.key === 'achievementsIdle'
+      ? 1
+      : current.key === 'toTaskEditor'
+        ? 1 - easeInOut
+        : 0;
 
   return {
     panelTranslatePercent,
     dashboardScrollOffset,
-    sealsActive: current.key === 'achievementsIdle',
-    modalVisible,
+    sealsProgress,
+    modalProgress,
     aiProgress,
   };
 }
@@ -144,7 +166,7 @@ function DashboardScene({ scrollOffset }: { scrollOffset: number }) {
   );
 }
 
-function AchievementsScene({ active }: { active: boolean }) {
+function AchievementsScene({ motionIntensity }: { motionIntensity: number }) {
   return (
     <section className={styles.scenePanel}>
       <div className={styles.sceneHeader}><span>Achievements</span><span className={styles.badge}>Seals</span></div>
@@ -152,8 +174,12 @@ function AchievementsScene({ active }: { active: boolean }) {
         {['7 Day Streak', 'Body Balance', 'Focus Master', 'Quest Combo'].map((seal, index) => (
           <article
             key={seal}
-            className={`${styles.sealCard} ${active ? styles.sealCardActive : ''}`}
-            style={{ animationDelay: `${index * 0.2}s` }}
+            className={`${styles.sealCard} ${motionIntensity > 0.04 ? styles.sealCardActive : ''}`}
+            style={{
+              animationDelay: `${index * 0.24}s`,
+              animationDuration: `${3.6 + index * 0.12}s`,
+              ['--seal-motion' as string]: `${(1.8 + index * 0.2) * motionIntensity}px`,
+            }}
           >
             <span>◉</span>
             <strong>{seal}</strong>
@@ -164,7 +190,7 @@ function AchievementsScene({ active }: { active: boolean }) {
   );
 }
 
-function TaskEditorScene({ modalVisible, aiProgress }: { modalVisible: boolean; aiProgress: number }) {
+function TaskEditorScene({ modalProgress, aiProgress }: { modalProgress: number; aiProgress: number }) {
   return (
     <section className={styles.scenePanel}>
       <div className={styles.sceneHeader}><span>Task editor</span><span className={styles.badge}>AI assist</span></div>
@@ -173,11 +199,17 @@ function TaskEditorScene({ modalVisible, aiProgress }: { modalVisible: boolean; 
         <strong>Morning Focus Ritual</strong>
         <small>Category: Mind · Frequency: Daily</small>
       </article>
-      <article className={`${styles.modalCard} ${modalVisible ? styles.modalCardVisible : ''}`}>
+      <article
+        className={styles.modalCard}
+        style={{
+          opacity: modalProgress,
+          transform: `translateY(${10 - modalProgress * 10}px) scale(${0.985 + modalProgress * 0.015})`,
+        }}
+      >
         <p>Create task with AI</p>
         <div className={styles.inputRow}>“Build a 15-min focus reset after lunch”</div>
         <div className={styles.aiProgressTrack}><span style={{ width: `${Math.max(8, aiProgress * 100)}%` }} /></div>
-        <small>{aiProgress >= 0.96 ? 'Task ready ✓' : 'Generating adaptive steps...'}</small>
+        <small>{aiProgress >= 0.96 ? 'Task ready ✓' : 'Drafting 3 concrete steps...'}</small>
       </article>
     </section>
   );
@@ -190,8 +222,8 @@ function HeroPhoneShowcase() {
     <PhoneFrame>
       <div className={styles.phoneViewportTrack} style={{ transform: `translateX(${timeline.panelTranslatePercent}%)` }}>
         <DashboardScene scrollOffset={timeline.dashboardScrollOffset} />
-        <AchievementsScene active={timeline.sealsActive} />
-        <TaskEditorScene modalVisible={timeline.modalVisible} aiProgress={timeline.aiProgress} />
+        <AchievementsScene motionIntensity={timeline.sealsProgress} />
+        <TaskEditorScene modalProgress={timeline.modalProgress} aiProgress={timeline.aiProgress} />
       </div>
     </PhoneFrame>
   );
