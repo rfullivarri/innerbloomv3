@@ -8,6 +8,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Sparkles, Target, WandSparkles } from "lucide-react";
 import { DevErrorBoundary } from "../../components/DevErrorBoundary";
 import { Navbar } from "../../components/layout/Navbar";
 import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
@@ -37,6 +38,8 @@ import { useAppMode } from "../../hooks/useAppMode";
 import { useDailyQuestReadiness } from "../../hooks/useDailyQuestReadiness";
 import { useOnboardingEditorNudge } from "../../hooks/useOnboardingEditorNudge";
 import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
+import { resolveAuthLanguage } from "../../lib/authLanguage";
+import { getPublicDemoHubPath } from "../../lib/demoEntry";
 import {
   localizeDifficultyLabel,
   localizePillarLabel,
@@ -59,11 +62,47 @@ import {
 export const FEATURE_TASK_EDITOR_MOBILE_LIST_V1 = true;
 const ENABLE_EDITOR_GUIDE_AUTO_OPEN = true;
 
-export default function TaskEditorPage() {
+type TaskEditorPageProps = {
+  publicDemo?: boolean;
+};
+
+const PUBLIC_DEMO_TASKS: UserTask[] = EDITOR_LAB_QUICK_START_SEED.slice(0, 8).map(
+  (seedTask, index) => ({
+    id: `public-demo-${seedTask.id}`,
+    title: seedTask.title,
+    pillarId: seedTask.pillar.toLowerCase(),
+    traitId: seedTask.trait.toLowerCase(),
+    statId: `${seedTask.trait.toLowerCase()}-progress`,
+    difficultyId: index % 3 === 0 ? "easy" : index % 3 === 1 ? "medium" : "hard",
+    isActive: true,
+    xp: 20 + index * 3,
+    createdAt: "2026-01-05T10:00:00Z",
+    updatedAt: "2026-01-08T10:00:00Z",
+    completedAt: null,
+    archivedAt: null,
+  }),
+);
+
+const PUBLIC_DEMO_PILLARS: Pillar[] = [
+  { id: "body", code: "BODY", name: "Body" },
+  { id: "mind", code: "MIND", name: "Mind" },
+  { id: "soul", code: "SOUL", name: "Soul" },
+];
+
+export default function TaskEditorPage({ publicDemo = false }: TaskEditorPageProps = {}) {
   const location = useLocation();
-  const { language, t } = usePostLoginLanguage();
+  const { language, t, syncLocaleLanguage } = usePostLoginLanguage();
+  const demoHubPath = getPublicDemoHubPath(location.search);
   const activeLocale = language === "es" ? "es" : "en";
   const sections = getDashboardSections(location.pathname, language);
+  const publicDemoSections = useMemo(
+    () => [
+      { key: "dashboard", label: "Dashboard", to: `/demo${location.search}`, end: true, icon: Target },
+      { key: "rewards", label: language === "es" ? "Logros" : "Achievements", to: `/demo/logros${location.search}`, icon: Sparkles },
+      { key: "editor", label: language === "es" ? "Tareas" : "Tasks", to: `/demo/tasks${location.search}`, end: true, icon: WandSparkles },
+    ],
+    [language, location.search],
+  );
   const activeSection = getActiveSection(location.pathname, sections, language);
   const taskEditorSection = getDashboardSectionConfig(
     "editor",
@@ -117,6 +156,7 @@ export default function TaskEditorPage() {
     useState<EditorGuideStepId>("wheel-core");
   const [showSuggestionsModal, setShowSuggestionsModal] = useState(false);
   const [isApplyingSuggestions, setIsApplyingSuggestions] = useState(false);
+  const [demoTasks, setDemoTasks] = useState<UserTask[]>(PUBLIC_DEMO_TASKS);
 
   const editorTopRef = useRef<HTMLDivElement | null>(null);
   const dailyQuestReadiness = useDailyQuestReadiness(backendUserId ?? "", {
@@ -137,11 +177,29 @@ export default function TaskEditorPage() {
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const isBackendReady = backendStatus === "success" && Boolean(backendUserId);
-  const isLoadingTasks =
-    !isBackendReady ||
-    tasksStatus === "loading" ||
-    (isBackendReady && tasksStatus === "idle");
-  const combinedError = backendError ?? tasksError;
+  const effectiveTasks = publicDemo ? demoTasks : tasks;
+  const effectiveBackendUserId = publicDemo ? "public-demo-user" : backendUserId;
+  const effectivePillars = publicDemo ? PUBLIC_DEMO_PILLARS : pillars;
+  const effectiveDifficulties = publicDemo
+    ? [
+        { id: "easy", code: "EASY", name: language === "es" ? "Baja" : "Low" },
+        { id: "medium", code: "MEDIUM", name: language === "es" ? "Media" : "Medium" },
+        { id: "hard", code: "HARD", name: language === "es" ? "Alta" : "High" },
+      ]
+    : difficulties;
+  const isLoadingTasks = publicDemo
+    ? false
+    : !isBackendReady ||
+      tasksStatus === "loading" ||
+      (isBackendReady && tasksStatus === "idle");
+  const combinedError = publicDemo ? null : backendError ?? tasksError;
+
+  useEffect(() => {
+    if (!publicDemo) {
+      return;
+    }
+    syncLocaleLanguage(resolveAuthLanguage(location.search));
+  }, [location.search, publicDemo, syncLocaleLanguage]);
 
   useEffect(() => {
     if (!taskToDelete) {
@@ -161,7 +219,10 @@ export default function TaskEditorPage() {
   useEffect(() => {
     const missingTraitsByPillar = new Map<string, Set<string>>();
 
-    for (const task of tasks) {
+    if (publicDemo) {
+      return;
+    }
+    for (const task of effectiveTasks) {
       const pillarId = task.pillarId?.trim();
       const traitId = task.traitId?.trim();
       if (!pillarId || !traitId || traitCatalogById[traitId]) {
@@ -204,12 +265,15 @@ export default function TaskEditorPage() {
     return () => {
       isCancelled = true;
     };
-  }, [tasks, traitCatalogById]);
+  }, [effectiveTasks, publicDemo, traitCatalogById]);
 
   useEffect(() => {
     const missingStatsByTrait = new Map<string, Set<string>>();
 
-    for (const task of tasks) {
+    if (publicDemo) {
+      return;
+    }
+    for (const task of effectiveTasks) {
       const traitId = task.traitId?.trim();
       const statId = task.statId?.trim();
       if (!traitId || !statId || statNamesById[statId]) {
@@ -252,25 +316,25 @@ export default function TaskEditorPage() {
     return () => {
       isCancelled = true;
     };
-  }, [tasks, statNamesById]);
+  }, [effectiveTasks, publicDemo, statNamesById]);
 
   const pillarOptions = useMemo(() => {
     return [
       { value: "", label: t("editor.filters.pillars.all") },
-      ...pillars.map((pillar) => ({
+      ...effectivePillars.map((pillar) => ({
         value: pillar.id,
         label: localizePillarLabel(pillar.name, language),
       })),
     ];
-  }, [language, pillars, t]);
+  }, [effectivePillars, language, t]);
 
   const pillarNamesById = useMemo(() => {
     const map = new Map<string, string>();
-    for (const pillar of pillars) {
+    for (const pillar of effectivePillars) {
       map.set(pillar.id, localizePillarLabel(pillar.name, language));
     }
     return map;
-  }, [language, pillars]);
+  }, [effectivePillars, language]);
 
   const traitNamesMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -291,21 +355,21 @@ export default function TaskEditorPage() {
   );
   const difficultyNamesById = useMemo(() => {
     const map = new Map<string, string>();
-    for (const difficulty of difficulties) {
+    for (const difficulty of effectiveDifficulties) {
       map.set(
         difficulty.id,
         localizeDifficultyLabel(difficulty.name, language),
       );
     }
     return map;
-  }, [difficulties, language]);
+  }, [effectiveDifficulties, language]);
 
   const pillarGrouping = useMemo(() => {
     const canonicalOrder = new Map<string, number>();
     const normalizedToCanonical = new Map<string, string>();
     const metaByCanonical = new Map<string, { name: string; code: string }>();
 
-    pillars.forEach((pillar, index) => {
+    effectivePillars.forEach((pillar, index) => {
       const canonicalId = pillar.id;
       const normalizedId = canonicalId.trim().toLowerCase();
       const code = (pillar.code ?? pillar.id).trim();
@@ -324,10 +388,10 @@ export default function TaskEditorPage() {
     });
 
     return { canonicalOrder, normalizedToCanonical, metaByCanonical };
-  }, [pillars]);
+  }, [effectivePillars]);
 
   const filteredTasks = useMemo(() => {
-    return tasks.filter((task) => {
+    return effectiveTasks.filter((task) => {
       const matchesSearch =
         normalizedSearch.length === 0 ||
         task.title.toLowerCase().includes(normalizedSearch);
@@ -336,7 +400,7 @@ export default function TaskEditorPage() {
         (task.pillarId ?? "").toLowerCase() === selectedPillar.toLowerCase();
       return matchesSearch && matchesPillar;
     });
-  }, [normalizedSearch, selectedPillar, tasks]);
+  }, [effectiveTasks, normalizedSearch, selectedPillar]);
 
   const sortedTasks = useMemo(() => {
     if (!FEATURE_TASK_EDITOR_MOBILE_LIST_V1) {
@@ -376,22 +440,29 @@ export default function TaskEditorPage() {
   const isDeletingTask = deleteStatus === "loading";
 
   const isTaskListEmpty =
-    !isLoadingTasks && !combinedError && tasks.length === 0;
+    !isLoadingTasks && !combinedError && effectiveTasks.length === 0;
   const visibleTasks = FEATURE_TASK_EDITOR_MOBILE_LIST_V1
     ? sortedTasks
     : filteredTasks;
   const isFilteredEmpty =
     !isLoadingTasks &&
     !combinedError &&
-    tasks.length > 0 &&
+    effectiveTasks.length > 0 &&
     visibleTasks.length === 0;
 
   const handleRetry = () => {
+    if (publicDemo) {
+      return;
+    }
     reloadProfile();
     reloadTasks();
   };
 
   const handleCreateClick = () => {
+    if (publicDemo) {
+      setShowGuideModal(true);
+      return;
+    }
     setShowCreateModal(true);
   };
 
@@ -426,6 +497,10 @@ export default function TaskEditorPage() {
   }, [isDeletingTask]);
 
   const handleConfirmDelete = useCallback(async () => {
+    if (publicDemo) {
+      setTaskToDelete(null);
+      return;
+    }
     if (!taskToDelete) {
       setDeleteErrorMessage(t("editor.validation.taskNotFound"));
       return;
@@ -447,7 +522,7 @@ export default function TaskEditorPage() {
       setDeleteErrorMessage(message);
       setPageToast({ type: "error", text: message });
     }
-  }, [backendUserId, deleteTask, t, taskToDelete]);
+  }, [backendUserId, deleteTask, publicDemo, t, taskToDelete]);
 
   useEffect(() => {
     if (!pageToast) {
@@ -460,6 +535,18 @@ export default function TaskEditorPage() {
 
   const handleDuplicateTask = useCallback(
     async (task: UserTask) => {
+      if (publicDemo) {
+        const duplicatedTask: UserTask = {
+          ...task,
+          id: `${task.id}-copy-${Date.now()}`,
+          title: `${task.title} ${t("editor.duplicate.copySuffix")}`,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        setDemoTasks((previous) => [duplicatedTask, ...previous]);
+        setPageToast({ type: "success", text: t("editor.toast.duplicate.success") });
+        return;
+      }
       if (!backendUserId) {
         setPageToast({
           type: "error",
@@ -498,11 +585,39 @@ export default function TaskEditorPage() {
         setDuplicatingTaskId(null);
       }
     },
-    [backendUserId, createTask, t],
+    [backendUserId, createTask, publicDemo, t],
   );
 
   const handleApplySuggestions = useCallback(
     async (selectedTaskIds: string[]) => {
+      if (publicDemo) {
+        const selectedTasks = EDITOR_LAB_QUICK_START_SEED.filter((task) =>
+          selectedTaskIds.includes(task.id),
+        );
+        setDemoTasks((previous) => {
+          const seenTitles = new Set(previous.map((task) => task.title.trim().toLowerCase()));
+          const additions = selectedTasks
+            .filter((task) => !seenTitles.has(task.title.trim().toLowerCase()))
+            .map((task) => ({
+              id: `public-demo-${task.id}-${Date.now()}`,
+              title: task.title,
+              pillarId: task.pillar.toLowerCase(),
+              traitId: task.trait.toLowerCase(),
+              statId: `${task.trait.toLowerCase()}-progress`,
+              difficultyId: "medium",
+              isActive: true,
+              xp: 25,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              completedAt: null,
+              archivedAt: null,
+            }));
+          return [...additions, ...previous];
+        });
+        setShowSuggestionsModal(false);
+        setPageToast({ type: "success", text: t("editor.toast.suggestions.success") });
+        return;
+      }
       if (!backendUserId) {
         setPageToast({
           type: "error",
@@ -522,7 +637,7 @@ export default function TaskEditorPage() {
       try {
         const normalizeValue = (value: string) => value.trim().toLowerCase();
         const pillarIdBySeedPillar = new Map<string, string>();
-        for (const pillar of pillars) {
+        for (const pillar of effectivePillars) {
           const name = normalizeValue(pillar.name);
           const code = normalizeValue(pillar.code ?? "");
           if (
@@ -593,7 +708,7 @@ export default function TaskEditorPage() {
         setIsApplyingSuggestions(false);
       }
     },
-    [backendUserId, createTask, language, pillars, reloadTasks, t],
+    [backendUserId, createTask, language, effectivePillars, publicDemo, reloadTasks, t],
   );
 
   const navigationTasks = useMemo(() => {
@@ -673,11 +788,22 @@ export default function TaskEditorPage() {
     <DevErrorBoundary>
       <div className="flex min-h-screen flex-col">
         <Navbar
-          title={activeSection.pageTitle}
-          sections={sections.map((section) => ({
+          title={publicDemo ? (language === "es" ? "Tareas" : "Tasks") : activeSection.pageTitle}
+          sections={(publicDemo ? publicDemoSections : sections).map((section) => ({
             ...section,
             showPulseDot: section.key === "dashboard" && shouldShowDashboardDot,
           }))}
+          menuSlot={
+            publicDemo ? (
+              <Link
+                to={demoHubPath}
+                aria-label={language === "es" ? "Cerrar demo de Tareas y volver al hub público" : "Close Tasks demo and return to the public hub"}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-lg leading-none text-[color:var(--color-text)]"
+              >
+                <span aria-hidden>×</span>
+              </Link>
+            ) : undefined
+          }
         />
         <main
           className="flex-1 pb-[calc(env(safe-area-inset-bottom,0px)+10.25rem)] md:pb-0"
@@ -774,13 +900,29 @@ export default function TaskEditorPage() {
                         traitNamesById={traitNamesMap}
                         statNamesById={statNamesMap}
                         difficultyNamesById={difficultyNamesById}
-                        onEditTask={(task) => setTaskToEdit(task)}
-                        onDeleteTask={(task) => setTaskToDelete(task)}
-                        onDuplicateTask={
-                          FEATURE_TASK_EDITOR_MOBILE_LIST_V1
-                            ? handleDuplicateTask
-                            : undefined
+                        onEditTask={(task) =>
+                          publicDemo
+                            ? setPageToast({
+                                type: "info",
+                                text:
+                                  language === "es"
+                                    ? "Demo pública: explora la guía y la navegación. La edición real está desactivada."
+                                    : "Public demo: explore the guide and navigation. Real editing is disabled.",
+                              })
+                            : setTaskToEdit(task)
                         }
+                        onDeleteTask={(task) =>
+                          publicDemo
+                            ? setPageToast({
+                                type: "info",
+                                text:
+                                  language === "es"
+                                    ? "Demo pública: explora la guía y la navegación. La edición real está desactivada."
+                                    : "Public demo: explore the guide and navigation. Real editing is disabled.",
+                              })
+                            : setTaskToDelete(task)
+                        }
+                        onDuplicateTask={FEATURE_TASK_EDITOR_MOBILE_LIST_V1 ? handleDuplicateTask : undefined}
                         duplicatingTaskId={
                           FEATURE_TASK_EDITOR_MOBILE_LIST_V1
                             ? duplicatingTaskId
@@ -795,7 +937,7 @@ export default function TaskEditorPage() {
         </main>
         {!isAppMode && (
           <MobileBottomNav
-            items={sections.map((section) => {
+            items={(publicDemo ? publicDemoSections : sections).map((section) => {
               const Icon = section.icon;
 
               return {
@@ -826,35 +968,35 @@ export default function TaskEditorPage() {
             {t("editor.button.newTask")}
           </button>
         )}
-        <CreateTaskModal
+        {!publicDemo && <CreateTaskModal
           open={showCreateModal}
           onClose={() => setShowCreateModal(false)}
-          userId={backendUserId ?? null}
-          pillars={pillars}
+          userId={effectiveBackendUserId ?? null}
+          pillars={effectivePillars}
           isLoadingPillars={isLoadingPillars}
           pillarsError={pillarsError}
           onRetryPillars={reloadPillars}
           guideStepId={showGuideModal ? activeGuideStepId : null}
-        />
-        <EditTaskModal
+        />}
+        {!publicDemo && <EditTaskModal
           open={taskToEdit != null}
           onClose={handleCloseEdit}
           onTaskUpdated={handleEditSuccess}
-          userId={backendUserId ?? null}
+          userId={effectiveBackendUserId ?? null}
           task={taskToEdit}
-          pillars={pillars}
+          pillars={effectivePillars}
           variant={editVariant}
           navigationTasks={navigationTasks}
           onNavigateTask={handleNavigatePanelTask}
-        />
-        <DeleteTaskModal
+        />}
+        {!publicDemo && <DeleteTaskModal
           open={taskToDelete != null}
           onClose={handleDeleteModalClose}
           task={taskToDelete}
           isDeleting={isDeletingTask}
           errorMessage={deleteErrorMessage}
           onConfirm={handleConfirmDelete}
-        />
+        />}
         <EditorGuideOverlay
           isOpen={showGuideModal}
           locale={language === "es" ? "es" : "en"}
@@ -865,12 +1007,12 @@ export default function TaskEditorPage() {
             setShowCreateModal(false);
           }}
         />
-        <SuggestionsLabModal
+        {!publicDemo && <SuggestionsLabModal
           isOpen={showSuggestionsModal}
           isApplying={isApplyingSuggestions}
           onClose={() => setShowSuggestionsModal(false)}
           onApply={handleApplySuggestions}
-        />
+        />}
       </div>
     </DevErrorBoundary>
   );

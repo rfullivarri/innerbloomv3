@@ -64,14 +64,14 @@ export default function LabsDemoModeSelectPage({ legacyLabsPath = false }: DemoM
       id: 'logros',
       title: language === 'es' ? 'Logros' : 'Achievements',
       description: language === 'es' ? 'Explora badges, sellos y recompensas desbloqueables.' : 'Explore badges, seals, and unlockable reward cards.',
-      href: `/labs/logros?lang=${language}&source=${legacyLabsPath ? 'labs' : source}`,
+      href: `${legacyLabsPath ? '/labs/logros' : '/demo/logros'}?lang=${language}&source=${legacyLabsPath ? 'labs' : source}`,
       Icon: Sparkles,
     },
     {
       id: 'tareas',
       title: language === 'es' ? 'Tareas' : 'Tasks',
       description: language === 'es' ? 'Editor público con datos mock y guía de uso incluida.' : 'Public editor preview with mock data and built-in guidance.',
-      href: `/labs/tasks-demo?lang=${language}&source=${legacyLabsPath ? 'labs' : source}`,
+      href: `${legacyLabsPath ? '/labs/tasks-demo' : '/demo/tasks'}?lang=${language}&source=${legacyLabsPath ? 'labs' : source}`,
       Icon: WandSparkles,
     },
   ];

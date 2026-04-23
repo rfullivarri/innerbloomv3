@@ -24,6 +24,16 @@ export function getDemoModeSelectPath(legacyLabsPath = false): string {
   return legacyLabsPath ? '/labs/demo-mode-select' : '/demo-mode-select';
 }
 
+export function getPublicDemoHubPath(search: string): string {
+  const params = new URLSearchParams(search);
+  const sourceParam = params.get('source');
+  const isLegacyLabs = sourceParam === 'labs';
+  const language = params.get('lang') === 'en' ? 'en' : 'es';
+  const hubPath = getDemoModeSelectPath(isLegacyLabs);
+  const query = new URLSearchParams({ lang: language, source: sourceParam === 'labs' ? 'labs' : 'selector' });
+  return `${hubPath}?${query.toString()}`;
+}
+
 export interface DemoEntryContext {
   language: 'es' | 'en';
   source: DemoEntrySource;
