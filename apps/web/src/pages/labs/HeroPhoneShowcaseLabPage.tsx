@@ -17,13 +17,12 @@ import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import styles from './HeroPhoneShowcaseLabPage.module.css';
 
 type SceneKey =
-  | 'dashboardIdle'
-  | 'dashboardScroll'
+  | 'dashboardStill'
+  | 'dashboardDrift'
   | 'toAchievements'
-  | 'achievementsIdle'
+  | 'achievementsShowcase'
   | 'toTaskEditor'
-  | 'taskModalOpen'
-  | 'taskAiCreate'
+  | 'taskEditorStory'
   | 'backToDashboard';
 
 type SceneDefinition = {
@@ -54,24 +53,23 @@ const DEMO_DAILY_QUEST_READINESS = {
 };
 
 const SCENE_TIMELINE: SceneDefinition[] = [
-  { key: 'dashboardIdle', durationMs: 1700 },
-  { key: 'dashboardScroll', durationMs: 2400 },
-  { key: 'toAchievements', durationMs: 1300 },
-  { key: 'achievementsIdle', durationMs: 2400 },
-  { key: 'toTaskEditor', durationMs: 1300 },
-  { key: 'taskModalOpen', durationMs: 1400 },
-  { key: 'taskAiCreate', durationMs: 2600 },
-  { key: 'backToDashboard', durationMs: 1700 },
+  { key: 'dashboardStill', durationMs: 650 },
+  { key: 'dashboardDrift', durationMs: 1800 },
+  { key: 'toAchievements', durationMs: 550 },
+  { key: 'achievementsShowcase', durationMs: 1750 },
+  { key: 'toTaskEditor', durationMs: 550 },
+  { key: 'taskEditorStory', durationMs: 2200 },
+  { key: 'backToDashboard', durationMs: 650 },
 ];
 
 const LOOP_MS = SCENE_TIMELINE.reduce((total, scene) => total + scene.durationMs, 0);
 
-function useLoopTimeline() {
+function useLoopTimeline(isReady: boolean) {
   const prefersReducedMotion = useReducedMotion();
   const [elapsedMs, setElapsedMs] = useState(0);
 
   useEffect(() => {
-    if (prefersReducedMotion) {
+    if (prefersReducedMotion || !isReady) {
       setElapsedMs(0);
       return;
     }
@@ -86,11 +84,11 @@ function useLoopTimeline() {
 
     rafId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(rafId);
-  }, [prefersReducedMotion]);
+  }, [isReady, prefersReducedMotion]);
 
-  if (prefersReducedMotion) {
+  if (prefersReducedMotion || !isReady) {
     return {
-      scene: 'dashboardIdle' as SceneKey,
+      scene: 'dashboardStill' as SceneKey,
       sceneProgress: 0,
       panelTranslatePercent: 0,
     };
@@ -111,9 +109,9 @@ function useLoopTimeline() {
 
   const panelTranslatePercent = (() => {
     if (current.key === 'toAchievements') return -100 * easeInOut;
-    if (current.key === 'achievementsIdle') return -100;
+    if (current.key === 'achievementsShowcase') return -100;
     if (current.key === 'toTaskEditor') return -100 - 100 * easeInOut;
-    if (current.key === 'taskModalOpen' || current.key === 'taskAiCreate') return -200;
+    if (current.key === 'taskEditorStory') return -200;
     if (current.key === 'backToDashboard') return -200 + 200 * easeInOut;
     return 0;
   })();
@@ -137,12 +135,15 @@ function PhoneFrame({ children }: { children: ReactNode }) {
 function RealDashboardScene({
   scene,
   sceneProgress,
+  onReady,
 }: {
   scene: SceneKey;
   sceneProgress: number;
+  onReady: () => void;
 }) {
   const { language } = usePostLoginLanguage();
   const viewportRef = useRef<HTMLDivElement | null>(null);
+  const readyReportedRef = useRef(false);
   const section = useMemo(
     () => getDashboardSectionConfig('dashboard', '/dashboard', language),
     [language],
@@ -153,22 +154,36 @@ function RealDashboardScene({
     if (!viewport) return;
 
     const maxScroll = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
+    const dashboardScrollCap = 0.24;
     const progressByScene =
-      scene === 'dashboardScroll'
+      scene === 'dashboardDrift'
         ? sceneProgress
-        : scene === 'toAchievements' || scene === 'achievementsIdle' || scene === 'toTaskEditor'
+        : scene === 'toAchievements' || scene === 'achievementsShowcase' || scene === 'toTaskEditor'
           ? 1
           : scene === 'backToDashboard'
             ? 1 - sceneProgress
             : 0;
 
-    viewport.scrollTop = maxScroll * progressByScene;
+    viewport.scrollTop = maxScroll * dashboardScrollCap * progressByScene;
   }, [scene, sceneProgress]);
 
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport || readyReportedRef.current) return;
+
+    let rafId = window.requestAnimationFrame(() => {
+      if (readyReportedRef.current) return;
+      readyReportedRef.current = true;
+      onReady();
+    });
+
+    return () => window.cancelAnimationFrame(rafId);
+  }, [onReady]);
+
   return (
-    <section className={styles.scenePanel} data-light-scope="dashboard-v3">
+    <section className={`${styles.scenePanel} ${styles.sceneDashboard}`} data-light-scope="dashboard-v3">
       <div ref={viewportRef} className={styles.realViewport}>
-        <div className={styles.realSceneScale}>
+        <div className={`${styles.realSceneScale} ${styles.dashboardSceneScale}`}>
           <DashboardOverview
             userId="demo-public-user"
             gameMode="flow"
@@ -195,10 +210,12 @@ function RealAchievementsScene({
   scene,
   sceneProgress,
   controlsRef,
+  onReady,
 }: {
   scene: SceneKey;
   sceneProgress: number;
   controlsRef: MutableRefObject<RewardsSectionDemoControls | null>;
+  onReady: () => void;
 }) {
   const { language } = usePostLoginLanguage();
 
@@ -206,12 +223,12 @@ function RealAchievementsScene({
     const controls = controlsRef.current;
     if (!controls) return;
 
-    if (scene === 'achievementsIdle') {
-      if (sceneProgress < 0.45) {
-        controls.closeAllOverlays();
+    if (scene === 'achievementsShowcase') {
+      controls.closeAllOverlays();
+      if (sceneProgress < 0.58) {
         controls.focusCarouselCard('task-dinner-before-22');
       } else {
-        controls.openAchievedCard();
+        controls.focusCarouselCard('task-gym');
       }
     }
 
@@ -228,16 +245,17 @@ function RealAchievementsScene({
       controls: {
         onReady: (controls: RewardsSectionDemoControls) => {
           controlsRef.current = controls;
+          onReady();
         },
       },
     }),
-    [controlsRef, language],
+    [controlsRef, language, onReady],
   );
 
   return (
-    <section className={styles.scenePanel} data-light-scope="dashboard-v3">
-      <div className={styles.realViewport}>
-        <div className={styles.realSceneScale}>
+    <section className={`${styles.scenePanel} ${styles.sceneAchievements}`} data-light-scope="dashboard-v3">
+      <div className={`${styles.realViewport} ${styles.achievementsViewport}`}>
+        <div className={`${styles.realSceneScale} ${styles.achievementsSceneScale}`}>
           <RewardsSection
             userId=""
             initialData={getDemoLogrosData(language)}
@@ -249,40 +267,82 @@ function RealAchievementsScene({
   );
 }
 
-function RealEditorScene({ scene }: { scene: SceneKey }) {
+function RealEditorScene({
+  scene,
+  sceneProgress,
+  onReady,
+}: {
+  scene: SceneKey;
+  sceneProgress: number;
+  onReady: () => void;
+}) {
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const aiRequestedRef = useRef(false);
+  const readyReportedRef = useRef(false);
+  const storyStepsRef = useRef({
+    triggerPressed: false,
+    aiRequested: false,
+  });
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || readyReportedRef.current) return;
+
+    const notifyReadyIfMounted = () => {
+      const cta = root.querySelector('[data-editor-guide-target="new-task-trigger"]');
+      if (!cta || readyReportedRef.current) return false;
+      readyReportedRef.current = true;
+      onReady();
+      return true;
+    };
+
+    if (notifyReadyIfMounted()) return;
+
+    const intervalId = window.setInterval(() => {
+      if (notifyReadyIfMounted()) {
+        window.clearInterval(intervalId);
+      }
+    }, 80);
+
+    return () => window.clearInterval(intervalId);
+  }, [onReady]);
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
 
-    if (scene === 'taskModalOpen' || scene === 'taskAiCreate') {
+    if (scene !== 'taskEditorStory') {
+      if (scene === 'backToDashboard') {
+        const closeButton = root.querySelector<HTMLButtonElement>('.create-task-ai-modal__close');
+        closeButton?.click();
+      }
+      storyStepsRef.current = {
+        triggerPressed: false,
+        aiRequested: false,
+      };
+      return;
+    }
+
+    if (sceneProgress >= 0.2 && !storyStepsRef.current.triggerPressed) {
       const createTrigger = root.querySelector<HTMLButtonElement>('[data-editor-guide-target="new-task-trigger"]');
       if (createTrigger) {
         createTrigger.click();
+        storyStepsRef.current.triggerPressed = true;
       }
     }
 
-    if (scene === 'taskAiCreate' && !aiRequestedRef.current) {
+    if (sceneProgress >= 0.52 && !storyStepsRef.current.aiRequested) {
       const aiButton = root.querySelector<HTMLButtonElement>('[data-editor-guide-target="new-task-modal-ai-action"]');
       if (aiButton) {
         aiButton.click();
-        aiRequestedRef.current = true;
+        storyStepsRef.current.aiRequested = true;
       }
     }
-
-    if (scene === 'backToDashboard') {
-      const closeButton = root.querySelector<HTMLButtonElement>('.create-task-ai-modal__close');
-      closeButton?.click();
-      aiRequestedRef.current = false;
-    }
-  }, [scene]);
+  }, [scene, sceneProgress]);
 
   return (
-    <section className={styles.scenePanel} data-light-scope="dashboard-v3">
-      <div className={styles.realViewport}>
-        <div ref={rootRef} className={styles.realSceneScale}>
+    <section className={`${styles.scenePanel} ${styles.sceneEditor}`} data-light-scope="dashboard-v3">
+      <div className={`${styles.realViewport} ${styles.editorViewport}`}>
+        <div ref={rootRef} className={`${styles.realSceneScale} ${styles.editorSceneScale}`}>
           <TaskEditorPage publicDemo />
         </div>
       </div>
@@ -291,19 +351,36 @@ function RealEditorScene({ scene }: { scene: SceneKey }) {
 }
 
 function HeroPhoneShowcase() {
-  const timeline = useLoopTimeline();
+  const [sceneReadyMap, setSceneReadyMap] = useState({
+    dashboard: false,
+    achievements: false,
+    editor: false,
+  });
+  const timeline = useLoopTimeline(sceneReadyMap.dashboard && sceneReadyMap.achievements && sceneReadyMap.editor);
   const achievementsControlsRef = useRef<RewardsSectionDemoControls | null>(null);
+  const markReady = (scene: 'dashboard' | 'achievements' | 'editor') => {
+    setSceneReadyMap((prev) => (prev[scene] ? prev : { ...prev, [scene]: true }));
+  };
 
   return (
     <PhoneFrame>
       <div className={styles.phoneViewportTrack} style={{ transform: `translateX(${timeline.panelTranslatePercent}%)` }}>
-        <RealDashboardScene scene={timeline.scene} sceneProgress={timeline.sceneProgress} />
+        <RealDashboardScene
+          scene={timeline.scene}
+          sceneProgress={timeline.sceneProgress}
+          onReady={() => markReady('dashboard')}
+        />
         <RealAchievementsScene
           scene={timeline.scene}
           sceneProgress={timeline.sceneProgress}
           controlsRef={achievementsControlsRef}
+          onReady={() => markReady('achievements')}
         />
-        <RealEditorScene scene={timeline.scene} />
+        <RealEditorScene
+          scene={timeline.scene}
+          sceneProgress={timeline.sceneProgress}
+          onReady={() => markReady('editor')}
+        />
       </div>
     </PhoneFrame>
   );
