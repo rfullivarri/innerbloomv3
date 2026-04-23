@@ -137,18 +137,29 @@ function RealDashboardScene({
 
 function HeroPhoneShowcase() {
   const [dashboardReady, setDashboardReady] = useState(false);
+  const [demoDataReady, setDemoDataReady] = useState(false);
   const scrollProgress = useDashboardScrollProgress(dashboardReady);
 
   useEffect(() => {
     setDashboardDemoModeEnabled(true);
+    setDemoDataReady(true);
     return () => {
+      setDemoDataReady(false);
       setDashboardDemoModeEnabled(false);
     };
   }, []);
 
   return (
     <PhoneFrame>
-      <RealDashboardScene scrollProgress={scrollProgress} onReady={() => setDashboardReady(true)} />
+      {demoDataReady ? (
+        <RealDashboardScene scrollProgress={scrollProgress} onReady={() => setDashboardReady(true)} />
+      ) : (
+        <section
+          className={`${styles.scenePanel} ${styles.scenePanelSingle} ${styles.sceneDashboard}`}
+          data-light-scope="dashboard-v3"
+          aria-hidden
+        />
+      )}
     </PhoneFrame>
   );
 }
