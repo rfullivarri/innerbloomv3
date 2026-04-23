@@ -29,6 +29,7 @@ import LabsIndexPage from './pages/labs/LabsIndexPage';
 import LandingRhythmSectionMvpPage from './pages/labs/LandingRhythmSectionMvpPage';
 import EditorLabPage from './pages/labs/EditorLabPage';
 import PublicTasksDemoPage from './pages/labs/PublicTasksDemoPage';
+import HeroPhoneShowcaseLabPage from './pages/labs/HeroPhoneShowcaseLabPage';
 import { useGa4FunnelTracking } from './hooks/useGa4FunnelTracking';
 import { isNativeCapacitorPlatform } from './mobile/capacitor';
 import { writeMobileDebug } from './mobile/mobileDebug';
@@ -277,6 +278,7 @@ export default function App() {
         <Route path="/labs/demo-mode-select" element={<LabsDemoModeSelectPage legacyLabsPath />} />
         <Route path="/labs/logros" element={<LabsLogrosDemoPage />} />
         <Route path="/labs/tasks-demo" element={<PublicTasksDemoPage />} />
+        <Route path="/labs/hero-phone-showcase" element={<HeroPhoneShowcaseLabPage />} />
         <Route path="/demo/logros" element={<LabsLogrosDemoPage />} />
         <Route path="/demo/tasks" element={<PublicTasksDemoPage />} />
         <Route path="/labs/landing-rhythm-section" element={<LandingRhythmSectionMvpPage />} />

@@ -18,6 +18,11 @@ const LAB_EXPERIMENTS = [
     description: 'Guided preview of the Achievements module for dashboard exploration.',
     href: '/labs/logros',
   },
+  {
+    title: 'Hero Phone Showcase',
+    description: 'Experimental hero fold replacing static AI art with a looping Innerbloom product phone showcase.',
+    href: '/labs/hero-phone-showcase',
+  },
 ];
 
 export default function LabsIndexPage() {
