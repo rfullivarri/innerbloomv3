@@ -196,6 +196,8 @@ export function EditorGuideOverlay({
     : { aria: "Guide", back: "Previous", skip: "Skip", finish: "Finish", next: "Next", label: "Guide" };
 
   const nextLabel = isLast ? copy.finish : copy.next;
+  const maskedOverlayClass =
+    "bg-slate-950/88 backdrop-blur-[6px] backdrop-saturate-[0.82]";
 
   const frame = useMemo(() => {
     if (!targetRect) {
@@ -225,15 +227,15 @@ export function EditorGuideOverlay({
       {frame && !isWheelStep ? (
         <>
           <div
-            className="absolute left-0 right-0 top-0 bg-slate-950/82 backdrop-blur-[5px] transition-all duration-500"
+            className={`absolute left-0 right-0 top-0 ${maskedOverlayClass} transition-all duration-500`}
             style={{ height: frame.top }}
           />
           <div
-            className="absolute left-0 bg-slate-950/82 backdrop-blur-[5px] transition-all duration-500"
+            className={`absolute left-0 ${maskedOverlayClass} transition-all duration-500`}
             style={{ top: frame.top, width: frame.left, height: frame.height }}
           />
           <div
-            className="absolute right-0 bg-slate-950/82 backdrop-blur-[5px] transition-all duration-500"
+            className={`absolute right-0 ${maskedOverlayClass} transition-all duration-500`}
             style={{
               top: frame.top,
               left: frame.left + frame.width,
@@ -241,11 +243,11 @@ export function EditorGuideOverlay({
             }}
           />
           <div
-            className="absolute left-0 right-0 bg-slate-950/82 backdrop-blur-[5px] transition-all duration-500"
+            className={`absolute left-0 right-0 ${maskedOverlayClass} transition-all duration-500`}
             style={{ top: frame.top + frame.height, bottom: 0 }}
           />
           <div
-            className="pointer-events-none absolute rounded-2xl border border-violet-200/65 shadow-[0_0_0_1px_rgba(255,255,255,0.26),0_0_0_9999px_rgba(2,6,23,0.18),0_0_46px_rgba(139,92,246,0.38)] transition-all duration-500"
+            className="pointer-events-none absolute rounded-2xl border border-violet-200/70 shadow-[0_0_0_1px_rgba(255,255,255,0.3),0_0_0_9999px_rgba(2,6,23,0.28),0_0_52px_rgba(139,92,246,0.42)] transition-all duration-500"
             style={{
               top: frame.top,
               left: frame.left,
@@ -255,11 +257,11 @@ export function EditorGuideOverlay({
           />
         </>
       ) : (
-        <div className="absolute inset-0 bg-slate-950/82 backdrop-blur-[5px]" />
+        <div className={`absolute inset-0 ${maskedOverlayClass}`} />
       )}
 
       <section
-        className={`editor-guide-panel absolute left-1/2 flex w-[min(calc(100vw-1.5rem),42rem)] -translate-x-1/2 flex-col rounded-3xl bg-[color:var(--color-surface-elevated)] px-5 py-4 text-[color:var(--color-slate-100)] shadow-[0_20px_55px_rgba(15,23,42,0.6)] ${
+        className={`editor-guide-panel absolute left-1/2 flex w-[min(calc(100vw-1.5rem),42rem)] -translate-x-1/2 flex-col rounded-3xl border border-white/10 bg-[color:var(--color-surface-elevated)] px-5 py-4 text-[color:var(--color-slate-100)] shadow-[0_24px_65px_rgba(2,6,23,0.72)] ${
           panelPlacement === "top"
             ? "top-3 md:top-6"
             : panelPlacement === "center"
