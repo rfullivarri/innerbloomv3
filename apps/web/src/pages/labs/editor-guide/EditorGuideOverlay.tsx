@@ -259,7 +259,7 @@ export function EditorGuideOverlay({
       )}
 
       <section
-        className={`editor-guide-panel absolute left-1/2 flex w-[min(calc(100vw-1.5rem),42rem)] -translate-x-1/2 flex-col rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] px-5 py-4 text-[color:var(--color-slate-100)] shadow-[0_20px_55px_rgba(15,23,42,0.6)] ${
+        className={`editor-guide-panel absolute left-1/2 flex w-[min(calc(100vw-1.5rem),42rem)] -translate-x-1/2 flex-col rounded-3xl bg-[color:var(--color-surface-elevated)] px-5 py-4 text-[color:var(--color-slate-100)] shadow-[0_20px_55px_rgba(15,23,42,0.6)] ${
           panelPlacement === "top"
             ? "top-3 md:top-6"
             : panelPlacement === "center"
