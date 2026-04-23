@@ -2660,7 +2660,7 @@ function CreateTaskModal({
               />
             )}
 
-            <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+            <div className="create-task-ai-modal__actions flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={handleClose}
