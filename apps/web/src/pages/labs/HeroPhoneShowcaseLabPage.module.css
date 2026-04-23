@@ -150,6 +150,35 @@
   padding: 14px 10px 120px;
 }
 
+.sceneDashboard .realViewport {
+  overflow: hidden;
+}
+
+.dashboardSceneScale {
+  transform: translate(-18px, -8px) scale(0.75);
+  padding-bottom: 110px;
+}
+
+.sceneAchievements .realViewport,
+.achievementsViewport {
+  overflow: hidden;
+}
+
+.achievementsSceneScale {
+  transform: translate(-14px, -4px) scale(0.76);
+  padding-bottom: 96px;
+}
+
+.sceneEditor .realViewport,
+.editorViewport {
+  overflow: hidden;
+}
+
+.editorSceneScale {
+  transform: translate(-12px, -6px) scale(0.75);
+  padding-bottom: 108px;
+}
+
 @media (max-width: 980px) {
   .hero {
     grid-template-columns: 1fr;
