@@ -123,6 +123,10 @@
   background: #050816;
 }
 
+
+.scenePanelSingle {
+  width: 100%;
+}
 .realViewport {
   position: absolute;
   inset: 0;

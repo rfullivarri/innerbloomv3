@@ -133,32 +133,94 @@ function RealDashboardScene({
       return true;
     };
 
-    const markReadyIfStable = () => {
-      if (!hasCriticalBlocks() || readyReportedRef.current) {
-        return false;
-      }
-
-      window.setTimeout(() => {
-        if (readyReportedRef.current || !hasCriticalBlocks()) return;
-        readyReportedRef.current = true;
-        onReady();
-      }, 120);
+    const markIfReady = () => {
+      if (!hasAnchors()) return false;
+      window.setTimeout(() => setIsReady(true), 120);
       return true;
     };
 
-    if (markReadyIfStable()) return;
+    if (!markIfReady()) {
+      intervalId = window.setInterval(() => {
+        if (markIfReady()) {
+          window.clearInterval(intervalId);
+        }
+      }, 80);
+    }
 
-    const intervalId = window.setInterval(() => {
-      if (markReadyIfStable()) {
+    return () => {
+      if (intervalId) {
         window.clearInterval(intervalId);
       }
-    }, 80);
+    };
+  }, []);
 
-    return () => window.clearInterval(intervalId);
-  }, [onReady]);
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport || !isReady || prefersReducedMotion) {
+      if (viewport) viewport.scrollTop = 0;
+      return;
+    }
+
+    const avatarNode = viewport.querySelector('[data-demo-anchor="overall-progress"]') as HTMLElement | null;
+    const emotionNode = viewport.querySelector('[data-demo-anchor="emotion-chart"]') as HTMLElement | null;
+    const streaksNode = viewport.querySelector('[data-demo-anchor="streaks"]') as HTMLElement | null;
+
+    if (!avatarNode || !emotionNode || !streaksNode) {
+      viewport.scrollTop = 0;
+      return;
+    }
+
+    const maxScroll = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
+    const avatarTop = avatarNode.offsetTop;
+    const emotionTop = emotionNode.offsetTop;
+    const streaksTop = streaksNode.offsetTop;
+
+    const startScroll = Math.max(0, avatarTop - 32);
+    const emotionFocusScroll = Math.max(startScroll + 60, emotionTop - viewport.clientHeight * 0.28);
+    const finalScroll = Math.min(
+      maxScroll,
+      Math.max(emotionFocusScroll + 80, streaksTop - viewport.clientHeight * 0.5),
+    );
+
+    let rafId = 0;
+    const animationStart = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - animationStart;
+
+      if (elapsed <= INITIAL_PAUSE_MS) {
+        viewport.scrollTop = startScroll;
+        rafId = window.requestAnimationFrame(tick);
+        return;
+      }
+
+      const progress = Math.min(1, (elapsed - INITIAL_PAUSE_MS) / SCROLL_DURATION_MS);
+      const eased = easeInOutCubic(progress);
+
+      // Coreografía en dos tramos para mantener avatar/progreso al inicio,
+      // luego enfocar Emotion Chart y terminar mostrando streaks.
+      if (eased <= 0.58) {
+        const t = eased / 0.58;
+        viewport.scrollTop = startScroll + (emotionFocusScroll - startScroll) * t;
+      } else {
+        const t = (eased - 0.58) / 0.42;
+        viewport.scrollTop = emotionFocusScroll + (finalScroll - emotionFocusScroll) * t;
+      }
+
+      if (progress < 1) {
+        rafId = window.requestAnimationFrame(tick);
+      }
+    };
+
+    rafId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(rafId);
+  }, [isReady, prefersReducedMotion]);
 
   return (
-    <section className={`${styles.scenePanel} ${styles.sceneDashboard}`} data-light-scope="dashboard-v3">
+    <section
+      className={`${styles.scenePanel} ${styles.scenePanelSingle} ${styles.sceneDashboard}`}
+      data-light-scope="dashboard-v3"
+    >
       <div ref={viewportRef} className={styles.realViewport}>
         <div className={`${styles.realSceneScale} ${styles.dashboardSceneScale}`}>
           <DashboardOverview
