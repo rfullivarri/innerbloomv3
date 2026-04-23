@@ -14,6 +14,7 @@ import TaskEditorPage from '../editor';
 import { RewardsSection, type RewardsSectionDemoControls } from '../../components/dashboard-v3/RewardsSection';
 import { getDemoLogrosData, getDemoLogrosPreviewByTaskId } from '../../data/demoLogrosData';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
+import { setDashboardDemoModeEnabled } from '../../lib/demoMode';
 import styles from './HeroPhoneShowcaseLabPage.module.css';
 
 type SceneKey =
@@ -53,13 +54,13 @@ const DEMO_DAILY_QUEST_READINESS = {
 };
 
 const SCENE_TIMELINE: SceneDefinition[] = [
-  { key: 'dashboardStill', durationMs: 650 },
+  { key: 'dashboardStill', durationMs: 600 },
   { key: 'dashboardDrift', durationMs: 1800 },
   { key: 'toAchievements', durationMs: 550 },
-  { key: 'achievementsShowcase', durationMs: 1750 },
+  { key: 'achievementsShowcase', durationMs: 1800 },
   { key: 'toTaskEditor', durationMs: 550 },
   { key: 'taskEditorStory', durationMs: 2200 },
-  { key: 'backToDashboard', durationMs: 650 },
+  { key: 'backToDashboard', durationMs: 500 },
 ];
 
 const LOOP_MS = SCENE_TIMELINE.reduce((total, scene) => total + scene.durationMs, 0);
@@ -154,30 +155,52 @@ function RealDashboardScene({
     if (!viewport) return;
 
     const maxScroll = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
-    const dashboardScrollCap = 0.24;
-    const progressByScene =
+    const dashboardScrollCap = 0.08;
+    const driftProgress =
       scene === 'dashboardDrift'
-        ? sceneProgress
+        ? Math.max(0, Math.min(1, (sceneProgress - 0.2) / 0.8))
         : scene === 'toAchievements' || scene === 'achievementsShowcase' || scene === 'toTaskEditor'
           ? 1
           : scene === 'backToDashboard'
             ? 1 - sceneProgress
             : 0;
 
-    viewport.scrollTop = maxScroll * dashboardScrollCap * progressByScene;
+    viewport.scrollTop = maxScroll * dashboardScrollCap * driftProgress;
   }, [scene, sceneProgress]);
 
   useEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport || readyReportedRef.current) return;
 
-    let rafId = window.requestAnimationFrame(() => {
-      if (readyReportedRef.current) return;
-      readyReportedRef.current = true;
-      onReady();
-    });
+    const hasCriticalBlocks = () => {
+      const hasAvatar = viewport.querySelector('[data-demo-anchor="overall-progress"]');
+      const hasEmotionChart = viewport.querySelector('[data-demo-anchor="emotion-chart"]');
+      const hasStreaks = viewport.querySelector('[data-demo-anchor="streaks"]');
+      return Boolean(hasAvatar && hasEmotionChart && hasStreaks);
+    };
 
-    return () => window.cancelAnimationFrame(rafId);
+    const markReadyIfStable = () => {
+      if (!hasCriticalBlocks() || readyReportedRef.current) {
+        return false;
+      }
+
+      window.setTimeout(() => {
+        if (readyReportedRef.current || !hasCriticalBlocks()) return;
+        readyReportedRef.current = true;
+        onReady();
+      }, 120);
+      return true;
+    };
+
+    if (markReadyIfStable()) return;
+
+    const intervalId = window.setInterval(() => {
+      if (markReadyIfStable()) {
+        window.clearInterval(intervalId);
+      }
+    }, 80);
+
+    return () => window.clearInterval(intervalId);
   }, [onReady]);
 
   return (
@@ -225,7 +248,7 @@ function RealAchievementsScene({
 
     if (scene === 'achievementsShowcase') {
       controls.closeAllOverlays();
-      if (sceneProgress < 0.58) {
+      if (sceneProgress < 0.68) {
         controls.focusCarouselCard('task-dinner-before-22');
       } else {
         controls.focusCarouselCard('task-gym');
@@ -245,7 +268,9 @@ function RealAchievementsScene({
       controls: {
         onReady: (controls: RewardsSectionDemoControls) => {
           controlsRef.current = controls;
-          onReady();
+          window.setTimeout(() => {
+            onReady();
+          }, 140);
         },
       },
     }),
@@ -322,7 +347,7 @@ function RealEditorScene({
       return;
     }
 
-    if (sceneProgress >= 0.2 && !storyStepsRef.current.triggerPressed) {
+    if (sceneProgress >= 0.32 && !storyStepsRef.current.triggerPressed) {
       const createTrigger = root.querySelector<HTMLButtonElement>('[data-editor-guide-target="new-task-trigger"]');
       if (createTrigger) {
         createTrigger.click();
@@ -330,7 +355,7 @@ function RealEditorScene({
       }
     }
 
-    if (sceneProgress >= 0.52 && !storyStepsRef.current.aiRequested) {
+    if (sceneProgress >= 0.64 && !storyStepsRef.current.aiRequested) {
       const aiButton = root.querySelector<HTMLButtonElement>('[data-editor-guide-target="new-task-modal-ai-action"]');
       if (aiButton) {
         aiButton.click();
@@ -356,8 +381,31 @@ function HeroPhoneShowcase() {
     achievements: false,
     editor: false,
   });
-  const timeline = useLoopTimeline(sceneReadyMap.dashboard && sceneReadyMap.achievements && sceneReadyMap.editor);
+  const [loopCanStart, setLoopCanStart] = useState(false);
+  const timeline = useLoopTimeline(loopCanStart);
   const achievementsControlsRef = useRef<RewardsSectionDemoControls | null>(null);
+  const allScenesReady = sceneReadyMap.dashboard && sceneReadyMap.achievements && sceneReadyMap.editor;
+
+  useEffect(() => {
+    setDashboardDemoModeEnabled(true);
+    return () => {
+      setDashboardDemoModeEnabled(false);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!allScenesReady) {
+      setLoopCanStart(false);
+      return;
+    }
+
+    const settleId = window.setTimeout(() => {
+      setLoopCanStart(true);
+    }, 320);
+
+    return () => window.clearTimeout(settleId);
+  }, [allScenesReady]);
+
   const markReady = (scene: 'dashboard' | 'achievements' | 'editor') => {
     setSceneReadyMap((prev) => (prev[scene] ? prev : { ...prev, [scene]: true }));
   };
