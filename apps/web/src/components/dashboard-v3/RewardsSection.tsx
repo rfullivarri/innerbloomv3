@@ -1043,12 +1043,7 @@ function AchievedShelf({
   };
 
   return (
-    <div className="space-y-4" data-demo-anchor={demoAnchors?.shelves}>
-      <div>
-        <h2 className="text-lg font-semibold text-[color:var(--color-text-strong)]">
-          {language === 'es' ? 'Logros' : 'Achievements'}
-        </h2>
-      </div>
+    <div className="space-y-3" data-demo-anchor={demoAnchors?.shelves}>
       {!isCarouselView && isShelfFocusStep ? (
         <div
           data-demo-anchor="logros-shelves-pillars"
