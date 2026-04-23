@@ -6470,7 +6470,6 @@
       rgba(255, 255, 255, 0.96),
       rgba(246, 242, 252, 0.94)
     );
-    border-color: color-mix(in srgb, var(--color-border-strong) 65%, white);
     color: var(--color-text);
     box-shadow: 0 22px 56px rgba(76, 29, 149, 0.18);
   }
