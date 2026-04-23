@@ -1,33 +1,9 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useReducedMotion } from 'framer-motion';
-import { DashboardOverview } from '../DashboardV3';
-import { getDashboardSectionConfig } from '../dashboardSections';
-import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { setDashboardDemoModeEnabled } from '../../lib/demoMode';
+import { DemoDashboardOverviewScene } from '../../components/demo/DemoDashboardOverviewScene';
 import styles from './HeroPhoneShowcaseLabPage.module.css';
-
-const DEMO_DAILY_QUEST_READINESS = {
-  hasTasks: true,
-  firstTasksConfirmed: true,
-  completedFirstDailyQuest: true,
-  canOpenDailyQuest: true,
-  canShowDailyQuestPopup: true,
-  canAutoOpenDailyQuestPopup: false,
-  showOnboardingGuidance: false,
-  showJourneyPreparing: false,
-  tasksStatus: 'success' as const,
-  journeyStatus: 'success' as const,
-  journey: {
-    first_date_log: null,
-    days_of_journey: 0,
-    quantity_daily_logs: 0,
-    first_programmed: true,
-    first_tasks_confirmed: true,
-    completed_first_daily_quest: true,
-  },
-  reload: () => undefined,
-};
 
 const INITIAL_PAUSE_MS = 400;
 const SCROLL_DURATION_MS = 3000;
@@ -85,15 +61,9 @@ function RealDashboardScene({
   scrollProgress: number;
   onReady: () => void;
 }) {
-  const { language } = usePostLoginLanguage();
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const readyReportedRef = useRef(false);
   const scrollRangeRef = useRef({ start: 0, end: 0 });
-
-  const section = useMemo(
-    () => getDashboardSectionConfig('dashboard', '/dashboard', language),
-    [language],
-  );
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -158,22 +128,7 @@ function RealDashboardScene({
     >
       <div ref={viewportRef} className={styles.realViewport}>
         <div className={`${styles.realSceneScale} ${styles.dashboardSceneScale}`}>
-          <DashboardOverview
-            userId="demo-public-user"
-            gameMode="flow"
-            avatarProfile={null}
-            weeklyTarget={3}
-            isJourneyGenerating={false}
-            dailyQuestReadiness={DEMO_DAILY_QUEST_READINESS}
-            showOnboardingGuidance={false}
-            section={section}
-            onOpenReminderScheduler={() => undefined}
-            onOpenModerationEdit={() => undefined}
-            shouldShowFirstDailyQuestCta={false}
-            onOpenDailyQuest={() => undefined}
-            showOnboardingCompletionBanner={false}
-            onUpgradeAccepted={() => undefined}
-          />
+          <DemoDashboardOverviewScene gameMode="flow" />
         </div>
       </div>
     </section>
