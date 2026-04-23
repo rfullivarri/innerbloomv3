@@ -2130,6 +2130,14 @@ function CreateTaskModal({
       if (!classification.pillarId || !classification.traitId) {
         return null;
       }
+
+      const normalizeCode = (code: string | null): string | null => {
+        if (!code) {
+          return null;
+        }
+        return code.trim().toLowerCase();
+      };
+
       const resolvedPillarId = String(classification.pillarId);
       const resolvedTraitId = String(classification.traitId);
 
@@ -2147,7 +2155,7 @@ function CreateTaskModal({
           classification.pillarName
           ?? (pillarFromCatalog
             ? localizePillarLabel(pillarFromCatalog.name, language)
-            : classification.pillarCode ?? resolvedPillarId),
+            : normalizeCode(classification.pillarCode) ?? resolvedPillarId),
         traitLabel:
           classification.traitName
           ?? (traitFromManualList
@@ -2159,7 +2167,7 @@ function CreateTaskModal({
               },
               language,
             )
-            : classification.traitCode ?? resolvedTraitId),
+            : normalizeCode(classification.traitCode) ?? resolvedTraitId),
         rationale:
           classification.rationale
           ?? t("editor.modal.aiCreate.suggestedCategory"),
@@ -2205,10 +2213,10 @@ function CreateTaskModal({
       }
     : null;
   const visibleSuggestion = suggestion ?? guideSuggestion;
-  const shouldShowGuidePillar =
-    isGuideAIThinkingStep && guideSimulationPhase !== "analyzing";
-  const shouldShowGuideTrait =
-    isGuideAIThinkingStep && guideSimulationPhase === "trait";
+  const shouldShowPillarChip =
+    !isGuideAIThinkingStep || guideSimulationPhase !== "analyzing";
+  const shouldShowTraitChip =
+    !isGuideAIThinkingStep || guideSimulationPhase === "trait";
   const showAnalyzingCard = isAnalyzing || isGuideAIThinkingStep;
   const isManualCategoryOpen = flowState === "manual-category-open";
   const hasManualCategorySelection = Boolean(manualPillarId && manualTraitId);
@@ -2518,7 +2526,7 @@ function CreateTaskModal({
                       {t("editor.modal.aiCreate.suggestedCategory")}
                     </p>
                     <div className="flex items-center justify-center gap-2 text-base">
-                      {shouldShowGuidePillar ? (
+                      {shouldShowPillarChip ? (
                         <span className="create-task-ai-modal__result-pill rounded-full border px-4 py-1.5 font-semibold">
                           {visibleSuggestion.pillarLabel}
                         </span>
@@ -2530,7 +2538,7 @@ function CreateTaskModal({
                         </span>
                       )}
                       <span className="create-task-ai-modal__hint">/</span>
-                      {shouldShowGuideTrait ? (
+                      {shouldShowTraitChip ? (
                         <span className="create-task-ai-modal__result-pill rounded-full border px-4 py-1.5 font-semibold">
                           {visibleSuggestion.traitLabel}
                         </span>
