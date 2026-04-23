@@ -26,7 +26,7 @@ import {
   useStats,
   useTraits,
 } from "../../hooks/useCatalogs";
-import { type UserTask } from "../../lib/api";
+import { classifyUserTask, type UserTask, type UserTaskClassification } from "../../lib/api";
 import {
   fetchCatalogStats,
   fetchCatalogTraits,
@@ -1944,159 +1944,14 @@ interface CreateTaskModalProps {
   guideStepId: EditorGuideStepId | null;
 }
 
-type SuggestedPillarGroup = "body" | "mind" | "soul";
-
 type TaskCategorySuggestion = {
   pillarId: string;
   pillarLabel: string;
   traitId: string;
   traitLabel: string;
   rationale: string;
+  confidence: number | null;
 };
-
-const CATEGORY_KEYWORDS: Record<SuggestedPillarGroup, string[]> = {
-  body: [
-    "caminar",
-    "walk",
-    "run",
-    "correr",
-    "train",
-    "entren",
-    "gym",
-    "agua",
-    "water",
-    "hidr",
-    "sleep",
-    "dorm",
-    "stretch",
-    "mov",
-    "exercise",
-    "comer",
-    "eat",
-  ],
-  mind: [
-    "leer",
-    "read",
-    "study",
-    "estudi",
-    "focus",
-    "foco",
-    "trabajo",
-    "work",
-    "plan",
-    "organ",
-    "deep work",
-    "learn",
-    "aprender",
-  ],
-  soul: [
-    "hablar",
-    "talk",
-    "call",
-    "llamar",
-    "agradec",
-    "gratitude",
-    "medit",
-    "rez",
-    "pray",
-    "connect",
-    "conectar",
-    "friend",
-    "famil",
-    "journal",
-    "respirar",
-    "breathe",
-  ],
-};
-
-function normalizeForMatching(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
-}
-
-function detectSuggestedPillarGroup(taskTitle: string): SuggestedPillarGroup {
-  const normalizedTitle = normalizeForMatching(taskTitle);
-  const scores = (Object.keys(CATEGORY_KEYWORDS) as SuggestedPillarGroup[]).map(
-    (group) => ({
-      group,
-      score: CATEGORY_KEYWORDS[group].reduce(
-        (total, keyword) =>
-          normalizedTitle.includes(normalizeForMatching(keyword))
-            ? total + 1
-            : total,
-        0,
-      ),
-    }),
-  );
-
-  const topScore = scores.reduce(
-    (best, current) => (current.score > best.score ? current : best),
-    { group: "mind" as SuggestedPillarGroup, score: 0 },
-  );
-
-  if (topScore.score === 0) {
-    return "mind";
-  }
-
-  return topScore.group;
-}
-
-function resolvePillarFromCatalog(
-  pillars: Pillar[],
-  group: SuggestedPillarGroup,
-): Pillar | null {
-  const byCode = pillars.find((pillar) =>
-    normalizeForMatching(pillar.code).includes(group),
-  );
-  if (byCode) {
-    return byCode;
-  }
-
-  const labelHints: Record<SuggestedPillarGroup, string[]> = {
-    body: ["body", "cuerpo", "salud", "fisico", "physical"],
-    mind: ["mind", "mente", "focus", "foco", "mental"],
-    soul: ["soul", "alma", "conexion", "connection", "spirit"],
-  };
-
-  const byName = pillars.find((pillar) =>
-    labelHints[group].some((hint) =>
-      normalizeForMatching(pillar.name).includes(hint),
-    ),
-  );
-
-  return byName ?? pillars[0] ?? null;
-}
-
-function resolveSuggestedTrait(traits: Trait[], group: SuggestedPillarGroup): Trait | null {
-  const traitHints: Record<SuggestedPillarGroup, string[]> = {
-    body: ["hydr", "sleep", "movement", "fitness", "energia", "energy", "health"],
-    mind: ["focus", "clarity", "learn", "discipline", "product", "study"],
-    soul: ["connection", "gratitude", "mindful", "calm", "compassion", "bond"],
-  };
-
-  const hinted = traits.find((trait) => {
-    const searchable = `${trait.name} ${trait.code}`;
-    return traitHints[group].some((hint) =>
-      normalizeForMatching(searchable).includes(hint),
-    );
-  });
-
-  return hinted ?? traits[0] ?? null;
-}
-
-function buildSuggestionRationale(
-  language: "es" | "en",
-  taskTitle: string,
-  pillarLabel: string,
-  traitLabel: string,
-): string {
-  if (language === "es") {
-    return `“${taskTitle}” se alinea con ${pillarLabel} > ${traitLabel}.`;
-  }
-  return `“${taskTitle}” aligns with ${pillarLabel} > ${traitLabel}.`;
-}
 
 function CreateTaskModal({
   open,
@@ -2114,6 +1969,15 @@ function CreateTaskModal({
   const [difficultyId, setDifficultyId] = useState("");
   const [suggestionStatus, setSuggestionStatus] = useState<
     "idle" | "analyzing" | "ready"
+  >("idle");
+  const [flowState, setFlowState] = useState<
+    | "idle"
+    | "analyzing"
+    | "suggestion-ready"
+    | "manual-category-open"
+    | "confirming"
+    | "created"
+    | "error"
   >("idle");
   const [suggestion, setSuggestion] = useState<TaskCategorySuggestion | null>(
     null,
@@ -2152,6 +2016,7 @@ function CreateTaskModal({
       setTitle("");
       setDifficultyId("");
       setSuggestionStatus("idle");
+      setFlowState("idle");
       setSuggestion(null);
       setManualCategoryEnabled(false);
       setManualPillarId("");
@@ -2255,6 +2120,56 @@ function CreateTaskModal({
   >("idle");
 
   useEffect(() => {
+    if (isSubmitting) {
+      setFlowState("confirming");
+    }
+  }, [isSubmitting]);
+
+  const mapClassificationToSuggestion = useCallback(
+    (classification: UserTaskClassification): TaskCategorySuggestion | null => {
+      if (!classification.pillarId || !classification.traitId) {
+        return null;
+      }
+      const resolvedPillarId = String(classification.pillarId);
+      const resolvedTraitId = String(classification.traitId);
+
+      const pillarFromCatalog = sortedPillars.find(
+        (pillar) => pillar.id === resolvedPillarId,
+      );
+      const traitFromManualList = manualTraits.find(
+        (trait) => trait.id === resolvedTraitId,
+      );
+
+      return {
+        pillarId: resolvedPillarId,
+        traitId: resolvedTraitId,
+        pillarLabel:
+          classification.pillarName
+          ?? (pillarFromCatalog
+            ? localizePillarLabel(pillarFromCatalog.name, language)
+            : classification.pillarCode ?? resolvedPillarId),
+        traitLabel:
+          classification.traitName
+          ?? (traitFromManualList
+            ? localizeTraitLabel(
+              {
+                name: traitFromManualList.name,
+                code: traitFromManualList.code,
+                fallback: traitFromManualList.id,
+              },
+              language,
+            )
+            : classification.traitCode ?? resolvedTraitId),
+        rationale:
+          classification.rationale
+          ?? t("editor.modal.aiCreate.suggestedCategory"),
+        confidence: classification.confidence,
+      };
+    },
+    [language, manualTraits, sortedPillars, t],
+  );
+
+  useEffect(() => {
     if (!isGuideAIThinkingStep) {
       setGuideSimulationPhase("idle");
       return;
@@ -2286,6 +2201,7 @@ function CreateTaskModal({
           language === "es"
             ? "La simulación muestra una clasificación coherente: Alma + Gratitud."
             : "The simulation shows a coherent classification: Soul + Gratitude.",
+        confidence: null,
       }
     : null;
   const visibleSuggestion = suggestion ?? guideSuggestion;
@@ -2294,6 +2210,7 @@ function CreateTaskModal({
   const shouldShowGuideTrait =
     isGuideAIThinkingStep && guideSimulationPhase === "trait";
   const showAnalyzingCard = isAnalyzing || isGuideAIThinkingStep;
+  const isManualCategoryOpen = flowState === "manual-category-open";
   const hasManualCategorySelection = Boolean(manualPillarId && manualTraitId);
   const shouldUseManualCategory =
     manualCategoryEnabled && hasManualCategorySelection;
@@ -2305,87 +2222,66 @@ function CreateTaskModal({
   const isSuggestDisabled =
     (isAnalyzing && !isGuideAIThinkingStep) ||
     title.trim().length === 0 ||
-    isLoadingPillars ||
-    Boolean(pillarsError);
+    !userId;
 
   const handleSuggestCategory = useCallback(async () => {
     const validationErrors: Record<string, string> = {};
     if (title.trim().length === 0) {
       validationErrors.title = t("editor.validation.titleRequired");
     }
-    if (sortedPillars.length === 0) {
-      validationErrors.suggestion = t("editor.modal.aiCreate.catalogFallback");
+    if (!userId) {
+      validationErrors.user = t("editor.validation.userNotFound");
     }
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) {
       return;
     }
 
-    const pillarGroup = detectSuggestedPillarGroup(title);
-    const selectedPillar = resolvePillarFromCatalog(sortedPillars, pillarGroup);
-    if (!selectedPillar) {
-      setErrors((previous) => ({
-        ...previous,
-        suggestion: t("editor.modal.aiCreate.catalogFallback"),
-      }));
-      return;
-    }
-
     setSuggestionStatus("analyzing");
+    setFlowState("analyzing");
     setSuggestion(null);
     clearError("suggestion");
-    await new Promise((resolve) => window.setTimeout(resolve, 1200));
 
     try {
-      const pillarTraits = await fetchCatalogTraits(selectedPillar.id);
-      const selectedTrait = resolveSuggestedTrait(pillarTraits, pillarGroup);
-      if (!selectedTrait) {
+      const classification = await classifyUserTask(userId!, {
+        title: title.trim(),
+      });
+
+      const resolvedSuggestion = mapClassificationToSuggestion(classification);
+      if (!resolvedSuggestion || classification.requiresManualSelection) {
         setSuggestionStatus("idle");
+        setFlowState("manual-category-open");
+        setManualCategoryEnabled(true);
         setErrors((previous) => ({
           ...previous,
-          suggestion: t("editor.modal.aiCreate.noTraits"),
+          suggestion: t("editor.modal.aiCreate.catalogFallback"),
         }));
         return;
       }
 
-      const localizedPillar = localizePillarLabel(selectedPillar.name, language);
-      const localizedTrait = localizeTraitLabel(
-        {
-          name: selectedTrait.name,
-          code: selectedTrait.code,
-          fallback: selectedTrait.id,
-        },
-        language,
-      );
-
-      setSuggestion({
-        pillarId: selectedPillar.id,
-        pillarLabel: localizedPillar,
-        traitId: selectedTrait.id,
-        traitLabel: localizedTrait,
-        rationale: buildSuggestionRationale(
-          activeLocale,
-          title.trim(),
-          localizedPillar,
-          localizedTrait,
-        ),
-      });
+      setSuggestion(resolvedSuggestion);
       setSuggestionStatus("ready");
+      setFlowState("suggestion-ready");
+      if (manualCategoryEnabled) {
+        setManualCategoryEnabled(false);
+      }
     } catch (error) {
       console.error("Failed to resolve AI suggestion for lab editor", error);
       setSuggestionStatus("idle");
+      setFlowState("error");
+      setManualCategoryEnabled(true);
       setErrors((previous) => ({
         ...previous,
         suggestion: t("editor.modal.aiCreate.suggestionError"),
       }));
     }
   }, [
-    activeLocale,
     clearError,
-    language,
-    sortedPillars,
+    manualCategoryEnabled,
+    mapClassificationToSuggestion,
     t,
     title,
+    userId,
   ]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -2427,6 +2323,7 @@ function CreateTaskModal({
         difficultyId: difficultyId || null,
       });
       setToast({ type: "success", text: t("editor.toast.create.success") });
+      setFlowState("created");
       setTitle("");
       setDifficultyId("");
       setSuggestionStatus("idle");
@@ -2438,6 +2335,7 @@ function CreateTaskModal({
     } catch (error) {
       const message =
         error instanceof Error ? error.message : t("editor.toast.create.error");
+      setFlowState("error");
       setToast({ type: "error", text: message });
     }
   };
@@ -2506,6 +2404,7 @@ function CreateTaskModal({
                       clearError("title");
                       clearError("suggestion");
                       setSuggestionStatus("idle");
+                      setFlowState("idle");
                       setSuggestion(null);
                     }}
                     placeholder={t("editor.modal.aiCreate.taskTitlePlaceholder")}
@@ -2662,6 +2561,9 @@ function CreateTaskModal({
                             if (previous) {
                               setManualPillarId("");
                               setManualTraitId("");
+                              setFlowState("suggestion-ready");
+                            } else {
+                              setFlowState("manual-category-open");
                             }
                             return !previous;
                           });
@@ -2676,7 +2578,7 @@ function CreateTaskModal({
                   </section>
                 )}
 
-              {manualCategoryEnabled && (
+              {(manualCategoryEnabled || isManualCategoryOpen) && (
                 <section
                   className="create-task-ai-modal__manual-grid grid gap-3 rounded-xl border p-3"
                   data-editor-guide-target="new-task-modal-ai-result"
@@ -2689,6 +2591,7 @@ function CreateTaskModal({
                         setManualCategoryEnabled(false);
                         setManualPillarId("");
                         setManualTraitId("");
+                        setFlowState("suggestion-ready");
                         clearError("suggestion");
                       }}
                     >

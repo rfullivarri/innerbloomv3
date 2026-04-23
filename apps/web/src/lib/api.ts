@@ -1751,6 +1751,22 @@ export type CreateUserTaskInput = {
   isActive?: boolean;
 };
 
+export type ClassifyUserTaskInput = {
+  title: string;
+};
+
+export type UserTaskClassification = {
+  pillarId: number | null;
+  traitId: number | null;
+  pillarCode: string | null;
+  pillarName: string | null;
+  traitCode: string | null;
+  traitName: string | null;
+  rationale: string | null;
+  confidence: number | null;
+  requiresManualSelection: boolean;
+};
+
 export type UpdateUserTaskInput = {
   title?: string;
   pillarId?: string | null;
@@ -1852,6 +1868,69 @@ export async function createUserTask(userId: string, payload: CreateUserTaskInpu
   }
 
   return normalized;
+}
+
+function normalizeUserTaskClassification(source: unknown): UserTaskClassification {
+  const envelope = isRecord(source) ? source : {};
+  const record = isRecord(envelope.classification) ? envelope.classification : envelope;
+  const meta = isRecord(envelope.meta) ? envelope.meta : {};
+  const confidenceRaw = record.confidence ?? meta.confidence;
+  const confidence =
+    typeof confidenceRaw === 'number'
+      ? confidenceRaw
+      : typeof confidenceRaw === 'string'
+        ? Number.parseFloat(confidenceRaw)
+        : null;
+
+  const pillarId = pickNumber(record.pillar_id);
+  const traitId = pickNumber(record.trait_id);
+  const requiresManualSelectionRaw = record.requires_manual_selection ?? envelope.requires_manual_selection;
+  const requiresManualSelection =
+    typeof requiresManualSelectionRaw === 'boolean'
+      ? requiresManualSelectionRaw
+      : !pillarId || !traitId;
+
+  return {
+    pillarId,
+    traitId,
+    pillarCode: pickString(record.pillar_code),
+    pillarName: pickString(record.pillar_name),
+    traitCode: pickString(record.trait_code),
+    traitName: pickString(record.trait_name),
+    rationale: pickString(record.rationale ?? meta.rationale),
+    confidence: Number.isFinite(confidence) ? confidence : null,
+    requiresManualSelection,
+  };
+}
+
+export async function classifyUserTask(
+  userId: string,
+  payload: ClassifyUserTaskInput,
+): Promise<UserTaskClassification> {
+  const title = pickString(payload.title);
+  if (!title) {
+    throw new Error('Task title is required.');
+  }
+
+  const path = `/users/${encodeURIComponent(userId)}/tasks/classify`;
+  const url = buildApiUrl(path);
+  const response = await apiAuthorizedFetch(url, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ title }),
+  });
+
+  const body = await response.json().catch(() => null);
+  logShape('user-task-classify', body);
+
+  if (!response.ok) {
+    throw new ApiError(response.status, body, url);
+  }
+
+  return normalizeUserTaskClassification(body);
 }
 
 export async function updateUserTask(
