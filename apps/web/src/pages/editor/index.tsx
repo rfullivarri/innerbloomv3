@@ -243,27 +243,27 @@ export default function TaskEditorPage({ publicDemo = false }: TaskEditorPagePro
     if (!ENABLE_EDITOR_GUIDE_AUTO_OPEN) {
       return;
     }
+
+    if (publicDemo) {
+      setShowGuideModal(false);
+      setActiveGuideStepId("wheel-core");
+      const timeoutId = window.setTimeout(() => {
+        setActiveGuideStepId("wheel-core");
+        setShowGuideModal(true);
+      }, PUBLIC_DEMO_EDITOR_GUIDE_AUTO_OPEN_DELAY_MS);
+
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
+    }
+
     if (!shouldAutoOpenEditorGuide()) {
       return;
     }
 
-    if (!publicDemo) {
-      setActiveGuideStepId("wheel-core");
-      setShowGuideModal(true);
-      return;
-    }
-
-    setShowGuideModal(false);
     setActiveGuideStepId("wheel-core");
-    const timeoutId = window.setTimeout(() => {
-      setActiveGuideStepId("wheel-core");
-      setShowGuideModal(true);
-    }, PUBLIC_DEMO_EDITOR_GUIDE_AUTO_OPEN_DELAY_MS);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [publicDemo]);
+    setShowGuideModal(true);
+  }, [location.key, publicDemo]);
 
   useEffect(() => {
     const missingTraitsByPillar = new Map<string, Set<string>>();
