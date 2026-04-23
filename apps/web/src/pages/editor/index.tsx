@@ -3327,7 +3327,7 @@ function SuggestionsLabModal({
         className="absolute inset-0 h-full w-full"
       />
       <section className="editor-suggestions-modal relative z-10 w-full max-w-3xl rounded-t-3xl border border-[color:var(--color-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.95),rgba(15,23,42,0.92))] p-4 shadow-[0_28px_80px_rgba(2,6,23,0.5)] md:rounded-3xl md:p-6">
-        <div className="flex items-start justify-between gap-4">
+        <div className="editor-suggestions-header flex items-start justify-between gap-4">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-200/85">
               Sugerencias
@@ -3343,12 +3343,12 @@ function SuggestionsLabModal({
             type="button"
             onClick={onClose}
             aria-label="Cerrar sugerencias"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-[color:var(--color-slate-200)] transition hover:border-white/35 hover:text-white"
+            className="editor-suggestions-close inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-[color:var(--color-slate-200)] transition hover:border-white/35 hover:text-white"
           >
             <CloseTinyIcon className="h-4 w-4" />
           </button>
         </div>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2">
+        <div className="editor-suggestions-summary mt-4 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2">
           <p className="text-xs text-[color:var(--color-slate-300)]">
             {selectedCount} de {totalAvailableSuggestions} seleccionadas
           </p>
@@ -3362,7 +3362,7 @@ function SuggestionsLabModal({
                     : EDITOR_LAB_QUICK_START_SEED.map((task) => task.id),
                 )
               }
-              className="rounded-full border border-white/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white"
+              className="editor-suggestions-summary-action rounded-full border border-white/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white"
             >
               {isEverythingSelected ? "Limpiar" : "Seleccionar todo"}
             </button>
@@ -3401,10 +3401,10 @@ function SuggestionsLabModal({
                         )
                       }
                       aria-pressed={checked}
-                      className={`group flex items-start gap-3 rounded-2xl border px-3 py-3 text-left transition ${checked ? "border-violet-300/60 bg-[linear-gradient(155deg,rgba(167,139,250,0.25),rgba(129,140,248,0.12))] shadow-[0_10px_24px_rgba(139,92,246,0.24)]" : "border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-white/25"}`}
+                      className={`editor-suggestions-card group flex items-start gap-3 rounded-2xl border px-3 py-3 text-left transition ${checked ? "border-violet-300/60 bg-[linear-gradient(155deg,rgba(167,139,250,0.25),rgba(129,140,248,0.12))] shadow-[0_10px_24px_rgba(139,92,246,0.24)]" : "border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-white/25"}`}
                     >
                       <span
-                        className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] transition ${checked ? "border-violet-100 bg-violet-200/90 text-violet-700" : "border-white/25 text-transparent group-hover:border-white/40"}`}
+                        className={`editor-suggestions-card-selector mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] transition ${checked ? "border-violet-100 bg-violet-200/90 text-violet-700" : "border-white/25 text-transparent group-hover:border-white/40"}`}
                       >
                         ✓
                       </span>
@@ -3412,7 +3412,7 @@ function SuggestionsLabModal({
                         <span className="block text-sm font-medium text-[color:var(--color-slate-100)]">
                           {task.title}
                         </span>
-                        <span className="mt-1 inline-flex rounded-full border border-violet-200/20 bg-violet-400/10 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.14em] text-violet-100/85">
+                        <span className="editor-suggestions-card-pill mt-1 inline-flex rounded-full border border-violet-200/20 bg-violet-400/10 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.14em] text-violet-100/85">
                           {task.trait}
                         </span>
                       </span>
@@ -3423,7 +3423,7 @@ function SuggestionsLabModal({
             </div>
           ))}
         </div>
-        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 border-t border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.05),rgba(15,23,42,0.96)_24%)] px-4 py-4 backdrop-blur-md md:px-6">
+        <div className="editor-suggestions-footer absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 border-t border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.05),rgba(15,23,42,0.96)_24%)] px-4 py-4 backdrop-blur-md md:px-6">
           <p className="text-xs text-[color:var(--color-slate-400)]">
             {hasSelectedSuggestions
               ? `Listo para sumar ${selectedCount} tarea(s) a tu sistema.`
