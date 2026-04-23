@@ -2127,23 +2127,22 @@ function CreateTaskModal({
       return {
         pillarId: resolvedPillarId,
         traitId: resolvedTraitId,
-        pillarLabel:
-          classification.pillarName
-          ?? (pillarFromCatalog
-            ? localizePillarLabel(pillarFromCatalog.name, language)
-            : normalizeCode(classification.pillarCode) ?? resolvedPillarId),
-        traitLabel:
-          classification.traitName
-          ?? (traitFromManualList
-            ? localizeTraitLabel(
-              {
-                name: traitFromManualList.name,
-                code: traitFromManualList.code,
-                fallback: traitFromManualList.id,
-              },
-              language,
-            )
-            : normalizeCode(classification.traitCode) ?? resolvedTraitId),
+        pillarLabel: localizePillarLabel(
+          pillarFromCatalog?.name
+            ?? classification.pillarName
+            ?? normalizeCode(classification.pillarCode)
+            ?? resolvedPillarId,
+          language,
+        ),
+        traitLabel: localizeTraitLabel(
+          {
+            name: traitFromManualList?.name ?? classification.traitName,
+            code: traitFromManualList?.code ?? classification.traitCode,
+            fallback:
+              normalizeCode(classification.traitCode) ?? resolvedTraitId,
+          },
+          language,
+        ),
         rationale:
           classification.rationale
           ?? t("editor.modal.aiCreate.suggestedCategory"),

@@ -88,7 +88,7 @@ export const editorTranslations = {
     es: 'Selecciona una dificultad…',
     en: 'Select a difficulty…',
   },
-  'editor.modal.aiCreate.badge': { es: 'Asistente IA', en: 'AI Assistant' },
+  'editor.modal.aiCreate.badge': { es: 'Nueva tarea', en: 'New Task' },
   'editor.modal.aiCreate.title': { es: 'Nueva tarea guiada', en: 'Guided new task' },
   'editor.modal.aiCreate.description': {
     es: 'Escribe tu intención y deja que la IA sugiera la mejor categoría.',
