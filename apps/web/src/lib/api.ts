@@ -2135,20 +2135,74 @@ function normalizeEmotionDate(raw: unknown): string | null {
   return null;
 }
 
+function addDaysIso(isoDate: string, days: number): string {
+  const [year, month, day] = isoDate.split('-').map((part) => Number(part));
+  const date = new Date(year, month - 1, day);
+  date.setDate(date.getDate() + days);
+  return formatDateKey(date);
+}
+
+function buildContiguousDemoEmotionSnapshots(): EmotionSnapshot[] {
+  const segments: Array<{ start: string; mood: EmotionSnapshot['mood']; days: number }> = [
+    { start: '2025-10-01', mood: 'Calma', days: 4 },
+    { start: '2025-10-06', mood: 'Motivación', days: 5 },
+    { start: '2025-10-11', mood: 'Felicidad', days: 3 },
+    { start: '2025-10-15', mood: 'Cansancio', days: 2 },
+    { start: '2025-10-17', mood: 'Calma', days: 4 },
+    { start: '2025-10-22', mood: 'Motivación', days: 6 },
+    { start: '2025-10-28', mood: 'Ansiedad', days: 2 },
+    { start: '2025-10-30', mood: 'Calma', days: 5 },
+    { start: '2025-11-05', mood: 'Felicidad', days: 4 },
+    { start: '2025-11-09', mood: 'Motivación', days: 6 },
+    { start: '2025-11-16', mood: 'Frustración', days: 3 },
+    { start: '2025-11-19', mood: 'Calma', days: 5 },
+    { start: '2025-11-24', mood: 'Motivación', days: 6 },
+    { start: '2025-12-01', mood: 'Cansancio', days: 3 },
+    { start: '2025-12-04', mood: 'Felicidad', days: 4 },
+    { start: '2025-12-08', mood: 'Motivación', days: 5 },
+    { start: '2025-12-14', mood: 'Tristeza', days: 2 },
+    { start: '2025-12-16', mood: 'Calma', days: 5 },
+    { start: '2025-12-21', mood: 'Motivación', days: 6 },
+    { start: '2025-12-28', mood: 'Felicidad', days: 4 },
+    { start: '2026-01-01', mood: 'Calma', days: 4 },
+    { start: '2026-01-05', mood: 'Motivación', days: 6 },
+    { start: '2026-01-12', mood: 'Ansiedad', days: 2 },
+    { start: '2026-01-14', mood: 'Calma', days: 4 },
+    { start: '2026-01-18', mood: 'Motivación', days: 6 },
+    { start: '2026-01-25', mood: 'Felicidad', days: 4 },
+    { start: '2026-01-29', mood: 'Calma', days: 4 },
+    { start: '2026-02-02', mood: 'Motivación', days: 6 },
+    { start: '2026-02-09', mood: 'Frustración', days: 2 },
+    { start: '2026-02-11', mood: 'Calma', days: 4 },
+    { start: '2026-02-15', mood: 'Motivación', days: 5 },
+    { start: '2026-02-21', mood: 'Felicidad', days: 3 },
+    { start: '2026-02-24', mood: 'Calma', days: 3 },
+    { start: '2026-02-27', mood: 'Motivación', days: 5 },
+    { start: '2026-03-04', mood: 'Cansancio', days: 2 },
+    { start: '2026-03-06', mood: 'Calma', days: 3 },
+    { start: '2026-03-09', mood: 'Motivación', days: 5 },
+    { start: '2026-03-14', mood: 'Felicidad', days: 4 },
+    { start: '2026-03-18', mood: 'Calma', days: 3 },
+    { start: '2026-03-21', mood: 'Motivación', days: 4 },
+  ];
+
+  const snapshots: EmotionSnapshot[] = [];
+
+  for (const segment of segments) {
+    for (let offset = 0; offset < segment.days; offset += 1) {
+      snapshots.push({
+        date: addDaysIso(segment.start, offset),
+        mood: segment.mood,
+      });
+    }
+  }
+
+  return snapshots;
+}
+
 export async function getEmotions(userId: string, params: EmotionQuery = {}): Promise<EmotionSnapshot[]> {
   if (isDashboardDemoModeEnabled()) {
-    return [
-      { date: '2025-10-03', mood: 'Calma' }, { date: '2025-10-08', mood: 'Motivación' },
-      { date: '2025-10-14', mood: 'Felicidad' }, { date: '2025-10-20', mood: 'Tristeza' },
-      { date: '2025-10-24', mood: 'Motivación' }, { date: '2025-11-02', mood: 'Calma' },
-      { date: '2025-11-11', mood: 'Frustración' }, { date: '2025-11-20', mood: 'Ansiedad' },
-      { date: '2025-12-02', mood: 'Cansancio' }, { date: '2025-12-10', mood: 'Felicidad' },
-      { date: '2025-12-19', mood: 'Motivación' }, { date: '2026-01-03', mood: 'Calma' },
-      { date: '2026-01-09', mood: 'Cansancio' }, { date: '2026-01-17', mood: 'Motivación' },
-      { date: '2026-01-25', mood: 'Felicidad' }, { date: '2026-02-05', mood: 'Calma' },
-      { date: '2026-02-14', mood: 'Motivación' }, { date: '2026-02-23', mood: 'Ansiedad' },
-      { date: '2026-03-01', mood: 'Motivación' },
-    ];
+    return buildContiguousDemoEmotionSnapshots();
   }
   const response = await getAuthorizedJson<
     EmotionLogResponse | EmotionLogEntry[] | { emotions?: unknown; days?: unknown }
