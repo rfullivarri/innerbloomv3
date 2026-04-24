@@ -537,19 +537,19 @@ export default function LandingPage() {
             <>
               <Link
                 className={`${buttonClasses('ghost')} nav-auth-button`}
-                data-analytics-cta="create_account"
-                data-analytics-location="nav"
-                to={buildLocalizedAuthPath('/sign-up', language)}
-              >
-                {copy.auth.signup}
-              </Link>
-              <Link
-                className={`${buttonClasses()} nav-auth-button`}
                 data-analytics-cta="login"
                 data-analytics-location="nav"
                 to={buildLocalizedAuthPath('/login', language)}
               >
                 {copy.auth.login}
+              </Link>
+              <Link
+                className={`${buttonClasses()} nav-auth-button`}
+                data-analytics-cta="create_account"
+                data-analytics-location="nav"
+                to={buildLocalizedAuthPath('/sign-up', language)}
+              >
+                {copy.auth.signup}
               </Link>
             </>
           )}
@@ -589,9 +589,6 @@ export default function LandingPage() {
                       data-analytics-location="hero"
                       to={buildDemoModeSelectUrl({ language, source: 'landing' })}
                     >
-                      <span className="hero-demo-cta-icon" aria-hidden>
-                        ▶
-                      </span>
                       <span>{copy.auth.guidedDemo}</span>
                     </Link>
                   </>
