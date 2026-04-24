@@ -115,7 +115,11 @@ async function resolveXpBase(difficultyId: number | null | undefined): Promise<n
 const emptyUpdateMessage = 'At least one property must be provided';
 const EDIT_CONTINUITY_DAYS = 35;
 
-function shouldCloneTaskOnEdit(createdAt: string, now: Date): boolean {
+function shouldCloneTaskOnEdit(createdAt: string, lifecycleStatus: string | null | undefined, now: Date): boolean {
+  if (lifecycleStatus !== 'achievement_maintained') {
+    return false;
+  }
+
   const created = new Date(createdAt);
   const boundary = new Date(created.getTime());
   boundary.setUTCDate(boundary.getUTCDate() + EDIT_CONTINUITY_DAYS);
@@ -184,7 +188,7 @@ export async function updateUserTaskRow(
     throw new HttpError(404, 'task_not_found', 'Task not found');
   }
 
-  const shouldClone = shouldCloneTaskOnEdit(currentTask.created_at, new Date());
+  const shouldClone = shouldCloneTaskOnEdit(currentTask.created_at, currentTask.lifecycle_status, new Date());
   if (shouldClone) {
     const nextTaskId = randomUUID();
     const nextTitle = payload.title ?? currentTask.task;
