@@ -306,14 +306,18 @@
 }
 
 .heroFocusContent :global([data-demo-anchor="streaks"] .ib-card article[role="button"] > .grid > div + div) {
-  min-width: 4.8rem;
+  min-width: 4.2rem;
   align-items: stretch;
-  gap: 0.14rem;
+  gap: 0.1rem;
+}
+
+.heroFocusContent :global([data-demo-anchor="streaks"] .ib-card article[role="button"] > .grid > div + div > .flex) {
+  width: fit-content;
 }
 
 .heroFocusContent :global([data-demo-anchor="streaks"] .ib-card article[role="button"] > .grid > div + div > .flex.items-end) {
-  justify-content: space-between;
-  gap: 0.2rem;
+  justify-content: flex-start;
+  gap: 0.12rem;
 }
 
 .heroFocusContent :global([data-demo-anchor="streaks"] .ib-card article[role="button"] > .grid > div + div > .flex.items-end > div) {
@@ -322,8 +326,8 @@
 }
 
 .heroFocusContent :global([data-demo-anchor="streaks"] .ib-card article[role="button"] > .grid > div + div > .flex.items-center) {
-  justify-content: space-between;
-  gap: 0.2rem;
+  justify-content: flex-start;
+  gap: 0.12rem;
   font-size: 0.46rem;
   letter-spacing: 0.02em;
   text-transform: uppercase;
