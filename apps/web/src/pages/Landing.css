@@ -83,7 +83,7 @@
   --chill: #34d399;
   --flow: #38bdf8;
   --evolve: #8b5cf6;
-  --hero-size: min(480px, 80vw);
+  --hero-size: min(420px, 42vw);
   position: relative;
   min-height: 100vh;
   overflow-x: hidden;
@@ -373,15 +373,16 @@
   margin: 0 auto;
   padding: 56px 18px;
   display: grid;
-  grid-template-columns: 1.1fr var(--hero-size);
+  grid-template-columns: minmax(0, 1.08fr) minmax(280px, var(--hero-size));
   gap: 40px;
   align-items: center;
 }
 
 .landing .hero h1 {
   font-size: clamp(2.25rem, 2vw + 2rem, 3.5rem);
-  line-height: 1.1;
-  font-weight: 900;
+  line-height: 1.06;
+  font-weight: 560;
+  letter-spacing: -0.028em;
   margin: 0 0 16px;
 }
 
@@ -425,7 +426,7 @@
   position: relative;
   border: var(--conic-border) solid transparent;
   padding-inline: 2.4rem;
-  min-width: min(320px, 80%);
+  min-width: min(320px, 88vw);
   background:
     linear-gradient(#8b5cf6, #8b5cf6) padding-box,
     conic-gradient(
@@ -504,20 +505,13 @@
 }
 
 .landing .hero-media {
-  width: var(--hero-size);
-  height: var(--hero-size);
-  aspect-ratio: 1 / 1;
+  width: min(100%, var(--hero-size));
+  min-height: clamp(540px, 64vh, 700px);
   position: relative;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-left: auto;
-  border-radius: 16px;
-  border: 1px solid var(--line);
-  background: linear-gradient(
-    180deg,
-    rgba(15, 23, 42, 0.65),
-    rgba(17, 28, 51, 0.4)
-  );
-  box-shadow: 0 24px 70px rgba(12, 18, 34, 0.55);
   animation: float 18s ease-in-out infinite;
   will-change: transform;
 }
@@ -2531,6 +2525,8 @@
   }
 
   .landing .hero-media {
+    width: min(100%, 360px);
+    min-height: auto;
     margin: 0 auto;
   }
 
@@ -2568,6 +2564,25 @@
 
   .landing .demo-title {
     font-size: clamp(1.55rem, 3.4vw, 2.05rem);
+  }
+}
+
+@media (min-width: 1025px) {
+  .landing .hero-actions {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .landing .hero-actions .journey-cta {
+    min-width: 0;
+  }
+
+  .landing .hero-cta-note {
+    margin-left: 0;
+    margin-right: 0;
+    text-align: left;
   }
 }
 
