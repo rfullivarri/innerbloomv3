@@ -295,28 +295,30 @@ export function EditorGuideOverlay({
         <EditorGuideStep step={step} label={copy.label} />
 
         <div className="mt-3 flex items-center gap-1.5">
-          {canGoBack && (
+          <div className="flex min-w-0 items-center gap-1.5">
+            {canGoBack && (
+              <button
+                type="button"
+                onClick={goToPreviousStep}
+                className="inline-flex min-h-8 rounded-full border border-white/20 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-slate-100)]"
+              >
+                {copy.back}
+              </button>
+            )}
             <button
               type="button"
-              onClick={goToPreviousStep}
-              className="inline-flex min-h-8 rounded-full border border-white/20 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-slate-100)]"
+              onClick={goToNextStep}
+              className="inline-flex min-h-8 rounded-full bg-violet-500 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white"
             >
-              {copy.back}
+              {nextLabel}
             </button>
-          )}
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex min-h-8 rounded-full px-1.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-slate-300)]"
+            className="ml-auto inline-flex min-h-8 rounded-full px-1.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-slate-300)]"
           >
             {copy.skip}
-          </button>
-          <button
-            type="button"
-            onClick={goToNextStep}
-            className="ml-auto inline-flex min-h-8 rounded-full bg-violet-500 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white"
-          >
-            {nextLabel}
           </button>
         </div>
       </section>

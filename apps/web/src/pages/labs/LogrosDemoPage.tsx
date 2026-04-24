@@ -104,7 +104,9 @@ export default function LabsLogrosDemoPage() {
     }
   }, []);
 
-  const shouldReturnToDashboard = Boolean(userId) && (demoContext.fromOnboarding || demoContext.source === 'internal');
+  const isInternalAchievementsDemoRoute = location.pathname === '/labs/logros';
+  const shouldReturnToDashboard = Boolean(userId)
+    && (demoContext.fromOnboarding || demoContext.source === 'internal' || isInternalAchievementsDemoRoute);
 
   const handleDemoExit = useCallback(() => {
     if (shouldReturnToDashboard) {

@@ -673,24 +673,36 @@ export function GuidedDemoOverlay({
 
         <div className={buttonRowClass}>
           {!isLast ? (
-            <button
-              type="button"
-              onClick={goToPreviousStep}
-              disabled={stepIndex === 0 || isTransitioningStep}
-              className={secondaryButtonClass}
-            >
-              {language === 'es' ? 'Anterior' : 'Back'}
-            </button>
-          ) : null}
-          {!isLast ? (
-            <button
-              type="button"
-              onClick={goToNextStep}
-              disabled={isTransitioningStep}
-              className={primaryButtonClass}
-            >
-              {language === 'es' ? 'Siguiente' : 'Next'}
-            </button>
+            <>
+              <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+                <button
+                  type="button"
+                  onClick={goToPreviousStep}
+                  disabled={stepIndex === 0 || isTransitioningStep}
+                  className={secondaryButtonClass}
+                >
+                  {language === 'es' ? 'Anterior' : 'Back'}
+                </button>
+                <button
+                  type="button"
+                  onClick={goToNextStep}
+                  disabled={isTransitioningStep}
+                  className={primaryButtonClass}
+                >
+                  {language === 'es' ? 'Siguiente' : 'Next'}
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  onSkip(step.id, stepIndex);
+                  onFinish();
+                }}
+                className={`${tertiaryButtonClass} ml-auto`}
+              >
+                {language === 'es' ? 'Saltar' : 'Skip'}
+              </button>
+            </>
           ) : (
             <>
               <button
@@ -723,18 +735,6 @@ export function GuidedDemoOverlay({
               </button>
             </>
           )}
-          {!isLast ? (
-            <button
-              type="button"
-              onClick={() => {
-                onSkip(step.id, stepIndex);
-                onFinish();
-              }}
-              className={tertiaryButtonClass}
-            >
-              {language === 'es' ? 'Saltar' : 'Skip'}
-            </button>
-          ) : null}
         </div>
       </aside>
     </div>
