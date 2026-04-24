@@ -185,7 +185,8 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
-  padding: 8px 7px 12px;
+  display: flex;
+  padding: 8px 8px 10px;
   background:
     radial-gradient(
       circle at 20% 12%,
@@ -197,6 +198,12 @@
 
 .logrosHeroOnly {
   height: 100%;
+  width: 100%;
+}
+
+.logrosHeroOnly :global(.ib-card) {
+  height: 100%;
+  min-height: 0;
 }
 
 .logrosHeroOnly :global(.ib-card > header),
@@ -230,17 +237,17 @@
 
 .logrosHeroOnly :global([data-demo-anchor="logros-carousel-track"]) {
   min-height: 0;
-  margin-top: 0.2rem;
+  margin-top: 0.25rem;
   padding-inline: 0.2rem;
-  gap: 0.55rem;
+  gap: 0.42rem;
   align-items: stretch;
 }
 
 .logrosHeroOnly :global([data-demo-anchor="logros-carousel-track"] > button) {
-  width: 86%;
+  width: 88%;
   min-height: 0;
-  height: 24.4rem;
-  padding: 0.75rem;
+  height: min(22.4rem, 100%);
+  padding: 0.72rem;
   border-radius: 1.1rem;
 }
 
@@ -256,9 +263,8 @@
 .realViewport {
   position: absolute;
   inset: 0;
-  overflow: auto;
+  overflow: hidden;
   overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   pointer-events: none;
   touch-action: none;

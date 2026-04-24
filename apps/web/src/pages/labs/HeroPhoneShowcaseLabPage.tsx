@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { useReducedMotion } from "framer-motion";
 import { setDashboardDemoModeEnabled } from "../../lib/demoMode";
 import { DemoDashboardOverviewScene } from "../../components/demo/DemoDashboardOverviewScene";
 import {
@@ -82,7 +81,6 @@ function resolveDashboardProgress(elapsedInLoop: number) {
 type HeroPhase = "dashboard" | "to-logros" | "logros" | "to-dashboard";
 
 function useHeroShowcaseTimeline(isReady: boolean) {
-  const prefersReducedMotion = useReducedMotion();
   const [timeline, setTimeline] = useState<{
     phase: HeroPhase;
     dashboardProgress: number;
@@ -94,7 +92,7 @@ function useHeroShowcaseTimeline(isReady: boolean) {
   });
 
   useEffect(() => {
-    if (prefersReducedMotion || !isReady) {
+    if (!isReady) {
       setTimeline({
         phase: "dashboard",
         dashboardProgress: 0,
@@ -158,9 +156,9 @@ function useHeroShowcaseTimeline(isReady: boolean) {
 
     rafId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(rafId);
-  }, [isReady, prefersReducedMotion]);
+  }, [isReady]);
 
-  return prefersReducedMotion || !isReady
+  return !isReady
     ? { phase: "dashboard" as const, dashboardProgress: 0, trackProgress: 0 }
     : timeline;
 }
@@ -223,15 +221,32 @@ function RealDashboardScene({
         0,
         viewport.scrollHeight - viewport.clientHeight,
       );
+      if (maxScroll <= 0) {
+        return false;
+      }
       const overallTop = resolveTop(overallProgress);
       const emotionTop = resolveTop(emotionChart);
       const streakTop = resolveTop(streaks);
-      const start = Math.max(0, Math.min(maxScroll, overallTop - 18));
-      const endTarget = Math.max(
-        emotionTop - viewport.clientHeight * 0.42,
-        streakTop - viewport.clientHeight * 0.16,
+      const minTravel = Math.max(
+        Math.min(viewport.clientHeight * 0.58, maxScroll),
+        Math.min(160, maxScroll),
       );
-      const end = Math.max(start, Math.min(maxScroll, endTarget));
+      let start = Math.max(0, Math.min(maxScroll, overallTop - 18));
+      const endTarget = Math.max(
+        emotionTop - viewport.clientHeight * 0.38,
+        streakTop - viewport.clientHeight * 0.14,
+      );
+      let end = Math.max(start, Math.min(maxScroll, endTarget));
+      if (end - start < minTravel) {
+        end = Math.min(maxScroll, start + minTravel);
+      }
+      if (end - start < minTravel) {
+        start = Math.max(0, end - minTravel);
+      }
+      if (end <= start) {
+        start = 0;
+        end = maxScroll;
+      }
 
       scrollRangeRef.current = { start, end };
       viewport.scrollTop = start;
@@ -282,8 +297,10 @@ function HeroLogrosScene({
   onReady: () => void;
 }) {
   const { language } = usePostLoginLanguage();
+  const sceneRef = useRef<HTMLElement | null>(null);
   const controlsRef = useRef<RewardsSectionDemoControls | null>(null);
   const [sceneReady, setSceneReady] = useState(false);
+  const [controlsReady, setControlsReady] = useState(false);
   const readyReportedRef = useRef(false);
   const readinessResolvedRef = useRef(false);
 
@@ -298,12 +315,14 @@ function HeroLogrosScene({
         carouselStructure: "logros-carousel-structure",
         pillarSelector: "logros-pillar-selector",
         achievedCard: "logros-achieved-card",
+        blockedCard: "logros-blocked-card",
         achievedCardTaskId: HERO_BODY_CARD_UNLOCKED_1,
         blockedCardTaskId: HERO_BODY_CARD_BLOCKED_1,
       },
       controls: {
         onReady: (controls: RewardsSectionDemoControls) => {
           controlsRef.current = controls;
+          setControlsReady(true);
         },
       },
     }),
@@ -314,9 +333,7 @@ function HeroLogrosScene({
     let intervalId = 0;
 
     const resolveTrackReady = () => {
-      const sceneRoot = document.querySelector<HTMLElement>(
-        `.${styles.sceneLogros}`,
-      );
+      const sceneRoot = sceneRef.current;
       const controls = controlsRef.current;
       const track = sceneRoot?.querySelector<HTMLElement>(
         '[data-demo-anchor="logros-carousel-track"]',
@@ -344,14 +361,11 @@ function HeroLogrosScene({
             .includes("cuerpo"),
       );
 
-      if (
-        !controls ||
-        !track ||
-        !cards ||
-        cards.length < 3 ||
-        !firstCard ||
-        !blockedCard
-      ) {
+      if (!sceneRoot || !controlsReady || !controls || !track || !cards) {
+        return false;
+      }
+
+      if (cards.length < 3 || !firstCard || !blockedCard) {
         return false;
       }
 
@@ -374,7 +388,11 @@ function HeroLogrosScene({
       const horizontallyVisible =
         firstRect.right > trackRect.left + 8 &&
         firstRect.left < trackRect.right - 8;
-      if (!isBodySelected || !horizontallyVisible) {
+      const hasFocusableFirstCard =
+        firstCard.matches("button") &&
+        !firstCard.hasAttribute("disabled") &&
+        firstCard.tabIndex >= 0;
+      if (!isBodySelected || !horizontallyVisible || !hasFocusableFirstCard) {
         return false;
       }
 
@@ -399,7 +417,7 @@ function HeroLogrosScene({
         window.clearInterval(intervalId);
       }
     };
-  }, [onReady]);
+  }, [controlsReady, onReady]);
 
   useEffect(() => {
     if (!isActive || !sceneReady) {
@@ -432,6 +450,7 @@ function HeroLogrosScene({
 
   return (
     <section
+      ref={sceneRef}
       className={`${styles.scenePanel} ${styles.sceneLogros}`}
       data-light-scope="dashboard-v3"
     >
