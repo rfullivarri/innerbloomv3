@@ -210,7 +210,10 @@
   gap: 0.45rem !important;
 }
 
-.logrosHeroOnly :global(.ib-card > .relative > :not([data-demo-anchor])) {
+.logrosHeroOnly
+  :global(
+    .ib-card > .relative > :not([data-demo-anchor="logros-shelves"])
+  ) {
   display: none !important;
 }
 
@@ -257,6 +260,9 @@
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  pointer-events: none;
+  touch-action: none;
+  user-select: none;
 }
 
 .realViewport::-webkit-scrollbar {

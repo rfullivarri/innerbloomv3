@@ -285,6 +285,7 @@ function HeroLogrosScene({
   const controlsRef = useRef<RewardsSectionDemoControls | null>(null);
   const [sceneReady, setSceneReady] = useState(false);
   const readyReportedRef = useRef(false);
+  const readinessResolvedRef = useRef(false);
 
   const demoConfig = useMemo(
     () => ({
@@ -292,9 +293,11 @@ function HeroLogrosScene({
       forceAchievementsViewMode: "carousel" as const,
       mockPreviewAchievementByTaskId: getDemoLogrosPreviewByTaskId(language),
       anchors: {
+        shelves: "logros-shelves",
         carouselTrack: "logros-carousel-track",
         carouselStructure: "logros-carousel-structure",
         pillarSelector: "logros-pillar-selector",
+        achievedCard: "logros-achieved-card",
         achievedCardTaskId: HERO_BODY_CARD_UNLOCKED_1,
         blockedCardTaskId: HERO_BODY_CARD_BLOCKED_1,
       },
@@ -311,24 +314,67 @@ function HeroLogrosScene({
     let intervalId = 0;
 
     const resolveTrackReady = () => {
+      const sceneRoot = document.querySelector<HTMLElement>(
+        `.${styles.sceneLogros}`,
+      );
       const controls = controlsRef.current;
-      const track = document.querySelector<HTMLElement>(
+      const track = sceneRoot?.querySelector<HTMLElement>(
         '[data-demo-anchor="logros-carousel-track"]',
+      );
+      const pillarSelector = sceneRoot?.querySelector<HTMLElement>(
+        '[data-demo-anchor="logros-pillar-selector"]',
       );
       const cards = track?.querySelectorAll<HTMLElement>(
         "[data-achievement-carousel-index]",
       );
+      const firstCard = sceneRoot?.querySelector<HTMLElement>(
+        '[data-demo-anchor="logros-achieved-card"]',
+      );
+      const blockedCard = sceneRoot?.querySelector<HTMLElement>(
+        '[data-demo-anchor="logros-blocked-card"]',
+      );
+      const isBodySelected = Boolean(
+        pillarSelector?.querySelector<HTMLElement>(
+          '[role="tab"][aria-selected="true"]',
+        )?.textContent?.toLowerCase().includes("body") ||
+          pillarSelector?.querySelector<HTMLElement>(
+            '[role="tab"][aria-selected="true"]',
+          )?.textContent
+            ?.toLowerCase()
+            .includes("cuerpo"),
+      );
 
-      if (!controls || !track || !cards || cards.length < 3) {
+      if (
+        !controls ||
+        !track ||
+        !cards ||
+        cards.length < 3 ||
+        !firstCard ||
+        !blockedCard
+      ) {
         return false;
       }
 
-      const firstCard = cards[0];
       const trackRect = track.getBoundingClientRect();
       const firstRect = firstCard.getBoundingClientRect();
       const hasLayout =
         trackRect.width > 0 && firstRect.width > 0 && firstRect.height > 0;
       if (!hasLayout) {
+        return false;
+      }
+
+      if (!readinessResolvedRef.current) {
+        controls.closeAllOverlays();
+        controls.selectPillar("BODY");
+        controls.focusCarouselCard(HERO_BODY_CARD_UNLOCKED_1);
+        readinessResolvedRef.current = true;
+        return false;
+      }
+
+      const horizontallyVisible =
+        firstRect.right > trackRect.left + 8 &&
+        firstRect.left < trackRect.right - 8;
+      if (!isBodySelected || !horizontallyVisible) {
         return false;
       }
 
@@ -366,7 +412,6 @@ function HeroLogrosScene({
     }
 
     controls.closeAllOverlays();
-    controls.selectPillar("BODY");
     controls.focusCarouselCard(HERO_BODY_CARD_UNLOCKED_1);
 
     const segment = LOGROS_CAROUSEL_DURATION_MS / 3;
