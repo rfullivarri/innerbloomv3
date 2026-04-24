@@ -147,6 +147,28 @@
   box-sizing: border-box;
 }
 
+
+.heroFocusContent > :global(.space-y-6) > :first-child {
+  display: none !important;
+}
+
+.heroFocusContent :global([data-demo-anchor="daily-energy"]),
+.heroFocusContent :global([data-demo-anchor="daily-cultivation"]),
+.heroFocusContent :global([data-demo-anchor="moderation"]),
+.heroFocusContent :global([data-demo-anchor="balance"]) {
+  display: none !important;
+}
+
+.heroFocusContent :global(.order-1),
+.heroFocusContent :global(.order-3 > :not([data-demo-anchor="emotion-chart"])),
+.heroFocusContent :global(.order-4 > :not([data-demo-anchor="streaks"])) {
+  display: none !important;
+}
+
+.heroFocusViewport {
+  padding-bottom: 88px;
+}
+
 .sceneDashboard :global(.lg\:grid-cols-12) {
   grid-template-columns: minmax(0, 1fr) !important;
 }
