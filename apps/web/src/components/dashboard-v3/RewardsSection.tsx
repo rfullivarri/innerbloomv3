@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { createPortal } from 'react-dom';
-import { Sparkles } from 'lucide-react';
-import { Card } from '../ui/Card';
-import { useRequest } from '../../hooks/useRequest';
-import { useCarouselSelection } from '../../hooks/useCarouselSelection';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { createPortal } from "react-dom";
+import { Sparkles } from "lucide-react";
+import { Card } from "../ui/Card";
+import { useRequest } from "../../hooks/useRequest";
+import { useCarouselSelection } from "../../hooks/useCarouselSelection";
 import {
   decideTaskHabitAchievement,
   getTaskInsights,
@@ -15,26 +15,26 @@ import {
   type MonthlyWrappedRecord,
   type RewardsHistorySummary,
   type WeeklyWrappedRecord,
-} from '../../lib/api';
-import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
-import { emitHabitAchievementUpdated } from '../../lib/habitAchievementEvents';
-import { subscribeToMediaQuery } from '../../lib/mediaQuery';
-import { HabitAchievementSeal } from './HabitAchievementSeal';
-import { PreviewAchievementCard } from './PreviewAchievementCard';
+} from "../../lib/api";
+import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
+import { emitHabitAchievementUpdated } from "../../lib/habitAchievementEvents";
+import { subscribeToMediaQuery } from "../../lib/mediaQuery";
+import { HabitAchievementSeal } from "./HabitAchievementSeal";
+import { PreviewAchievementCard } from "./PreviewAchievementCard";
 import {
   DASHBOARD_SEGMENTED_BUTTON_ACTIVE,
   DASHBOARD_SEGMENTED_BUTTON_BASE,
   DASHBOARD_SEGMENTED_BUTTON_INACTIVE,
   DASHBOARD_SEGMENTED_GROUP_BASE,
-} from './segmentedControlStyles';
+} from "./segmentedControlStyles";
 
 const REWARDS_PILLAR_ORDER = [
-  { code: 'BODY', name: 'Body' },
-  { code: 'MIND', name: 'Mind' },
-  { code: 'SOUL', name: 'Soul' },
+  { code: "BODY", name: "Body" },
+  { code: "MIND", name: "Mind" },
+  { code: "SOUL", name: "Soul" },
 ] as const;
 
-type AchievementViewMode = 'shelves' | 'carousel';
+type AchievementViewMode = "shelves" | "carousel";
 
 interface RewardsSectionProps {
   userId: string;
@@ -42,9 +42,13 @@ interface RewardsSectionProps {
   initialData?: RewardsHistorySummary;
   onPendingCountChange?: (count: number) => void;
   disableRemote?: boolean;
-  mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
+  mockPreviewAchievementByTaskId?: Record<
+    string,
+    NonNullable<TaskInsightsResponse["previewAchievement"]>
+  >;
   demoAnchors?: {
     shelves?: string;
+    growthCalibration?: string;
     carouselStructure?: string;
     pillarSelector?: string;
     carouselTrack?: string;
@@ -66,8 +70,11 @@ interface RewardsSectionProps {
   demoConfig?: {
     disableRemote?: boolean;
     forceAchievementsViewMode?: AchievementViewMode;
-    mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
-    anchors?: RewardsSectionProps['demoAnchors'];
+    mockPreviewAchievementByTaskId?: Record<
+      string,
+      NonNullable<TaskInsightsResponse["previewAchievement"]>
+    >;
+    anchors?: RewardsSectionProps["demoAnchors"];
     controls?: {
       onReady?: (controls: RewardsSectionDemoControls) => void;
     };
@@ -76,7 +83,7 @@ interface RewardsSectionProps {
 }
 
 export type RewardsSectionDemoControls = {
-  selectPillar: (pillarCode: 'BODY' | 'MIND' | 'SOUL') => void;
+  selectPillar: (pillarCode: "BODY" | "MIND" | "SOUL") => void;
   focusCarouselCard: (taskId: string) => void;
   openAchievedCard: () => void;
   openBlockedCard: () => void;
@@ -103,27 +110,37 @@ export function RewardsSection({
   const { language } = usePostLoginLanguage();
   const resolvedDisableRemote = demoConfig?.disableRemote ?? disableRemote;
   const forcedAchievementsViewMode = demoConfig?.forceAchievementsViewMode;
-  const resolvedMockPreviewAchievementByTaskId = demoConfig?.mockPreviewAchievementByTaskId ?? mockPreviewAchievementByTaskId;
+  const resolvedMockPreviewAchievementByTaskId =
+    demoConfig?.mockPreviewAchievementByTaskId ??
+    mockPreviewAchievementByTaskId;
   const resolvedDemoAnchors = demoConfig?.anchors ?? demoAnchors;
 
   const [isDecisionOpen, setIsDecisionOpen] = useState(false);
   const [decisionIndex, setDecisionIndex] = useState(0);
-  const [celebrating, setCelebrating] = useState<null | HabitAchievementShelfItem[]>(null);
+  const [celebrating, setCelebrating] = useState<
+    null | HabitAchievementShelfItem[]
+  >(null);
   const [educationBannerVisible, setEducationBannerVisible] = useState(false);
   const [isTransitioningDecision, setIsTransitioningDecision] = useState(false);
-  const [isGrowthCalibrationModalOpen, setIsGrowthCalibrationModalOpen] = useState(false);
-  const achievementsViewMode: AchievementViewMode = forcedAchievementsViewMode ?? 'carousel';
+  const [isGrowthCalibrationModalOpen, setIsGrowthCalibrationModalOpen] =
+    useState(false);
+  const achievementsViewMode: AchievementViewMode =
+    forcedAchievementsViewMode ?? "carousel";
 
-  const { data, status, error, reload } = useRequest(() => getRewardsHistory(userId), [userId], {
-    enabled: !resolvedDisableRemote && Boolean(userId),
-  });
+  const { data, status, error, reload } = useRequest(
+    () => getRewardsHistory(userId),
+    [userId],
+    {
+      enabled: !resolvedDisableRemote && Boolean(userId),
+    },
+  );
   const effectiveData = data ?? initialData;
 
   const pendingItems = useMemo(
     () =>
       (effectiveData?.habitAchievements.achievedByPillar ?? [])
         .flatMap((group) => group.habits)
-        .filter((habit) => habit.status === 'pending_decision'),
+        .filter((habit) => habit.status === "pending_decision"),
     [effectiveData],
   );
 
@@ -146,7 +163,10 @@ export function RewardsSection({
     latestResults: [],
   };
 
-  const handleDecision = async (habit: HabitAchievementShelfItem, decision: 'maintain' | 'store') => {
+  const handleDecision = async (
+    habit: HabitAchievementShelfItem,
+    decision: "maintain" | "store",
+  ) => {
     if (resolvedDisableRemote) {
       return;
     }
@@ -187,21 +207,29 @@ export function RewardsSection({
 
   return (
     <Card
-      rightSlot={(
+      rightSlot={
         <div className="flex items-center gap-2">
           {!resolvedDisableRemote ? (
             <a
               href="/labs/logros"
-              title={language === 'es' ? 'Ver demo guiada de Logros' : 'View guided Achievements demo'}
-              aria-label={language === 'es' ? 'Ver demo guiada de Logros' : 'View guided Achievements demo'}
+              title={
+                language === "es"
+                  ? "Ver demo guiada de Logros"
+                  : "View guided Achievements demo"
+              }
+              aria-label={
+                language === "es"
+                  ? "Ver demo guiada de Logros"
+                  : "View guided Achievements demo"
+              }
               className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/55 bg-violet-100/95 px-2.5 py-1 text-xs font-semibold text-violet-700 shadow-[0_4px_12px_rgba(124,58,237,0.16)] transition hover:border-violet-500/60 hover:bg-violet-200/90 hover:text-violet-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 disabled:cursor-not-allowed disabled:opacity-45 dark:border-violet-300/55 dark:bg-violet-500/35 dark:text-violet-50 dark:shadow-[0_6px_18px_rgba(124,58,237,0.35)] dark:hover:border-violet-200/80 dark:hover:bg-violet-500/45 dark:hover:text-white dark:focus-visible:outline-violet-200"
             >
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>{language === 'es' ? 'Ver guía' : 'View guide'}</span>
+              <span>{language === "es" ? "Ver guía" : "View guide"}</span>
             </a>
           ) : null}
         </div>
-      )}
+      }
       bodyClassName="gap-5"
     >
       {!resolvedDisableRemote && pendingCount > 0 ? (
@@ -212,22 +240,33 @@ export function RewardsSection({
           }}
           className="ib-card-contour-shadow w-full rounded-2xl border border-amber-300/50 bg-gradient-to-r from-amber-400/15 via-orange-400/10 to-fuchsia-500/10 p-4 text-left"
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-100">{language === 'es' ? 'Pendiente' : 'Pending'}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-100">
+            {language === "es" ? "Pendiente" : "Pending"}
+          </p>
           <p className="mt-1 text-sm font-semibold text-[color:var(--color-text)]">
-            {language === 'es' ? 'Tienes hábitos logrados para revisar' : 'You have achieved habits to review'}
+            {language === "es"
+              ? "Tienes hábitos logrados para revisar"
+              : "You have achieved habits to review"}
           </p>
         </button>
       ) : null}
 
       {!resolvedDisableRemote && educationBannerVisible ? (
         <div className="rounded-2xl border border-emerald-300/40 bg-emerald-400/10 p-4 text-sm text-emerald-100">
-          {language === 'es'
-            ? 'Tus hábitos logrados ahora viven en Logros. Puedes mantenerlos o guardarlos desde los estantes.'
-            : 'Your achieved habits now live in Achievements. You can maintain or store them from the shelves.'}
+          {language === "es"
+            ? "Tus hábitos logrados ahora viven en Logros. Puedes mantenerlos o guardarlos desde los estantes."
+            : "Your achieved habits now live in Achievements. You can maintain or store them from the shelves."}
         </div>
       ) : null}
 
-      {status === 'error' ? <p className="text-sm text-rose-200">{error?.message ?? (language === 'es' ? 'Error al cargar Logros.' : 'Error loading Achievements.')}</p> : null}
+      {status === "error" ? (
+        <p className="text-sm text-rose-200">
+          {error?.message ??
+            (language === "es"
+              ? "Error al cargar Logros."
+              : "Error loading Achievements.")}
+        </p>
+      ) : null}
 
       <AchievedShelf
         language={language}
@@ -251,13 +290,25 @@ export function RewardsSection({
         language={language}
         growthCalibration={growthCalibration}
         onOpenResults={() => setIsGrowthCalibrationModalOpen(true)}
+        anchor={resolvedDemoAnchors?.growthCalibration}
       />
 
-      <WeeklyWrapupShelf items={weeklyItems} onOpen={onOpenWeeklyWrapped} language={language} anchor={resolvedDemoAnchors?.weekly} />
+      <WeeklyWrapupShelf
+        items={weeklyItems}
+        onOpen={onOpenWeeklyWrapped}
+        language={language}
+        anchor={resolvedDemoAnchors?.weekly}
+      />
 
-      <MonthlyWrapupShelf items={monthlyItems} language={language} anchor={resolvedDemoAnchors?.monthly} />
+      <MonthlyWrapupShelf
+        items={monthlyItems}
+        language={language}
+        anchor={resolvedDemoAnchors?.monthly}
+      />
 
-      {!resolvedDisableRemote && isDecisionOpen && pendingItems[decisionIndex] ? (
+      {!resolvedDisableRemote &&
+      isDecisionOpen &&
+      pendingItems[decisionIndex] ? (
         <DecisionModal
           language={language}
           currentIndex={decisionIndex}
@@ -265,12 +316,20 @@ export function RewardsSection({
           habit={pendingItems[decisionIndex]}
           transitioning={isTransitioningDecision}
           onClose={() => setIsDecisionOpen(false)}
-          onMaintain={() => handleDecision(pendingItems[decisionIndex], 'maintain')}
-          onStore={() => handleDecision(pendingItems[decisionIndex], 'store')}
+          onMaintain={() =>
+            handleDecision(pendingItems[decisionIndex], "maintain")
+          }
+          onStore={() => handleDecision(pendingItems[decisionIndex], "store")}
         />
       ) : null}
 
-      {!resolvedDisableRemote && celebrating ? <CelebrationOverlay language={language} habits={celebrating} onSkip={() => setCelebrating(null)} /> : null}
+      {!resolvedDisableRemote && celebrating ? (
+        <CelebrationOverlay
+          language={language}
+          habits={celebrating}
+          onSkip={() => setCelebrating(null)}
+        />
+      ) : null}
 
       <GrowthCalibrationResultsModal
         language={language}
@@ -286,22 +345,34 @@ function GrowthCalibrationShelf({
   language,
   growthCalibration,
   onOpenResults,
+  anchor,
 }: {
-  language: 'es' | 'en';
-  growthCalibration: RewardsHistorySummary['growthCalibration'];
+  language: "es" | "en";
+  growthCalibration: RewardsHistorySummary["growthCalibration"];
   onOpenResults: () => void;
+  anchor?: string;
 }) {
   const hasResults = growthCalibration.latestResults.length > 0;
   return (
-    <div className="ib-card-contour-shadow ib-light-elevated-surface ib-light-elevated-surface--rose rounded-2xl p-4">
+    <div
+      data-demo-anchor={anchor}
+      className="ib-card-contour-shadow ib-light-elevated-surface ib-light-elevated-surface--rose rounded-2xl p-4"
+    >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">Growth Calibration Results</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">
+            Growth Calibration Results
+          </p>
           <p className="mt-1 text-xs text-[color:var(--color-text-muted)]">
-            {language === 'es' ? 'Últimos ajustes automáticos de dificultad' : 'Latest automatic difficulty adjustments'}
+            {language === "es"
+              ? "Últimos ajustes automáticos de dificultad"
+              : "Latest automatic difficulty adjustments"}
           </p>
         </div>
-        <InlineCountdown days={growthCalibration.countdownDays} language={language} />
+        <InlineCountdown
+          days={growthCalibration.countdownDays}
+          language={language}
+        />
       </div>
 
       {hasResults ? (
@@ -311,55 +382,92 @@ function GrowthCalibrationShelf({
           className="mt-3 w-full rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left transition hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
         >
           <p className="text-lg font-bold tracking-[0.02em] text-[color:var(--color-text)] sm:text-xl">
-            <span className="text-rose-300">↑ {growthCalibration.summary.up}</span>
-            <span className="mx-3 text-amber-300">• {growthCalibration.summary.keep}</span>
-            <span className="text-emerald-300">↓ {growthCalibration.summary.down}</span>
+            <span className="text-rose-300">
+              ↑ {growthCalibration.summary.up}
+            </span>
+            <span className="mx-3 text-amber-300">
+              • {growthCalibration.summary.keep}
+            </span>
+            <span className="text-emerald-300">
+              ↓ {growthCalibration.summary.down}
+            </span>
           </p>
           {growthCalibration.latestPeriodLabel ? (
-            <p className="mt-1.5 text-xs uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">{growthCalibration.latestPeriodLabel}</p>
+            <p className="mt-1.5 text-xs uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">
+              {growthCalibration.latestPeriodLabel}
+            </p>
           ) : null}
         </button>
       ) : (
         <div className="mt-3 rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
-          {language === 'es'
-            ? 'Todavía no hay resultados de Growth Calibration. Tus próximos ajustes aparecerán aquí.'
-            : 'There are no Growth Calibration results yet. Your next adjustments will appear here.'}
+          {language === "es"
+            ? "Todavía no hay resultados de Growth Calibration. Tus próximos ajustes aparecerán aquí."
+            : "There are no Growth Calibration results yet. Your next adjustments will appear here."}
         </div>
       )}
     </div>
   );
 }
 
-function MonthlyWrapupShelf({ items, language, anchor }: { items: MonthlyWrappedRecord[]; language: 'es' | 'en'; anchor?: string }) {
-  const monthlyCountdownDays = useDailyWrapupCountdown(getDaysUntilNextMonthWrapup);
+function MonthlyWrapupShelf({
+  items,
+  language,
+  anchor,
+}: {
+  items: MonthlyWrappedRecord[];
+  language: "es" | "en";
+  anchor?: string;
+}) {
+  const monthlyCountdownDays = useDailyWrapupCountdown(
+    getDaysUntilNextMonthWrapup,
+  );
   const compactItems = useMemo(() => items.slice(0, 2), [items]);
   const latest = compactItems[0] ?? null;
   const previous = compactItems[1] ?? null;
 
   return (
-    <div data-demo-anchor={anchor} className="ib-card-contour-shadow ib-light-elevated-surface ib-light-elevated-surface--indigo rounded-2xl p-4">
+    <div
+      data-demo-anchor={anchor}
+      className="ib-card-contour-shadow ib-light-elevated-surface ib-light-elevated-surface--indigo rounded-2xl p-4"
+    >
       <div className="flex items-start justify-between gap-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Monthly Wrapped' : 'Monthly Wrapped'}</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">
+          {language === "es" ? "Monthly Wrapped" : "Monthly Wrapped"}
+        </p>
         <InlineCountdown days={monthlyCountdownDays} language={language} />
       </div>
       {latest ? (
         <div className="mt-3 space-y-2">
           <div className="w-full rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{latest.periodKey}</p>
-            <p className="mt-1 text-sm font-semibold text-[color:var(--color-text)]">{language === 'es' ? 'Resumen mensual más reciente' : 'Most recent monthly summary'}</p>
-            <CompletionDots completionDays={latest.completionDays ?? []} range={resolveMonthRange(latest.periodKey)} language={language} />
+            <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
+              {latest.periodKey}
+            </p>
+            <p className="mt-1 text-sm font-semibold text-[color:var(--color-text)]">
+              {language === "es"
+                ? "Resumen mensual más reciente"
+                : "Most recent monthly summary"}
+            </p>
+            <CompletionDots
+              completionDays={latest.completionDays ?? []}
+              range={resolveMonthRange(latest.periodKey)}
+              language={language}
+            />
           </div>
           {previous ? (
             <div className="w-full rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/70 p-3 text-left">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{previous.periodKey}</p>
-              <p className="mt-1 text-xs font-semibold text-[color:var(--color-text-muted)]">{language === 'es' ? 'Periodo anterior' : 'Previous period'}</p>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
+                {previous.periodKey}
+              </p>
+              <p className="mt-1 text-xs font-semibold text-[color:var(--color-text-muted)]">
+                {language === "es" ? "Periodo anterior" : "Previous period"}
+              </p>
             </div>
           ) : null}
         </div>
       ) : (
         <div className="mt-3 rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
-          {language === 'es'
-            ? 'Aún no tienes Wrap-Ups mensuales. Tus próximos resúmenes aparecerán aquí.'
+          {language === "es"
+            ? "Aún no tienes Wrap-Ups mensuales. Tus próximos resúmenes aparecerán aquí."
             : "You don't have monthly wrap-ups yet. Your next summaries will appear here."}
         </div>
       )}
@@ -367,19 +475,37 @@ function MonthlyWrapupShelf({ items, language, anchor }: { items: MonthlyWrapped
   );
 }
 
-function WeeklyWrapupShelf({ items, onOpen, language, anchor }: { items: WeeklyWrappedRecord[]; onOpen?: (record?: WeeklyWrappedRecord | null) => void; language: 'es' | 'en'; anchor?: string }) {
-  const weeklyCountdownDays = useDailyWrapupCountdown(getDaysUntilNextWeeklyWrapup);
+function WeeklyWrapupShelf({
+  items,
+  onOpen,
+  language,
+  anchor,
+}: {
+  items: WeeklyWrappedRecord[];
+  onOpen?: (record?: WeeklyWrappedRecord | null) => void;
+  language: "es" | "en";
+  anchor?: string;
+}) {
+  const weeklyCountdownDays = useDailyWrapupCountdown(
+    getDaysUntilNextWeeklyWrapup,
+  );
   const compactItems = useMemo(() => items.slice(0, 2), [items]);
   return (
-    <div data-demo-anchor={anchor} className="ib-card-contour-shadow ib-light-elevated-surface ib-light-elevated-surface--emerald rounded-2xl p-4">
+    <div
+      data-demo-anchor={anchor}
+      className="ib-card-contour-shadow ib-light-elevated-surface ib-light-elevated-surface--emerald rounded-2xl p-4"
+    >
       <div className="flex items-start justify-between gap-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Weekly Wrapped' : 'Weekly Wrapped'}</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">
+          {language === "es" ? "Weekly Wrapped" : "Weekly Wrapped"}
+        </p>
         <InlineCountdown days={weeklyCountdownDays} language={language} />
       </div>
       {compactItems.length ? (
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           {compactItems.map((item) => {
-            const weeklyEmotion = item.payload.emotions.weekly ?? item.payload.emotions.biweekly;
+            const weeklyEmotion =
+              item.payload.emotions.weekly ?? item.payload.emotions.biweekly;
             const dominantPillar = item.payload.summary.pillarDominant;
             return (
               <button
@@ -388,10 +514,19 @@ function WeeklyWrapupShelf({ items, onOpen, language, anchor }: { items: WeeklyW
                 onClick={() => onOpen?.(item)}
                 className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left"
               >
-                <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{item.weekStart} → {item.weekEnd}</p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
+                  {item.weekStart} → {item.weekEnd}
+                </p>
                 <div className="mt-2 flex min-h-6 items-center gap-2.5">
                   <EmotionDot color={weeklyEmotion?.color} />
-                  <span className="text-[1.3rem] leading-none" aria-label={language === 'es' ? 'Pilar dominante en GP' : 'Dominant pillar by GP'}>
+                  <span
+                    className="text-[1.3rem] leading-none"
+                    aria-label={
+                      language === "es"
+                        ? "Pilar dominante en GP"
+                        : "Dominant pillar by GP"
+                    }
+                  >
                     {resolvePillarEmoji(dominantPillar)}
                   </span>
                   <CompletionDots
@@ -407,8 +542,8 @@ function WeeklyWrapupShelf({ items, onOpen, language, anchor }: { items: WeeklyW
         </div>
       ) : (
         <div className="mt-3 rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
-          {language === 'es'
-            ? 'Aún no tienes Weekly Wrap-Ups. Tus próximos resúmenes semanales aparecerán aquí.'
+          {language === "es"
+            ? "Aún no tienes Weekly Wrap-Ups. Tus próximos resúmenes semanales aparecerán aquí."
             : "You don't have weekly wrap-ups yet. Your next weekly summaries will appear here."}
         </div>
       )}
@@ -416,11 +551,19 @@ function WeeklyWrapupShelf({ items, onOpen, language, anchor }: { items: WeeklyW
   );
 }
 
-function InlineCountdown({ days, language }: { days: number; language: 'es' | 'en' }) {
+function InlineCountdown({
+  days,
+  language,
+}: {
+  days: number;
+  language: "es" | "en";
+}) {
   return (
     <p className="whitespace-nowrap text-right text-xs font-semibold tracking-[0.03em] text-[color:var(--color-text-dim)]">
-      {language === 'es' ? 'Próximo en ' : 'Next in '}
-      <span className="text-lg font-black leading-none text-[color:var(--color-text-strong)]">{days}d</span>
+      {language === "es" ? "Próximo en " : "Next in "}
+      <span className="text-lg font-black leading-none text-[color:var(--color-text-strong)]">
+        {days}d
+      </span>
     </p>
   );
 }
@@ -431,9 +574,9 @@ function GrowthCalibrationResultsModal({
   growthCalibration,
   onClose,
 }: {
-  language: 'es' | 'en';
+  language: "es" | "en";
   isOpen: boolean;
-  growthCalibration: RewardsHistorySummary['growthCalibration'];
+  growthCalibration: RewardsHistorySummary["growthCalibration"];
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -441,31 +584,34 @@ function GrowthCalibrationResultsModal({
       return;
     }
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         onClose();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen || typeof document === 'undefined') {
+  if (!isOpen || typeof document === "undefined") {
     return null;
   }
 
-  const resultTone: Record<'up' | 'keep' | 'down', string> = {
-    up: 'text-rose-300',
-    keep: 'text-amber-300',
-    down: 'text-emerald-300',
+  const resultTone: Record<"up" | "keep" | "down", string> = {
+    up: "text-rose-300",
+    keep: "text-amber-300",
+    down: "text-emerald-300",
   };
-  const resultSymbol: Record<'up' | 'keep' | 'down', string> = {
-    up: '↑',
-    keep: '•',
-    down: '↓',
+  const resultSymbol: Record<"up" | "keep" | "down", string> = {
+    up: "↑",
+    keep: "•",
+    down: "↓",
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[240] flex items-end justify-center bg-slate-950/75 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:items-center" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[240] flex items-end justify-center bg-slate-950/75 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:items-center"
+      onClick={onClose}
+    >
       <div
         className="w-full max-w-4xl overflow-hidden rounded-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-surface-elevated)] shadow-[0_24px_70px_rgba(0,0,0,0.45)]"
         onClick={(event) => event.stopPropagation()}
@@ -473,50 +619,88 @@ function GrowthCalibrationResultsModal({
         <div className="flex items-start justify-between gap-3 border-b border-[color:var(--color-border-subtle)] px-4 py-3 sm:px-5">
           <div>
             <p className="text-sm font-semibold text-[color:var(--color-text-strong)]">
-              {language === 'es' ? 'Resultados de Growth Calibration' : 'Growth Calibration Results'}
+              {language === "es"
+                ? "Resultados de Growth Calibration"
+                : "Growth Calibration Results"}
             </p>
             {growthCalibration.latestPeriodLabel ? (
-              <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-slate-400)]">{growthCalibration.latestPeriodLabel}</p>
+              <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-slate-400)]">
+                {growthCalibration.latestPeriodLabel}
+              </p>
             ) : null}
           </div>
-          <button type="button" onClick={onClose} className="rounded-full border border-[color:var(--color-border-subtle)] px-2 py-1 text-xs">✕</button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-[color:var(--color-border-subtle)] px-2 py-1 text-xs"
+          >
+            ✕
+          </button>
         </div>
 
         <div className="max-h-[70vh] overflow-auto p-3 sm:p-4">
           {growthCalibration.latestResults.length === 0 ? (
             <p className="rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
-              {language === 'es'
-                ? 'Todavía no hay resultados de Growth Calibration. Tus próximos ajustes aparecerán aquí.'
-                : 'There are no Growth Calibration results yet. Your next adjustments will appear here.'}
+              {language === "es"
+                ? "Todavía no hay resultados de Growth Calibration. Tus próximos ajustes aparecerán aquí."
+                : "There are no Growth Calibration results yet. Your next adjustments will appear here."}
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-xs">
                 <thead className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-text-dim)]">
                   <tr>
-                    <th className="px-2 py-2">{language === 'es' ? 'Tarea' : 'Task'}</th>
-                    <th className="px-2 py-2">{language === 'es' ? 'Resultado' : 'Result'}</th>
-                    <th className="px-2 py-2">{language === 'es' ? 'Progreso' : 'Progress'}</th>
-                    <th className="px-2 py-2">{language === 'es' ? 'Tasa' : 'Rate'}</th>
-                    <th className="px-2 py-2">{language === 'es' ? 'Detalle' : 'Detail'}</th>
+                    <th className="px-2 py-2">
+                      {language === "es" ? "Tarea" : "Task"}
+                    </th>
+                    <th className="px-2 py-2">
+                      {language === "es" ? "Resultado" : "Result"}
+                    </th>
+                    <th className="px-2 py-2">
+                      {language === "es" ? "Progreso" : "Progress"}
+                    </th>
+                    <th className="px-2 py-2">
+                      {language === "es" ? "Tasa" : "Rate"}
+                    </th>
+                    <th className="px-2 py-2">
+                      {language === "es" ? "Detalle" : "Detail"}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {growthCalibration.latestResults.map((row) => (
-                    <tr key={`${row.taskId}-${row.evaluatedAt}`} className="border-t border-[color:var(--color-border-subtle)] align-top">
+                    <tr
+                      key={`${row.taskId}-${row.evaluatedAt}`}
+                      className="border-t border-[color:var(--color-border-subtle)] align-top"
+                    >
                       <td className="px-2 py-2">
-                        <p className="font-semibold text-[color:var(--color-text)]">{row.taskTitle}</p>
-                        {(row.difficultyBefore || row.difficultyAfter) ? (
-                          <p className="mt-0.5 text-[11px] text-[color:var(--color-text-muted)]">{row.difficultyBefore ?? '—'} → {row.difficultyAfter ?? '—'}</p>
+                        <p className="font-semibold text-[color:var(--color-text)]">
+                          {row.taskTitle}
+                        </p>
+                        {row.difficultyBefore || row.difficultyAfter ? (
+                          <p className="mt-0.5 text-[11px] text-[color:var(--color-text-muted)]">
+                            {row.difficultyBefore ?? "—"} →{" "}
+                            {row.difficultyAfter ?? "—"}
+                          </p>
                         ) : null}
                       </td>
-                      <td className={`px-2 py-2 text-base font-bold ${resultTone[row.finalAction]}`}>{resultSymbol[row.finalAction]}</td>
-                      <td className="px-2 py-2 text-[color:var(--color-text)]">{row.actualCompletions} / {row.expectedTarget}</td>
-                      <td className="px-2 py-2 text-[color:var(--color-text)]">{Math.round(row.completionRatePct)}%</td>
+                      <td
+                        className={`px-2 py-2 text-base font-bold ${resultTone[row.finalAction]}`}
+                      >
+                        {resultSymbol[row.finalAction]}
+                      </td>
+                      <td className="px-2 py-2 text-[color:var(--color-text)]">
+                        {row.actualCompletions} / {row.expectedTarget}
+                      </td>
+                      <td className="px-2 py-2 text-[color:var(--color-text)]">
+                        {Math.round(row.completionRatePct)}%
+                      </td>
                       <td className="px-2 py-2 text-[color:var(--color-text)]">
                         <p>{row.reason}</p>
                         {row.clampApplied && row.clampReason ? (
-                          <p className="mt-1 text-[11px] text-[color:var(--color-text-muted)]">{row.clampReason}</p>
+                          <p className="mt-1 text-[11px] text-[color:var(--color-text-muted)]">
+                            {row.clampReason}
+                          </p>
                         ) : null}
                       </td>
                     </tr>
@@ -533,7 +717,8 @@ function GrowthCalibrationResultsModal({
 }
 
 function EmotionDot({ color }: { color?: string }) {
-  const dotColor = color && color.trim().length ? color : 'rgba(255,255,255,0.45)';
+  const dotColor =
+    color && color.trim().length ? color : "rgba(255,255,255,0.45)";
   return (
     <span
       className="inline-flex h-4 w-4 shrink-0 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.2)]"
@@ -544,20 +729,23 @@ function EmotionDot({ color }: { color?: string }) {
 }
 
 function resolvePillarEmoji(pillar: string | null | undefined): string {
-  if (!pillar) return '•';
+  if (!pillar) return "•";
   const normalized = pillar.toString().trim().toUpperCase();
-  if (normalized === 'BODY' || normalized === 'CUERPO') return '🫀';
-  if (normalized === 'MIND' || normalized === 'MENTE') return '🧠';
-  if (normalized === 'SOUL' || normalized === 'ALMA') return '🏵️';
-  return '•';
+  if (normalized === "BODY" || normalized === "CUERPO") return "🫀";
+  if (normalized === "MIND" || normalized === "MENTE") return "🧠";
+  if (normalized === "SOUL" || normalized === "ALMA") return "🏵️";
+  return "•";
 }
 
-function resolvePillarHeader(pillar: { code?: string | null; name?: string | null }, language: 'es' | 'en'): string {
-  const code = (pillar.code ?? '').trim().toUpperCase();
-  if (code === 'BODY') return `${language === 'es' ? 'Cuerpo' : 'Body'} 🫀`;
-  if (code === 'MIND') return `${language === 'es' ? 'Mente' : 'Mind'} 🧠`;
-  if (code === 'SOUL') return `${language === 'es' ? 'Alma' : 'Soul'} 🏵️`;
-  return `${pillar.name ?? 'Pillar'} ${resolvePillarEmoji(pillar.code)}`;
+function resolvePillarHeader(
+  pillar: { code?: string | null; name?: string | null },
+  language: "es" | "en",
+): string {
+  const code = (pillar.code ?? "").trim().toUpperCase();
+  if (code === "BODY") return `${language === "es" ? "Cuerpo" : "Body"} 🫀`;
+  if (code === "MIND") return `${language === "es" ? "Mente" : "Mind"} 🧠`;
+  if (code === "SOUL") return `${language === "es" ? "Alma" : "Soul"} 🏵️`;
+  return `${pillar.name ?? "Pillar"} ${resolvePillarEmoji(pillar.code)}`;
 }
 
 function CompletionDots({
@@ -568,14 +756,22 @@ function CompletionDots({
 }: {
   completionDays: string[];
   range: { start: string; end: string };
-  language: 'es' | 'en';
+  language: "es" | "en";
   inline?: boolean;
 }) {
-  const dayLabels = language === 'es' ? ['L', 'M', 'X', 'J', 'V', 'S', 'D'] : ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const dayLabels =
+    language === "es"
+      ? ["L", "M", "X", "J", "V", "S", "D"]
+      : ["M", "T", "W", "T", "F", "S", "S"];
   const completed = useMemo(() => new Set(completionDays), [completionDays]);
-  const weekDates = useMemo(() => getWeekDatesFromRange(range), [range.end, range.start]);
+  const weekDates = useMemo(
+    () => getWeekDatesFromRange(range),
+    [range.end, range.start],
+  );
   return (
-    <div className={`flex items-center justify-center gap-1.5 ${inline ? 'w-auto mt-0 min-w-0 flex-1 justify-start' : 'mt-3 w-full'}`}>
+    <div
+      className={`flex items-center justify-center gap-1.5 ${inline ? "w-auto mt-0 min-w-0 flex-1 justify-start" : "mt-3 w-full"}`}
+    >
       {weekDates.map((dateKey, index) => {
         const isDone = completed.has(dateKey);
         return (
@@ -583,8 +779,8 @@ function CompletionDots({
             key={`${dateKey}-${index}`}
             className={`flex h-6 w-6 items-center justify-center rounded-full border text-[10px] font-semibold ${
               isDone
-                ? 'border-[#d8b4fe] bg-[#e9d5ff] text-[#7c3aed] shadow-sm dark:border-violet-300/50 dark:bg-violet-500/45 dark:text-violet-100'
-                : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]'
+                ? "border-[#d8b4fe] bg-[#e9d5ff] text-[#7c3aed] shadow-sm dark:border-violet-300/50 dark:bg-violet-500/45 dark:text-violet-100"
+                : "border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]"
             }`}
           >
             {dayLabels[index]}
@@ -595,7 +791,10 @@ function CompletionDots({
   );
 }
 
-function getWeekDatesFromRange(range: { start: string; end: string }): string[] {
+function getWeekDatesFromRange(range: {
+  start: string;
+  end: string;
+}): string[] {
   const start = new Date(`${range.start}T00:00:00Z`);
   if (Number.isNaN(start.getTime())) {
     return [];
@@ -608,7 +807,7 @@ function getWeekDatesFromRange(range: { start: string; end: string }): string[] 
 }
 
 function resolveMonthRange(periodKey: string): { start: string; end: string } {
-  const [yearRaw, monthRaw] = periodKey.split('-');
+  const [yearRaw, monthRaw] = periodKey.split("-");
   const year = Number(yearRaw);
   const month = Number(monthRaw);
   if (!Number.isFinite(year) || !Number.isFinite(month)) {
@@ -619,30 +818,52 @@ function resolveMonthRange(periodKey: string): { start: string; end: string } {
   const rangeStart = new Date(monthEnd);
   rangeStart.setUTCDate(monthEnd.getUTCDate() - 6);
   if (rangeStart < monthStart) {
-    return { start: monthStart.toISOString().slice(0, 10), end: monthEnd.toISOString().slice(0, 10) };
+    return {
+      start: monthStart.toISOString().slice(0, 10),
+      end: monthEnd.toISOString().slice(0, 10),
+    };
   }
-  return { start: rangeStart.toISOString().slice(0, 10), end: monthEnd.toISOString().slice(0, 10) };
+  return {
+    start: rangeStart.toISOString().slice(0, 10),
+    end: monthEnd.toISOString().slice(0, 10),
+  };
 }
 
 function getDaysUntilNextWeeklyWrapup(referenceDate = new Date()): number {
-  const nowUtc = new Date(Date.UTC(referenceDate.getUTCFullYear(), referenceDate.getUTCMonth(), referenceDate.getUTCDate()));
+  const nowUtc = new Date(
+    Date.UTC(
+      referenceDate.getUTCFullYear(),
+      referenceDate.getUTCMonth(),
+      referenceDate.getUTCDate(),
+    ),
+  );
   const dayOfWeek = nowUtc.getUTCDay();
   const daysToNextMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
   return Math.max(0, daysToNextMonday);
 }
 
 function getDaysUntilNextMonthWrapup(referenceDate = new Date()): number {
-  const nowUtc = new Date(Date.UTC(referenceDate.getUTCFullYear(), referenceDate.getUTCMonth(), referenceDate.getUTCDate()));
-  const nextMonthStart = new Date(Date.UTC(nowUtc.getUTCFullYear(), nowUtc.getUTCMonth() + 1, 1));
+  const nowUtc = new Date(
+    Date.UTC(
+      referenceDate.getUTCFullYear(),
+      referenceDate.getUTCMonth(),
+      referenceDate.getUTCDate(),
+    ),
+  );
+  const nextMonthStart = new Date(
+    Date.UTC(nowUtc.getUTCFullYear(), nowUtc.getUTCMonth() + 1, 1),
+  );
   const diffMs = nextMonthStart.getTime() - nowUtc.getTime();
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 }
 
-function useDailyWrapupCountdown(getter: (referenceDate?: Date) => number): number {
+function useDailyWrapupCountdown(
+  getter: (referenceDate?: Date) => number,
+): number {
   const [days, setDays] = useState(() => getter(new Date()));
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return undefined;
     }
 
@@ -650,8 +871,20 @@ function useDailyWrapupCountdown(getter: (referenceDate?: Date) => number): numb
     refresh();
 
     const now = new Date();
-    const nextUtcMidnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 3));
-    const firstTickDelay = Math.max(5_000, nextUtcMidnight.getTime() - now.getTime());
+    const nextUtcMidnight = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() + 1,
+        0,
+        0,
+        3,
+      ),
+    );
+    const firstTickDelay = Math.max(
+      5_000,
+      nextUtcMidnight.getTime() - now.getTime(),
+    );
     let intervalId: number | null = null;
 
     const timeoutId = window.setTimeout(() => {
@@ -674,11 +907,11 @@ function usePrefersReducedMotion(): boolean {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return;
     }
 
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const update = () => setPrefersReducedMotion(mediaQuery.matches);
     update();
 
@@ -699,29 +932,48 @@ function AchievedShelf({
   onDemoControlsReady,
   demoStepId,
 }: {
-  groups: RewardsHistorySummary['habitAchievements']['achievedByPillar'];
-  language: 'es' | 'en';
+  groups: RewardsHistorySummary["habitAchievements"]["achievedByPillar"];
+  language: "es" | "en";
   viewMode: AchievementViewMode;
-  onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>;
+  onToggleMaintained: (
+    habit: HabitAchievementShelfItem,
+    enabled: boolean,
+  ) => Promise<void>;
   disableRemote: boolean;
-  mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
-  demoAnchors?: RewardsSectionProps['demoAnchors'];
+  mockPreviewAchievementByTaskId?: Record<
+    string,
+    NonNullable<TaskInsightsResponse["previewAchievement"]>
+  >;
+  demoAnchors?: RewardsSectionProps["demoAnchors"];
   onDemoControlsReady?: (controls: RewardsSectionDemoControls) => void;
   demoStepId?: string | null;
 }) {
   const [activeHabitId, setActiveHabitId] = useState<string | null>(null);
-  const [previewHabit, setPreviewHabit] = useState<HabitAchievementShelfItem | null>(null);
+  const [previewHabit, setPreviewHabit] =
+    useState<HabitAchievementShelfItem | null>(null);
   const [showBackFace, setShowBackFace] = useState(false);
-  const [activePillarCode, setActivePillarCode] = useState<(typeof REWARDS_PILLAR_ORDER)[number]['code']>(REWARDS_PILLAR_ORDER[0].code);
-  const [flippedCarouselHabitId, setFlippedCarouselHabitId] = useState<string | null>(null);
-  const [maintainPendingHabitId, setMaintainPendingHabitId] = useState<string | null>(null);
+  const [activePillarCode, setActivePillarCode] = useState<
+    (typeof REWARDS_PILLAR_ORDER)[number]["code"]
+  >(REWARDS_PILLAR_ORDER[0].code);
+  const [flippedCarouselHabitId, setFlippedCarouselHabitId] = useState<
+    string | null
+  >(null);
+  const [maintainPendingHabitId, setMaintainPendingHabitId] = useState<
+    string | null
+  >(null);
   const prefersReducedMotion = usePrefersReducedMotion();
   const normalizedGroups = useMemo(() => {
-    const byCode = new Map(groups.map((group) => [group.pillar.code.toUpperCase(), group]));
+    const byCode = new Map(
+      groups.map((group) => [group.pillar.code.toUpperCase(), group]),
+    );
     return REWARDS_PILLAR_ORDER.map((pillar) => {
       const existing = byCode.get(pillar.code);
       return {
-        pillar: existing?.pillar ?? { id: null, code: pillar.code, name: pillar.name },
+        pillar: existing?.pillar ?? {
+          id: null,
+          code: pillar.code,
+          name: pillar.name,
+        },
         habits: existing?.habits ?? [],
       };
     });
@@ -737,9 +989,13 @@ function AchievedShelf({
     return map;
   }, [normalizedGroups]);
 
-  const activeHabit = activeHabitId ? habitsById.get(activeHabitId) ?? null : null;
+  const activeHabit = activeHabitId
+    ? (habitsById.get(activeHabitId) ?? null)
+    : null;
   const activePillarHabits = useMemo(() => {
-    const group = normalizedGroups.find((entry) => entry.pillar.code.toUpperCase() === activePillarCode);
+    const group = normalizedGroups.find(
+      (entry) => entry.pillar.code.toUpperCase() === activePillarCode,
+    );
     return group?.habits ?? [];
   }, [activePillarCode, normalizedGroups]);
   const {
@@ -748,18 +1004,18 @@ function AchievedShelf({
     trackRef: carouselTrackRef,
     handleTrackScroll: handleCarouselTrackScroll,
   } = useCarouselSelection<HTMLDivElement>({
-    itemAttribute: 'data-achievement-carousel-index',
+    itemAttribute: "data-achievement-carousel-index",
     initialIndex: 0,
   });
   const resolvedAchievedTaskId = demoAnchors?.achievedCardTaskId;
   const resolvedBlockedTaskId = demoAnchors?.blockedCardTaskId;
-  const isShelfFocusStep = demoStepId === 'logros-shelves';
+  const isShelfFocusStep = demoStepId === "logros-shelves";
   const isDemoExperience = Boolean(demoStepId);
-  const useCompactLockedPreview = demoStepId?.startsWith('logros-') ?? false;
-  const isCarouselView = viewMode === 'carousel';
+  const useCompactLockedPreview = demoStepId?.startsWith("logros-") ?? false;
+  const isCarouselView = viewMode === "carousel";
 
   useEffect(() => {
-    if (viewMode !== 'shelves') {
+    if (viewMode !== "shelves") {
       setActiveHabitId(null);
       setPreviewHabit(null);
       setShowBackFace(false);
@@ -770,7 +1026,7 @@ function AchievedShelf({
     setFlippedCarouselHabitId(null);
     setActiveCarouselIndex(0);
     if (carouselTrackRef.current) {
-      carouselTrackRef.current.scrollTo({ left: 0, behavior: 'auto' });
+      carouselTrackRef.current.scrollTo({ left: 0, behavior: "auto" });
     }
   }, [activePillarCode, carouselTrackRef, setActiveCarouselIndex]);
 
@@ -778,71 +1034,111 @@ function AchievedShelf({
     if (!flippedCarouselHabitId) {
       return;
     }
-    const flippedIndex = activePillarHabits.findIndex((habit) => habit.id === flippedCarouselHabitId);
+    const flippedIndex = activePillarHabits.findIndex(
+      (habit) => habit.id === flippedCarouselHabitId,
+    );
     if (flippedIndex !== activeCarouselIndex) {
       setFlippedCarouselHabitId(null);
     }
   }, [activeCarouselIndex, activePillarHabits, flippedCarouselHabitId]);
 
   const focusBlockedShelfCard = useCallback(() => {
-    const target = document.querySelector('[data-demo-anchor="logros-blocked-card"]') as HTMLElement | null;
+    const target = document.querySelector(
+      '[data-demo-anchor="logros-blocked-card"]',
+    ) as HTMLElement | null;
     if (!target) {
       return;
     }
 
-    target.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'center' });
-    const horizontalContainer = target.closest('.ib-rewards-shelf-scroll') as HTMLElement | null;
+    target.scrollIntoView({
+      behavior: "auto",
+      block: "center",
+      inline: "center",
+    });
+    const horizontalContainer = target.closest(
+      ".ib-rewards-shelf-scroll",
+    ) as HTMLElement | null;
     if (horizontalContainer) {
       const itemLeft = target.offsetLeft;
-      const centeredLeft = itemLeft - (horizontalContainer.clientWidth - target.clientWidth) / 2;
-      horizontalContainer.scrollTo({ left: Math.max(0, centeredLeft), behavior: 'auto' });
+      const centeredLeft =
+        itemLeft - (horizontalContainer.clientWidth - target.clientWidth) / 2;
+      horizontalContainer.scrollTo({
+        left: Math.max(0, centeredLeft),
+        behavior: "auto",
+      });
     }
   }, []);
 
-  const scrollCarouselToIndex = useCallback((targetIndex: number) => {
-    const track = carouselTrackRef.current;
-    if (!track) {
-      return;
-    }
-    const clampedIndex = Math.max(0, Math.min(targetIndex, Math.max(activePillarHabits.length - 1, 0)));
-    const targetCard = track.querySelector<HTMLElement>(`[data-achievement-carousel-index="${clampedIndex}"]`);
-    if (!targetCard) {
-      return;
-    }
-    if (typeof targetCard.scrollIntoView === 'function') {
-      targetCard.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', inline: 'center', block: 'nearest' });
-    }
-    setActiveCarouselIndex(clampedIndex);
-  }, [activePillarHabits.length, carouselTrackRef, prefersReducedMotion, setActiveCarouselIndex]);
-
-  const resolveHabitLocationByTaskId = useCallback((taskId: string) => {
-    for (const group of normalizedGroups) {
-      const habitIndex = group.habits.findIndex((habit) => habit.taskId === taskId);
-      if (habitIndex >= 0) {
-        return {
-          pillarCode: (group.pillar.code?.toUpperCase() ?? 'BODY') as (typeof REWARDS_PILLAR_ORDER)[number]['code'],
-          index: habitIndex,
-          habit: group.habits[habitIndex],
-        };
+  const scrollCarouselToIndex = useCallback(
+    (targetIndex: number) => {
+      const track = carouselTrackRef.current;
+      if (!track) {
+        return;
       }
-    }
-    return null;
-  }, [normalizedGroups]);
+      const clampedIndex = Math.max(
+        0,
+        Math.min(targetIndex, Math.max(activePillarHabits.length - 1, 0)),
+      );
+      const targetCard = track.querySelector<HTMLElement>(
+        `[data-achievement-carousel-index="${clampedIndex}"]`,
+      );
+      if (!targetCard) {
+        return;
+      }
+      if (typeof targetCard.scrollIntoView === "function") {
+        targetCard.scrollIntoView({
+          behavior: prefersReducedMotion ? "auto" : "smooth",
+          inline: "center",
+          block: "nearest",
+        });
+      }
+      setActiveCarouselIndex(clampedIndex);
+    },
+    [
+      activePillarHabits.length,
+      carouselTrackRef,
+      prefersReducedMotion,
+      setActiveCarouselIndex,
+    ],
+  );
 
-  const focusCarouselCardByTaskId = useCallback((taskId: string) => {
-    const location = resolveHabitLocationByTaskId(taskId);
-    if (!location) {
-      return;
-    }
-    setActiveHabitId(null);
-    setPreviewHabit(null);
-    setShowBackFace(false);
-    setFlippedCarouselHabitId(null);
-    setActivePillarCode(location.pillarCode);
-    window.setTimeout(() => {
-      scrollCarouselToIndex(location.index);
-    }, 40);
-  }, [resolveHabitLocationByTaskId, scrollCarouselToIndex]);
+  const resolveHabitLocationByTaskId = useCallback(
+    (taskId: string) => {
+      for (const group of normalizedGroups) {
+        const habitIndex = group.habits.findIndex(
+          (habit) => habit.taskId === taskId,
+        );
+        if (habitIndex >= 0) {
+          return {
+            pillarCode: (group.pillar.code?.toUpperCase() ??
+              "BODY") as (typeof REWARDS_PILLAR_ORDER)[number]["code"],
+            index: habitIndex,
+            habit: group.habits[habitIndex],
+          };
+        }
+      }
+      return null;
+    },
+    [normalizedGroups],
+  );
+
+  const focusCarouselCardByTaskId = useCallback(
+    (taskId: string) => {
+      const location = resolveHabitLocationByTaskId(taskId);
+      if (!location) {
+        return;
+      }
+      setActiveHabitId(null);
+      setPreviewHabit(null);
+      setShowBackFace(false);
+      setFlippedCarouselHabitId(null);
+      setActivePillarCode(location.pillarCode);
+      window.setTimeout(() => {
+        scrollCarouselToIndex(location.index);
+      }, 40);
+    },
+    [resolveHabitLocationByTaskId, scrollCarouselToIndex],
+  );
 
   const openAchievedCard = useCallback(() => {
     if (isCarouselView) {
@@ -854,14 +1150,23 @@ function AchievedShelf({
     }
     const target = normalizedGroups
       .flatMap((group) => group.habits)
-      .find((habit) => habit.taskId === resolvedAchievedTaskId && habit.status !== 'not_achieved');
+      .find(
+        (habit) =>
+          habit.taskId === resolvedAchievedTaskId &&
+          habit.status !== "not_achieved",
+      );
     if (!target) {
       return;
     }
     setPreviewHabit(null);
     setShowBackFace(false);
     setActiveHabitId(target.id);
-  }, [focusCarouselCardByTaskId, isCarouselView, normalizedGroups, resolvedAchievedTaskId]);
+  }, [
+    focusCarouselCardByTaskId,
+    isCarouselView,
+    normalizedGroups,
+    resolvedAchievedTaskId,
+  ]);
 
   const openBlockedCard = useCallback(() => {
     if (isCarouselView) {
@@ -879,15 +1184,22 @@ function AchievedShelf({
       setActivePillarCode(location.pillarCode);
       window.setTimeout(() => {
         scrollCarouselToIndex(location.index);
-        window.setTimeout(() => {
-          setFlippedCarouselHabitId(location.habit.id);
-        }, prefersReducedMotion ? 0 : 120);
+        window.setTimeout(
+          () => {
+            setFlippedCarouselHabitId(location.habit.id);
+          },
+          prefersReducedMotion ? 0 : 120,
+        );
       }, 40);
       return;
     }
     const target = normalizedGroups
       .flatMap((group) => group.habits)
-      .find((habit) => habit.taskId === resolvedBlockedTaskId && habit.status === 'not_achieved');
+      .find(
+        (habit) =>
+          habit.taskId === resolvedBlockedTaskId &&
+          habit.status === "not_achieved",
+      );
     if (!target) {
       return;
     }
@@ -938,9 +1250,14 @@ function AchievedShelf({
           }
           setActivePillarCode(location.pillarCode);
           scrollCarouselToIndex(location.index);
-          window.setTimeout(() => {
-            setFlippedCarouselHabitId((current) => (current === location.habit.id ? null : location.habit.id));
-          }, prefersReducedMotion ? 0 : 120);
+          window.setTimeout(
+            () => {
+              setFlippedCarouselHabitId((current) =>
+                current === location.habit.id ? null : location.habit.id,
+              );
+            },
+            prefersReducedMotion ? 0 : 120,
+          );
           return;
         }
         if (activeHabitId) {
@@ -963,9 +1280,12 @@ function AchievedShelf({
           }
           setActivePillarCode(location.pillarCode);
           scrollCarouselToIndex(location.index);
-          window.setTimeout(() => {
-            setFlippedCarouselHabitId(location.habit.id);
-          }, prefersReducedMotion ? 0 : 120);
+          window.setTimeout(
+            () => {
+              setFlippedCarouselHabitId(location.habit.id);
+            },
+            prefersReducedMotion ? 0 : 120,
+          );
           return;
         }
         if (activeHabitId) {
@@ -1005,41 +1325,60 @@ function AchievedShelf({
   ]);
 
   const getSealBadge = (habit: HabitAchievementShelfItem) => {
-    const pillarCode = (habit.pillar ?? 'X').slice(0, 1).toUpperCase();
-    const traitCode = habit.trait?.code?.slice(0, 3).toUpperCase() ?? '---';
+    const pillarCode = (habit.pillar ?? "X").slice(0, 1).toUpperCase();
+    const traitCode = habit.trait?.code?.slice(0, 3).toUpperCase() ?? "---";
     return `${pillarCode}-${traitCode}`;
   };
 
-  const handleCarouselCardClick = useCallback((habitId: string, index: number) => {
-    if (index !== activeCarouselIndex) {
-      setFlippedCarouselHabitId(null);
-      scrollCarouselToIndex(index);
-      window.setTimeout(() => {
-        setFlippedCarouselHabitId((current) => (current === habitId ? null : habitId));
-      }, prefersReducedMotion ? 0 : 120);
-      return;
-    }
-    setFlippedCarouselHabitId((current) => (current === habitId ? null : habitId));
-  }, [activeCarouselIndex, prefersReducedMotion, scrollCarouselToIndex]);
+  const handleCarouselCardClick = useCallback(
+    (habitId: string, index: number) => {
+      if (index !== activeCarouselIndex) {
+        setFlippedCarouselHabitId(null);
+        scrollCarouselToIndex(index);
+        window.setTimeout(
+          () => {
+            setFlippedCarouselHabitId((current) =>
+              current === habitId ? null : habitId,
+            );
+          },
+          prefersReducedMotion ? 0 : 120,
+        );
+        return;
+      }
+      setFlippedCarouselHabitId((current) =>
+        current === habitId ? null : habitId,
+      );
+    },
+    [activeCarouselIndex, prefersReducedMotion, scrollCarouselToIndex],
+  );
 
-  const handleToggleMaintained = useCallback(async (habit: HabitAchievementShelfItem, enabled: boolean) => {
-    setMaintainPendingHabitId(habit.id);
-    try {
-      await onToggleMaintained(habit, enabled);
-    } finally {
-      setMaintainPendingHabitId(null);
-    }
-  }, [onToggleMaintained]);
+  const handleToggleMaintained = useCallback(
+    async (habit: HabitAchievementShelfItem, enabled: boolean) => {
+      setMaintainPendingHabitId(habit.id);
+      try {
+        await onToggleMaintained(habit, enabled);
+      } finally {
+        setMaintainPendingHabitId(null);
+      }
+    },
+    [onToggleMaintained],
+  );
 
-  const pillarChipLabels: Record<(typeof REWARDS_PILLAR_ORDER)[number]['code'], string> = {
-    BODY: language === 'es' ? 'Cuerpo' : 'Body',
-    MIND: language === 'es' ? 'Mente' : 'Mind',
-    SOUL: language === 'es' ? 'Alma' : 'Soul',
+  const pillarChipLabels: Record<
+    (typeof REWARDS_PILLAR_ORDER)[number]["code"],
+    string
+  > = {
+    BODY: language === "es" ? "Cuerpo" : "Body",
+    MIND: language === "es" ? "Mente" : "Mind",
+    SOUL: language === "es" ? "Alma" : "Soul",
   };
-  const pillarChipIcons: Record<(typeof REWARDS_PILLAR_ORDER)[number]['code'], string> = {
-    BODY: '🫀',
-    MIND: '🧠',
-    SOUL: '🏵️',
+  const pillarChipIcons: Record<
+    (typeof REWARDS_PILLAR_ORDER)[number]["code"],
+    string
+  > = {
+    BODY: "🫀",
+    MIND: "🧠",
+    SOUL: "🏵️",
   };
 
   return (
@@ -1064,11 +1403,16 @@ function AchievedShelf({
         </div>
       ) : null}
       {isCarouselView ? (
-        <div className="space-y-3" data-demo-anchor={demoAnchors?.carouselStructure}>
+        <div
+          className="space-y-3"
+          data-demo-anchor={demoAnchors?.carouselStructure}
+        >
           <div
             className={DASHBOARD_SEGMENTED_GROUP_BASE}
             role="tablist"
-            aria-label={language === 'es' ? 'Seleccionar pilar' : 'Select pillar'}
+            aria-label={
+              language === "es" ? "Seleccionar pilar" : "Select pillar"
+            }
             data-demo-anchor={demoAnchors?.pillarSelector}
           >
             {REWARDS_PILLAR_ORDER.map((pillar) => {
@@ -1103,8 +1447,10 @@ function AchievedShelf({
                 data-demo-anchor={demoAnchors?.carouselTrack}
               >
                 {activePillarHabits.map((habit, index) => {
-                  const isFlipped = flippedCarouselHabitId === habit.id && activeCarouselIndex === index;
-                  const isAchieved = habit.status !== 'not_achieved';
+                  const isFlipped =
+                    flippedCarouselHabitId === habit.id &&
+                    activeCarouselIndex === index;
+                  const isAchieved = habit.status !== "not_achieved";
                   const slotLabel = getSealBadge(habit);
                   return (
                     <button
@@ -1121,8 +1467,8 @@ function AchievedShelf({
                       onClick={() => handleCarouselCardClick(habit.id, index)}
                       className={`ib-card-contour-shadow relative h-[27.5rem] w-[86%] shrink-0 snap-center overflow-hidden rounded-3xl border p-3.5 text-left transition sm:h-[24rem] sm:w-[22.5rem] sm:p-4 lg:h-[29rem] lg:w-[calc((100%-2rem)/3)] lg:max-w-[25rem] lg:snap-start lg:p-5 xl:h-[30rem] ${
                         isAchieved
-                          ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] shadow-[0_16px_30px_rgba(2,8,23,0.14)] dark:shadow-[0_16px_30px_rgba(2,8,23,0.34)]'
-                          : 'border-dashed border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-1)]/82 shadow-[0_12px_24px_rgba(2,8,23,0.1)] dark:border-[color:var(--color-border-subtle)] dark:shadow-[0_12px_24px_rgba(2,8,23,0.22)]'
+                          ? "border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] shadow-[0_16px_30px_rgba(2,8,23,0.14)] dark:shadow-[0_16px_30px_rgba(2,8,23,0.34)]"
+                          : "border-dashed border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-1)]/82 shadow-[0_12px_24px_rgba(2,8,23,0.1)] dark:border-[color:var(--color-border-subtle)] dark:shadow-[0_12px_24px_rgba(2,8,23,0.22)]"
                       }`}
                     >
                       {!isFlipped ? (
@@ -1138,7 +1484,7 @@ function AchievedShelf({
                         >
                           {!isAchieved ? (
                             <span className="absolute right-0 top-0 z-20 rounded-full border border-amber-300/65 bg-amber-200/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-900 shadow-[0_8px_18px_rgba(180,83,9,0.24)] dark:border-amber-300/35 dark:bg-[color:var(--color-overlay-1)] dark:text-[color:var(--color-text-dim)]">
-                              {language === 'es' ? 'Bloqueado' : 'Locked'}
+                              {language === "es" ? "Bloqueado" : "Locked"}
                             </span>
                           ) : null}
                           <div className="flex min-h-0 flex-1 items-start justify-center pt-1 sm:pt-2">
@@ -1148,24 +1494,33 @@ function AchievedShelf({
                               traitName={habit.trait?.name}
                               alt={`${habit.taskName} seal`}
                               disabled={!isAchieved}
-                              className={`h-[17rem] min-h-[17rem] w-[17rem] min-w-[17rem] overflow-hidden rounded-[2rem] border border-transparent bg-transparent shadow-none sm:h-[15.5rem] sm:min-h-[15.5rem] sm:w-[15.5rem] sm:min-w-[15.5rem] lg:h-[16.8rem] lg:min-h-[16.8rem] lg:w-[16.8rem] lg:min-w-[16.8rem] ${isAchieved ? '' : 'opacity-55'}`}
+                              className={`h-[17rem] min-h-[17rem] w-[17rem] min-w-[17rem] overflow-hidden rounded-[2rem] border border-transparent bg-transparent shadow-none sm:h-[15.5rem] sm:min-h-[15.5rem] sm:w-[15.5rem] sm:min-w-[15.5rem] lg:h-[16.8rem] lg:min-h-[16.8rem] lg:w-[16.8rem] lg:min-w-[16.8rem] ${isAchieved ? "" : "opacity-55"}`}
                               imgClassName="h-full w-full object-contain drop-shadow-[0_22px_26px_rgba(15,23,42,0.22)]"
-                              fallback={(
+                              fallback={
                                 <span className="text-6xl font-semibold leading-none text-[color:var(--color-text-muted)] sm:text-7xl">
-                                  {isAchieved ? (habit.seal.visible ? '🏅' : slotLabel) : slotLabel}
+                                  {isAchieved
+                                    ? habit.seal.visible
+                                      ? "🏅"
+                                      : slotLabel
+                                    : slotLabel}
                                 </span>
-                              )}
+                              }
                             />
                           </div>
                           <div className="mt-auto space-y-1 pb-2">
-                            <p className="text-lg font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</p>
+                            <p className="text-lg font-semibold text-[color:var(--color-text-strong)]">
+                              {habit.taskName}
+                            </p>
                             <p className="line-clamp-1 text-sm font-medium text-[color:var(--color-text-muted)]">
-                              {habit.trait?.name ?? (language === 'es' ? 'Rasgo en progreso' : 'Trait in progress')}
+                              {habit.trait?.name ??
+                                (language === "es"
+                                  ? "Rasgo en progreso"
+                                  : "Trait in progress")}
                             </p>
                             <p className="text-[11px] text-[color:var(--color-text-subtle)]">
-                              {language === 'es'
-                                ? 'Toca para ver más'
-                                : 'Tap to see more'}
+                              {language === "es"
+                                ? "Toca para ver más"
+                                : "Tap to see more"}
                             </p>
                           </div>
                         </div>
@@ -1179,10 +1534,14 @@ function AchievedShelf({
                             language={language}
                             disableRemote={disableRemote}
                             maintainPendingHabitId={maintainPendingHabitId}
-                            onToggleMaintainedWithPending={handleToggleMaintained}
+                            onToggleMaintainedWithPending={
+                              handleToggleMaintained
+                            }
                           />
                           <p className="mt-auto text-xs text-[color:var(--color-text-dim)]">
-                            {language === 'es' ? 'Toca otra vez para volver al frente' : 'Tap again to return to front'}
+                            {language === "es"
+                              ? "Toca otra vez para volver al frente"
+                              : "Tap again to return to front"}
                           </p>
                         </div>
                       ) : (
@@ -1192,16 +1551,22 @@ function AchievedShelf({
                         >
                           <div className="space-y-0.5 sm:space-y-0">
                             <p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-text-dim)]">
-                              {language === 'es' ? 'Logro bloqueado' : 'Achievement locked'}
+                              {language === "es"
+                                ? "Logro bloqueado"
+                                : "Achievement locked"}
                             </p>
-                            <h3 className="text-[15px] font-semibold leading-[1.2] text-[color:var(--color-text-strong)] sm:text-base">{habit.taskName}</h3>
+                            <h3 className="text-[15px] font-semibold leading-[1.2] text-[color:var(--color-text-strong)] sm:text-base">
+                              {habit.taskName}
+                            </h3>
                           </div>
                           <div className="min-h-0 flex-1">
                             <LockedAchievementHabitDevelopment
                               habit={habit}
                               language={language}
                               disableRemote={disableRemote}
-                              mockPreviewAchievementByTaskId={mockPreviewAchievementByTaskId}
+                              mockPreviewAchievementByTaskId={
+                                mockPreviewAchievementByTaskId
+                              }
                               loadOnVisible={isFlipped}
                               compact={useCompactLockedPreview}
                               embedded
@@ -1220,47 +1585,63 @@ function AchievedShelf({
                   disabled={activeCarouselIndex <= 0}
                   className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)] shadow-[0_6px_14px_rgba(15,23,42,0.08)] transition hover:bg-[color:var(--color-overlay-2)] disabled:opacity-50"
                 >
-                  {language === 'es' ? 'Anterior' : 'Previous'}
+                  {language === "es" ? "Anterior" : "Previous"}
                 </button>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--color-text-dim)]">
-                  {Math.min(activeCarouselIndex + 1, activePillarHabits.length)} / {activePillarHabits.length}
+                  {Math.min(activeCarouselIndex + 1, activePillarHabits.length)}{" "}
+                  / {activePillarHabits.length}
                 </p>
                 <button
                   type="button"
                   onClick={() => scrollCarouselToIndex(activeCarouselIndex + 1)}
-                  disabled={activeCarouselIndex >= activePillarHabits.length - 1}
+                  disabled={
+                    activeCarouselIndex >= activePillarHabits.length - 1
+                  }
                   className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)] shadow-[0_6px_14px_rgba(15,23,42,0.08)] transition hover:bg-[color:var(--color-overlay-2)] disabled:opacity-50"
                 >
-                  {language === 'es' ? 'Siguiente' : 'Next'}
+                  {language === "es" ? "Siguiente" : "Next"}
                 </button>
               </div>
             </>
           ) : (
             <p className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
-              {language === 'es' ? 'Sin tareas seguidas en este pilar todavía.' : 'No tracked tasks in this pillar yet.'}
+              {language === "es"
+                ? "Sin tareas seguidas en este pilar todavía."
+                : "No tracked tasks in this pillar yet."}
             </p>
           )}
         </div>
       ) : (
         normalizedGroups.map((group) => (
-          <section key={group.pillar.code} className={`space-y-2 transition ${isShelfFocusStep ? 'space-y-1.5' : ''}`}>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{resolvePillarHeader(group.pillar, language)}</p>
-            <div className={`ib-rewards-shelf-scroll flex overflow-x-auto pb-1 transition ${isShelfFocusStep ? 'gap-2.5' : 'gap-3'} ${isDemoExperience ? 'pt-0.5' : ''}`}>
+          <section
+            key={group.pillar.code}
+            className={`space-y-2 transition ${isShelfFocusStep ? "space-y-1.5" : ""}`}
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">
+              {resolvePillarHeader(group.pillar, language)}
+            </p>
+            <div
+              className={`ib-rewards-shelf-scroll flex overflow-x-auto pb-1 transition ${isShelfFocusStep ? "gap-2.5" : "gap-3"} ${isDemoExperience ? "pt-0.5" : ""}`}
+            >
               {group.habits.map((habit) => {
-                const isAchieved = habit.status !== 'not_achieved';
+                const isAchieved = habit.status !== "not_achieved";
                 const active = habit.id === activeHabitId;
-                const traitCode = habit.trait?.code?.slice(0, 3).toUpperCase() ?? '---';
-                const slotLabel = `${(habit.pillar ?? group.pillar.code ?? 'X').slice(0, 1).toUpperCase()}-${traitCode}`;
+                const traitCode =
+                  habit.trait?.code?.slice(0, 3).toUpperCase() ?? "---";
+                const slotLabel = `${(habit.pillar ?? group.pillar.code ?? "X").slice(0, 1).toUpperCase()}-${traitCode}`;
 
                 if (!isAchieved) {
-                  const blockedAnchor = demoAnchors?.blockedCardTaskId === habit.taskId ? demoAnchors?.blockedCard : undefined;
+                  const blockedAnchor =
+                    demoAnchors?.blockedCardTaskId === habit.taskId
+                      ? demoAnchors?.blockedCard
+                      : undefined;
                   return (
                     <button
                       key={habit.id}
                       type="button"
                       data-demo-anchor={blockedAnchor}
                       onClick={() => setPreviewHabit(habit)}
-                      className={`flex shrink-0 flex-col items-center justify-center rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/55 px-3 text-center opacity-80 transition hover:border-[color:var(--color-border-strong)] hover:opacity-100 ${isShelfFocusStep ? 'h-32 w-24 py-3' : 'h-40 w-32 py-4'}`}
+                      className={`flex shrink-0 flex-col items-center justify-center rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/55 px-3 text-center opacity-80 transition hover:border-[color:var(--color-border-strong)] hover:opacity-100 ${isShelfFocusStep ? "h-32 w-24 py-3" : "h-40 w-32 py-4"}`}
                     >
                       <HabitAchievementSeal
                         pillar={habit.pillar ?? group.pillar.code}
@@ -1268,20 +1649,27 @@ function AchievedShelf({
                         traitName={habit.trait?.name}
                         alt={`${habit.taskName} seal`}
                         disabled
-                        className={`flex items-center justify-center overflow-hidden rounded-full border border-dashed border-[color:var(--color-border-subtle)] bg-transparent ${isShelfFocusStep ? 'h-16 min-h-16 w-16 min-w-16 max-h-16 max-w-16' : 'h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20'}`}
+                        className={`flex items-center justify-center overflow-hidden rounded-full border border-dashed border-[color:var(--color-border-subtle)] bg-transparent ${isShelfFocusStep ? "h-16 min-h-16 w-16 min-w-16 max-h-16 max-w-16" : "h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20"}`}
                         imgClassName="h-full w-full object-cover"
-                        fallback={(
+                        fallback={
                           <div className="flex h-full w-full items-center justify-center text-xs font-semibold tracking-[0.12em] text-[color:var(--color-text-dim)]">
                             {slotLabel}
                           </div>
-                        )}
+                        }
                       />
-                      <p className={`mt-2 w-full truncate font-semibold text-[color:var(--color-text-muted)] ${isShelfFocusStep ? 'text-xs' : 'text-sm'}`}>{habit.taskName}</p>
+                      <p
+                        className={`mt-2 w-full truncate font-semibold text-[color:var(--color-text-muted)] ${isShelfFocusStep ? "text-xs" : "text-sm"}`}
+                      >
+                        {habit.taskName}
+                      </p>
                     </button>
                   );
                 }
 
-                const achievedAnchor = demoAnchors?.achievedCardTaskId === habit.taskId ? demoAnchors?.achievedCard : undefined;
+                const achievedAnchor =
+                  demoAnchors?.achievedCardTaskId === habit.taskId
+                    ? demoAnchors?.achievedCard
+                    : undefined;
                 return (
                   <button
                     key={habit.id}
@@ -1291,28 +1679,34 @@ function AchievedShelf({
                       setActiveHabitId(habit.id);
                       setShowBackFace(false);
                     }}
-                    className={`flex shrink-0 flex-col items-center justify-center rounded-2xl border px-3 text-center transition ${isShelfFocusStep ? 'h-32 w-24 py-3' : 'h-40 w-32 py-4'} ${active ? 'border-violet-300/60 bg-violet-500/10' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-[color:var(--color-border-strong)]'}`}
+                    className={`flex shrink-0 flex-col items-center justify-center rounded-2xl border px-3 text-center transition ${isShelfFocusStep ? "h-32 w-24 py-3" : "h-40 w-32 py-4"} ${active ? "border-violet-300/60 bg-violet-500/10" : "border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-[color:var(--color-border-strong)]"}`}
                   >
                     <HabitAchievementSeal
                       pillar={habit.pillar ?? group.pillar.code}
                       traitCode={habit.trait?.code}
                       traitName={habit.trait?.name}
                       alt={`${habit.taskName} seal`}
-                      className={`flex items-center justify-center overflow-hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] shadow-[0_10px_30px_rgba(0,0,0,0.22)] ${isShelfFocusStep ? 'h-16 min-h-16 w-16 min-w-16 max-h-16 max-w-16' : 'h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20'}`}
+                      className={`flex items-center justify-center overflow-hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] shadow-[0_10px_30px_rgba(0,0,0,0.22)] ${isShelfFocusStep ? "h-16 min-h-16 w-16 min-w-16 max-h-16 max-w-16" : "h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20"}`}
                       imgClassName="h-full w-full object-cover"
-                      fallback={(
+                      fallback={
                         <span className="text-3xl leading-none">
-                          {habit.seal.visible ? '🏅' : getSealBadge(habit)}
+                          {habit.seal.visible ? "🏅" : getSealBadge(habit)}
                         </span>
-                      )}
+                      }
                     />
-                    <p className={`mt-2 w-full truncate font-semibold text-[color:var(--color-text)] ${isShelfFocusStep ? 'text-xs' : 'text-sm'}`}>{habit.taskName}</p>
+                    <p
+                      className={`mt-2 w-full truncate font-semibold text-[color:var(--color-text)] ${isShelfFocusStep ? "text-xs" : "text-sm"}`}
+                    >
+                      {habit.taskName}
+                    </p>
                   </button>
                 );
               })}
               {group.habits.length === 0 ? (
                 <p className="py-6 text-sm text-[color:var(--color-text-muted)]">
-                  {language === 'es' ? 'Sin tareas seguidas en este pilar todavía.' : 'No tracked tasks in this pillar yet.'}
+                  {language === "es"
+                    ? "Sin tareas seguidas en este pilar todavía."
+                    : "No tracked tasks in this pillar yet."}
                 </p>
               ) : null}
             </div>
@@ -1362,28 +1756,37 @@ function LockedAchievementHabitDevelopment({
   embedded = false,
 }: {
   habit: HabitAchievementShelfItem;
-  language: 'es' | 'en';
+  language: "es" | "en";
   disableRemote: boolean;
-  mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
+  mockPreviewAchievementByTaskId?: Record<
+    string,
+    NonNullable<TaskInsightsResponse["previewAchievement"]>
+  >;
   loadOnVisible: boolean;
   compact?: boolean;
   embedded?: boolean;
 }) {
   const taskId = habit.taskId;
-  const mockPreviewAchievement = mockPreviewAchievementByTaskId?.[taskId] ?? null;
+  const mockPreviewAchievement =
+    mockPreviewAchievementByTaskId?.[taskId] ?? null;
   const { data, status, error } = useRequest(
     () => getTaskInsights(taskId),
     [taskId],
     { enabled: loadOnVisible && !disableRemote && !mockPreviewAchievement },
   );
-  const previewAchievement = mockPreviewAchievement ?? data?.previewAchievement ?? null;
-  const showLoading = loadOnVisible && status === 'loading' && !mockPreviewAchievement;
-  const showError = loadOnVisible && status === 'error';
-  const showEmpty = loadOnVisible && !showLoading && !showError && !previewAchievement;
+  const previewAchievement =
+    mockPreviewAchievement ?? data?.previewAchievement ?? null;
+  const showLoading =
+    loadOnVisible && status === "loading" && !mockPreviewAchievement;
+  const showError = loadOnVisible && status === "error";
+  const showEmpty =
+    loadOnVisible && !showLoading && !showError && !previewAchievement;
   if (showLoading) {
     return (
       <p className="rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2.5 text-xs text-[color:var(--color-text-muted)]">
-        {language === 'es' ? 'Cargando desarrollo del hábito…' : 'Loading habit development…'}
+        {language === "es"
+          ? "Cargando desarrollo del hábito…"
+          : "Loading habit development…"}
       </p>
     );
   }
@@ -1391,7 +1794,10 @@ function LockedAchievementHabitDevelopment({
   if (showError) {
     return (
       <p className="rounded-xl border border-rose-400/40 bg-rose-500/10 p-2.5 text-xs text-rose-100">
-        {error?.message ?? (language === 'es' ? 'No pudimos cargar el desarrollo del hábito.' : "We couldn't load habit development.")}
+        {error?.message ??
+          (language === "es"
+            ? "No pudimos cargar el desarrollo del hábito."
+            : "We couldn't load habit development.")}
       </p>
     );
   }
@@ -1402,8 +1808,8 @@ function LockedAchievementHabitDevelopment({
         <PreviewAchievementCard
           previewAchievement={previewAchievement}
           language={language}
-          size={compact ? 'compact' : 'default'}
-          surface={embedded ? 'ghost' : 'default'}
+          size={compact ? "compact" : "default"}
+          surface={embedded ? "ghost" : "default"}
         />
       </div>
     );
@@ -1412,9 +1818,9 @@ function LockedAchievementHabitDevelopment({
   if (showEmpty) {
     return (
       <p className="rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2.5 text-xs text-[color:var(--color-text-muted)]">
-        {language === 'es'
-          ? 'Aún no hay datos suficientes de desarrollo del hábito para esta tarea.'
-          : 'There is not enough habit development data for this task yet.'}
+        {language === "es"
+          ? "Aún no hay datos suficientes de desarrollo del hábito para esta tarea."
+          : "There is not enough habit development data for this task yet."}
       </p>
     );
   }
@@ -1432,17 +1838,22 @@ function NotAchievedPreviewOverlay({
   onClose,
 }: {
   habit: HabitAchievementShelfItem | null;
-  language: 'es' | 'en';
+  language: "es" | "en";
   disableRemote: boolean;
-  mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
-  demoAnchors?: RewardsSectionProps['demoAnchors'];
+  mockPreviewAchievementByTaskId?: Record<
+    string,
+    NonNullable<TaskInsightsResponse["previewAchievement"]>
+  >;
+  demoAnchors?: RewardsSectionProps["demoAnchors"];
   compact?: boolean;
   onClose: () => void;
 }) {
   const taskId = habit?.taskId;
-  const mockPreviewAchievement = taskId ? mockPreviewAchievementByTaskId?.[taskId] : null;
+  const mockPreviewAchievement = taskId
+    ? mockPreviewAchievementByTaskId?.[taskId]
+    : null;
   const { data, status, error } = useRequest(
-    () => getTaskInsights(taskId ?? ''),
+    () => getTaskInsights(taskId ?? ""),
     [taskId],
     { enabled: Boolean(taskId) && !disableRemote && !mockPreviewAchievement },
   );
@@ -1453,58 +1864,82 @@ function NotAchievedPreviewOverlay({
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         onClose();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [habit, onClose]);
 
-  if (!habit || typeof document === 'undefined') {
+  if (!habit || typeof document === "undefined") {
     return null;
   }
 
-  const previewAchievement = mockPreviewAchievement ?? data?.previewAchievement ?? null;
+  const previewAchievement =
+    mockPreviewAchievement ?? data?.previewAchievement ?? null;
   const isLocalPreview = Boolean(mockPreviewAchievement);
 
   return createPortal(
-    <div className="fixed inset-0 z-[230] flex items-end justify-center bg-slate-950/70 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:items-center" data-achievement-overlay="seal-path" onClick={onClose}>
-      <div className="relative w-full max-w-sm overflow-y-auto rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-4 max-h-[calc(100vh-2rem)]" onClick={(event) => event.stopPropagation()} data-demo-anchor={demoAnchors?.sealPath}>
+    <div
+      className="fixed inset-0 z-[230] flex items-end justify-center bg-slate-950/70 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:items-center"
+      data-achievement-overlay="seal-path"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-sm overflow-y-auto rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-4 max-h-[calc(100vh-2rem)]"
+        onClick={(event) => event.stopPropagation()}
+        data-demo-anchor={demoAnchors?.sealPath}
+      >
         <button
           type="button"
           onClick={onClose}
           data-achievement-action="close-overlay"
           className="absolute right-4 top-4 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] px-2 py-1 text-xs text-[color:var(--color-text)]"
-          aria-label={language === 'es' ? 'Cerrar vista de sello' : 'Close seal preview'}
+          aria-label={
+            language === "es" ? "Cerrar vista de sello" : "Close seal preview"
+          }
         >
           ✕
         </button>
         <div className="pr-9">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">
-            {language === 'es' ? 'Ruta del sello' : 'Seal path'}
+            {language === "es" ? "Ruta del sello" : "Seal path"}
           </p>
-          <h3 className="mt-1 text-base font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</h3>
+          <h3 className="mt-1 text-base font-semibold text-[color:var(--color-text-strong)]">
+            {habit.taskName}
+          </h3>
         </div>
 
         <div className="mt-4">
-          {status === 'loading' && !isLocalPreview ? (
+          {status === "loading" && !isLocalPreview ? (
             <div className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
-              {language === 'es' ? 'Cargando vista previa del logro…' : 'Loading achievement preview…'}
+              {language === "es"
+                ? "Cargando vista previa del logro…"
+                : "Loading achievement preview…"}
             </div>
           ) : null}
-          {status === 'error' ? (
+          {status === "error" ? (
             <div className="rounded-2xl border border-rose-400/40 bg-rose-500/10 p-4 text-sm text-rose-100">
-              {error?.message ?? (language === 'es' ? 'No pudimos cargar el estado del sello.' : "Couldn't load seal state.")}
+              {error?.message ??
+                (language === "es"
+                  ? "No pudimos cargar el estado del sello."
+                  : "Couldn't load seal state.")}
             </div>
           ) : null}
-          {(status === 'success' || isLocalPreview) && previewAchievement ? (
-            <PreviewAchievementCard previewAchievement={previewAchievement} language={language} size={compact ? 'compact' : 'default'} />
+          {(status === "success" || isLocalPreview) && previewAchievement ? (
+            <PreviewAchievementCard
+              previewAchievement={previewAchievement}
+              language={language}
+              size={compact ? "compact" : "default"}
+            />
           ) : null}
-          {(status === 'success' || isLocalPreview) && !previewAchievement ? (
+          {(status === "success" || isLocalPreview) && !previewAchievement ? (
             <div className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
-              {language === 'es' ? 'Sigue registrando esta tarea para desbloquear el sello.' : 'Keep logging this task to unlock the seal.'}
+              {language === "es"
+                ? "Sigue registrando esta tarea para desbloquear el sello."
+                : "Keep logging this task to unlock the seal."}
             </div>
           ) : null}
         </div>
@@ -1526,13 +1961,16 @@ function AchievementFocusOverlay({
   maintainPendingHabitId,
 }: {
   habit: HabitAchievementShelfItem | null;
-  language: 'es' | 'en';
+  language: "es" | "en";
   showBackFace: boolean;
   disableRemote: boolean;
-  demoAnchors?: RewardsSectionProps['demoAnchors'];
+  demoAnchors?: RewardsSectionProps["demoAnchors"];
   onFlip: () => void;
   onClose: () => void;
-  onToggleMaintainedWithPending: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>;
+  onToggleMaintainedWithPending: (
+    habit: HabitAchievementShelfItem,
+    enabled: boolean,
+  ) => Promise<void>;
   maintainPendingHabitId: string | null;
 }) {
   useEffect(() => {
@@ -1541,28 +1979,39 @@ function AchievementFocusOverlay({
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         onClose();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [habit, onClose]);
 
-  if (!habit || typeof document === 'undefined') {
+  if (!habit || typeof document === "undefined") {
     return null;
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[230] flex items-end justify-center bg-slate-950/70 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:items-center" data-achievement-overlay="focus-card" onClick={onClose}>
-      <div className="relative w-full max-w-sm" onClick={(event) => event.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-[230] flex items-end justify-center bg-slate-950/70 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:items-center"
+      data-achievement-overlay="focus-card"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-sm"
+        onClick={(event) => event.stopPropagation()}
+      >
         <button
           type="button"
           onClick={onClose}
           data-achievement-action="close-overlay"
           className="absolute -top-3 right-0 z-10 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] px-2 py-1 text-xs text-[color:var(--color-text)]"
-          aria-label={language === 'es' ? 'Cerrar logro activo' : 'Close active achievement'}
+          aria-label={
+            language === "es"
+              ? "Cerrar logro activo"
+              : "Close active achievement"
+          }
         >
           ✕
         </button>
@@ -1574,7 +2023,10 @@ function AchievementFocusOverlay({
           className="ib-card-contour-shadow flex h-[min(82vh,34rem)] min-h-[24rem] w-full flex-col rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-5 text-left"
         >
           {!showBackFace ? (
-            <div className="flex h-full flex-col items-center justify-center gap-4 text-center" data-demo-anchor={demoAnchors?.achievementFront}>
+            <div
+              className="flex h-full flex-col items-center justify-center gap-4 text-center"
+              data-demo-anchor={demoAnchors?.achievementFront}
+            >
               <div className="flex h-[min(60vw,18rem)] min-h-44 w-[min(60vw,18rem)] min-w-44 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-7xl shadow-[0_20px_50px_rgba(0,0,0,0.24)] sm:h-[75%] sm:max-h-72 sm:min-h-56 sm:w-[75%] sm:max-w-72 sm:min-w-56 sm:text-8xl">
                 <HabitAchievementSeal
                   pillar={habit.pillar}
@@ -1583,16 +2035,27 @@ function AchievementFocusOverlay({
                   alt={`${habit.taskName} seal`}
                   className="h-full w-full overflow-hidden rounded-full"
                   imgClassName="h-full w-full object-cover"
-                  fallback={<span className="leading-none">{habit.seal.visible ? '🏅' : '✨'}</span>}
+                  fallback={
+                    <span className="leading-none">
+                      {habit.seal.visible ? "🏅" : "✨"}
+                    </span>
+                  }
                 />
               </div>
-              <p className="text-base font-semibold text-[color:var(--color-text-strong)] sm:text-lg">{habit.taskName}</p>
+              <p className="text-base font-semibold text-[color:var(--color-text-strong)] sm:text-lg">
+                {habit.taskName}
+              </p>
               <p className="text-sm text-[color:var(--color-text-muted)]">
-                {language === 'es' ? 'Toque nuevamente para ver el reverso' : 'Tap again to view the back side'}
+                {language === "es"
+                  ? "Toque nuevamente para ver el reverso"
+                  : "Tap again to view the back side"}
               </p>
             </div>
           ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-3 text-center" data-demo-anchor={demoAnchors?.achievementBack}>
+            <div
+              className="flex h-full flex-col items-center justify-center gap-3 text-center"
+              data-demo-anchor={demoAnchors?.achievementBack}
+            >
               <AchievedHabitBackContent
                 habit={habit}
                 language={language}
@@ -1602,7 +2065,9 @@ function AchievementFocusOverlay({
                 centerAligned
               />
               <p className="text-xs text-[color:var(--color-text-dim)]">
-                {language === 'es' ? 'Toque nuevamente para volver al frente' : 'Tap again to return to the front'}
+                {language === "es"
+                  ? "Toque nuevamente para volver al frente"
+                  : "Tap again to return to the front"}
               </p>
             </div>
           )}
@@ -1622,30 +2087,49 @@ function AchievedHabitBackContent({
   centerAligned = false,
 }: {
   habit: HabitAchievementShelfItem;
-  language: 'es' | 'en';
+  language: "es" | "en";
   disableRemote: boolean;
   maintainPendingHabitId: string | null;
-  onToggleMaintainedWithPending: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>;
+  onToggleMaintainedWithPending: (
+    habit: HabitAchievementShelfItem,
+    enabled: boolean,
+  ) => Promise<void>;
   centerAligned?: boolean;
 }) {
-  const traitLabel = habit.trait?.name || habit.trait?.code || (language === 'es' ? 'Sin rasgo visible' : 'No visible trait');
+  const traitLabel =
+    habit.trait?.name ||
+    habit.trait?.code ||
+    (language === "es" ? "Sin rasgo visible" : "No visible trait");
   return (
-    <div className={`flex w-full flex-col gap-1.5 ${centerAligned ? 'items-center text-center' : ''}`}>
+    <div
+      className={`flex w-full flex-col gap-1.5 ${centerAligned ? "items-center text-center" : ""}`}
+    >
       <p className="text-[11px] uppercase tracking-[0.16em] text-[color:var(--color-text-dim)]">
-        {language === 'es' ? 'Logro desbloqueado' : 'Achievement unlocked'}
+        {language === "es" ? "Logro desbloqueado" : "Achievement unlocked"}
       </p>
-      <p className="text-lg font-semibold leading-tight text-[color:var(--color-text-strong)]">{habit.taskName}</p>
-      <p className="text-sm leading-tight text-[color:var(--color-text-muted)]">{traitLabel}</p>
-      <p className="text-xs text-[color:var(--color-text-muted)]">
-        {language === 'es' ? 'Logrado el' : 'Achieved on'} {habit.achievedAt?.slice(0, 10) ?? '—'}
+      <p className="text-lg font-semibold leading-tight text-[color:var(--color-text-strong)]">
+        {habit.taskName}
       </p>
-      <p className="text-xs text-[color:var(--color-text-muted)]">
-        {language === 'es' ? 'GP antes del logro' : 'GP before achievement'}: {habit.gpBeforeAchievement}
+      <p className="text-sm leading-tight text-[color:var(--color-text-muted)]">
+        {traitLabel}
       </p>
       <p className="text-xs text-[color:var(--color-text-muted)]">
-        {language === 'es' ? 'GP desde mantener activo' : 'GP since keep maintained'}: {habit.gpSinceMaintain}
+        {language === "es" ? "Logrado el" : "Achieved on"}{" "}
+        {habit.achievedAt?.slice(0, 10) ?? "—"}
       </p>
-      <div className={`mt-0.5 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-1.5 ${centerAligned ? 'w-full max-w-sm' : ''}`}>
+      <p className="text-xs text-[color:var(--color-text-muted)]">
+        {language === "es" ? "GP antes del logro" : "GP before achievement"}:{" "}
+        {habit.gpBeforeAchievement}
+      </p>
+      <p className="text-xs text-[color:var(--color-text-muted)]">
+        {language === "es"
+          ? "GP desde mantener activo"
+          : "GP since keep maintained"}
+        : {habit.gpSinceMaintain}
+      </p>
+      <div
+        className={`mt-0.5 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-1.5 ${centerAligned ? "w-full max-w-sm" : ""}`}
+      >
         <MaintainToggleRow
           language={language}
           checked={habit.maintainEnabled}
@@ -1665,30 +2149,32 @@ function MaintainToggleRow({
   disabled,
   onToggle,
 }: {
-  language: 'es' | 'en';
+  language: "es" | "en";
   checked: boolean;
   disabled?: boolean;
   onToggle: () => void;
 }) {
   return (
     <label className="flex items-center justify-between gap-3 text-sm text-[color:var(--color-text)]">
-      <span>{language === 'es' ? 'Mantener activo' : 'Keep maintained'}</span>
+      <span>{language === "es" ? "Mantener activo" : "Keep maintained"}</span>
       <button
         type="button"
         role="switch"
         aria-checked={checked}
-        aria-label={language === 'es' ? 'Mantener activo' : 'Keep maintained'}
+        aria-label={language === "es" ? "Mantener activo" : "Keep maintained"}
         disabled={disabled}
         onClick={(event) => {
           event.stopPropagation();
           onToggle();
         }}
-        className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full border transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-65 ${checked
-          ? 'border-emerald-300/70 bg-emerald-500/80'
-          : 'border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-3)]'}`}
+        className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full border transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-65 ${
+          checked
+            ? "border-emerald-300/70 bg-emerald-500/80"
+            : "border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-3)]"
+        }`}
       >
         <span
-          className={`block h-6 w-6 rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.35)] transition-transform duration-300 ${checked ? 'translate-x-7' : 'translate-x-1'}`}
+          className={`block h-6 w-6 rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.35)] transition-transform duration-300 ${checked ? "translate-x-7" : "translate-x-1"}`}
         />
       </button>
     </label>
@@ -1706,7 +2192,7 @@ function DecisionModal({
   onStore,
 }: {
   habit: HabitAchievementShelfItem;
-  language: 'es' | 'en';
+  language: "es" | "en";
   total: number;
   currentIndex: number;
   transitioning: boolean;
@@ -1714,47 +2200,110 @@ function DecisionModal({
   onMaintain: () => void;
   onStore: () => void;
 }) {
-  if (typeof document === 'undefined') {
+  if (typeof document === "undefined") {
     return null;
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[240] flex items-center justify-center bg-slate-950/85 p-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[240] flex items-center justify-center bg-slate-950/85 p-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]"
+      onClick={onClose}
+    >
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={habit.id}
           initial={{ opacity: 0, y: 16, scale: 0.98 }}
-          animate={{ opacity: transitioning ? 0.55 : 1, y: 0, scale: transitioning ? 0.985 : 1 }}
+          animate={{
+            opacity: transitioning ? 0.55 : 1,
+            y: 0,
+            scale: transitioning ? 0.985 : 1,
+          }}
           exit={{ opacity: 0, y: -12, scale: 0.98 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
           className="w-full max-w-3xl rounded-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-surface)] p-4 sm:p-6"
           onClick={(event) => event.stopPropagation()}
         >
-        <div className="mb-4 flex items-center justify-between">
-          <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Hábito logrado' : 'Achieved habit'} {currentIndex + 1}/{total}</p>
-          <button type="button" onClick={onClose} className="rounded-full border border-[color:var(--color-border-subtle)] px-2 py-1 text-xs">✕</button>
-        </div>
-        <p className="mb-4 text-lg font-semibold">{habit.taskName}</p>
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="rounded-2xl border border-emerald-300/50 bg-emerald-400/10 p-4">
-            <p className="font-semibold">{language === 'es' ? 'Mantener hábito' : 'Maintain habit'}</p>
-            <ul className="mt-2 space-y-1 text-sm text-[color:var(--color-text-muted)]">
-              <li>• {language === 'es' ? 'Vuelve a Daily Quest' : 'Returns to Daily Quest'}</li>
-              <li>• {language === 'es' ? 'Sello visible en tareas activas' : 'Seal shown in active tasks'}</li>
-              <li>• {language === 'es' ? 'Genera 1 GP' : 'Generates 1 GP'}</li>
-            </ul>
-            <button type="button" onClick={onMaintain} className="mt-3 w-full rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white">{language === 'es' ? 'Mantener hábito' : 'Maintain habit'}</button>
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">
+              {language === "es" ? "Hábito logrado" : "Achieved habit"}{" "}
+              {currentIndex + 1}/{total}
+            </p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-[color:var(--color-border-subtle)] px-2 py-1 text-xs"
+            >
+              ✕
+            </button>
           </div>
-          <div className="rounded-2xl border border-violet-300/40 bg-violet-500/10 p-4">
-            <p className="font-semibold">{language === 'es' ? 'Guardar en Logros' : 'Store in Achievements'}</p>
-            <ul className="mt-2 space-y-1 text-sm text-[color:var(--color-text-muted)]">
-              <li>• {language === 'es' ? 'Sale de seguimiento activo' : 'Leaves active tracking'}</li>
-              <li>• {language === 'es' ? 'Permanece en la estantería' : 'Stays in shelf forever'}</li>
-              <li>• {language === 'es' ? 'Sin generación de GP' : 'No GP generation'}</li>
-            </ul>
-            <button type="button" onClick={onStore} className="mt-3 w-full rounded-full border border-violet-300/50 bg-violet-500/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white">{language === 'es' ? 'Guardar en Logros' : 'Store in Achievements'}</button>
+          <p className="mb-4 text-lg font-semibold">{habit.taskName}</p>
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-2xl border border-emerald-300/50 bg-emerald-400/10 p-4">
+              <p className="font-semibold">
+                {language === "es" ? "Mantener hábito" : "Maintain habit"}
+              </p>
+              <ul className="mt-2 space-y-1 text-sm text-[color:var(--color-text-muted)]">
+                <li>
+                  •{" "}
+                  {language === "es"
+                    ? "Vuelve a Daily Quest"
+                    : "Returns to Daily Quest"}
+                </li>
+                <li>
+                  •{" "}
+                  {language === "es"
+                    ? "Sello visible en tareas activas"
+                    : "Seal shown in active tasks"}
+                </li>
+                <li>
+                  • {language === "es" ? "Genera 1 GP" : "Generates 1 GP"}
+                </li>
+              </ul>
+              <button
+                type="button"
+                onClick={onMaintain}
+                className="mt-3 w-full rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white"
+              >
+                {language === "es" ? "Mantener hábito" : "Maintain habit"}
+              </button>
+            </div>
+            <div className="rounded-2xl border border-violet-300/40 bg-violet-500/10 p-4">
+              <p className="font-semibold">
+                {language === "es"
+                  ? "Guardar en Logros"
+                  : "Store in Achievements"}
+              </p>
+              <ul className="mt-2 space-y-1 text-sm text-[color:var(--color-text-muted)]">
+                <li>
+                  •{" "}
+                  {language === "es"
+                    ? "Sale de seguimiento activo"
+                    : "Leaves active tracking"}
+                </li>
+                <li>
+                  •{" "}
+                  {language === "es"
+                    ? "Permanece en la estantería"
+                    : "Stays in shelf forever"}
+                </li>
+                <li>
+                  •{" "}
+                  {language === "es"
+                    ? "Sin generación de GP"
+                    : "No GP generation"}
+                </li>
+              </ul>
+              <button
+                type="button"
+                onClick={onStore}
+                className="mt-3 w-full rounded-full border border-violet-300/50 bg-violet-500/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white"
+              >
+                {language === "es"
+                  ? "Guardar en Logros"
+                  : "Store in Achievements"}
+              </button>
+            </div>
           </div>
-        </div>
         </motion.div>
       </AnimatePresence>
     </div>,
@@ -1762,17 +2311,42 @@ function DecisionModal({
   );
 }
 
-function CelebrationOverlay({ habits, language, onSkip }: { habits: HabitAchievementShelfItem[]; language: 'es' | 'en'; onSkip: () => void }) {
+function CelebrationOverlay({
+  habits,
+  language,
+  onSkip,
+}: {
+  habits: HabitAchievementShelfItem[];
+  language: "es" | "en";
+  onSkip: () => void;
+}) {
   return (
     <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 bg-slate-950/85">
-      <button type="button" onClick={onSkip} className="absolute right-5 top-5 rounded-full border border-white/30 px-3 py-1 text-xs text-white">✕</button>
-      <p className="text-sm uppercase tracking-[0.2em] text-amber-100">{language === 'es' ? 'Celebrando' : 'Celebrating'}</p>
+      <button
+        type="button"
+        onClick={onSkip}
+        className="absolute right-5 top-5 rounded-full border border-white/30 px-3 py-1 text-xs text-white"
+      >
+        ✕
+      </button>
+      <p className="text-sm uppercase tracking-[0.2em] text-amber-100">
+        {language === "es" ? "Celebrando" : "Celebrating"}
+      </p>
       <div className="flex flex-wrap items-center justify-center gap-3">
         {habits.map((habit) => (
-          <div key={habit.id} className="rounded-full border border-amber-300/40 bg-amber-400/10 px-4 py-2 text-white">🏅 {habit.taskName}</div>
+          <div
+            key={habit.id}
+            className="rounded-full border border-amber-300/40 bg-amber-400/10 px-4 py-2 text-white"
+          >
+            🏅 {habit.taskName}
+          </div>
         ))}
       </div>
-      <p className="text-xs text-[color:var(--color-slate-300)]">{language === 'es' ? 'Tus sellos ahora viven en tus estantes de Logros' : 'Your seals now live in your Achievement Shelves'}</p>
+      <p className="text-xs text-[color:var(--color-slate-300)]">
+        {language === "es"
+          ? "Tus sellos ahora viven en tus estantes de Logros"
+          : "Your seals now live in your Achievement Shelves"}
+      </p>
     </div>
   );
 }

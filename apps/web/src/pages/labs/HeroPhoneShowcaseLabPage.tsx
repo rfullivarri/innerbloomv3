@@ -120,7 +120,10 @@ function useHeroShowcaseTimeline({
     if (startedAtRef.current == null) {
       startedAtRef.current = now;
     }
-    if (wasLogrosReadyRef.current !== logrosReady && startedAtRef.current != null) {
+    if (
+      wasLogrosReadyRef.current !== logrosReady &&
+      startedAtRef.current != null
+    ) {
       const previousNow = lastNowRef.current ?? now;
       if (wasLogrosReadyRef.current === false && logrosReady === true) {
         startedAtRef.current = previousNow - dashboardElapsedRef.current;
@@ -139,7 +142,9 @@ function useHeroShowcaseTimeline({
       if (!logrosReady) {
         setTimeline({
           phase: "dashboard",
-          dashboardProgress: resolveDashboardProgress(dashboardElapsedRef.current),
+          dashboardProgress: resolveDashboardProgress(
+            dashboardElapsedRef.current,
+          ),
           trackProgress: 0,
         });
         rafId = window.requestAnimationFrame(tick);
@@ -153,7 +158,10 @@ function useHeroShowcaseTimeline({
           dashboardProgress: resolveDashboardProgress(elapsedInLoop),
           trackProgress: 0,
         });
-      } else if (elapsedInLoop < DASHBOARD_LOOP_DURATION_MS + DASHBOARD_TO_LOGROS_DURATION_MS) {
+      } else if (
+        elapsedInLoop <
+        DASHBOARD_LOOP_DURATION_MS + DASHBOARD_TO_LOGROS_DURATION_MS
+      ) {
         const transitionElapsed = elapsedInLoop - DASHBOARD_LOOP_DURATION_MS;
         setTimeline({
           phase: "to-logros",
@@ -303,10 +311,11 @@ function RealDashboardScene({
       if (attempts >= maxAttempts && maxScroll > 0) {
         scrollRangeRef.current = { start: 0, end: maxScroll };
         viewport.scrollTop = 0;
-        console.info(
-          "[hero-phone-showcase] dashboard fallback ready",
-          { hasAnchors, maxScroll, attempts },
-        );
+        console.info("[hero-phone-showcase] dashboard fallback ready", {
+          hasAnchors,
+          maxScroll,
+          attempts,
+        });
         reportReady();
         return true;
       }
@@ -374,6 +383,7 @@ function HeroLogrosScene({
       mockPreviewAchievementByTaskId: getDemoLogrosPreviewByTaskId(language),
       anchors: {
         shelves: "logros-shelves",
+        growthCalibration: "logros-growth-calibration",
         carouselTrack: "logros-carousel-track",
         carouselStructure: "logros-carousel-structure",
         pillarSelector: "logros-pillar-selector",
@@ -516,6 +526,65 @@ function HeroLogrosScene({
     };
   }, [cycleKey, isActive, sceneReady]);
 
+  useEffect(() => {
+    const sceneRoot = sceneRef.current;
+    if (!sceneRoot) return;
+
+    const trackedAnchors = [
+      "logros-shelves",
+      "logros-carousel-structure",
+      "logros-carousel-track",
+    ] as const;
+
+    const logVisibility = (reason: string) => {
+      const payload = trackedAnchors.map((anchor) => {
+        const node = sceneRoot.querySelector<HTMLElement>(
+          `[data-demo-anchor="${anchor}"]`,
+        );
+        if (!node) {
+          return { anchor, exists: false };
+        }
+        const rect = node.getBoundingClientRect();
+        const style = window.getComputedStyle(node);
+        return {
+          anchor,
+          exists: true,
+          rect: {
+            width: Math.round(rect.width * 100) / 100,
+            height: Math.round(rect.height * 100) / 100,
+            top: Math.round(rect.top * 100) / 100,
+            left: Math.round(rect.left * 100) / 100,
+          },
+          display: style.display,
+          visibility: style.visibility,
+          opacity: style.opacity,
+          hiddenByStyle:
+            style.display === "none" ||
+            style.visibility === "hidden" ||
+            style.opacity === "0" ||
+            rect.height === 0,
+        };
+      });
+      console.info("[hero-logros-visibility]", { reason, payload });
+    };
+
+    logVisibility("effect-start");
+    const timeoutId = window.setTimeout(
+      () => logVisibility("post-layout"),
+      120,
+    );
+    const intervalId = window.setInterval(() => {
+      if (isActive || !sceneReady) {
+        logVisibility("interval");
+      }
+    }, 650);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.clearInterval(intervalId);
+    };
+  }, [isActive, sceneReady, cycleKey]);
+
   return (
     <section
       ref={sceneRef}
@@ -540,11 +609,10 @@ function HeroPhoneShowcase() {
   const [logrosReady, setLogrosReady] = useState(false);
   const [demoDataReady, setDemoDataReady] = useState(false);
   const [logrosCycleKey, setLogrosCycleKey] = useState(0);
-  const { phase, dashboardProgress, trackProgress } =
-    useHeroShowcaseTimeline({
-      dashboardReady,
-      logrosReady,
-    });
+  const { phase, dashboardProgress, trackProgress } = useHeroShowcaseTimeline({
+    dashboardReady,
+    logrosReady,
+  });
   const previousPhaseRef = useRef<HeroPhase>("dashboard");
 
   useEffect(() => {

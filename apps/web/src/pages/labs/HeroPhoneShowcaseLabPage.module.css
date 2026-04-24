@@ -217,11 +217,15 @@
   gap: 0.45rem !important;
 }
 
-.logrosHeroOnly
-  :global(
-    .ib-card > .relative > :not([data-demo-anchor="logros-shelves"])
-  ) {
+.logrosHeroOnly :global([data-demo-anchor="logros-growth-calibration"]),
+.logrosHeroOnly :global([data-demo-anchor="weekly-wrapped-shelf"]),
+.logrosHeroOnly :global([data-demo-anchor="monthly-wrapped-shelf"]) {
   display: none !important;
+}
+
+.logrosHeroOnly :global([data-demo-anchor="logros-shelves"]) {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .logrosHeroOnly :global([data-demo-anchor="logros-carousel-structure"]) {
