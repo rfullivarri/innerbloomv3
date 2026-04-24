@@ -36,6 +36,7 @@ export default function LabsLogrosDemoPage() {
   const { userId } = useAuth();
   const { language } = usePostLoginLanguage();
   const demoContext = resolveDemoEntryContext(location.search);
+  const returnTo = useMemo(() => new URLSearchParams(location.search).get('returnTo'), [location.search]);
   const demoHubPath = getPublicDemoHubPath(location.search);
   const dashboardPath = useMemo(() => {
     const raw = DASHBOARD_PATH || '/dashboard-v3';
@@ -109,12 +110,22 @@ export default function LabsLogrosDemoPage() {
     && (demoContext.fromOnboarding || demoContext.source === 'internal' || isInternalAchievementsDemoRoute);
 
   const handleDemoExit = useCallback(() => {
+    if (returnTo === 'logros') {
+      navigate(dashboardPath, { state: { scrollToTopOnEnter: true, source: 'demo', focusSection: 'logros' } });
+      return;
+    }
+
+    if (returnTo === 'demo-hub') {
+      navigate(demoHubPath);
+      return;
+    }
+
     if (shouldReturnToDashboard) {
       navigate(dashboardPath, { state: { scrollToTopOnEnter: true, source: 'demo', focusSection: 'logros' } });
       return;
     }
     navigate(demoHubPath);
-  }, [dashboardPath, demoHubPath, navigate, shouldReturnToDashboard]);
+  }, [dashboardPath, demoHubPath, navigate, returnTo, shouldReturnToDashboard]);
 
   return (
     <div className="min-h-screen bg-transparent" data-light-scope="dashboard-v3" data-labs-logros-step={activeStepId ?? undefined}>
@@ -125,7 +136,7 @@ export default function LabsLogrosDemoPage() {
             <h1 className="font-display text-[1.05rem] font-semibold text-[color:var(--color-text)] md:text-xl">{language === 'es' ? 'Logros' : 'Achievements'}</h1>
           </div>
           <Link
-            to={shouldReturnToDashboard ? dashboardPath : demoHubPath}
+            to={returnTo === 'demo-hub' ? demoHubPath : dashboardPath}
             onClick={(event) => {
               event.preventDefault();
               handleDemoExit();

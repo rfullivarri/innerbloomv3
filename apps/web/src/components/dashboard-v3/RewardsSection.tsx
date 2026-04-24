@@ -212,7 +212,7 @@ export function RewardsSection({
         <div className="flex items-center gap-2">
           {!resolvedDisableRemote ? (
             <a
-              href={`/labs/logros?${new URLSearchParams({ lang: language, source: 'internal' }).toString()}`}
+              href={`/labs/logros?${new URLSearchParams({ lang: language, source: 'internal', returnTo: 'logros' }).toString()}`}
               title={
                 language === "es"
                   ? "Ver demo guiada de Logros"

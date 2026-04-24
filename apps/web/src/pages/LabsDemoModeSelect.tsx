@@ -70,7 +70,11 @@ export default function LabsDemoModeSelectPage({ legacyLabsPath = false }: DemoM
         language === 'es'
           ? 'Badges, sellos y recompensas desbloqueables.'
           : 'Badges, seals, and unlockable reward moments.',
-      href: `${legacyLabsPath ? '/labs/logros' : '/demo/logros'}?lang=${language}&source=${legacyLabsPath ? 'labs' : source}`,
+      href: `${legacyLabsPath ? '/labs/logros' : '/demo/logros'}?${new URLSearchParams({
+        lang: language,
+        source: legacyLabsPath ? 'labs' : source,
+        returnTo: 'demo-hub',
+      }).toString()}`,
       Icon: Sparkles,
     },
     {
