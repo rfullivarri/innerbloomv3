@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { DEMO_GUIDED_STEPS, type DemoLanguage, type GuidedStep } from '../../config/demoGuidedTour';
+import {
+  GUIDED_OVERLAY_FRAME_CLASS,
+  GUIDED_OVERLAY_MASK_CLASS,
+  GUIDED_OVERLAY_PANEL_BASE_CLASS,
+  GUIDED_OVERLAY_SLICE_CLASS,
+} from './guidedOverlayFoundation';
 
 type Props = {
   language: DemoLanguage;
@@ -176,7 +182,7 @@ export function GuidedDemoOverlay({
 }: Props) {
   const [stepIndex, setStepIndex] = useState(0);
   const [isTransitioningStep, setIsTransitioningStep] = useState(true);
-  const [isInteractionLocked, setIsInteractionLocked] = useState(false);
+  const [isInteractionLocked] = useState(true);
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
   const step = steps[stepIndex];
@@ -186,20 +192,11 @@ export function GuidedDemoOverlay({
   const isLogrosModalStep = LABS_LOGROS_MODAL_STEP_IDS.has(step.id);
   const isCompactMobile = viewport.width <= 390 || viewport.height <= 740;
 
-  const lockManualScroll = () => {
-    setIsInteractionLocked(true);
-  };
-
-  const unlockManualScroll = () => {
-    setIsInteractionLocked(false);
-  };
-
   const goToStep = (nextIndex: number) => {
     const boundedIndex = clamp(nextIndex, 0, steps.length - 1);
     if (boundedIndex === stepIndex) {
       return;
     }
-    unlockManualScroll();
     setIsTransitioningStep(true);
     setStepIndex(boundedIndex);
   };
@@ -257,7 +254,6 @@ export function GuidedDemoOverlay({
     if (!step?.targetSelector) {
       setTargetRect(null);
       void waitForLayoutSettle(1).then(() => {
-        lockManualScroll();
         setIsTransitioningStep(false);
       });
       return;
@@ -271,7 +267,6 @@ export function GuidedDemoOverlay({
       }
       const target = document.querySelector(selector) as HTMLElement | null;
       if (!target) {
-        setTargetRect(null);
         return;
       }
       const targetRect = target.getBoundingClientRect();
@@ -397,7 +392,6 @@ export function GuidedDemoOverlay({
         return;
       }
       updateRect();
-      lockManualScroll();
       setIsTransitioningStep(false);
     };
 
@@ -414,7 +408,6 @@ export function GuidedDemoOverlay({
     }, 220);
     const handleResize = () => {
       setViewport({ width: window.innerWidth, height: window.innerHeight });
-      unlockManualScroll();
       setIsTransitioningStep(true);
       void runStepAlignment(2);
     };
@@ -541,8 +534,6 @@ export function GuidedDemoOverlay({
   const primaryButtonClass = `ib-primary-button !min-h-0 !px-4 !py-2 !font-semibold !text-xs !uppercase !tracking-[0.16em] focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${walkthroughButtonSizeClass}`;
   const tertiaryButtonClass = `ml-auto inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)]/70 font-semibold uppercase tracking-[0.14em] text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-1)] hover:text-[color:var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${walkthroughButtonSizeClass}`;
   const overlayZClass = isDailyQuestStep ? 'z-[10020]' : 'z-[520]';
-  const overlayMaskClass = 'bg-slate-950/88 backdrop-blur-[6px] backdrop-saturate-[0.82]';
-
   const goToPreviousStep = () => {
     if (canGoBack && !isTransitioningStep) {
       goToStep(stepIndex - 1);
@@ -590,13 +581,16 @@ export function GuidedDemoOverlay({
     >
       {targetRect ? (
         <>
-          <div className={`absolute left-0 right-0 top-0 ${overlayMaskClass}`} style={{ height: targetRect.top }} />
           <div
-            className={`absolute left-0 ${overlayMaskClass}`}
+            className={`absolute left-0 right-0 top-0 ${GUIDED_OVERLAY_MASK_CLASS} ${GUIDED_OVERLAY_SLICE_CLASS}`}
+            style={{ height: targetRect.top }}
+          />
+          <div
+            className={`absolute left-0 ${GUIDED_OVERLAY_MASK_CLASS} ${GUIDED_OVERLAY_SLICE_CLASS}`}
             style={{ top: targetRect.top, width: targetRect.left, height: targetRect.height }}
           />
           <div
-            className={`absolute right-0 ${overlayMaskClass}`}
+            className={`absolute right-0 ${GUIDED_OVERLAY_MASK_CLASS} ${GUIDED_OVERLAY_SLICE_CLASS}`}
             style={{
               top: targetRect.top,
               width: Math.max(0, viewport.width - (targetRect.left + targetRect.width)),
@@ -604,23 +598,23 @@ export function GuidedDemoOverlay({
             }}
           />
           <div
-            className={`absolute bottom-0 left-0 right-0 ${overlayMaskClass}`}
+            className={`absolute bottom-0 left-0 right-0 ${GUIDED_OVERLAY_MASK_CLASS} ${GUIDED_OVERLAY_SLICE_CLASS}`}
             style={{ top: targetRect.top + targetRect.height }}
           />
         </>
       ) : (
-        <div className={`absolute inset-0 ${overlayMaskClass}`} />
+        <div className={`absolute inset-0 ${GUIDED_OVERLAY_MASK_CLASS} ${GUIDED_OVERLAY_SLICE_CLASS}`} />
       )}
 
       {targetRect ? (
         <div
-          className="pointer-events-none absolute rounded-2xl border border-violet-200/70 shadow-[0_0_0_1px_rgba(255,255,255,0.3),0_0_0_9999px_rgba(2,6,23,0.28),0_0_52px_rgba(139,92,246,0.42)] transition-all"
+          className={GUIDED_OVERLAY_FRAME_CLASS}
           style={{ top: targetRect.top, left: targetRect.left, width: targetRect.width, height: targetRect.height }}
         />
       ) : null}
 
       <aside
-        className={`guided-demo-panel pointer-events-auto absolute rounded-2xl border border-violet-200/60 bg-slate-950/92 text-[color:var(--color-text)] shadow-[0_24px_60px_rgba(2,6,23,0.55)] backdrop-blur-xl ${isCompactMobile ? 'p-3' : 'p-4'} ${isIntroModalStep ? 'max-w-lg overflow-hidden border-white/20 bg-[#0a133d]/92 text-center text-white shadow-[0_0_45px_rgba(79,70,229,0.22)]' : ''}`}
+        className={`guided-demo-panel pointer-events-auto absolute ${GUIDED_OVERLAY_PANEL_BASE_CLASS} ${isCompactMobile ? 'p-3' : 'p-4'} ${isIntroModalStep ? 'max-w-lg overflow-hidden border-white/20 bg-[#0a133d]/92 text-center text-white shadow-[0_0_45px_rgba(79,70,229,0.22)]' : ''} transition-all duration-500 ease-out`}
         style={tooltipStyle}
       >
         {isIntroModalStep ? (

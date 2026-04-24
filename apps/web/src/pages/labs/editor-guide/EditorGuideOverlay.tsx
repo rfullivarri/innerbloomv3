@@ -6,6 +6,12 @@ import {
   type EditorGuideStepId,
   getEditorGuideSteps,
 } from "./guideConfig";
+import {
+  GUIDED_OVERLAY_FRAME_CLASS,
+  GUIDED_OVERLAY_MASK_CLASS,
+  GUIDED_OVERLAY_PANEL_BASE_CLASS,
+  GUIDED_OVERLAY_SLICE_CLASS,
+} from "../../../components/demo/guidedOverlayFoundation";
 
 type Rect = { top: number; left: number; width: number; height: number };
 type ModalCoreFocusPhase = "overview" | "detail";
@@ -73,13 +79,27 @@ export function EditorGuideOverlay({
     const body = document.body;
     const prevHtmlOverflow = html.style.overflow;
     const prevBodyOverflow = body.style.overflow;
+    const prevHtmlOverscrollBehavior = html.style.overscrollBehavior;
+    const prevBodyOverscrollBehavior = body.style.overscrollBehavior;
 
     html.style.overflow = "hidden";
     body.style.overflow = "hidden";
+    html.style.overscrollBehavior = "none";
+    body.style.overscrollBehavior = "none";
+
+    const preventManualScroll = (event: WheelEvent | TouchEvent) => {
+      event.preventDefault();
+    };
+    window.addEventListener("wheel", preventManualScroll, { passive: false });
+    window.addEventListener("touchmove", preventManualScroll, { passive: false });
 
     return () => {
+      window.removeEventListener("wheel", preventManualScroll);
+      window.removeEventListener("touchmove", preventManualScroll);
       html.style.overflow = prevHtmlOverflow;
       body.style.overflow = prevBodyOverflow;
+      html.style.overscrollBehavior = prevHtmlOverscrollBehavior;
+      body.style.overscrollBehavior = prevBodyOverscrollBehavior;
     };
   }, [isOpen]);
 
@@ -196,8 +216,6 @@ export function EditorGuideOverlay({
     : { aria: "Guide", back: "Previous", skip: "Skip", finish: "Finish", next: "Next", label: "Guide" };
 
   const nextLabel = isLast ? copy.finish : copy.next;
-  const maskedOverlayClass =
-    "bg-slate-950/88 backdrop-blur-[6px] backdrop-saturate-[0.82]";
 
   const frame = useMemo(() => {
     if (!targetRect) {
@@ -227,15 +245,15 @@ export function EditorGuideOverlay({
       {frame && !isWheelStep ? (
         <>
           <div
-            className={`absolute left-0 right-0 top-0 ${maskedOverlayClass} transition-all duration-500`}
+            className={`absolute left-0 right-0 top-0 ${GUIDED_OVERLAY_MASK_CLASS} ${GUIDED_OVERLAY_SLICE_CLASS}`}
             style={{ height: frame.top }}
           />
           <div
-            className={`absolute left-0 ${maskedOverlayClass} transition-all duration-500`}
+            className={`absolute left-0 ${GUIDED_OVERLAY_MASK_CLASS} ${GUIDED_OVERLAY_SLICE_CLASS}`}
             style={{ top: frame.top, width: frame.left, height: frame.height }}
           />
           <div
-            className={`absolute right-0 ${maskedOverlayClass} transition-all duration-500`}
+            className={`absolute right-0 ${GUIDED_OVERLAY_MASK_CLASS} ${GUIDED_OVERLAY_SLICE_CLASS}`}
             style={{
               top: frame.top,
               left: frame.left + frame.width,
@@ -243,11 +261,11 @@ export function EditorGuideOverlay({
             }}
           />
           <div
-            className={`absolute left-0 right-0 ${maskedOverlayClass} transition-all duration-500`}
+            className={`absolute left-0 right-0 ${GUIDED_OVERLAY_MASK_CLASS} ${GUIDED_OVERLAY_SLICE_CLASS}`}
             style={{ top: frame.top + frame.height, bottom: 0 }}
           />
           <div
-            className="pointer-events-none absolute rounded-2xl border border-violet-200/70 shadow-[0_0_0_1px_rgba(255,255,255,0.3),0_0_0_9999px_rgba(2,6,23,0.28),0_0_52px_rgba(139,92,246,0.42)] transition-all duration-500"
+            className={GUIDED_OVERLAY_FRAME_CLASS}
             style={{
               top: frame.top,
               left: frame.left,
@@ -257,11 +275,11 @@ export function EditorGuideOverlay({
           />
         </>
       ) : (
-        <div className={`absolute inset-0 ${maskedOverlayClass}`} />
+        <div className={`absolute inset-0 ${GUIDED_OVERLAY_MASK_CLASS}`} />
       )}
 
       <section
-        className={`editor-guide-panel absolute left-1/2 flex w-[min(calc(100vw-1.5rem),42rem)] -translate-x-1/2 flex-col rounded-3xl border border-white/10 bg-[color:var(--color-surface-elevated)] px-5 py-4 text-[color:var(--color-slate-100)] shadow-[0_24px_65px_rgba(2,6,23,0.72)] ${
+        className={`editor-guide-panel absolute left-1/2 flex w-[min(calc(100vw-1.5rem),42rem)] -translate-x-1/2 flex-col px-5 py-4 ${GUIDED_OVERLAY_PANEL_BASE_CLASS} ${
           panelPlacement === "top"
             ? "top-3 md:top-6"
             : panelPlacement === "center"

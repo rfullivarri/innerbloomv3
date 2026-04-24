@@ -1,11 +1,13 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { GuidedDemoOverlay } from '../../components/demo/GuidedDemoOverlay';
 import { RewardsSection, type RewardsSectionDemoControls } from '../../components/dashboard-v3/RewardsSection';
+import { DASHBOARD_PATH } from '../../config/auth';
 import { LABS_LOGROS_GUIDED_STEPS } from '../../config/labsLogrosGuidedTour';
 import { getDemoLogrosData, getDemoLogrosPreviewByTaskId } from '../../data/demoLogrosData';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
-import { getPublicDemoHubPath } from '../../lib/demoEntry';
+import { getPublicDemoHubPath, resolveDemoEntryContext } from '../../lib/demoEntry';
 
 const DEMO_ANCHORS = {
   shelves: 'logros-shelves',
@@ -30,8 +32,16 @@ const DEMO_ANCHORS = {
 
 export default function LabsLogrosDemoPage() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { userId } = useAuth();
   const { language } = usePostLoginLanguage();
+  const demoContext = resolveDemoEntryContext(location.search);
   const demoHubPath = getPublicDemoHubPath(location.search);
+  const dashboardPath = useMemo(() => {
+    const raw = DASHBOARD_PATH || '/dashboard-v3';
+    const normalized = raw.startsWith('/') ? raw : `/${raw}`;
+    return normalized.replace(/\/+$/, '') || '/dashboard-v3';
+  }, []);
   const [showGuidedTour, setShowGuidedTour] = useState(true);
   const [activeStepId, setActiveStepId] = useState<string | null>(LABS_LOGROS_GUIDED_STEPS[0]?.id ?? null);
   const demoControlsRef = useRef<RewardsSectionDemoControls | null>(null);
@@ -94,6 +104,15 @@ export default function LabsLogrosDemoPage() {
     }
   }, []);
 
+  const handleDemoExit = useCallback(() => {
+    const shouldReturnToDashboard = Boolean(userId) && (demoContext.fromOnboarding || demoContext.source === 'internal');
+    if (shouldReturnToDashboard) {
+      navigate(dashboardPath, { state: { scrollToTopOnEnter: true, source: 'demo', focusSection: 'logros' } });
+      return;
+    }
+    navigate(demoHubPath);
+  }, [dashboardPath, demoContext.fromOnboarding, demoContext.source, demoHubPath, navigate, userId]);
+
   return (
     <div className="min-h-screen bg-transparent" data-light-scope="dashboard-v3" data-labs-logros-step={activeStepId ?? undefined}>
       <header className="sticky top-0 z-40 border-b border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] px-3 py-3 backdrop-blur-xl md:px-6">
@@ -103,8 +122,14 @@ export default function LabsLogrosDemoPage() {
             <h1 className="font-display text-[1.05rem] font-semibold text-[color:var(--color-text)] md:text-xl">{language === 'es' ? 'Logros' : 'Achievements'}</h1>
           </div>
           <Link
-            to={demoHubPath}
-            aria-label={language === 'es' ? 'Cerrar demo de Logros y volver al hub público' : 'Close Achievements demo and return to the public hub'}
+            to={demoContext.fromOnboarding || demoContext.source === 'internal' ? dashboardPath : demoHubPath}
+            onClick={(event) => {
+              event.preventDefault();
+              handleDemoExit();
+            }}
+            aria-label={language === 'es'
+              ? 'Cerrar demo de Logros'
+              : 'Close Achievements demo'}
             className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--glass-border)] bg-[color:var(--color-surface-soft)] text-lg font-semibold leading-none text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-surface-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-bg)]"
           >
             <span aria-hidden>×</span>
