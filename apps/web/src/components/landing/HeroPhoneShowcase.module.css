@@ -1,5 +1,5 @@
 .phoneFrame {
-  --hero-phone-safe-top: 86px;
+  --hero-phone-safe-top: 74px;
   width: min(100%, 342px);
   aspect-ratio: 9 / 18.5;
   border-radius: 42px;
@@ -80,9 +80,9 @@
   inset: 0 0 auto;
   z-index: 6;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  padding: 44px 14px 10px;
+  padding: 37px 12px 8px;
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--color-surface) 92%, transparent) 0%,
@@ -99,7 +99,7 @@
 
 .phoneTopBarBrand {
   margin: 0;
-  font-size: 0.47rem;
+  font-size: 0.42rem;
   line-height: 1.1;
   font-weight: 700;
   letter-spacing: 0.23em;
@@ -108,11 +108,11 @@
 }
 
 .phoneTopBarTitle {
-  margin: 0.22rem 0 0;
+  margin: 0.08rem 0 0;
   font-family: var(--font-heading);
-  font-size: 0.96rem;
+  font-size: 0.44rem;
   font-weight: 600;
-  line-height: 1.08;
+  line-height: 1.02;
   letter-spacing: -0.01em;
   color: var(--color-text);
 }
@@ -120,11 +120,11 @@
 .phoneTopBarMenu {
   display: inline-flex;
   flex-direction: column;
-  gap: 0.17rem;
+  gap: 0.14rem;
   align-items: center;
   justify-content: center;
-  width: 1.95rem;
-  height: 1.95rem;
+  width: 1.64rem;
+  height: 1.64rem;
   border-radius: 999px;
   border: 1px solid
     color-mix(in srgb, var(--color-border-subtle) 90%, transparent);
@@ -133,7 +133,7 @@
 }
 
 .phoneTopBarMenu span {
-  width: 0.78rem;
+  width: 0.62rem;
   height: 1.25px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--color-text) 90%, transparent);

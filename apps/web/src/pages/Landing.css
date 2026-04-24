@@ -387,7 +387,7 @@
 }
 
 .landing .hero h1 .grad {
-  background: linear-gradient(100deg, var(--accent), var(--accent-2));
+  background: var(--gradient-innerbloom);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -418,7 +418,7 @@
   padding-inline: clamp(1.15rem, 1.4vw, 1.5rem);
   min-width: 0;
   background: var(--gradient-innerbloom);
-  color: #111827;
+  color: #ffffff;
   box-shadow:
     var(--shadow-innerbloom-cta),
     0 1px 0 rgba(255, 255, 255, 0.28) inset;
