@@ -6,7 +6,7 @@ import { DemoDashboardOverviewScene } from '../../components/demo/DemoDashboardO
 import styles from './HeroPhoneShowcaseLabPage.module.css';
 
 const INITIAL_TOP_PAUSE_MS = 500;
-const SCROLL_DOWN_DURATION_MS = 3000;
+const SCROLL_DOWN_DURATION_MS = 4500;
 const RESET_TO_TOP_DURATION_MS = 300;
 const LOOP_TOP_PAUSE_MS = 350;
 const LOOP_DURATION_MS =
@@ -109,7 +109,7 @@ function RealDashboardScene({
       const start = Math.max(0, Math.min(maxScroll, overallTop - 18));
       const endTarget = Math.max(
         emotionTop - viewport.clientHeight * 0.42,
-        streakTop - viewport.clientHeight * 0.28,
+        streakTop - viewport.clientHeight * 0.16,
       );
       const end = Math.max(start, Math.min(maxScroll, endTarget));
 
