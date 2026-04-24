@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -66,6 +67,109 @@ const PUBLIC_DEMO_EDITOR_GUIDE_AUTO_OPEN_DELAY_MS = 1500;
 type TaskEditorPageProps = {
   publicDemo?: boolean;
 };
+
+type ModalPickerOption = {
+  value: string;
+  label: string;
+};
+
+function ModalPickerField({
+  label,
+  value,
+  placeholder,
+  options,
+  onChange,
+  disabled = false,
+  dataTarget,
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  options: ModalPickerOption[];
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  dataTarget?: string;
+}) {
+  const listboxId = useId();
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedOption = options.find((option) => option.value === value) ?? null;
+
+  useEffect(() => {
+    if (disabled && isOpen) {
+      setIsOpen(false);
+    }
+  }, [disabled, isOpen]);
+
+  return (
+    <div className="space-y-2">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-controls={listboxId}
+        data-editor-guide-target={dataTarget}
+        disabled={disabled}
+        onClick={() => setIsOpen((previous) => !previous)}
+        className="create-task-ai-modal__control flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left text-sm ios-touch-input focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <span className={selectedOption ? "text-[color:var(--color-text)]" : "text-[color:var(--color-text-dim)]"}>
+          {selectedOption?.label ?? placeholder}
+        </span>
+        <span
+          aria-hidden="true"
+          className={`text-xs text-[color:var(--color-text-dim)] transition-transform ${isOpen ? "rotate-180" : ""}`}
+        >
+          ▾
+        </span>
+      </button>
+      {isOpen ? (
+        <div
+          id={listboxId}
+          role="listbox"
+          className="max-h-56 space-y-1 overflow-y-auto rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-surface-elevated)]/95 p-2 shadow-[var(--color-card-shadow)] backdrop-blur"
+        >
+          <button
+            type="button"
+            role="option"
+            aria-selected={value === ""}
+            onClick={() => {
+              onChange("");
+              setIsOpen(false);
+            }}
+            className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition ${
+              value === ""
+                ? "bg-[color:var(--color-overlay-2)] text-[color:var(--color-text)]"
+                : "text-[color:var(--color-text)] hover:bg-[color:var(--color-overlay-1)]"
+            }`}
+          >
+            <span>{placeholder}</span>
+          </button>
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              role="option"
+              aria-selected={option.value === value}
+              onClick={() => {
+                onChange(option.value);
+                setIsOpen(false);
+              }}
+              className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition ${
+                option.value === value
+                  ? "bg-[color:var(--color-overlay-2)] text-[color:var(--color-text)]"
+                  : "text-[color:var(--color-text)] hover:bg-[color:var(--color-overlay-1)]"
+              }`}
+            >
+              <span>{option.label}</span>
+              {option.value === value ? <span aria-hidden="true">✓</span> : null}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      <label className="sr-only">{label}</label>
+    </div>
+  );
+}
 
 const PUBLIC_DEMO_TASKS: UserTask[] = EDITOR_LAB_QUICK_START_SEED.slice(0, 8).map(
   (seedTask, index) => ({
@@ -2287,7 +2391,20 @@ function CreateTaskModal({
       a.name.localeCompare(b.name, activeLocale, { sensitivity: "base" }),
     );
   }, [activeLocale, demoDifficulties, difficulties, publicDemo]);
-
+  const difficultyOptions = useMemo(
+    () => sortedDifficulties.map((difficulty) => ({
+      value: difficulty.id,
+      label: localizeDifficultyLabel(difficulty.name, language),
+    })),
+    [language, sortedDifficulties],
+  );
+  const manualPillarOptions = useMemo(
+    () => sortedPillars.map((pillar) => ({
+      value: pillar.id,
+      label: localizePillarLabel(pillar.name, language),
+    })),
+    [language, sortedPillars],
+  );
   const selectedManualPillar = useMemo(
     () => sortedPillars.find((pillar) => pillar.id === manualPillarId) ?? null,
     [manualPillarId, sortedPillars],
@@ -2342,6 +2459,17 @@ function CreateTaskModal({
       cancelled = true;
     };
   }, [demoTraitsByPillar, manualCategoryEnabled, manualPillarId, publicDemo, t]);
+
+  const manualTraitOptions = useMemo(
+    () => manualTraits.map((trait) => ({
+      value: trait.id,
+      label: localizeTraitLabel(
+        { name: trait.name, code: trait.code, fallback: trait.id },
+        language,
+      ),
+    })),
+    [language, manualTraits],
+  );
 
   const isSubmitting = createStatus === "loading";
   const isAnalyzing = suggestionStatus === "analyzing";
@@ -2697,26 +2825,15 @@ function CreateTaskModal({
                   <span className="create-task-ai-modal__field-label text-xs font-semibold uppercase tracking-[0.18em]">
                     {t("editor.field.difficulty")}
                   </span>
-                  <select
-                    data-editor-guide-target="new-task-modal-difficulty"
+                  <ModalPickerField
+                    label={t("editor.field.difficulty")}
                     value={difficultyId}
-                    onChange={(event) => setDifficultyId(event.target.value)}
-                    className="create-task-ai-modal__control w-full appearance-none rounded-2xl border px-4 py-3 text-sm ios-touch-input focus:outline-none disabled:cursor-not-allowed"
+                    onChange={setDifficultyId}
+                    dataTarget="new-task-modal-difficulty"
+                    placeholder={t("editor.modal.create.selectDifficultyPlaceholder")}
+                    options={difficultyOptions}
                     disabled={isLoadingDifficulties}
-                  >
-                    <option value="" className="create-task-ai-modal__option">
-                      {t("editor.modal.create.selectDifficultyPlaceholder")}
-                    </option>
-                    {sortedDifficulties.map((difficulty) => (
-                      <option
-                        key={difficulty.id}
-                        value={difficulty.id}
-                        className="create-task-ai-modal__option"
-                      >
-                        {localizeDifficultyLabel(difficulty.name, language)}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </label>
                 {!publicDemo && isLoadingDifficulties && (
                   <p className="create-task-modal__hint text-[11px] uppercase tracking-[0.2em]">
@@ -2877,52 +2994,37 @@ function CreateTaskModal({
                     <span className="create-task-ai-modal__field-label text-[11px] font-semibold uppercase tracking-[0.2em]">
                       {t("editor.field.pillar")}
                     </span>
-                    <select
+                    <ModalPickerField
+                      label={t("editor.field.pillar")}
                       value={manualPillarId}
-                      onChange={(event) => {
-                        setManualPillarId(event.target.value);
+                      placeholder={t("editor.modal.create.selectPillarPlaceholder")}
+                      options={manualPillarOptions}
+                      onChange={(nextValue) => {
+                        setManualPillarId(nextValue);
                         setManualTraitId("");
                         clearError("suggestion");
                       }}
-                      className="create-task-ai-modal__control w-full appearance-none rounded-xl border px-3 py-2 text-sm ios-touch-input focus:outline-none"
-                    >
-                      <option value="">
-                        {t("editor.modal.create.selectPillarPlaceholder")}
-                      </option>
-                      {sortedPillars.map((pillar) => (
-                        <option key={pillar.id} value={pillar.id}>
-                          {localizePillarLabel(pillar.name, language)}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </label>
                   <label className="flex flex-col gap-2">
                     <span className="create-task-ai-modal__field-label text-[11px] font-semibold uppercase tracking-[0.2em]">
                       {t("editor.field.trait")}
                     </span>
-                    <select
+                    <ModalPickerField
+                      label={t("editor.field.trait")}
                       value={manualTraitId}
-                      onChange={(event) => {
-                        setManualTraitId(event.target.value);
+                      onChange={(nextValue) => {
+                        setManualTraitId(nextValue);
                         clearError("suggestion");
                       }}
-                      className="create-task-ai-modal__control w-full appearance-none rounded-xl border px-3 py-2 text-sm ios-touch-input focus:outline-none"
-                      disabled={!selectedManualPillar || isLoadingManualTraits}
-                    >
-                      <option value="">
-                        {selectedManualPillar
+                      placeholder={
+                        selectedManualPillar
                           ? t("editor.modal.create.selectTraitPlaceholder")
-                          : t("editor.modal.create.selectPillarFirst")}
-                      </option>
-                      {manualTraits.map((trait) => (
-                        <option key={trait.id} value={trait.id}>
-                          {localizeTraitLabel(
-                            { name: trait.name, code: trait.code, fallback: trait.id },
-                            language,
-                          )}
-                        </option>
-                      ))}
-                    </select>
+                          : t("editor.modal.create.selectPillarFirst")
+                      }
+                      options={manualTraitOptions}
+                      disabled={!selectedManualPillar || isLoadingManualTraits}
+                    />
                   </label>
                   {manualTraitsError && (
                     <p className="text-xs text-rose-300">{manualTraitsError}</p>

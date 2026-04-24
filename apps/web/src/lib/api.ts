@@ -104,8 +104,12 @@ async function performNativeCapacitorRequest(url: string, init: RequestInit = {}
 
   const responseHeaders = new Headers(response.headers ?? {});
   const responseBody = typeof response.data === 'string' ? response.data : JSON.stringify(response.data ?? null);
-  return new Response(responseBody, {
-    status: response.status,
+  const status = response.status;
+  const allowsBody = ![101, 103, 204, 205, 304].includes(status);
+  const normalizedBody = allowsBody ? responseBody : null;
+
+  return new Response(normalizedBody, {
+    status,
     headers: responseHeaders,
   });
 }

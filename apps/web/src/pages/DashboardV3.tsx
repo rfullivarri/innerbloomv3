@@ -695,6 +695,17 @@ export default function DashboardV3Page() {
   }: {
     wasFirstScheduleCompletion: boolean;
   }) => {
+    if (!onboardingProgress.progress?.daily_quest_scheduled_at) {
+      try {
+        await markStep('daily_quest_scheduled', {
+          trigger: 'dashboard_reminder_scheduler',
+          source: 'native_or_web_reminder_dialog',
+        });
+      } catch (error) {
+        console.error('Failed to mark daily quest scheduled onboarding step', error);
+      }
+    }
+
     if (wasFirstScheduleCompletion) {
       setShowOnboardingCompletionBanner(true);
     }
@@ -703,7 +714,7 @@ export default function DashboardV3Page() {
       dailyQuestReadiness.reload(),
       reload(),
     ]);
-  }, [dailyQuestReadiness, onboardingProgress, reload]);
+  }, [dailyQuestReadiness, markStep, onboardingProgress, reload]);
 
   useEffect(() => {
     if (!showOnboardingCompletionBanner) {

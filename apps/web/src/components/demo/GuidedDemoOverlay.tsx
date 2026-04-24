@@ -528,11 +528,14 @@ export function GuidedDemoOverlay({
       ? (language === 'es' ? 'Seguir explorando' : 'Keep exploring')
       : (language === 'es' ? 'Anterior' : 'Back'));
   const walkthroughButtonSizeClass = isCompactMobile
-    ? 'min-h-8 px-3 py-1.5 text-[11px]'
-    : 'min-h-9 px-4 py-2 text-xs';
-  const secondaryButtonClass = `inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] font-semibold uppercase tracking-[0.16em] text-[color:var(--color-text)] transition hover:border-[color:var(--color-text)]/55 hover:bg-[color:var(--color-overlay-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)] disabled:opacity-40 ${walkthroughButtonSizeClass}`;
-  const primaryButtonClass = `ib-primary-button !min-h-0 !px-4 !py-2 !font-semibold !text-xs !uppercase !tracking-[0.16em] focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${walkthroughButtonSizeClass}`;
-  const tertiaryButtonClass = `ml-auto inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)]/70 font-semibold uppercase tracking-[0.14em] text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-1)] hover:text-[color:var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${walkthroughButtonSizeClass}`;
+    ? 'min-h-8 min-w-0 w-full px-2 py-1.5 text-[9px] tracking-[0.08em]'
+    : 'min-h-9 px-4 py-2 text-xs tracking-[0.16em]';
+  const buttonRowClass = isCompactMobile && !isLast
+    ? 'mt-3 grid grid-cols-3 gap-1 min-w-0'
+    : `flex flex-wrap items-center ${isCompactMobile ? 'mt-3 gap-1.5' : 'mt-4 gap-2'}`;
+  const secondaryButtonClass = `inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] font-semibold uppercase text-[color:var(--color-text)] transition hover:border-[color:var(--color-text)]/55 hover:bg-[color:var(--color-overlay-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)] disabled:opacity-40 ${walkthroughButtonSizeClass}`;
+  const primaryButtonClass = `ib-primary-button !min-h-0 !font-semibold !uppercase focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${isCompactMobile ? '!px-2.5 !py-1.5 !text-[10px] !tracking-[0.12em]' : '!px-4 !py-2 !text-xs !tracking-[0.16em]'} ${walkthroughButtonSizeClass}`;
+  const tertiaryButtonClass = `inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)]/70 font-semibold uppercase text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-1)] hover:text-[color:var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${walkthroughButtonSizeClass}`;
   const overlayZClass = isDailyQuestStep ? 'z-[10020]' : 'z-[520]';
   const goToPreviousStep = () => {
     if (canGoBack && !isTransitioningStep) {
@@ -666,7 +669,7 @@ export function GuidedDemoOverlay({
           {step.body[language]}
         </p>
 
-        <div className={`flex flex-wrap items-center ${isCompactMobile ? 'mt-3 gap-1.5' : 'mt-4 gap-2'}`}>
+        <div className={buttonRowClass}>
           {!isLast ? (
             <button
               type="button"

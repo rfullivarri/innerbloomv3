@@ -5298,6 +5298,16 @@
     color: var(--color-text);
   }
 
+  :root[data-theme="light"] [data-light-scope="editor"] .editor-themed-select {
+    color-scheme: light;
+    color: #0f172a;
+  }
+
+  :root[data-theme="light"] [data-light-scope="editor"] .editor-themed-option {
+    background: #ffffff;
+    color: #0f172a;
+  }
+
   :root[data-theme="light"]
     [data-light-scope="editor"]
     [class*="focus:ring-white"] {
@@ -5931,6 +5941,16 @@
     [data-light-scope="editor"]
     .edit-task-modal__editable-field-label {
     color: #c4b5fd;
+  }
+
+  :root[data-theme="dark"] [data-light-scope="editor"] .editor-themed-select {
+    color-scheme: dark;
+    color: #f8fafc;
+  }
+
+  :root[data-theme="dark"] [data-light-scope="editor"] .editor-themed-option {
+    background: #0f172a;
+    color: #f8fafc;
   }
 
   :root[data-theme="dark"]

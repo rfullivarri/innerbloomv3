@@ -1,4 +1,5 @@
 import { SignIn, SignUp, useAuth, useClerk, useSession, useSignIn, useSignUp, useUser } from '@clerk/clerk-react';
+import type { ReactNode } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { GoogleOAuthButton } from '../components/auth/GoogleOAuthButton';
@@ -120,20 +121,43 @@ function buildHandoffUrl(currentUrl: string): string {
   return url.toString();
 }
 
-function RedirectingState({
-  title,
-  description,
+function RedirectingState({ message }: { message: string }) {
+  return (
+    <div className="mx-auto flex w-full max-w-xs flex-col items-center text-center text-white">
+      <span
+        className="h-7 w-7 animate-spin rounded-full border-2 border-white/30 border-t-white"
+        aria-hidden
+      />
+      <p className="mt-3 text-xs leading-5 text-white/68 sm:text-sm">{message}</p>
+    </div>
+  );
+}
+
+function MinimalAuthTransitionLayout({
+  children,
+  secondaryActionLabel,
+  secondaryActionHref,
 }: {
-  title: string;
-  description: string;
+  children: ReactNode;
+  secondaryActionLabel: string;
+  secondaryActionHref: string;
 }) {
   return (
-    <div className="mx-auto max-w-xl rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(86,106,170,0.18),rgba(31,43,94,0.34))] p-8 text-center text-white shadow-[0_28px_80px_rgba(6,12,34,0.32)] backdrop-blur-2xl">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-violet-300/18 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.38),rgba(124,58,237,0.14))] shadow-[0_0_0_1px_rgba(139,92,246,0.16),0_8px_30px_rgba(91,33,182,0.22)]">
-        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/35 border-t-white" aria-hidden />
+    <div className="relative flex min-h-screen min-h-dvh flex-col items-center justify-center overflow-hidden bg-[#0b1335] px-4 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] pt-[calc(env(safe-area-inset-top,0px)+1.15rem)] text-white sm:px-6 sm:pb-[calc(env(safe-area-inset-bottom)+3rem)] sm:pt-[calc(env(safe-area-inset-top,0px)+1.35rem)]">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-100">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(104,69,255,0.28),transparent_34%),radial-gradient(circle_at_78%_18%,rgba(167,139,250,0.18),transparent_22%),linear-gradient(180deg,#10193f_0%,#0b1335_50%,#090f2d_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-44 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent)]" />
       </div>
-      <h2 className="mt-5 text-[2rem] font-semibold leading-tight text-white">{title}</h2>
-      <p className="mt-3 text-sm leading-7 text-white/74">{description}</p>
+      <a
+        href={secondaryActionHref}
+        className="absolute left-4 top-[calc(env(safe-area-inset-top,0px)+0.45rem)] z-20 inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.055] px-3 py-2 text-sm font-semibold text-white/68 shadow-[0_12px_28px_rgba(0,0,0,0.16)] backdrop-blur transition-colors duration-200 hover:border-white/18 hover:bg-white/[0.08] hover:text-white sm:left-6 lg:left-8"
+      >
+        <span aria-hidden="true" className="text-base leading-none">←</span>
+        {secondaryActionLabel}
+      </a>
+      <div className="relative z-10 flex w-full items-center justify-center">
+        {children}
+      </div>
     </div>
   );
 }
@@ -530,54 +554,66 @@ export default function MobileBrowserAuthPage() {
 
   if (mode === 'logout') {
     return (
-      <AuthLayout
-        title={language === 'en' ? 'Signing out' : 'Cerrando sesión'}
+      <MinimalAuthTransitionLayout
         secondaryActionLabel={language === 'en' ? 'Back' : 'Volver'}
         secondaryActionHref={signedOutUrl}
       >
         <RedirectingState
-          title={language === 'en' ? 'Closing your session' : 'Cerrando tu sesión'}
-          description={language === 'en'
+          message={language === 'en'
             ? 'We are removing your browser session and returning you to the app.'
             : 'Estamos cerrando tu sesión web y devolviéndote a la app.'}
         />
         {error ? <p className="mt-4 text-center text-sm text-rose-200">{error}</p> : null}
-      </AuthLayout>
+      </MinimalAuthTransitionLayout>
     );
   }
 
   if (!isLoaded || isResettingBrowserSession || shouldResetBrowserSession) {
     return (
-      <AuthLayout
-        title={language === 'en' ? 'Preparing secure access' : 'Preparando acceso seguro'}
+      <MinimalAuthTransitionLayout
         secondaryActionLabel={language === 'en' ? 'Back' : 'Volver'}
         secondaryActionHref={signedOutUrl}
       >
         <RedirectingState
-          title={language === 'en' ? 'Preparing sign-in' : 'Preparando acceso'}
-          description={language === 'en'
+          message={language === 'en'
             ? 'Opening a fresh session for this device.'
             : 'Abriendo una sesión limpia para este dispositivo.'}
         />
-      </AuthLayout>
+      </MinimalAuthTransitionLayout>
     );
   }
 
   if (isSignedIn) {
     return (
-      <AuthLayout
-        title={language === 'en' ? 'Returning to the app' : 'Volviendo a la app'}
+      <MinimalAuthTransitionLayout
         secondaryActionLabel={language === 'en' ? 'Back' : 'Volver'}
         secondaryActionHref={callbackUrl}
       >
         <RedirectingState
-          title={language === 'en' ? 'Session ready' : 'Sesión lista'}
-          description={language === 'en'
+          message={language === 'en'
             ? 'We are packaging your active session and sending it back to Innerbloom.'
             : 'Estamos transfiriendo tu sesión activa y devolviéndola a Innerbloom.'}
         />
         {error ? <p className="mt-4 text-center text-sm text-rose-200">{error}</p> : null}
-      </AuthLayout>
+      </MinimalAuthTransitionLayout>
+    );
+  }
+
+  if (shouldStartGoogleOAuth) {
+    return (
+      <MinimalAuthTransitionLayout
+        secondaryActionLabel={language === 'en' ? 'Back' : 'Volver'}
+        secondaryActionHref={signedOutUrl}
+      >
+        <RedirectingState
+          message={
+            language === 'en'
+              ? 'Opening Google sign in…'
+              : 'Abriendo el inicio de sesión con Google…'
+          }
+        />
+        {error ? <p className="mt-4 text-center text-sm text-rose-200">{error}</p> : null}
+      </MinimalAuthTransitionLayout>
     );
   }
 
@@ -600,30 +636,21 @@ export default function MobileBrowserAuthPage() {
       secondaryActionHref={signedOutUrl}
     >
       <div className={AUTH_STACK_CLASS}>
-        {shouldStartGoogleOAuth ? (
-          <RedirectingState
-            title={language === 'en' ? 'Opening Google' : 'Abriendo Google'}
-            description={language === 'en' ? 'Continue with your Google account.' : 'Continuá con tu cuenta de Google.'}
-          />
-        ) : (
+        {!shouldHideGoogleButton ? (
           <>
-            {!shouldHideGoogleButton ? (
-              <>
-                <GoogleOAuthButton
-                  language={language}
-                  mode={mode === 'sign-up' ? 'sign-up' : 'sign-in'}
-                  redirectUrlComplete={handoffUrl}
-                  forceAccountSelection
-                />
-                <div className={AUTH_DIVIDER_CLASS}>
-                  <span className="h-px flex-1 bg-white/12" aria-hidden />
-                  <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
-                  <span className="h-px flex-1 bg-white/12" aria-hidden />
-                </div>
-              </>
-            ) : null}
+            <GoogleOAuthButton
+              language={language}
+              mode={mode === 'sign-up' ? 'sign-up' : 'sign-in'}
+              redirectUrlComplete={handoffUrl}
+              forceAccountSelection
+            />
+            <div className={AUTH_DIVIDER_CLASS}>
+              <span className="h-px flex-1 bg-white/12" aria-hidden />
+              <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
+              <span className="h-px flex-1 bg-white/12" aria-hidden />
+            </div>
           </>
-        )}
+        ) : null}
         {mode === 'sign-up' ? (
           <SignUp
             appearance={authAppearance}
