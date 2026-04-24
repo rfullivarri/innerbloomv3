@@ -72,9 +72,11 @@ type HeroPhase = 'dashboard' | 'to-logros' | 'logros' | 'to-dashboard';
 function useHeroShowcaseTimeline({
   dashboardReady,
   logrosReady,
+  isActiveInViewport,
 }: {
   dashboardReady: boolean;
   logrosReady: boolean;
+  isActiveInViewport: boolean;
 }) {
   const [timeline, setTimeline] = useState<{
     phase: HeroPhase;
@@ -89,6 +91,7 @@ function useHeroShowcaseTimeline({
   const lastNowRef = useRef<number | null>(null);
   const dashboardElapsedRef = useRef(0);
   const wasLogrosReadyRef = useRef(logrosReady);
+  const pausedAtRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!dashboardReady) {
@@ -104,10 +107,19 @@ function useHeroShowcaseTimeline({
       return;
     }
 
-    let rafId = 0;
     const now = performance.now();
+    if (!isActiveInViewport) {
+      pausedAtRef.current = lastNowRef.current ?? now;
+      return;
+    }
+
+    let rafId = 0;
     if (startedAtRef.current == null) {
       startedAtRef.current = now;
+    }
+    if (pausedAtRef.current != null && startedAtRef.current != null) {
+      startedAtRef.current += now - pausedAtRef.current;
+      pausedAtRef.current = null;
     }
     if (
       wasLogrosReadyRef.current !== logrosReady &&
@@ -190,7 +202,7 @@ function useHeroShowcaseTimeline({
 
     rafId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(rafId);
-  }, [dashboardReady, logrosReady]);
+  }, [dashboardReady, isActiveInViewport, logrosReady]);
 
   return !dashboardReady
     ? { phase: 'dashboard' as const, dashboardProgress: 0, trackProgress: 0 }
@@ -335,10 +347,12 @@ function RealDashboardScene({
 
 function HeroLogrosScene({
   isActive,
+  isInViewport,
   cycleKey,
   onReady,
 }: {
   isActive: boolean;
+  isInViewport: boolean;
   cycleKey: number;
   onReady: () => void;
 }) {
@@ -372,6 +386,7 @@ function HeroLogrosScene({
         blockedCardTaskId: HERO_BODY_CARD_BLOCKED_1,
       },
       controls: {
+        preventPageScrollOnProgrammaticFocus: true,
         onReady: (controls: RewardsSectionDemoControls) => {
           controlsRef.current = controls;
           setControlsReady(true);
@@ -424,6 +439,10 @@ function HeroLogrosScene({
       return false;
     };
 
+    if (!isInViewport) {
+      return;
+    }
+
     if (!resolveTrackReady()) {
       intervalId = window.setInterval(() => {
         if (resolveTrackReady()) {
@@ -437,10 +456,10 @@ function HeroLogrosScene({
         window.clearInterval(intervalId);
       }
     };
-  }, [controlsReady]);
+  }, [controlsReady, isInViewport]);
 
   useEffect(() => {
-    if (!isActive || !sceneReady) {
+    if (!isActive || !sceneReady || !isInViewport) {
       return;
     }
 
@@ -466,7 +485,7 @@ function HeroLogrosScene({
       window.clearTimeout(t1);
       window.clearTimeout(t2);
     };
-  }, [cycleKey, isActive, sceneReady]);
+  }, [cycleKey, isActive, isInViewport, sceneReady]);
 
   return (
     <section
@@ -488,6 +507,8 @@ function HeroLogrosScene({
 }
 
 export function HeroPhoneShowcase() {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [isInViewport, setIsInViewport] = useState(true);
   const [dashboardReady, setDashboardReady] = useState(false);
   const [logrosReady, setLogrosReady] = useState(false);
   const [demoDataReady, setDemoDataReady] = useState(false);
@@ -495,8 +516,25 @@ export function HeroPhoneShowcase() {
   const { phase, dashboardProgress, trackProgress } = useHeroShowcaseTimeline({
     dashboardReady,
     logrosReady,
+    isActiveInViewport: isInViewport,
   });
   const previousPhaseRef = useRef<HeroPhase>('dashboard');
+
+  useEffect(() => {
+    const target = rootRef.current;
+    if (!target || typeof IntersectionObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInViewport(entry.isIntersecting && entry.intersectionRatio > 0.15);
+      },
+      { threshold: [0, 0.15, 0.35] },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     setDashboardDemoModeEnabled(true);
@@ -515,29 +553,32 @@ export function HeroPhoneShowcase() {
   }, [phase]);
 
   return (
-    <PhoneFrame>
-      {demoDataReady ? (
-        <div
-          className={styles.sceneTrack}
-          style={{ transform: `translate3d(${-50 * trackProgress}%, 0, 0)` }}
-        >
-          <RealDashboardScene
-            scrollProgress={dashboardProgress}
-            onReady={() => setDashboardReady(true)}
+    <div ref={rootRef}>
+      <PhoneFrame>
+        {demoDataReady ? (
+          <div
+            className={styles.sceneTrack}
+            style={{ transform: `translate3d(${-50 * trackProgress}%, 0, 0)` }}
+          >
+            <RealDashboardScene
+              scrollProgress={dashboardProgress}
+              onReady={() => setDashboardReady(true)}
+            />
+            <HeroLogrosScene
+              isActive={phase === 'logros'}
+              isInViewport={isInViewport}
+              cycleKey={logrosCycleKey}
+              onReady={() => setLogrosReady(true)}
+            />
+          </div>
+        ) : (
+          <section
+            className={`${styles.scenePanel} ${styles.sceneDashboard}`}
+            data-light-scope="dashboard-v3"
+            aria-hidden
           />
-          <HeroLogrosScene
-            isActive={phase === 'logros'}
-            cycleKey={logrosCycleKey}
-            onReady={() => setLogrosReady(true)}
-          />
-        </div>
-      ) : (
-        <section
-          className={`${styles.scenePanel} ${styles.sceneDashboard}`}
-          data-light-scope="dashboard-v3"
-          aria-hidden
-        />
-      )}
-    </PhoneFrame>
+        )}
+      </PhoneFrame>
+    </div>
   );
 }
