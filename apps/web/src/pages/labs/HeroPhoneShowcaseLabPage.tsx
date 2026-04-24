@@ -80,7 +80,13 @@ function resolveDashboardProgress(elapsedInLoop: number) {
 
 type HeroPhase = "dashboard" | "to-logros" | "logros" | "to-dashboard";
 
-function useHeroShowcaseTimeline(isReady: boolean) {
+function useHeroShowcaseTimeline({
+  dashboardReady,
+  logrosReady,
+}: {
+  dashboardReady: boolean;
+  logrosReady: boolean;
+}) {
   const [timeline, setTimeline] = useState<{
     phase: HeroPhase;
     dashboardProgress: number;
@@ -90,33 +96,64 @@ function useHeroShowcaseTimeline(isReady: boolean) {
     dashboardProgress: 0,
     trackProgress: 0,
   });
+  const startedAtRef = useRef<number | null>(null);
+  const lastNowRef = useRef<number | null>(null);
+  const dashboardElapsedRef = useRef(0);
+  const wasLogrosReadyRef = useRef(logrosReady);
 
   useEffect(() => {
-    if (!isReady) {
+    if (!dashboardReady) {
       setTimeline({
         phase: "dashboard",
         dashboardProgress: 0,
         trackProgress: 0,
       });
+      startedAtRef.current = null;
+      lastNowRef.current = null;
+      dashboardElapsedRef.current = 0;
+      wasLogrosReadyRef.current = logrosReady;
       return;
     }
 
     let rafId = 0;
-    const startedAt = performance.now();
+    const now = performance.now();
+    if (startedAtRef.current == null) {
+      startedAtRef.current = now;
+    }
+    if (wasLogrosReadyRef.current !== logrosReady && startedAtRef.current != null) {
+      const previousNow = lastNowRef.current ?? now;
+      if (wasLogrosReadyRef.current === false && logrosReady === true) {
+        startedAtRef.current = previousNow - dashboardElapsedRef.current;
+      } else if (wasLogrosReadyRef.current === true && logrosReady === false) {
+        startedAtRef.current = previousNow;
+      }
+      wasLogrosReadyRef.current = logrosReady;
+    }
 
     const tick = (now: number) => {
-      const elapsedInLoop = (now - startedAt) % HERO_LOOP_DURATION_MS;
+      const startedAt = startedAtRef.current ?? now;
+      const elapsed = Math.max(0, now - startedAt);
+      dashboardElapsedRef.current = elapsed % DASHBOARD_LOOP_DURATION_MS;
+      lastNowRef.current = now;
 
+      if (!logrosReady) {
+        setTimeline({
+          phase: "dashboard",
+          dashboardProgress: resolveDashboardProgress(dashboardElapsedRef.current),
+          trackProgress: 0,
+        });
+        rafId = window.requestAnimationFrame(tick);
+        return;
+      }
+
+      const elapsedInLoop = elapsed % HERO_LOOP_DURATION_MS;
       if (elapsedInLoop < DASHBOARD_LOOP_DURATION_MS) {
         setTimeline({
           phase: "dashboard",
           dashboardProgress: resolveDashboardProgress(elapsedInLoop),
           trackProgress: 0,
         });
-      } else if (
-        elapsedInLoop <
-        DASHBOARD_LOOP_DURATION_MS + DASHBOARD_TO_LOGROS_DURATION_MS
-      ) {
+      } else if (elapsedInLoop < DASHBOARD_LOOP_DURATION_MS + DASHBOARD_TO_LOGROS_DURATION_MS) {
         const transitionElapsed = elapsedInLoop - DASHBOARD_LOOP_DURATION_MS;
         setTimeline({
           phase: "to-logros",
@@ -156,9 +193,9 @@ function useHeroShowcaseTimeline(isReady: boolean) {
 
     rafId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(rafId);
-  }, [isReady]);
+  }, [dashboardReady, logrosReady]);
 
-  return !isReady
+  return !dashboardReady
     ? { phase: "dashboard" as const, dashboardProgress: 0, trackProgress: 0 }
     : timeline;
 }
@@ -198,8 +235,17 @@ function RealDashboardScene({
     if (!viewport || readyReportedRef.current) return;
 
     let intervalId = 0;
+    let attempts = 0;
+    const maxAttempts = 45;
+    const reportReady = () => {
+      if (readyReportedRef.current) return;
+      readyReportedRef.current = true;
+      console.info("[hero-phone-showcase] dashboard ready");
+      onReady();
+    };
 
     const resolveIfReady = () => {
+      attempts += 1;
       const overallProgress = viewport.querySelector<HTMLElement>(
         '[data-demo-anchor="overall-progress"]',
       );
@@ -221,39 +267,51 @@ function RealDashboardScene({
         0,
         viewport.scrollHeight - viewport.clientHeight,
       );
-      if (maxScroll <= 0) {
-        return false;
-      }
-      const overallTop = resolveTop(overallProgress);
-      const emotionTop = resolveTop(emotionChart);
-      const streakTop = resolveTop(streaks);
-      const minTravel = Math.max(
-        Math.min(viewport.clientHeight * 0.58, maxScroll),
-        Math.min(160, maxScroll),
-      );
-      let start = Math.max(0, Math.min(maxScroll, overallTop - 18));
-      const endTarget = Math.max(
-        emotionTop - viewport.clientHeight * 0.38,
-        streakTop - viewport.clientHeight * 0.14,
-      );
-      let end = Math.max(start, Math.min(maxScroll, endTarget));
-      if (end - start < minTravel) {
-        end = Math.min(maxScroll, start + minTravel);
-      }
-      if (end - start < minTravel) {
-        start = Math.max(0, end - minTravel);
-      }
-      if (end <= start) {
-        start = 0;
-        end = maxScroll;
+      const hasAnchors = Boolean(overallProgress && emotionChart && streaks);
+
+      if (maxScroll > 0 && hasAnchors) {
+        const overallTop = resolveTop(overallProgress);
+        const emotionTop = resolveTop(emotionChart);
+        const streakTop = resolveTop(streaks);
+        const minTravel = Math.max(
+          Math.min(viewport.clientHeight * 0.58, maxScroll),
+          Math.min(160, maxScroll),
+        );
+        let start = Math.max(0, Math.min(maxScroll, overallTop - 18));
+        const endTarget = Math.max(
+          emotionTop - viewport.clientHeight * 0.38,
+          streakTop - viewport.clientHeight * 0.14,
+        );
+        let end = Math.max(start, Math.min(maxScroll, endTarget));
+        if (end - start < minTravel) {
+          end = Math.min(maxScroll, start + minTravel);
+        }
+        if (end - start < minTravel) {
+          start = Math.max(0, end - minTravel);
+        }
+        if (end <= start) {
+          start = 0;
+          end = maxScroll;
+        }
+
+        scrollRangeRef.current = { start, end };
+        viewport.scrollTop = start;
+        reportReady();
+        return true;
       }
 
-      scrollRangeRef.current = { start, end };
-      viewport.scrollTop = start;
+      if (attempts >= maxAttempts && maxScroll > 0) {
+        scrollRangeRef.current = { start: 0, end: maxScroll };
+        viewport.scrollTop = 0;
+        console.info(
+          "[hero-phone-showcase] dashboard fallback ready",
+          { hasAnchors, maxScroll, attempts },
+        );
+        reportReady();
+        return true;
+      }
 
-      readyReportedRef.current = true;
-      onReady();
-      return true;
+      return false;
     };
 
     if (!resolveIfReady()) {
@@ -331,8 +389,23 @@ function HeroLogrosScene({
 
   useEffect(() => {
     let intervalId = 0;
+    let attempts = 0;
+    const maxAttempts = 50;
+    const markReady = (reason: "strict" | "fallback") => {
+      setSceneReady(true);
+      if (!readyReportedRef.current) {
+        readyReportedRef.current = true;
+        if (reason === "fallback") {
+          console.info("[hero-phone-showcase] logros fallback ready");
+        } else {
+          console.info("[hero-phone-showcase] logros ready");
+        }
+        onReady();
+      }
+    };
 
     const resolveTrackReady = () => {
+      attempts += 1;
       const sceneRoot = sceneRef.current;
       const controls = controlsRef.current;
       const track = sceneRoot?.querySelector<HTMLElement>(
@@ -350,30 +423,7 @@ function HeroLogrosScene({
       const blockedCard = sceneRoot?.querySelector<HTMLElement>(
         '[data-demo-anchor="logros-blocked-card"]',
       );
-      const isBodySelected = Boolean(
-        pillarSelector?.querySelector<HTMLElement>(
-          '[role="tab"][aria-selected="true"]',
-        )?.textContent?.toLowerCase().includes("body") ||
-          pillarSelector?.querySelector<HTMLElement>(
-            '[role="tab"][aria-selected="true"]',
-          )?.textContent
-            ?.toLowerCase()
-            .includes("cuerpo"),
-      );
-
       if (!sceneRoot || !controlsReady || !controls || !track || !cards) {
-        return false;
-      }
-
-      if (cards.length < 3 || !firstCard || !blockedCard) {
-        return false;
-      }
-
-      const trackRect = track.getBoundingClientRect();
-      const firstRect = firstCard.getBoundingClientRect();
-      const hasLayout =
-        trackRect.width > 0 && firstRect.width > 0 && firstRect.height > 0;
-      if (!hasLayout) {
         return false;
       }
 
@@ -385,6 +435,25 @@ function HeroLogrosScene({
         return false;
       }
 
+      if (!firstCard) {
+        return false;
+      }
+
+      const trackRect = track.getBoundingClientRect();
+      const firstRect = firstCard.getBoundingClientRect();
+      const hasLayout =
+        trackRect.width > 0 && firstRect.width > 0 && firstRect.height > 0;
+      if (!hasLayout) {
+        return false;
+      }
+
+      const selectedTabLabel = pillarSelector
+        ?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')
+        ?.textContent?.toLowerCase();
+      const isBodySelected = Boolean(
+        selectedTabLabel?.includes("body") || selectedTabLabel?.includes("cuerpo"),
+      );
+
       const horizontallyVisible =
         firstRect.right > trackRect.left + 8 &&
         firstRect.left < trackRect.right - 8;
@@ -392,16 +461,33 @@ function HeroLogrosScene({
         firstCard.matches("button") &&
         !firstCard.hasAttribute("disabled") &&
         firstCard.tabIndex >= 0;
-      if (!isBodySelected || !horizontallyVisible || !hasFocusableFirstCard) {
-        return false;
+      const hasMinimumStructure = cards.length >= 2 && Boolean(blockedCard);
+      if (
+        hasMinimumStructure &&
+        isBodySelected &&
+        horizontallyVisible &&
+        hasFocusableFirstCard
+      ) {
+        markReady("strict");
+        return true;
       }
 
-      setSceneReady(true);
-      if (!readyReportedRef.current) {
-        readyReportedRef.current = true;
-        onReady();
+      if (attempts >= maxAttempts && hasMinimumStructure) {
+        console.info("[hero-phone-showcase] logros readiness fallback", {
+          attempts,
+          cards: cards.length,
+          isBodySelected,
+          horizontallyVisible,
+          hasFocusableFirstCard,
+        });
+        markReady("fallback");
+        return true;
       }
-      return true;
+
+      if (!hasMinimumStructure) {
+        return false;
+      }
+      return false;
     };
 
     if (!resolveTrackReady()) {
@@ -473,7 +559,10 @@ function HeroPhoneShowcase() {
   const [demoDataReady, setDemoDataReady] = useState(false);
   const [logrosCycleKey, setLogrosCycleKey] = useState(0);
   const { phase, dashboardProgress, trackProgress } =
-    useHeroShowcaseTimeline(dashboardReady && logrosReady);
+    useHeroShowcaseTimeline({
+      dashboardReady,
+      logrosReady,
+    });
   const previousPhaseRef = useRef<HeroPhase>("dashboard");
 
   useEffect(() => {
@@ -486,8 +575,23 @@ function HeroPhoneShowcase() {
   }, []);
 
   useEffect(() => {
+    if (dashboardReady) {
+      console.info("[hero-phone-showcase] dashboard ready flag true");
+    }
+  }, [dashboardReady]);
+
+  useEffect(() => {
+    if (logrosReady) {
+      console.info("[hero-phone-showcase] logros ready flag true");
+    }
+  }, [logrosReady]);
+
+  useEffect(() => {
     if (previousPhaseRef.current !== "logros" && phase === "logros") {
       setLogrosCycleKey((value) => value + 1);
+    }
+    if (previousPhaseRef.current !== phase) {
+      console.info("[hero-phone-showcase] phase", phase);
     }
     previousPhaseRef.current = phase;
   }, [phase]);

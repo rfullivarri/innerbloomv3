@@ -263,7 +263,8 @@
 .realViewport {
   position: absolute;
   inset: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
   scrollbar-width: none;
   pointer-events: none;
