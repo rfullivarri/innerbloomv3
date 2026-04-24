@@ -223,15 +223,32 @@ function RealDashboardScene({
         0,
         viewport.scrollHeight - viewport.clientHeight,
       );
+      if (maxScroll <= 0) {
+        return false;
+      }
       const overallTop = resolveTop(overallProgress);
       const emotionTop = resolveTop(emotionChart);
       const streakTop = resolveTop(streaks);
-      const start = Math.max(0, Math.min(maxScroll, overallTop - 18));
-      const endTarget = Math.max(
-        emotionTop - viewport.clientHeight * 0.42,
-        streakTop - viewport.clientHeight * 0.16,
+      const minTravel = Math.max(
+        Math.min(viewport.clientHeight * 0.58, maxScroll),
+        Math.min(160, maxScroll),
       );
-      const end = Math.max(start, Math.min(maxScroll, endTarget));
+      let start = Math.max(0, Math.min(maxScroll, overallTop - 18));
+      const endTarget = Math.max(
+        emotionTop - viewport.clientHeight * 0.38,
+        streakTop - viewport.clientHeight * 0.14,
+      );
+      let end = Math.max(start, Math.min(maxScroll, endTarget));
+      if (end - start < minTravel) {
+        end = Math.min(maxScroll, start + minTravel);
+      }
+      if (end - start < minTravel) {
+        start = Math.max(0, end - minTravel);
+      }
+      if (end <= start) {
+        start = 0;
+        end = maxScroll;
+      }
 
       scrollRangeRef.current = { start, end };
       viewport.scrollTop = start;
@@ -282,8 +299,10 @@ function HeroLogrosScene({
   onReady: () => void;
 }) {
   const { language } = usePostLoginLanguage();
+  const sceneRef = useRef<HTMLElement | null>(null);
   const controlsRef = useRef<RewardsSectionDemoControls | null>(null);
   const [sceneReady, setSceneReady] = useState(false);
+  const [controlsReady, setControlsReady] = useState(false);
   const readyReportedRef = useRef(false);
   const readinessResolvedRef = useRef(false);
 
@@ -304,6 +323,7 @@ function HeroLogrosScene({
       controls: {
         onReady: (controls: RewardsSectionDemoControls) => {
           controlsRef.current = controls;
+          setControlsReady(true);
         },
       },
     }),
@@ -314,9 +334,7 @@ function HeroLogrosScene({
     let intervalId = 0;
 
     const resolveTrackReady = () => {
-      const sceneRoot = document.querySelector<HTMLElement>(
-        `.${styles.sceneLogros}`,
-      );
+      const sceneRoot = sceneRef.current;
       const controls = controlsRef.current;
       const track = sceneRoot?.querySelector<HTMLElement>(
         '[data-demo-anchor="logros-carousel-track"]',
@@ -344,14 +362,11 @@ function HeroLogrosScene({
             .includes("cuerpo"),
       );
 
-      if (
-        !controls ||
-        !track ||
-        !cards ||
-        cards.length < 3 ||
-        !firstCard ||
-        !blockedCard
-      ) {
+      if (!sceneRoot || !controlsReady || !controls || !track || !cards) {
+        return false;
+      }
+
+      if (cards.length < 3 || !firstCard || !blockedCard) {
         return false;
       }
 
@@ -374,7 +389,11 @@ function HeroLogrosScene({
       const horizontallyVisible =
         firstRect.right > trackRect.left + 8 &&
         firstRect.left < trackRect.right - 8;
-      if (!isBodySelected || !horizontallyVisible) {
+      const hasFocusableFirstCard =
+        firstCard.matches("button") &&
+        !firstCard.hasAttribute("disabled") &&
+        firstCard.tabIndex >= 0;
+      if (!isBodySelected || !horizontallyVisible || !hasFocusableFirstCard) {
         return false;
       }
 
@@ -399,7 +418,7 @@ function HeroLogrosScene({
         window.clearInterval(intervalId);
       }
     };
-  }, [onReady]);
+  }, [controlsReady, onReady]);
 
   useEffect(() => {
     if (!isActive || !sceneReady) {
@@ -432,6 +451,7 @@ function HeroLogrosScene({
 
   return (
     <section
+      ref={sceneRef}
       className={`${styles.scenePanel} ${styles.sceneLogros}`}
       data-light-scope="dashboard-v3"
     >
