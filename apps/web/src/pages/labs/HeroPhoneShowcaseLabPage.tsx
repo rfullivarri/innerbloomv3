@@ -127,7 +127,7 @@ function RealDashboardScene({
       data-light-scope="dashboard-v3"
     >
       <div ref={viewportRef} className={styles.realViewport}>
-        <div className={`${styles.realSceneScale} ${styles.dashboardSceneScale}`}>
+        <div className={styles.mobileDashboardRoot}>
           <DemoDashboardOverviewScene gameMode="flow" />
         </div>
       </div>
