@@ -279,7 +279,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       signup: 'Crear cuenta',
       login: 'Iniciar sesión',
       startJourney: 'Crear mi plan adaptativo',
-      guidedDemo: 'Ver demo guiada'
+      guidedDemo: 'Demos'
     },
     footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
   },
@@ -516,7 +516,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       signup: 'Create account',
       login: 'Log in',
       startJourney: 'Create my adaptive plan',
-      guidedDemo: 'See guided demo'
+      guidedDemo: 'Demos'
     },
     footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
   }

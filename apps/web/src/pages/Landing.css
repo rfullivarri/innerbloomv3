@@ -413,36 +413,36 @@
   font-weight: 500;
 }
 
-@property --conic-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
 .landing .journey-cta {
-  --conic-angle: 0deg;
-  --conic-border: 2px;
-  --conic-duration: 4s;
-  position: relative;
-  border: var(--conic-border) solid transparent;
-  padding-inline: 2.4rem;
-  min-width: min(320px, 88vw);
+  border: 1px solid color-mix(in srgb, #c4cfff 32%, rgba(255, 255, 255, 0.42));
+  padding-inline: clamp(1.15rem, 1.4vw, 1.5rem);
+  min-width: 0;
   background:
-    linear-gradient(#8b5cf6, #8b5cf6) padding-box,
-    conic-gradient(
-        from var(--conic-angle),
-        rgba(255, 255, 255, 0.95),
-        rgba(255, 255, 255, 0.45),
-        rgba(255, 255, 255, 0.85),
-        rgba(255, 255, 255, 0.35),
-        rgba(255, 255, 255, 0.95)
-      )
-      border-box;
-  animation: conic-spin var(--conic-duration) linear infinite;
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent) 74%, #b8b8ff 26%),
+      color-mix(in srgb, var(--accent-2) 70%, #8fd3ff 30%)
+    );
+  color: #f9fbff;
+  box-shadow:
+    0 11px 26px rgba(54, 66, 146, 0.34),
+    0 1px 0 rgba(255, 255, 255, 0.32) inset;
+  transition:
+    transform 170ms ease,
+    filter 170ms ease,
+    box-shadow 210ms ease;
 }
 
 .landing .hero-actions .journey-cta {
   flex: 0 1 auto;
+}
+
+.landing .journey-cta:hover {
+  transform: translateY(-1px);
+  filter: saturate(1.06) brightness(1.03);
+  box-shadow:
+    0 14px 30px rgba(57, 68, 150, 0.4),
+    0 1px 0 rgba(255, 255, 255, 0.38) inset;
 }
 
 .landing .hero-actions {
@@ -456,20 +456,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.42rem;
-  min-height: 30px;
-  padding: 0.4rem 1.02rem;
-  border-radius: 14px;
+  gap: 0.28rem;
+  min-height: 36px;
+  padding: 0.46rem 0.92rem;
+  border-radius: 999px;
   border: 1px solid
-    color-mix(in srgb, var(--accent-2) 48%, rgba(186, 212, 255, 0.45));
-  background: color-mix(in srgb, var(--accent-2) 9%, rgba(255, 255, 255, 0.03));
-  color: color-mix(in srgb, var(--ink) 94%, #fff 6%);
+    color-mix(in srgb, var(--accent-2) 38%, rgba(186, 212, 255, 0.26));
+  background: color-mix(in srgb, var(--accent-2) 8%, rgba(255, 255, 255, 0.02));
+  color: color-mix(in srgb, var(--ink) 86%, #fff 14%);
   text-decoration: none;
   font-family: var(--font-body);
-  font-size: 0.83rem;
-  font-weight: 650;
+  font-size: 0.78rem;
+  font-weight: 620;
   letter-spacing: 0.01em;
-  box-shadow: 0 10px 26px rgba(8, 18, 44, 0.28);
+  box-shadow: 0 7px 18px rgba(8, 18, 44, 0.24);
   transition:
     transform 160ms ease,
     background-color 160ms ease,
@@ -497,11 +497,6 @@
 .landing .hero-demo-cta:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--accent-2) 78%, #fff 22%);
   outline-offset: 2px;
-}
-
-.landing .hero-demo-cta-icon {
-  font-size: 0.64rem;
-  opacity: 0.92;
 }
 
 .landing .hero-media {
@@ -2482,12 +2477,6 @@
   }
 }
 
-@keyframes conic-spin {
-  to {
-    --conic-angle: 360deg;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .landing::before,
   .landing::after,
@@ -2524,10 +2513,9 @@
   }
 
   .landing .hero-demo-cta {
-    min-height: 28px;
-    padding: 0.38rem 0.95rem;
-    font-size: 0.8rem;
-    border-radius: 13px;
+    min-height: 34px;
+    padding: 0.42rem 0.88rem;
+    font-size: 0.75rem;
   }
 
   .landing .visible-progress-top {
