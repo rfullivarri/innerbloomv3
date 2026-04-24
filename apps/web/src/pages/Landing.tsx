@@ -801,7 +801,7 @@ export default function LandingPage() {
                 ) : (
                   <>
                     <Link
-                      className={`${buttonClasses()} journey-cta`}
+                      className={buttonClasses()}
                       data-analytics-cta="start_journey"
                       data-analytics-location="hero"
                       to={buildOnboardingPath(language)}
@@ -1496,7 +1496,7 @@ export default function LandingPage() {
               ) : (
                 <>
                   <Link
-                    className={`${buttonClasses()} journey-cta`}
+                    className={buttonClasses()}
                     data-analytics-cta="start_journey"
                     data-analytics-location="footer"
                     to={buildOnboardingPath(language)}
