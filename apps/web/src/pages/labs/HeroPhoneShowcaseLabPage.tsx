@@ -7,10 +7,15 @@ import styles from './HeroPhoneShowcaseLabPage.module.css';
 
 const INITIAL_TOP_PAUSE_MS = 500;
 const SCROLL_DOWN_DURATION_MS = 4500;
+const LOOP_BOTTOM_PAUSE_MS = 950;
 const RESET_TO_TOP_DURATION_MS = 300;
 const LOOP_TOP_PAUSE_MS = 350;
 const LOOP_DURATION_MS =
-  INITIAL_TOP_PAUSE_MS + SCROLL_DOWN_DURATION_MS + RESET_TO_TOP_DURATION_MS + LOOP_TOP_PAUSE_MS;
+  INITIAL_TOP_PAUSE_MS +
+  SCROLL_DOWN_DURATION_MS +
+  LOOP_BOTTOM_PAUSE_MS +
+  RESET_TO_TOP_DURATION_MS +
+  LOOP_TOP_PAUSE_MS;
 
 function smoothProgress(progress: number) {
   return progress * progress * (3 - 2 * progress);
@@ -37,12 +42,14 @@ function useDashboardScrollProgress(isReady: boolean) {
       } else if (elapsedInLoop < INITIAL_TOP_PAUSE_MS + SCROLL_DOWN_DURATION_MS) {
         const downElapsed = elapsedInLoop - INITIAL_TOP_PAUSE_MS;
         setProgress(smoothProgress(downElapsed / SCROLL_DOWN_DURATION_MS));
+      } else if (elapsedInLoop < INITIAL_TOP_PAUSE_MS + SCROLL_DOWN_DURATION_MS + LOOP_BOTTOM_PAUSE_MS) {
+        setProgress(1);
       } else if (
         elapsedInLoop <
-        INITIAL_TOP_PAUSE_MS + SCROLL_DOWN_DURATION_MS + RESET_TO_TOP_DURATION_MS
+        INITIAL_TOP_PAUSE_MS + SCROLL_DOWN_DURATION_MS + LOOP_BOTTOM_PAUSE_MS + RESET_TO_TOP_DURATION_MS
       ) {
         const resetElapsed =
-          elapsedInLoop - INITIAL_TOP_PAUSE_MS - SCROLL_DOWN_DURATION_MS;
+          elapsedInLoop - INITIAL_TOP_PAUSE_MS - SCROLL_DOWN_DURATION_MS - LOOP_BOTTOM_PAUSE_MS;
         setProgress(1 - resetElapsed / RESET_TO_TOP_DURATION_MS);
       } else {
         setProgress(0);
