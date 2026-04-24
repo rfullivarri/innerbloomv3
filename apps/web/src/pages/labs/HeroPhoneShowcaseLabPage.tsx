@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { useReducedMotion } from "framer-motion";
 import { setDashboardDemoModeEnabled } from "../../lib/demoMode";
 import { DemoDashboardOverviewScene } from "../../components/demo/DemoDashboardOverviewScene";
 import {
@@ -82,7 +81,6 @@ function resolveDashboardProgress(elapsedInLoop: number) {
 type HeroPhase = "dashboard" | "to-logros" | "logros" | "to-dashboard";
 
 function useHeroShowcaseTimeline(isReady: boolean) {
-  const prefersReducedMotion = useReducedMotion();
   const [timeline, setTimeline] = useState<{
     phase: HeroPhase;
     dashboardProgress: number;
@@ -94,7 +92,7 @@ function useHeroShowcaseTimeline(isReady: boolean) {
   });
 
   useEffect(() => {
-    if (prefersReducedMotion || !isReady) {
+    if (!isReady) {
       setTimeline({
         phase: "dashboard",
         dashboardProgress: 0,
@@ -158,9 +156,9 @@ function useHeroShowcaseTimeline(isReady: boolean) {
 
     rafId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(rafId);
-  }, [isReady, prefersReducedMotion]);
+  }, [isReady]);
 
-  return prefersReducedMotion || !isReady
+  return !isReady
     ? { phase: "dashboard" as const, dashboardProgress: 0, trackProgress: 0 }
     : timeline;
 }
