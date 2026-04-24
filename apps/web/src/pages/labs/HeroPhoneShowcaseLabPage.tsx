@@ -317,6 +317,7 @@ function HeroLogrosScene({
         carouselStructure: "logros-carousel-structure",
         pillarSelector: "logros-pillar-selector",
         achievedCard: "logros-achieved-card",
+        blockedCard: "logros-blocked-card",
         achievedCardTaskId: HERO_BODY_CARD_UNLOCKED_1,
         blockedCardTaskId: HERO_BODY_CARD_BLOCKED_1,
       },
