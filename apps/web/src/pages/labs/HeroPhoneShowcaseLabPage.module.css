@@ -132,6 +132,7 @@
   inset: 0;
   overflow: auto;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 
@@ -139,21 +140,50 @@
   display: none;
 }
 
-.realSceneScale {
-  width: 436px;
+.mobileDashboardRoot {
   min-height: 100%;
-  transform: scale(0.72);
-  transform-origin: top left;
-  padding: 14px 10px 120px;
+  width: 100%;
+  padding: 12px 12px 108px;
+  box-sizing: border-box;
 }
 
-.sceneDashboard .realViewport {
-  overflow: hidden;
+.sceneDashboard :global(.lg\:grid-cols-12) {
+  grid-template-columns: minmax(0, 1fr) !important;
 }
 
-.dashboardSceneScale {
-  transform: translate(-18px, -8px) scale(0.75);
-  padding-bottom: 110px;
+.sceneDashboard :global(.lg\:col-span-4),
+.sceneDashboard :global(.lg\:col-span-5),
+.sceneDashboard :global(.lg\:col-span-6),
+.sceneDashboard :global(.lg\:col-span-7),
+.sceneDashboard :global(.lg\:col-span-8),
+.sceneDashboard :global(.lg\:col-span-12),
+.sceneDashboard :global(.md\:col-span-2),
+.sceneDashboard :global(.md\:col-span-3),
+.sceneDashboard :global(.md\:col-span-4) {
+  grid-column: span 1 / span 1 !important;
+}
+
+.sceneDashboard :global(.lg\:order-2),
+.sceneDashboard :global(.lg\:order-3),
+.sceneDashboard :global(.lg\:order-4) {
+  order: initial !important;
+}
+
+.sceneDashboard :global(.md\:grid-cols-2),
+.sceneDashboard :global(.md\:grid-cols-3),
+.sceneDashboard :global(.lg\:grid-cols-2),
+.sceneDashboard :global(.lg\:grid-cols-3),
+.sceneDashboard :global(.lg\:grid-cols-4) {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.sceneDashboard :global(.md\:gap-5),
+.sceneDashboard :global(.lg\:gap-6) {
+  gap: 1rem !important;
+}
+
+.sceneDashboard :global([class*="max-w-"]) {
+  max-width: 100% !important;
 }
 
 @media (max-width: 980px) {
