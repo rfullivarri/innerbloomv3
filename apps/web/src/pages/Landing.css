@@ -373,7 +373,7 @@
   margin: 0 auto;
   padding: 56px 18px;
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(280px, var(--hero-size));
+  grid-template-columns: minmax(0, 1.03fr) minmax(320px, var(--hero-size));
   gap: 40px;
   align-items: center;
 }
@@ -505,24 +505,16 @@
 }
 
 .landing .hero-media {
-  width: min(100%, var(--hero-size));
-  min-height: clamp(540px, 64vh, 700px);
+  width: min(100%, 420px);
+  min-height: clamp(560px, 68vh, 740px);
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-left: auto;
+  justify-content: flex-end;
+  margin-left: clamp(6px, 1.8vw, 28px);
   animation: float 18s ease-in-out infinite;
   will-change: transform;
-}
-
-.landing .hero-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 12%;
+  overflow: visible;
 }
 
 .landing section h2 {
@@ -2528,6 +2520,7 @@
     width: min(100%, 360px);
     min-height: auto;
     margin: 0 auto;
+    justify-content: center;
   }
 
   .landing .hero-demo-cta {
