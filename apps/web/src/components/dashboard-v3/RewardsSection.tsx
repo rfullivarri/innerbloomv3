@@ -77,7 +77,6 @@ interface RewardsSectionProps {
     anchors?: RewardsSectionProps["demoAnchors"];
     controls?: {
       onReady?: (controls: RewardsSectionDemoControls) => void;
-      preventPageScrollOnProgrammaticFocus?: boolean;
     };
   };
   demoStepId?: string | null;
@@ -278,9 +277,6 @@ export function RewardsSection({
         disableRemote={resolvedDisableRemote}
         mockPreviewAchievementByTaskId={resolvedMockPreviewAchievementByTaskId}
         onDemoControlsReady={demoConfig?.controls?.onReady}
-        preventPageScrollOnProgrammaticFocus={
-          demoConfig?.controls?.preventPageScrollOnProgrammaticFocus ?? false
-        }
         onToggleMaintained={async (habit, enabled) => {
           if (resolvedDisableRemote) {
             return;
@@ -934,7 +930,6 @@ function AchievedShelf({
   mockPreviewAchievementByTaskId,
   demoAnchors,
   onDemoControlsReady,
-  preventPageScrollOnProgrammaticFocus,
   demoStepId,
 }: {
   groups: RewardsHistorySummary["habitAchievements"]["achievedByPillar"];
@@ -951,7 +946,6 @@ function AchievedShelf({
   >;
   demoAnchors?: RewardsSectionProps["demoAnchors"];
   onDemoControlsReady?: (controls: RewardsSectionDemoControls) => void;
-  preventPageScrollOnProgrammaticFocus: boolean;
   demoStepId?: string | null;
 }) {
   const [activeHabitId, setActiveHabitId] = useState<string | null>(null);
@@ -1091,21 +1085,11 @@ function AchievedShelf({
       if (!targetCard) {
         return;
       }
-      if (
-        !preventPageScrollOnProgrammaticFocus &&
-        typeof targetCard.scrollIntoView === "function"
-      ) {
+      if (typeof targetCard.scrollIntoView === "function") {
         targetCard.scrollIntoView({
           behavior: prefersReducedMotion ? "auto" : "smooth",
           inline: "center",
           block: "nearest",
-        });
-      } else {
-        const nextLeft =
-          targetCard.offsetLeft - (track.clientWidth - targetCard.clientWidth) / 2;
-        track.scrollTo({
-          left: Math.max(0, nextLeft),
-          behavior: prefersReducedMotion ? "auto" : "smooth",
         });
       }
       setActiveCarouselIndex(clampedIndex);
@@ -1113,7 +1097,6 @@ function AchievedShelf({
     [
       activePillarHabits.length,
       carouselTrackRef,
-      preventPageScrollOnProgrammaticFocus,
       prefersReducedMotion,
       setActiveCarouselIndex,
     ],
