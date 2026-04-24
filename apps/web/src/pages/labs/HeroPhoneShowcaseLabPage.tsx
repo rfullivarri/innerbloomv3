@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useAuth } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
 import { setDashboardDemoModeEnabled } from "../../lib/demoMode";
 import { DemoDashboardOverviewScene } from "../../components/demo/DemoDashboardOverviewScene";
@@ -678,6 +679,13 @@ function HeroPhoneShowcase() {
 }
 
 export default function HeroPhoneShowcaseLabPage() {
+  const { userId } = useAuth();
+  const isSignedIn = Boolean(userId);
+
+  const primaryCta = isSignedIn
+    ? { label: "Go to dashboard", to: "/dashboard" }
+    : { label: "Comenzar ahora", to: "/onboarding" };
+
   return (
     <main className={styles.page}>
       <section className={styles.hero}>
@@ -691,13 +699,19 @@ export default function HeroPhoneShowcaseLabPage() {
             manteniendo el recorrido actual y sumando una escena de carrusel
             BODY en loop horizontal premium.
           </p>
-          <div className={styles.ctaRow}>
-            <Link className={styles.primaryCta} to="/onboarding">
-              Comenzar ahora
+          <div
+            className={`${styles.ctaRow} ${
+              isSignedIn ? styles.ctaRowSingle : ""
+            }`}
+          >
+            <Link className={styles.primaryCta} to={primaryCta.to}>
+              {primaryCta.label}
             </Link>
-            <a className={styles.secondaryCta} href="/landing-v2#highlights">
-              Ver dashboard
-            </a>
+            {!isSignedIn ? (
+              <a className={styles.secondaryCta} href="/landing-v2#highlights">
+                Demos
+              </a>
+            ) : null}
           </div>
         </div>
 
