@@ -237,12 +237,26 @@
 }
 
 .heroFocusContent :global([data-demo-anchor="emotion-chart"] .ib-card .emotion-highlight-indicator) {
-  width: 1.95rem;
-  height: 1.95rem;
+  width: 1.35rem;
+  height: 1.35rem;
 }
 
 .heroFocusContent :global([data-demo-anchor="emotion-chart"] .ib-card [data-emotion-card="summary"] .summary-inner) {
-  padding: 0.55rem 0.65rem;
+  padding: 0.42rem 0.5rem;
+  gap: 0.35rem;
+}
+
+.heroFocusContent :global([data-demo-anchor="emotion-chart"] .ib-card [data-emotion-card="summary"] .summary-content) {
+  gap: 0.4rem;
+}
+
+.heroFocusContent :global([data-demo-anchor="emotion-chart"] .ib-card [data-emotion-card="summary"] .summary-title) {
+  font-size: 0.7rem;
+}
+
+.heroFocusContent :global([data-demo-anchor="emotion-chart"] .ib-card [data-emotion-card="summary"] .summary-description) {
+  font-size: 0.66rem;
+  line-height: 1.2;
 }
 
 .heroFocusContent :global([data-demo-anchor="emotion-chart"] .ib-card [data-emotion-card="heatmap"]) {
@@ -267,8 +281,31 @@
   gap: 0.45rem;
 }
 
-.heroFocusContent :global([data-demo-anchor="streaks"] .ib-card [class*="rounded-ib-md"]) {
-  min-height: 4.65rem;
+.heroFocusContent :global([data-demo-anchor="streaks"] .ib-card [data-demo-anchor="streaks-top"] article[role="button"]),
+.heroFocusContent :global([data-demo-anchor="streaks"] .ib-card [data-demo-anchor="streaks-bottom"] article[role="button"]) {
+  min-height: 4rem;
+  padding: 0.38rem 0.5rem;
+  gap: 0.22rem;
+}
+
+.heroFocusContent :global([data-demo-anchor="streaks"] .ib-card article[role="button"] .text-sm.font-medium) {
+  font-size: 0.75rem;
+  line-height: 1.15;
+}
+
+.heroFocusContent :global([data-demo-anchor="streaks"] .ib-card article[role="button"] .min-w-0.flex-1 p) {
+  font-size: 0.63rem;
+}
+
+.heroFocusContent :global([data-demo-anchor="streaks"] .ib-card article[role="button"] .h-2\.5),
+.heroFocusContent :global([data-demo-anchor="streaks"] .ib-card article[role="button"] .h-2\.5 > div) {
+  height: 0.42rem;
+}
+
+.heroFocusContent :global([data-demo-anchor="streaks"] .ib-card article[role="button"] .ib-streak-fire-chip__inner) {
+  padding: 0.1rem 0.38rem;
+  font-size: 0.58rem;
+  gap: 0.2rem;
 }
 
 .sceneDashboard :global(.lg\:grid-cols-12) {
