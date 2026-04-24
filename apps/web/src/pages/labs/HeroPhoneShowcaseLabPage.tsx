@@ -5,13 +5,15 @@ import { setDashboardDemoModeEnabled } from '../../lib/demoMode';
 import { DemoDashboardOverviewScene } from '../../components/demo/DemoDashboardOverviewScene';
 import styles from './HeroPhoneShowcaseLabPage.module.css';
 
-const INITIAL_PAUSE_MS = 400;
-const SCROLL_DURATION_MS = 3000;
+const INITIAL_TOP_PAUSE_MS = 500;
+const SCROLL_DOWN_DURATION_MS = 3000;
+const RESET_TO_TOP_DURATION_MS = 300;
+const LOOP_TOP_PAUSE_MS = 350;
+const LOOP_DURATION_MS =
+  INITIAL_TOP_PAUSE_MS + SCROLL_DOWN_DURATION_MS + RESET_TO_TOP_DURATION_MS + LOOP_TOP_PAUSE_MS;
 
-function easeInOut(progress: number) {
-  return progress < 0.5
-    ? 4 * progress * progress * progress
-    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+function smoothProgress(progress: number) {
+  return progress * progress * (3 - 2 * progress);
 }
 
 function useDashboardScrollProgress(isReady: boolean) {
@@ -25,24 +27,35 @@ function useDashboardScrollProgress(isReady: boolean) {
     }
 
     let rafId = 0;
-    const start = performance.now();
+    const startedAt = performance.now();
 
     const tick = (now: number) => {
-      const elapsed = now - start;
-      const movementElapsed = Math.max(0, elapsed - INITIAL_PAUSE_MS);
-      const nextProgress = Math.min(1, movementElapsed / SCROLL_DURATION_MS);
-      setProgress(nextProgress);
+      const elapsedInLoop = (now - startedAt) % LOOP_DURATION_MS;
 
-      if (nextProgress < 1) {
-        rafId = window.requestAnimationFrame(tick);
+      if (elapsedInLoop < INITIAL_TOP_PAUSE_MS) {
+        setProgress(0);
+      } else if (elapsedInLoop < INITIAL_TOP_PAUSE_MS + SCROLL_DOWN_DURATION_MS) {
+        const downElapsed = elapsedInLoop - INITIAL_TOP_PAUSE_MS;
+        setProgress(smoothProgress(downElapsed / SCROLL_DOWN_DURATION_MS));
+      } else if (
+        elapsedInLoop <
+        INITIAL_TOP_PAUSE_MS + SCROLL_DOWN_DURATION_MS + RESET_TO_TOP_DURATION_MS
+      ) {
+        const resetElapsed =
+          elapsedInLoop - INITIAL_TOP_PAUSE_MS - SCROLL_DOWN_DURATION_MS;
+        setProgress(1 - resetElapsed / RESET_TO_TOP_DURATION_MS);
+      } else {
+        setProgress(0);
       }
+
+      rafId = window.requestAnimationFrame(tick);
     };
 
     rafId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(rafId);
   }, [isReady, prefersReducedMotion]);
 
-  return prefersReducedMotion || !isReady ? 0 : easeInOut(progress);
+  return prefersReducedMotion || !isReady ? 0 : progress;
 }
 
 function PhoneFrame({ children }: { children: ReactNode }) {
@@ -127,8 +140,10 @@ function RealDashboardScene({
       data-light-scope="dashboard-v3"
     >
       <div ref={viewportRef} className={styles.realViewport}>
-        <div className={styles.mobileDashboardRoot}>
-          <DemoDashboardOverviewScene gameMode="flow" />
+        <div className={`${styles.mobileDashboardRoot} ${styles.heroFocusViewport}`}>
+          <div className={styles.heroFocusContent}>
+            <DemoDashboardOverviewScene gameMode="flow" />
+          </div>
         </div>
       </div>
     </section>
