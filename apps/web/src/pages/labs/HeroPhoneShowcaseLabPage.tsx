@@ -361,6 +361,11 @@ function HeroLogrosScene({
   const [controlsReady, setControlsReady] = useState(false);
   const readyReportedRef = useRef(false);
   const readinessResolvedRef = useRef(false);
+  const onReadyRef = useRef(onReady);
+
+  useEffect(() => {
+    onReadyRef.current = onReady;
+  }, [onReady]);
 
   const demoConfig = useMemo(
     () => ({
@@ -379,6 +384,7 @@ function HeroLogrosScene({
       },
       controls: {
         onReady: (controls: RewardsSectionDemoControls) => {
+          console.info("[hero-logros] controls.onReady fired");
           controlsRef.current = controls;
           setControlsReady(true);
         },
@@ -388,19 +394,25 @@ function HeroLogrosScene({
   );
 
   useEffect(() => {
+    console.info("[hero-logros] HeroLogrosScene mounted");
+  }, []);
+
+  useEffect(() => {
+    if (sceneReady) {
+      console.info("[hero-logros] sceneReady -> true");
+    }
+  }, [sceneReady]);
+
+  useEffect(() => {
     let intervalId = 0;
     let attempts = 0;
-    const maxAttempts = 50;
+    const maxAttempts = 14;
     const markReady = (reason: "strict" | "fallback") => {
       setSceneReady(true);
       if (!readyReportedRef.current) {
         readyReportedRef.current = true;
-        if (reason === "fallback") {
-          console.info("[hero-phone-showcase] logros fallback ready");
-        } else {
-          console.info("[hero-phone-showcase] logros ready");
-        }
-        onReady();
+        console.info("[hero-logros] onReady() call", { reason });
+        onReadyRef.current();
       }
     };
 
@@ -417,76 +429,46 @@ function HeroLogrosScene({
       const cards = track?.querySelectorAll<HTMLElement>(
         "[data-achievement-carousel-index]",
       );
-      const firstCard = sceneRoot?.querySelector<HTMLElement>(
-        '[data-demo-anchor="logros-achieved-card"]',
-      );
-      const blockedCard = sceneRoot?.querySelector<HTMLElement>(
-        '[data-demo-anchor="logros-blocked-card"]',
-      );
-      if (!sceneRoot || !controlsReady || !controls || !track || !cards) {
+
+      if (attempts <= 3 || attempts === maxAttempts) {
+        console.info("[hero-logros] readiness tick", {
+          attempts,
+          hasSceneRoot: Boolean(sceneRoot),
+          controlsReady,
+          hasControls: Boolean(controls),
+          hasTrack: Boolean(track),
+          cards: cards?.length ?? 0,
+        });
+      }
+
+      if (!sceneRoot || !controls || !track || !cards) {
         return false;
       }
 
       if (!readinessResolvedRef.current) {
+        console.info("[hero-logros] initial controls setup");
         controls.closeAllOverlays();
         controls.selectPillar("BODY");
         controls.focusCarouselCard(HERO_BODY_CARD_UNLOCKED_1);
         readinessResolvedRef.current = true;
-        return false;
       }
 
-      if (!firstCard) {
-        return false;
-      }
-
-      const trackRect = track.getBoundingClientRect();
-      const firstRect = firstCard.getBoundingClientRect();
-      const hasLayout =
-        trackRect.width > 0 && firstRect.width > 0 && firstRect.height > 0;
-      if (!hasLayout) {
-        return false;
-      }
-
-      const selectedTabLabel = pillarSelector
-        ?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')
-        ?.textContent?.toLowerCase();
-      const isBodySelected = Boolean(
-        selectedTabLabel?.includes("body") || selectedTabLabel?.includes("cuerpo"),
-      );
-
-      const horizontallyVisible =
-        firstRect.right > trackRect.left + 8 &&
-        firstRect.left < trackRect.right - 8;
-      const hasFocusableFirstCard =
-        firstCard.matches("button") &&
-        !firstCard.hasAttribute("disabled") &&
-        firstCard.tabIndex >= 0;
-      const hasMinimumStructure = cards.length >= 2 && Boolean(blockedCard);
-      if (
-        hasMinimumStructure &&
-        isBodySelected &&
-        horizontallyVisible &&
-        hasFocusableFirstCard
-      ) {
+      const hasMinimumStructure = cards.length >= 2;
+      if (hasMinimumStructure) {
         markReady("strict");
         return true;
       }
 
-      if (attempts >= maxAttempts && hasMinimumStructure) {
-        console.info("[hero-phone-showcase] logros readiness fallback", {
+      if (attempts >= maxAttempts && cards.length >= 1) {
+        console.info("[hero-logros] fallback ready after retries", {
           attempts,
           cards: cards.length,
-          isBodySelected,
-          horizontallyVisible,
-          hasFocusableFirstCard,
+          hasPillarSelector: Boolean(pillarSelector),
         });
         markReady("fallback");
         return true;
       }
 
-      if (!hasMinimumStructure) {
-        return false;
-      }
       return false;
     };
 
@@ -503,7 +485,7 @@ function HeroLogrosScene({
         window.clearInterval(intervalId);
       }
     };
-  }, [controlsReady, onReady]);
+  }, [controlsReady]);
 
   useEffect(() => {
     if (!isActive || !sceneReady) {
@@ -589,6 +571,9 @@ function HeroPhoneShowcase() {
   useEffect(() => {
     if (previousPhaseRef.current !== "logros" && phase === "logros") {
       setLogrosCycleKey((value) => value + 1);
+    }
+    if (phase === "to-logros" || phase === "logros") {
+      console.info("[hero-logros] phase", phase, { logrosReady });
     }
     if (previousPhaseRef.current !== phase) {
       console.info("[hero-phone-showcase] phase", phase);
