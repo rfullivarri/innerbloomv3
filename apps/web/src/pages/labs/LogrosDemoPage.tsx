@@ -104,14 +104,15 @@ export default function LabsLogrosDemoPage() {
     }
   }, []);
 
+  const shouldReturnToDashboard = Boolean(userId) && (demoContext.fromOnboarding || demoContext.source === 'internal');
+
   const handleDemoExit = useCallback(() => {
-    const shouldReturnToDashboard = Boolean(userId) && (demoContext.fromOnboarding || demoContext.source === 'internal');
     if (shouldReturnToDashboard) {
       navigate(dashboardPath, { state: { scrollToTopOnEnter: true, source: 'demo', focusSection: 'logros' } });
       return;
     }
     navigate(demoHubPath);
-  }, [dashboardPath, demoContext.fromOnboarding, demoContext.source, demoHubPath, navigate, userId]);
+  }, [dashboardPath, demoHubPath, navigate, shouldReturnToDashboard]);
 
   return (
     <div className="min-h-screen bg-transparent" data-light-scope="dashboard-v3" data-labs-logros-step={activeStepId ?? undefined}>
@@ -122,7 +123,7 @@ export default function LabsLogrosDemoPage() {
             <h1 className="font-display text-[1.05rem] font-semibold text-[color:var(--color-text)] md:text-xl">{language === 'es' ? 'Logros' : 'Achievements'}</h1>
           </div>
           <Link
-            to={demoContext.fromOnboarding || demoContext.source === 'internal' ? dashboardPath : demoHubPath}
+            to={shouldReturnToDashboard ? dashboardPath : demoHubPath}
             onClick={(event) => {
               event.preventDefault();
               handleDemoExit();
