@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { setDashboardDemoModeEnabled } from '../../lib/demoMode';
 import { DemoDashboardOverviewScene } from '../demo/DemoDashboardOverviewScene';
 import { RewardsSection, type RewardsSectionDemoControls } from '../dashboard-v3/RewardsSection';
@@ -72,9 +72,11 @@ type HeroPhase = 'dashboard' | 'to-logros' | 'logros' | 'to-dashboard';
 function useHeroShowcaseTimeline({
   dashboardReady,
   logrosReady,
+  isActive,
 }: {
   dashboardReady: boolean;
   logrosReady: boolean;
+  isActive: boolean;
 }) {
   const [timeline, setTimeline] = useState<{
     phase: HeroPhase;
@@ -89,6 +91,7 @@ function useHeroShowcaseTimeline({
   const lastNowRef = useRef<number | null>(null);
   const dashboardElapsedRef = useRef(0);
   const wasLogrosReadyRef = useRef(logrosReady);
+  const pausedAtRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!dashboardReady) {
@@ -101,6 +104,7 @@ function useHeroShowcaseTimeline({
       lastNowRef.current = null;
       dashboardElapsedRef.current = 0;
       wasLogrosReadyRef.current = logrosReady;
+      pausedAtRef.current = null;
       return;
     }
 
@@ -108,6 +112,17 @@ function useHeroShowcaseTimeline({
     const now = performance.now();
     if (startedAtRef.current == null) {
       startedAtRef.current = now;
+    }
+    if (isActive) {
+      if (pausedAtRef.current != null && startedAtRef.current != null) {
+        startedAtRef.current += now - pausedAtRef.current;
+      }
+      pausedAtRef.current = null;
+    } else {
+      if (pausedAtRef.current == null) {
+        pausedAtRef.current = now;
+      }
+      return;
     }
     if (
       wasLogrosReadyRef.current !== logrosReady &&
@@ -190,16 +205,22 @@ function useHeroShowcaseTimeline({
 
     rafId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(rafId);
-  }, [dashboardReady, logrosReady]);
+  }, [dashboardReady, isActive, logrosReady]);
 
   return !dashboardReady
     ? { phase: 'dashboard' as const, dashboardProgress: 0, trackProgress: 0 }
     : timeline;
 }
 
-function PhoneFrame({ children }: { children: ReactNode }) {
+function PhoneFrame({
+  children,
+  frameRef,
+}: {
+  children: ReactNode;
+  frameRef?: RefObject<HTMLDivElement | null>;
+}) {
   return (
-    <div className={styles.phoneFrame}>
+    <div ref={frameRef} className={styles.phoneFrame}>
       <div className={styles.phoneIsland} aria-hidden>
         <span className={styles.phoneIslandLens} />
       </div>
@@ -372,6 +393,7 @@ function HeroLogrosScene({
         blockedCardTaskId: HERO_BODY_CARD_BLOCKED_1,
       },
       controls: {
+        preventPageScrollOnProgrammaticFocus: true,
         onReady: (controls: RewardsSectionDemoControls) => {
           controlsRef.current = controls;
           setControlsReady(true);
@@ -492,9 +514,12 @@ export function HeroPhoneShowcase() {
   const [logrosReady, setLogrosReady] = useState(false);
   const [demoDataReady, setDemoDataReady] = useState(false);
   const [logrosCycleKey, setLogrosCycleKey] = useState(0);
+  const [isHeroActive, setIsHeroActive] = useState(true);
+  const phoneFrameRef = useRef<HTMLDivElement | null>(null);
   const { phase, dashboardProgress, trackProgress } = useHeroShowcaseTimeline({
     dashboardReady,
     logrosReady,
+    isActive: isHeroActive,
   });
   const previousPhaseRef = useRef<HeroPhase>('dashboard');
 
@@ -514,8 +539,25 @@ export function HeroPhoneShowcase() {
     previousPhaseRef.current = phase;
   }, [phase]);
 
+  useEffect(() => {
+    const target = phoneFrameRef.current;
+    if (!target || typeof IntersectionObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsHeroActive(entry.isIntersecting && entry.intersectionRatio > 0.35);
+      },
+      { threshold: [0, 0.35, 1] },
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <PhoneFrame>
+    <PhoneFrame frameRef={phoneFrameRef}>
       {demoDataReady ? (
         <div
           className={styles.sceneTrack}
@@ -526,7 +568,7 @@ export function HeroPhoneShowcase() {
             onReady={() => setDashboardReady(true)}
           />
           <HeroLogrosScene
-            isActive={phase === 'logros'}
+            isActive={isHeroActive && phase === 'logros'}
             cycleKey={logrosCycleKey}
             onReady={() => setLogrosReady(true)}
           />
