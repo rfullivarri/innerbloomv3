@@ -26,6 +26,7 @@ type Rect = { top: number; left: number; width: number; height: number };
 
 const PADDING = 10;
 const VIEWPORT_PADDING = 12;
+const MOBILE_SAFE_TOP_CLEARANCE = 34;
 const MOBILE_TOOLTIP_BOTTOM_GAP = 6;
 const MOBILE_TOOLTIP_BOTTOM_GAP_LOWER = 2;
 const TOOLTIP_HEIGHT_DESKTOP = 252;
@@ -431,6 +432,7 @@ export function GuidedDemoOverlay({
     const width = Math.min(viewport.width - 24, 360);
     const isMobile = viewport.width < 768;
     const mobileTooltipHeight = isCompactMobile ? TOOLTIP_HEIGHT_MOBILE_COMPACT : TOOLTIP_HEIGHT_MOBILE;
+    const mobileMinTop = VIEWPORT_PADDING + MOBILE_SAFE_TOP_CLEARANCE;
     if (!targetRect || isIntroModalStep) {
       return {
         top: '50%',
@@ -443,15 +445,15 @@ export function GuidedDemoOverlay({
     if (isMobile) {
       const defaultMobileTop = viewport.height - mobileTooltipHeight - MOBILE_TOOLTIP_BOTTOM_GAP;
       const lowerMobileTop = viewport.height - mobileTooltipHeight - MOBILE_TOOLTIP_BOTTOM_GAP_LOWER;
-      const modalTop = Math.max(VIEWPORT_PADDING + 8, viewport.height * 0.06);
+      const modalTop = Math.max(mobileMinTop, viewport.height * 0.06);
       const shouldPinTop = LABS_LOGROS_PINNED_TOP_STEP_IDS.has(step.id);
       const preferredMobilePlacement = step.mobileTooltipPlacement ?? 'auto';
       const stepSpecificTopRatio = LABS_LOGROS_MOBILE_TOP_RATIO_BY_STEP[step.id];
       const stepSpecificTop = stepSpecificTopRatio != null
-        ? Math.max(VIEWPORT_PADDING + 8, viewport.height * stepSpecificTopRatio)
+        ? Math.max(mobileMinTop, viewport.height * stepSpecificTopRatio)
         : null;
       const mobileTop = preferredMobilePlacement === 'bottom'
-        ? clamp(lowerMobileTop, VIEWPORT_PADDING, lowerMobileTop)
+        ? clamp(lowerMobileTop, mobileMinTop, lowerMobileTop)
         : preferredMobilePlacement === 'top'
         ? (stepSpecificTop ?? modalTop)
         : stepSpecificTop != null
@@ -459,8 +461,8 @@ export function GuidedDemoOverlay({
         : ((isLogrosModalStep && shouldPinTop) || step.id === 'logros-monthly')
         ? modalTop
         : step.id === DAILY_QUEST_FOOTER_STEP_ID
-        ? clamp(Math.max(VIEWPORT_PADDING + 24, targetRect.top - mobileTooltipHeight - 24), VIEWPORT_PADDING, defaultMobileTop)
-        : clamp(lowerMobileTop, VIEWPORT_PADDING, lowerMobileTop);
+        ? clamp(Math.max(mobileMinTop + 16, targetRect.top - mobileTooltipHeight - 24), mobileMinTop, defaultMobileTop)
+        : clamp(lowerMobileTop, mobileMinTop, lowerMobileTop);
       return {
         left: VIEWPORT_PADDING,
         top: mobileTop,
@@ -528,14 +530,14 @@ export function GuidedDemoOverlay({
       ? (language === 'es' ? 'Seguir explorando' : 'Keep exploring')
       : (language === 'es' ? 'Anterior' : 'Back'));
   const walkthroughButtonSizeClass = isCompactMobile
-    ? 'min-h-8 min-w-0 w-full px-2 py-1.5 text-[9px] tracking-[0.08em]'
-    : 'min-h-9 px-4 py-2 text-xs tracking-[0.16em]';
+    ? 'min-h-7 min-w-0 w-full px-1.5 py-1 text-[8px] tracking-[0.06em]'
+    : 'min-h-8 px-3 py-1.5 text-[11px] tracking-[0.12em]';
   const buttonRowClass = isCompactMobile && !isLast
     ? 'mt-3 grid grid-cols-3 gap-1 min-w-0'
     : `flex flex-wrap items-center ${isCompactMobile ? 'mt-3 gap-1.5' : 'mt-4 gap-2'}`;
   const secondaryButtonClass = `inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] font-semibold uppercase text-[color:var(--color-text)] transition hover:border-[color:var(--color-text)]/55 hover:bg-[color:var(--color-overlay-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)] disabled:opacity-40 ${walkthroughButtonSizeClass}`;
-  const primaryButtonClass = `ib-primary-button !min-h-0 !font-semibold !uppercase focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${isCompactMobile ? '!px-2.5 !py-1.5 !text-[10px] !tracking-[0.12em]' : '!px-4 !py-2 !text-xs !tracking-[0.16em]'} ${walkthroughButtonSizeClass}`;
-  const tertiaryButtonClass = `inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)]/70 font-semibold uppercase text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-1)] hover:text-[color:var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${walkthroughButtonSizeClass}`;
+  const primaryButtonClass = `ib-primary-button !min-h-0 !font-semibold !uppercase focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${isCompactMobile ? '!px-2 !py-1 !text-[8px] !tracking-[0.08em]' : '!px-3 !py-1.5 !text-[11px] !tracking-[0.12em]'} ${walkthroughButtonSizeClass}`;
+  const tertiaryButtonClass = `${isCompactMobile ? 'px-1 py-1 text-[8px] tracking-[0.06em]' : 'px-1.5 py-1 text-[11px] tracking-[0.12em]'} inline-flex items-center justify-center font-semibold uppercase text-[color:var(--color-text-muted)] transition hover:text-[color:var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)] rounded-full`;
   const overlayZClass = isDailyQuestStep ? 'z-[10020]' : 'z-[520]';
   const goToPreviousStep = () => {
     if (canGoBack && !isTransitioningStep) {

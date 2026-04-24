@@ -279,12 +279,12 @@ export function EditorGuideOverlay({
       )}
 
       <section
-        className={`editor-guide-panel absolute left-1/2 flex w-[min(calc(100vw-1.5rem),42rem)] -translate-x-1/2 flex-col px-5 py-4 ${GUIDED_OVERLAY_PANEL_BASE_CLASS} ${
+        className={`editor-guide-panel absolute left-1/2 flex w-[min(calc(100vw-1.5rem),42rem)] -translate-x-1/2 flex-col px-4 py-3.5 ${GUIDED_OVERLAY_PANEL_BASE_CLASS} ${
           panelPlacement === "top"
-            ? "top-3 md:top-6"
+            ? "top-[calc(env(safe-area-inset-top,0px)+0.75rem)] md:top-[calc(env(safe-area-inset-top,0px)+1.25rem)]"
             : panelPlacement === "center"
               ? "top-1/2 -translate-y-1/2"
-              : "bottom-4 md:bottom-6"
+              : "bottom-[calc(env(safe-area-inset-bottom,0px)+1rem)] md:bottom-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]"
         }`}
       >
         {isWheelStep && (
@@ -294,12 +294,12 @@ export function EditorGuideOverlay({
         )}
         <EditorGuideStep step={step} label={copy.label} />
 
-        <div className="mt-4 flex items-center gap-2">
+        <div className="mt-3 flex items-center gap-1.5">
           {canGoBack && (
             <button
               type="button"
               onClick={goToPreviousStep}
-              className="inline-flex rounded-full border border-white/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--color-slate-100)]"
+              className="inline-flex min-h-8 rounded-full border border-white/20 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-slate-100)]"
             >
               {copy.back}
             </button>
@@ -307,14 +307,14 @@ export function EditorGuideOverlay({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex rounded-full border border-white/15 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--color-slate-300)]"
+            className="inline-flex min-h-8 rounded-full px-1.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-slate-300)]"
           >
             {copy.skip}
           </button>
           <button
             type="button"
             onClick={goToNextStep}
-            className="ml-auto inline-flex rounded-full bg-violet-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+            className="ml-auto inline-flex min-h-8 rounded-full bg-violet-500 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white"
           >
             {nextLabel}
           </button>

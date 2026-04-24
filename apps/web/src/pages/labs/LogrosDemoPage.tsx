@@ -116,7 +116,7 @@ export default function LabsLogrosDemoPage() {
 
   return (
     <div className="min-h-screen bg-transparent" data-light-scope="dashboard-v3" data-labs-logros-step={activeStepId ?? undefined}>
-      <header className="sticky top-0 z-40 border-b border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] px-3 py-3 backdrop-blur-xl md:px-6">
+      <header className="sticky top-0 z-40 border-b border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] px-3 pb-3 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] backdrop-blur-xl md:px-6 md:pb-4 md:pt-[calc(env(safe-area-inset-top,0px)+1rem)]">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="inline-flex items-center gap-1.5 text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-text-subtle)] md:text-xs">INNERBLOOM</p>
