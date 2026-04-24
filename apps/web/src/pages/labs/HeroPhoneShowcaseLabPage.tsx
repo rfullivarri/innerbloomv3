@@ -40,6 +40,9 @@ const HERO_TASK_SEQUENCE = [
   "task-dinner-before-22",
   "task-gym",
 ] as const;
+const HERO_BODY_CARD_UNLOCKED_1 = HERO_TASK_SEQUENCE[0];
+const HERO_BODY_CARD_UNLOCKED_2 = HERO_TASK_SEQUENCE[1];
+const HERO_BODY_CARD_BLOCKED_1 = HERO_TASK_SEQUENCE[2];
 
 function smoothProgress(progress: number) {
   return progress * progress * (3 - 2 * progress);
@@ -272,12 +275,16 @@ function RealDashboardScene({
 function HeroLogrosScene({
   isActive,
   cycleKey,
+  onReady,
 }: {
   isActive: boolean;
   cycleKey: number;
+  onReady: () => void;
 }) {
   const { language } = usePostLoginLanguage();
   const controlsRef = useRef<RewardsSectionDemoControls | null>(null);
+  const [sceneReady, setSceneReady] = useState(false);
+  const readyReportedRef = useRef(false);
 
   const demoConfig = useMemo(
     () => ({
@@ -286,8 +293,10 @@ function HeroLogrosScene({
       mockPreviewAchievementByTaskId: getDemoLogrosPreviewByTaskId(language),
       anchors: {
         carouselTrack: "logros-carousel-track",
-        achievedCardTaskId: HERO_TASK_SEQUENCE[0],
-        blockedCardTaskId: HERO_TASK_SEQUENCE[2],
+        carouselStructure: "logros-carousel-structure",
+        pillarSelector: "logros-pillar-selector",
+        achievedCardTaskId: HERO_BODY_CARD_UNLOCKED_1,
+        blockedCardTaskId: HERO_BODY_CARD_BLOCKED_1,
       },
       controls: {
         onReady: (controls: RewardsSectionDemoControls) => {
@@ -299,7 +308,55 @@ function HeroLogrosScene({
   );
 
   useEffect(() => {
-    if (!isActive) {
+    let intervalId = 0;
+
+    const resolveTrackReady = () => {
+      const controls = controlsRef.current;
+      const track = document.querySelector<HTMLElement>(
+        '[data-demo-anchor="logros-carousel-track"]',
+      );
+      const cards = track?.querySelectorAll<HTMLElement>(
+        "[data-achievement-carousel-index]",
+      );
+
+      if (!controls || !track || !cards || cards.length < 3) {
+        return false;
+      }
+
+      const firstCard = cards[0];
+      const trackRect = track.getBoundingClientRect();
+      const firstRect = firstCard.getBoundingClientRect();
+      const hasLayout =
+        trackRect.width > 0 && firstRect.width > 0 && firstRect.height > 0;
+      if (!hasLayout) {
+        return false;
+      }
+
+      setSceneReady(true);
+      if (!readyReportedRef.current) {
+        readyReportedRef.current = true;
+        onReady();
+      }
+      return true;
+    };
+
+    if (!resolveTrackReady()) {
+      intervalId = window.setInterval(() => {
+        if (resolveTrackReady()) {
+          window.clearInterval(intervalId);
+        }
+      }, 80);
+    }
+
+    return () => {
+      if (intervalId) {
+        window.clearInterval(intervalId);
+      }
+    };
+  }, [onReady]);
+
+  useEffect(() => {
+    if (!isActive || !sceneReady) {
       return;
     }
 
@@ -310,15 +367,15 @@ function HeroLogrosScene({
 
     controls.closeAllOverlays();
     controls.selectPillar("BODY");
-    controls.focusCarouselCard(HERO_TASK_SEQUENCE[0]);
+    controls.focusCarouselCard(HERO_BODY_CARD_UNLOCKED_1);
 
     const segment = LOGROS_CAROUSEL_DURATION_MS / 3;
     const t1 = window.setTimeout(
-      () => controls.focusCarouselCard(HERO_TASK_SEQUENCE[1]),
+      () => controls.focusCarouselCard(HERO_BODY_CARD_UNLOCKED_2),
       segment * 0.9,
     );
     const t2 = window.setTimeout(
-      () => controls.focusCarouselCard(HERO_TASK_SEQUENCE[2]),
+      () => controls.focusCarouselCard(HERO_BODY_CARD_BLOCKED_1),
       segment * 1.95,
     );
 
@@ -326,7 +383,7 @@ function HeroLogrosScene({
       window.clearTimeout(t1);
       window.clearTimeout(t2);
     };
-  }, [cycleKey, isActive]);
+  }, [cycleKey, isActive, sceneReady]);
 
   return (
     <section
@@ -348,10 +405,11 @@ function HeroLogrosScene({
 
 function HeroPhoneShowcase() {
   const [dashboardReady, setDashboardReady] = useState(false);
+  const [logrosReady, setLogrosReady] = useState(false);
   const [demoDataReady, setDemoDataReady] = useState(false);
   const [logrosCycleKey, setLogrosCycleKey] = useState(0);
   const { phase, dashboardProgress, trackProgress } =
-    useHeroShowcaseTimeline(dashboardReady);
+    useHeroShowcaseTimeline(dashboardReady && logrosReady);
   const previousPhaseRef = useRef<HeroPhase>("dashboard");
 
   useEffect(() => {
@@ -384,6 +442,7 @@ function HeroPhoneShowcase() {
           <HeroLogrosScene
             isActive={phase === "logros"}
             cycleKey={logrosCycleKey}
+            onReady={() => setLogrosReady(true)}
           />
         </div>
       ) : (
