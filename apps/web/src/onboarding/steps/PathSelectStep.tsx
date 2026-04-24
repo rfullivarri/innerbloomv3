@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import type { OnboardingLanguage } from '../constants';
-import { NavButtons } from '../ui/NavButtons';
 
 type PathOption = 'traditional' | 'quick_start';
+
+type PathVariant = 'traditional' | 'quick_start';
 
 interface PathSelectStepProps {
   language?: OnboardingLanguage;
@@ -12,66 +13,99 @@ interface PathSelectStepProps {
   onBack: () => void;
 }
 
+const ADVANCE_DELAY_MS = 140;
+
+const getPathCardStyle = (isActive: boolean, variant: PathVariant) => {
+  const palettes: Record<PathVariant, { glow: string; softTint: string; accent: string; border: string; badgeBg: string; badgeText: string; badgeBorder: string }> = {
+    traditional: {
+      glow: 'rgba(196, 132, 252, 0.34)',
+      softTint: 'rgba(251, 191, 211, 0.24)',
+      accent: 'rgba(216, 180, 254, 0.65)',
+      border: 'rgba(236, 197, 255, 0.8)',
+      badgeBg: 'rgba(245, 220, 255, 0.92)',
+      badgeText: '#3a195e',
+      badgeBorder: 'rgba(243, 213, 255, 0.92)',
+    },
+    quick_start: {
+      glow: 'rgba(103, 232, 249, 0.32)',
+      softTint: 'rgba(129, 140, 248, 0.24)',
+      accent: 'rgba(147, 197, 253, 0.64)',
+      border: 'rgba(186, 230, 253, 0.82)',
+      badgeBg: 'rgba(207, 250, 254, 0.92)',
+      badgeText: '#10364a',
+      badgeBorder: 'rgba(186, 230, 253, 0.88)',
+    },
+  };
+
+  const palette = palettes[variant];
+
+  return {
+    palette,
+    cardStyle: isActive
+      ? {
+          boxShadow: `0 0 0 1px rgba(255,255,255,0.26), 0 0 30px ${palette.glow}, 0 0 56px ${palette.softTint}`,
+          borderColor: palette.border,
+          background: `color-mix(in srgb, ${palette.softTint} 52%, rgba(8,14,38,0.78))`,
+        }
+      : {
+          background: 'linear-gradient(165deg, rgba(14,20,44,0.84) 0%, rgba(11,17,38,0.7) 55%, rgba(8,14,33,0.84) 100%)',
+        },
+    overlayStyle: {
+      background: `radial-gradient(circle at 18% 8%, color-mix(in srgb, ${palette.accent} 34%, transparent) 0%, color-mix(in srgb, ${palette.accent} 20%, transparent) 30%, color-mix(in srgb, ${palette.accent} 12%, transparent) 58%, transparent 100%)`,
+    },
+  };
+};
+
 export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQuickStart, onBack }: PathSelectStepProps) {
   const [selectedPath, setSelectedPath] = useState<PathOption | null>(null);
+  const [isAdvancing, setIsAdvancing] = useState(false);
 
   const copy = language === 'en'
     ? {
         step: 'Step 2 · Choose your path',
         title: 'How do you want to start today?',
-        subtitle: 'Choose a path. Your personal guide remains exactly as before.',
+        subtitle: 'Choose the way that best matches your momentum right now.',
         personalTitle: 'Personal guide',
-        personalDescription: 'Answer the complete onboarding and get your customized plan.',
+        personalDescription: 'Answer the full onboarding and get a tailored plan based on your rhythm.',
         personalDuration: '3-4 min',
         quickTitle: 'Quick Start',
-        quickDescription: 'A faster path with curated tasks and a compact setup.',
+        quickDescription: 'Go live in under a minute with curated tasks and a compact setup.',
         quickDuration: '< 1 min',
-        quickLabel: 'Fast path',
+        quickLabel: 'Fast lane',
         back: 'Back',
-        continue: 'Continue',
-        selectPath: 'Select a path to continue',
+        selected: 'Selected',
         selectedSuffix: ' selected',
       }
     : {
         step: 'Paso 2 · Elegí tu camino',
         title: '¿Cómo querés arrancar hoy?',
-        subtitle: 'Elegí un camino. La guía personal sigue exactamente igual que hoy.',
+        subtitle: 'Elegí la forma que mejor acompaña tu energía en este momento.',
         personalTitle: 'Guía personal',
-        personalDescription: 'Respondé el onboarding completo y obtené tu plan personalizado.',
+        personalDescription: 'Respondé el onboarding completo y recibí un plan a medida según tu ritmo.',
         personalDuration: '3-4 min',
         quickTitle: 'Inicio rápido',
-        quickDescription: 'Un camino más veloz con tareas curadas y setup compacto.',
+        quickDescription: 'Activá en menos de un minuto con tareas curadas y setup compacto.',
         quickDuration: '< 1 min',
-        quickLabel: 'Camino rápido',
+        quickLabel: 'Camino veloz',
         back: 'Volver',
-        continue: 'Continuar',
-        selectPath: 'Elegí un camino para continuar',
+        selected: 'Seleccionado',
         selectedSuffix: ' seleccionado',
       };
 
-  const handleConfirm = () => {
-    if (selectedPath === 'traditional') {
-      onSelectTraditional();
-      return;
-    }
+  const handlePathTap = (path: PathOption) => {
+    if (isAdvancing) return;
 
-    if (selectedPath === 'quick_start') {
+    setSelectedPath(path);
+    setIsAdvancing(true);
+
+    window.setTimeout(() => {
+      if (path === 'traditional') {
+        onSelectTraditional();
+        return;
+      }
+
       onSelectQuickStart();
-    }
-  };
-
-  const baseCardClasses =
-    'glass-card onboarding-surface-inner onboarding-glass-border-soft border-white/20 bg-white/[0.08] shadow-[0_24px_64px_rgba(15,23,42,0.24),0_8px_24px_rgba(129,140,248,0.12)] hover:border-white/35 hover:bg-white/[0.11] focus-visible:border-white/40 focus-visible:ring-2 focus-visible:ring-sky-300/70';
-
-  const selectedCardClasses =
-    'border-white/80 bg-white/[0.12] ring-2 ring-sky-300/75 shadow-[0_0_0_1px_rgba(255,255,255,0.2),0_0_24px_rgba(34,211,238,0.24),0_0_44px_rgba(139,92,246,0.22)] focus-visible:ring-4 focus-visible:ring-sky-200/90';
-
-  const getCardClasses = (isSelected: boolean) => {
-    if (isSelected) {
-      return `${baseCardClasses} ${selectedCardClasses}`;
-    }
-
-    return baseCardClasses;
+    }, ADVANCE_DELAY_MS);
   };
 
   return (
@@ -86,63 +120,122 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
       <p className="mt-2 text-sm text-white/70">{copy.subtitle}</p>
 
       <div className="mt-6 grid gap-3.5 sm:grid-cols-2">
-        <button
-          type="button"
-          onClick={() => setSelectedPath('traditional')}
-          aria-pressed={selectedPath === 'traditional'}
-          aria-label={`${copy.personalTitle}${selectedPath === 'traditional' ? copy.selectedSuffix : ''}`}
-          data-selected={selectedPath === 'traditional' ? 'true' : 'false'}
-          className={[
-            'rounded-2xl border p-4 text-left transition-all duration-200 focus-visible:outline-none sm:p-5',
-            getCardClasses(selectedPath === 'traditional'),
-          ].join(' ')}
-        >
-          <p className="flex items-center gap-2 text-lg font-semibold leading-tight text-white">
-            <span aria-hidden className="text-base">✨</span>
-            {copy.personalTitle}
-          </p>
-          <p className="mt-2 text-base leading-snug text-white/90">{copy.personalDescription}</p>
-          <span className="mt-4 inline-flex rounded-full border border-violet-200/35 bg-violet-300/18 px-2.5 py-1 text-[0.65rem] font-medium uppercase tracking-[0.12em] text-violet-100">
-            {copy.personalDuration}
-          </span>
-        </button>
+        {[
+          {
+            id: 'traditional' as const,
+            emoji: '✨',
+            title: copy.personalTitle,
+            description: copy.personalDescription,
+            chips: [
+              {
+                key: 'duration',
+                className: 'border-[#d8b4fe]/35 bg-[#d8b4fe]/20 text-[#f6e8ff]',
+                text: copy.personalDuration,
+              },
+            ],
+          },
+          {
+            id: 'quick_start' as const,
+            emoji: '⚡',
+            title: copy.quickTitle,
+            description: copy.quickDescription,
+            chips: [
+              {
+                key: 'duration',
+                className: 'border-white/20 bg-white/10 text-white/75',
+                text: copy.quickDuration,
+              },
+              {
+                key: 'label',
+                className: 'border-sky-200/30 bg-sky-200/12 text-sky-100/90',
+                text: copy.quickLabel,
+              },
+            ],
+          },
+        ].map((option) => {
+          const isActive = selectedPath === option.id;
+          const { palette, cardStyle, overlayStyle } = getPathCardStyle(isActive, option.id);
 
-        <button
-          type="button"
-          onClick={() => setSelectedPath('quick_start')}
-          aria-pressed={selectedPath === 'quick_start'}
-          aria-label={`${copy.quickTitle}${selectedPath === 'quick_start' ? copy.selectedSuffix : ''}`}
-          data-selected={selectedPath === 'quick_start' ? 'true' : 'false'}
-          className={[
-            'rounded-2xl border p-4 text-left transition-all duration-200 focus-visible:outline-none sm:p-5',
-            getCardClasses(selectedPath === 'quick_start'),
-          ].join(' ')}
-        >
-          <p className="flex items-center gap-2 text-lg font-semibold leading-tight text-white">
-            <span aria-hidden className="text-base">⚡</span>
-            {copy.quickTitle}
-          </p>
-          <p className="mt-2 text-base leading-snug text-white/90">{copy.quickDescription}</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="inline-flex rounded-full border border-white/20 bg-white/8 px-2.5 py-1 text-[0.65rem] font-medium uppercase tracking-[0.12em] text-white/75">
-              {copy.quickDuration}
-            </span>
-            <span className="inline-flex rounded-full border border-sky-200/20 bg-sky-300/10 px-3 py-1 text-[0.65rem] uppercase tracking-[0.18em] text-sky-100/80">
-              {copy.quickLabel}
-            </span>
-          </div>
-        </button>
+          return (
+            <motion.button
+              key={option.id}
+              type="button"
+              whileTap={{ scale: 0.985 }}
+              onClick={() => handlePathTap(option.id)}
+              disabled={isAdvancing}
+              aria-pressed={isActive}
+              aria-label={`${option.title}${isActive ? copy.selectedSuffix : ''}`}
+              data-selected={isActive ? 'true' : 'false'}
+              className={[
+                'glass-card onboarding-surface-inner onboarding-glass-border-soft relative flex h-full overflow-hidden rounded-3xl border p-4 text-left transition-all duration-250 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80 sm:p-5',
+                isActive
+                  ? 'ring-2 -translate-y-0.5 scale-[1.01] border-white/70 bg-white/[0.1] focus-visible:ring-4'
+                  : 'border-white/12 hover:border-white/35 hover:-translate-y-0.5 hover:bg-white/[0.04] focus-visible:border-white/45 focus-visible:ring-[#cf8bf3]/70',
+                isAdvancing && !isActive ? 'opacity-75' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              style={cardStyle}
+            >
+              <span
+                className={[
+                  'pointer-events-none absolute inset-0 rounded-3xl transition-all duration-250 ease-out',
+                  isActive ? 'opacity-100' : 'opacity-65',
+                ].join(' ')}
+                style={overlayStyle}
+                aria-hidden
+              />
+
+              <span className="relative z-10 flex w-full flex-col gap-2.5">
+                <span className="flex items-start justify-between gap-3">
+                  <span className="flex items-center gap-2 text-lg font-semibold leading-tight text-white">
+                    <span aria-hidden className="text-sm opacity-80">{option.emoji}</span>
+                    {option.title}
+                  </span>
+
+                  {isActive ? (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[0.58rem] font-semibold uppercase tracking-[0.08em] shadow-[0_0_14px_rgba(207,139,243,0.42)]"
+                      style={{
+                        background: palette.badgeBg,
+                        color: palette.badgeText,
+                        borderColor: palette.badgeBorder,
+                      }}
+                    >
+                      <span aria-hidden>✓</span>
+                      {copy.selected}
+                    </span>
+                  ) : null}
+                </span>
+
+                <p className="text-[0.95rem] leading-snug text-white/88">{option.description}</p>
+
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {option.chips.map((chip) => (
+                    <span
+                      key={chip.key}
+                      className={`inline-flex rounded-full border px-2.5 py-1 text-[0.64rem] font-medium uppercase tracking-[0.12em] ${chip.className}`}
+                    >
+                      {chip.text}
+                    </span>
+                  ))}
+                </div>
+              </span>
+            </motion.button>
+          );
+        })}
       </div>
 
-      <NavButtons
-        language={language}
-        onBack={onBack}
-        onConfirm={handleConfirm}
-        confirmLabel={copy.continue}
-        backLabel={copy.back}
-        disabled={!selectedPath}
-      />
-      {!selectedPath ? <p className="mt-3 text-right text-xs text-white/45">{copy.selectPath}</p> : null}
+      <div className="mt-8 flex justify-start">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={isAdvancing}
+          className="inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-2 text-sm font-medium text-white/80 transition hover:border-white/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#cf8bf3]/60 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          ← {copy.back}
+        </button>
+      </div>
     </motion.section>
   );
 }
