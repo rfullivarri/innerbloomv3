@@ -9,6 +9,7 @@ import PremiumTimeline from '../components/PremiumTimeline';
 import { AdaptiveText } from '../components/landing/AdaptiveText';
 import { CookieConsentBanner } from '../components/landing/CookieConsentBanner';
 import { useLandingAnalytics } from '../components/landing/useLandingAnalytics';
+import { HeroPhoneShowcase } from '../components/landing/HeroPhoneShowcase';
 import { LabsWeeklyRhythmSystemSection } from '../components/labs/LabsWeeklyRhythmSystemSection';
 import { buildOnboardingPath } from '../onboarding/i18n';
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
@@ -598,15 +599,8 @@ export default function LandingPage() {
               </div>
               <p className="tiny hero-cta-note">{copy.hero.note}</p>
             </div>
-            <div className="hero-media">
-              <img
-                src="/nene.png"
-                alt={copy.hero.alt}
-                className="hero-img"
-                width={1200}
-                height={1200}
-                loading="eager"
-              />
+            <div className="hero-media" aria-label={copy.hero.alt}>
+              <HeroPhoneShowcase />
             </div>
           </div>
         </section>
