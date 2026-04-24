@@ -1,21 +1,41 @@
-import { Fragment, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type TouchEvent } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
-import { OFFICIAL_DESIGN_TOKENS, OFFICIAL_LANDING_CSS_VARIABLES } from '../content/officialDesignTokens';
-import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLandingContent';
-import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
-import { buildDemoModeSelectUrl } from '../lib/demoEntry';
-import PremiumTimeline from '../components/PremiumTimeline';
-import { AdaptiveText } from '../components/landing/AdaptiveText';
-import { CookieConsentBanner } from '../components/landing/CookieConsentBanner';
-import { useLandingAnalytics } from '../components/landing/useLandingAnalytics';
-import { HeroPhoneShowcase } from '../components/landing/HeroPhoneShowcase';
-import { LabsWeeklyRhythmSystemSection } from '../components/labs/LabsWeeklyRhythmSystemSection';
-import { buildOnboardingPath } from '../onboarding/i18n';
-import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
-import { persistCookieConsentState, readCookieConsentState } from '../lib/cookieConsent';
-import { SHOW_LANDING_PRICING } from '../config/releaseFlags';
-import './Landing.css';
+import {
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type TouchEvent,
+} from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
+import {
+  OFFICIAL_DESIGN_TOKENS,
+  OFFICIAL_LANDING_CSS_VARIABLES,
+} from "../content/officialDesignTokens";
+import {
+  OFFICIAL_LANDING_CONTENT,
+  type Language,
+} from "../content/officialLandingContent";
+import {
+  buildLocalizedAuthPath,
+  resolveAuthLanguage,
+} from "../lib/authLanguage";
+import { buildDemoModeSelectUrl } from "../lib/demoEntry";
+import PremiumTimeline from "../components/PremiumTimeline";
+import { AdaptiveText } from "../components/landing/AdaptiveText";
+import { CookieConsentBanner } from "../components/landing/CookieConsentBanner";
+import { useLandingAnalytics } from "../components/landing/useLandingAnalytics";
+import { HeroPhoneShowcase } from "../components/landing/HeroPhoneShowcase";
+import { LabsWeeklyRhythmSystemSection } from "../components/labs/LabsWeeklyRhythmSystemSection";
+import { buildOnboardingPath } from "../onboarding/i18n";
+import { usePostLoginLanguage } from "../i18n/postLoginLanguage";
+import {
+  persistCookieConsentState,
+  readCookieConsentState,
+} from "../lib/cookieConsent";
+import { SHOW_LANDING_PRICING } from "../config/releaseFlags";
+import "./Landing.css";
 
 type LandingGradientOption = {
   id: string;
@@ -26,35 +46,40 @@ type LandingGradientOption = {
 };
 
 const GRADIENT_LABELS: Record<string, { es: string; en: string }> = {
-  curiosity_blue: { es: 'Curiosity Blue', en: 'Curiosity Blue' },
-  endless_river: { es: 'Endless River', en: 'Endless River' },
-  amethyst: { es: 'Amethyst', en: 'Amethyst' },
-  dirty_fog: { es: 'Dirty Fog', en: 'Dirty Fog' },
-  purple_paradise: { es: 'Purple Paradise', en: 'Purple Paradise' },
-  color_1: { es: 'Color 1', en: 'Color 1' },
-  color_2: { es: 'Color 2', en: 'Color 2' },
-  purple_love: { es: 'Purple Love', en: 'Purple Love' },
-  afternoon: { es: 'Afternoon', en: 'Afternoon' },
-  purple_afternoon: { es: 'Purple Afternoon', en: 'Purple Afternoon' },
+  curiosity_blue: { es: "Curiosity Blue", en: "Curiosity Blue" },
+  endless_river: { es: "Endless River", en: "Endless River" },
+  amethyst: { es: "Amethyst", en: "Amethyst" },
+  dirty_fog: { es: "Dirty Fog", en: "Dirty Fog" },
+  purple_paradise: { es: "Purple Paradise", en: "Purple Paradise" },
+  color_1: { es: "Color 1", en: "Color 1" },
+  color_2: { es: "Color 2", en: "Color 2" },
+  purple_love: { es: "Purple Love", en: "Purple Love" },
+  afternoon: { es: "Afternoon", en: "Afternoon" },
+  purple_afternoon: { es: "Purple Afternoon", en: "Purple Afternoon" },
 };
 
-const LANDING_GRADIENTS: LandingGradientOption[] = OFFICIAL_DESIGN_TOKENS.gradients
-  .filter((gradient) => gradient.type === 'linear' && gradient.stops.length >= 2)
-  .map((gradient) => {
-    const label = GRADIENT_LABELS[gradient.name]
-      ?? { es: gradient.name.replace(/_/g, ' '), en: gradient.name.replace(/_/g, ' ') };
+const LANDING_GRADIENTS: LandingGradientOption[] =
+  OFFICIAL_DESIGN_TOKENS.gradients
+    .filter(
+      (gradient) => gradient.type === "linear" && gradient.stops.length >= 2,
+    )
+    .map((gradient) => {
+      const label = GRADIENT_LABELS[gradient.name] ?? {
+        es: gradient.name.replace(/_/g, " "),
+        en: gradient.name.replace(/_/g, " "),
+      };
 
-    return {
-      id: gradient.name,
-      label,
-      angle: gradient.angle,
-      a: gradient.stops[0],
-      b: gradient.stops[1],
-    };
-  });
+      return {
+        id: gradient.name,
+        label,
+        angle: gradient.angle,
+        a: gradient.stops[0],
+        b: gradient.stops[1],
+      };
+    });
 
-const LANDING_GRADIENT_STORAGE_KEY = 'ib:official-landing-gradient';
-const OFFICIAL_DEFAULT_GRADIENT_ID = 'purple_afternoon';
+const LANDING_GRADIENT_STORAGE_KEY = "ib:official-landing-gradient";
+const OFFICIAL_DEFAULT_GRADIENT_ID = "purple_afternoon";
 const SHOW_GRADIENT_SELECTOR = false;
 
 type ModeVisual = {
@@ -65,86 +90,90 @@ type ModeVisual = {
   avatarLabel: string;
 };
 
-const MODE_VISUALS: Record<Language, Record<'low' | 'chill' | 'flow' | 'evolve', ModeVisual>> = {
+const MODE_VISUALS: Record<
+  Language,
+  Record<"low" | "chill" | "flow" | "evolve", ModeVisual>
+> = {
   en: {
     low: {
-      avatarVideo: '/avatars/low-basic.mp4',
-      avatarImage: '/LowMood.jpg',
-      thumbImage: '/LowVertical.png',
-      avatarAlt: 'Red Cat avatar in Innerbloom.',
-      avatarLabel: 'Aligned with your energy'
+      avatarVideo: "/avatars/low-basic.mp4",
+      avatarImage: "/LowMood.jpg",
+      thumbImage: "/LowVertical.png",
+      avatarAlt: "Red Cat avatar in Innerbloom.",
+      avatarLabel: "Aligned with your energy",
     },
     chill: {
-      avatarVideo: '/avatars/chill-basic.mp4',
-      avatarImage: '/Chill-Mood.jpg',
-      thumbImage: '/ChillVertical.png',
-      avatarAlt: 'Green Bear avatar in Innerbloom.',
-      avatarLabel: 'Aligned with your energy'
+      avatarVideo: "/avatars/chill-basic.mp4",
+      avatarImage: "/Chill-Mood.jpg",
+      thumbImage: "/ChillVertical.png",
+      avatarAlt: "Green Bear avatar in Innerbloom.",
+      avatarLabel: "Aligned with your energy",
     },
     flow: {
-      avatarVideo: '/avatars/flow-basic.mp4',
-      avatarImage: '/FlowMood.jpg',
-      thumbImage: '/FlowVertical.png',
-      avatarAlt: 'Blue Amphibian avatar in Innerbloom.',
-      avatarLabel: 'Aligned with your energy'
+      avatarVideo: "/avatars/flow-basic.mp4",
+      avatarImage: "/FlowMood.jpg",
+      thumbImage: "/FlowVertical.png",
+      avatarAlt: "Blue Amphibian avatar in Innerbloom.",
+      avatarLabel: "Aligned with your energy",
     },
     evolve: {
-      avatarVideo: '/avatars/evolve-basic.mp4',
-      avatarImage: '/Evolve-Mood.jpg',
-      thumbImage: '/EvolveVertical.png',
-      avatarAlt: 'Violet Owl avatar in Innerbloom.',
-      avatarLabel: 'Aligned with your energy'
-    }
+      avatarVideo: "/avatars/evolve-basic.mp4",
+      avatarImage: "/Evolve-Mood.jpg",
+      thumbImage: "/EvolveVertical.png",
+      avatarAlt: "Violet Owl avatar in Innerbloom.",
+      avatarLabel: "Aligned with your energy",
+    },
   },
   es: {
     low: {
-      avatarVideo: '/avatars/low-basic.mp4',
-      avatarImage: '/LowMood.jpg',
-      thumbImage: '/LowVertical.png',
-      avatarAlt: 'Avatar Red Cat dentro de Innerbloom.',
-      avatarLabel: 'Alineado a tu energía'
+      avatarVideo: "/avatars/low-basic.mp4",
+      avatarImage: "/LowMood.jpg",
+      thumbImage: "/LowVertical.png",
+      avatarAlt: "Avatar Red Cat dentro de Innerbloom.",
+      avatarLabel: "Alineado a tu energía",
     },
     chill: {
-      avatarVideo: '/avatars/chill-basic.mp4',
-      avatarImage: '/Chill-Mood.jpg',
-      thumbImage: '/ChillVertical.png',
-      avatarAlt: 'Avatar Green Bear dentro de Innerbloom.',
-      avatarLabel: 'Alineado a tu energía'
+      avatarVideo: "/avatars/chill-basic.mp4",
+      avatarImage: "/Chill-Mood.jpg",
+      thumbImage: "/ChillVertical.png",
+      avatarAlt: "Avatar Green Bear dentro de Innerbloom.",
+      avatarLabel: "Alineado a tu energía",
     },
     flow: {
-      avatarVideo: '/avatars/flow-basic.mp4',
-      avatarImage: '/FlowMood.jpg',
-      thumbImage: '/FlowVertical.png',
-      avatarAlt: 'Avatar Blue Amphibian dentro de Innerbloom.',
-      avatarLabel: 'Alineado a tu energía'
+      avatarVideo: "/avatars/flow-basic.mp4",
+      avatarImage: "/FlowMood.jpg",
+      thumbImage: "/FlowVertical.png",
+      avatarAlt: "Avatar Blue Amphibian dentro de Innerbloom.",
+      avatarLabel: "Alineado a tu energía",
     },
     evolve: {
-      avatarVideo: '/avatars/evolve-basic.mp4',
-      avatarImage: '/Evolve-Mood.jpg',
-      thumbImage: '/EvolveVertical.png',
-      avatarAlt: 'Avatar Violet Owl dentro de Innerbloom.',
-      avatarLabel: 'Alineado a tu energía'
-    }
-  }
+      avatarVideo: "/avatars/evolve-basic.mp4",
+      avatarImage: "/Evolve-Mood.jpg",
+      thumbImage: "/EvolveVertical.png",
+      avatarAlt: "Avatar Violet Owl dentro de Innerbloom.",
+      avatarLabel: "Alineado a tu energía",
+    },
+  },
 };
 
 const buttonBaseClasses =
-  'inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-3 font-display text-sm font-semibold tracking-tight transition duration-150 ease-out active:translate-y-[1px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
+  "inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-3 font-display text-sm font-semibold tracking-tight transition duration-150 ease-out active:translate-y-[1px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
 
 const buttonVariants = {
-  primary: 'ib-primary-button',
-  ghost: `${buttonBaseClasses} border border-transparent bg-transparent text-text-subtle hover:bg-white/10 hover:text-white`
+  primary: "ib-primary-button",
+  ghost: `${buttonBaseClasses} border border-transparent bg-transparent text-text-subtle hover:bg-white/10 hover:text-white`,
 };
 
-const buttonClasses = (variant: keyof typeof buttonVariants = 'primary') => buttonVariants[variant];
+const buttonClasses = (variant: keyof typeof buttonVariants = "primary") =>
+  buttonVariants[variant];
 
 const PILLAR_EXAMPLES_LABEL: Record<Language, string> = {
-  es: 'Tareas sugeridas:',
-  en: 'Suggested tasks:'
+  es: "Tareas sugeridas:",
+  en: "Suggested tasks:",
 };
 
 function renderMultilineText(text: string) {
-  return text.split('\n').map((line, index) => (
+  return text.split("\n").map((line, index) => (
     <Fragment key={`${line}-${index}`}>
       {index > 0 ? <br /> : null}
       {line}
@@ -156,28 +185,176 @@ function splitPillarCopy(copy: string, language: Language) {
   const examplesLabel = PILLAR_EXAMPLES_LABEL[language];
   const [definitionPart, examplesPart] = copy.split(examplesLabel);
   const definition = definitionPart?.trim() ?? copy;
-  const examples = (examplesPart ?? '')
-    .split('•')
+  const examples = (examplesPart ?? "")
+    .split("•")
     .map((item) => item.trim())
     .filter(Boolean);
 
   return { definition, examples };
 }
 
-const EMOTION_HEATMAP_ROWS: Array<Array<'calm' | 'happy' | 'focus' | 'stress' | 'neutral'>> = [
-  ['calm', 'happy', 'calm', 'happy', 'neutral', 'calm', 'focus', 'calm', 'happy', 'calm', 'neutral', 'focus', 'calm', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral'],
-  ['calm', 'focus', 'calm', 'neutral', 'happy', 'neutral', 'calm', 'focus', 'calm', 'happy', 'focus', 'stress', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral'],
-  ['calm', 'focus', 'neutral', 'happy', 'happy', 'neutral', 'focus', 'calm', 'focus', 'calm', 'focus', 'stress', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral'],
-  ['calm', 'focus', 'neutral', 'focus', 'neutral', 'neutral', 'focus', 'focus', 'focus', 'focus', 'calm', 'stress', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral'],
-  ['focus', 'neutral', 'neutral', 'neutral', 'calm', 'happy', 'focus', 'neutral', 'focus', 'focus', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral'],
-  ['focus', 'calm', 'neutral', 'calm', 'focus', 'neutral', 'focus', 'happy', 'focus', 'calm', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral'],
-  ['calm', 'calm', 'neutral', 'neutral', 'focus', 'focus', 'happy', 'focus', 'calm', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral'],
+const EMOTION_HEATMAP_ROWS: Array<
+  Array<"calm" | "happy" | "focus" | "stress" | "neutral">
+> = [
+  [
+    "calm",
+    "happy",
+    "calm",
+    "happy",
+    "neutral",
+    "calm",
+    "focus",
+    "calm",
+    "happy",
+    "calm",
+    "neutral",
+    "focus",
+    "calm",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+  ],
+  [
+    "calm",
+    "focus",
+    "calm",
+    "neutral",
+    "happy",
+    "neutral",
+    "calm",
+    "focus",
+    "calm",
+    "happy",
+    "focus",
+    "stress",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+  ],
+  [
+    "calm",
+    "focus",
+    "neutral",
+    "happy",
+    "happy",
+    "neutral",
+    "focus",
+    "calm",
+    "focus",
+    "calm",
+    "focus",
+    "stress",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+  ],
+  [
+    "calm",
+    "focus",
+    "neutral",
+    "focus",
+    "neutral",
+    "neutral",
+    "focus",
+    "focus",
+    "focus",
+    "focus",
+    "calm",
+    "stress",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+  ],
+  [
+    "focus",
+    "neutral",
+    "neutral",
+    "neutral",
+    "calm",
+    "happy",
+    "focus",
+    "neutral",
+    "focus",
+    "focus",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+  ],
+  [
+    "focus",
+    "calm",
+    "neutral",
+    "calm",
+    "focus",
+    "neutral",
+    "focus",
+    "happy",
+    "focus",
+    "calm",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+  ],
+  [
+    "calm",
+    "calm",
+    "neutral",
+    "neutral",
+    "focus",
+    "focus",
+    "happy",
+    "focus",
+    "calm",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+    "neutral",
+  ],
 ];
 
-function LanguageDropdown({ value, onChange }: { value: Language; onChange: (language: Language) => void }) {
+function LanguageDropdown({
+  value,
+  onChange,
+}: {
+  value: Language;
+  onChange: (language: Language) => void;
+}) {
   const options: { code: Language; label: string }[] = [
-    { code: 'en', label: 'EN' },
-    { code: 'es', label: 'ES' }
+    { code: "en", label: "EN" },
+    { code: "es", label: "ES" },
   ];
 
   const [isOpen, setIsOpen] = useState(false);
@@ -185,16 +362,20 @@ function LanguageDropdown({ value, onChange }: { value: Language; onChange: (lan
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const currentOption = options.find((option) => option.code === value) ?? options[0];
+  const currentOption =
+    options.find((option) => option.code === value) ?? options[0];
 
   function handleSelect(language: Language) {
     onChange(language);
@@ -202,7 +383,12 @@ function LanguageDropdown({ value, onChange }: { value: Language; onChange: (lan
   }
 
   return (
-    <div ref={dropdownRef} className="lang-toggle" role="group" aria-label="Language selector">
+    <div
+      ref={dropdownRef}
+      className="lang-toggle"
+      role="group"
+      aria-label="Language selector"
+    >
       <button
         type="button"
         className="lang-button"
@@ -223,7 +409,7 @@ function LanguageDropdown({ value, onChange }: { value: Language; onChange: (lan
             type="button"
             role="option"
             aria-selected={value === option.code}
-            className={value === option.code ? 'active' : ''}
+            className={value === option.code ? "active" : ""}
             onClick={() => handleSelect(option.code)}
           >
             {option.label}
@@ -241,31 +427,43 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const isSignedIn = Boolean(userId);
   const [language, setLanguage] = useState<Language>(() =>
-    typeof window !== 'undefined' ? resolveAuthLanguage(window.location.search) : 'es'
+    typeof window !== "undefined"
+      ? resolveAuthLanguage(window.location.search)
+      : "es",
   );
   const [gradientId, setGradientId] = useState<string>(() => {
-    const fallbackGradientId = LANDING_GRADIENTS[0]?.id ?? '';
-    const officialGradient = LANDING_GRADIENTS.find((option) => option.id === OFFICIAL_DEFAULT_GRADIENT_ID);
+    const fallbackGradientId = LANDING_GRADIENTS[0]?.id ?? "";
+    const officialGradient = LANDING_GRADIENTS.find(
+      (option) => option.id === OFFICIAL_DEFAULT_GRADIENT_ID,
+    );
     const officialGradientId = officialGradient?.id ?? fallbackGradientId;
 
-    if (typeof window === 'undefined') return officialGradientId;
+    if (typeof window === "undefined") return officialGradientId;
 
     if (!SHOW_GRADIENT_SELECTOR) {
       return officialGradientId;
     }
 
-    const storedGradientId = window.localStorage.getItem(LANDING_GRADIENT_STORAGE_KEY);
-    const storedGradient = LANDING_GRADIENTS.find((option) => option.id === storedGradientId);
+    const storedGradientId = window.localStorage.getItem(
+      LANDING_GRADIENT_STORAGE_KEY,
+    );
+    const storedGradient = LANDING_GRADIENTS.find(
+      (option) => option.id === storedGradientId,
+    );
     return storedGradient?.id ?? officialGradientId;
   });
   const copy = OFFICIAL_LANDING_CONTENT[language];
-  const visibleNavLinks = copy.navLinks.filter((link) => !/^\/demo$/i.test(link.href) && !/^#?demo$/i.test(link.href));
-  const selectedGradient = LANDING_GRADIENTS.find((option) => option.id === gradientId) ?? LANDING_GRADIENTS[0];
+  const visibleNavLinks = copy.navLinks.filter(
+    (link) => !/^\/demo$/i.test(link.href) && !/^#?demo$/i.test(link.href),
+  );
+  const selectedGradient =
+    LANDING_GRADIENTS.find((option) => option.id === gradientId) ??
+    LANDING_GRADIENTS[0];
   const landingStyle = {
     ...(OFFICIAL_LANDING_CSS_VARIABLES as CSSProperties),
-    '--bg-angle': selectedGradient.angle,
-    '--bg-a': selectedGradient.a,
-    '--bg-b': selectedGradient.b,
+    "--bg-angle": selectedGradient.angle,
+    "--bg-a": selectedGradient.a,
+    "--bg-b": selectedGradient.b,
   } as CSSProperties;
   const [activeSlide, setActiveSlide] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -273,9 +471,11 @@ export default function LandingPage() {
   const [isModesInView, setIsModesInView] = useState(false);
   const [hasModeInteracted, setHasModeInteracted] = useState(false);
   const initialCookieConsentStateRef = useRef(readCookieConsentState());
-  const [analyticsConsent, setAnalyticsConsent] = useState(() => initialCookieConsentStateRef.current.analytics);
+  const [analyticsConsent, setAnalyticsConsent] = useState(
+    () => initialCookieConsentStateRef.current.analytics,
+  );
   const [isCookiePanelOpen, setIsCookiePanelOpen] = useState(
-    () => initialCookieConsentStateRef.current.analytics === 'unset'
+    () => initialCookieConsentStateRef.current.analytics === "unset",
   );
   const modesSectionRef = useRef<HTMLElement | null>(null);
   const modeThumbTouchStartXRef = useRef<number | null>(null);
@@ -285,7 +485,10 @@ export default function LandingPage() {
   const activeMode = copy.modes.items[activeModeIndex] ?? copy.modes.items[0];
   const activeVisual = MODE_VISUALS[language][activeMode.id];
   useEffect(() => {
-    console.info('[landing][ga4-debug] cookie consent read on load', initialCookieConsentStateRef.current);
+    console.info(
+      "[landing][ga4-debug] cookie consent read on load",
+      initialCookieConsentStateRef.current,
+    );
   }, []);
 
   useEffect(() => {
@@ -320,7 +523,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     const elements = Array.from(
-      document.querySelectorAll<HTMLElement>('.reveal-on-scroll')
+      document.querySelectorAll<HTMLElement>(".reveal-on-scroll"),
     );
 
     if (!elements.length) {
@@ -328,12 +531,12 @@ export default function LandingPage() {
     }
 
     const prefersReducedMotion = window.matchMedia(
-      '(prefers-reduced-motion: reduce)'
+      "(prefers-reduced-motion: reduce)",
     ).matches;
 
     if (prefersReducedMotion) {
       elements.forEach((element) => {
-        element.classList.add('is-visible');
+        element.classList.add("is-visible");
       });
       return;
     }
@@ -342,12 +545,12 @@ export default function LandingPage() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
+            entry.target.classList.add("is-visible");
             observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.15, rootMargin: '0px 0px -10%' }
+      { threshold: 0.15, rootMargin: "0px 0px -10%" },
     );
 
     elements.forEach((element) => observer.observe(element));
@@ -366,7 +569,7 @@ export default function LandingPage() {
       ([entry]) => {
         setIsModesInView(entry.isIntersecting);
       },
-      { threshold: 0.35 }
+      { threshold: 0.35 },
     );
 
     observer.observe(sectionElement);
@@ -375,9 +578,16 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
-    if (prefersReducedMotion || hasModeInteracted || !isModesInView || modeCount <= 1) {
+    if (
+      prefersReducedMotion ||
+      hasModeInteracted ||
+      !isModesInView ||
+      modeCount <= 1
+    ) {
       return;
     }
 
@@ -393,11 +603,11 @@ export default function LandingPage() {
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'ArrowLeft') {
+    if (event.key === "ArrowLeft") {
       event.preventDefault();
       goToSlide(activeSlide - 1);
     }
-    if (event.key === 'ArrowRight') {
+    if (event.key === "ArrowRight") {
       event.preventDefault();
       goToSlide(activeSlide + 1);
     }
@@ -416,23 +626,26 @@ export default function LandingPage() {
     selectMode(index);
   };
 
-  const handleModeThumbKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+  const handleModeThumbKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    index: number,
+  ) => {
     const { key } = event;
 
-    if (key === 'Enter' || key === ' ' || key === 'Spacebar') {
+    if (key === "Enter" || key === " " || key === "Spacebar") {
       event.preventDefault();
       handleModeSelect(index);
       return;
     }
 
-    if (key === 'ArrowUp' || key === 'ArrowLeft') {
+    if (key === "ArrowUp" || key === "ArrowLeft") {
       event.preventDefault();
       stopModesAutoplay();
       selectMode(index - 1);
       return;
     }
 
-    if (key === 'ArrowDown' || key === 'ArrowRight') {
+    if (key === "ArrowDown" || key === "ArrowRight") {
       event.preventDefault();
       stopModesAutoplay();
       selectMode(index + 1);
@@ -460,22 +673,22 @@ export default function LandingPage() {
   };
 
   const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
     inLanguage: language,
     mainEntity: copy.faq.items.map((item) => ({
-      '@type': 'Question',
+      "@type": "Question",
       name: item.question,
       acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.answer
-      }
-    }))
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
   };
 
-  const handleAnalyticsConsent = (nextDecision: 'accepted' | 'rejected') => {
+  const handleAnalyticsConsent = (nextDecision: "accepted" | "rejected") => {
     const nextState = persistCookieConsentState(nextDecision);
-    console.info('[landing][ga4-debug] cookie consent updated', {
+    console.info("[landing][ga4-debug] cookie consent updated", {
       nextDecision,
       persistedState: nextState,
     });
@@ -483,14 +696,15 @@ export default function LandingPage() {
     setIsCookiePanelOpen(false);
   };
 
-
   return (
     <div className="landing" style={landingStyle}>
       <header className="nav">
         <Link
           className="brand"
-          to={buildLocalizedAuthPath('/', language)}
-          aria-label={language === 'es' ? 'Innerbloom — inicio' : 'Innerbloom — home'}
+          to={buildLocalizedAuthPath("/", language)}
+          aria-label={
+            language === "es" ? "Innerbloom — inicio" : "Innerbloom — home"
+          }
         >
           <span className="brand-text">Innerbloom</span>
           <img
@@ -513,12 +727,18 @@ export default function LandingPage() {
         <div className="nav-actions">
           {SHOW_GRADIENT_SELECTOR ? (
             <label className="gradient-select-wrapper">
-              <span className="visually-hidden">{language === 'es' ? 'Seleccionar fondo' : 'Select background'}</span>
+              <span className="visually-hidden">
+                {language === "es" ? "Seleccionar fondo" : "Select background"}
+              </span>
               <select
                 className="gradient-select"
                 value={gradientId}
                 onChange={(event) => setGradientId(event.target.value)}
-                aria-label={language === 'es' ? 'Selector de fondo' : 'Background selector'}
+                aria-label={
+                  language === "es"
+                    ? "Selector de fondo"
+                    : "Background selector"
+                }
               >
                 {LANDING_GRADIENTS.map((option) => (
                   <option key={option.id} value={option.id}>
@@ -536,10 +756,10 @@ export default function LandingPage() {
           ) : (
             <>
               <Link
-                className={`${buttonClasses('ghost')} nav-auth-button`}
+                className={`${buttonClasses("ghost")} nav-auth-button`}
                 data-analytics-cta="login"
                 data-analytics-location="nav"
-                to={buildLocalizedAuthPath('/login', language)}
+                to={buildLocalizedAuthPath("/login", language)}
               >
                 {copy.auth.login}
               </Link>
@@ -547,7 +767,7 @@ export default function LandingPage() {
                 className={`${buttonClasses()} nav-auth-button`}
                 data-analytics-cta="create_account"
                 data-analytics-location="nav"
-                to={buildLocalizedAuthPath('/sign-up', language)}
+                to={buildLocalizedAuthPath("/sign-up", language)}
               >
                 {copy.auth.signup}
               </Link>
@@ -557,18 +777,23 @@ export default function LandingPage() {
       </header>
 
       <main>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
         <section className="hero reveal-on-scroll" id="overview">
           <div className="hero-grid">
             <div className="hero-copy">
               <h1>
-                {copy.hero.titleLead}{' '}
+                {copy.hero.titleLead}{" "}
                 <span className="grad">{copy.hero.titleHighlight}</span>
               </h1>
-              <p className="sub">
-                {copy.hero.subtitle}
-              </p>
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-3 hero-actions">
+              <p className="sub">{copy.hero.subtitle}</p>
+              <div
+                className={`mt-6 flex flex-wrap items-center justify-center gap-3 hero-actions ${
+                  isSignedIn ? "hero-actions--single" : ""
+                }`}
+              >
                 {isSignedIn ? (
                   <Link className={buttonClasses()} to="/dashboard">
                     {copy.auth.dashboard}
@@ -587,7 +812,10 @@ export default function LandingPage() {
                       className="hero-demo-cta"
                       data-analytics-cta="guided_demo"
                       data-analytics-location="hero"
-                      to={buildDemoModeSelectUrl({ language, source: 'landing' })}
+                      to={buildDemoModeSelectUrl({
+                        language,
+                        source: "landing",
+                      })}
                     >
                       <span>{copy.auth.guidedDemo}</span>
                     </Link>
@@ -602,18 +830,26 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="truth-problem section-pad reveal-on-scroll" id="why">
+        <section
+          className="truth-problem section-pad reveal-on-scroll"
+          id="why"
+        >
           <div className="container narrow truth-problem-section">
             <p className="truth-problem-kicker">
-              {language === 'es' ? 'EL PROBLEMA REAL' : 'THE REAL PROBLEM'}
+              {language === "es" ? "EL PROBLEMA REAL" : "THE REAL PROBLEM"}
             </p>
 
-            <AdaptiveText as="h2" className="truth-problem-title truth-problem-title--outside">
+            <AdaptiveText
+              as="h2"
+              className="truth-problem-title truth-problem-title--outside"
+            >
               {copy.problem.title}
             </AdaptiveText>
 
             <div className="truth-problem-shell truth-problem-shell--body-only">
-              <AdaptiveText as="p" className="section-sub truth-problem-body">{renderMultilineText(copy.problem.body)}</AdaptiveText>
+              <AdaptiveText as="p" className="section-sub truth-problem-body">
+                {renderMultilineText(copy.problem.body)}
+              </AdaptiveText>
             </div>
           </div>
         </section>
@@ -623,7 +859,9 @@ export default function LandingPage() {
             <div className="how-heading">
               <p className="how-kicker">{copy.how.kicker}</p>
               <AdaptiveText as="h2">{copy.how.title}</AdaptiveText>
-              <AdaptiveText as="p" className="section-sub how-intro">{copy.how.intro}</AdaptiveText>
+              <AdaptiveText as="p" className="section-sub how-intro">
+                {copy.how.intro}
+              </AdaptiveText>
             </div>
             <PremiumTimeline
               steps={copy.how.steps}
@@ -633,12 +871,19 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="feature-showcase section-pad reveal-on-scroll" id="demo">
+        <section
+          className="feature-showcase section-pad reveal-on-scroll"
+          id="demo"
+        >
           <div className="container narrow">
             <div className="visible-progress-top">
               <div className="visible-progress-copy">
-                <AdaptiveText as="h2" className="demo-title">{copy.demo.title}</AdaptiveText>
-                <AdaptiveText as="p" className="demo-sub">{renderMultilineText(copy.demo.text)}</AdaptiveText>
+                <AdaptiveText as="h2" className="demo-title">
+                  {copy.demo.title}
+                </AdaptiveText>
+                <AdaptiveText as="p" className="demo-sub">
+                  {renderMultilineText(copy.demo.text)}
+                </AdaptiveText>
               </div>
 
               <div className="visible-progress-module" aria-hidden>
@@ -647,46 +892,195 @@ export default function LandingPage() {
                     <div className="visible-scene-region visible-scene-region--balance visible-scene-fragment visible-scene-fragment--radar">
                       <div className="visible-canvas-header">
                         <p className="visible-canvas-title">BALANCE</p>
-                        <span className="visible-canvas-chip">Predominio Body</span>
+                        <span className="visible-canvas-chip">
+                          Predominio Body
+                        </span>
                       </div>
                       <div className="visible-radar-shell">
                         <div className="visible-balance-radar-wrap">
-                          <svg className="visible-balance-radar" viewBox="0 0 420 420" aria-hidden>
+                          <svg
+                            className="visible-balance-radar"
+                            viewBox="0 0 420 420"
+                            aria-hidden
+                          >
                             <defs>
-                              <radialGradient id="visible-balance-radar-shape-fill" cx="42%" cy="32%" r="72%">
-                                <stop offset="0%" stopColor="rgba(243, 247, 255, 0.52)" />
-                                <stop offset="100%" stopColor="rgba(189, 205, 243, 0.18)" />
+                              <radialGradient
+                                id="visible-balance-radar-shape-fill"
+                                cx="42%"
+                                cy="32%"
+                                r="72%"
+                              >
+                                <stop
+                                  offset="0%"
+                                  stopColor="rgba(243, 247, 255, 0.52)"
+                                />
+                                <stop
+                                  offset="100%"
+                                  stopColor="rgba(189, 205, 243, 0.18)"
+                                />
                               </radialGradient>
-                              <radialGradient id="visible-balance-radar-inner-fill" cx="50%" cy="42%" r="68%">
-                                <stop offset="0%" stopColor="rgba(226, 236, 255, 0.3)" />
-                                <stop offset="100%" stopColor="rgba(179, 197, 240, 0.08)" />
+                              <radialGradient
+                                id="visible-balance-radar-inner-fill"
+                                cx="50%"
+                                cy="42%"
+                                r="68%"
+                              >
+                                <stop
+                                  offset="0%"
+                                  stopColor="rgba(226, 236, 255, 0.3)"
+                                />
+                                <stop
+                                  offset="100%"
+                                  stopColor="rgba(179, 197, 240, 0.08)"
+                                />
                               </radialGradient>
                             </defs>
-                            <circle className="visible-balance-radar-glow" cx="210" cy="210" r="186" />
-                            <polygon className="visible-balance-radar-ring" points="210.0,40.0 295.0,62.8 357.2,125.0 380.0,210.0 357.2,295.0 295.0,357.2 210.0,380.0 125.0,357.2 62.8,295.0 40.0,210.0 62.8,125.0 125.0,62.8" />
-                            <polygon className="visible-balance-radar-ring" points="210.0,80.0 275.0,97.4 322.6,145.0 340.0,210.0 322.6,275.0 275.0,322.6 210.0,340.0 145.0,322.6 97.4,275.0 80.0,210.0 97.4,145.0 145.0,97.4" />
-                            <polygon className="visible-balance-radar-ring" points="210.0,118.0 256.0,130.3 289.7,164.0 302.0,210.0 289.7,256.0 256.0,289.7 210.0,302.0 164.0,289.7 130.3,256.0 118.0,210.0 130.3,164.0 164.0,130.3" />
-                            <polygon className="visible-balance-radar-ring" points="210.0,154.0 238.0,161.5 258.5,182.0 266.0,210.0 258.5,238.0 238.0,258.5 210.0,266.0 182.0,258.5 161.5,238.0 154.0,210.0 161.5,182.0 182.0,161.5" />
-                            <line className="visible-balance-radar-axis" x1="210" y1="40" x2="210" y2="380" />
-                            <line className="visible-balance-radar-axis" x1="295" y1="62.8" x2="125" y2="357.2" />
-                            <line className="visible-balance-radar-axis" x1="357.2" y1="125" x2="62.8" y2="295" />
-                            <line className="visible-balance-radar-axis" x1="380" y1="210" x2="40" y2="210" />
-                            <line className="visible-balance-radar-axis" x1="357.2" y1="295" x2="62.8" y2="125" />
-                            <line className="visible-balance-radar-axis" x1="295" y1="357.2" x2="125" y2="62.8" />
-                            <path className="visible-balance-radar-pillar visible-balance-radar-pillar--soul" d="M 323.1 344.8 A 176 176 0 0 1 50.5 284.4" />
-                            <path className="visible-balance-radar-pillar visible-balance-radar-pillar--mind" d="M 50.5 284.4 A 176 176 0 0 1 104.1 69.4" />
-                            <path className="visible-balance-radar-pillar visible-balance-radar-pillar--body" d="M 104.1 69.4 A 176 176 0 0 1 323.1 344.8" />
-                            <polygon className="visible-balance-radar-shape visible-balance-radar-shape--outer" points="210.0,144.3 264.4,115.8 321.9,145.4 309.7,210.0 284.6,253.1 280.8,332.7 210.0,280.3 170.3,278.7 159.0,239.5 40.0,210.0 133.4,165.8 157.9,119.7" />
-                            <polygon className="visible-balance-radar-shape visible-balance-radar-shape--inner" points="210.0,159.7 251.6,137.9 295.6,160.6 286.3,210.0 267.0,242.9 264.2,303.8 210.0,263.7 179.7,262.5 171.0,232.5 80.0,210.0 151.5,176.2 170.1,140.9" />
-                            <circle className="visible-balance-radar-core" cx="210" cy="210" r="9" />
-                            <text className="visible-balance-radar-value" x="28" y="208">777</text>
-                            <text className="visible-balance-radar-value" x="252" y="84">483</text>
-                            <text className="visible-balance-radar-value" x="286" y="336">517</text>
-                            <text className="visible-balance-radar-value" x="132" y="236">251</text>
-                            <text className="visible-balance-radar-value" x="141" y="122">456</text>
-                            <text className="visible-balance-radar-value" x="270" y="158">414</text>
-                            <text className="visible-balance-radar-value" x="288" y="192">378</text>
-                            <text className="visible-balance-radar-value" x="118" y="172">252</text>
+                            <circle
+                              className="visible-balance-radar-glow"
+                              cx="210"
+                              cy="210"
+                              r="186"
+                            />
+                            <polygon
+                              className="visible-balance-radar-ring"
+                              points="210.0,40.0 295.0,62.8 357.2,125.0 380.0,210.0 357.2,295.0 295.0,357.2 210.0,380.0 125.0,357.2 62.8,295.0 40.0,210.0 62.8,125.0 125.0,62.8"
+                            />
+                            <polygon
+                              className="visible-balance-radar-ring"
+                              points="210.0,80.0 275.0,97.4 322.6,145.0 340.0,210.0 322.6,275.0 275.0,322.6 210.0,340.0 145.0,322.6 97.4,275.0 80.0,210.0 97.4,145.0 145.0,97.4"
+                            />
+                            <polygon
+                              className="visible-balance-radar-ring"
+                              points="210.0,118.0 256.0,130.3 289.7,164.0 302.0,210.0 289.7,256.0 256.0,289.7 210.0,302.0 164.0,289.7 130.3,256.0 118.0,210.0 130.3,164.0 164.0,130.3"
+                            />
+                            <polygon
+                              className="visible-balance-radar-ring"
+                              points="210.0,154.0 238.0,161.5 258.5,182.0 266.0,210.0 258.5,238.0 238.0,258.5 210.0,266.0 182.0,258.5 161.5,238.0 154.0,210.0 161.5,182.0 182.0,161.5"
+                            />
+                            <line
+                              className="visible-balance-radar-axis"
+                              x1="210"
+                              y1="40"
+                              x2="210"
+                              y2="380"
+                            />
+                            <line
+                              className="visible-balance-radar-axis"
+                              x1="295"
+                              y1="62.8"
+                              x2="125"
+                              y2="357.2"
+                            />
+                            <line
+                              className="visible-balance-radar-axis"
+                              x1="357.2"
+                              y1="125"
+                              x2="62.8"
+                              y2="295"
+                            />
+                            <line
+                              className="visible-balance-radar-axis"
+                              x1="380"
+                              y1="210"
+                              x2="40"
+                              y2="210"
+                            />
+                            <line
+                              className="visible-balance-radar-axis"
+                              x1="357.2"
+                              y1="295"
+                              x2="62.8"
+                              y2="125"
+                            />
+                            <line
+                              className="visible-balance-radar-axis"
+                              x1="295"
+                              y1="357.2"
+                              x2="125"
+                              y2="62.8"
+                            />
+                            <path
+                              className="visible-balance-radar-pillar visible-balance-radar-pillar--soul"
+                              d="M 323.1 344.8 A 176 176 0 0 1 50.5 284.4"
+                            />
+                            <path
+                              className="visible-balance-radar-pillar visible-balance-radar-pillar--mind"
+                              d="M 50.5 284.4 A 176 176 0 0 1 104.1 69.4"
+                            />
+                            <path
+                              className="visible-balance-radar-pillar visible-balance-radar-pillar--body"
+                              d="M 104.1 69.4 A 176 176 0 0 1 323.1 344.8"
+                            />
+                            <polygon
+                              className="visible-balance-radar-shape visible-balance-radar-shape--outer"
+                              points="210.0,144.3 264.4,115.8 321.9,145.4 309.7,210.0 284.6,253.1 280.8,332.7 210.0,280.3 170.3,278.7 159.0,239.5 40.0,210.0 133.4,165.8 157.9,119.7"
+                            />
+                            <polygon
+                              className="visible-balance-radar-shape visible-balance-radar-shape--inner"
+                              points="210.0,159.7 251.6,137.9 295.6,160.6 286.3,210.0 267.0,242.9 264.2,303.8 210.0,263.7 179.7,262.5 171.0,232.5 80.0,210.0 151.5,176.2 170.1,140.9"
+                            />
+                            <circle
+                              className="visible-balance-radar-core"
+                              cx="210"
+                              cy="210"
+                              r="9"
+                            />
+                            <text
+                              className="visible-balance-radar-value"
+                              x="28"
+                              y="208"
+                            >
+                              777
+                            </text>
+                            <text
+                              className="visible-balance-radar-value"
+                              x="252"
+                              y="84"
+                            >
+                              483
+                            </text>
+                            <text
+                              className="visible-balance-radar-value"
+                              x="286"
+                              y="336"
+                            >
+                              517
+                            </text>
+                            <text
+                              className="visible-balance-radar-value"
+                              x="132"
+                              y="236"
+                            >
+                              251
+                            </text>
+                            <text
+                              className="visible-balance-radar-value"
+                              x="141"
+                              y="122"
+                            >
+                              456
+                            </text>
+                            <text
+                              className="visible-balance-radar-value"
+                              x="270"
+                              y="158"
+                            >
+                              414
+                            </text>
+                            <text
+                              className="visible-balance-radar-value"
+                              x="288"
+                              y="192"
+                            >
+                              378
+                            </text>
+                            <text
+                              className="visible-balance-radar-value"
+                              x="118"
+                              y="172"
+                            >
+                              252
+                            </text>
                           </svg>
                         </div>
                       </div>
@@ -715,12 +1109,20 @@ export default function LandingPage() {
                       </div>
                       <div className="visible-emotion-grid">
                         {EMOTION_HEATMAP_ROWS.map((row, rowIndex) => (
-                          <div className="visible-emotion-grid-row" key={`emotion-row-${rowIndex}`}>
+                          <div
+                            className="visible-emotion-grid-row"
+                            key={`emotion-row-${rowIndex}`}
+                          >
                             {row.map((emotion, cellIndex) => (
                               <span
                                 key={`emotion-cell-${rowIndex}-${cellIndex}`}
                                 className={`visible-emotion-cell visible-emotion-cell--${emotion}`}
-                                style={{ '--emotion-order': rowIndex * 19 + cellIndex } as CSSProperties}
+                                style={
+                                  {
+                                    "--emotion-order":
+                                      rowIndex * 19 + cellIndex,
+                                  } as CSSProperties
+                                }
                               />
                             ))}
                           </div>
@@ -736,9 +1138,15 @@ export default function LandingPage() {
                       <div className="visible-canvas-header visible-canvas-header--streaks">
                         <p className="visible-canvas-title">STREAKS</p>
                         <span className="visible-canvas-info">i</span>
-                        <span className="visible-canvas-chip visible-canvas-chip--flow">FLOW · 3M</span>
+                        <span className="visible-canvas-chip visible-canvas-chip--flow">
+                          FLOW · 3M
+                        </span>
                       </div>
-                      <div className="visible-streak-pillars" role="tablist" aria-label="Pilares">
+                      <div
+                        className="visible-streak-pillars"
+                        role="tablist"
+                        aria-label="Pilares"
+                      >
                         <span className="is-active">🫀 BODY</span>
                         <span>🧠 MIND</span>
                         <span>🏵️ SOUL</span>
@@ -792,7 +1200,7 @@ export default function LandingPage() {
                   className={buttonClasses()}
                   data-analytics-cta="guided_demo"
                   data-analytics-location="feature"
-                  to={buildDemoModeSelectUrl({ language, source: 'landing' })}
+                  to={buildDemoModeSelectUrl({ language, source: "landing" })}
                 >
                   {copy.demo.cta}
                 </Link>
@@ -804,28 +1212,48 @@ export default function LandingPage() {
         <section className="why section-pad reveal-on-scroll" id="pillars">
           <div className="container narrow">
             <p className="section-kicker">{copy.pillars.kicker}</p>
-            <AdaptiveText as="h2" className="pillars-title">{copy.pillars.title}</AdaptiveText>
-            <AdaptiveText as="p" className="section-sub pillars-intro">{copy.pillars.intro}</AdaptiveText>
+            <AdaptiveText as="h2" className="pillars-title">
+              {copy.pillars.title}
+            </AdaptiveText>
+            <AdaptiveText as="p" className="section-sub pillars-intro">
+              {copy.pillars.intro}
+            </AdaptiveText>
             <div className="cards grid-3">
               {copy.pillars.items.map((pillar, index) => {
-                const { definition, examples } = splitPillarCopy(pillar.copy, language);
+                const { definition, examples } = splitPillarCopy(
+                  pillar.copy,
+                  language,
+                );
                 return (
                   <article
                     className="card card--hero-glass pillar-card fade-item"
                     key={pillar.title}
-                    style={{ '--delay': `${index * 90}ms` } as CSSProperties}
+                    style={{ "--delay": `${index * 90}ms` } as CSSProperties}
                   >
                     <h3 className="pillar-heading">
-                      <span className="pillar-emoji" aria-hidden>{pillar.emoji}</span>
-                      <span className="concept-term concept-term--pillar">{pillar.title}</span>
+                      <span className="pillar-emoji" aria-hidden>
+                        {pillar.emoji}
+                      </span>
+                      <span className="concept-term concept-term--pillar">
+                        {pillar.title}
+                      </span>
                     </h3>
                     <p className="pillar-definition">{definition}</p>
                     {examples.length > 0 ? (
-                      <div className="pillar-examples" aria-label={PILLAR_EXAMPLES_LABEL[language]}>
-                        <span className="pillar-examples-label">{PILLAR_EXAMPLES_LABEL[language]}</span>
+                      <div
+                        className="pillar-examples"
+                        aria-label={PILLAR_EXAMPLES_LABEL[language]}
+                      >
+                        <span className="pillar-examples-label">
+                          {PILLAR_EXAMPLES_LABEL[language]}
+                        </span>
                         <div className="pillar-chips" role="list">
                           {examples.map((example) => (
-                            <span key={example} className="pillar-chip" role="listitem">
+                            <span
+                              key={example}
+                              className="pillar-chip"
+                              role="listitem"
+                            >
                               {example}
                             </span>
                           ))}
@@ -836,30 +1264,47 @@ export default function LandingPage() {
                 );
               })}
             </div>
-            <AdaptiveText as="p" className="section-sub highlight">{copy.pillars.highlight}</AdaptiveText>
+            <AdaptiveText as="p" className="section-sub highlight">
+              {copy.pillars.highlight}
+            </AdaptiveText>
           </div>
         </section>
 
         <section className="section-pad reveal-on-scroll" id="rhythms">
           <div className="container">
-            <LabsWeeklyRhythmSystemSection language={language} headingAlignment="center" />
+            <LabsWeeklyRhythmSystemSection
+              language={language}
+              headingAlignment="center"
+            />
           </div>
         </section>
 
-        <section ref={modesSectionRef} className="modes section-pad reveal-on-scroll" id="modes">
+        <section
+          ref={modesSectionRef}
+          className="modes section-pad reveal-on-scroll"
+          id="modes"
+        >
           <div className="container">
             <p className="section-kicker">{copy.modes.kicker}</p>
-            <AdaptiveText as="h2" className="modes-title">{copy.modes.title}</AdaptiveText>
-            <AdaptiveText as="p" className="section-sub modes-intro">{copy.modes.intro}</AdaptiveText>
+            <AdaptiveText as="h2" className="modes-title">
+              {copy.modes.title}
+            </AdaptiveText>
+            <AdaptiveText as="p" className="section-sub modes-intro">
+              {copy.modes.intro}
+            </AdaptiveText>
             <div
               className="modes-carousel"
               aria-live="polite"
-              style={{ '--mode-count': copy.modes.items.length } as CSSProperties}
+              style={
+                { "--mode-count": copy.modes.items.length } as CSSProperties
+              }
             >
               <div
                 className="mode-thumbs"
                 role="listbox"
-                aria-label={language === 'es' ? 'Elegir avatar' : 'Choose avatar'}
+                aria-label={
+                  language === "es" ? "Elegir avatar" : "Choose avatar"
+                }
                 onTouchStart={handleModeThumbTouchStart}
                 onTouchEnd={handleModeThumbTouchEnd}
               >
@@ -873,9 +1318,11 @@ export default function LandingPage() {
                       role="option"
                       aria-label={mode.title}
                       aria-selected={isActive}
-                      className={`mode-thumb ${isActive ? 'is-active' : ''}`}
+                      className={`mode-thumb ${isActive ? "is-active" : ""}`}
                       onClick={() => handleModeSelect(index)}
-                      onKeyDown={(event) => handleModeThumbKeyDown(event, index)}
+                      onKeyDown={(event) =>
+                        handleModeThumbKeyDown(event, index)
+                      }
                     >
                       <img src={visual.thumbImage} alt="" aria-hidden />
                     </button>
@@ -883,7 +1330,9 @@ export default function LandingPage() {
                 })}
               </div>
 
-              <article className={`card card--hero-glass mode mode-main mode-${activeMode.id} fade-item`}>
+              <article
+                className={`card card--hero-glass mode mode-main mode-${activeMode.id} fade-item`}
+              >
                 <header className="mode-header">
                   <div className="mode-title">{activeMode.title}</div>
                 </header>
@@ -898,7 +1347,9 @@ export default function LandingPage() {
                     playsInline
                     aria-label={activeVisual.avatarAlt}
                   />
-                  <figcaption className="mode-media-caption">{activeVisual.avatarLabel}</figcaption>
+                  <figcaption className="mode-media-caption">
+                    {activeVisual.avatarLabel}
+                  </figcaption>
                 </figure>
                 <p className="mode-avatar-copy">{activeMode.goal}</p>
               </article>
@@ -906,10 +1357,15 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="testimonials section-pad reveal-on-scroll" id="testimonials">
+        <section
+          className="testimonials section-pad reveal-on-scroll"
+          id="testimonials"
+        >
           <div className="container">
             <AdaptiveText as="h2">{copy.testimonials.title}</AdaptiveText>
-            <AdaptiveText as="p" className="section-sub">{copy.testimonials.intro}</AdaptiveText>
+            <AdaptiveText as="p" className="section-sub">
+              {copy.testimonials.intro}
+            </AdaptiveText>
             <div
               className="slider"
               id="testi-slider"
@@ -921,7 +1377,10 @@ export default function LandingPage() {
               onFocus={() => setPaused(true)}
               onBlur={() => setPaused(false)}
             >
-              <div className="slider-track" style={{ transform: `translateX(-${activeSlide * 100}%)` }}>
+              <div
+                className="slider-track"
+                style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+              >
                 {copy.testimonials.items.map((testimonial, index) => (
                   <figure
                     className="testi"
@@ -929,7 +1388,7 @@ export default function LandingPage() {
                     role="group"
                     id={`slide-${index + 1}`}
                     aria-label={
-                      language === 'es'
+                      language === "es"
                         ? `${index + 1} de ${testimonialCount}`
                         : `${index + 1} of ${testimonialCount}`
                     }
@@ -955,7 +1414,11 @@ export default function LandingPage() {
               >
                 ›
               </button>
-              <div className="slider-dots" role="tablist" aria-label={copy.testimonials.groupLabel}>
+              <div
+                className="slider-dots"
+                role="tablist"
+                aria-label={copy.testimonials.groupLabel}
+              >
                 {copy.testimonials.items.map((testimonial, index) => (
                   <button
                     key={testimonial.author}
@@ -986,20 +1449,29 @@ export default function LandingPage() {
         </section>
 
         {SHOW_LANDING_PRICING ? (
-          <section className="pricing section-pad reveal-on-scroll" id="pricing">
+          <section
+            className="pricing section-pad reveal-on-scroll"
+            id="pricing"
+          >
             <div className="container">
               <AdaptiveText as="h2">{copy.pricing.title}</AdaptiveText>
-              <AdaptiveText as="p" className="section-sub">{copy.pricing.intro}</AdaptiveText>
-              <p className="pricing-trial-highlight">{copy.pricing.trialHighlight}</p>
+              <AdaptiveText as="p" className="section-sub">
+                {copy.pricing.intro}
+              </AdaptiveText>
+              <p className="pricing-trial-highlight">
+                {copy.pricing.trialHighlight}
+              </p>
               <p className="pricing-tax-note">{copy.pricing.taxNote}</p>
               <div className="pricing-grid">
                 {copy.pricing.plans.map((plan, index) => (
                   <article
                     className="card pricing-card fade-item"
                     key={plan.id}
-                    style={{ '--delay': `${index * 90}ms` } as CSSProperties}
+                    style={{ "--delay": `${index * 90}ms` } as CSSProperties}
                   >
-                    {plan.id === 'YEAR' ? <span className="pricing-best-deal-chip">best deal</span> : null}
+                    {plan.id === "YEAR" ? (
+                      <span className="pricing-best-deal-chip">best deal</span>
+                    ) : null}
                     <p className="pricing-plan-name">{plan.name}</p>
                     <p className="pricing-plan-detail">{plan.detail}</p>
                     <p className="pricing-plan-price">{plan.price}</p>
@@ -1013,7 +1485,9 @@ export default function LandingPage() {
         <section className="next section-pad reveal-on-scroll">
           <div className="container narrow center">
             <AdaptiveText as="h2">{copy.next.title}</AdaptiveText>
-            <AdaptiveText as="p" className="section-sub">{copy.next.intro}</AdaptiveText>
+            <AdaptiveText as="p" className="section-sub">
+              {copy.next.intro}
+            </AdaptiveText>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               {isSignedIn ? (
                 <Link className={buttonClasses()} to="/dashboard">
@@ -1043,10 +1517,18 @@ export default function LandingPage() {
             <Link to="/dashboard">Dashboard</Link>
           ) : (
             <>
-              <Link data-analytics-cta="login" data-analytics-location="footer" to={buildLocalizedAuthPath('/login', language)}>
+              <Link
+                data-analytics-cta="login"
+                data-analytics-location="footer"
+                to={buildLocalizedAuthPath("/login", language)}
+              >
                 {copy.auth.login}
               </Link>
-              <Link data-analytics-cta="create_account" data-analytics-location="footer" to={buildLocalizedAuthPath('/sign-up', language)}>
+              <Link
+                data-analytics-cta="create_account"
+                data-analytics-location="footer"
+                to={buildLocalizedAuthPath("/sign-up", language)}
+              >
                 {copy.auth.signup}
               </Link>
             </>
@@ -1060,7 +1542,7 @@ export default function LandingPage() {
             className="footer-cookies-link"
             onClick={() => setIsCookiePanelOpen(true)}
           >
-            {language === 'es' ? 'Cookies' : 'Cookies'}
+            {language === "es" ? "Cookies" : "Cookies"}
           </button>
           <a
             className="footer-community-link"
@@ -1083,9 +1565,9 @@ export default function LandingPage() {
       <CookieConsentBanner
         language={language}
         isOpen={isCookiePanelOpen}
-        hasDecision={analyticsConsent !== 'unset'}
-        onAccept={() => handleAnalyticsConsent('accepted')}
-        onReject={() => handleAnalyticsConsent('rejected')}
+        hasDecision={analyticsConsent !== "unset"}
+        onAccept={() => handleAnalyticsConsent("accepted")}
+        onReject={() => handleAnalyticsConsent("rejected")}
         onClose={() => setIsCookiePanelOpen(false)}
       />
     </div>
