@@ -169,6 +169,46 @@
   padding-bottom: 88px;
 }
 
+.heroFocusContent :global([data-demo-anchor="overall-progress"] .ib-metric-header-card > .relative) {
+  gap: 0.7rem;
+  padding: 0.4rem 0.45rem 0.6rem;
+}
+
+.heroFocusContent :global([data-demo-anchor="overall-progress"] .ib-metric-header-card header) {
+  gap: 0.5rem;
+  padding-top: 0.2rem;
+}
+
+.heroFocusContent :global([data-demo-anchor="overall-progress"] .ib-metric-header-card header h3) {
+  font-size: 0.7rem;
+}
+
+.heroFocusContent :global([data-demo-anchor="overall-progress"] .ib-metric-header-card header [class*="inline-flex"]) {
+  transform: scale(0.94);
+  transform-origin: top right;
+}
+
+.heroFocusContent :global([data-demo-anchor="overall-progress"] .ib-metric-header-card .text-4xl) {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.heroFocusContent :global([data-demo-anchor="overall-progress"] .ib-metric-header-card .text-\[2\.5em\]) {
+  font-size: 2.05em;
+}
+
+.heroFocusContent :global([data-demo-anchor="overall-progress"] .ib-metric-header-card .space-y-3) {
+  row-gap: 0.5rem;
+}
+
+.heroFocusContent :global([data-demo-anchor="overall-progress"] .ib-metric-header-card .h-6) {
+  height: 1.2rem;
+}
+
+.heroFocusContent :global([data-demo-anchor="overall-progress"] .ib-metric-header-card [role="progressbar"] span) {
+  font-size: 10px;
+}
+
 .sceneDashboard :global(.lg\:grid-cols-12) {
   grid-template-columns: minmax(0, 1fr) !important;
 }
