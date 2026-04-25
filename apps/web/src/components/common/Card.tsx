@@ -23,7 +23,7 @@ export function Card({ title, subtitle, action, children, className = '' }: Card
   const normalizedTitle = normalizeDashboardTitle(title);
 
   return (
-    <section className={`glass-card flex flex-col gap-4 rounded-2xl p-6 shadow-glow transition hover:border-white/10 ${className}`}>
+    <section className={`ib-premium-card ib-premium-card-soft flex flex-col gap-4 rounded-2xl p-6 transition ${className}`}>
       {(title || action) && (
         <header className="flex items-start justify-between gap-4">
           <div>

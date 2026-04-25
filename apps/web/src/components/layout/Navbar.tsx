@@ -38,7 +38,7 @@ export function Navbar({ onDailyClick, onSectionClick, dailyButtonRef, title, se
   const hasSections = Boolean(sections && sections.length > 0);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] shadow-[var(--shadow-elev-1)] backdrop-blur-xl pt-[calc(env(safe-area-inset-top,0px)+0.65rem)]">
+    <header className="ib-premium-nav sticky top-0 z-40 pt-[calc(env(safe-area-inset-top,0px)+0.65rem)]">
       <div className="flex w-full flex-wrap items-center justify-between gap-2 px-3 py-3 sm:px-4 md:flex-nowrap md:px-8 md:py-4">
         <div className="flex flex-1 min-w-0 flex-wrap items-center justify-start gap-x-2 gap-y-1 text-left sm:gap-x-3 md:flex-row">
           <div className="min-w-0">
@@ -68,10 +68,10 @@ export function Navbar({ onDailyClick, onSectionClick, dailyButtonRef, title, se
                 }}
                 className={({ isActive }: { isActive: boolean }) =>
                   combine(
-                    'relative inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1.5 text-[9px] font-semibold tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-overlay-4)]',
+                    'ib-premium-pill relative inline-flex items-center whitespace-nowrap px-3 py-1.5 text-[9px] font-semibold tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-overlay-4)]',
                     isActive
-                      ? 'border-[color:var(--glass-border)] bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)] shadow-[var(--shadow-elev-1)]'
-                      : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)] hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)] hover:text-[color:var(--color-text)]',
+                      ? 'ib-premium-pill-active text-[color:var(--color-accent-primary)]'
+                      : 'text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]',
                   )
                 }
               >
@@ -100,7 +100,7 @@ export function Navbar({ onDailyClick, onSectionClick, dailyButtonRef, title, se
           {menuSlot}
           {planSlot}
           {displayName && (
-            <span className="hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs text-[color:var(--color-text-dim)] md:inline-flex">
+            <span className="ib-premium-pill ib-premium-muted hidden px-3 py-1 text-xs md:inline-flex">
               {displayName}
             </span>
           )}
