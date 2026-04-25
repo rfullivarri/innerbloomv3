@@ -846,11 +846,17 @@ export default function LandingPage() {
               {copy.problem.title}
             </AdaptiveText>
 
-            <div className="truth-problem-shell truth-problem-shell--body-only">
-              <AdaptiveText as="p" className="section-sub truth-problem-body">
-                {renderMultilineText(copy.problem.body)}
-              </AdaptiveText>
+            <div className="problem-flow-visual" aria-hidden>
+              <img
+                src="/problem-adaptive-flow.png"
+                alt=""
+                loading="lazy"
+              />
             </div>
+
+            <AdaptiveText as="p" className="section-sub truth-problem-body">
+              {renderMultilineText(copy.problem.body)}
+            </AdaptiveText>
           </div>
         </section>
 

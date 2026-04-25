@@ -569,47 +569,7 @@
 .landing .truth-problem-section {
   display: grid;
   justify-items: center;
-  gap: clamp(12px, 1.7vw, 20px);
-}
-
-.landing .truth-problem-shell {
-  position: relative;
-  isolation: isolate;
-  width: min(100%, 900px);
-  margin: 0 auto;
-  padding: clamp(24px, 2.8vw, 34px) clamp(22px, 3.2vw, 36px)
-    clamp(22px, 2.7vw, 30px);
-  border-radius: var(--landing-surface-radius-lg);
-  border: 1px solid var(--landing-surface-border);
-  background: var(--landing-surface-bg);
-  backdrop-filter: blur(var(--landing-glass-blur));
-  box-shadow: var(--landing-surface-shadow);
-}
-
-.landing .truth-problem-shell::before {
-  content: "";
-  position: absolute;
-  inset: -18px -8px -10px;
-  z-index: -1;
-  border-radius: inherit;
-  background: var(--landing-surface-glow);
-  filter: blur(10px);
-  opacity: 0.72;
-}
-
-.landing .truth-problem-shell::after {
-  content: "";
-  position: absolute;
-  top: clamp(14px, 1.9vw, 18px);
-  left: clamp(22px, 3.2vw, 36px);
-  width: clamp(68px, 8.5vw, 98px);
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    rgba(234, 215, 255, 0.66),
-    rgba(234, 215, 255, 0)
-  );
-  opacity: 0.78;
+  gap: clamp(16px, 2vw, 28px);
 }
 
 .landing .truth-problem-kicker {
@@ -634,23 +594,111 @@
 
 .landing .truth-problem-title--outside {
   max-width: 19ch;
-  margin-bottom: clamp(2px, 0.7vw, 8px);
+  margin-bottom: 0;
   font-size: clamp(1.78rem, 1.35vw + 1.34rem, 2.36rem);
 }
 
-.landing .truth-problem-shell--body-only {
-  width: min(100%, 780px);
-  padding: clamp(16px, 2.1vw, 24px) clamp(20px, 2.8vw, 30px)
-    clamp(14px, 1.9vw, 22px);
+.landing .problem-flow-visual {
+  position: relative;
+  width: min(1040px, 100%);
+  margin: clamp(8px, 2vw, 16px) auto clamp(2px, 0.6vw, 8px);
+  pointer-events: none;
+}
+
+.landing .problem-flow-visual img {
+  width: 100%;
+  display: block;
+  opacity: 0.72;
+  mix-blend-mode: screen;
+  filter: saturate(1.08) contrast(1.04);
+  -webkit-mask-image: radial-gradient(
+    ellipse 80% 62% at center,
+    #000 42%,
+    rgba(0, 0, 0, 0.74) 66%,
+    rgba(0, 0, 0, 0.38) 82%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 80% 62% at center,
+    #000 42%,
+    rgba(0, 0, 0, 0.74) 66%,
+    rgba(0, 0, 0, 0.38) 82%,
+    transparent 100%
+  );
+}
+
+.landing .problem-flow-visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+      circle at 77% 48%,
+      rgba(255, 202, 175, 0.22),
+      transparent 46%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(8, 20, 68, 0.42),
+      rgba(11, 14, 47, 0.1) 36%,
+      rgba(24, 14, 55, 0.2) 72%,
+      rgba(10, 15, 40, 0.44)
+    );
+  mix-blend-mode: screen;
+  opacity: 0.82;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.92) 14%,
+    #000 50%,
+    rgba(0, 0, 0, 0.9) 86%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.92) 14%,
+    #000 50%,
+    rgba(0, 0, 0, 0.9) 86%,
+    transparent 100%
+  );
 }
 
 .landing .section-sub.truth-problem-body {
   margin: 0 auto;
-  max-width: min(52ch, 92%);
+  max-width: min(720px, 92%);
   color: color-mix(in srgb, var(--ink) 88%, #e6dcff 12%);
-  font-size: clamp(0.96rem, 0.26vw + 0.9rem, 1.06rem);
-  line-height: 1.58;
+  font-size: clamp(1rem, 0.24vw + 0.94rem, 1.14rem);
+  line-height: 1.64;
+  text-align: center;
   text-wrap: pretty;
+}
+
+@media (max-width: 840px) {
+  .landing .problem-flow-visual {
+    width: min(1120px, 150%);
+    margin-left: -25%;
+    margin-right: -25%;
+  }
+
+  .landing .problem-flow-visual img {
+    opacity: 0.78;
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.9) 20%,
+      #000 50%,
+      rgba(0, 0, 0, 0.86) 78%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.9) 20%,
+      #000 50%,
+      rgba(0, 0, 0, 0.86) 78%,
+      transparent 100%
+    );
+  }
 }
 
 .landing .section-sub.highlight {
