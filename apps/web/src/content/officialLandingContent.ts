@@ -59,7 +59,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     problem: {
       title: 'El problema no sos vos.',
       body:
-        'La mayoría de las apps de hábitos están diseñadas para una versión de vos que no existe: siempre con la misma energía, el mismo foco y la misma disciplina.\n\nPero la vida cambia. Y cuando el sistema no cambia con vos, no parece que falló el sistema: parece que fallaste vos.'
+        'La mayoría de las apps de hábitos asumen que aparece la misma versión de vos todos los días.\nMisma energía. Mismo foco. Misma disciplina.\n\nPero la vida cambia.\nEntonces tu sistema también debería cambiar con vos.'
     },
     pillars: {
       kicker: 'PROGRESO EN EQUILIBRIO',
@@ -296,7 +296,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     problem: {
       title: 'You’re not the problem.',
       body:
-        'Most habit apps are designed for a version of you that doesn’t exist: always with the same energy, the same focus, and the same discipline.\n\nBut life changes. And when the system doesn’t change with you, it doesn’t feel like the system failed — it feels like you did.'
+        'Most habit apps assume the same version of you shows up every day.\nSame energy. Same focus. Same discipline.\n\nBut real life changes.\nSo your system should change with you.'
     },
     pillars: {
       kicker: 'PROGRESS IN BALANCE',
