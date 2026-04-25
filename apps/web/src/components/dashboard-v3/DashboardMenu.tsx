@@ -37,6 +37,7 @@ import { AVATAR_OPTIONS, resolveAvatarOption, resolveAvatarPickerPreviewImage } 
 import type { ResolvedTheme } from "../../theme/themePreference";
 import {
   forwardRef,
+  type CSSProperties,
   type MouseEvent,
   type ReactNode,
   useCallback,
@@ -134,7 +135,7 @@ export function getRhythmCardContent(mode: GameMode, language: LocalizedLanguage
 
 function MenuIcon({
   children,
-  className = "h-5 w-5 text-[color:var(--color-text-dim)]",
+  className = "dashboard-menu-icon h-5 w-5",
 }: {
   children: ReactNode;
   className?: string;
@@ -399,11 +400,18 @@ export function DashboardMenu({
     [normalizedCurrentMode, selectedOrCurrentMode],
   );
   const currentAvatarTheme = useMemo(() => resolveMenuAvatarTheme(currentAvatarProfile), [currentAvatarProfile]);
+  const dashboardMenuStyle = useMemo(
+    () =>
+      ({
+        "--dashboard-menu-accent": currentAvatarTheme.accent,
+      }) as CSSProperties,
+    [currentAvatarTheme.accent],
+  );
 
   const menuRowClassName =
-    "flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40";
+    "dashboard-menu-row flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-[color:var(--color-text-dim)] transition focus:outline-none focus-visible:ring-2";
   const menuCardClassName =
-    "ib-card-contour-shadow relative z-10 rounded-2xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)]";
+    "dashboard-menu-premium-card ib-card-contour-shadow relative z-10 rounded-2xl";
 
   const handleOpenProfile = useCallback(() => {
     setIsProfileOpen(true);
@@ -809,7 +817,8 @@ export function DashboardMenu({
                 role="dialog"
                 aria-modal="true"
                 aria-label={t('dashboard.nav.mainMenu')}
-                className="flex max-h-[92vh] w-full max-w-[420px] flex-col rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-5 text-[color:var(--color-text)] shadow-2xl transition"
+                className="dashboard-menu-shell flex max-h-[92vh] w-full max-w-[420px] flex-col rounded-3xl p-5 text-[color:var(--color-text)] transition"
+                style={dashboardMenuStyle}
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 40 }}
@@ -826,7 +835,7 @@ export function DashboardMenu({
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-2 text-sm text-[color:var(--color-text-dim)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)]"
+                    className="dashboard-menu-icon-button rounded-full p-2 text-sm text-[color:var(--color-text-dim)] transition"
                     aria-label={t('dashboard.nav.closeMenu')}
                   >
                     <svg
@@ -848,7 +857,7 @@ export function DashboardMenu({
                       <div
                         role="radiogroup"
                         aria-label={t('dashboard.language.title')}
-                        className="inline-flex items-center rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-2)] p-1 dark:border-[color:var(--color-border-soft)] dark:bg-[color:var(--color-slate-900-15)]"
+                        className="dashboard-menu-segmented inline-flex items-center rounded-full p-1"
                       >
                         {([
                           { value: "es", label: "ES" },
@@ -864,10 +873,10 @@ export function DashboardMenu({
                               aria-checked={isActive}
                               aria-label={option.label}
                               onClick={() => setManualLanguage(option.value)}
-                              className={`min-w-[3rem] rounded-full px-3 py-1.5 text-xs font-semibold tracking-[0.18em] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40 ${
+                              className={`dashboard-menu-segment-option min-w-[3rem] rounded-full px-3 py-1.5 text-xs font-semibold tracking-[0.18em] transition focus:outline-none focus-visible:ring-2 ${
                                 isActive
-                                  ? "border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] text-[color:var(--color-text-strong)] dark:border-white/35"
-                                  : "border border-[color:var(--color-border-subtle)]/70 text-[color:var(--color-text-dim)] hover:border-[color:var(--color-border-soft)] hover:text-[color:var(--color-text)] dark:border-transparent dark:text-[color:var(--color-text-faint)]"
+                                  ? "dashboard-menu-segment-option--active border text-[color:var(--color-text-strong)]"
+                                  : "border border-transparent text-[color:var(--color-text-dim)] hover:text-[color:var(--color-text)] dark:text-[color:var(--color-text-faint)]"
                               }`}
                             >
                               {option.label}
@@ -880,7 +889,7 @@ export function DashboardMenu({
                         type="button"
                         onClick={handleThemeCycle}
                         aria-label={`${t('dashboard.theme.appearance')}: ${themeToggleLabel}`}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-2)] text-[color:var(--color-text-dim)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-3)] hover:text-[color:var(--color-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40 dark:border-[color:var(--color-border-soft)] dark:bg-[color:var(--color-slate-900-15)] dark:hover:bg-[color:var(--color-overlay-2)]"
+                        className="dashboard-menu-theme-toggle inline-flex h-9 w-9 items-center justify-center rounded-full border text-[color:var(--color-text-dim)] transition hover:text-[color:var(--color-text)] focus:outline-none focus-visible:ring-2"
                       >
                         {theme === "dark" ? (
                           <svg
@@ -918,7 +927,7 @@ export function DashboardMenu({
                       <img
                         src={currentAvatarPreviewImage}
                         alt={t('dashboard.menu.avatarAlt')}
-                        className="h-9 w-9 rounded-full border border-[color:var(--color-border-soft)] object-cover"
+                        className="dashboard-menu-avatar-rim h-9 w-9 rounded-full border object-cover"
                       />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold text-[color:var(--color-text)]">
@@ -948,11 +957,11 @@ export function DashboardMenu({
                         <span>{hasActiveUpgradeCta ? t('dashboard.menu.upgradeAvailable') : t('dashboard.menu.changeGameMode')}</span>
                         {hasActiveUpgradeCta ? <span className="rounded-full border border-black/20 bg-white/35 px-2 py-0.5 text-[10px] font-bold uppercase text-black shadow-[0_8px_20px_rgba(167,112,239,0.35)] backdrop-blur-sm">7d</span> : null}
                       </div>
-                      <span className="[&_.ib-game-mode-chip__glow]:opacity-10 [&_.ib-game-mode-chip__glow]:blur-[3px] [&_.ib-game-mode-chip__inner]:gap-0.5 [&_.ib-game-mode-chip__inner]:px-[0.4rem] [&_.ib-game-mode-chip__inner]:py-[0.12rem] [&_.ib-game-mode-chip__inner]:text-[7px] [&_.ib-game-mode-chip__inner]:tracking-[0.12em] [&_.ib-game-mode-chip__inner_span:first-child]:h-0.5 [&_.ib-game-mode-chip__inner_span:first-child]:w-0.5">
+                      <span className="dashboard-menu-mode-chip [&_.ib-game-mode-chip__glow]:opacity-[0.08] [&_.ib-game-mode-chip__glow]:blur-[2px] [&_.ib-game-mode-chip__inner]:gap-0.5 [&_.ib-game-mode-chip__inner]:px-[0.4rem] [&_.ib-game-mode-chip__inner]:py-[0.12rem] [&_.ib-game-mode-chip__inner]:text-[7px] [&_.ib-game-mode-chip__inner]:tracking-[0.12em] [&_.ib-game-mode-chip__inner_span:first-child]:h-0.5 [&_.ib-game-mode-chip__inner_span:first-child]:w-0.5">
                         <GameModeChip {...buildGameModeChip(normalizedCurrentMode ?? 'Flow', { avatarProfile: currentAvatarProfile })} />
                       </span>
                     </button>
-                    <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
+                    <div className="dashboard-menu-divider mx-3 h-px" aria-hidden />
                     <button
                       type="button"
                       onClick={handleOpenScheduler}
@@ -966,7 +975,7 @@ export function DashboardMenu({
                     </button>
                     {SHOW_BILLING_UI ? (
                       <>
-                        <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
+                        <div className="dashboard-menu-divider mx-3 h-px" aria-hidden />
                         <button
                           type="button"
                           onClick={() => setIsPlansOpen((current) => !current)}
@@ -1019,7 +1028,7 @@ export function DashboardMenu({
                         ) : null}
                       </>
                     ) : null}
-                    <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
+                    <div className="dashboard-menu-divider mx-3 h-px" aria-hidden />
                       <button
                         type="button"
                         onClick={() => setActivePanel("widgets")}
@@ -1042,12 +1051,12 @@ export function DashboardMenu({
                         className="-mt-1 mb-1 space-y-3 px-3 pb-2 pl-3"
                       >
                         <div className="flex items-center gap-2 pb-1">
-                          <button
-                            type="button"
-                            onClick={() => setActivePanel("main")}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-widget-menu-heading)] transition hover:bg-[color:var(--color-overlay-2)]"
-                            aria-label={t('dashboard.menu.backToMenu')}
-                          >
+                            <button
+                              type="button"
+                              onClick={() => setActivePanel("main")}
+                              className="dashboard-menu-icon-button inline-flex h-8 w-8 items-center justify-center rounded-full text-[color:var(--color-widget-menu-heading)] transition"
+                              aria-label={t('dashboard.menu.backToMenu')}
+                            >
                             <MenuIcon className="h-4 w-4 text-[color:var(--color-widget-menu-heading)]">
                               <path d="m15 6-6 6 6 6" />
                             </MenuIcon>
@@ -1250,7 +1259,7 @@ export function DashboardMenu({
                     onClick={(event) => handleLayerOverlayClick(event, handleCloseProfile)}
                   >
                     <div
-                      className="flex w-full min-h-0 max-h-[92vh] flex-col overflow-hidden rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-4 shadow-2xl"
+                      className="dashboard-menu-shell flex w-full min-h-0 max-h-[92vh] flex-col overflow-hidden rounded-3xl p-4"
                       style={{ maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)' }}
                     >
                       <div className="mb-3 flex shrink-0 items-start justify-between gap-3">
@@ -1261,7 +1270,7 @@ export function DashboardMenu({
                         <button
                           type="button"
                           onClick={handleCloseProfile}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)]"
+                          className="dashboard-menu-icon-button inline-flex h-8 w-8 items-center justify-center rounded-full text-[color:var(--color-text-dim)]"
                           aria-label={t('dashboard.nav.closeMenu')}
                         >
                           <MenuIcon className="h-4 w-4 text-[color:var(--color-text-dim)]">
@@ -1276,7 +1285,7 @@ export function DashboardMenu({
                             <img
                               src={currentAvatarPreviewImage}
                               alt={t('dashboard.menu.avatarAlt')}
-                              className="mx-auto h-20 w-20 rounded-full border border-[color:var(--color-border-soft)] object-cover"
+                              className="dashboard-menu-avatar-rim mx-auto h-20 w-20 rounded-full border object-cover"
                             />
                             <p className="mt-3 text-base font-semibold text-[color:var(--color-text)]">
                               {user?.fullName || user?.username || t('dashboard.menu.profileFallback')}
@@ -1288,7 +1297,7 @@ export function DashboardMenu({
                             ) : null}
                           </div>
 
-                          <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-2 py-1">
+                          <div className="dashboard-menu-premium-card rounded-2xl px-2 py-1">
                             <button
                               type="button"
                               onClick={handleOpenAvatar}
@@ -1303,7 +1312,7 @@ export function DashboardMenu({
                                 {currentAvatarSelection.name}
                               </span>
                             </button>
-                            <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
+                            <div className="dashboard-menu-divider mx-3 h-px" aria-hidden />
                             <button
                               type="button"
                               onClick={handleOpenClerkSettings}
@@ -1342,7 +1351,7 @@ export function DashboardMenu({
                     onClick={(event) => handleLayerOverlayClick(event, handleCloseGameMode)}
                   >
                     <div
-                      className="flex w-full min-h-0 max-h-[92vh] flex-col overflow-hidden rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-4 shadow-2xl"
+                      className="dashboard-menu-shell flex w-full min-h-0 max-h-[92vh] flex-col overflow-hidden rounded-3xl p-4"
                       style={{ maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)' }}
                     >
                       <div className="mb-3 flex shrink-0 items-start justify-between gap-3">
@@ -1353,7 +1362,7 @@ export function DashboardMenu({
                         <button
                           type="button"
                           onClick={handleCloseGameMode}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)]"
+                          className="dashboard-menu-icon-button inline-flex h-8 w-8 items-center justify-center rounded-full text-[color:var(--color-text-dim)]"
                           aria-label={t('dashboard.nav.closeMenu')}
                         >
                           <MenuIcon className="h-4 w-4 text-[color:var(--color-text-dim)]">
@@ -1374,7 +1383,7 @@ export function DashboardMenu({
                                   key={mode}
                                   type="button"
                                   onClick={() => handleSelectGameMode(mode)}
-                                  className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[color:var(--color-accent-primary)] bg-[color:var(--color-overlay-3)] shadow-[0_0_0_1px_rgba(167,112,239,0.58),0_0_20px_rgba(139,92,246,0.22)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
+                                  className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'dashboard-menu-selection-active bg-[color:var(--color-overlay-3)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
                                 >
                                   <div className="ml-2 space-y-2">
                                     <div className="flex items-center justify-between gap-2">
@@ -1402,7 +1411,7 @@ export function DashboardMenu({
                                     <p className="line-clamp-1 text-[11px] text-[color:var(--color-text-dim)]">{content.state}</p>
                                     <p className="line-clamp-2 text-[11px] text-[color:var(--color-text-dim)]">{content.objective}</p>
                                     {isCurrent ? (
-                                      <span className="inline-flex rounded-full border border-emerald-300/40 bg-emerald-400/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
+                                      <span className="dashboard-menu-current-chip inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold">
                                         {t('dashboard.menu.currentRhythm')}
                                       </span>
                                     ) : null}
@@ -1425,7 +1434,7 @@ export function DashboardMenu({
                           ) : null}
 
                           {pendingConfirmMode ? (
-                            <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] p-3">
+                            <div className="dashboard-menu-premium-card rounded-2xl p-3">
                               <p className="text-sm text-[color:var(--color-text)]">
                                 {t('dashboard.menu.gameModeConfirmPrompt', { mode: pendingConfirmMode })}
                               </p>
@@ -1441,7 +1450,7 @@ export function DashboardMenu({
                                 <button
                                   type="button"
                                   onClick={() => void handleConfirmGameMode()}
-                                  className="flex-1 rounded-xl border border-[color:var(--color-accent-primary)] bg-[color:var(--color-accent-primary)]/20 px-3 py-2 text-sm font-semibold text-[color:var(--color-text)] disabled:opacity-60"
+                                  className="dashboard-menu-accent-button flex-1 rounded-xl border px-3 py-2 text-sm font-semibold text-[color:var(--color-text)] disabled:opacity-60"
                                   disabled={isSavingMode}
                                 >
                                   {isSavingMode ? t('dashboard.menu.gameModeSaving') : t('dashboard.menu.confirmChange')}
@@ -1461,7 +1470,7 @@ export function DashboardMenu({
                     onClick={(event) => handleLayerOverlayClick(event, handleCloseAvatar)}
                   >
                     <div
-                      className="flex w-full min-h-0 max-h-[92vh] flex-col overflow-hidden rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-4 shadow-2xl"
+                      className="dashboard-menu-shell flex w-full min-h-0 max-h-[92vh] flex-col overflow-hidden rounded-3xl p-4"
                       style={{ maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)' }}
                     >
                       <div className="mb-3 flex shrink-0 items-start justify-between gap-3">
@@ -1472,7 +1481,7 @@ export function DashboardMenu({
                         <button
                           type="button"
                           onClick={handleCloseAvatar}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)]"
+                          className="dashboard-menu-icon-button inline-flex h-8 w-8 items-center justify-center rounded-full text-[color:var(--color-text-dim)]"
                           aria-label={t('dashboard.nav.closeMenu')}
                         >
                           <MenuIcon className="h-4 w-4 text-[color:var(--color-text-dim)]">
@@ -1493,7 +1502,7 @@ export function DashboardMenu({
                                   key={avatarOption.avatarId}
                                   type="button"
                                   onClick={() => setSelectedAvatarId(avatarOption.avatarId)}
-                                  className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[color:var(--color-accent-primary)] bg-[color:var(--color-overlay-3)] shadow-[0_0_0_1px_rgba(167,112,239,0.58),0_0_20px_rgba(139,92,246,0.22)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
+                                  className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'dashboard-menu-selection-active bg-[color:var(--color-overlay-3)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
                                 >
                                   <div className="ml-2 space-y-2">
                                     <div className="flex items-center justify-between gap-2">
@@ -1509,7 +1518,7 @@ export function DashboardMenu({
                                       loading="lazy"
                                     />
                                     {isCurrent ? (
-                                      <span className="inline-flex rounded-full border border-emerald-300/40 bg-emerald-400/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
+                                      <span className="dashboard-menu-current-chip inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold">
                                         {t("dashboard.menu.currentAvatar")}
                                       </span>
                                     ) : null}
@@ -1562,7 +1571,7 @@ export function DashboardMenu({
                       role="alertdialog"
                       aria-modal="true"
                       aria-label={t("dashboard.menu.deleteAccountTitle")}
-                      className="w-full rounded-3xl border border-rose-300/30 bg-[color:var(--color-slate-900-95)] p-4 shadow-2xl"
+                      className="dashboard-menu-shell w-full rounded-3xl border border-rose-300/30 p-4"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
@@ -1577,7 +1586,7 @@ export function DashboardMenu({
                           type="button"
                           onClick={handleCloseDeleteAccount}
                           disabled={isDeletingAccount}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] disabled:opacity-50"
+                          className="dashboard-menu-icon-button inline-flex h-8 w-8 items-center justify-center rounded-full text-[color:var(--color-text-dim)] disabled:opacity-50"
                           aria-label={t("dashboard.menu.cancel")}
                         >
                           <MenuIcon className="h-4 w-4 text-[color:var(--color-text-dim)]">
@@ -1639,9 +1648,9 @@ export function DashboardMenu({
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="mt-4 flex h-12 w-full items-center gap-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-4 text-sm font-semibold text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-3)]"
+                  className="dashboard-menu-premium-card mt-4 flex h-12 w-full items-center gap-3 rounded-2xl px-4 text-sm font-semibold text-[color:var(--color-text-dim)] transition"
                 >
-                  <MenuIcon className="h-5 w-5 text-[color:var(--color-text-dim)]">
+                  <MenuIcon className="dashboard-menu-icon h-5 w-5">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                     <path d="M16 17l5-5-5-5" />
                     <path d="M21 12H9" />
