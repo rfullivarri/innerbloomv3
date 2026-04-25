@@ -24,7 +24,7 @@ export type LandingCopy = {
     note: string;
     alt: string;
   };
-  problem: { title: string; body: string };
+  problem: { title: string; left: string; right: string };
   pillars: { kicker: string; title: string; intro: string; highlightLeadIn: string; highlight: string; items: Pillar[] };
   modes: { kicker: string; title: string; intro: string; items: Mode[] };
   how: { kicker: string; title: string; intro: string; closingLine: string; steps: HowTimelineStep[] };
@@ -58,8 +58,10 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     },
     problem: {
       title: 'El problema no sos vos.',
-      body:
-        'La mayoría de las apps de hábitos asumen que aparece la misma versión de vos todos los días.\nMisma energía. Mismo foco. Misma disciplina.\n\nPero la vida cambia.\nEntonces tu sistema también debería cambiar con vos.'
+      left:
+        'La mayoría de las apps de hábitos están diseñadas para una versión de vos que no existe:\n\nsiempre con la misma energía,\nel mismo foco y la misma disciplina.',
+      right:
+        'Pero la vida cambia. Y cuando\nel sistema no cambia con vos,\n\nno se siente que el sistema falló:\nse siente que fallaste vos.'
     },
     pillars: {
       kicker: 'PROGRESO EN EQUILIBRIO',
@@ -295,8 +297,10 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     },
     problem: {
       title: 'You’re not the problem.',
-      body:
-        'Most habit apps assume the same version of you shows up every day.\nSame energy. Same focus. Same discipline.\n\nBut real life changes.\nSo your system should change with you.'
+      left:
+        'Most habit apps are designed\nfor a version of you that doesn’t exist:\n\nalways with the same energy,\nthe same focus, and the same discipline.',
+      right:
+        'But life changes. And when\nthe system doesn’t change with you,\n\nit doesn’t feel like the system failed—\nit feels like you did.'
     },
     pillars: {
       kicker: 'PROGRESS IN BALANCE',
