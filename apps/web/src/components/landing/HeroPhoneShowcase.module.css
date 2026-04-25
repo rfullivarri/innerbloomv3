@@ -273,7 +273,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(5px, 1vw, 7px);
+  gap: clamp(4px, 0.85vw, 6px);
   padding-inline: clamp(4px, 1.8vw, 10px);
   box-sizing: border-box;
   transform-origin: center center;
@@ -310,9 +310,9 @@
   max-width: calc(100% - clamp(62px, 20vw, 76px));
   overflow: hidden;
   white-space: nowrap;
-  font-size: clamp(0.825rem, 1.275vw, 1.05rem);
+  font-size: clamp(0.95rem, 1.47vw, 1.21rem);
   font-weight: 700;
-  letter-spacing: 0.11em;
+  letter-spacing: 0.32em;
   text-transform: uppercase;
   color: rgba(244, 239, 255, 0.96);
   text-shadow:
