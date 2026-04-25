@@ -157,8 +157,8 @@ type EmotionTheme = {
 const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   calm: {
     chipInactive:
-      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
+      'ib-daily-quest-emotion-chip ib-daily-quest-emotion-chip--inactive text-[color:var(--color-text-dim)]',
+    chipActive: 'ib-daily-quest-emotion-chip ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
     chipShadow: 'shadow-[0_12px_32px_rgba(56,189,248,0.45)]',
     checkBackground: 'bg-sky-500/20',
     checkBorder: 'border-sky-300/60',
@@ -167,8 +167,8 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   },
   happy: {
     chipInactive:
-      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
+      'ib-daily-quest-emotion-chip ib-daily-quest-emotion-chip--inactive text-[color:var(--color-text-dim)]',
+    chipActive: 'ib-daily-quest-emotion-chip ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
     chipShadow: 'shadow-[0_12px_32px_rgba(251,191,36,0.45)]',
     checkBackground: 'bg-amber-500/20',
     checkBorder: 'border-amber-300/60',
@@ -177,8 +177,8 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   },
   motivation: {
     chipInactive:
-      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
+      'ib-daily-quest-emotion-chip ib-daily-quest-emotion-chip--inactive text-[color:var(--color-text-dim)]',
+    chipActive: 'ib-daily-quest-emotion-chip ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
     chipShadow: 'shadow-[0_12px_32px_rgba(139,92,246,0.45)]',
     checkBackground: 'bg-violet-500/20',
     checkBorder: 'border-violet-300/60',
@@ -187,8 +187,8 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   },
   sad: {
     chipInactive:
-      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
+      'ib-daily-quest-emotion-chip ib-daily-quest-emotion-chip--inactive text-[color:var(--color-text-dim)]',
+    chipActive: 'ib-daily-quest-emotion-chip ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
     chipShadow: 'shadow-[0_12px_32px_rgba(99,102,241,0.45)]',
     checkBackground: 'bg-indigo-500/20',
     checkBorder: 'border-indigo-300/60',
@@ -197,8 +197,8 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   },
   anxiety: {
     chipInactive:
-      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
+      'ib-daily-quest-emotion-chip ib-daily-quest-emotion-chip--inactive text-[color:var(--color-text-dim)]',
+    chipActive: 'ib-daily-quest-emotion-chip ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
     chipShadow: 'shadow-[0_12px_32px_rgba(244,63,94,0.45)]',
     checkBackground: 'bg-rose-500/20',
     checkBorder: 'border-rose-300/60',
@@ -207,8 +207,8 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   },
   frustration: {
     chipInactive:
-      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
+      'ib-daily-quest-emotion-chip ib-daily-quest-emotion-chip--inactive text-[color:var(--color-text-dim)]',
+    chipActive: 'ib-daily-quest-emotion-chip ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
     chipShadow: 'shadow-[0_12px_32px_rgba(249,115,22,0.45)]',
     checkBackground: 'bg-orange-500/20',
     checkBorder: 'border-orange-300/60',
@@ -217,8 +217,8 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   },
   tired: {
     chipInactive:
-      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
+      'ib-daily-quest-emotion-chip ib-daily-quest-emotion-chip--inactive text-[color:var(--color-text-dim)]',
+    chipActive: 'ib-daily-quest-emotion-chip ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
     chipShadow: 'shadow-[0_12px_32px_rgba(139,92,246,0.45)]',
     checkBackground: 'bg-violet-500/20',
     checkBorder: 'border-violet-300/60',
@@ -229,8 +229,8 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
 
 const DEFAULT_EMOTION_THEME: EmotionTheme = {
   chipInactive:
-    'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-  chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
+    'ib-daily-quest-emotion-chip ib-daily-quest-emotion-chip--inactive text-[color:var(--color-text-dim)]',
+  chipActive: 'ib-daily-quest-emotion-chip ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
   chipShadow: 'shadow-[0_12px_32px_rgba(99,102,241,0.45)]',
   checkBackground: 'bg-primary/20',
   checkBorder: 'border-primary/60',
@@ -953,7 +953,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   animate="visible"
                   exit="hidden"
                   transition={{ duration: 0.24, ease: 'easeOut' }}
-                  className="pointer-events-auto relative mx-auto flex h-[100dvh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-[color:var(--color-slate-900-95)] text-white shadow-2xl backdrop-blur md:max-w-2xl" data-light-scope="daily-quest"
+                  className="ib-daily-quest-shell pointer-events-auto relative mx-auto flex h-[100dvh] w-full max-w-xl flex-col overflow-hidden rounded-2xl text-white shadow-2xl backdrop-blur md:max-w-2xl" data-light-scope="daily-quest"
                   layout={false}
                   onClick={(event: MouseEvent<HTMLDivElement>) => {
                     event.stopPropagation();
@@ -963,7 +963,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                     layout={false}
                     data-demo-anchor="daily-quest-intro"
                     data-daily-quest-sticky-header="true"
-                    className="sticky top-[env(safe-area-inset-top)] z-10 flex flex-col justify-center border-b border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] px-4 py-3 backdrop-blur md:py-4"
+                    className="ib-daily-quest-header sticky top-[env(safe-area-inset-top)] z-10 flex flex-col justify-center border-b px-4 py-3 backdrop-blur md:py-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1.5">
@@ -978,7 +978,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                       <button
                         ref={closeButtonRef}
                         type="button"
-                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-sm text-white/80 transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                        className="ib-daily-quest-close-btn inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm text-white/80 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                         onClick={handleSnooze}
                         aria-label={t('dailyQuest.closeAria')}
                       >
@@ -994,7 +994,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   >
                     <div className="flex flex-col gap-6 pb-6">
                       {showSkeleton && (
-                        <div className="flex flex-col gap-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-faint)]">
+                        <div className="ib-daily-quest-surface flex flex-col gap-3 rounded-2xl border p-4 text-sm text-[color:var(--color-text-faint)]">
                           <div className="h-3 w-24 animate-pulse rounded-full bg-[color:var(--color-overlay-2)]" />
                           <div className="h-3 w-3/4 animate-pulse rounded-full bg-[color:var(--color-overlay-2)]" />
                           <div className="h-3 w-5/6 animate-pulse rounded-full bg-[color:var(--color-overlay-2)]" />
@@ -1020,8 +1020,8 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                     transition={{ duration: isActive ? 0.32 : 0.18, ease: 'easeOut' }}
                                     whileTap={{ scale: 0.94 }}
                                     onClick={() => setSelectedEmotion(option.emotion_id)}
-                                    className={classNames(
-                                      'relative overflow-visible rounded-full px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
+                                  className={classNames(
+                                      'relative overflow-visible rounded-full border px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
                                       isActive
                                         ? classNames(theme.chipActive, theme.chipShadow)
                                         : theme.chipInactive,
@@ -1075,8 +1075,8 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                             key={task.task_id}
                                             whileTap={{ scale: 0.98 }}
                                             className={classNames(
-                                              'group relative flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/5 bg-[color:var(--color-overlay-1)] p-4 text-left transition duration-200 hover:bg-white/[0.07] focus-within:ring-2 focus-within:ring-white/60',
-                                              isSelected && 'bg-white/[0.12] backdrop-blur-sm',
+                                              'ib-daily-quest-task-row group relative flex cursor-pointer items-center justify-between gap-3 rounded-2xl border p-4 text-left transition duration-200 focus-within:ring-2 focus-within:ring-white/60',
+                                              isSelected && 'ib-daily-quest-task-row--selected backdrop-blur-sm',
                                             )}
                                           >
                                             <AnimatePresence presenceAffectsLayout={false}>
@@ -1205,7 +1205,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                               value={notes}
                               onChange={(event) => setNotes(event.target.value)}
                               placeholder={t('dailyQuest.notes.placeholder')}
-                              className="min-h-[96px] resize-y rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-3 text-sm text-[color:var(--color-text)] placeholder:text-[color:var(--color-text-subtle)] focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                              className="ib-daily-quest-surface min-h-[96px] resize-y rounded-2xl border px-3 py-3 text-sm text-[color:var(--color-text)] placeholder:text-[color:var(--color-text-subtle)] focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
                             />
                           </section>
                         </>
@@ -1216,7 +1216,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   <motion.footer
                     layout={false}
                     data-demo-anchor="daily-quest-footer"
-                    className="sticky bottom-[env(safe-area-inset-bottom)] z-10 border-t border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2 backdrop-blur md:py-3"
+                    className="ib-daily-quest-footer sticky bottom-[env(safe-area-inset-bottom)] z-10 border-t px-4 py-2 backdrop-blur md:py-3"
                   >
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                       <div className="relative text-white">
@@ -1248,7 +1248,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                         <button
                           type="button"
                           onClick={handleSnooze}
-                          className="h-10 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:h-11 md:px-6"
+                          className="ib-daily-quest-secondary-btn h-10 rounded-xl border text-sm font-medium text-[color:var(--color-text-dim)] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:h-11 md:px-6"
                         >
                           {t('dailyQuest.actions.later')}
                         </button>
