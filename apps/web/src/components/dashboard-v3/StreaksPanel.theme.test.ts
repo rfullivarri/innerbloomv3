@@ -39,13 +39,13 @@ describe('buildStreakModeChipVisual', () => {
 
     const visual = buildStreakModeChipVisual(avatarProfile);
 
-    expect(visual.accent).toBe('#F87171');
-    expect(visual.glowPrimary).toContain('248, 113, 113');
-    expect(visual.glowSecondary).toContain('248, 113, 113');
+    expect(visual.accent).toBe('#F56767');
+    expect(visual.glowPrimary).toContain('245, 103, 103');
+    expect(visual.glowSecondary).toContain('245, 103, 103');
   });
 
   it('falls back safely when avatar profile is unavailable', () => {
     const visual = buildStreakModeChipVisual(null);
-    expect(visual.accent).toBe('#38BDF8');
+    expect(visual.accent).toBe('#32AEE4');
   });
 });

@@ -9,6 +9,11 @@ interface GameModeChipStyle {
   style: CSSProperties;
 }
 
+interface GameModeChipProps extends GameModeChipStyle {
+  size?: 'default' | 'compact';
+  className?: string;
+}
+
 const GAME_MODE_LABELS: Record<GameMode, string> = {
   Flow: 'FLOW',
   Chill: 'CHILL',
@@ -47,18 +52,27 @@ export function buildGameModeChip(
   };
 }
 
-export function GameModeChip({ label, animate, style }: GameModeChipStyle) {
+function cx(...values: Array<string | false | null | undefined>): string {
+  return values.filter(Boolean).join(' ');
+}
+
+export function GameModeChip({ label, animate, style, size = 'default', className }: GameModeChipProps) {
   return (
     <span
-      className={`ib-game-mode-chip relative inline-flex items-center ${animate ? 'ib-game-mode-chip--animated' : ''}`}
+      className={cx(
+        'ib-game-mode-chip relative inline-flex items-center',
+        animate && 'ib-game-mode-chip--animated',
+        size === 'compact' && 'ib-game-mode-chip--compact',
+        className,
+      )}
       style={style}
     >
       <span
         className="ib-game-mode-chip__glow absolute rounded-full"
         aria-hidden
       />
-      <span className="ib-game-mode-chip__inner relative inline-flex items-center gap-2 rounded-full border px-3 py-[0.26rem] text-[10px] font-semibold uppercase tracking-[0.2em] backdrop-blur">
-        <span className="h-[0.32rem] w-[0.32rem] rounded-full bg-white/80" />
+      <span className="ib-game-mode-chip__inner relative inline-flex items-center gap-2 rounded-full border px-3 py-[0.24rem] text-[10px] font-semibold uppercase tracking-[0.18em] backdrop-blur-md">
+        <span className="ib-game-mode-chip__dot h-[0.28rem] w-[0.28rem] rounded-full" />
         {label}
       </span>
     </span>
