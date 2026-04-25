@@ -77,15 +77,16 @@ describe('PreviewAchievementCard', () => {
       expect(node.className).not.toContain(' border ');
     });
     expect(within(months[0]).getByText('✓')).toBeInTheDocument();
-    expect(within(months[1]).getByText('•')).toBeInTheDocument();
+    expect(within(months[1]).getByLabelText('2026-02-weak').querySelector('.bg-amber-50')).not.toBeNull();
     expect(within(months[2]).getByText('✕')).toBeInTheDocument();
-    expect(within(months[3]).getByText('~')).toBeInTheDocument();
+    expect(within(months[3]).getByLabelText('2026-04-projected_valid').querySelector('.animate-spin')).not.toBeNull();
     expect(within(months[0]).getByText('ene')).toBeInTheDocument();
     expect(within(months[3]).getByText('abr')).toBeInTheDocument();
     const progress = screen.getAllByTestId('recent-month-progress').map((node) => node.textContent);
     expect(progress).toEqual(['89%', '42%', '0%', '65%']);
     expect(screen.queryByTestId('recent-month-value-label')).not.toBeInTheDocument();
-    expect(screen.getByTestId('recent-timeline-projection-note')).toHaveTextContent('~ proyectado al ritmo actual');
+    expect(screen.queryByTestId('recent-timeline-projection-note')).not.toBeInTheDocument();
+    expect(screen.getByText('proyectado')).toBeInTheDocument();
     expect(screen.queryByText('Actual')).not.toBeInTheDocument();
     expect(screen.queryByText('Current')).not.toBeInTheDocument();
     expect(screen.getAllByTestId('recent-month-label')).toHaveLength(4);
@@ -151,7 +152,7 @@ describe('PreviewAchievementCard', () => {
     });
     const groupedWindow = screen.getByTestId('seal-window-group');
     expect(groupedWindow.className).toContain('rounded-xl');
-    expect(groupedWindow.className).toContain('bg-white/5');
+    expect(groupedWindow.className).toContain('bg-indigo-400/10');
     expect(groupedWindow.className).not.toContain('pointer-events-none');
     expect(groupedWindow).toHaveAttribute('data-window-start', '1');
     expect(groupedWindow).toHaveAttribute('data-window-end', '3');
@@ -315,7 +316,8 @@ describe('PreviewAchievementCard', () => {
       ],
     });
 
-    expect(screen.getByTestId('recent-timeline-projection-note')).toHaveTextContent('estimación temprana');
+    expect(screen.queryByTestId('recent-timeline-projection-note')).not.toBeInTheDocument();
+    expect(screen.getByText('proyectado')).toBeInTheDocument();
   });
 
   test('renders at most 8 recent months and keeps the most recent months', () => {
@@ -350,7 +352,8 @@ describe('PreviewAchievementCard', () => {
       ],
     });
 
-    expect(screen.getByTestId('recent-timeline-projection-note')).toHaveTextContent('~ proyectado al ritmo actual');
+    expect(screen.queryByTestId('recent-timeline-projection-note')).not.toBeInTheDocument();
+    expect(screen.getByText('proyectado')).toBeInTheDocument();
     expect(screen.queryByTestId('recent-month-value-label')).not.toBeInTheDocument();
   });
 

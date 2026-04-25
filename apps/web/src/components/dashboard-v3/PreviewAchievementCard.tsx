@@ -28,21 +28,24 @@ type MonthNodeProps = {
 const statusConfig = {
   fragile: {
     label: { es: 'Hábito frágil', en: 'Fragile habit' },
-    chip: 'border border-rose-200/30 bg-gradient-to-r from-rose-300/90 to-rose-200/80 text-rose-950 shadow-[0_8px_24px_rgba(251,113,133,0.22)]',
+    chip: 'bg-rose-300 text-rose-950',
     ringColor: '#fb7185',
     ringGradientStop: '#fda4af',
+    ringTrack: 'rgba(251,113,133,0.24)',
   },
   building: {
     label: { es: 'Hábito en construcción', en: 'Habit in progress' },
-    chip: 'border border-amber-100/30 bg-gradient-to-r from-amber-300/90 to-yellow-200/85 text-amber-950 shadow-[0_8px_24px_rgba(251,191,36,0.2)]',
+    chip: 'bg-amber-300 text-amber-950',
     ringColor: '#fbbf24',
     ringGradientStop: '#fde68a',
+    ringTrack: 'rgba(251,191,36,0.25)',
   },
   strong: {
     label: { es: 'Hábito fuerte', en: 'Strong habit' },
-    chip: 'border border-emerald-100/30 bg-gradient-to-r from-emerald-300/92 to-teal-200/85 text-emerald-950 shadow-[0_8px_24px_rgba(74,222,128,0.24)]',
+    chip: 'bg-emerald-300 text-emerald-950',
     ringColor: '#6ee7b7',
     ringGradientStop: '#99f6e4',
+    ringTrack: 'rgba(110,231,183,0.25)',
   },
 } as const;
 
@@ -101,16 +104,16 @@ function normalizeRecentMonths(recentMonths: PreviewAchievement['recentMonths'])
 function getMonthTone(state: string | null | undefined): string {
   const normalized = String(state ?? '').toLowerCase();
   if (normalized === 'strong' || normalized === 'valid' || normalized === 'achieved') {
-    return 'bg-gradient-to-br from-emerald-300/95 to-emerald-200/75 text-emerald-950 shadow-[0_6px_18px_rgba(16,185,129,0.25)]';
+    return 'bg-emerald-400 text-white';
   }
   if (normalized === 'building' || normalized === 'pending' || normalized === 'weak' || normalized === 'floor_only') {
-    return 'bg-gradient-to-br from-amber-300/92 to-yellow-200/72 text-amber-950 shadow-[0_6px_18px_rgba(245,158,11,0.24)]';
+    return 'bg-amber-400 text-amber-950';
   }
   if (normalized.startsWith('projected')) {
-    return 'bg-gradient-to-br from-violet-300/45 to-indigo-300/30 text-violet-100 shadow-[0_8px_24px_rgba(139,92,246,0.25)]';
+    return 'bg-indigo-900 text-indigo-100';
   }
   if (normalized === 'invalid' || normalized === 'bad' || normalized === 'locked') {
-    return 'bg-gradient-to-br from-rose-300/88 to-rose-200/68 text-rose-950 shadow-[0_6px_18px_rgba(244,63,94,0.22)]';
+    return 'bg-rose-500 text-white';
   }
   return 'bg-white/10 text-[color:var(--color-slate-300)]';
 }
@@ -132,6 +135,9 @@ function getMonthMetric(value: number | null | undefined): string {
 
 function RecentMonthNode({ entry, language, compact = false }: MonthNodeProps) {
   const monthSymbol = getMonthSymbol(entry.state);
+  const normalized = String(entry.state ?? '').toLowerCase();
+  const isProjected = normalized.startsWith('projected');
+  const isBuilding = normalized === 'building' || normalized === 'pending' || normalized === 'weak' || normalized === 'floor_only';
   return (
     <div
       key={`${entry.key}-${entry.value ?? 0}`}
@@ -145,14 +151,26 @@ function RecentMonthNode({ entry, language, compact = false }: MonthNodeProps) {
         data-testid="recent-month-node"
         className={cx(
           compact
-            ? 'relative inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold leading-none shadow-[0_8px_20px_rgba(5,10,35,0.4)] sm:h-7 sm:w-7 sm:text-sm'
-            : 'relative inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold leading-none shadow-[0_8px_20px_rgba(5,10,35,0.4)] sm:h-9 sm:w-9 sm:text-base',
+            ? 'relative inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold leading-none shadow-[0_7px_16px_rgba(5,10,35,0.34)] sm:h-7 sm:w-7 sm:text-sm'
+            : 'relative inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold leading-none shadow-[0_7px_16px_rgba(5,10,35,0.34)] sm:h-9 sm:w-9 sm:text-base',
           getMonthTone(entry.state),
         )}
         aria-label={`${entry.periodKey ?? 'unknown'}-${entry.state ?? 'unknown'}`}
         data-month-symbol={monthSymbol}
       >
-        {monthSymbol}
+        {isProjected ? (
+          <span
+            className={cx(
+              'inline-flex rounded-full border-2 border-indigo-100/80 border-t-transparent animate-spin',
+              compact ? 'h-3.5 w-3.5' : 'h-4 w-4',
+            )}
+            aria-hidden
+          />
+        ) : isBuilding ? (
+          <span className={cx('inline-flex rounded-full bg-amber-50', compact ? 'h-1.5 w-1.5' : 'h-2 w-2')} aria-hidden />
+        ) : (
+          monthSymbol
+        )}
       </div>
       <span className={cx('text-[color:var(--color-slate-300)] leading-none', compact ? 'text-[9px]' : 'text-[10px]')} data-testid="recent-month-label">
         {entry.periodKey ? monthLabel(entry.periodKey, language) : language === 'es' ? 'Sin mes' : 'No month'}
@@ -209,16 +227,6 @@ export function PreviewAchievementCard({
   const scoreMarkerTop = `${Math.max(0, Math.min(100, 100 - score))}%`;
   const groupedProjectedMonth = groupedMonths.find((entry) => entry.projected);
   const windowTitle = language === 'es' ? 'Ventana activa' : 'Active window';
-  const projectionNote =
-    groupedProjectedMonth || orderedRecentMonths.some((entry) => entry.projected)
-      ? previewAchievement.currentMonth?.expectedTargetSoFar != null && previewAchievement.currentMonth.expectedTargetSoFar <= 1
-        ? language === 'es'
-          ? '~ estimación temprana'
-          : '~ early estimate'
-        : language === 'es'
-          ? '~ proyectado al ritmo actual'
-          : '~ projected at current pace'
-      : null;
   const rangeLabels = {
     strong: language === 'es' ? 'fuerte' : 'strong',
     building: language === 'es' ? 'en construcción' : 'building',
@@ -318,7 +326,7 @@ export function PreviewAchievementCard({
                   r={ring.radius}
                   strokeWidth={10}
                   className="fill-none"
-                  stroke="rgba(79,70,229,0.2)"
+                  stroke={tone.ringTrack}
                 />
                 <circle
                   cx="60"
@@ -366,13 +374,9 @@ export function PreviewAchievementCard({
                 </div>
               )}
             </div>
-            <div
-              className={cx('relative flex items-center rounded-xl border border-white/10 bg-white/[0.02] px-2 py-2', isCompact ? 'h-24 sm:h-28' : 'h-32 sm:h-36')}
-              data-testid="score-range-rail"
-              data-tour-anchor="achievement-preview-scale"
-            >
-              <div className={cx('relative h-full', isCompact ? 'w-[3.9rem]' : 'w-[4.5rem]')}>
-                <div className="absolute bottom-1 left-1.5 top-1 w-2 overflow-hidden rounded-full bg-[rgba(79,70,229,0.18)]">
+            <div className={cx('relative flex items-center px-1 py-1', isCompact ? 'h-24 sm:h-28' : 'h-32 sm:h-36')} data-testid="score-range-rail" data-tour-anchor="achievement-preview-scale">
+              <div className={cx('relative h-full', isCompact ? 'w-[4.2rem]' : 'w-[4.8rem]')}>
+                <div className="absolute bottom-1 left-4 top-1 w-2 overflow-hidden rounded-full bg-[rgba(79,70,229,0.18)]">
                   <button
                     type="button"
                     className="absolute inset-x-0 top-0 h-[20%] bg-gradient-to-b from-emerald-200/90 to-emerald-300/75 focus:outline-none"
@@ -390,23 +394,23 @@ export function PreviewAchievementCard({
                   />
                   <span className="absolute inset-x-0 top-[20%] h-px bg-white/45" />
                   <span className="absolute inset-x-0 top-[50%] h-px bg-white/45" />
-                  <span
-                    className="pointer-events-none absolute -inset-x-0.5 h-0.5 rounded-full bg-white shadow-[0_0_0_1px_rgba(10,14,26,0.4),0_0_12px_rgba(255,255,255,0.45)] transition-all duration-500 ease-out"
-                    style={{ top: scoreMarkerTop }}
-                    aria-hidden
-                  />
-                </div>
+                <span
+                  className="pointer-events-none absolute -inset-x-0.5 h-0.5 rounded-full bg-white shadow-[0_0_0_1px_rgba(10,14,26,0.4),0_0_12px_rgba(255,255,255,0.45)] transition-all duration-500 ease-out"
+                  style={{ top: scoreMarkerTop }}
+                  aria-hidden
+                />
+              </div>
                 <span className="absolute left-0 top-0 text-[8px] text-[color:var(--color-slate-400)]">100</span>
                 <span className="absolute left-0 top-[20%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">80</span>
                 <span className="absolute left-0 top-[50%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">50</span>
                 <span className="absolute left-0 bottom-0 text-[8px] text-[color:var(--color-slate-500)]">0</span>
-                <span className={cx('absolute top-[3%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.25rem]' : 'left-[2.6rem]')}>
+                <span className={cx('absolute top-[3%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.75rem]' : 'left-[3rem]')}>
                   {rangeLabels.strong}
                 </span>
-                <span className={cx('absolute top-[50%] -translate-y-1/2 text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.25rem]' : 'left-[2.6rem]')}>
+                <span className={cx('absolute top-[50%] -translate-y-1/2 text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.75rem]' : 'left-[3rem]')}>
                   {rangeLabels.building}
                 </span>
-                <span className={cx('absolute bottom-[3%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.25rem]' : 'left-[2.6rem]')}>
+                <span className={cx('absolute bottom-[3%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.75rem]' : 'left-[3rem]')}>
                   {rangeLabels.fragile}
                 </span>
               </div>
@@ -452,30 +456,24 @@ export function PreviewAchievementCard({
                   <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} compact={isCompact} />
                 ))}
                 {hasGroupedWindow && (
-                  <div className="relative flex items-end rounded-xl bg-white/5 px-1.5 pb-1 pt-4">
-                    <span className="pointer-events-none absolute inset-0 rounded-xl border border-violet-200/20 bg-violet-400/8 shadow-[0_0_24px_rgba(129,140,248,0.16)]" />
-                    <p className="absolute left-2 top-1 text-[8px] font-medium uppercase tracking-[0.1em] text-[color:var(--color-slate-400)]">{windowTitle}</p>
-                    <div
-                      className="relative flex items-end gap-1 rounded-xl bg-white/5 md:gap-1.5"
-                      data-testid="seal-window-group"
-                      data-window-start={lastThreeStart}
-                      data-window-end={lastThreeEnd - 1}
-                      data-tour-anchor="achievement-preview-active-window"
-                    >
-                      {groupedMonths.map((entry) => (
-                        <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} compact={isCompact} />
-                      ))}
-                    </div>
+                  <div
+                    className="relative flex items-end gap-1 rounded-xl bg-indigo-400/10 px-1.5 pb-1 pt-3.5 shadow-[0_0_18px_rgba(99,102,241,0.12)] md:gap-1.5"
+                    data-testid="seal-window-group"
+                    data-window-start={lastThreeStart}
+                    data-window-end={lastThreeEnd - 1}
+                    data-tour-anchor="achievement-preview-active-window"
+                  >
+                    <p className="pointer-events-none absolute left-1/2 top-1 -translate-x-1/2 text-[8px] font-medium uppercase tracking-[0.09em] text-[color:var(--color-slate-400)]">
+                      {windowTitle}
+                    </p>
+                    {groupedMonths.map((entry) => (
+                      <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} compact={isCompact} />
+                    ))}
                     {groupedProjectedMonth && <span className="absolute -bottom-3 right-2 text-[9px] text-[color:var(--color-slate-400)]">{language === 'es' ? 'proyectado' : 'projected'}</span>}
                   </div>
                 )}
               </div>
             </div>
-            {projectionNote && (
-              <p className="mt-1 text-[10px] text-[color:var(--color-slate-400)]" data-testid="recent-timeline-projection-note">
-                {projectionNote}
-              </p>
-            )}
           </div>
         )}
       </div>
