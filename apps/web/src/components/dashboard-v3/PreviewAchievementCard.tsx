@@ -143,8 +143,8 @@ function RecentMonthNode({ entry, language, compact = false }: MonthNodeProps) {
       key={`${entry.key}-${entry.value ?? 0}`}
       data-testid="recent-month-item"
       className={cx(
-        'flex shrink-0 flex-col items-center gap-1 py-0',
-        compact ? 'h-[3.8rem] w-[2.5rem] sm:h-[4rem] sm:w-[2.75rem]' : 'h-[4.8rem] w-[3.35rem] sm:h-[4.95rem] sm:w-[3.55rem]',
+        'mt-1 flex shrink-0 flex-col items-center gap-1 py-0',
+        compact ? 'h-[3.8rem] w-[2.35rem] sm:h-[4rem] sm:w-[2.65rem]' : 'h-[4.8rem] w-[3.1rem] sm:h-[4.95rem] sm:w-[3.45rem]',
       )}
     >
       <div
@@ -344,18 +344,18 @@ export function PreviewAchievementCard({
               </svg>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-[30px] font-semibold leading-none text-[color:var(--color-text)] sm:text-[32px]">{score}</span>
-                <span data-testid="score-affordance" className="mt-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.12em] text-[color:var(--color-slate-300)]">
+                <span data-testid="score-affordance" className="mt-1 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.12em] text-[color:var(--color-slate-300)]">
                   <span className="font-semibold">{scoreLabel}</span>
                   <span className="sr-only">{language === 'es' ? 'fuerza actual del hábito' : 'current habit strength'}</span>
                 </span>
               </div>
-              <div className="absolute left-1/2 top-[67%] inline-flex -translate-x-1/2 items-center gap-1 text-[10px] text-[color:var(--color-slate-400)]">
+              <div className="absolute left-1/2 top-[70%] inline-flex -translate-x-1/2 items-center gap-1 text-[10px] text-[color:var(--color-slate-400)]">
                 <button
                   type="button"
                   onClick={() => setIsScoreTooltipOpen((prev) => !prev)}
                   onFocus={() => setIsScoreTooltipOpen(true)}
                   aria-label={language === 'es' ? 'Qué significa este score' : 'What this score means'}
-                  className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-white/65 bg-white/20 text-[9px] font-semibold text-white shadow-[0_8px_20px_rgba(8,12,24,0.55)] backdrop-blur-xl"
+                  className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white/60 bg-white/20 text-[8px] font-semibold text-white shadow-[0_7px_18px_rgba(8,12,24,0.52)] backdrop-blur-xl"
                   data-testid="score-info-dot"
                   aria-describedby={isScoreTooltipOpen ? scoreTooltipId : undefined}
                 >
@@ -375,42 +375,42 @@ export function PreviewAchievementCard({
               )}
             </div>
             <div className={cx('relative flex items-center px-1 py-1', isCompact ? 'h-24 sm:h-28' : 'h-32 sm:h-36')} data-testid="score-range-rail" data-tour-anchor="achievement-preview-scale">
-              <div className={cx('relative h-full', isCompact ? 'w-[4.2rem]' : 'w-[4.8rem]')}>
-                <div className="absolute bottom-1 left-4 top-1 w-2 overflow-hidden rounded-full bg-[rgba(79,70,229,0.18)]">
+              <div className={cx('relative h-full', isCompact ? 'w-[3.9rem]' : 'w-[4.25rem]')}>
+                <div className="absolute bottom-1 left-4 top-1 w-2 overflow-hidden rounded-full bg-[rgba(67,56,202,0.22)]">
                   <button
                     type="button"
-                    className="absolute inset-x-0 top-0 h-[20%] bg-gradient-to-b from-emerald-200/90 to-emerald-300/75 focus:outline-none"
+                    className="absolute inset-x-0 top-0 h-[20%] bg-gradient-to-b from-emerald-300/95 to-emerald-500/88 focus:outline-none"
                     aria-label={rangeLabels.strong}
                   />
                   <button
                     type="button"
-                    className="absolute inset-x-0 top-[20%] h-[30%] bg-gradient-to-b from-amber-200/90 to-amber-300/75 focus:outline-none"
+                    className="absolute inset-x-0 top-[20%] h-[30%] bg-gradient-to-b from-amber-300/95 to-amber-500/88 focus:outline-none"
                     aria-label={rangeLabels.building}
                   />
                   <button
                     type="button"
-                    className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-b from-rose-200/85 to-rose-300/78 focus:outline-none"
+                    className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-b from-rose-300/95 to-rose-500/88 focus:outline-none"
                     aria-label={rangeLabels.fragile}
                   />
                   <span className="absolute inset-x-0 top-[20%] h-px bg-white/45" />
                   <span className="absolute inset-x-0 top-[50%] h-px bg-white/45" />
-                <span
-                  className="pointer-events-none absolute -inset-x-0.5 h-0.5 rounded-full bg-white shadow-[0_0_0_1px_rgba(10,14,26,0.4),0_0_12px_rgba(255,255,255,0.45)] transition-all duration-500 ease-out"
-                  style={{ top: scoreMarkerTop }}
-                  aria-hidden
-                />
-              </div>
+                  <span
+                    className="pointer-events-none absolute -inset-x-0.5 h-0.5 rounded-full bg-white shadow-[0_0_0_1px_rgba(10,14,26,0.4),0_0_12px_rgba(255,255,255,0.45)] transition-all duration-500 ease-out"
+                    style={{ top: scoreMarkerTop }}
+                    aria-hidden
+                  />
+                </div>
                 <span className="absolute left-0 top-0 text-[8px] text-[color:var(--color-slate-400)]">100</span>
                 <span className="absolute left-0 top-[20%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">80</span>
                 <span className="absolute left-0 top-[50%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">50</span>
                 <span className="absolute left-0 bottom-0 text-[8px] text-[color:var(--color-slate-500)]">0</span>
-                <span className={cx('absolute top-[3%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.75rem]' : 'left-[3rem]')}>
+                <span className={cx('absolute top-[3%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.3rem]' : 'left-[2.45rem]')}>
                   {rangeLabels.strong}
                 </span>
-                <span className={cx('absolute top-[50%] -translate-y-1/2 text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.75rem]' : 'left-[3rem]')}>
+                <span className={cx('absolute top-[50%] -translate-y-1/2 text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.3rem]' : 'left-[2.45rem]')}>
                   {rangeLabels.building}
                 </span>
-                <span className={cx('absolute bottom-[3%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.75rem]' : 'left-[3rem]')}>
+                <span className={cx('absolute bottom-[3%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.3rem]' : 'left-[2.45rem]')}>
                   {rangeLabels.fragile}
                 </span>
               </div>
@@ -457,13 +457,13 @@ export function PreviewAchievementCard({
                 ))}
                 {hasGroupedWindow && (
                   <div
-                    className="relative flex items-end gap-1 rounded-xl bg-indigo-400/10 px-1.5 pb-1 pt-3.5 shadow-[0_0_18px_rgba(99,102,241,0.12)] md:gap-1.5"
+                    className="relative flex items-end gap-0.5 rounded-xl bg-indigo-400/10 px-1 pb-1 pt-[1.15rem] shadow-[0_0_18px_rgba(99,102,241,0.12)] sm:gap-1 md:gap-1.5"
                     data-testid="seal-window-group"
                     data-window-start={lastThreeStart}
                     data-window-end={lastThreeEnd - 1}
                     data-tour-anchor="achievement-preview-active-window"
                   >
-                    <p className="pointer-events-none absolute left-1/2 top-1 -translate-x-1/2 text-[8px] font-medium uppercase tracking-[0.09em] text-[color:var(--color-slate-400)]">
+                    <p className="pointer-events-none absolute left-1/2 top-0.5 -translate-x-1/2 text-[8px] font-medium uppercase tracking-[0.09em] text-[color:var(--color-slate-400)]">
                       {windowTitle}
                     </p>
                     {groupedMonths.map((entry) => (
