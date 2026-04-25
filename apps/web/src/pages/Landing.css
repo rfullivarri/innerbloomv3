@@ -89,10 +89,13 @@
   overflow-x: hidden;
   font-family: var(--font-body);
   color: var(--ink);
-  background: linear-gradient(
-    var(--bg-angle, 135deg),
-    var(--bg-a, #525252),
-    var(--bg-b, #3d72b4)
+  background: var(
+    --landing-background,
+    linear-gradient(
+      var(--bg-angle, 135deg),
+      var(--bg-a, #525252),
+      var(--bg-b, #3d72b4)
+    )
   );
 }
 
@@ -253,25 +256,70 @@
 .landing .gradient-select-wrapper {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid rgba(186, 212, 255, 0.28);
+  border-radius: 14px;
+  background: rgba(12, 16, 28, 0.62);
+  backdrop-filter: blur(8px);
+}
+
+.landing .gradient-select-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(224, 237, 255, 0.9);
 }
 
 .landing .gradient-select {
-  border: 1px solid rgba(186, 212, 255, 0.36);
-  border-radius: 12px;
-  background: rgba(11, 18, 32, 0.82);
+  border: 1px solid rgba(186, 212, 255, 0.28);
+  border-radius: 10px;
+  background: rgba(11, 18, 32, 0.88);
   color: #eaf1ff;
   font-family: var(--font-body);
-  font-size: 0.74rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  padding: 7px 10px;
-  min-width: 130px;
+  padding: 6px 8px;
+  min-width: 122px;
   cursor: pointer;
 }
 
 .landing .gradient-select:focus-visible {
   outline: 2px solid rgba(125, 211, 252, 0.7);
   outline-offset: 2px;
+}
+
+.landing[data-background-tone="light"] {
+  --ink: #151326;
+  --muted: rgba(39, 35, 62, 0.72);
+  --line: rgba(78, 61, 130, 0.18);
+}
+
+.landing[data-background-tone="light"] .nav {
+  background: rgba(255, 255, 255, 0.72);
+  border-bottom-color: rgba(78, 61, 130, 0.16);
+}
+
+.landing[data-background-tone="light"] .brand,
+.landing[data-background-tone="light"] .nav-links a {
+  color: #151326;
+}
+
+.landing[data-background-tone="light"] .gradient-select-wrapper {
+  background: rgba(255, 255, 255, 0.76);
+  border-color: rgba(78, 61, 130, 0.2);
+}
+
+.landing[data-background-tone="light"] .gradient-select-label {
+  color: rgba(39, 35, 62, 0.78);
+}
+
+.landing[data-background-tone="light"] .gradient-select {
+  color: #151326;
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(78, 61, 130, 0.26);
 }
 
 .landing .lang-toggle {
@@ -2757,6 +2805,11 @@
     min-width: 102px;
     font-size: 0.6rem;
     padding: 5px 8px;
+  }
+
+  .landing .gradient-select-label {
+    font-size: 0.56rem;
+    letter-spacing: 0.08em;
   }
 
   .landing .lang-button {
