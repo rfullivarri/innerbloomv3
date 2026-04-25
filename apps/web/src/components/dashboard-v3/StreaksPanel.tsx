@@ -21,6 +21,7 @@ import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { HABIT_ACHIEVEMENT_UPDATED_EVENT } from '../../lib/habitAchievementEvents';
 import { type AvatarProfile } from '../../lib/avatarProfile';
 import { resolveAvatarChipColor } from '../../lib/avatarChipPalette';
+import { GameModeChip, buildGameModeChip } from '../common/GameModeChip';
 import {
   DASHBOARD_SEGMENTED_BUTTON_ACTIVE,
   DASHBOARD_SEGMENTED_BUTTON_BASE,
@@ -32,6 +33,29 @@ export const FEATURE_STREAKS_PANEL_V1 = false;
 
 function cx(...values: Array<string | false | null | undefined>): string {
   return values.filter(Boolean).join(' ');
+}
+
+type GlowChipProps = {
+  glowPrimary: string;
+  glowSecondary: string;
+  children: ReactNode;
+  className?: string;
+  innerClassName?: string;
+  style?: CSSProperties;
+};
+
+function GlowChip({ glowPrimary, glowSecondary, children, className, innerClassName, style }: GlowChipProps) {
+  const chipStyle = {
+    '--glow-primary': glowPrimary,
+    '--glow-secondary': glowSecondary,
+    ...style,
+  } as CSSProperties;
+
+  return (
+    <span className={cx('glow-chip inline-flex', className)} style={chipStyle}>
+      <span className={cx('relative z-[1] inline-flex items-center', innerClassName)}>{children}</span>
+    </span>
+  );
 }
 
 interface LegacyStreaksPanelProps {
@@ -288,29 +312,6 @@ type DisplayTask = {
 
 const numberFormatter = new Intl.NumberFormat('es-AR');
 
-type GlowChipProps = {
-  glowPrimary: string;
-  glowSecondary: string;
-  children: ReactNode;
-  className?: string;
-  innerClassName?: string;
-  style?: CSSProperties;
-};
-
-function GlowChip({ glowPrimary, glowSecondary, children, className, innerClassName, style }: GlowChipProps) {
-  const chipStyle = {
-    '--glow-primary': glowPrimary,
-    '--glow-secondary': glowSecondary,
-    ...style,
-  } as CSSProperties;
-
-  return (
-    <span className={cx('glow-chip inline-flex', className)} style={chipStyle}>
-      <span className={cx('relative z-[1] inline-flex items-center', innerClassName)}>{children}</span>
-    </span>
-  );
-}
-
 function hexToRgba(hex: string, alpha: number): string {
   const normalized = hex.replace('#', '').trim();
   const expanded = normalized.length === 3
@@ -330,8 +331,8 @@ export function buildStreakModeChipVisual(avatarProfile?: AvatarProfile | null) 
   const chipColor = resolveAvatarChipColor(avatarProfile ?? null);
   return {
     accent: chipColor,
-    glowPrimary: hexToRgba(chipColor, 0.28),
-    glowSecondary: hexToRgba(chipColor, 0.14),
+    glowPrimary: hexToRgba(chipColor, 0.26),
+    glowSecondary: hexToRgba(chipColor, 0.12),
   };
 }
 
@@ -879,16 +880,8 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, avatarProfile, fo
   }));
   const daysConsecutiveText = (days: string) => t('dashboard.streaks.daysConsecutiveSr', { days });
   const modeChipVisual = buildStreakModeChipVisual(avatarProfile);
-  const modeChip = {
-    className: 'ib-streak-mode-chip',
-    glowPrimary: modeChipVisual.glowPrimary,
-    glowSecondary: modeChipVisual.glowSecondary,
-    innerClassName:
-      'ib-streak-mode-chip__inner gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]',
-  };
-  const modeChipStyle = {
-    '--ib-chip-accent': modeChipVisual.accent,
-  } as CSSProperties;
+  const modeChipBase = buildGameModeChip(normalizedMode, { avatarProfile });
+  const modeChipStyle = { ...modeChipBase.style, '--ib-chip-accent': modeChipVisual.accent } as CSSProperties;
 
   return (
     <>
@@ -898,15 +891,12 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, avatarProfile, fo
         className="text-sm leading-relaxed"
         rightSlot={
           <InfoDotTarget id="streaksGuide" placement="left" className="flex items-center gap-2">
-            <GlowChip
-              className={modeChip.className}
-              glowPrimary={modeChip.glowPrimary}
-              glowSecondary={modeChip.glowSecondary}
-              innerClassName={modeChip.innerClassName}
+            <GameModeChip
+              label={modeLabel}
+              animate={modeChipBase.animate}
               style={modeChipStyle}
-            >
-              {modeLabel}
-            </GlowChip>
+              className="ib-streak-mode-chip"
+            />
           </InfoDotTarget>
         }
       >

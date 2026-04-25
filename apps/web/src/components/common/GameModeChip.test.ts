@@ -40,11 +40,11 @@ describe('buildGameModeChip', () => {
     const chip = buildGameModeChip('Flow', { avatarProfile });
 
     expect(chip.label).toBe('FLOW');
-    expect(chip.style).toMatchObject({ '--ib-chip-accent': '#F87171' });
+    expect(chip.style).toMatchObject({ '--ib-chip-accent': '#F56767' });
   });
 
   it('uses safe legacy fallback accent when avatar is missing', () => {
     const chip = buildGameModeChip('Flow');
-    expect(chip.style).toMatchObject({ '--ib-chip-accent': '#38BDF8' });
+    expect(chip.style).toMatchObject({ '--ib-chip-accent': '#32AEE4' });
   });
 });

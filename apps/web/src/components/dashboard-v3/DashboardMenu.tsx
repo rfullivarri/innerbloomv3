@@ -957,9 +957,11 @@ export function DashboardMenu({
                         <span>{hasActiveUpgradeCta ? t('dashboard.menu.upgradeAvailable') : t('dashboard.menu.changeGameMode')}</span>
                         {hasActiveUpgradeCta ? <span className="rounded-full border border-black/20 bg-white/35 px-2 py-0.5 text-[10px] font-bold uppercase text-black shadow-[0_8px_20px_rgba(167,112,239,0.35)] backdrop-blur-sm">7d</span> : null}
                       </div>
-                      <span className="dashboard-menu-mode-chip [&_.ib-game-mode-chip__glow]:opacity-[0.08] [&_.ib-game-mode-chip__glow]:blur-[2px] [&_.ib-game-mode-chip__inner]:gap-0.5 [&_.ib-game-mode-chip__inner]:px-[0.4rem] [&_.ib-game-mode-chip__inner]:py-[0.12rem] [&_.ib-game-mode-chip__inner]:text-[7px] [&_.ib-game-mode-chip__inner]:tracking-[0.12em] [&_.ib-game-mode-chip__inner_span:first-child]:h-0.5 [&_.ib-game-mode-chip__inner_span:first-child]:w-0.5">
-                        <GameModeChip {...buildGameModeChip(normalizedCurrentMode ?? 'Flow', { avatarProfile: currentAvatarProfile })} />
-                      </span>
+                      <GameModeChip
+                        {...buildGameModeChip(normalizedCurrentMode ?? 'Flow', { avatarProfile: currentAvatarProfile })}
+                        size="compact"
+                        className="dashboard-menu-mode-chip"
+                      />
                     </button>
                     <div className="dashboard-menu-divider mx-3 h-px" aria-hidden />
                     <button
