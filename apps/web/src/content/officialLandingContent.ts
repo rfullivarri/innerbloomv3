@@ -59,9 +59,9 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     problem: {
       title: 'El problema no sos vos.',
       left:
-        'La mayoría de las apps de hábitos están diseñadas para una versión de vos que no existe:\n\nsiempre con la misma energía,\nel mismo foco y la misma disciplina.',
+        '✕ La mayoría de las apps de hábitos asumen que todos tus días tienen la misma energía.\n\n✕ Te piden la misma intensidad incluso cuando estás cansado o saturado.\n\n✕ Si no cumplís el plan rígido, te hacen sentir que vos fallaste.',
       right:
-        'Pero la vida cambia. Y cuando\nel sistema no cambia con vos,\n\nno se siente que el sistema falló:\nse siente que fallaste vos.'
+        '✓ Innerbloom parte de tu capacidad real de hoy, no de una versión idealizada tuya.\n\n✓ Ajusta tu carga semanal cuando cambia tu energía, tu foco o tu contexto.\n\n✓ Así sostenés el proceso en el tiempo y convertís constancia en hábitos reales.'
     },
     pillars: {
       kicker: 'PROGRESO EN EQUILIBRIO',
@@ -298,9 +298,9 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     problem: {
       title: 'You’re not the problem.',
       left:
-        'Most habit apps are designed\nfor a version of you that doesn’t exist:\n\nalways with the same energy,\nthe same focus, and the same discipline.',
+        '✕ Most habit apps assume you show up with the same energy every single day.\n\n✕ They demand the same intensity even when your week is heavy or unpredictable.\n\n✕ If you miss a rigid plan, the app makes it feel like you failed.',
       right:
-        'But life changes. And when\nthe system doesn’t change with you,\n\nit doesn’t feel like the system failed—\nit feels like you did.'
+        '✓ Innerbloom starts from your real capacity today, not an idealized version of you.\n\n✓ It adapts your weekly load as your energy, focus, and context change.\n\n✓ That helps you stay consistent long enough to build habits that actually last.'
     },
     pillars: {
       kicker: 'PROGRESS IN BALANCE',
