@@ -355,7 +355,7 @@ export function PreviewAchievementCard({
                   onClick={() => setIsScoreTooltipOpen((prev) => !prev)}
                   onFocus={() => setIsScoreTooltipOpen(true)}
                   aria-label={language === 'es' ? 'Qué significa este score' : 'What this score means'}
-                  className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white/60 bg-white/20 text-[8px] font-semibold text-white shadow-[0_7px_18px_rgba(8,12,24,0.52)] backdrop-blur-xl"
+                  className="inline-flex h-3 w-3 items-center justify-center rounded-full border border-white/60 bg-white/20 text-[7px] font-semibold text-white shadow-[0_7px_18px_rgba(8,12,24,0.52)] backdrop-blur-xl sm:h-3.5 sm:w-3.5 sm:text-[8px]"
                   data-testid="score-info-dot"
                   aria-describedby={isScoreTooltipOpen ? scoreTooltipId : undefined}
                 >
@@ -375,21 +375,21 @@ export function PreviewAchievementCard({
               )}
             </div>
             <div className={cx('relative flex items-center px-1 py-1', isCompact ? 'h-24 sm:h-28' : 'h-32 sm:h-36')} data-testid="score-range-rail" data-tour-anchor="achievement-preview-scale">
-              <div className={cx('relative h-full', isCompact ? 'w-[3.9rem]' : 'w-[4.25rem]')}>
-                <div className="absolute bottom-1 left-4 top-1 w-2 overflow-hidden rounded-full bg-[rgba(67,56,202,0.22)]">
+              <div className={cx('relative h-full', isCompact ? 'w-[3.35rem]' : 'w-[3.65rem]')}>
+                <div className="absolute bottom-1 left-3.5 top-1 w-2 overflow-hidden rounded-full bg-white/10">
                   <button
                     type="button"
-                    className="absolute inset-x-0 top-0 h-[20%] bg-gradient-to-b from-emerald-300/95 to-emerald-500/88 focus:outline-none"
+                    className="absolute inset-x-0 top-0 h-[20%] bg-emerald-400 focus:outline-none"
                     aria-label={rangeLabels.strong}
                   />
                   <button
                     type="button"
-                    className="absolute inset-x-0 top-[20%] h-[30%] bg-gradient-to-b from-amber-300/95 to-amber-500/88 focus:outline-none"
+                    className="absolute inset-x-0 top-[20%] h-[30%] bg-amber-400 focus:outline-none"
                     aria-label={rangeLabels.building}
                   />
                   <button
                     type="button"
-                    className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-b from-rose-300/95 to-rose-500/88 focus:outline-none"
+                    className="absolute inset-x-0 bottom-0 h-[50%] bg-rose-400 focus:outline-none"
                     aria-label={rangeLabels.fragile}
                   />
                   <span className="absolute inset-x-0 top-[20%] h-px bg-white/45" />
@@ -404,13 +404,13 @@ export function PreviewAchievementCard({
                 <span className="absolute left-0 top-[20%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">80</span>
                 <span className="absolute left-0 top-[50%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">50</span>
                 <span className="absolute left-0 bottom-0 text-[8px] text-[color:var(--color-slate-500)]">0</span>
-                <span className={cx('absolute top-[3%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.3rem]' : 'left-[2.45rem]')}>
+                <span className={cx('absolute top-[3%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[1.95rem]' : 'left-[2.05rem]')}>
                   {rangeLabels.strong}
                 </span>
-                <span className={cx('absolute top-[50%] -translate-y-1/2 text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.3rem]' : 'left-[2.45rem]')}>
+                <span className={cx('absolute top-[50%] -translate-y-1/2 text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[1.95rem]' : 'left-[2.05rem]')}>
                   {rangeLabels.building}
                 </span>
-                <span className={cx('absolute bottom-[3%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.3rem]' : 'left-[2.45rem]')}>
+                <span className={cx('absolute bottom-[3%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[1.95rem]' : 'left-[2.05rem]')}>
                   {rangeLabels.fragile}
                 </span>
               </div>
@@ -446,7 +446,7 @@ export function PreviewAchievementCard({
             <div className="w-full overflow-x-auto pb-2 pt-1" data-testid="recent-timeline" data-tour-anchor="achievement-preview-months">
               <div
                 className={cx(
-                  'flex items-end gap-1 md:gap-1.5',
+                  'flex items-end gap-0.5 md:gap-1',
                   shouldCenterRecentTimeline ? 'justify-center' : 'justify-start',
                   shouldUseOverflowTrack ? 'min-w-max' : 'w-full',
                 )}
@@ -457,7 +457,7 @@ export function PreviewAchievementCard({
                 ))}
                 {hasGroupedWindow && (
                   <div
-                    className="relative flex items-end gap-0.5 rounded-xl bg-indigo-400/10 px-1 pb-1 pt-[1.15rem] shadow-[0_0_18px_rgba(99,102,241,0.12)] sm:gap-1 md:gap-1.5"
+                    className="relative flex items-end gap-0.5 rounded-xl bg-indigo-400/10 px-0.5 pb-1 pt-[1.1rem] shadow-[0_0_18px_rgba(99,102,241,0.12)] sm:gap-1 md:gap-1"
                     data-testid="seal-window-group"
                     data-window-start={lastThreeStart}
                     data-window-end={lastThreeEnd - 1}
@@ -469,7 +469,7 @@ export function PreviewAchievementCard({
                     {groupedMonths.map((entry) => (
                       <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} compact={isCompact} />
                     ))}
-                    {groupedProjectedMonth && <span className="absolute -bottom-3 right-2 text-[9px] text-[color:var(--color-slate-400)]">{language === 'es' ? 'proyectado' : 'projected'}</span>}
+                    {groupedProjectedMonth && <span className="absolute -bottom-3 right-1 text-[9px] text-[color:var(--color-slate-400)]">{language === 'es' ? 'proyectado' : 'projected'}</span>}
                   </div>
                 )}
               </div>
