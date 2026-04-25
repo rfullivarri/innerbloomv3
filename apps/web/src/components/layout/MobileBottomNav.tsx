@@ -42,7 +42,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
         transform: "var(--mobile-bottom-nav-transform, none)",
       }}
     >
-      <ul className="flex w-full max-w-xl items-center justify-between gap-1 rounded-[1.75rem] border border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] px-2 py-1 shadow-[var(--shadow-elev-2)] backdrop-blur-2xl backdrop-saturate-150">
+      <ul className="ib-premium-nav flex w-full max-w-xl items-center justify-between gap-1 rounded-[1.75rem] px-2 py-1">
         {items.map((item) => (
           <li key={item.key} className="relative flex flex-1 justify-center">
             <NavLink
@@ -85,13 +85,14 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                         className={combine(
                           "relative z-10 flex h-7 w-7 items-center justify-center rounded-2xl text-[10px] shadow-[var(--shadow-elev-1)] transition-all duration-400 ease-out group-active:scale-95",
                           isDashboard ? "h-8 w-8 rounded-full" : null,
+                          "ib-premium-card-soft",
                           isDashboard
                             ? isActive
-                              ? "bg-[color:color-mix(in_srgb,var(--color-accent-secondary)_18%,var(--color-surface)_82%)] text-[color:color-mix(in_srgb,var(--color-accent-primary)_72%,var(--color-text)_28%)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-accent-secondary)_36%,transparent),0_12px_24px_color-mix(in_srgb,var(--color-accent-secondary)_20%,transparent)] dark:bg-[color:color-mix(in_srgb,var(--color-accent-secondary)_28%,var(--color-surface)_72%)] dark:text-[color:color-mix(in_srgb,#ffffff_86%,var(--color-accent-secondary)_14%)] dark:shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-accent-secondary)_42%,transparent),0_12px_26px_color-mix(in_srgb,var(--color-accent-secondary)_34%,transparent)]"
+                              ? "ib-premium-pill-active text-[color:color-mix(in_srgb,var(--color-accent-primary)_72%,var(--color-text)_28%)]"
                               : "bg-transparent text-[color:color-mix(in_srgb,var(--color-text-muted)_86%,transparent)] shadow-none"
                             : isActive
-                              ? "bg-[color:color-mix(in_srgb,var(--color-accent-primary)_18%,var(--color-surface)_82%)] text-[color:color-mix(in_srgb,var(--color-accent-primary)_76%,var(--color-text)_24%)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-accent-primary)_30%,transparent),0_10px_22px_color-mix(in_srgb,var(--color-accent-primary)_18%,transparent)] dark:bg-[color:color-mix(in_srgb,var(--color-accent-primary)_28%,var(--color-surface)_72%)] dark:text-[color:color-mix(in_srgb,#ffffff_84%,var(--color-accent-primary)_16%)] dark:shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-accent-primary)_36%,transparent),0_10px_24px_color-mix(in_srgb,var(--color-accent-primary)_30%,transparent)]"
-                              : "bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]",
+                              ? "ib-premium-pill-active text-[color:color-mix(in_srgb,var(--color-accent-primary)_76%,var(--color-text)_24%)]"
+                              : "text-[color:var(--color-text-muted)]",
                         )}
                       >
                         <span

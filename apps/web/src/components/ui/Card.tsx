@@ -56,13 +56,14 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
       role="region"
       aria-labelledby={labelledBy}
       className={combine(
-        "ib-card relative overflow-hidden rounded-ib-lg border border-[color:var(--color-card-border,var(--color-border-subtle))]",
+        "ib-card ib-premium-card relative overflow-hidden rounded-ib-lg",
         (variant === "default" || variant === "soft-surface") &&
           "ib-card--macro",
         variant === "default" &&
-          "bg-[image:var(--color-card-gradient)] backdrop-blur-md shadow-[var(--color-card-shadow)]",
+          "ib-premium-card-soft",
         variant === "soft-surface" &&
-          "bg-[image:var(--color-card-gradient)] shadow-[var(--color-card-shadow)]",
+          "ib-premium-panel",
+        variant === "plain" && "border-0 bg-transparent shadow-none",
         className,
       )}
       data-card-variant={variant}
