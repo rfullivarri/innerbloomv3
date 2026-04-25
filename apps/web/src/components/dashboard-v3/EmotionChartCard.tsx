@@ -890,14 +890,27 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
       {(!showSkeleton && !showError && !showEmpty) || hasRecordedEmotion ? (
         <div className="flex flex-col gap-5">
-          <div className="flex flex-wrap gap-4 text-xs text-[color:var(--color-text-subtle)]">
+          <div
+            className="flex flex-wrap gap-4 text-xs text-[color:var(--color-text-subtle)]"
+            data-emotion-card="legend"
+          >
             {LEGEND.map((item) => (
-              <div key={getEmotionLabel(item.name, language)} className="flex items-center gap-2">
+              <div
+                key={getEmotionLabel(item.name, language)}
+                className="flex items-center gap-2"
+                data-emotion-card="legend-item"
+              >
                 <span
                   className="h-4 w-4 rounded-md border border-[color:var(--color-border-subtle)]"
+                  data-emotion-card="legend-swatch"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="font-medium text-[color:var(--color-text)]">{getEmotionLabel(item.name, language)}</span>
+                <span
+                  className="font-medium text-[color:var(--color-text)]"
+                  data-emotion-card="legend-label"
+                >
+                  {getEmotionLabel(item.name, language)}
+                </span>
               </div>
             ))}
           </div>
