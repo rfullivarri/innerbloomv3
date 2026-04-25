@@ -6565,9 +6565,76 @@
       -webkit-text-fill-color: #ffffff;
     }
   }
+  [data-light-scope="daily-quest"].ib-daily-quest-shell {
+    color: var(--color-text);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-image: linear-gradient(
+      180deg,
+      rgba(11, 15, 20, 0.97),
+      rgba(5, 7, 11, 0.98)
+    );
+    box-shadow:
+      0 34px 82px rgba(0, 0, 0, 0.56),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  [data-light-scope="daily-quest"] .ib-daily-quest-header,
+  [data-light-scope="daily-quest"] .ib-daily-quest-footer {
+    border-color: rgba(255, 255, 255, 0.07);
+    background-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.03),
+      rgba(255, 255, 255, 0.015)
+    );
+  }
+
+  [data-light-scope="daily-quest"] .ib-daily-quest-surface,
+  [data-light-scope="daily-quest"] .ib-daily-quest-task-row,
+  [data-light-scope="daily-quest"] .ib-daily-quest-secondary-btn,
+  [data-light-scope="daily-quest"] .ib-daily-quest-close-btn,
+  [data-light-scope="daily-quest"] .ib-daily-quest-emotion-chip--inactive {
+    border-color: rgba(255, 255, 255, 0.08);
+    background-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.03),
+      rgba(255, 255, 255, 0.015)
+    );
+  }
+
+  [data-light-scope="daily-quest"] .ib-daily-quest-task-row:hover,
+  [data-light-scope="daily-quest"] .ib-daily-quest-secondary-btn:hover,
+  [data-light-scope="daily-quest"] .ib-daily-quest-close-btn:hover,
+  [data-light-scope="daily-quest"] .ib-daily-quest-emotion-chip--inactive:hover {
+    background-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.09),
+      rgba(255, 255, 255, 0.04)
+    );
+  }
+
+  [data-light-scope="daily-quest"] .ib-daily-quest-task-row--selected {
+    background-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.12),
+      rgba(255, 255, 255, 0.05)
+    );
+  }
+
+  [data-light-scope="daily-quest"] .ib-daily-quest-emotion-chip {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
   :root[data-theme="light"] [data-light-scope="daily-quest"] {
     color: var(--color-text);
-    box-shadow: 0 24px 52px rgba(15, 23, 42, 0.12);
+    border-color: rgba(15, 23, 42, 0.08);
+    background-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.96),
+      rgba(246, 248, 251, 0.93)
+    );
+    box-shadow:
+      0 24px 52px rgba(15, 23, 42, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
   :root[data-theme="light"]
@@ -6580,6 +6647,86 @@
     [data-light-scope="daily-quest"]
     [class*="border-white/"] {
     border-color: var(--color-border-subtle);
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="daily-quest"]
+    .ib-daily-quest-header,
+  :root[data-theme="light"]
+    [data-light-scope="daily-quest"]
+    .ib-daily-quest-footer {
+    border-color: rgba(15, 23, 42, 0.08);
+    background-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.95),
+      rgba(248, 250, 252, 0.9)
+    );
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="daily-quest"]
+    .ib-daily-quest-surface,
+  :root[data-theme="light"]
+    [data-light-scope="daily-quest"]
+    .ib-daily-quest-task-row,
+  :root[data-theme="light"]
+    [data-light-scope="daily-quest"]
+    .ib-daily-quest-secondary-btn,
+  :root[data-theme="light"]
+    [data-light-scope="daily-quest"]
+    .ib-daily-quest-close-btn,
+  :root[data-theme="light"]
+    [data-light-scope="daily-quest"]
+    .ib-daily-quest-emotion-chip--inactive {
+    border-color: rgba(15, 23, 42, 0.08);
+    background-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.95),
+      rgba(248, 250, 252, 0.9)
+    );
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="daily-quest"]
+    .ib-daily-quest-task-row:hover,
+  :root[data-theme="light"]
+    [data-light-scope="daily-quest"]
+    .ib-daily-quest-secondary-btn:hover,
+  :root[data-theme="light"]
+    [data-light-scope="daily-quest"]
+    .ib-daily-quest-close-btn:hover,
+  :root[data-theme="light"]
+    [data-light-scope="daily-quest"]
+    .ib-daily-quest-emotion-chip--inactive:hover {
+    background-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 1),
+      rgba(243, 245, 249, 0.95)
+    );
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="daily-quest"]
+    .ib-daily-quest-task-row--selected {
+    background-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 1),
+      rgba(239, 243, 250, 0.95)
+    );
+  }
+
+  :root[data-theme="light"]
+    [data-light-scope="daily-quest"]
+    .ib-daily-quest-emotion-chip {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .metric-header-divider {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  :root[data-theme="light"] .metric-header-divider {
+    background: rgba(15, 23, 42, 0.1);
   }
 
   :root[data-theme="light"]

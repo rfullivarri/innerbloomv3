@@ -138,28 +138,26 @@ export function MetricHeader({
       {showContent && (
         <div className="flex flex-col gap-6">
           <div className="space-y-3">
-            <div className="flex flex-wrap items-center justify-center gap-6 text-[color:var(--color-text-muted)]">
-              <div className="flex items-center gap-3">
-                <span className="text-[2.5em] leading-none">🏆</span>
-                <div className="flex flex-col items-center text-center">
-                  <span className="text-4xl font-semibold text-[color:var(--color-text)] sm:text-5xl">
-                    {totalXpLabel}
-                  </span>
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-subtle)]">
-                    Total GP
-                  </span>
-                </div>
+            <div className="grid grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] items-center justify-items-center gap-4 text-[color:var(--color-text-muted)] sm:gap-6">
+              <div className="flex w-full flex-col items-center text-center">
+                <span className="text-4xl font-semibold text-[color:var(--color-text)] sm:text-5xl">
+                  {totalXpLabel}
+                </span>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-subtle)]">
+                  Total GP
+                </span>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-[2.5em] leading-none">🎯</span>
-                <div className="flex flex-col items-center text-center">
-                  <span className="text-4xl font-semibold text-[color:var(--color-text)] sm:text-5xl">
-                    {levelLabel}
-                  </span>
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-subtle)]">
-                    {t("dashboard.metricHeader.level")}
-                  </span>
-                </div>
+              <span
+                aria-hidden="true"
+                className="metric-header-divider h-11 w-px rounded-full"
+              />
+              <div className="flex w-full flex-col items-center text-center">
+                <span className="text-4xl font-semibold text-[color:var(--color-text)] sm:text-5xl">
+                  {levelLabel}
+                </span>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-subtle)]">
+                  {t("dashboard.metricHeader.level")}
+                </span>
               </div>
             </div>
           </div>
