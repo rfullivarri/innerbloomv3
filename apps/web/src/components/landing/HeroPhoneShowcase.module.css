@@ -226,6 +226,8 @@
   border-radius: 30px;
   display: grid;
   place-items: center;
+  box-sizing: border-box;
+  padding-inline: clamp(12px, 5.5%, 18px);
   overflow: hidden;
   background:
     radial-gradient(
@@ -263,11 +265,13 @@
 
 .loopSplashLockup {
   position: relative;
-  width: min(84%, 260px);
+  width: min(100%, 320px);
+  max-width: 100%;
   min-height: 40%;
   --loop-splash-wordmark-width: 188px;
   --loop-splash-lockup-gap: 12px;
   --loop-splash-flower-shift-x: 90px;
+  --loop-splash-wordmark-shift-x: 10px;
 }
 
 .loopSplashFlower {
@@ -290,7 +294,8 @@
   position: absolute;
   top: 50%;
   left: calc(
-    50% - var(--loop-splash-lockup-gap) - var(--loop-splash-wordmark-width)
+    50% - var(--loop-splash-lockup-gap) - var(--loop-splash-wordmark-width) +
+      var(--loop-splash-wordmark-shift-x)
   );
   display: inline-flex;
   align-items: center;
