@@ -846,10 +846,6 @@ export default function LandingPage() {
               {copy.problem.title}
             </AdaptiveText>
 
-            <div className="problem-flow-visual" aria-hidden>
-              <img src="/problem-adaptive-flow.png" alt="" loading="lazy" />
-            </div>
-
             <div className="truth-problem-body">
               <AdaptiveText as="p" className="truth-problem-block truth-problem-block--left">
                 <span className="truth-problem-icon truth-problem-icon--x" aria-hidden>
