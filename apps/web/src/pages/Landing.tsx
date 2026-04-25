@@ -846,17 +846,84 @@ export default function LandingPage() {
               {copy.problem.title}
             </AdaptiveText>
 
-            <div className="problem-flow-visual" aria-hidden>
-              <img
-                src="/problem-adaptive-flow.png"
-                alt=""
-                loading="lazy"
-              />
+            <div className="problem-visual-stage" aria-hidden>
+              <div className="problem-grid">
+                {Array.from({ length: 36 }).map((_, index) => (
+                  <span
+                    key={`problem-grid-cell-${index}`}
+                    className="problem-grid-cell"
+                  >
+                    {index % 5 === 0 || index % 7 === 0 ? "✓" : ""}
+                  </span>
+                ))}
+              </div>
+
+              <svg
+                className="problem-flow problem-flow-svg"
+                viewBox="0 0 1440 560"
+                role="presentation"
+                focusable="false"
+              >
+                <defs>
+                  <linearGradient id="problem-flow-band-1" x1="0%" y1="90%" x2="100%" y2="14%">
+                    <stop offset="0%" stopColor="rgba(114, 170, 255, 0.06)" />
+                    <stop offset="45%" stopColor="rgba(139, 198, 255, 0.32)" />
+                    <stop offset="100%" stopColor="rgba(189, 150, 255, 0.26)" />
+                  </linearGradient>
+                  <linearGradient id="problem-flow-band-2" x1="2%" y1="85%" x2="100%" y2="10%">
+                    <stop offset="0%" stopColor="rgba(118, 164, 255, 0.04)" />
+                    <stop offset="52%" stopColor="rgba(153, 206, 255, 0.28)" />
+                    <stop offset="100%" stopColor="rgba(255, 179, 160, 0.24)" />
+                  </linearGradient>
+                  <linearGradient id="problem-flow-band-3" x1="0%" y1="88%" x2="98%" y2="4%">
+                    <stop offset="0%" stopColor="rgba(102, 145, 240, 0.03)" />
+                    <stop offset="54%" stopColor="rgba(134, 178, 255, 0.22)" />
+                    <stop offset="100%" stopColor="rgba(178, 132, 255, 0.2)" />
+                  </linearGradient>
+                </defs>
+                <path
+                  className="flow-band band-1"
+                  d="M 120 486 C 312 450, 456 328, 632 300 C 796 274, 882 192, 1012 170 C 1128 148, 1242 70, 1368 42"
+                  stroke="url(#problem-flow-band-1)"
+                />
+                <path
+                  className="flow-band band-2"
+                  d="M 138 520 C 320 474, 462 352, 664 334 C 842 318, 938 236, 1064 210 C 1176 188, 1274 124, 1402 92"
+                  stroke="url(#problem-flow-band-2)"
+                />
+                <path
+                  className="flow-band band-3"
+                  d="M 92 454 C 262 420, 412 298, 598 260 C 758 228, 858 164, 996 132 C 1118 104, 1236 48, 1366 22"
+                  stroke="url(#problem-flow-band-3)"
+                />
+              </svg>
+
+              <div className="problem-flow">
+                <span className="flow-band band-1" />
+                <span className="flow-band band-2" />
+                <span className="flow-band band-3" />
+                <span className="flow-band band-4" />
+                <span className="flow-glow glow-1" />
+                <span className="flow-glow glow-2" />
+                <span className="flow-glow glow-3" />
+              </div>
             </div>
 
-            <AdaptiveText as="p" className="section-sub truth-problem-body">
-              {renderMultilineText(copy.problem.body)}
-            </AdaptiveText>
+            <div className="truth-problem-body">
+              <AdaptiveText as="p" className="truth-problem-block truth-problem-block--left">
+                <span className="truth-problem-icon truth-problem-icon--x" aria-hidden>
+                  ×
+                </span>
+                <span>{renderMultilineText(copy.problem.left)}</span>
+              </AdaptiveText>
+              <div className="truth-problem-divider" aria-hidden />
+              <AdaptiveText as="p" className="truth-problem-block truth-problem-block--right">
+                <span className="truth-problem-icon truth-problem-icon--check" aria-hidden>
+                  ✓
+                </span>
+                <span>{renderMultilineText(copy.problem.right)}</span>
+              </AdaptiveText>
+            </div>
           </div>
         </section>
 
