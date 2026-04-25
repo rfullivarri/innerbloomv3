@@ -310,15 +310,31 @@ function RealDashboardScene({
 }
 
 function LoopSplashScene() {
+  const brandCharacters = "INNERBLOOM".split("");
+
   return (
     <section className={styles.loopSplashScene} aria-hidden>
-      <img
-        src="/IB-COLOR-LOGO.png"
-        alt=""
-        className={styles.loopSplashFlower}
-        loading="eager"
-        decoding="async"
-      />
+      <div className={styles.loopSplashDepthGlow} />
+      <div className={styles.loopSplashLockup}>
+        <img
+          src="/IB-COLOR-LOGO.png"
+          alt=""
+          className={styles.loopSplashFlower}
+          loading="eager"
+          decoding="async"
+        />
+        <p className={styles.loopSplashWordmark}>
+          {brandCharacters.map((character, index) => (
+            <span
+              key={`${character}-${index}`}
+              className={styles.loopSplashWordmarkLetter}
+              style={{ "--letter-delay": `${index * 28}ms` } as CSSProperties}
+            >
+              {character}
+            </span>
+          ))}
+        </p>
+      </div>
     </section>
   );
 }
