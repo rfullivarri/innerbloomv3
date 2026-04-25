@@ -50,6 +50,12 @@ function resolveDashboardProgress(elapsedInLoop: number) {
       LOOP_BOTTOM_PAUSE_MS +
       LOOP_SPLASH_DURATION_MS
   ) {
+    const splashElapsed =
+      elapsedInLoop - INITIAL_TOP_PAUSE_MS - SCROLL_DOWN_DURATION_MS - LOOP_BOTTOM_PAUSE_MS;
+    const hiddenResetDuration = Math.min(720, LOOP_SPLASH_DURATION_MS * 0.26);
+    if (splashElapsed <= hiddenResetDuration) {
+      return 1 - splashElapsed / hiddenResetDuration;
+    }
     return 0;
   }
   if (
@@ -315,25 +321,27 @@ function LoopSplashScene() {
   return (
     <section className={styles.loopSplashScene} aria-hidden>
       <div className={styles.loopSplashDepthGlow} />
-      <div className={styles.loopSplashLockup}>
-        <img
-          src="/IB-COLOR-LOGO.png"
-          alt=""
-          className={styles.loopSplashFlower}
-          loading="eager"
-          decoding="async"
-        />
-        <p className={styles.loopSplashWordmark}>
-          {brandCharacters.map((character, index) => (
-            <span
-              key={`${character}-${index}`}
-              className={styles.loopSplashWordmarkLetter}
-              style={{ "--letter-delay": `${index * 92}ms` } as CSSProperties}
-            >
-              {character}
-            </span>
-          ))}
-        </p>
+      <div className={styles.loopSplashLockupShell}>
+        <div className={styles.loopSplashLockup}>
+          <p className={styles.loopSplashWordmark}>
+            {brandCharacters.map((character, index) => (
+              <span
+                key={`${character}-${index}`}
+                className={styles.loopSplashWordmarkLetter}
+                style={{ "--letter-delay": `${index * 92}ms` } as CSSProperties}
+              >
+                {character}
+              </span>
+            ))}
+          </p>
+          <img
+            src="/IB-COLOR-LOGO.png"
+            alt=""
+            className={styles.loopSplashFlower}
+            loading="eager"
+            decoding="async"
+          />
+        </div>
       </div>
     </section>
   );
