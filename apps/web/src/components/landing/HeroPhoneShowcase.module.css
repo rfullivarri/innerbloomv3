@@ -244,7 +244,7 @@
   z-index: 9;
   opacity: 0;
   transform-origin: center center;
-  animation: loopSplashOverlay 3900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: loopSplashOverlay 4400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .loopSplashDepthGlow {
@@ -263,7 +263,7 @@
       transparent 80%
     );
   opacity: 0;
-  animation: loopSplashGlow 3900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: loopSplashGlow 4400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .loopSplashLockup {
@@ -273,11 +273,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(10px, 2vw, 14px);
+  gap: clamp(5px, 1vw, 7px);
   padding-inline: clamp(4px, 1.8vw, 10px);
   box-sizing: border-box;
   transform-origin: center center;
-  animation: loopSplashLockupOutro 3900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: loopSplashLockupOutro 4400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .loopSplashLockupShell {
@@ -298,7 +298,7 @@
   filter:
     drop-shadow(0 14px 26px rgba(0, 0, 0, 0.45))
     drop-shadow(0 0 18px rgba(165, 119, 236, 0.28));
-  animation: loopSplashFlower 3900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: loopSplashFlower 4400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .loopSplashWordmark {
@@ -310,7 +310,7 @@
   max-width: calc(100% - clamp(62px, 20vw, 76px));
   overflow: hidden;
   white-space: nowrap;
-  font-size: clamp(0.66rem, 1.02vw, 0.84rem);
+  font-size: clamp(0.825rem, 1.275vw, 1.05rem);
   font-weight: 700;
   letter-spacing: 0.11em;
   text-transform: uppercase;
@@ -320,7 +320,7 @@
     0 0 1px rgba(255, 255, 255, 0.4);
   opacity: 0;
   clip-path: inset(0 100% 0 0 round 2px);
-  animation: loopSplashWordmarkReveal 3900ms cubic-bezier(0.22, 1, 0.36, 1)
+  animation: loopSplashWordmarkReveal 4400ms cubic-bezier(0.22, 1, 0.36, 1)
     forwards;
 }
 
