@@ -565,10 +565,7 @@
   position: relative;
   overflow: hidden;
   padding: clamp(68px, 7.6vw, 98px) 0 clamp(56px, 6.4vw, 84px);
-  background:
-    radial-gradient(circle at 16% 72%, rgba(26, 52, 118, 0.36), transparent 54%),
-    radial-gradient(circle at 88% 14%, rgba(70, 40, 140, 0.28), transparent 56%),
-    linear-gradient(166deg, rgba(8, 12, 34, 0.96), rgba(10, 16, 45, 0.98) 42%, rgba(12, 17, 42, 0.98));
+  background: linear-gradient(166deg, rgba(8, 12, 34, 0.96), rgba(10, 16, 45, 0.98) 42%, rgba(12, 17, 42, 0.98));
 }
 
 .landing .truth-problem-section {
@@ -602,35 +599,15 @@
   margin-bottom: 0;
   font-size: clamp(2.1rem, 1.95vw + 1.3rem, 3.05rem);
   line-height: 1.06;
-  position: relative;
-  z-index: 3;
-}
-
-.landing .problem-flow-visual {
-  width: min(100%, 920px);
-  margin: clamp(2px, 0.45vw, 10px) auto 0;
-  border-radius: 20px;
-  overflow: hidden;
-  border: 1px solid rgba(138, 177, 243, 0.26);
-  background: rgba(10, 17, 42, 0.72);
-  box-shadow: 0 22px 40px rgba(4, 8, 20, 0.34);
-}
-
-.landing .problem-flow-visual img {
-  display: block;
-  width: 100%;
-  height: auto;
 }
 
 .landing .truth-problem-body {
   width: min(900px, 100%);
-  margin: clamp(8px, 1vw, 14px) auto 0;
+  margin: clamp(12px, 1.5vw, 22px) auto 0;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   gap: clamp(14px, 1.7vw, 24px);
   align-items: stretch;
-  position: relative;
-  z-index: 4;
 }
 
 .landing .truth-problem-block {
@@ -678,10 +655,6 @@
   .landing .truth-problem-title--outside {
     max-width: 10ch;
     font-size: clamp(1.95rem, 7.2vw, 2.8rem);
-  }
-
-  .landing .problem-flow-visual {
-    border-radius: 16px;
   }
 
   .landing .truth-problem-body {
