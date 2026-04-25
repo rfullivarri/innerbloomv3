@@ -330,8 +330,8 @@ export function buildStreakModeChipVisual(avatarProfile?: AvatarProfile | null) 
   const chipColor = resolveAvatarChipColor(avatarProfile ?? null);
   return {
     accent: chipColor,
-    glowPrimary: hexToRgba(chipColor, 0.66),
-    glowSecondary: hexToRgba(chipColor, 0.36),
+    glowPrimary: hexToRgba(chipColor, 0.28),
+    glowSecondary: hexToRgba(chipColor, 0.14),
   };
 }
 
