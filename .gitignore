@@ -16,3 +16,4 @@ coverage
 *.keystore
 apps/mobile/android/keystore.properties
 apps/mobile/android/.idea/
+apps/mobile/ios/build/
