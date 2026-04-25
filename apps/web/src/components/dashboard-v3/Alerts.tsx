@@ -10,6 +10,7 @@ interface AlertsProps {
   tasksStatus: AsyncStatus;
   journeyStatus: AsyncStatus;
   journey: UserJourneySummary | null;
+  dailyQuestScheduled?: boolean;
   showOnboardingGuidance?: boolean;
   onScheduleClick?: () => void;
   suppressJourneyPreparing?: boolean;
@@ -31,6 +32,7 @@ export function Alerts({
   tasksStatus,
   journeyStatus,
   journey,
+  dailyQuestScheduled = false,
   showOnboardingGuidance,
   onScheduleClick,
   suppressJourneyPreparing = false,
@@ -41,6 +43,7 @@ export function Alerts({
     hasTasks &&
     firstTasksConfirmed &&
     completedFirstDailyQuest &&
+    !dailyQuestScheduled &&
     shouldShowSchedulerWarning(journey);
   const canSchedule = typeof onScheduleClick === 'function';
 

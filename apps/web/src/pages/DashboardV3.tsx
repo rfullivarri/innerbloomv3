@@ -1026,6 +1026,7 @@ export default function DashboardV3Page() {
                       shouldShowFirstDailyQuestCta={shouldShowFirstDailyQuestCta}
                       onOpenDailyQuest={handleOpenDaily}
                       showOnboardingCompletionBanner={showOnboardingCompletionBanner}
+                      dailyQuestScheduled={Boolean(onboardingProgress.progress?.daily_quest_scheduled_at)}
                       onUpgradeAccepted={handleUpgradeAccepted}
                     />
                   }
@@ -1171,6 +1172,7 @@ interface DashboardOverviewProps {
   shouldShowFirstDailyQuestCta: boolean;
   onOpenDailyQuest: () => void;
   showOnboardingCompletionBanner: boolean;
+  dailyQuestScheduled: boolean;
   onUpgradeAccepted: (nextMode: string | null) => void;
 }
 
@@ -1189,6 +1191,7 @@ export function DashboardOverview({
   shouldShowFirstDailyQuestCta,
   onOpenDailyQuest,
   showOnboardingCompletionBanner,
+  dailyQuestScheduled,
   onUpgradeAccepted,
 }: DashboardOverviewProps) {
   const trackedPanelInteractionsRef = useRef<Set<"balance" | "streaks">>(
@@ -1275,6 +1278,7 @@ export function DashboardOverview({
             tasksStatus={dailyQuestReadiness.tasksStatus}
             journeyStatus={dailyQuestReadiness.journeyStatus}
             journey={dailyQuestReadiness.journey}
+            dailyQuestScheduled={dailyQuestScheduled}
             showOnboardingGuidance={showOnboardingGuidance}
             onScheduleClick={handleScheduleClick}
             suppressJourneyPreparing={journeyReadyOpen}

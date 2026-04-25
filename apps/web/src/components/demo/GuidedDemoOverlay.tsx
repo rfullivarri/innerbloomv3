@@ -529,15 +529,11 @@ export function GuidedDemoOverlay({
     ?? (step.id === 'tour-end'
       ? (language === 'es' ? 'Seguir explorando' : 'Keep exploring')
       : (language === 'es' ? 'Anterior' : 'Back'));
-  const walkthroughButtonSizeClass = isCompactMobile
-    ? 'min-h-7 min-w-0 w-full px-1.5 py-1 text-[8px] tracking-[0.06em]'
-    : 'min-h-8 px-3 py-1.5 text-[11px] tracking-[0.12em]';
-  const buttonRowClass = isCompactMobile && !isLast
-    ? 'mt-3 grid grid-cols-3 gap-1 min-w-0'
-    : `flex flex-wrap items-center ${isCompactMobile ? 'mt-3 gap-1.5' : 'mt-4 gap-2'}`;
+  const walkthroughButtonSizeClass = 'min-h-8 shrink-0 whitespace-nowrap px-3 py-1.5 text-[11px] tracking-[0.12em]';
+  const buttonRowClass = `flex flex-wrap items-center ${isCompactMobile ? 'mt-3 gap-1.5' : 'mt-4 gap-2'}`;
   const secondaryButtonClass = `inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] font-semibold uppercase text-[color:var(--color-text)] transition hover:border-[color:var(--color-text)]/55 hover:bg-[color:var(--color-overlay-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)] disabled:opacity-40 ${walkthroughButtonSizeClass}`;
-  const primaryButtonClass = `ib-primary-button !min-h-0 !font-semibold !uppercase focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${isCompactMobile ? '!px-2 !py-1 !text-[8px] !tracking-[0.08em]' : '!px-3 !py-1.5 !text-[11px] !tracking-[0.12em]'} ${walkthroughButtonSizeClass}`;
-  const tertiaryButtonClass = `${isCompactMobile ? 'px-1 py-1 text-[8px] tracking-[0.06em]' : 'px-1.5 py-1 text-[11px] tracking-[0.12em]'} inline-flex items-center justify-center font-semibold uppercase text-[color:var(--color-text-muted)] transition hover:text-[color:var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)] rounded-full`;
+  const primaryButtonClass = `ib-primary-button !min-h-8 !shrink-0 !whitespace-nowrap !px-3 !py-1.5 !text-[11px] !font-semibold !uppercase !tracking-[0.12em] focus-visible:ring-offset-[color:var(--color-surface-elevated)]`;
+  const tertiaryButtonClass = 'inline-flex min-h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-full px-1.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-text-muted)] transition hover:text-[color:var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)]';
   const overlayZClass = isDailyQuestStep ? 'z-[10020]' : 'z-[520]';
   const goToPreviousStep = () => {
     if (canGoBack && !isTransitioningStep) {
