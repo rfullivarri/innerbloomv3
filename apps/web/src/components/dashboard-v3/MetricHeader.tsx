@@ -96,17 +96,17 @@ export function MetricHeader({
       className="ib-metric-header-card"
       title={t("dashboard.metricHeader.title")}
       rightSlot={
-        <div className="flex items-start justify-end gap-2 sm:gap-3 -mt-1">
-          {chipStyle ? <GameModeChip {...chipStyle} /> : null}
+        <div className="metric-header-right-slot flex items-center justify-end gap-1.5 sm:gap-2.5 -mt-0.5">
           <InfoDotTarget
             id="xpLevel"
             placement="left"
-            className="inline-flex items-center"
+            className="metric-header-info-dot inline-flex items-center"
           >
             <span className="sr-only">
               {t("dashboard.metricHeader.infoAria")}
             </span>
           </InfoDotTarget>
+          {chipStyle ? <GameModeChip {...chipStyle} /> : null}
         </div>
       }
       subtitle={subtitle}
@@ -165,7 +165,7 @@ export function MetricHeader({
           </div>
 
           <div className="space-y-3">
-            <DashboardMeta className="tracking-[0.02em] text-[color:var(--color-text)]">
+            <DashboardMeta className="text-left tracking-[0.02em] text-[color:var(--color-text)]">
               {t("dashboard.metricHeader.progress")}
             </DashboardMeta>
             <div

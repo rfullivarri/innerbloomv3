@@ -14,7 +14,7 @@ import styles from "./HeroPhoneShowcase.module.css";
 const INITIAL_TOP_PAUSE_MS = 500;
 const SCROLL_DOWN_DURATION_MS = 4500;
 const LOOP_BOTTOM_PAUSE_MS = 1600;
-const LOOP_SPLASH_DURATION_MS = 1300;
+const LOOP_SPLASH_DURATION_MS = 3900;
 const RESET_TO_TOP_DURATION_MS = 300;
 const LOOP_TOP_PAUSE_MS = 350;
 const DASHBOARD_LOOP_DURATION_MS =
@@ -328,7 +328,7 @@ function LoopSplashScene() {
             <span
               key={`${character}-${index}`}
               className={styles.loopSplashWordmarkLetter}
-              style={{ "--letter-delay": `${index * 28}ms` } as CSSProperties}
+              style={{ "--letter-delay": `${index * 92}ms` } as CSSProperties}
             >
               {character}
             </span>
