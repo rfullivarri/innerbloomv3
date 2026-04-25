@@ -1,6 +1,6 @@
 .phoneFrame {
   --hero-phone-safe-top: 74px;
-  width: min(100%, 342px);
+  width: min(100%, 306px);
   aspect-ratio: 9 / 18.5;
   border-radius: 42px;
   background: linear-gradient(160deg, #2d2738 0%, #0b0d13 55%, #111c2f 100%);
@@ -13,6 +13,14 @@
   transform: perspective(1300px) rotateY(-1.35deg) rotateX(0.4deg);
   transform-origin: center center;
   position: relative;
+}
+
+.phoneScreenBackground {
+  position: absolute;
+  inset: 10px;
+  border-radius: 30px;
+  background: var(--hero-purple-afternoon, #000c40);
+  pointer-events: none;
 }
 
 .phoneIsland {
@@ -156,6 +164,22 @@
       transparent 58%
     ),
     linear-gradient(180deg, #10172d 0%, #090f22 100%);
+}
+
+.loopSplashScene {
+  position: absolute;
+  inset: 10px;
+  border-radius: 30px;
+  display: grid;
+  place-items: center;
+  background: var(--hero-purple-afternoon, #000c40);
+  z-index: 9;
+}
+
+.loopSplashFlower {
+  width: clamp(74px, 32%, 108px);
+  height: auto;
+  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.35));
 }
 
 .sceneTrack {
@@ -768,7 +792,7 @@
   }
 
   .phoneFrame {
-    width: min(100%, 340px);
+    width: min(100%, 300px);
     transform: none;
   }
 }

@@ -2,22 +2,26 @@ import {
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
   type RefObject,
 } from "react";
 import { setDashboardDemoModeEnabled } from "../../lib/demoMode";
+import { OFFICIAL_DESIGN_TOKENS } from "../../content/officialDesignTokens";
 import { DemoDashboardOverviewScene } from "../demo/DemoDashboardOverviewScene";
 import styles from "./HeroPhoneShowcase.module.css";
 
 const INITIAL_TOP_PAUSE_MS = 500;
 const SCROLL_DOWN_DURATION_MS = 4500;
-const LOOP_BOTTOM_PAUSE_MS = 950;
+const LOOP_BOTTOM_PAUSE_MS = 1600;
+const LOOP_SPLASH_DURATION_MS = 1300;
 const RESET_TO_TOP_DURATION_MS = 300;
 const LOOP_TOP_PAUSE_MS = 350;
 const DASHBOARD_LOOP_DURATION_MS =
   INITIAL_TOP_PAUSE_MS +
   SCROLL_DOWN_DURATION_MS +
   LOOP_BOTTOM_PAUSE_MS +
+  LOOP_SPLASH_DURATION_MS +
   RESET_TO_TOP_DURATION_MS +
   LOOP_TOP_PAUSE_MS;
 
@@ -44,32 +48,49 @@ function resolveDashboardProgress(elapsedInLoop: number) {
     INITIAL_TOP_PAUSE_MS +
       SCROLL_DOWN_DURATION_MS +
       LOOP_BOTTOM_PAUSE_MS +
+      LOOP_SPLASH_DURATION_MS
+  ) {
+    return 0;
+  }
+  if (
+    elapsedInLoop <
+    INITIAL_TOP_PAUSE_MS +
+      SCROLL_DOWN_DURATION_MS +
+      LOOP_BOTTOM_PAUSE_MS +
+      LOOP_SPLASH_DURATION_MS +
       RESET_TO_TOP_DURATION_MS
   ) {
     const resetElapsed =
       elapsedInLoop -
       INITIAL_TOP_PAUSE_MS -
       SCROLL_DOWN_DURATION_MS -
-      LOOP_BOTTOM_PAUSE_MS;
+      LOOP_BOTTOM_PAUSE_MS -
+      LOOP_SPLASH_DURATION_MS;
     return 1 - resetElapsed / RESET_TO_TOP_DURATION_MS;
   }
   return 0;
 }
 
+type HeroShowcasePhase = "dashboard" | "splash";
+
 function useHeroShowcaseTimeline({
   dashboardReady,
   isActive,
+  reducedMotion,
 }: {
   dashboardReady: boolean;
   isActive: boolean;
+  reducedMotion: boolean;
 }) {
   const [dashboardProgress, setDashboardProgress] = useState(0);
+  const [phase, setPhase] = useState<HeroShowcasePhase>("dashboard");
   const startedAtRef = useRef<number | null>(null);
   const pausedAtRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!dashboardReady) {
+    if (!dashboardReady || reducedMotion) {
       setDashboardProgress(0);
+      setPhase("dashboard");
       startedAtRef.current = null;
       pausedAtRef.current = null;
       return;
@@ -97,15 +118,26 @@ function useHeroShowcaseTimeline({
       const startedAt = startedAtRef.current ?? currentNow;
       const elapsed = Math.max(0, currentNow - startedAt);
       const elapsedInLoop = elapsed % DASHBOARD_LOOP_DURATION_MS;
+      const splashStart =
+        INITIAL_TOP_PAUSE_MS + SCROLL_DOWN_DURATION_MS + LOOP_BOTTOM_PAUSE_MS;
+      const splashEnd = splashStart + LOOP_SPLASH_DURATION_MS;
+      const nextPhase: HeroShowcasePhase =
+        elapsedInLoop >= splashStart && elapsedInLoop < splashEnd
+          ? "splash"
+          : "dashboard";
+      setPhase(nextPhase);
       setDashboardProgress(resolveDashboardProgress(elapsedInLoop));
       rafId = window.requestAnimationFrame(tick);
     };
 
     rafId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(rafId);
-  }, [dashboardReady, isActive]);
+  }, [dashboardReady, isActive, reducedMotion]);
 
-  return !dashboardReady ? 0 : dashboardProgress;
+  return {
+    dashboardProgress: !dashboardReady || reducedMotion ? 0 : dashboardProgress,
+    phase: !dashboardReady || reducedMotion ? "dashboard" : phase,
+  };
 }
 
 function PhoneFrame({
@@ -145,6 +177,13 @@ function PhoneTopBar({ sectionTitle }: { sectionTitle: string }) {
     </header>
   );
 }
+
+const purpleAfternoon =
+  OFFICIAL_DESIGN_TOKENS.gradients.find(
+    (gradient) => gradient.name === "purple_afternoon",
+  ) ?? OFFICIAL_DESIGN_TOKENS.gradients[0];
+const purpleAfternoonSolid =
+  purpleAfternoon.stops[0]?.trim().split(" ")[0] ?? "#000c40";
 
 function RealDashboardScene({
   scrollProgress,
@@ -270,15 +309,41 @@ function RealDashboardScene({
   );
 }
 
+function LoopSplashScene() {
+  return (
+    <section className={styles.loopSplashScene} aria-hidden>
+      <img
+        src="/IB-COLOR-LOGO.png"
+        alt=""
+        className={styles.loopSplashFlower}
+        loading="eager"
+        decoding="async"
+      />
+    </section>
+  );
+}
+
 export function HeroPhoneShowcase() {
   const [dashboardReady, setDashboardReady] = useState(false);
   const [demoDataReady, setDemoDataReady] = useState(false);
   const [isHeroActive, setIsHeroActive] = useState(true);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const phoneFrameRef = useRef<HTMLDivElement | null>(null);
-  const dashboardProgress = useHeroShowcaseTimeline({
+  const { dashboardProgress, phase } = useHeroShowcaseTimeline({
     dashboardReady,
     isActive: isHeroActive,
+    reducedMotion: prefersReducedMotion,
   });
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function")
+      return;
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setPrefersReducedMotion(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     setDashboardDemoModeEnabled(true);
@@ -308,6 +373,10 @@ export function HeroPhoneShowcase() {
 
   return (
     <PhoneFrame frameRef={phoneFrameRef}>
+      <div
+        className={styles.phoneScreenBackground}
+        style={{ "--hero-purple-afternoon": purpleAfternoonSolid } as CSSProperties}
+      />
       {demoDataReady ? (
         <RealDashboardScene
           scrollProgress={dashboardProgress}
@@ -320,6 +389,7 @@ export function HeroPhoneShowcase() {
           aria-hidden
         />
       )}
+      {phase === "splash" ? <LoopSplashScene /> : null}
     </PhoneFrame>
   );
 }
