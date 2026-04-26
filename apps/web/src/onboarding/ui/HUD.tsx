@@ -78,7 +78,7 @@ export function HUD({ language = 'es', mode, stepIndex, totalSteps, xp, highligh
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-40 border-b bg-white/10 backdrop-blur-2xl transition duration-200 ${
+      className={`onboarding-premium-shell fixed inset-x-0 top-0 z-40 border-b transition duration-200 ${
         highlighted
           ? 'border-sky-200/40 shadow-[0_14px_38px_rgba(8,57,104,0.35)] ring-1 ring-sky-200/30'
           : 'border-white/15'

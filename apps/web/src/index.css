@@ -21,6 +21,18 @@
     --onboarding-glass-border: rgba(255, 255, 255, 0.2);
     --onboarding-glass-border-soft: rgba(255, 255, 255, 0.12);
     --onboarding-glass-shadow: 0 26px 80px rgba(12, 18, 38, 0.24);
+    --onboarding-premium-root-bg:
+      radial-gradient(
+        112% 84% at 16% -8%,
+        rgba(255, 255, 255, 0.04),
+        transparent 62%
+      ),
+      linear-gradient(180deg, #010409 0%, #030507 58%, #010203 100%);
+    --onboarding-premium-root-text: #f8fafc;
+    --onboarding-premium-text-muted: rgba(255, 255, 255, 0.7);
+    --onboarding-premium-text-subtle: rgba(255, 255, 255, 0.5);
+    --onboarding-premium-overlay-soft: rgba(255, 255, 255, 0.06);
+    --onboarding-premium-overlay-base: rgba(255, 255, 255, 0.1);
 
     --color-surface: #010409;
     --color-surface-muted: #05070b;
@@ -330,6 +342,18 @@
       rgba(246, 248, 251, 0.92)
     );
     --glass-border: rgba(15, 23, 42, 0.08);
+    --onboarding-premium-root-bg:
+      radial-gradient(
+        116% 84% at 84% -6%,
+        rgba(148, 163, 184, 0.07) 0%,
+        rgba(148, 163, 184, 0) 62%
+      ),
+      linear-gradient(180deg, #f8fafc 0%, #f4f6f8 52%, #eef2f6 100%);
+    --onboarding-premium-root-text: #0f172a;
+    --onboarding-premium-text-muted: #334155;
+    --onboarding-premium-text-subtle: #64748b;
+    --onboarding-premium-overlay-soft: rgba(15, 23, 42, 0.035);
+    --onboarding-premium-overlay-base: rgba(15, 23, 42, 0.06);
     --onboarding-glass-surface-base: rgba(255, 255, 255, 0.92);
     --onboarding-glass-surface-inner: rgba(255, 255, 255, 0.85);
     --onboarding-glass-surface-ghost: rgba(248, 250, 255, 0.76);
@@ -1121,43 +1145,91 @@
     outline-offset: 2px;
   }
 
-  .onboarding-force-white,
-  .onboarding-force-white
-    :is(
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6,
-      p,
-      span,
-      label,
-      legend,
-      li,
-      dt,
-      dd,
-      small,
-      strong,
-      em,
-      a
-    ) {
-    color: #ffffff;
+  .onboarding-premium-root {
+    background: var(--onboarding-premium-root-bg);
+    color: var(--onboarding-premium-root-text);
   }
 
-  .onboarding-force-white {
-    /* Keep IntroJourney in dark mode even when app theme is light. */
-    --onboarding-glass-surface-base: rgba(255, 255, 255, 0.1);
-    --onboarding-glass-surface-inner: rgba(255, 255, 255, 0.06);
-    --onboarding-glass-surface-ghost: rgba(255, 255, 255, 0.03);
-    --onboarding-glass-border: rgba(255, 255, 255, 0.2);
-    --onboarding-glass-border-soft: rgba(255, 255, 255, 0.12);
-    --onboarding-glass-shadow: 0 26px 80px rgba(12, 18, 38, 0.24);
+  .onboarding-premium-shell {
+    background: color-mix(in srgb, var(--onboarding-premium-overlay-soft) 72%, transparent);
+    border-bottom: 1px solid var(--onboarding-glass-border-soft);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
   }
 
-  .onboarding-force-white :is(input, textarea)::placeholder {
-    color: #ffffff;
+  .onboarding-premium-card {
+    background: var(--onboarding-glass-surface-base);
+    border: 1px solid var(--onboarding-glass-border);
+    box-shadow: var(--onboarding-glass-shadow);
+    backdrop-filter: blur(22px);
+  }
+
+  .onboarding-premium-surface {
+    background: var(--onboarding-glass-surface-inner);
+    border: 1px solid var(--onboarding-glass-border-soft);
+    backdrop-filter: blur(16px);
+  }
+
+  .onboarding-premium-button {
+    border: 1px solid var(--onboarding-glass-border-soft);
+    background: var(--onboarding-premium-overlay-base);
+    color: var(--onboarding-premium-root-text);
+  }
+
+  .onboarding-premium-input {
+    border: 1px solid var(--onboarding-glass-border-soft);
+    background: var(--onboarding-premium-overlay-soft);
+    color: var(--onboarding-premium-root-text);
+  }
+
+  .onboarding-premium-input::placeholder {
+    color: color-mix(in srgb, var(--onboarding-premium-root-text) 62%, transparent);
     opacity: 1;
+  }
+
+  .onboarding-premium-divider {
+    border-color: color-mix(in srgb, var(--onboarding-glass-border-soft) 55%, transparent);
+  }
+
+  .onboarding-premium-root .text-white,
+  .onboarding-premium-root .text-white\/90,
+  .onboarding-premium-root .text-white\/85,
+  .onboarding-premium-root .text-white\/80,
+  .onboarding-premium-root .text-white\/75,
+  .onboarding-premium-root .text-white\/70 {
+    color: var(--onboarding-premium-root-text);
+  }
+
+  .onboarding-premium-root .text-white\/65,
+  .onboarding-premium-root .text-white\/60 {
+    color: var(--onboarding-premium-text-muted);
+  }
+
+  .onboarding-premium-root .text-white\/50 {
+    color: var(--onboarding-premium-text-subtle);
+  }
+
+  .onboarding-premium-root .border-white\/20,
+  .onboarding-premium-root .border-white\/15,
+  .onboarding-premium-root .border-white\/12,
+  .onboarding-premium-root .border-white\/10,
+  .onboarding-premium-root .border-white\/5 {
+    border-color: var(--onboarding-glass-border-soft);
+  }
+
+  .onboarding-premium-root .bg-white\/12,
+  .onboarding-premium-root .bg-white\/10,
+  .onboarding-premium-root .bg-white\/6,
+  .onboarding-premium-root .bg-white\/5,
+  .onboarding-premium-root .bg-white\/\[0\.11\],
+  .onboarding-premium-root .bg-white\/\[0\.1\],
+  .onboarding-premium-root .bg-white\/\[0\.07\],
+  .onboarding-premium-root .bg-white\/\[0\.04\] {
+    background: var(--onboarding-premium-overlay-soft);
+  }
+
+  .onboarding-premium-root .bg-white\/80 {
+    background: color-mix(in srgb, var(--onboarding-premium-root-text) 16%, var(--onboarding-glass-surface-base) 84%);
   }
 
   @property --conic-angle {
