@@ -552,6 +552,8 @@ export default function LandingPage() {
     "--bg-a": selectedBackground?.a ?? "#525252",
     "--bg-b": selectedBackground?.b ?? "#3d72b4",
     "--landing-background": resolvedLandingBackground,
+    "--landing-background-base":
+      selectedBackground?.tone === "light" ? "#f6f1ff" : "#0a0a12",
   } as CSSProperties;
   const [activeSlide, setActiveSlide] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -789,7 +791,9 @@ export default function LandingPage() {
       className="landing"
       style={landingStyle}
       data-background-tone={selectedBackground?.tone ?? "dark"}
+      data-background-kind={selectedBackground?.type ?? "linear"}
     >
+      <div className="landing-background-layer" aria-hidden="true" />
       <header className="nav">
         <Link
           className="brand"
