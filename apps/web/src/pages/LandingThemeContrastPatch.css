@@ -1,0 +1,456 @@
+/* =========================================================
+   LANDING THEME CONTRAST PATCH
+   Must be imported AFTER Landing.css.
+   Purpose:
+   - Fix light-mode white text leaks.
+   - Fix dark-mode final FAQ/CTA contrast.
+   - Prevent landing theme from contaminating the hero phone mock.
+   ========================================================= */
+
+/* ---------- Strong final tokens ---------- */
+
+.landing[data-theme-mode="dark"] {
+  --ib-landing-title: #f7f4ff;
+  --ib-landing-title-soft: rgba(247, 244, 255, 0.9);
+  --ib-landing-body: rgba(226, 229, 246, 0.84);
+  --ib-landing-muted: rgba(205, 199, 229, 0.72);
+  --ib-landing-kicker: rgba(198, 210, 244, 0.74);
+  --ib-landing-card-title: #f7f4ff;
+  --ib-landing-card-body: rgba(226, 229, 246, 0.82);
+  --ib-landing-chip-text: rgba(226, 229, 246, 0.82);
+}
+
+.landing[data-theme-mode="light"] {
+  --ib-landing-title: #12101f;
+  --ib-landing-title-soft: rgba(18, 16, 31, 0.9);
+  --ib-landing-body: rgba(35, 30, 55, 0.84);
+  --ib-landing-muted: rgba(68, 58, 102, 0.68);
+  --ib-landing-kicker: rgba(67, 57, 95, 0.76);
+  --ib-landing-card-title: #12101f;
+  --ib-landing-card-body: rgba(44, 38, 66, 0.82);
+  --ib-landing-chip-text: rgba(72, 62, 105, 0.74);
+}
+
+/* =========================================================
+   1. DO NOT LET LANDING THEME BREAK THE HERO PHONE
+   ========================================================= */
+
+.landing .hero-media {
+  color-scheme: dark;
+}
+
+/* The phone/dashboard mock must remain visually dark even in landing light mode. */
+.landing[data-theme-mode="light"] .hero-media,
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"],
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] * {
+  --color-text: #edf2ff;
+  --color-text-muted: rgba(216, 224, 245, 0.82);
+  --color-text-subtle: rgba(170, 181, 210, 0.72);
+  --color-surface: #080d1b;
+  --color-surface-elevated: #0b1224;
+  --color-border-subtle: rgba(171, 188, 230, 0.22);
+}
+
+/* Undo the landing h/p overrides inside the phone. */
+.landing[data-theme-mode="light"] .hero-media :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--color-text, #edf2ff) !important;
+}
+
+.landing[data-theme-mode="light"] .hero-media :is(p, span, small, li, div) {
+  color: inherit;
+}
+
+/* Keep phone card/body text readable but do not force the entire phone into black text. */
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] :is(p, span, small, li) {
+  color: inherit;
+}
+
+/* Very specific dark protection for the metric/header text inside phone. */
+.landing[data-theme-mode="light"] .hero-media [data-demo-anchor="overall-progress"] :is(h1, h2, h3, p, span),
+.landing[data-theme-mode="light"] .hero-media [data-demo-anchor="emotion-chart"] :is(h1, h2, h3, p, span),
+.landing[data-theme-mode="light"] .hero-media [data-demo-anchor="streaks"] :is(h1, h2, h3, p, span) {
+  color: inherit;
+}
+
+/* =========================================================
+   2. GLOBAL LANDING TEXT BY THEME
+   ========================================================= */
+
+/* Headings, but not the hero gradient span. */
+.landing[data-theme-mode="dark"] main > section :is(h1, h2, h3, h4, h5, h6),
+.landing[data-theme-mode="dark"] .final-cta :is(h1, h2, h3),
+.landing[data-theme-mode="dark"] .faq :is(h1, h2, h3) {
+  color: var(--ib-landing-title) !important;
+}
+
+.landing[data-theme-mode="light"] main > section :is(h1, h2, h3, h4, h5, h6),
+.landing[data-theme-mode="light"] .final-cta :is(h1, h2, h3),
+.landing[data-theme-mode="light"] .faq :is(h1, h2, h3) {
+  color: var(--ib-landing-title) !important;
+}
+
+/* Preserve gradient text always. */
+.landing .hero h1 .grad,
+.landing h1 .grad,
+.landing .grad {
+  background: var(--gradient-innerbloom) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
+/* General section paragraphs, excluding hero phone. */
+.landing[data-theme-mode="dark"] main > section:not(.hero) :is(p, li),
+.landing[data-theme-mode="dark"] .final-cta :is(p, li),
+.landing[data-theme-mode="dark"] .faq :is(p, li) {
+  color: var(--ib-landing-body) !important;
+}
+
+.landing[data-theme-mode="light"] main > section:not(.hero) :is(p, li),
+.landing[data-theme-mode="light"] .final-cta :is(p, li),
+.landing[data-theme-mode="light"] .faq :is(p, li) {
+  color: var(--ib-landing-body) !important;
+}
+
+/* Eyebrows / pretitles. */
+.landing[data-theme-mode="dark"] :is(
+  .section-kicker,
+  .truth-problem-kicker,
+  .how-kicker,
+  .kicker,
+  .concept-term
+) {
+  color: var(--ib-landing-kicker) !important;
+}
+
+.landing[data-theme-mode="light"] :is(
+  .section-kicker,
+  .truth-problem-kicker,
+  .how-kicker,
+  .kicker,
+  .concept-term
+) {
+  color: var(--ib-landing-kicker) !important;
+}
+
+/* =========================================================
+   3. SPECIFIC BROKEN SECTIONS IN LIGHT MODE
+   ========================================================= */
+
+/* --- Problem real --- */
+
+.landing[data-theme-mode="light"] .truth-problem-title,
+.landing[data-theme-mode="light"] .truth-problem-primary,
+.landing[data-theme-mode="light"] .truth-problem-primary *,
+.landing[data-theme-mode="light"] .truth-problem-secondary,
+.landing[data-theme-mode="light"] .truth-problem-secondary * {
+  color: var(--ib-landing-body) !important;
+}
+
+.landing[data-theme-mode="light"] .truth-problem-title {
+  color: var(--ib-landing-title) !important;
+}
+
+.landing[data-theme-mode="light"] .truth-problem-divider {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(128, 95, 190, 0.26) 18%,
+    rgba(128, 95, 190, 0.16) 80%,
+    transparent 100%
+  ) !important;
+}
+
+/* --- Cómo funciona Innerbloom / timeline --- */
+
+.landing[data-theme-mode="light"] .how-heading :is(h2, p),
+.landing[data-theme-mode="light"] .how :is(h2, h3, p, li),
+.landing[data-theme-mode="light"] .timeline-card :is(h3, p, li, span) {
+  color: var(--ib-landing-body) !important;
+}
+
+.landing[data-theme-mode="light"] .how-heading h2,
+.landing[data-theme-mode="light"] .how h2,
+.landing[data-theme-mode="light"] .timeline-card h3 {
+  color: var(--ib-landing-title) !important;
+}
+
+/* Chips/pills in timeline section */
+.landing[data-theme-mode="light"] .timeline-card :is(.chip, [class*="chip"], [class*="pill"], [class*="tag"]) {
+  color: rgba(82, 67, 126, 0.76) !important;
+  background: rgba(255, 255, 255, 0.54) !important;
+  border-color: rgba(137, 106, 204, 0.18) !important;
+}
+
+/* Timeline line and dots: lilac/violet in light mode */
+.landing[data-theme-mode="light"] .how :is(.timeline-line, [class*="line"], [class*="connector"]) {
+  background: linear-gradient(
+    180deg,
+    rgba(166, 128, 255, 0.08),
+    rgba(166, 128, 255, 0.46),
+    rgba(96, 190, 255, 0.24),
+    rgba(166, 128, 255, 0.08)
+  ) !important;
+}
+
+.landing[data-theme-mode="light"] .how :is(.timeline-dot, [class*="dot"], [class*="stepNumber"]) {
+  border-color: rgba(166, 128, 255, 0.42) !important;
+  box-shadow:
+    0 0 0 6px rgba(166, 128, 255, 0.1),
+    0 0 18px rgba(96, 190, 255, 0.22) !important;
+}
+
+/* Final sentence under timeline */
+.landing[data-theme-mode="light"] .section-sub.highlight {
+  color: rgba(50, 42, 84, 0.82) !important;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.58),
+      rgba(246, 241, 255, 0.46)
+    ) !important;
+  border-color: rgba(96, 190, 255, 0.28) !important;
+}
+
+/* --- Visible progress section --- */
+
+.landing[data-theme-mode="light"] .feature-showcase :is(.demo-title, .demo-sub),
+.landing[data-theme-mode="light"] .feature-showcase .visible-progress-copy :is(h2, p) {
+  color: var(--ib-landing-body) !important;
+}
+
+.landing[data-theme-mode="light"] .feature-showcase :is(.demo-title, h2),
+.landing[data-theme-mode="light"] .feature-showcase .visible-progress-copy h2 {
+  color: var(--ib-landing-title) !important;
+}
+
+/* Do not recolor the product screenshots/modules too aggressively */
+.landing[data-theme-mode="light"] .visible-progress-module :is(h1, h2, h3, p, span) {
+  color: inherit;
+}
+
+/* --- Pillars / Balance section --- */
+
+.landing[data-theme-mode="light"] .pillars-title,
+.landing[data-theme-mode="light"] .why h2,
+.landing[data-theme-mode="light"] .why .section-kicker {
+  color: var(--ib-landing-title) !important;
+}
+
+.landing[data-theme-mode="light"] .pillars-intro,
+.landing[data-theme-mode="light"] .why .section-sub {
+  color: var(--ib-landing-body) !important;
+}
+
+.landing[data-theme-mode="light"] .pillar-card :is(h3, .pillar-heading) {
+  color: var(--ib-landing-title) !important;
+}
+
+.landing[data-theme-mode="light"] .pillar-card :is(p, .pillar-definition, .pillar-examples-label, .pillar-chip) {
+  color: var(--ib-landing-card-body) !important;
+}
+
+.landing[data-theme-mode="light"] .pillar-chip {
+  background: rgba(255, 255, 255, 0.56) !important;
+  border-color: rgba(137, 106, 204, 0.18) !important;
+}
+
+/* --- Modes / rhythms --- */
+
+.landing[data-theme-mode="light"] .modes-title,
+.landing[data-theme-mode="light"] .modes h2,
+.landing[data-theme-mode="light"] .mode-main :is(h3, strong) {
+  color: var(--ib-landing-title) !important;
+}
+
+.landing[data-theme-mode="light"] .modes-intro,
+.landing[data-theme-mode="light"] .mode-main :is(p, li, span),
+.landing[data-theme-mode="light"] .mode-thumb :is(p, span) {
+  color: var(--ib-landing-card-body) !important;
+}
+
+/* Fix frequency chip overflowing, especially EVOLVE 4x/week. */
+.landing .mode-main,
+.landing .mode-thumb {
+  overflow: hidden;
+}
+
+.landing .mode-main :is([class*="chip"], [class*="badge"], [class*="frequency"]),
+.landing .mode-thumb :is([class*="chip"], [class*="badge"], [class*="frequency"]) {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* If the mode header uses flex, allow chip to shrink instead of escaping. */
+.landing .mode-main :is(header, .mode-header),
+.landing .mode-thumb :is(header, .mode-header) {
+  min-width: 0;
+}
+
+.landing .mode-main :is(header, .mode-header) > *,
+.landing .mode-thumb :is(header, .mode-header) > * {
+  min-width: 0;
+}
+
+/* --- Avatar section --- */
+
+.landing[data-theme-mode="light"] :is(
+  .avatar-section,
+  .avatars-section,
+  .avatar-showcase,
+  [class*="avatar"]
+) :is(h2, h3) {
+  color: var(--ib-landing-title) !important;
+}
+
+.landing[data-theme-mode="light"] :is(
+  .avatar-section,
+  .avatars-section,
+  .avatar-showcase,
+  [class*="avatar"]
+) :is(p, span, li) {
+  color: var(--ib-landing-card-body) !important;
+}
+
+/* But do not affect image content or non-text layout inside avatar thumbnails */
+.landing[data-theme-mode="light"] :is(
+  .avatar-section,
+  .avatars-section,
+  .avatar-showcase,
+  [class*="avatar"]
+) img {
+  color: initial;
+}
+
+/* --- Testimonials / primeras experiencias --- */
+
+.landing[data-theme-mode="light"] :is(
+  .testimonials,
+  .testimonials-section,
+  .testimonial-section,
+  .slider
+) :is(h2, h3) {
+  color: var(--ib-landing-title) !important;
+}
+
+.landing[data-theme-mode="light"] :is(
+  .testimonials,
+  .testimonials-section,
+  .testimonial-section,
+  .slider
+) :is(p, span, li) {
+  color: var(--ib-landing-card-body) !important;
+}
+
+.landing[data-theme-mode="light"] .slider {
+  background:
+    radial-gradient(
+      120% 120% at 16% 8%,
+      rgba(255, 255, 255, 0.88),
+      rgba(255, 255, 255, 0.56) 58%,
+      rgba(246, 241, 255, 0.48)
+    ) !important;
+  border-color: rgba(137, 106, 204, 0.18) !important;
+}
+
+/* =========================================================
+   4. DARK MODE FINAL SECTIONS
+   ========================================================= */
+
+.landing[data-theme-mode="dark"] .faq h2,
+.landing[data-theme-mode="dark"] .final-cta h2 {
+  color: #f7f4ff !important;
+}
+
+.landing[data-theme-mode="dark"] .faq summary,
+.landing[data-theme-mode="dark"] .faq details,
+.landing[data-theme-mode="dark"] .faq details p,
+.landing[data-theme-mode="dark"] .final-cta p {
+  color: rgba(226, 229, 246, 0.86) !important;
+}
+
+.landing[data-theme-mode="dark"] .final-cta {
+  color: rgba(226, 229, 246, 0.86) !important;
+}
+
+/* If final CTA title still appears black because of a more specific old rule */
+.landing[data-theme-mode="dark"] :is(.final-cta, [class*="final"], [class*="cta"]) :is(h1, h2, h3, p) {
+  color: rgba(247, 244, 255, 0.9) !important;
+}
+
+.landing[data-theme-mode="dark"] :is(.final-cta, [class*="final"], [class*="cta"]) :is(a, button) {
+  color: #ffffff;
+}
+
+/* =========================================================
+   5. FAQ BOTH MODES
+   ========================================================= */
+
+.landing[data-theme-mode="light"] .faq h2 {
+  color: var(--ib-landing-title) !important;
+}
+
+.landing[data-theme-mode="light"] .faq summary {
+  color: var(--ib-landing-title) !important;
+}
+
+.landing[data-theme-mode="light"] .faq details p,
+.landing[data-theme-mode="light"] .faq details div {
+  color: var(--ib-landing-body) !important;
+}
+
+.landing[data-theme-mode="light"] .faq details {
+  background:
+    radial-gradient(
+      110% 120% at 14% 10%,
+      rgba(255, 255, 255, 0.9),
+      rgba(255, 255, 255, 0.58) 62%,
+      rgba(246, 241, 255, 0.48)
+    ) !important;
+  border-color: rgba(137, 106, 204, 0.18) !important;
+  box-shadow:
+    0 14px 34px rgba(64, 54, 104, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+
+/* =========================================================
+   6. FOOTER
+   ========================================================= */
+
+.landing[data-theme-mode="dark"] footer,
+.landing[data-theme-mode="dark"] footer :is(a, p, span) {
+  color: rgba(220, 212, 245, 0.74) !important;
+}
+
+.landing[data-theme-mode="light"] footer,
+.landing[data-theme-mode="light"] footer :is(a, p, span) {
+  color: rgba(50, 42, 84, 0.78) !important;
+}
+
+/* =========================================================
+   7. BUTTONS MUST KEEP BRAND COLORS
+   ========================================================= */
+
+.landing .ib-primary-button,
+.landing .journey-cta,
+.landing .primaryCta,
+.landing .hero-actions .ib-primary-button,
+.landing .final-cta .ib-primary-button,
+.landing .final-cta a[class*="primary"] {
+  color: #ffffff !important;
+}
+
+.landing[data-theme-mode="light"] .hero-demo-cta {
+  color: rgba(55, 43, 92, 0.9) !important;
+  border-color: rgba(139, 92, 246, 0.32) !important;
+  background: rgba(255, 255, 255, 0.48) !important;
+}
+
+.landing[data-theme-mode="dark"] .hero-demo-cta {
+  color: rgba(247, 244, 255, 0.9) !important;
+  border-color: rgba(200, 166, 255, 0.48) !important;
+  background: rgba(139, 92, 246, 0.08) !important;
+}
