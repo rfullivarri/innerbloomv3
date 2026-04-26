@@ -457,3 +457,184 @@
   border-color: rgba(200, 166, 255, 0.48) !important;
   background: rgba(139, 92, 246, 0.08) !important;
 }
+
+/* =========================================================
+   FINAL LIGHT MODE FIX — timeline chips + closing line + testimonials
+   Keep this at the very end of LandingThemeContrastPatch.css
+   ========================================================= */
+
+/* ---------- PremiumTimeline: chips/badges/cards in light mode ---------- */
+
+.landing[data-theme-mode="light"] .premium-timeline {
+  color: #171126 !important;
+}
+
+.landing[data-theme-mode="light"] .premium-timeline-card {
+  background:
+    radial-gradient(
+      120% 120% at 16% 8%,
+      rgba(255, 255, 255, 0.94),
+      rgba(255, 255, 255, 0.64) 58%,
+      rgba(246, 241, 255, 0.52)
+    ) !important;
+  border-color: rgba(137, 106, 204, 0.2) !important;
+  box-shadow:
+    0 18px 42px rgba(64, 54, 104, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
+}
+
+.landing[data-theme-mode="light"] .premium-timeline-title {
+  color: #171126 !important;
+}
+
+.landing[data-theme-mode="light"] .premium-timeline-bullets,
+.landing[data-theme-mode="light"] .premium-timeline-bullets li {
+  color: rgba(44, 38, 66, 0.86) !important;
+}
+
+.landing[data-theme-mode="light"] .premium-timeline-badge,
+.landing[data-theme-mode="light"] .premium-timeline-chip {
+  color: rgba(67, 57, 95, 0.82) !important;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.72),
+      rgba(238, 232, 255, 0.58)
+    ) !important;
+  border-color: rgba(137, 106, 204, 0.24) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 4px 14px rgba(64, 54, 104, 0.06) !important;
+}
+
+/* Closing sentence: "Un hábito logrado..." */
+.landing[data-theme-mode="light"] .premium-timeline-closing,
+.landing[data-theme-mode="light"] .timeline-closing-card {
+  color: rgba(44, 38, 66, 0.86) !important;
+  background:
+    radial-gradient(
+      110% 120% at 16% 10%,
+      rgba(255, 255, 255, 0.82),
+      rgba(255, 255, 255, 0.5) 60%,
+      rgba(246, 241, 255, 0.44)
+    ) !important;
+  border-color: rgba(166, 128, 255, 0.28) !important;
+  box-shadow:
+    0 14px 34px rgba(64, 54, 104, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+
+.landing[data-theme-mode="light"] .premium-timeline-closing *,
+.landing[data-theme-mode="light"] .timeline-closing-card * {
+  color: rgba(44, 38, 66, 0.86) !important;
+}
+
+/* If completed state overrides the closing card */
+.landing[data-theme-mode="light"] .timeline-closing-card.completed,
+.landing[data-theme-mode="light"] .timeline-closing-card[data-completed="true"] {
+  color: rgba(44, 38, 66, 0.88) !important;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.66),
+      rgba(243, 238, 255, 0.5)
+    ) !important;
+  border-color: rgba(166, 128, 255, 0.34) !important;
+  box-shadow:
+    0 0 0 1px rgba(166, 128, 255, 0.16),
+    0 18px 38px rgba(64, 54, 104, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.74) !important;
+}
+
+/* ---------- Testimonials / Primeras experiencias ---------- */
+
+.landing[data-theme-mode="light"] .testimonials,
+.landing[data-theme-mode="light"] .testimonial-section,
+.landing[data-theme-mode="light"] .testimonials-section {
+  color: #171126 !important;
+}
+
+.landing[data-theme-mode="light"] .testimonials h2,
+.landing[data-theme-mode="light"] .testimonial-section h2,
+.landing[data-theme-mode="light"] .testimonials-section h2 {
+  color: #12101f !important;
+}
+
+.landing[data-theme-mode="light"] .testimonials .section-sub,
+.landing[data-theme-mode="light"] .testimonial-section .section-sub,
+.landing[data-theme-mode="light"] .testimonials-section .section-sub {
+  color: rgba(44, 38, 66, 0.82) !important;
+}
+
+/* Main slider/card */
+.landing[data-theme-mode="light"] .slider {
+  color: rgba(44, 38, 66, 0.88) !important;
+  background:
+    radial-gradient(
+      120% 120% at 16% 8%,
+      rgba(255, 255, 255, 0.9),
+      rgba(255, 255, 255, 0.62) 58%,
+      rgba(246, 241, 255, 0.48)
+    ) !important;
+  border-color: rgba(137, 106, 204, 0.18) !important;
+  box-shadow:
+    0 18px 44px rgba(64, 54, 104, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+
+/* Force all testimonial text to dark.
+   This is intentionally broad, but scoped only to .slider in light mode. */
+.landing[data-theme-mode="light"] .slider :is(h1, h2, h3, h4, p, span, small, strong, em, blockquote, cite, li, div) {
+  color: rgba(44, 38, 66, 0.88) !important;
+}
+
+/* Testimonial quote/title should be stronger */
+.landing[data-theme-mode="light"] .slider :is(blockquote, h3, strong) {
+  color: #171126 !important;
+}
+
+/* Role / meta / secondary text */
+.landing[data-theme-mode="light"] .slider :is(small, cite, .muted, [class*="role"], [class*="meta"]) {
+  color: rgba(72, 62, 105, 0.72) !important;
+}
+
+/* Arrows */
+.landing[data-theme-mode="light"] .slider button {
+  color: #ffffff !important;
+}
+
+.landing[data-theme-mode="light"] .slider button:not([aria-current="true"]) {
+  background: rgba(41, 52, 76, 0.92) !important;
+  border-color: rgba(41, 52, 76, 0.18) !important;
+}
+
+/* Dots */
+.landing[data-theme-mode="light"] .slider [aria-label*="slide"],
+.landing[data-theme-mode="light"] .slider [aria-label*="testimonio"],
+.landing[data-theme-mode="light"] .slider [aria-label*="testimonial"] {
+  color: transparent !important;
+}
+
+/* If dots are buttons/spans with generic classes */
+.landing[data-theme-mode="light"] .slider :is(.dot, [class*="dot"], [class*="indicator"]) {
+  color: transparent !important;
+  background: rgba(139, 92, 246, 0.18) !important;
+  border-color: rgba(139, 92, 246, 0.38) !important;
+}
+
+.landing[data-theme-mode="light"] .slider :is(.active, [aria-current="true"], [data-active="true"]) {
+  background: linear-gradient(135deg, #8b5cf6, #38bdf8) !important;
+  border-color: rgba(139, 92, 246, 0.42) !important;
+}
+
+/* ---------- Safety: avoid white text leaks in these two sections ---------- */
+
+.landing[data-theme-mode="light"] .how :is(.premium-timeline-card, .premium-timeline-closing, .timeline-closing-card) :is(p, span, li, h3) {
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: none !important;
+}
+
+.landing[data-theme-mode="light"] .slider :is(p, span, small, strong, em, blockquote, cite, h3) {
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: none !important;
+}
