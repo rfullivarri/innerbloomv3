@@ -66,7 +66,7 @@ export function QuickStartModerationStep({ language = 'es', selectedModerations,
       };
 
   return (
-    <section className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
+    <section className="onboarding-premium-root quickstart-premium-card onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
       <h1 className="text-2xl font-semibold text-white sm:text-3xl">{copy.title}</h1>
       <p className="mt-2 text-sm text-white/70">{copy.subtitle}</p>
       <p className="mt-2 text-xs text-white/55">{copy.hint}</p>
@@ -79,13 +79,13 @@ export function QuickStartModerationStep({ language = 'es', selectedModerations,
               key={option}
               type="button"
               onClick={() => onToggle(option)}
-              className={`flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition ${enabled ? 'border-violet-200/45 bg-violet-400/18' : 'border-white/20 bg-white/6'}`}
+              className={`quickstart-moderation-option flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition ${enabled ? 'quickstart-moderation-option--enabled' : ''}`}
             >
               <div>
                 <p className="text-sm font-semibold text-white">{OPTIONS[option].icon} {card.title}</p>
                 <p className="mt-1 text-xs text-white/65">{card.description}</p>
               </div>
-              <span className={`inline-flex h-5 w-10 shrink-0 items-center overflow-hidden rounded-full p-0.5 ${enabled ? 'bg-violet-300/70' : 'bg-white/20'}`}>
+              <span className={`quickstart-moderation-toggle inline-flex h-5 w-10 shrink-0 items-center overflow-hidden rounded-full p-0.5 ${enabled ? 'quickstart-moderation-toggle--enabled' : ''}`}>
                 <span className={`block h-4 w-4 shrink-0 rounded-full bg-white transition-transform ${enabled ? 'translate-x-[1.125rem]' : ''}`} />
               </span>
             </button>

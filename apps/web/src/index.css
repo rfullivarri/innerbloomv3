@@ -1232,6 +1232,207 @@
     background: color-mix(in srgb, var(--onboarding-premium-root-text) 16%, var(--onboarding-glass-surface-base) 84%);
   }
 
+  .quickstart-premium-root {
+    background: var(--onboarding-premium-root-bg);
+    color: var(--onboarding-premium-root-text);
+  }
+
+  .quickstart-premium-card {
+    background: var(--color-card-gradient);
+    border: 1px solid var(--color-border-soft);
+    box-shadow: var(--shadow-elev-2);
+    backdrop-filter: blur(20px);
+  }
+
+  .quickstart-premium-surface {
+    background: color-mix(in srgb, var(--color-overlay-1) 74%, transparent);
+    border-color: var(--color-border-subtle);
+  }
+
+  .quickstart-pill {
+    border-color: color-mix(in srgb, var(--color-accent-secondary) 24%, var(--color-border-soft));
+    background: color-mix(in srgb, var(--color-accent-secondary) 12%, var(--color-overlay-1));
+    color: var(--onboarding-premium-root-text);
+  }
+
+  .quickstart-min-rule {
+    color: color-mix(in srgb, var(--onboarding-premium-root-text) 92%, transparent);
+  }
+
+  .quickstart-min-rule__dot {
+    color: var(--onboarding-premium-text-subtle);
+  }
+
+  .quickstart-bonus-pill {
+    border-color: var(--color-border-soft);
+  }
+
+  .quickstart-bonus-pill--ready {
+    background: color-mix(in srgb, #34d399 20%, transparent);
+    border-color: color-mix(in srgb, #34d399 35%, var(--color-border-soft));
+    color: color-mix(in srgb, #dcfce7 82%, var(--onboarding-premium-root-text));
+  }
+
+  .quickstart-bonus-pill--pending {
+    background: color-mix(in srgb, #38bdf8 16%, transparent);
+    border-color: color-mix(in srgb, #38bdf8 32%, var(--color-border-soft));
+    color: color-mix(in srgb, #dbeafe 82%, var(--onboarding-premium-root-text));
+  }
+
+  .quickstart-task-row {
+    background: var(--color-card-gradient);
+    border-color: var(--color-border-subtle);
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.22);
+  }
+
+  .quickstart-task-row:hover {
+    border-color: var(--color-border-soft);
+    background: color-mix(in srgb, var(--color-overlay-1) 86%, var(--color-card-gradient));
+  }
+
+  .quickstart-task-row--selected {
+    border-color: color-mix(in srgb, var(--color-accent-secondary) 34%, var(--color-border-soft));
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-surface-elevated) 88%, var(--color-accent-secondary) 12%),
+      color-mix(in srgb, var(--color-surface-muted) 90%, var(--color-accent-secondary) 10%)
+    );
+    box-shadow: 0 16px 32px rgba(2, 6, 23, 0.32);
+  }
+
+  .quickstart-task-row__back {
+    border-color: color-mix(in srgb, var(--color-accent-secondary) 46%, var(--color-border-soft));
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-accent-secondary) 28%, var(--color-overlay-1)),
+      color-mix(in srgb, var(--color-accent-secondary) 22%, var(--color-surface-muted))
+    );
+    box-shadow: 0 10px 22px rgba(2, 6, 23, 0.24);
+  }
+
+  .quickstart-task-trait-band {
+    color: color-mix(in srgb, var(--onboarding-premium-root-text) 88%, #c4b5fd 12%);
+  }
+
+  .quickstart-task-input {
+    border-color: color-mix(in srgb, var(--color-accent-secondary) 22%, var(--color-border-soft));
+    background: color-mix(in srgb, var(--color-overlay-1) 70%, transparent);
+    color: var(--onboarding-premium-root-text);
+  }
+
+  .quickstart-task-input:focus-visible {
+    --tw-ring-color: color-mix(in srgb, var(--color-accent-secondary) 42%, #93c5fd);
+  }
+
+  .quickstart-task-help {
+    border-color: color-mix(in srgb, var(--color-accent-secondary) 30%, var(--color-border-soft));
+    background: color-mix(in srgb, var(--color-accent-secondary) 16%, var(--color-overlay-1));
+    color: color-mix(in srgb, var(--onboarding-premium-root-text) 92%, transparent);
+  }
+
+  .quickstart-suggestions-panel {
+    border-color: color-mix(in srgb, var(--color-accent-secondary) 28%, var(--color-border-soft));
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, var(--color-accent-secondary) 6%);
+    color: color-mix(in srgb, var(--onboarding-premium-root-text) 92%, transparent);
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.34);
+  }
+
+  .quickstart-moderation-option {
+    border-color: var(--color-border-soft);
+    background: color-mix(in srgb, var(--color-overlay-1) 68%, transparent);
+  }
+
+  .quickstart-moderation-option--enabled {
+    border-color: color-mix(in srgb, var(--color-accent-secondary) 35%, var(--color-border-soft));
+    background: color-mix(in srgb, var(--color-accent-secondary) 20%, var(--color-overlay-1));
+  }
+
+  .quickstart-moderation-toggle {
+    background: color-mix(in srgb, var(--color-border-soft) 75%, transparent);
+  }
+
+  .quickstart-moderation-toggle--enabled {
+    background: color-mix(in srgb, var(--color-accent-secondary) 48%, #a5b4fc);
+  }
+
+  .quickstart-setup-dot {
+    background: color-mix(in srgb, var(--color-accent-secondary) 62%, #cbd5e1);
+  }
+
+  .quickstart-free-pill {
+    border-color: color-mix(in srgb, #34d399 44%, var(--color-border-soft));
+    background: color-mix(in srgb, #34d399 20%, transparent);
+    color: color-mix(in srgb, #dcfce7 82%, var(--onboarding-premium-root-text));
+  }
+
+  .quickstart-progress-track {
+    background: color-mix(in srgb, var(--color-border-soft) 80%, transparent);
+  }
+
+  .quickstart-progress-fill {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-accent-secondary) 68%, #a5b4fc),
+      color-mix(in srgb, var(--color-accent-primary) 52%, #cbd5e1),
+      color-mix(in srgb, var(--color-accent-secondary) 60%, #818cf8)
+    );
+  }
+
+  .quickstart-primary-cta {
+    border-color: color-mix(in srgb, var(--color-accent-secondary) 42%, var(--color-border-soft));
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-accent-secondary) 62%, var(--color-surface-elevated)),
+      color-mix(in srgb, var(--color-accent-primary) 36%, var(--color-surface-highlight))
+    );
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.32);
+  }
+
+  .quickstart-primary-cta:hover {
+    box-shadow: 0 14px 28px rgba(2, 6, 23, 0.38);
+  }
+
+  .quickstart-primary-cta:focus-visible {
+    --tw-ring-color: color-mix(in srgb, var(--color-accent-secondary) 48%, #93c5fd);
+  }
+
+  :root[data-theme="light"] .quickstart-task-row {
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  }
+
+  :root[data-theme="light"] .quickstart-task-row--selected {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, #ffffff 92%, #e0e7ff),
+      color-mix(in srgb, #f8fafc 88%, #e9d5ff)
+    );
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+  }
+
+  :root[data-theme="light"] .quickstart-task-row__back {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, #e9d5ff 26%, #ffffff),
+      color-mix(in srgb, #dbeafe 22%, #f8fafc)
+    );
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.1);
+  }
+
+  :root[data-theme="light"] .quickstart-suggestions-panel {
+    background: color-mix(in srgb, #ffffff 94%, #eef2ff);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.14);
+  }
+
+  :root[data-theme="light"] .quickstart-primary-cta {
+    color: #0f172a;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, #ffffff 70%, #e0e7ff),
+      color-mix(in srgb, #f8fafc 70%, #dbeafe)
+    );
+  }
+
   @property --conic-angle {
     syntax: "<angle>";
     inherits: false;

@@ -575,16 +575,6 @@ function InlineTaskRow({
   const hasInput = Boolean(task.inputAfter || task.inputBefore);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const rowRef = useRef<HTMLDivElement | null>(null);
-  const selectedFrontStyle = {
-    borderColor: 'color-mix(in srgb, var(--color-accent-secondary) 42%, var(--onboarding-glass-border))',
-    background: 'color-mix(in srgb, var(--color-surface-elevated) 82%, var(--color-accent-secondary) 18%)',
-    boxShadow: '0 18px 40px color-mix(in srgb, var(--color-surface-elevated) 56%, rgba(8,12,28,0.66))',
-  };
-  const selectedBackStyle = {
-    borderColor: 'color-mix(in srgb, var(--color-accent-secondary) 54%, var(--onboarding-glass-border-soft))',
-    background: 'color-mix(in srgb, var(--color-accent-secondary) 62%, var(--color-surface-elevated) 38%)',
-    boxShadow: '0 12px 24px color-mix(in srgb, var(--color-accent-secondary) 40%, rgba(8,12,28,0.64))',
-  };
 
   useEffect(() => {
     if (!selected) {
@@ -611,12 +601,8 @@ function InlineTaskRow({
   return (
     <div ref={rowRef} className={`relative ${selected ? 'pt-5 pb-1' : ''}`}>
       {selected ? (
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 bottom-1 rounded-2xl border px-4 pt-1.5 pb-3"
-          style={selectedBackStyle}
-          aria-hidden
-        >
-          <span className="block text-[10px] font-semibold uppercase leading-none tracking-[0.16em] text-violet-100/90">
+        <div className="quickstart-task-row__back pointer-events-none absolute inset-x-0 top-0 bottom-1 rounded-2xl border px-4 pt-1.5 pb-3" aria-hidden>
+          <span className="quickstart-task-trait-band block text-[10px] font-semibold uppercase leading-none tracking-[0.16em]">
             {copy.traitLabel}: {task.trait}
           </span>
         </div>
@@ -634,8 +620,7 @@ function InlineTaskRow({
         role="button"
         tabIndex={0}
         data-selected={selected ? 'true' : undefined}
-        className="onboarding-surface-inner relative z-10 w-full rounded-2xl border px-4 py-3.5 text-left text-white/85 shadow-[0_12px_24px_rgba(8,12,28,0.18)] transition hover:border-white/30 hover:bg-white/[0.12]"
-        style={selected ? selectedFrontStyle : undefined}
+        className={`quickstart-task-row onboarding-surface-inner relative z-10 w-full rounded-2xl border px-4 py-3.5 text-left text-white/85 transition ${selected ? 'quickstart-task-row--selected' : ''}`}
       >
         <div className="flex items-center gap-2.5">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-2 text-sm leading-relaxed sm:text-base">
@@ -648,7 +633,7 @@ function InlineTaskRow({
                 inputMode="numeric"
                 onClick={(event) => event.stopPropagation()}
                 onChange={(event) => onInputChange(event.target.value)}
-                className="h-6 w-12 rounded-md border border-violet-200/30 bg-violet-100/5 px-1.5 text-center text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70 disabled:opacity-40 sm:h-7 sm:w-14"
+                className="quickstart-task-input h-6 w-12 rounded-md border px-1.5 text-center text-xs focus:outline-none focus-visible:ring-2 disabled:opacity-40 sm:h-7 sm:w-14"
                 placeholder={copy.countPlaceholder}
               />
             ) : null}
@@ -663,7 +648,7 @@ function InlineTaskRow({
                 event.stopPropagation();
                 setShowSuggestions((prev) => !prev);
               }}
-              className="relative z-20 ml-auto inline-flex h-5 w-5 shrink-0 items-center justify-center self-start rounded-md border border-violet-200/45 bg-violet-300/18 text-white/90 transition"
+              className="quickstart-task-help relative z-20 ml-auto inline-flex h-5 w-5 shrink-0 items-center justify-center self-start rounded-md border transition"
               aria-label={copy.taskHelpLabel}
               aria-expanded={showSuggestions}
             >
@@ -679,8 +664,7 @@ function InlineTaskRow({
 
       {selected && task.suggestions?.length && showSuggestions ? (
         <div
-          className="absolute right-3 bottom-[calc(100%+0.35rem)] z-30 w-[min(18.5rem,calc(100%-1.5rem))] rounded-xl border p-3 text-xs text-white/92 shadow-[0_10px_30px_rgba(43,25,96,0.45)] backdrop-blur"
-          style={{ borderColor: 'rgba(196, 181, 253, 0.42)', backgroundColor: 'rgba(17, 24, 39, 0.93)' }}
+          className="quickstart-suggestions-panel absolute right-3 bottom-[calc(100%+0.35rem)] z-30 w-[min(18.5rem,calc(100%-1.5rem))] rounded-xl border p-3 text-xs backdrop-blur"
         >
           <ul className="space-y-1.5">
             {task.suggestions.map((suggestion) => (
@@ -1024,12 +1008,12 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
     const modeStyle = { tint: rhythmTheme.softTint, border: rhythmTheme.border, glow: rhythmTheme.glow };
 
     return (
-      <section className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
+      <section className="quickstart-premium-card onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
         <header className="mb-5 border-b border-white/10 pb-4">
           <h1 className="text-2xl font-semibold text-white sm:text-3xl">{copy.pillarTitles[currentPillar]}</h1>
           <p className="mt-2 text-sm text-white/70">{copy.pillarSubtitles[currentPillar]}</p>
           <div
-            className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold text-violet-50/95"
+            className="quickstart-min-rule mt-3 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold"
             style={{
               borderColor: `color-mix(in srgb, ${modeStyle.border} 92%, rgba(255,255,255,0.14))`,
               background: `linear-gradient(135deg, color-mix(in srgb, ${modeStyle.tint} 90%, rgba(10,14,30,0.72)), color-mix(in srgb, ${modeStyle.tint} 66%, rgba(10,14,30,0.58)))`,
@@ -1037,13 +1021,13 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
             }}
           >
             <span className="whitespace-nowrap">{copy.minRule(minimum)}</span>
-            <span className="text-violet-100/60" aria-hidden>·</span>
+            <span className="quickstart-min-rule__dot" aria-hidden>·</span>
             <span className="whitespace-nowrap">{copy.suggestedRule}</span>
           </div>
           <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
             <span
-              className={`inline-flex rounded-lg border px-3.5 py-1.5 text-[0.68rem] font-medium sm:text-[0.72rem] ${
-                balancedBonusActive ? 'border-cyan-200/30 bg-cyan-300/8 text-cyan-100/90' : 'border-sky-200/28 bg-sky-300/8 text-sky-100/85'
+              className={`quickstart-bonus-pill inline-flex rounded-lg border px-3.5 py-1.5 text-[0.68rem] font-medium sm:text-[0.72rem] ${
+                balancedBonusActive ? 'quickstart-bonus-pill--ready' : 'quickstart-bonus-pill--pending'
               }`}
             >
               {balancedBonusActive ? copy.bonusReady : copy.bonusPending}
@@ -1086,7 +1070,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
   };
 
   return (
-    <div className={`min-h-screen min-h-dvh bg-[#000c40] text-white ${step === 'setup' ? '' : 'pb-12 pt-28 sm:pt-32'}`}>
+    <div className={`quickstart-premium-root onboarding-premium-root min-h-screen min-h-dvh text-white ${step === 'setup' ? '' : 'pb-12 pt-28 sm:pt-32'}`}>
       {step !== 'setup' ? (
         <HUD
           language={language}
@@ -1105,7 +1089,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
         {step === 'body' || step === 'mind' || step === 'soul' ? quickStartBody() : null}
 
         {step === 'moderation' ? (
-          <section className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
+          <section className="quickstart-premium-card onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
             <h1 className="text-2xl font-semibold text-white sm:text-3xl">{copy.moderationTitle}</h1>
             <p className="mt-2 text-sm text-white/70">{copy.moderationSubtitle}</p>
             <p className="mt-2 text-xs text-white/55">{copy.moderationHint}</p>
@@ -1118,13 +1102,13 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
                     key={option}
                     type="button"
                     onClick={() => setModerationPrefs((prev) => ({ ...prev, [option]: !prev[option] }))}
-                    className={`flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition ${enabled ? 'border-violet-200/45 bg-violet-400/18' : 'border-white/20 bg-white/6'}`}
+                    className={`quickstart-moderation-option flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition ${enabled ? 'quickstart-moderation-option--enabled' : ''}`}
                   >
                     <div>
                       <p className="text-sm font-semibold text-white">{card.icon} {card.title}</p>
                       <p className="mt-1 text-xs text-white/65">{card.description}</p>
                     </div>
-                    <span className={`inline-flex h-5 w-10 shrink-0 items-center overflow-hidden rounded-full p-0.5 ${enabled ? 'bg-violet-300/70' : 'bg-white/20'}`}>
+                    <span className={`quickstart-moderation-toggle inline-flex h-5 w-10 shrink-0 items-center overflow-hidden rounded-full p-0.5 ${enabled ? 'quickstart-moderation-toggle--enabled' : ''}`}>
                       <span className={`block h-4 w-4 shrink-0 rounded-full bg-white transition-transform ${enabled ? 'translate-x-[1.125rem]' : ''}`} />
                     </span>
                   </button>
@@ -1137,7 +1121,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
         ) : null}
 
         {step === 'summary' ? (
-          <section className="glass-card onboarding-surface-base mx-auto w-full max-w-5xl rounded-3xl p-6 sm:p-8">
+          <section className="quickstart-premium-card glass-card onboarding-surface-base mx-auto w-full max-w-5xl rounded-3xl p-6 sm:p-8">
             <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
               <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.quickSummary.eyebrow}</p>
               <h2 className="text-3xl font-semibold text-white">{copy.quickSummary.title}</h2>
@@ -1145,7 +1129,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
             </header>
             <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
               <div className="space-y-5">
-                <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                <section className="quickstart-premium-surface rounded-2xl border p-5">
                   <header className="border-b border-white/5 pb-3">
                     <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.quickSummary.baseData}</p>
                   </header>
@@ -1169,20 +1153,20 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
                     </div>
                   </div>
                 </section>
-                <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                <section className="quickstart-premium-surface rounded-2xl border p-5">
                   <header className="border-b border-white/5 pb-3">
                     <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.quickSummary.pillars}</p>
                   </header>
                   <div className="mt-4 space-y-3">
                     <p className="text-sm text-white/70">{copy.quickSummary.selectedTraits}</p>
                     {(['Body', 'Mind', 'Soul'] as Pillar[]).map((pillar) => (
-                      <div key={pillar} className="rounded-xl border border-white/10 bg-white/5 p-3">
+                      <div key={pillar} className="quickstart-premium-surface rounded-xl border p-3">
                         <p className="text-sm font-semibold text-white">{copy.pillarTitles[pillar]}</p>
                         <p className="mt-1 text-xs text-white/70">{copy.quickSummary.selectedTasks}: {selectedByPillar[pillar].length}</p>
                         <div className="mt-2 flex flex-wrap gap-1.5">
                           {quickStartDraft.selectedTraitsByPillar[pillar].length > 0
                             ? quickStartDraft.selectedTraitsByPillar[pillar].map((trait) => (
-                              <span key={`${pillar}-${trait}`} className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white/90">
+                              <span key={`${pillar}-${trait}`} className="quickstart-pill rounded-full border px-2.5 py-1 text-[11px] font-medium">
                                 {trait}
                               </span>
                             ))
@@ -1194,7 +1178,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
                 </section>
               </div>
               <aside className="space-y-5">
-                <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                <section className="quickstart-premium-surface rounded-2xl border p-5">
                   <header className="border-b border-white/5 pb-3">
                     <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.quickSummary.xp}</p>
                   </header>
@@ -1221,7 +1205,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
         ) : null}
 
         {step === 'setup' ? (
-          <section className="relative mx-auto mt-5 w-full max-w-3xl rounded-3xl border border-white/10 bg-[#0a133d]/85 p-5 shadow-[0_0_45px_rgba(79,70,229,0.22)] backdrop-blur-xl sm:p-8">
+          <section className="quickstart-premium-card relative mx-auto mt-5 w-full max-w-3xl rounded-3xl p-5 sm:p-8">
             <div className="mb-5 flex items-center justify-center gap-2 text-center text-[0.68rem] font-semibold uppercase tracking-[0.36em] text-white/65 sm:text-xs">
               <span>Innerbloom</span>
               <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.8em] w-auto" />
@@ -1237,11 +1221,11 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
                     key={setupStep}
                     className="flex items-center gap-3 text-sm text-slate-100/90 transition-all duration-500"
                   >
-                    <span className={`h-2.5 w-2.5 rounded-full bg-violet-300 ${!complete && index === setupProgress - 1 ? 'animate-pulse' : ''}`} />
+                    <span className={`quickstart-setup-dot h-2.5 w-2.5 rounded-full ${!complete && index === setupProgress - 1 ? 'animate-pulse' : ''}`} />
                     <span>
                       {setupStep}
                       {isPlanStep ? (
-                        <span className="ml-2 inline-flex rounded-full border border-emerald-300/35 bg-emerald-400/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-100 align-middle">
+                        <span className="quickstart-free-pill ml-2 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] align-middle">
                           FREE
                         </span>
                       ) : null}
@@ -1250,9 +1234,9 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
                 );
               })}
             </ul>
-            <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-white/15">
+            <div className="quickstart-progress-track mt-6 h-1.5 w-full overflow-hidden rounded-full">
               <div
-                className={`h-full bg-gradient-to-r from-violet-300/80 via-indigo-300/85 to-violet-300/80 transition-all duration-700 ${
+                className={`quickstart-progress-fill h-full transition-all duration-700 ${
                   setupProgress >= setupSteps.length ? 'w-full quick-start-setup__progress-complete' : 'w-1/3 quick-start-setup__progress-animated'
                 }`}
               />
@@ -1280,7 +1264,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
                 type="button"
                 onClick={openGuidedDemo}
                 whileTap={{ scale: 0.97 }}
-                className="order-1 inline-flex items-center justify-center rounded-full border border-violet-300/45 bg-violet-500 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(76,29,149,0.3)] transition duration-200 hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-[0_14px_28px_rgba(76,29,149,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 sm:order-2"
+                className="quickstart-primary-cta order-1 inline-flex items-center justify-center rounded-full border px-6 py-2.5 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 sm:order-2"
                 disabled={isSubmitting || !submitCompleted}
               >
                 {isSubmitting

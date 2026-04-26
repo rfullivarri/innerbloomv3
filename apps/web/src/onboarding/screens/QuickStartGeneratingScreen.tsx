@@ -54,8 +54,8 @@ export function QuickStartGeneratingScreen({
   }, [steps.length]);
 
   return (
-    <div className="onboarding-premium-root min-h-screen min-h-dvh overflow-y-auto px-4 py-10">
-      <section className="onboarding-premium-card relative mx-auto mt-5 w-full max-w-3xl rounded-3xl p-5 sm:p-8">
+    <div className="quickstart-premium-root onboarding-premium-root min-h-screen min-h-dvh overflow-y-auto px-4 py-10">
+      <section className="quickstart-premium-card onboarding-premium-card relative mx-auto mt-5 w-full max-w-3xl rounded-3xl p-5 sm:p-8">
         <div className="mb-5 flex items-center justify-center gap-2 text-center text-[0.68rem] font-semibold uppercase tracking-[0.36em] text-white/65 sm:text-xs">
           <span>Innerbloom</span>
           <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.8em] w-auto" />
@@ -68,21 +68,21 @@ export function QuickStartGeneratingScreen({
             const isPlanStep = index === steps.length - 1;
             return (
               <li key={setupStep} className="flex items-center gap-3 text-sm text-slate-100/90 transition-all duration-500">
-                <span className={`h-2.5 w-2.5 rounded-full bg-violet-300 ${!complete && index === setupProgress - 1 ? 'animate-pulse' : ''}`} />
+                <span className={`quickstart-setup-dot h-2.5 w-2.5 rounded-full ${!complete && index === setupProgress - 1 ? 'animate-pulse' : ''}`} />
                 <span>
                   {setupStep}
-                  {isPlanStep ? <span className="ml-2 inline-flex rounded-full border border-emerald-300/35 bg-emerald-400/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-100 align-middle">FREE</span> : null}
+                  {isPlanStep ? <span className="quickstart-free-pill ml-2 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] align-middle">FREE</span> : null}
                 </span>
               </li>
             );
           })}
         </ul>
-        <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-white/15">
-          <div className={`h-full bg-gradient-to-r from-violet-300/80 via-indigo-300/85 to-violet-300/80 transition-all duration-700 ${setupProgress >= steps.length ? 'w-full quick-start-setup__progress-complete' : 'w-1/3 quick-start-setup__progress-animated'}`} />
+        <div className="quickstart-progress-track mt-6 h-1.5 w-full overflow-hidden rounded-full">
+          <div className={`quickstart-progress-fill h-full transition-all duration-700 ${setupProgress >= steps.length ? 'w-full quick-start-setup__progress-complete' : 'w-1/3 quick-start-setup__progress-animated'}`} />
         </div>
         <p className="mt-6 text-sm text-slate-300">{copy.bridgeHint}</p>
         <div className="mt-8 flex flex-col items-center gap-3">
-          <button type="button" onClick={onOpenGuidedDemo} disabled={isSubmitting || !submitCompleted} className="inline-flex items-center justify-center rounded-full border border-violet-300/45 bg-violet-500 px-7 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(76,29,149,0.3)] transition duration-200 hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-[0_14px_28px_rgba(76,29,149,0.4)] disabled:cursor-not-allowed disabled:opacity-55">{isSubmitting ? copy.saving : submitCompleted ? copy.cta : copy.saving}</button>
+          <button type="button" onClick={onOpenGuidedDemo} disabled={isSubmitting || !submitCompleted} className="quickstart-primary-cta inline-flex items-center justify-center rounded-full border px-7 py-3 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-55">{isSubmitting ? copy.saving : submitCompleted ? copy.cta : copy.saving}</button>
           {submitCompleted ? <p className="text-sm text-emerald-200">{copy.done}</p> : null}
           {submitError ? <p className="text-sm text-rose-200">{submitError}</p> : null}
         </div>
