@@ -82,7 +82,7 @@ export function QuickStartSummaryStep({
   const avatarPreviewImage = avatarOption ? resolveAvatarPickerPreviewImage(avatarOption) : null;
 
   return (
-    <section className="glass-card onboarding-surface-base mx-auto w-full max-w-5xl rounded-3xl p-6 sm:p-8">
+    <section className="onboarding-premium-root quickstart-premium-card glass-card onboarding-surface-base mx-auto w-full max-w-5xl rounded-3xl p-6 sm:p-8">
       <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
         <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.eyebrow}</p>
         <h2 className="text-3xl font-semibold text-white">{copy.title}</h2>
@@ -90,7 +90,7 @@ export function QuickStartSummaryStep({
       </header>
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
         <div className="space-y-5">
-          <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+          <section className="quickstart-premium-surface rounded-2xl border p-5">
             <header className="border-b border-white/5 pb-3">
               <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.baseData}</p>
             </header>
@@ -114,20 +114,20 @@ export function QuickStartSummaryStep({
               </div>
             </div>
           </section>
-          <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+          <section className="quickstart-premium-surface rounded-2xl border p-5">
             <header className="border-b border-white/5 pb-3">
               <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.pillars}</p>
             </header>
             <div className="mt-4 space-y-3">
               <p className="text-sm text-white/70">{copy.selectedTraits}</p>
               {(['Body', 'Mind', 'Soul'] as Pillar[]).map((pillar) => (
-                <div key={pillar} className="rounded-xl border border-white/10 bg-white/5 p-3">
+                <div key={pillar} className="quickstart-premium-surface rounded-xl border p-3">
                   <p className="text-sm font-semibold text-white">{pillar === 'Body' ? 'Body 🫀' : pillar === 'Mind' ? 'Mind 🧠' : 'Soul 🏵️'}</p>
                   <p className="mt-1 text-xs text-white/70">{copy.selectedTasks}: {selectedByPillar[pillar].length}</p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {selectedTraits[pillar].length > 0
                       ? selectedTraits[pillar].map((trait) => (
-                        <span key={`${pillar}-${trait}`} className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white/90">
+                        <span key={`${pillar}-${trait}`} className="quickstart-pill rounded-full border px-2.5 py-1 text-[11px] font-medium">
                           {trait}
                         </span>
                       ))
@@ -139,7 +139,7 @@ export function QuickStartSummaryStep({
           </section>
         </div>
         <aside className="space-y-5">
-          <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+          <section className="quickstart-premium-surface rounded-2xl border p-5">
             <header className="border-b border-white/5 pb-3">
               <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.gp}</p>
             </header>

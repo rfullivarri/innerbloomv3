@@ -42,16 +42,6 @@ function InlineTaskRow({
   const hasInput = Boolean(task.inputAfter || task.inputBefore);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const rowRef = useRef<HTMLDivElement | null>(null);
-  const selectedFrontStyle = {
-    borderColor: 'color-mix(in srgb, var(--color-accent-secondary) 42%, var(--onboarding-glass-border))',
-    background: 'color-mix(in srgb, var(--color-surface-elevated) 82%, var(--color-accent-secondary) 18%)',
-    boxShadow: '0 18px 40px color-mix(in srgb, var(--color-surface-elevated) 56%, rgba(8,12,28,0.66))',
-  };
-  const selectedBackStyle = {
-    borderColor: 'color-mix(in srgb, var(--color-accent-secondary) 54%, var(--onboarding-glass-border-soft))',
-    background: 'color-mix(in srgb, var(--color-accent-secondary) 62%, var(--color-surface-elevated) 38%)',
-    boxShadow: '0 12px 24px color-mix(in srgb, var(--color-accent-secondary) 40%, rgba(8,12,28,0.64))',
-  };
 
   useEffect(() => {
     if (!selected) {
@@ -77,12 +67,8 @@ function InlineTaskRow({
   return (
     <div ref={rowRef} className={`relative ${selected ? 'pt-5 pb-1' : ''}`}>
       {selected ? (
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 bottom-1 rounded-2xl border px-4 pt-1.5 pb-3"
-          style={selectedBackStyle}
-          aria-hidden
-        >
-          <span className="block text-[10px] font-semibold uppercase leading-none tracking-[0.16em] text-violet-100/90">
+        <div className="quickstart-task-row__back pointer-events-none absolute inset-x-0 top-0 bottom-1 rounded-2xl border px-4 pt-1.5 pb-3" aria-hidden>
+          <span className="quickstart-task-trait-band block text-[10px] font-semibold uppercase leading-none tracking-[0.16em]">
             {copy.traitLabel}: {task.trait}
           </span>
         </div>
@@ -100,8 +86,7 @@ function InlineTaskRow({
         role="button"
         tabIndex={0}
         data-selected={selected ? 'true' : undefined}
-        className="onboarding-surface-inner relative z-10 w-full rounded-2xl border px-4 py-3.5 text-left text-white/85 shadow-[0_12px_24px_rgba(8,12,28,0.18)] transition hover:border-white/30 hover:bg-white/[0.12]"
-        style={selected ? selectedFrontStyle : undefined}
+        className={`quickstart-task-row onboarding-surface-inner relative z-10 w-full rounded-2xl border px-4 py-3.5 text-left text-white/85 transition ${selected ? 'quickstart-task-row--selected' : ''}`}
       >
         <div className="flex items-center gap-2.5">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-2 text-sm leading-relaxed sm:text-base">
@@ -114,7 +99,7 @@ function InlineTaskRow({
                 inputMode="numeric"
                 onClick={(event) => event.stopPropagation()}
                 onChange={(event) => onInputChange(event.target.value)}
-                className="h-6 w-12 rounded-md border border-violet-200/30 bg-violet-100/5 px-1.5 text-center text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70 disabled:opacity-40 sm:h-7 sm:w-14"
+                className="quickstart-task-input h-6 w-12 rounded-md border px-1.5 text-center text-xs focus:outline-none focus-visible:ring-2 disabled:opacity-40 sm:h-7 sm:w-14"
                 placeholder={copy.countPlaceholder}
               />
             ) : null}
@@ -129,7 +114,7 @@ function InlineTaskRow({
                 event.stopPropagation();
                 setShowSuggestions((prev) => !prev);
               }}
-              className="relative z-20 ml-auto inline-flex h-5 w-5 shrink-0 items-center justify-center self-start rounded-md border border-violet-200/45 bg-violet-300/18 text-white/90 transition"
+              className="quickstart-task-help relative z-20 ml-auto inline-flex h-5 w-5 shrink-0 items-center justify-center self-start rounded-md border transition"
               aria-label={copy.taskHelpLabel}
               aria-expanded={showSuggestions}
             >
@@ -145,8 +130,7 @@ function InlineTaskRow({
 
       {selected && task.suggestions?.length && showSuggestions ? (
         <div
-          className="absolute right-3 bottom-[calc(100%+0.35rem)] z-30 w-[min(18.5rem,calc(100%-1.5rem))] rounded-xl border p-3 text-xs text-white/92 shadow-[0_10px_30px_rgba(43,25,96,0.45)] backdrop-blur"
-          style={{ borderColor: 'rgba(196, 181, 253, 0.42)', backgroundColor: 'rgba(17, 24, 39, 0.93)' }}
+          className="quickstart-suggestions-panel absolute right-3 bottom-[calc(100%+0.35rem)] z-30 w-[min(18.5rem,calc(100%-1.5rem))] rounded-xl border p-3 text-xs backdrop-blur"
         >
           <ul className="space-y-1.5">
             {task.suggestions.map((suggestion) => (
@@ -215,13 +199,13 @@ export function QuickStartTasksStep({
   const modeStyle = QUICK_START_MODE_SOFT_STYLES[gameMode];
 
   return (
-    <section className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
+    <section className="onboarding-premium-root quickstart-premium-card onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
       <header className="mb-5 border-b border-white/10 pb-4">
         <p className="text-xs uppercase tracking-[0.25em] text-white/55">{gameMode} · Quick Start</p>
         <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{copy.title}</h1>
         <p className="mt-2 text-sm text-white/70">{copy.subtitle}</p>
         <div
-          className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold text-violet-50/95"
+          className="quickstart-min-rule mt-3 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold"
           style={{
             borderColor: `color-mix(in srgb, ${modeStyle.border} 92%, rgba(255,255,255,0.14))`,
             background: `linear-gradient(135deg, color-mix(in srgb, ${modeStyle.tint} 90%, rgba(10,14,30,0.72)), color-mix(in srgb, ${modeStyle.tint} 66%, rgba(10,14,30,0.58)))`,
@@ -229,13 +213,13 @@ export function QuickStartTasksStep({
           }}
         >
           <span className="whitespace-nowrap">{copy.minRule}</span>
-          <span className="text-violet-100/60" aria-hidden>·</span>
+          <span className="quickstart-min-rule__dot" aria-hidden>·</span>
           <span className="whitespace-nowrap">{copy.suggestedRule}</span>
         </div>
         <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
           <span
-            className={`inline-flex rounded-lg border px-3.5 py-1.5 text-[0.68rem] font-medium sm:text-[0.72rem] ${
-              balancedBonusActive ? 'border-cyan-200/30 bg-cyan-300/8 text-cyan-100/90' : 'border-sky-200/28 bg-sky-300/8 text-sky-100/85'
+            className={`quickstart-bonus-pill inline-flex rounded-lg border px-3.5 py-1.5 text-[0.68rem] font-medium sm:text-[0.72rem] ${
+              balancedBonusActive ? 'quickstart-bonus-pill--ready' : 'quickstart-bonus-pill--pending'
             }`}
           >
             {balancedBonusActive ? copy.bonusReady : copy.bonusPending}
