@@ -24,7 +24,13 @@ export type LandingCopy = {
     note: string;
     alt: string;
   };
-  problem: { title: string; left: string; right: string };
+  problem: {
+    title: string;
+    leftPrimary: string;
+    leftSecondary: string;
+    rightPrimary: string;
+    rightSecondary: string;
+  };
   pillars: { kicker: string; title: string; intro: string; highlightLeadIn: string; highlight: string; items: Pillar[] };
   modes: { kicker: string; title: string; intro: string; items: Mode[] };
   how: { kicker: string; title: string; intro: string; closingLine: string; steps: HowTimelineStep[] };
@@ -58,10 +64,14 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     },
     problem: {
       title: 'El problema no sos vos.',
-      left:
-        '✕ La mayoría de las apps de hábitos asumen que todos tus días tienen la misma energía.\n\n✕ Te piden la misma intensidad incluso cuando estás cansado o saturado.\n\n✕ Si no cumplís el plan rígido, te hacen sentir que vos fallaste.',
-      right:
-        '✓ Innerbloom parte de tu capacidad real de hoy, no de una versión idealizada tuya.\n\n✓ Ajusta tu carga semanal cuando cambia tu energía, tu foco o tu contexto.\n\n✓ Así sostenés el proceso en el tiempo y convertís constancia en hábitos reales.'
+      leftPrimary:
+        'La mayoría de las apps de hábitos están diseñadas\npara una versión de vos que no existe:',
+      leftSecondary:
+        'siempre con la misma energía,\nel mismo foco y la misma disciplina.',
+      rightPrimary:
+        'Pero la vida cambia. Y cuando\nel sistema no cambia con vos,',
+      rightSecondary:
+        'no se siente como si el sistema hubiera fallado:\nse siente como si hubieras fallado vos.'
     },
     pillars: {
       kicker: 'PROGRESO EN EQUILIBRIO',
@@ -297,10 +307,14 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     },
     problem: {
       title: 'You’re not the problem.',
-      left:
-        '✕ Most habit apps assume you show up with the same energy every single day.\n\n✕ They demand the same intensity even when your week is heavy or unpredictable.\n\n✕ If you miss a rigid plan, the app makes it feel like you failed.',
-      right:
-        '✓ Innerbloom starts from your real capacity today, not an idealized version of you.\n\n✓ It adapts your weekly load as your energy, focus, and context change.\n\n✓ That helps you stay consistent long enough to build habits that actually last.'
+      leftPrimary:
+        'Most habit apps are designed\nfor a version of you that doesn’t exist:',
+      leftSecondary:
+        'always with the same energy,\nthe same focus, and the same discipline.',
+      rightPrimary:
+        'But life changes. And when\nthe system doesn’t change with you,',
+      rightSecondary:
+        'it doesn’t feel like the system failed—\nit feels like you did.'
     },
     pillars: {
       kicker: 'PROGRESS IN BALANCE',

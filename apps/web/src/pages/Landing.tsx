@@ -939,19 +939,33 @@ export default function LandingPage() {
             </AdaptiveText>
 
             <div className="truth-problem-body">
-              <AdaptiveText as="p" className="truth-problem-block truth-problem-block--left">
+              <div className="truth-problem-block truth-problem-block--left">
                 <span className="truth-problem-icon truth-problem-icon--x" aria-hidden>
                   ×
                 </span>
-                <span>{renderMultilineText(copy.problem.left)}</span>
-              </AdaptiveText>
+                <div className="truth-problem-copy">
+                  <AdaptiveText as="p" className="truth-problem-primary">
+                    {renderMultilineText(copy.problem.leftPrimary)}
+                  </AdaptiveText>
+                  <AdaptiveText as="p" className="truth-problem-secondary">
+                    {renderMultilineText(copy.problem.leftSecondary)}
+                  </AdaptiveText>
+                </div>
+              </div>
               <div className="truth-problem-divider" aria-hidden />
-              <AdaptiveText as="p" className="truth-problem-block truth-problem-block--right">
+              <div className="truth-problem-block truth-problem-block--right">
                 <span className="truth-problem-icon truth-problem-icon--check" aria-hidden>
                   ✓
                 </span>
-                <span>{renderMultilineText(copy.problem.right)}</span>
-              </AdaptiveText>
+                <div className="truth-problem-copy">
+                  <AdaptiveText as="p" className="truth-problem-primary">
+                    {renderMultilineText(copy.problem.rightPrimary)}
+                  </AdaptiveText>
+                  <AdaptiveText as="p" className="truth-problem-secondary">
+                    {renderMultilineText(copy.problem.rightSecondary)}
+                  </AdaptiveText>
+                </div>
+              </div>
             </div>
           </div>
         </section>

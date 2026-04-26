@@ -649,53 +649,72 @@
 }
 
 .landing .truth-problem-body {
-  width: min(900px, 100%);
+  width: min(940px, 100%);
   margin: clamp(12px, 1.5vw, 22px) auto 0;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  gap: clamp(14px, 1.7vw, 24px);
+  gap: clamp(18px, 2.4vw, 36px);
   align-items: stretch;
 }
 
 .landing .truth-problem-block {
-  margin: 0;
-  color: color-mix(in srgb, var(--ink) 90%, #e6dcff 10%);
-  font-size: clamp(0.98rem, 0.22vw + 0.92rem, 1.08rem);
-  line-height: 1.52;
-  text-align: left;
-  text-wrap: pretty;
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 10px;
+  gap: 14px;
+  align-content: start;
+}
+
+.landing .truth-problem-copy {
+  display: grid;
+  gap: 14px;
+  text-wrap: pretty;
+}
+
+.landing .truth-problem-primary,
+.landing .truth-problem-secondary {
+  margin: 0;
+  text-align: left;
+}
+
+.landing .truth-problem-primary {
+  color: rgba(242, 248, 255, 0.97);
+  font-size: clamp(1.03rem, 0.28vw + 0.96rem, 1.16rem);
+  line-height: 1.48;
+}
+
+.landing .truth-problem-secondary {
+  color: rgba(194, 184, 226, 0.9);
+  font-size: clamp(0.95rem, 0.22vw + 0.9rem, 1.04rem);
+  line-height: 1.52;
 }
 
 .landing .truth-problem-icon {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  margin-top: 1px;
+  margin-top: 3px;
 }
 
 .landing .truth-problem-icon--x {
-  color: rgba(255, 201, 187, 0.96);
-  background: rgba(237, 109, 93, 0.22);
-  box-shadow: inset 0 0 0 1px rgba(255, 172, 160, 0.36);
+  color: rgba(255, 215, 235, 0.96);
+  background: rgba(221, 140, 190, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(237, 185, 221, 0.34);
 }
 
 .landing .truth-problem-icon--check {
-  color: rgba(193, 251, 251, 0.98);
-  background: rgba(66, 177, 200, 0.2);
-  box-shadow: inset 0 0 0 1px rgba(132, 238, 243, 0.38);
+  color: rgba(198, 250, 248, 0.98);
+  background: rgba(88, 188, 193, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(144, 236, 233, 0.36);
 }
 
 .landing .truth-problem-divider {
   width: 1px;
-  background: linear-gradient(180deg, transparent 0%, rgba(160, 190, 242, 0.56) 24%, rgba(151, 197, 255, 0.34) 74%, transparent 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(181, 193, 234, 0.42) 18%, rgba(168, 181, 225, 0.28) 80%, transparent 100%);
 }
 
 @media (max-width: 840px) {
@@ -711,9 +730,7 @@
   }
 
   .landing .truth-problem-divider {
-    height: 1px;
-    width: 100%;
-    background: linear-gradient(90deg, transparent 0%, rgba(160, 190, 242, 0.56) 22%, rgba(151, 197, 255, 0.34) 72%, transparent 100%);
+    display: none;
   }
 }
 
