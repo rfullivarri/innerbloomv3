@@ -89,6 +89,14 @@
   overflow-x: hidden;
   font-family: var(--font-body);
   color: var(--ink);
+  background: var(--landing-background-base, #0a0a12);
+}
+
+.landing-background-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background: var(
     --landing-background,
     linear-gradient(
@@ -97,6 +105,9 @@
       var(--bg-b, #3d72b4)
     )
   );
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
 .landing::before {
@@ -107,7 +118,7 @@
   content: none;
 }
 
-.landing > * {
+.landing > *:not(.landing-background-layer) {
   position: relative;
   z-index: 1;
 }
