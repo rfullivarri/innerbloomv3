@@ -791,6 +791,7 @@ export default function LandingPage() {
       className="landing"
       style={landingStyle}
       data-background-tone={selectedBackground?.tone ?? "dark"}
+      data-background-id={selectedBackground?.id}
       data-background-kind={selectedBackground?.type ?? "linear"}
     >
       <div className="landing-background-layer" aria-hidden="true" />
