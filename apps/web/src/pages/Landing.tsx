@@ -43,6 +43,7 @@ import {
   writeLandingThemeMode,
 } from "../lib/landingTheme";
 import "./Landing.css";
+import "./LandingThemeContrastPatch.css";
 
 type ModeVisual = {
   avatarVideo: string;
