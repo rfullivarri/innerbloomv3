@@ -94,7 +94,7 @@ export function JourneyGeneratingScreen({ gameMode, language, onGoToDashboard, o
   }, [bullets.length]);
 
   return (
-    <div className="relative flex min-h-screen min-h-dvh items-center justify-center overflow-hidden bg-[#000c40] px-6 py-10 text-white">
+    <div className="onboarding-premium-root relative flex min-h-screen min-h-dvh items-center justify-center overflow-hidden px-6 py-10">
       <div className="pointer-events-none absolute inset-0 opacity-60">
         <svg viewBox="0 0 1200 720" className="h-full w-full" role="presentation" aria-hidden>
           <defs>
@@ -117,7 +117,7 @@ export function JourneyGeneratingScreen({ gameMode, language, onGoToDashboard, o
 
       <div className="pointer-events-none absolute inset-0 bg-black/55 backdrop-blur-sm" aria-hidden />
 
-      <section className="relative z-10 w-full max-w-3xl rounded-3xl border border-white/10 bg-[#0a133d]/85 p-6 shadow-[0_0_45px_rgba(79,70,229,0.22)] backdrop-blur-xl sm:p-10">
+      <section className="onboarding-premium-card relative z-10 w-full max-w-3xl rounded-3xl p-6 sm:p-10">
         <div className="mb-6 flex items-center justify-center gap-2 text-center text-xs font-semibold uppercase tracking-[0.42em] text-white/65 sm:text-sm">
           <span>Innerbloom</span>
           <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.9em] w-auto" />

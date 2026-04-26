@@ -54,8 +54,8 @@ export function QuickStartGeneratingScreen({
   }, [steps.length]);
 
   return (
-    <div className="min-h-screen min-h-dvh overflow-y-auto bg-[#000c40] px-4 py-10 text-white">
-      <section className="relative mx-auto mt-5 w-full max-w-3xl rounded-3xl border border-white/10 bg-[#0a133d]/85 p-5 shadow-[0_0_45px_rgba(79,70,229,0.22)] backdrop-blur-xl sm:p-8">
+    <div className="onboarding-premium-root min-h-screen min-h-dvh overflow-y-auto px-4 py-10">
+      <section className="onboarding-premium-card relative mx-auto mt-5 w-full max-w-3xl rounded-3xl p-5 sm:p-8">
         <div className="mb-5 flex items-center justify-center gap-2 text-center text-[0.68rem] font-semibold uppercase tracking-[0.36em] text-white/65 sm:text-xs">
           <span>Innerbloom</span>
           <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.8em] w-auto" />
