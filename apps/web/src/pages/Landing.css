@@ -2975,3 +2975,461 @@
 .landing .lang-menu[hidden] {
   display: none;
 }
+
+
+/* =========================================================
+   Landing theme contrast hardening
+   Fixes light-mode text contrast and dark-mode bottom sections.
+   Keep this block at the very end of Landing.css.
+   ========================================================= */
+
+/* ---------- Shared theme tokens ---------- */
+
+.landing[data-theme-mode="dark"] {
+  --landing-heading-strong: #f7f4ff;
+  --landing-text-strong: rgba(244, 241, 255, 0.94);
+  --landing-text-body: rgba(224, 228, 246, 0.82);
+  --landing-text-muted: rgba(205, 199, 229, 0.68);
+  --landing-kicker: rgba(198, 210, 244, 0.72);
+  --landing-card-text: rgba(235, 241, 255, 0.9);
+  --landing-card-muted: rgba(206, 216, 242, 0.76);
+}
+
+.landing[data-theme-mode="light"] {
+  --landing-heading-strong: #12101f;
+  --landing-text-strong: #171126;
+  --landing-text-body: rgba(32, 28, 50, 0.82);
+  --landing-text-muted: rgba(61, 52, 91, 0.68);
+  --landing-kicker: rgba(92, 79, 136, 0.62);
+  --landing-card-text: rgba(27, 23, 43, 0.88);
+  --landing-card-muted: rgba(72, 62, 105, 0.68);
+}
+
+/* ---------- Global text contrast ---------- */
+
+.landing[data-theme-mode="dark"] h1,
+.landing[data-theme-mode="dark"] h2,
+.landing[data-theme-mode="dark"] h3,
+.landing[data-theme-mode="dark"] h4,
+.landing[data-theme-mode="dark"] h5,
+.landing[data-theme-mode="dark"] h6 {
+  color: var(--landing-heading-strong);
+}
+
+.landing[data-theme-mode="light"] h1,
+.landing[data-theme-mode="light"] h2,
+.landing[data-theme-mode="light"] h3,
+.landing[data-theme-mode="light"] h4,
+.landing[data-theme-mode="light"] h5,
+.landing[data-theme-mode="light"] h6 {
+  color: var(--landing-heading-strong);
+}
+
+/* Keep the Innerbloom gradient title span intact in both modes */
+.landing .hero h1 .grad,
+.landing h1 .grad,
+.landing .grad {
+  background: var(--gradient-innerbloom);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Paragraphs and common body text */
+.landing[data-theme-mode="dark"] p,
+.landing[data-theme-mode="dark"] li,
+.landing[data-theme-mode="dark"] summary,
+.landing[data-theme-mode="dark"] details {
+  color: var(--landing-text-body);
+}
+
+.landing[data-theme-mode="light"] p,
+.landing[data-theme-mode="light"] li,
+.landing[data-theme-mode="light"] summary,
+.landing[data-theme-mode="light"] details {
+  color: var(--landing-text-body);
+}
+
+/* ---------- Hero ---------- */
+
+.landing[data-theme-mode="dark"] .hero h1 {
+  color: var(--landing-heading-strong);
+}
+
+.landing[data-theme-mode="light"] .hero h1 {
+  color: var(--landing-heading-strong);
+}
+
+.landing[data-theme-mode="dark"] .hero .sub,
+.landing[data-theme-mode="dark"] .section-sub,
+.landing[data-theme-mode="dark"] .hero-cta-note,
+.landing[data-theme-mode="dark"] .tiny {
+  color: var(--landing-text-body);
+}
+
+.landing[data-theme-mode="light"] .hero .sub,
+.landing[data-theme-mode="light"] .section-sub,
+.landing[data-theme-mode="light"] .hero-cta-note,
+.landing[data-theme-mode="light"] .tiny {
+  color: var(--landing-text-body);
+}
+
+/* ---------- Kicker / eyebrow labels ---------- */
+
+.landing[data-theme-mode="dark"] .section-kicker,
+.landing[data-theme-mode="dark"] .truth-problem-kicker,
+.landing[data-theme-mode="dark"] .how-kicker,
+.landing[data-theme-mode="dark"] .kicker {
+  color: var(--landing-kicker);
+}
+
+.landing[data-theme-mode="light"] .section-kicker,
+.landing[data-theme-mode="light"] .truth-problem-kicker,
+.landing[data-theme-mode="light"] .how-kicker,
+.landing[data-theme-mode="light"] .kicker {
+  color: var(--landing-kicker);
+}
+
+/* ---------- Problem section ---------- */
+
+.landing[data-theme-mode="dark"] .truth-problem-title,
+.landing[data-theme-mode="dark"] .truth-problem-primary {
+  color: var(--landing-heading-strong);
+}
+
+.landing[data-theme-mode="dark"] .truth-problem-secondary {
+  color: var(--landing-text-body);
+}
+
+.landing[data-theme-mode="light"] .truth-problem-title,
+.landing[data-theme-mode="light"] .truth-problem-primary {
+  color: var(--landing-heading-strong);
+}
+
+.landing[data-theme-mode="light"] .truth-problem-secondary {
+  color: var(--landing-text-body);
+}
+
+.landing[data-theme-mode="light"] .truth-problem-divider {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(92, 79, 136, 0.22) 18%,
+    rgba(92, 79, 136, 0.16) 80%,
+    transparent 100%
+  );
+}
+
+/* ---------- Timeline / how section ---------- */
+
+.landing[data-theme-mode="dark"] .timeline-card,
+.landing[data-theme-mode="dark"] .timeline-card p,
+.landing[data-theme-mode="dark"] .timeline-card li,
+.landing[data-theme-mode="dark"] .timeline-card span {
+  color: var(--landing-card-text);
+}
+
+.landing[data-theme-mode="light"] .timeline-card,
+.landing[data-theme-mode="light"] .timeline-card p,
+.landing[data-theme-mode="light"] .timeline-card li,
+.landing[data-theme-mode="light"] .timeline-card span {
+  color: var(--landing-card-text);
+}
+
+.landing[data-theme-mode="light"] .timeline-card {
+  background:
+    radial-gradient(
+      120% 120% at 18% 10%,
+      rgba(255, 255, 255, 0.9),
+      rgba(255, 255, 255, 0.48) 58%,
+      rgba(246, 241, 255, 0.46)
+    );
+  border-color: rgba(119, 101, 164, 0.18);
+  box-shadow:
+    0 18px 42px rgba(64, 54, 104, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* ---------- Cards / glass modules ---------- */
+
+.landing[data-theme-mode="dark"] .card,
+.landing[data-theme-mode="dark"] .card p,
+.landing[data-theme-mode="dark"] .card li,
+.landing[data-theme-mode="dark"] .mode-main,
+.landing[data-theme-mode="dark"] .mode-main p,
+.landing[data-theme-mode="dark"] .mode-thumb,
+.landing[data-theme-mode="dark"] .pricing-card,
+.landing[data-theme-mode="dark"] .visible-progress-module {
+  color: var(--landing-card-text);
+}
+
+.landing[data-theme-mode="light"] .card,
+.landing[data-theme-mode="light"] .card p,
+.landing[data-theme-mode="light"] .card li,
+.landing[data-theme-mode="light"] .mode-main,
+.landing[data-theme-mode="light"] .mode-main p,
+.landing[data-theme-mode="light"] .mode-thumb,
+.landing[data-theme-mode="light"] .pricing-card,
+.landing[data-theme-mode="light"] .visible-progress-module {
+  color: var(--landing-card-text);
+}
+
+.landing[data-theme-mode="light"] .card,
+.landing[data-theme-mode="light"] .mode-main,
+.landing[data-theme-mode="light"] .mode-thumb,
+.landing[data-theme-mode="light"] .pricing-card,
+.landing[data-theme-mode="light"] .visible-progress-module {
+  background:
+    radial-gradient(
+      120% 120% at 15% 8%,
+      rgba(255, 255, 255, 0.92),
+      rgba(255, 255, 255, 0.52) 58%,
+      rgba(246, 241, 255, 0.46)
+    );
+  border-color: rgba(119, 101, 164, 0.18);
+  box-shadow:
+    0 18px 44px rgba(64, 54, 104, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+/* ---------- Pillars ---------- */
+
+.landing[data-theme-mode="dark"] .pillar-heading,
+.landing[data-theme-mode="dark"] .pillar-card h3 {
+  color: var(--landing-heading-strong);
+}
+
+.landing[data-theme-mode="dark"] .pillar-definition,
+.landing[data-theme-mode="dark"] .pillar-examples-label,
+.landing[data-theme-mode="dark"] .pillar-chip {
+  color: var(--landing-card-muted);
+}
+
+.landing[data-theme-mode="light"] .pillar-heading,
+.landing[data-theme-mode="light"] .pillar-card h3 {
+  color: var(--landing-heading-strong);
+}
+
+.landing[data-theme-mode="light"] .pillar-definition,
+.landing[data-theme-mode="light"] .pillar-examples-label,
+.landing[data-theme-mode="light"] .pillar-chip {
+  color: var(--landing-card-muted);
+}
+
+.landing[data-theme-mode="light"] .pillar-chip {
+  background: rgba(255, 255, 255, 0.58);
+  border-color: rgba(119, 101, 164, 0.16);
+}
+
+/* ---------- Modes / rhythms ---------- */
+
+.landing[data-theme-mode="dark"] .modes-title,
+.landing[data-theme-mode="dark"] .modes-intro,
+.landing[data-theme-mode="dark"] .mode-title,
+.landing[data-theme-mode="dark"] .mode-copy {
+  color: var(--landing-text-body);
+}
+
+.landing[data-theme-mode="light"] .modes-title,
+.landing[data-theme-mode="light"] .modes-intro,
+.landing[data-theme-mode="light"] .mode-title,
+.landing[data-theme-mode="light"] .mode-copy {
+  color: var(--landing-text-body);
+}
+
+/* Mode names like LOW / CHILL / FLOW / EVOLVE should not become invisible */
+.landing[data-theme-mode="light"] .mode-main h3,
+.landing[data-theme-mode="light"] .mode-main strong,
+.landing[data-theme-mode="light"] .mode-thumb strong {
+  color: var(--landing-heading-strong);
+}
+
+/* ---------- Demo / visible progress section ---------- */
+
+.landing[data-theme-mode="dark"] .demo-title,
+.landing[data-theme-mode="dark"] .demo-sub {
+  color: var(--landing-text-body);
+}
+
+.landing[data-theme-mode="light"] .demo-title,
+.landing[data-theme-mode="light"] .demo-sub {
+  color: var(--landing-text-body);
+}
+
+/* ---------- Testimonials / slider ---------- */
+
+.landing[data-theme-mode="dark"] .slider,
+.landing[data-theme-mode="dark"] .slider p,
+.landing[data-theme-mode="dark"] .testimonial,
+.landing[data-theme-mode="dark"] .testimonial p {
+  color: var(--landing-card-text);
+}
+
+.landing[data-theme-mode="light"] .slider,
+.landing[data-theme-mode="light"] .slider p,
+.landing[data-theme-mode="light"] .testimonial,
+.landing[data-theme-mode="light"] .testimonial p {
+  color: var(--landing-card-text);
+}
+
+.landing[data-theme-mode="light"] .slider {
+  background:
+    radial-gradient(
+      120% 120% at 15% 8%,
+      rgba(255, 255, 255, 0.9),
+      rgba(255, 255, 255, 0.54) 58%,
+      rgba(246, 241, 255, 0.46)
+    );
+  border-color: rgba(119, 101, 164, 0.18);
+}
+
+/* ---------- FAQ ---------- */
+
+.landing[data-theme-mode="dark"] .faq h2,
+.landing[data-theme-mode="dark"] .faq summary {
+  color: var(--landing-heading-strong);
+}
+
+.landing[data-theme-mode="dark"] .faq details p,
+.landing[data-theme-mode="dark"] .faq details div {
+  color: var(--landing-text-body);
+}
+
+.landing[data-theme-mode="light"] .faq h2,
+.landing[data-theme-mode="light"] .faq summary {
+  color: var(--landing-heading-strong);
+}
+
+.landing[data-theme-mode="light"] .faq details p,
+.landing[data-theme-mode="light"] .faq details div {
+  color: var(--landing-text-body);
+}
+
+.landing[data-theme-mode="light"] .faq details {
+  background:
+    radial-gradient(
+      110% 120% at 14% 10%,
+      rgba(255, 255, 255, 0.92),
+      rgba(255, 255, 255, 0.58) 62%,
+      rgba(246, 241, 255, 0.5)
+    );
+  border-color: rgba(119, 101, 164, 0.18);
+  box-shadow:
+    0 14px 34px rgba(64, 54, 104, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+/* ---------- Final CTA / footer ---------- */
+
+.landing[data-theme-mode="dark"] .final-cta,
+.landing[data-theme-mode="dark"] .final-cta h2,
+.landing[data-theme-mode="dark"] .final-cta p,
+.landing[data-theme-mode="dark"] footer,
+.landing[data-theme-mode="dark"] footer a,
+.landing[data-theme-mode="dark"] footer p {
+  color: var(--landing-text-body);
+}
+
+.landing[data-theme-mode="light"] .final-cta,
+.landing[data-theme-mode="light"] .final-cta h2,
+.landing[data-theme-mode="light"] .final-cta p,
+.landing[data-theme-mode="light"] footer,
+.landing[data-theme-mode="light"] footer a,
+.landing[data-theme-mode="light"] footer p {
+  color: var(--landing-text-body);
+}
+
+/* If the footer links were too purple/low contrast */
+.landing[data-theme-mode="light"] footer a {
+  color: rgba(50, 42, 84, 0.78);
+}
+
+.landing[data-theme-mode="dark"] footer a {
+  color: rgba(220, 212, 245, 0.72);
+}
+
+/* ---------- Nav contrast ---------- */
+
+.landing[data-theme-mode="dark"] .brand,
+.landing[data-theme-mode="dark"] .brand-text,
+.landing[data-theme-mode="dark"] .nav-links a,
+.landing[data-theme-mode="dark"] .nav-auth-button,
+.landing[data-theme-mode="dark"] .lang-button {
+  color: rgba(247, 244, 255, 0.9);
+}
+
+.landing[data-theme-mode="light"] .brand,
+.landing[data-theme-mode="light"] .brand-text,
+.landing[data-theme-mode="light"] .nav-links a,
+.landing[data-theme-mode="light"] .nav-auth-button,
+.landing[data-theme-mode="light"] .lang-button {
+  color: rgba(18, 16, 31, 0.86);
+}
+
+/* Keep primary buttons white text in both modes */
+.landing .ib-primary-button,
+.landing .journey-cta,
+.landing .primaryCta,
+.landing .hero-actions .ib-primary-button {
+  color: #ffffff;
+}
+
+/* Ghost/demo buttons need contrast by mode */
+.landing[data-theme-mode="dark"] .hero-demo-cta {
+  color: rgba(247, 244, 255, 0.9);
+  border-color: rgba(200, 166, 255, 0.48);
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.landing[data-theme-mode="light"] .hero-demo-cta {
+  color: rgba(55, 43, 92, 0.9);
+  border-color: rgba(139, 92, 246, 0.32);
+  background: rgba(255, 255, 255, 0.48);
+}
+
+/* ---------- Kill accidental white-on-light text in known sections ---------- */
+
+.landing[data-theme-mode="light"] .truth-problem *,
+.landing[data-theme-mode="light"] .how *,
+.landing[data-theme-mode="light"] .feature-showcase *,
+.landing[data-theme-mode="light"] .why *,
+.landing[data-theme-mode="light"] .modes *,
+.landing[data-theme-mode="light"] .faq *,
+.landing[data-theme-mode="light"] .final-cta * {
+  text-shadow: none;
+}
+
+/* Restore headings after broad section override */
+.landing[data-theme-mode="light"] .truth-problem h2,
+.landing[data-theme-mode="light"] .how h2,
+.landing[data-theme-mode="light"] .feature-showcase h2,
+.landing[data-theme-mode="light"] .why h2,
+.landing[data-theme-mode="light"] .modes h2,
+.landing[data-theme-mode="light"] .faq h2,
+.landing[data-theme-mode="light"] .final-cta h2 {
+  color: var(--landing-heading-strong);
+}
+
+/* Body copy inside light mode sections */
+.landing[data-theme-mode="light"] .truth-problem p,
+.landing[data-theme-mode="light"] .how p,
+.landing[data-theme-mode="light"] .feature-showcase p,
+.landing[data-theme-mode="light"] .why p,
+.landing[data-theme-mode="light"] .modes p,
+.landing[data-theme-mode="light"] .faq p,
+.landing[data-theme-mode="light"] .final-cta p {
+  color: var(--landing-text-body);
+}
+
+/* ---------- Fix too-dark text in dark mode lower sections ---------- */
+
+.landing[data-theme-mode="dark"] .faq h2,
+.landing[data-theme-mode="dark"] .final-cta h2 {
+  color: var(--landing-heading-strong);
+}
+
+.landing[data-theme-mode="dark"] .faq p,
+.landing[data-theme-mode="dark"] .final-cta p {
+  color: var(--landing-text-body);
+}
