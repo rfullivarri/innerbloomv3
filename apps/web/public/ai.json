@@ -64,24 +64,24 @@
       "why_it_matters": "Reduce fricción de arranque y transforma intención difusa en plan accionable."
     },
     {
-      "feature": "🪫 LOW MOOD",
-      "what_it_does": "Modo pensado para cuando estás sin energía, sobrecargado.",
-      "why_it_matters": "reconstruir tu base con la menor carga posible y hábitos fáciles de sostener."
+      "feature": "🐈 RED CAT",
+      "what_it_does": "Modo pensado para cuando estás ",
+      "why_it_matters": "Un avatar vibrante para quienes quieren mostrarse con presencia y personalidad."
     },
     {
-      "feature": "🍃 CHILL MOOD",
-      "what_it_does": "Modo pensado para cuando estás relajado y estable.",
-      "why_it_matters": "mantener una constancia ligera y estable con una frecuencia que se sienta posible."
+      "feature": "🐻 GREEN BEAR",
+      "what_it_does": "Modo pensado para cuando estás ",
+      "why_it_matters": "Un avatar sereno y cercano para quienes priorizan calidez y estabilidad."
     },
     {
-      "feature": "🌊 FLOW MOOD",
-      "what_it_does": "Modo pensado para cuando estás enfocado y en movimiento.",
-      "why_it_matters": "aprovechar tu impulso con una intensidad sostenible y dirección clara."
+      "feature": "🦎 BLUE AMPHIBIAN",
+      "what_it_does": "Modo pensado para cuando estás ",
+      "why_it_matters": "Un avatar adaptable para quienes disfrutan explorar y moverse entre contextos."
     },
     {
-      "feature": "🧬 EVOLVE MOOD",
-      "what_it_does": "Modo pensado para cuando estás ambicioso y determinado.",
-      "why_it_matters": "subir la intensidad con más estructura sin romper la consistencia que ya construiste."
+      "feature": "🦉 VIOLET OWL",
+      "what_it_does": "Modo pensado para cuando estás ",
+      "why_it_matters": "Un avatar con carácter y visión para quienes quieren proyectar claridad y criterio."
     },
     {
       "feature": "Daily Quest + registro emocional",
@@ -202,8 +202,8 @@
     "llms": "https://innerbloom.org/llms.txt"
   },
   "versioning": {
-    "version": "3edfe320",
-    "lastUpdated": "2026-04-07T21:18:25.581Z"
+    "version": "ceecfa87",
+    "lastUpdated": "2026-04-26T10:58:51.635Z"
   },
   "design_tokens": {
     "palette": {
@@ -252,6 +252,16 @@
       "IB_SURFACE_CARD_LIGHT": "0 6px 20px rgba(15, 23, 42, 0.3)"
     },
     "gradients": [
+      {
+        "name": "innerbloom",
+        "type": "linear",
+        "angle": "90deg",
+        "stops": [
+          "#a770ef 0%",
+          "#cf8bf3 52%",
+          "#fdb99b 100%"
+        ]
+      },
       {
         "name": "landing_background_core",
         "type": "multi-layer",
