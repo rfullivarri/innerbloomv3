@@ -405,7 +405,7 @@ export default function PremiumTimeline({
             cx={endPoint.x}
             cy={endPoint.y}
             r={5}
-            fill="rgba(115,208,255,0.95)"
+            fill="var(--premium-timeline-path-dot, rgba(115,208,255,0.95))"
             style={{
               opacity: isComplete || reducedMotion ? 0.95 : 0.45,
               transition: 'opacity 320ms ease, transform 320ms ease, box-shadow 320ms ease',
