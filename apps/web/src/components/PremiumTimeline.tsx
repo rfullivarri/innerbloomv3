@@ -380,7 +380,7 @@ export default function PremiumTimeline({
           <path
             d={pathData || `M ${fallbackAxisX} 0 L ${fallbackAxisX} ${Math.max(containerHeight, 1)}`}
             fill="none"
-            stroke="rgba(255,255,255,0.2)"
+            stroke="var(--premium-timeline-path-glow, rgba(255,255,255,0.2))"
             strokeWidth={6}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -390,7 +390,7 @@ export default function PremiumTimeline({
             ref={pathRef}
             d={pathData || `M ${fallbackAxisX} 0 L ${fallbackAxisX} ${Math.max(containerHeight, 1)}`}
             fill="none"
-            stroke="rgba(255,255,255,0.78)"
+            stroke="var(--premium-timeline-path-active, rgba(255,255,255,0.78))"
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
