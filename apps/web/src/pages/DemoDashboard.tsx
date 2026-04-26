@@ -14,6 +14,7 @@ import { getLabsGameModeConfig } from '../config/labsGameModes';
 import { DASHBOARD_PATH } from '../config/auth';
 import { usePageMeta } from '../lib/seo';
 import { DemoDashboardOverviewScene } from '../components/demo/DemoDashboardOverviewScene';
+import { getLandingThemeBackground, readLandingThemeMode } from '../lib/landingTheme';
 
 const DEMO_SHARE_IMAGE = 'https://innerbloomjourney.org/og/neneOGP.png';
 
@@ -33,6 +34,8 @@ export default function DemoDashboardPage() {
   const demoHubPath = getPublicDemoHubPath(location.search);
   const { theme, setPreference } = useThemePreference();
   const [showGuidedTour, setShowGuidedTour] = useState(true);
+  const landingThemeMode = readLandingThemeMode('dark');
+  const landingThemeBackground = getLandingThemeBackground(landingThemeMode);
   const hasLoggedGuidedStart = useRef(false);
   const dailyQuestModalRef = useRef<DailyQuestModalHandle | null>(null);
 
@@ -115,7 +118,17 @@ export default function DemoDashboardPage() {
   }, [dashboardPath, demoContext.fromOnboarding, demoContext.mode, demoContext.source, guidedSteps.length, navigate, userId]);
 
   return (
-    <div className="min-h-screen bg-transparent" data-light-scope="dashboard-v3">
+    <div
+      className="relative min-h-screen bg-transparent"
+      data-light-scope="dashboard-v3"
+      data-theme-mode={landingThemeMode}
+      style={{ background: landingThemeBackground.base }}
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ background: landingThemeBackground.gradient }}
+      />
       <Navbar
         title="Dashboard"
         menuSlot={
@@ -209,7 +222,7 @@ export default function DemoDashboardPage() {
       />
 
       <main
-        className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8"
+        className="relative z-[1] mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8"
         data-demo-source={demoContext.source}
         data-demo-mode={demoContext.mode}
         style={{ '--demo-mode-accent': selectedModeConfig.accentColor } as CSSProperties}

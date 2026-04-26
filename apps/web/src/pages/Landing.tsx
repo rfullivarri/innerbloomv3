@@ -10,7 +10,6 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import {
-  OFFICIAL_DESIGN_TOKENS,
   OFFICIAL_LANDING_CSS_VARIABLES,
 } from "../content/officialDesignTokens";
 import {
@@ -35,133 +34,15 @@ import {
   readCookieConsentState,
 } from "../lib/cookieConsent";
 import {
-  SHOW_LANDING_BACKGROUND_SELECTOR,
   SHOW_LANDING_PRICING,
 } from "../config/releaseFlags";
+import {
+  type LandingThemeMode,
+  getLandingThemeStyle,
+  readLandingThemeMode,
+  writeLandingThemeMode,
+} from "../lib/landingTheme";
 import "./Landing.css";
-
-type LandingBackgroundOption = {
-  id: string;
-  label: { es: string; en: string };
-  tone: "light" | "dark";
-  type: "linear" | "solid" | "css";
-  cssBackground?: string;
-  color?: string;
-  angle?: string;
-  a?: string;
-  b?: string;
-};
-
-const GRADIENT_LABELS: Record<string, { es: string; en: string }> = {
-  curiosity_blue: { es: "Curiosity Blue", en: "Curiosity Blue" },
-  endless_river: { es: "Endless River", en: "Endless River" },
-  amethyst: { es: "Amethyst", en: "Amethyst" },
-  dirty_fog: { es: "Dirty Fog", en: "Dirty Fog" },
-  purple_paradise: { es: "Purple Paradise", en: "Purple Paradise" },
-  color_1: { es: "Color 1", en: "Color 1" },
-  color_2: { es: "Color 2", en: "Color 2" },
-  purple_love: { es: "Purple Love", en: "Purple Love" },
-  afternoon: { es: "Afternoon", en: "Afternoon" },
-  purple_afternoon: { es: "Purple Afternoon", en: "Purple Afternoon" },
-};
-
-const LANDING_BASE_GRADIENTS: LandingBackgroundOption[] = OFFICIAL_DESIGN_TOKENS
-  .gradients
-  .filter((gradient) => gradient.type === "linear" && gradient.stops.length >= 2)
-  .map((gradient) => {
-    const label = GRADIENT_LABELS[gradient.name] ?? {
-      es: gradient.name.replace(/_/g, " "),
-      en: gradient.name.replace(/_/g, " "),
-    };
-
-    return {
-      id: gradient.name,
-      label,
-      tone: "dark",
-      type: "linear",
-      angle: gradient.angle,
-      a: gradient.stops[0],
-      b: gradient.stops[1],
-    };
-  });
-
-const LANDING_PREMIUM_BACKGROUNDS: LandingBackgroundOption[] = [
-  {
-    id: "lab_showcase_dark",
-    label: { es: "Lab Showcase Dark", en: "Lab Showcase Dark" },
-    tone: "dark",
-    type: "css",
-    cssBackground:
-      "radial-gradient(circle at 80% 10%, rgba(153, 111, 244, 0.2), transparent 37%), radial-gradient(circle at 17% 13%, rgba(117, 142, 252, 0.16), transparent 33%), radial-gradient(circle at 52% 82%, rgba(253, 173, 124, 0.08), transparent 52%), linear-gradient(180deg, #0f0f19 0%, #0a0a12 100%)",
-  },
-  {
-    id: "true_black",
-    label: { es: "True Black", en: "True Black" },
-    tone: "dark",
-    type: "solid",
-    color: "#030306",
-  },
-  {
-    id: "innerbloom_black_violet",
-    label: { es: "Innerbloom Black Violet", en: "Innerbloom Black Violet" },
-    tone: "dark",
-    type: "solid",
-    color: "#080610",
-  },
-  {
-    id: "deep_navy_premium",
-    label: { es: "Deep Navy Premium", en: "Deep Navy Premium" },
-    tone: "dark",
-    type: "solid",
-    color: "#0B1220",
-  },
-  {
-    id: "soft_white_premium",
-    label: { es: "Soft White Premium", en: "Soft White Premium" },
-    tone: "light",
-    type: "solid",
-    color: "#F7F4FF",
-  },
-  {
-    id: "warm_ivory_premium",
-    label: { es: "Warm Ivory Premium", en: "Warm Ivory Premium" },
-    tone: "light",
-    type: "solid",
-    color: "#FBF6EF",
-  },
-  {
-    id: "violet_mist",
-    label: { es: "Violet Mist", en: "Violet Mist" },
-    tone: "dark",
-    type: "solid",
-    color: "#171126",
-  },
-  {
-    id: "nebulum_violet_dark",
-    label: { es: "Nebulum Violet Dark", en: "Nebulum Violet Dark" },
-    tone: "dark",
-    type: "css",
-    cssBackground:
-      "radial-gradient(circle at 72% 18%, rgba(143, 91, 255, 0.24), transparent 38%), radial-gradient(circle at 24% 78%, rgba(72, 190, 255, 0.14), transparent 42%), linear-gradient(180deg, #0A0714 0%, #05050B 100%)",
-  },
-  {
-    id: "premium_white_violet",
-    label: { es: "Premium White Violet", en: "Premium White Violet" },
-    tone: "light",
-    type: "css",
-    cssBackground:
-      "radial-gradient(circle at 75% 12%, rgba(139, 92, 246, 0.16), transparent 36%), radial-gradient(circle at 18% 82%, rgba(56, 189, 248, 0.10), transparent 42%), linear-gradient(180deg, #FBFAFF 0%, #F3EEFF 100%)",
-  },
-];
-
-const LANDING_BACKGROUNDS: LandingBackgroundOption[] = [
-  ...LANDING_BASE_GRADIENTS,
-  ...LANDING_PREMIUM_BACKGROUNDS,
-];
-
-const LANDING_GRADIENT_STORAGE_KEY = "ib:official-landing-gradient";
-const OFFICIAL_DEFAULT_GRADIENT_ID = "purple_afternoon";
-const SHOW_BACKGROUND_SELECTOR = SHOW_LANDING_BACKGROUND_SELECTOR;
 
 type ModeVisual = {
   avatarVideo: string;
@@ -512,48 +393,16 @@ export default function LandingPage() {
       ? resolveAuthLanguage(window.location.search)
       : "es",
   );
-  const [backgroundId, setBackgroundId] = useState<string>(() => {
-    const fallbackGradientId = LANDING_BACKGROUNDS[0]?.id ?? "";
-    const officialGradient = LANDING_BACKGROUNDS.find(
-      (option) => option.id === OFFICIAL_DEFAULT_GRADIENT_ID,
-    );
-    const officialGradientId = officialGradient?.id ?? fallbackGradientId;
-
-    if (typeof window === "undefined") return officialGradientId;
-
-    if (!SHOW_BACKGROUND_SELECTOR) {
-      return officialGradientId;
-    }
-
-    const storedGradientId = window.localStorage.getItem(
-      LANDING_GRADIENT_STORAGE_KEY,
-    );
-    const storedGradient = LANDING_BACKGROUNDS.find(
-      (option) => option.id === storedGradientId,
-    );
-    return storedGradient?.id ?? officialGradientId;
-  });
+  const [themeMode, setThemeMode] = useState<LandingThemeMode>(() =>
+    readLandingThemeMode("dark"),
+  );
   const copy = OFFICIAL_LANDING_CONTENT[language];
   const visibleNavLinks = copy.navLinks.filter(
     (link) => !/^\/demo$/i.test(link.href) && !/^#?demo$/i.test(link.href),
   );
-  const selectedBackground =
-    LANDING_BACKGROUNDS.find((option) => option.id === backgroundId) ??
-    LANDING_BACKGROUNDS[0];
-  const resolvedLandingBackground =
-    selectedBackground?.type === "css" && selectedBackground.cssBackground
-      ? selectedBackground.cssBackground
-      : selectedBackground?.type === "solid" && selectedBackground.color
-        ? selectedBackground.color
-        : `linear-gradient(${selectedBackground?.angle ?? "135deg"}, ${selectedBackground?.a ?? "#525252"}, ${selectedBackground?.b ?? "#3d72b4"})`;
   const landingStyle = {
     ...(OFFICIAL_LANDING_CSS_VARIABLES as CSSProperties),
-    "--bg-angle": selectedBackground?.angle ?? "135deg",
-    "--bg-a": selectedBackground?.a ?? "#525252",
-    "--bg-b": selectedBackground?.b ?? "#3d72b4",
-    "--landing-background": resolvedLandingBackground,
-    "--landing-background-base":
-      selectedBackground?.tone === "light" ? "#f6f1ff" : "#0a0a12",
+    ...getLandingThemeStyle(themeMode),
   } as CSSProperties;
   const [activeSlide, setActiveSlide] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -582,8 +431,8 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(LANDING_GRADIENT_STORAGE_KEY, backgroundId);
-  }, [backgroundId]);
+    writeLandingThemeMode(themeMode);
+  }, [themeMode]);
 
   useEffect(() => {
     const resolvedLanguage = resolveAuthLanguage(location.search);
@@ -599,6 +448,9 @@ export default function LandingPage() {
   const handleLanguageChange = (nextLanguage: Language) => {
     setLanguage(nextLanguage);
     setManualLanguage(nextLanguage);
+  };
+  const toggleThemeMode = () => {
+    setThemeMode((current) => (current === "dark" ? "light" : "dark"));
   };
 
   useEffect(() => {
@@ -790,9 +642,7 @@ export default function LandingPage() {
     <div
       className="landing"
       style={landingStyle}
-      data-background-tone={selectedBackground?.tone ?? "dark"}
-      data-background-id={selectedBackground?.id}
-      data-background-kind={selectedBackground?.type ?? "linear"}
+      data-theme-mode={themeMode}
     >
       <div className="landing-background-layer" aria-hidden="true" />
       <header className="nav">
@@ -822,29 +672,45 @@ export default function LandingPage() {
           </nav>
         ) : null}
         <div className="nav-actions">
-          {SHOW_BACKGROUND_SELECTOR ? (
-            <label className="gradient-select-wrapper">
-              <span className="gradient-select-label">
-                {language === "es" ? "BG" : "BG"}
-              </span>
-              <select
-                className="gradient-select"
-                value={backgroundId}
-                onChange={(event) => setBackgroundId(event.target.value)}
-                aria-label={
-                  language === "es"
-                    ? "Selector de fondo"
-                    : "Background selector"
-                }
+          <button
+            type="button"
+            onClick={toggleThemeMode}
+            className="landing-theme-toggle"
+            aria-label={
+              themeMode === "dark"
+                ? language === "es"
+                  ? "Cambiar a modo claro"
+                  : "Switch to light mode"
+                : language === "es"
+                  ? "Cambiar a modo oscuro"
+                  : "Switch to dark mode"
+            }
+          >
+            {themeMode === "dark" ? (
+              <svg
+                aria-hidden="true"
+                className="h-[15px] w-[15px]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
               >
-                {LANDING_BACKGROUNDS.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label[language]}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : null}
+                <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 1 0 9.8 9.8Z" />
+              </svg>
+            ) : (
+              <svg
+                aria-hidden="true"
+                className="h-[15px] w-[15px]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              >
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2.2M12 19.8V22M4.93 4.93l1.56 1.56M17.51 17.51l1.56 1.56M2 12h2.2M19.8 12H22M4.93 19.07l1.56-1.56M17.51 6.49l1.56-1.56" />
+              </svg>
+            )}
+          </button>
           <LanguageDropdown value={language} onChange={handleLanguageChange} />
           {isSignedIn ? (
             <Link className={buttonClasses()} to="/dashboard">

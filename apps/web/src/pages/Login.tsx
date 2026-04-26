@@ -10,6 +10,7 @@ import {
   AUTH_STACK_CLASS,
   createAuthAppearance,
 } from '../lib/clerkAppearance';
+import { readLandingThemeMode } from '../lib/landingTheme';
 import { usePageMeta } from '../lib/seo';
 import {
   isNativeCapacitorPlatform,
@@ -18,6 +19,8 @@ import {
 export default function LoginPage() {
   const location = useLocation();
   const language = resolveAuthLanguage(location.search);
+  const themeMode = readLandingThemeMode('dark');
+  const isLightTheme = themeMode === 'light';
   const isNativeApp = isNativeCapacitorPlatform();
 
   usePageMeta({
@@ -42,6 +45,7 @@ export default function LoginPage() {
         title={language === 'en' ? 'Sign in' : 'Iniciar sesión'}
         secondaryActionLabel={language === 'en' ? 'Back to app' : 'Volver a la app'}
         secondaryActionHref="/"
+        themeMode={themeMode}
       >
         <div className={AUTH_STACK_CLASS}>
           <div className={AUTH_CLERK_FORM_SHELL_CLASS}>
@@ -68,13 +72,14 @@ export default function LoginPage() {
       title={language === 'en' ? 'Sign in' : 'Iniciar sesión'}
       secondaryActionLabel={language === 'en' ? 'Back to home' : 'Volver al inicio'}
       secondaryActionHref={`/?lang=${language}`}
+      themeMode={themeMode}
     >
       <div className={AUTH_STACK_CLASS}>
         <GoogleOAuthButton language={language} mode="sign-in" redirectUrlComplete={`${location.pathname}${location.search}${location.hash}`} />
-        <div className={AUTH_DIVIDER_CLASS}>
-          <span className="h-px flex-1 bg-white/12" aria-hidden />
+        <div className={`${AUTH_DIVIDER_CLASS} ${isLightTheme ? '!text-[#3b305f]/52' : ''}`}>
+          <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/20' : 'bg-white/12'}`} aria-hidden />
           <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
-          <span className="h-px flex-1 bg-white/12" aria-hidden />
+          <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/20' : 'bg-white/12'}`} aria-hidden />
         </div>
         <div className={AUTH_CLERK_FORM_SHELL_CLASS}>
           <SignIn

@@ -10,6 +10,7 @@ import {
   AUTH_STACK_CLASS,
   createAuthAppearance,
 } from '../lib/clerkAppearance';
+import { readLandingThemeMode } from '../lib/landingTheme';
 import {
   isNativeCapacitorPlatform,
   openUrlInCapacitorBrowser,
@@ -20,6 +21,8 @@ export default function SignUpPage() {
   const signUpContainerRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
   const language = resolveAuthLanguage(location.search);
+  const themeMode = readLandingThemeMode('dark');
+  const isLightTheme = themeMode === 'light';
   const isNativeApp = isNativeCapacitorPlatform();
 
   const appearance = createAuthAppearance({
@@ -41,6 +44,7 @@ export default function SignUpPage() {
         title={language === 'en' ? 'Create your account' : 'Crear tu cuenta'}
         secondaryActionLabel={language === 'en' ? 'Back to app' : 'Volver a la app'}
         secondaryActionHref="/"
+        themeMode={themeMode}
       >
         <div className={AUTH_STACK_CLASS}>
           <button
@@ -62,10 +66,10 @@ export default function SignUpPage() {
             </svg>
             {language === 'en' ? 'Sign up with Google' : 'Crear cuenta con Google'}
           </button>
-          <div className={AUTH_DIVIDER_CLASS}>
-            <span className="h-px flex-1 bg-white/12" aria-hidden />
+          <div className={`${AUTH_DIVIDER_CLASS} ${isLightTheme ? '!text-[#3b305f]/52' : ''}`}>
+            <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/20' : 'bg-white/12'}`} aria-hidden />
             <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
-            <span className="h-px flex-1 bg-white/12" aria-hidden />
+            <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/20' : 'bg-white/12'}`} aria-hidden />
           </div>
           <div
             ref={signUpContainerRef}
@@ -89,13 +93,14 @@ export default function SignUpPage() {
       title={language === 'en' ? 'Create your account' : 'Crear tu cuenta'}
       secondaryActionLabel={language === 'en' ? 'Back to home' : 'Volver al inicio'}
       secondaryActionHref={`/?lang=${language}`}
+      themeMode={themeMode}
     >
       <div className={AUTH_STACK_CLASS}>
         <GoogleOAuthButton language={language} mode="sign-up" redirectUrlComplete={`${location.pathname}${location.search}${location.hash}`} />
-        <div className={AUTH_DIVIDER_CLASS}>
-          <span className="h-px flex-1 bg-white/12" aria-hidden />
+        <div className={`${AUTH_DIVIDER_CLASS} ${isLightTheme ? '!text-[#3b305f]/52' : ''}`}>
+          <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/20' : 'bg-white/12'}`} aria-hidden />
           <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
-          <span className="h-px flex-1 bg-white/12" aria-hidden />
+          <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/20' : 'bg-white/12'}`} aria-hidden />
         </div>
         <div
           ref={signUpContainerRef}
