@@ -39,8 +39,11 @@ const TRAIT_ALIASES: Record<string, string> = {
   POSTURE: 'POSTURE',
   RECUPERACION: 'RECOVERY',
   RECOVERY: 'RECOVERY',
-  RESISTENCIA: 'RESISTANCE',
-  RESISTANCE: 'RESISTANCE',
+  RESISTENCIA: 'ENDURANCE',
+  RESISTANCE: 'ENDURANCE',
+  ENDURANCE: 'ENDURANCE',
+  MOVIMIENTO: 'MOVEMENT',
+  MOVEMENT: 'MOVEMENT',
   SUENO: 'SLEEP',
   SLEEP: 'SLEEP',
   CURIOSIDAD: 'CURIOSITY',
@@ -61,11 +64,25 @@ const TRAIT_FILENAME_ALIASES: Record<string, string[]> = {
   NUTRITION: ['NUTRICION', 'NUTRITION'],
   POSTURE: ['POSTURA', 'POSTURE'],
   RECOVERY: ['RECUPERACION', 'RECOVERY'],
-  RESISTANCE: ['RESISTENCIA', 'RESISTANCE'],
+  ENDURANCE: ['RESISTENCIA', 'RESISTANCE', 'ENDURANCE'],
+  MOVEMENT: ['MOVIMIENTO', 'MOVEMENT'],
   SLEEP: ['SUEÑO', 'SUENO', 'SLEEP'],
   CURIOSITY: ['CURIOSIDAD', 'CURIOCIDAD', 'CURIOSITY'],
   DISCIPLINE: ['DISCIPLINA', 'DISCIPLINE', 'DICIPLINE'],
   FOCUS: ['ENFOQUE', 'FOCUS'],
+};
+
+const BODY_SEAL_ASSETS: Record<string, string> = {
+  ENERGY: 'energy',
+  STRENGTH: 'strength',
+  HYDRATION: 'hydration',
+  MOBILITY: 'mobility',
+  NUTRITION: 'nutrition',
+  POSTURE: 'posture',
+  RECOVERY: 'recovery',
+  ENDURANCE: 'endurance',
+  MOVEMENT: 'movement',
+  SLEEP: 'sleep',
 };
 
 function normalizeToken(value: string | null | undefined): string {
@@ -135,6 +152,11 @@ export function resolveHabitAchievementSealCandidates(input: SealResolverInput):
   const traitTokens = traitCandidates(canonicalTrait, input);
 
   const candidates: string[] = [];
+  const bodyAsset = pillar === 'BODY' ? BODY_SEAL_ASSETS[canonicalTrait] : null;
+  if (bodyAsset) {
+    candidates.push(`/sellos/body/sello_body_${bodyAsset}.png`);
+  }
+
   prefixes.forEach((prefix) => {
     variantsByUnicodeForm(prefix).forEach((prefixVariant) => {
       traitTokens.forEach((traitToken) => {

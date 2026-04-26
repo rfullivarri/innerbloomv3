@@ -4,7 +4,24 @@ import { resolveHabitAchievementSealCandidates } from '../habitAchievementSeals'
 describe('resolveHabitAchievementSealCandidates', () => {
   it('maps body energy with Spanish filename candidate', () => {
     const candidates = resolveHabitAchievementSealCandidates({ pillar: 'Body', traitCode: 'ENERGY' });
+    expect(candidates[0]).toBe('/sellos/body/sello_body_energy.png');
     expect(candidates).toContain('/sellos/Corazón ENERGIA.png');
+  });
+
+  it('maps Spanish body hydration to the new body seal asset first', () => {
+    const candidates = resolveHabitAchievementSealCandidates({ pillar: 'Body', traitCode: 'HIDRATACION' });
+    expect(candidates[0]).toBe('/sellos/body/sello_body_hydration.png');
+  });
+
+  it('maps legacy resistance to the endurance seal asset', () => {
+    const candidates = resolveHabitAchievementSealCandidates({ pillar: 'Body', traitCode: 'RESISTANCE' });
+    expect(candidates[0]).toBe('/sellos/body/sello_body_endurance.png');
+    expect(candidates).toContain('/sellos/Corazón RESISTENCIA.png');
+  });
+
+  it('maps body movement to the movement seal asset', () => {
+    const candidates = resolveHabitAchievementSealCandidates({ pillar: 'Body', traitCode: 'MOVEMENT' });
+    expect(candidates[0]).toBe('/sellos/body/sello_body_movement.png');
   });
 
   it('maps mind discipline and includes typo fallback for uploaded DICIPLINE', () => {
