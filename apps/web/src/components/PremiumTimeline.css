@@ -91,3 +91,11 @@
   --premium-timeline-path-glow: rgba(176, 132, 255, 0.24);
   --premium-timeline-path-active: rgba(160, 112, 255, 0.88);
 }
+
+.landing[data-theme-mode="dark"] .premium-timeline {
+  --premium-timeline-path-dot: rgba(115, 208, 255, 0.95);
+}
+
+.landing[data-theme-mode="light"] .premium-timeline {
+  --premium-timeline-path-dot: rgba(160, 112, 255, 0.95);
+}
