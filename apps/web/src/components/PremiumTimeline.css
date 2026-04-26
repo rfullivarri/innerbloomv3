@@ -80,3 +80,14 @@
     inset 0 0 34px rgba(173, 137, 255, 0.12);
   background-color: rgba(255, 255, 255, 0.1);
 }
+
+/* Timeline snake path colors by landing theme */
+.landing[data-theme-mode="dark"] .premium-timeline {
+  --premium-timeline-path-glow: rgba(255, 255, 255, 0.2);
+  --premium-timeline-path-active: rgba(255, 255, 255, 0.78);
+}
+
+.landing[data-theme-mode="light"] .premium-timeline {
+  --premium-timeline-path-glow: rgba(176, 132, 255, 0.24);
+  --premium-timeline-path-active: rgba(160, 112, 255, 0.88);
+}
