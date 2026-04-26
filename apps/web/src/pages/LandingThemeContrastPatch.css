@@ -183,22 +183,25 @@
   border-color: rgba(137, 106, 204, 0.18) !important;
 }
 
-/* Timeline line and dots: lilac/violet in light mode */
-.landing[data-theme-mode="light"] .how :is(.timeline-line, [class*="line"], [class*="connector"]) {
+/* Timeline snake line and step dots only — safe scoped version */
+.landing[data-theme-mode="light"] .how .timeline-line {
   background: linear-gradient(
     180deg,
-    rgba(166, 128, 255, 0.08),
-    rgba(166, 128, 255, 0.46),
-    rgba(96, 190, 255, 0.24),
-    rgba(166, 128, 255, 0.08)
+    rgba(176, 132, 255, 0.12),
+    rgba(176, 132, 255, 0.62),
+    rgba(176, 132, 255, 0.36),
+    rgba(176, 132, 255, 0.12)
   ) !important;
+  box-shadow:
+    0 0 18px rgba(176, 132, 255, 0.2),
+    0 0 32px rgba(96, 190, 255, 0.1) !important;
 }
 
-.landing[data-theme-mode="light"] .how :is(.timeline-dot, [class*="dot"], [class*="stepNumber"]) {
-  border-color: rgba(166, 128, 255, 0.42) !important;
+.landing[data-theme-mode="light"] .how .timeline-dot {
+  border-color: rgba(176, 132, 255, 0.48) !important;
   box-shadow:
-    0 0 0 6px rgba(166, 128, 255, 0.1),
-    0 0 18px rgba(96, 190, 255, 0.22) !important;
+    0 0 0 6px rgba(176, 132, 255, 0.12),
+    0 0 18px rgba(96, 190, 255, 0.18) !important;
 }
 
 /* Final sentence under timeline */
