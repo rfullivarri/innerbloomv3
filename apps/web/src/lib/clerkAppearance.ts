@@ -100,11 +100,117 @@ type AppearanceOverrides = {
   elements?: Record<string, string>;
 };
 
+type AuthAppearanceMode = 'dark' | 'light';
+
+function createModeAuthTokens(mode: AuthAppearanceMode) {
+  const isLight = mode === 'light';
+
+  return {
+    variables: {
+      colorPrimary: '#7c3aed',
+      colorBackground: 'transparent',
+      colorInputBackground: isLight
+        ? 'rgba(255, 255, 255, 0.68)'
+        : 'rgba(255, 255, 255, 0.1)',
+      colorInputText: isLight ? '#171126' : '#f8fafc',
+      colorText: isLight ? '#171126' : '#f8fafc',
+      colorTextSecondary: isLight
+        ? 'rgba(55, 45, 86, 0.78)'
+        : 'rgba(226, 232, 240, 0.8)',
+      borderRadius: '18px',
+      fontSize: '16px',
+      fontFamily: '"Manrope", "Inter", system-ui, sans-serif',
+    },
+    elements: isLight
+      ? {
+          card:
+            `mx-auto flex w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} flex-col gap-3 overflow-hidden rounded-[26px] ` +
+            `border border-[rgba(78,61,130,0.18)] ` +
+            `bg-[linear-gradient(180deg,rgba(255,255,255,0.62),rgba(246,241,255,0.42))] ` +
+            `p-3 shadow-[0_20px_50px_rgba(64,54,104,0.14)] backdrop-blur-[18px] sm:rounded-[30px] sm:p-4 md:p-5`,
+
+          formFieldLabel:
+            'text-[11px] font-medium text-[#2f2552]/78 sm:text-xs',
+
+          formFieldInput:
+            'rounded-2xl border border-[#5a478f]/22 ' +
+            'bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(248,245,255,0.66))] ' +
+            'px-3 py-2.5 text-base leading-6 text-[#171126] ' +
+            'placeholder:text-[#6a5d8f]/48 ' +
+            'shadow-[0_10px_28px_rgba(64,54,104,0.1)] ' +
+            'focus:border-violet-400/55 focus:bg-white/88 focus:outline-none focus-visible:ring-0',
+
+          formFieldInputShowPasswordButton:
+            'text-sm text-[#5a478f]/64 hover:text-[#2f2552]',
+
+          footer:
+            'mt-1 w-full max-w-none rounded-xl ' +
+            'bg-[linear-gradient(135deg,rgba(255,255,255,0.52),rgba(230,222,255,0.42))] ' +
+            '!px-2 !py-1 shadow-[0_10px_26px_rgba(64,54,104,0.1)] backdrop-blur-md',
+
+          footerAction:
+            '!flex !w-full !max-w-none items-center justify-start gap-1 rounded-lg ' +
+            'bg-[rgba(139,92,246,0.08)] !px-2.5 !py-1 text-[10px] !leading-[12px] ' +
+            'text-[#51456f]/78 backdrop-blur-sm',
+
+          footerActionText:
+            '!whitespace-nowrap text-[#51456f]/72',
+
+          footerActionLink:
+            '!whitespace-nowrap font-semibold text-[#3a2b68] underline underline-offset-2 hover:text-[#171126]',
+
+          footerPages:
+            '!mt-1 !flex !w-full !max-w-none items-center justify-center gap-1 rounded-lg ' +
+            'bg-white/32 !px-2.5 !py-1 text-[9px] !leading-[11px] text-[#51456f]/58 backdrop-blur-sm',
+
+          footerPageLink:
+            'inline-flex items-center gap-1 text-[#51456f]/58 hover:text-[#2f2552]',
+
+          formResendCodeLink:
+            'text-[7px] text-[#5a478f] hover:text-[#2f2552]',
+
+          identityPreview:
+            'rounded-2xl border border-[#5a478f]/18 bg-white/48 backdrop-blur-xl text-[#2f2552]/82',
+
+          identityPreviewTitle:
+            'text-[#171126]',
+
+          identityPreviewSubtitle:
+            'text-[#51456f]/72',
+
+          identityPreviewEditButton:
+            'text-[#5a478f] hover:text-[#2f2552]',
+
+          formFieldSuccessText:
+            'text-sm text-emerald-700',
+        }
+      : {},
+  };
+}
+
+type AppearanceOverrides = {
+  mode?: AuthAppearanceMode;
+  layout?: Record<string, unknown>;
+  variables?: Record<string, string>;
+  elements?: Record<string, string>;
+};
+
 export function createAuthAppearance(overrides: AppearanceOverrides = {}): Theme {
+  const mode = overrides.mode ?? 'dark';
+  const modeTokens = createModeAuthTokens(mode);
+
   return {
     layout: { ...baseLayout, ...overrides.layout },
-    variables: { ...baseVariables, ...overrides.variables },
-    elements: { ...baseElements, ...overrides.elements }
+    variables: {
+      ...baseVariables,
+      ...modeTokens.variables,
+      ...overrides.variables,
+    },
+    elements: {
+      ...baseElements,
+      ...modeTokens.elements,
+      ...overrides.elements,
+    },
   } as Theme;
 }
 
