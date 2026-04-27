@@ -26,14 +26,21 @@ export default function SignUpPage() {
   const isNativeApp = isNativeCapacitorPlatform();
 
   const appearance = createAuthAppearance({
+    mode: themeMode,
     layout: {
-      showOptionalFields: true
+      showOptionalFields: true,
     },
     elements: {
-      footerActionText: 'text-white/50',
-      footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4',
-      formFieldSuccessText: 'text-sm text-emerald-200'
-    }
+      footerActionText: isLightTheme
+        ? 'text-[#51456f]/72'
+        : 'text-white/50',
+      footerActionLink: isLightTheme
+        ? 'font-semibold text-[#3a2b68] hover:text-[#171126] underline-offset-4'
+        : 'font-semibold text-white/70 hover:text-white underline-offset-4',
+      formFieldSuccessText: isLightTheme
+        ? 'text-sm text-emerald-700'
+        : 'text-sm text-emerald-200',
+    },
   });
 
   if (isNativeApp) {
