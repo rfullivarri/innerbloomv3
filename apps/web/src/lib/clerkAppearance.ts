@@ -94,12 +94,6 @@ const baseElements = {
   //identityPreviewEditButton: 'text-white hover:text-white/80''
 };
 
-type AppearanceOverrides = {
-  layout?: Record<string, unknown>;
-  variables?: Record<string, string>;
-  elements?: Record<string, string>;
-};
-
 type AuthAppearanceMode = 'dark' | 'light';
 
 function createModeAuthTokens(mode: AuthAppearanceMode) {
