@@ -111,7 +111,7 @@ export const ReminderSchedulerDialog = forwardRef<
     <AnimatePresence>
       {isOpen ? (
         <motion.div
-          className="reminder-scheduler-dialog__overlay fixed inset-0 z-[70] flex items-end justify-center bg-black/60 p-4 backdrop-blur md:items-center"
+          className="reminder-scheduler-dialog__overlay fixed inset-0 z-[70] flex items-end justify-center bg-black/70 p-4 backdrop-blur-md md:items-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -122,7 +122,7 @@ export const ReminderSchedulerDialog = forwardRef<
             aria-modal="true"
             aria-labelledby={titleId}
             data-light-scope="reminder-scheduler"
-            className="reminder-scheduler-dialog__panel flex max-h-[80vh] w-full flex-col rounded-3xl border border-white/10 bg-surface/95 p-5 shadow-2xl md:max-h-[85vh] md:max-w-[560px]"
+            className="reminder-scheduler-dialog__panel flex max-h-[80vh] w-full flex-col rounded-3xl border border-white/12 bg-[radial-gradient(circle_at_85%_0%,rgba(143,91,255,0.16),transparent_36%),linear-gradient(180deg,rgba(12,11,24,0.98),rgba(7,7,15,0.98))] p-5 shadow-[0_28px_80px_rgba(0,0,0,0.58)] backdrop-blur-2xl md:max-h-[85vh] md:max-w-[560px]"
             initial={{ opacity: 0, y: 64 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 64 }}
