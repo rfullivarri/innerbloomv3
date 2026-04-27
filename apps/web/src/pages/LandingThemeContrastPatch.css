@@ -638,3 +638,60 @@
   -webkit-text-fill-color: currentColor !important;
   text-shadow: none !important;
 }
+
+/* =========================================================
+   HOTFIX — Visible progress mock must stay dark in light mode
+   Paste at the very end of LandingThemeContrastPatch.css
+   ========================================================= */
+
+.landing[data-theme-mode="light"] .visible-progress-module {
+  color-scheme: dark;
+  color: rgba(237, 242, 255, 0.92) !important;
+}
+
+/* Keep the dark product/mock fragments readable inside the light landing. */
+.landing[data-theme-mode="light"] .visible-progress-module :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  span,
+  small,
+  strong,
+  li,
+  div,
+  text,
+  tspan
+) {
+  color: rgba(237, 242, 255, 0.92) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* Secondary text inside the mock: still light, but softer. */
+.landing[data-theme-mode="light"] .visible-progress-module :is(
+  .visible-canvas-title,
+  .visible-streaks-title,
+  .visible-streak-label,
+  .visible-streak-category,
+  .visible-period-option,
+  .visible-month-label
+) {
+  color: rgba(213, 221, 247, 0.78) !important;
+}
+
+/* Main labels / selected chips stay crisp. */
+.landing[data-theme-mode="light"] .visible-progress-module :is(
+  .visible-canvas-chip,
+  .visible-streak-tab--active,
+  .visible-emotion-chip--active,
+  .visible-period-option--active
+) {
+  color: rgba(18, 24, 42, 0.86) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* SVG text inside the radar, if any, must not inherit black from landing. */
+.landing[data-theme-mode="light"] .visible-progress-module svg :is(text, tspan) {
+  fill: rgba(237, 242, 255, 0.9) !important;
+}
