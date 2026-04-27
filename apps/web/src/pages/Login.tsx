@@ -51,10 +51,15 @@ export default function LoginPage() {
           <div className={AUTH_CLERK_FORM_SHELL_CLASS}>
             <SignIn
               appearance={createAuthAppearance({
+                mode: themeMode,
                 elements: {
-                  footerActionText: 'text-white/50',
-                  footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4'
-                }
+                  footerActionText: isLightTheme
+                    ? 'text-[#51456f]/72'
+                    : 'text-white/50',
+                footerActionLink: isLightTheme
+                    ? 'font-semibold text-[#3a2b68] hover:text-[#171126] underline-offset-4'
+                    : 'font-semibold text-white/70 hover:text-white underline-offset-4',
+                },
               })}
               routing="path"
               path="/login"
@@ -84,11 +89,16 @@ export default function LoginPage() {
         <div className={AUTH_CLERK_FORM_SHELL_CLASS}>
           <SignIn
             appearance={createAuthAppearance({
-              elements: {
-                footerActionText: 'text-white/50',
-                footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4'
-              }
-            })}
+                mode: themeMode,
+                elements: {
+                  footerActionText: isLightTheme
+                    ? 'text-[#51456f]/72'
+                    : 'text-white/50',
+                footerActionLink: isLightTheme
+                    ? 'font-semibold text-[#3a2b68] hover:text-[#171126] underline-offset-4'
+                    : 'font-semibold text-white/70 hover:text-white underline-offset-4',
+                },
+              })}
             routing="path"
             path="/login"
             signUpUrl={buildLocalizedAuthPath('/sign-up', language)}
