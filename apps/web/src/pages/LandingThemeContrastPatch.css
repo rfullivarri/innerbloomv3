@@ -808,3 +808,190 @@
     inset 0 -4px 7px rgba(63, 42, 110, 0.16),
     0 6px 14px rgba(176, 112, 239, 0.14);
 }
+
+
+/* =========================================================
+   FINAL HOTFIX — Visible progress mock contrast
+   Keep this at the VERY END of LandingThemeContrastPatch.css
+   ========================================================= */
+
+/* 1) El mock de producto siempre se lee como dark product,
+   incluso cuando la landing está en light mode. */
+.landing[data-theme-mode="light"] .visible-progress-module {
+  color-scheme: dark;
+}
+
+/* 2) Texto general sobre paneles oscuros: blanco real, no gris. */
+.landing[data-theme-mode="light"] .visible-progress-module :is(
+  .visible-canvas-title,
+  .visible-streaks-title,
+  .visible-section-title,
+  .visible-panel-title,
+  .visible-chart-title,
+  .visible-streaks-heading,
+  .visible-top-streaks-title,
+  .visible-emotion-title,
+  .visible-month-label,
+  .visible-radar-label,
+  .visible-scene-region--streaks h1,
+  .visible-scene-region--streaks h2,
+  .visible-scene-region--streaks h3,
+  .visible-scene-region--streaks p,
+  .visible-scene-region--streaks span,
+  .visible-scene-region--balance h1,
+  .visible-scene-region--balance h2,
+  .visible-scene-region--balance h3,
+  .visible-scene-region--balance p,
+  .visible-scene-region--balance span,
+  .visible-scene-region--emotion h1,
+  .visible-scene-region--emotion h2,
+  .visible-scene-region--emotion h3,
+  .visible-scene-region--emotion p,
+  .visible-scene-region--emotion span
+) {
+  color: rgba(248, 250, 255, 0.94) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: 0 1px 8px rgba(4, 8, 22, 0.28);
+}
+
+/* 3) Títulos grandes: BALANCE / STREAKS / EMOTION CHART.
+   Más blanco y más nítido. */
+.landing[data-theme-mode="light"] .visible-progress-module :is(
+  .visible-canvas-title,
+  .visible-streaks-title,
+  .visible-chart-title
+) {
+  color: rgba(250, 252, 255, 0.88) !important;
+  letter-spacing: 0.22em;
+}
+
+/* 4) Cards de tareas/streaks: texto blanco.
+   Esto arregla Minoxidil noche, Recuperación, Ayuno, Nutrición, Dormir 8hs, Sueño. */
+.landing[data-theme-mode="light"] .visible-progress-module :is(
+  [class*="streak-card"],
+  [class*="streak-item"],
+  [class*="task-card"],
+  [class*="task-item"]
+) :is(h1, h2, h3, h4, p, span, small, strong, div) {
+  color: rgba(248, 250, 255, 0.9) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: 0 1px 7px rgba(5, 8, 24, 0.24);
+}
+
+/* Fallback por si esas cards no tienen nombres tipo streak-card/task-card:
+   dentro del panel de streaks, todo texto NO seleccionado se lee blanco. */
+.landing[data-theme-mode="light"] .visible-scene-region--streaks :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  span,
+  small,
+  strong,
+  div
+) {
+  color: rgba(248, 250, 255, 0.9) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* 5) Chips/botones claros: texto oscuro.
+   Esto arregla BODY activo, MES activo y cualquier píldora blanca. */
+.landing[data-theme-mode="light"] .visible-progress-module :is(
+  [class*="active"],
+  [class*="selected"],
+  [class*="current"],
+  [aria-selected="true"],
+  [aria-current="true"]
+) {
+  color: rgba(22, 27, 45, 0.9) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: none !important;
+}
+
+/* 6) Chips claros concretos por forma visual.
+   Si el chip tiene fondo blanco o casi blanco, fuerza texto oscuro. */
+.landing[data-theme-mode="light"] .visible-progress-module :is(
+  .visible-canvas-chip,
+  .visible-period-option--active,
+  .visible-streak-tab--active,
+  .visible-emotion-chip--active,
+  [class*="chip"][class*="active"],
+  [class*="pill"][class*="active"],
+  [class*="tab"][class*="active"],
+  [class*="option"][class*="active"]
+) {
+  color: rgba(22, 27, 45, 0.92) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: none !important;
+}
+
+/* 7) Chip azul tipo FLOW · 3M y Predominio Body:
+   no deben quedar negros sobre azul medio; que sean azul oscuro legible o blanco según fondo.
+   Para Predominio Body en tu captura conviene tinta navy porque el chip es azul claro. */
+.landing[data-theme-mode="light"] .visible-canvas-chip {
+  color: rgba(20, 39, 72, 0.92) !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-weight: 800;
+}
+
+/* FLOW · 3M suele estar sobre chip azul más saturado: mejor blanco. */
+.landing[data-theme-mode="light"] .visible-scene-region--streaks :is(
+  [class*="mode"],
+  [class*="frequency"],
+  [class*="period"],
+  [class*="flow"]
+) {
+  color: rgba(248, 250, 255, 0.94) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* Pero si ese chip está marcado como active/selected y es claro, recupera tinta oscura. */
+.landing[data-theme-mode="light"] .visible-scene-region--streaks :is(
+  [class*="mode"][class*="active"],
+  [class*="frequency"][class*="active"],
+  [class*="period"][class*="active"],
+  [class*="flow"][class*="active"]
+) {
+  color: rgba(18, 26, 46, 0.9) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: none !important;
+}
+
+/* 8) SVG radar labels: blanco nítido. */
+.landing[data-theme-mode="light"] .visible-progress-module svg :is(text, tspan) {
+  fill: rgba(248, 250, 255, 0.92) !important;
+  color: rgba(248, 250, 255, 0.92) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* 9) Puntos/labels secundarios del emotion chart: blanco suave pero visible. */
+.landing[data-theme-mode="light"] .visible-scene-region--emotion :is(
+  .visible-month-label,
+  [class*="month"],
+  [class*="label"]
+) {
+  color: rgba(236, 241, 255, 0.86) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* 10) Botón MES activo: negro sí o sí.
+   SEM inactivo: blanco porque está sobre fondo oscuro. */
+.landing[data-theme-mode="light"] .visible-progress-module :is(
+  [class*="period-option"][class*="active"],
+  [class*="period"][class*="active"],
+  [class*="toggle"][class*="active"]
+) {
+  color: rgba(22, 27, 45, 0.9) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: none !important;
+}
+
+.landing[data-theme-mode="light"] .visible-progress-module :is(
+  [class*="period-option"]:not([class*="active"]),
+  [class*="period"]:not([class*="active"]),
+  [class*="toggle"]:not([class*="active"])
+) {
+  color: rgba(248, 250, 255, 0.88) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
