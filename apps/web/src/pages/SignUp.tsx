@@ -73,10 +73,10 @@ export default function SignUpPage() {
             </svg>
             {language === 'en' ? 'Sign up with Google' : 'Crear cuenta con Google'}
           </button>
-          <div className={`${AUTH_DIVIDER_CLASS} ${isLightTheme ? '!text-[#3b305f]/52' : ''}`}>
-            <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/20' : 'bg-white/12'}`} aria-hidden />
+          <div className={`${AUTH_DIVIDER_CLASS} ${isLightTheme ? '!text-[#3b305f]/76' : ''}`}>
+            <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/28' : 'bg-white/12'}`} aria-hidden />
             <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
-            <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/20' : 'bg-white/12'}`} aria-hidden />
+            <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/28' : 'bg-white/12'}`} aria-hidden />
           </div>
           <div
             ref={signUpContainerRef}
