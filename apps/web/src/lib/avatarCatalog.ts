@@ -30,7 +30,7 @@ const DEFAULT_AVATAR_OPTION: AvatarOption = AVATAR_OPTIONS[0];
 const TEMP_LEGACY_AVATAR_PREVIEW_BY_CODE: Record<AvatarOption['code'], string> = {
   BLUE_AMPHIBIAN: '/flowGMO.png',
   GREEN_BEAR: '/chillGMO.png',
-  RED_CAT: '/lowGMO.png',
+  RED_CAT: '/lowGMO2.png',
   VIOLET_OWL: '/evolveGMO.png',
 };
 
