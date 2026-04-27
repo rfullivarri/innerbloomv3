@@ -695,3 +695,116 @@
 .landing[data-theme-mode="light"] .visible-progress-module svg :is(text, tspan) {
   fill: rgba(237, 242, 255, 0.9) !important;
 }
+
+/* =========================================================
+   HOTFIX — Weekly rhythm cards: frequency chip + intensity track
+   Paste at the very end of LandingThemeContrastPatch.css
+   ========================================================= */
+
+/* Make every rhythm card clip its own content safely. */
+.landing .rhythm-system-card {
+  overflow: hidden;
+}
+
+/* The title/chip row: allow the chip to shrink instead of escaping. */
+.landing .rhythm-system-card .flex.items-start.justify-between {
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+/* LOW / CHILL / FLOW / EVOLVE title can shrink if needed. */
+.landing .rhythm-card-title {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* Frequency chip: keep inside the card, improve contrast, avoid overflow. */
+.landing .rhythm-frequency-chip {
+  flex: 0 1 auto;
+  max-width: min(48%, 9.4rem);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  padding: 0.45rem 0.72rem;
+  border-radius: 999px;
+
+  font-size: clamp(0.64rem, 0.72vw, 0.76rem);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  border: 1px solid rgba(178, 146, 255, 0.24);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.58),
+      rgba(243, 232, 255, 0.48)
+    );
+  color: rgba(70, 57, 108, 0.84) !important;
+
+  box-shadow:
+    0 10px 22px rgba(84, 61, 142, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+/* Dark mode chip: still soft, but readable. */
+.landing[data-theme-mode="dark"] .rhythm-frequency-chip {
+  border-color: rgba(211, 187, 255, 0.22);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.16),
+      rgba(188, 140, 255, 0.13)
+    );
+  color: rgba(246, 241, 255, 0.88) !important;
+
+  box-shadow:
+    0 10px 22px rgba(6, 8, 22, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+/* Empty part of the progress bar: more visible, premium, subtle. */
+.landing .rhythm-intensity-track {
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.5),
+      rgba(232, 225, 255, 0.32)
+    );
+
+  box-shadow:
+    inset 0 -5px 9px rgba(68, 48, 120, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    0 8px 18px rgba(64, 54, 104, 0.06);
+}
+
+/* Dark mode empty bar. */
+.landing[data-theme-mode="dark"] .rhythm-intensity-track {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.12),
+      rgba(255, 255, 255, 0.045)
+    );
+
+  box-shadow:
+    inset 0 -5px 9px rgba(2, 6, 23, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 8px 18px rgba(0, 0, 0, 0.16);
+}
+
+/* Filled part gets a tiny bottom shadow so the gradient reads as a real bar. */
+.landing .rhythm-intensity-fill {
+  position: relative;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 -4px 7px rgba(63, 42, 110, 0.16),
+    0 6px 14px rgba(176, 112, 239, 0.14);
+}
