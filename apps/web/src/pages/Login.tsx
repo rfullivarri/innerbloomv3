@@ -81,10 +81,10 @@ export default function LoginPage() {
     >
       <div className={AUTH_STACK_CLASS}>
         <GoogleOAuthButton language={language} mode="sign-in" redirectUrlComplete={`${location.pathname}${location.search}${location.hash}`} />
-        <div className={`${AUTH_DIVIDER_CLASS} ${isLightTheme ? '!text-[#3b305f]/52' : ''}`}>
-          <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/20' : 'bg-white/12'}`} aria-hidden />
+        <div className={`${AUTH_DIVIDER_CLASS} ${isLightTheme ? '!text-[#3b305f]/76' : ''}`}>
+          <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/28' : 'bg-white/12'}`} aria-hidden />
           <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
-          <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/20' : 'bg-white/12'}`} aria-hidden />
+          <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/28' : 'bg-white/12'}`} aria-hidden />
         </div>
         <div className={AUTH_CLERK_FORM_SHELL_CLASS}>
           <SignIn
