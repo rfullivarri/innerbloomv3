@@ -548,7 +548,7 @@ export function DailyReminderSettings({
       className="reminder-scheduler-form space-y-6 text-base text-text"
       data-light-scope="reminder-scheduler"
     >
-      <div className="reminder-scheduler-form__toggle-card rounded-2xl border border-white/10 bg-white/5 p-5">
+      <div className="reminder-scheduler-form__toggle-card rounded-2xl border border-white/12 bg-white/[0.055] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
         <div className="flex items-center justify-between gap-4">
           <p className="reminder-scheduler-form__toggle-label text-sm font-semibold text-white">
             {toggleLabel}
@@ -647,7 +647,7 @@ export function DailyReminderSettings({
                 aria-expanded={isTimePickerOpen}
                 onClick={() => setIsTimePickerOpen((previous) => !previous)}
                 className={combine(
-                  "reminder-scheduler-form__control reminder-scheduler-form__time-trigger flex w-full items-center justify-between rounded-2xl border border-white/10 bg-surface px-4 py-3 text-left text-base text-white outline-none transition focus:border-white/40 focus-visible:ring-2 focus-visible:ring-white/50",
+                  "reminder-scheduler-form__control reminder-scheduler-form__time-trigger flex w-full items-center justify-between rounded-2xl border border-white/12 bg-white/[0.055] px-4 py-3 text-left text-base text-white outline-none transition focus:border-violet-200/45 focus:bg-white/[0.075] focus-visible:ring-2 focus-visible:ring-violet-200/35",
                   isSaving && "cursor-not-allowed opacity-60",
                 )}
               >
@@ -702,7 +702,7 @@ export function DailyReminderSettings({
                 }))
               }
               disabled={isSaving}
-              className="reminder-scheduler-form__control reminder-scheduler-form__time-select w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-base text-white outline-none transition focus:border-white/40"
+              className="reminder-scheduler-form__control reminder-scheduler-form__time-select w-full rounded-2xl border border-white/12 bg-white/[0.055] px-4 py-3 text-base text-white outline-none transition focus:border-violet-200/45 focus:bg-white/[0.075]"
             >
               {TIME_OPTIONS.map((time) => (
                 <option
