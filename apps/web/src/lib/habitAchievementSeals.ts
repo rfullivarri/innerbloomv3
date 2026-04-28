@@ -54,6 +54,26 @@ const TRAIT_ALIASES: Record<string, string> = {
   DICIPLINE: 'DISCIPLINE',
   ENFOQUE: 'FOCUS',
   FOCUS: 'FOCUS',
+  CONEXION: 'CONNECTION',
+  CONNECTION: 'CONNECTION',
+  ESPIRITUALIDAD: 'SPIRITUALITY',
+  SPIRITUALITY: 'SPIRITUALITY',
+  PROPOSITO: 'PURPOSE',
+  PURPOSE: 'PURPOSE',
+  VALORES: 'VALUES',
+  VALUES: 'VALUES',
+  ALTRUISMO: 'ALTRUISM',
+  ALTRUISM: 'ALTRUISM',
+  INSIGHT: 'INSIGHT',
+  GRATITUD: 'GRATITUDE',
+  GRATITUDE: 'GRATITUDE',
+  NATURALEZA: 'NATURE',
+  NATURE: 'NATURE',
+  GOZO: 'JOY',
+  JOY: 'JOY',
+  AUTOESTIMA: 'SELF_ESTEEM',
+  SELFESTEEM: 'SELF_ESTEEM',
+  SELF_ESTEEM: 'SELF_ESTEEM',
 };
 
 const TRAIT_FILENAME_ALIASES: Record<string, string[]> = {
@@ -70,6 +90,16 @@ const TRAIT_FILENAME_ALIASES: Record<string, string[]> = {
   CURIOSITY: ['CURIOSIDAD', 'CURIOCIDAD', 'CURIOSITY'],
   DISCIPLINE: ['DISCIPLINA', 'DISCIPLINE', 'DICIPLINE'],
   FOCUS: ['ENFOQUE', 'FOCUS'],
+  CONNECTION: ['CONEXION', 'CONNECTION'],
+  SPIRITUALITY: ['ESPIRITUALIDAD', 'SPIRITUALITY'],
+  PURPOSE: ['PROPOSITO', 'PURPOSE'],
+  VALUES: ['VALORES', 'VALUES'],
+  ALTRUISM: ['ALTRUISMO', 'ALTRUISM'],
+  INSIGHT: ['INSIGHT'],
+  GRATITUDE: ['GRATITUD', 'GRATITUDE'],
+  NATURE: ['NATURALEZA', 'NATURE'],
+  JOY: ['GOZO', 'JOY'],
+  SELF_ESTEEM: ['AUTOESTIMA', 'SELF_ESTEEM', 'SELFESTEEM'],
 };
 
 const BODY_SEAL_ASSETS: Record<string, string> = {
@@ -84,6 +114,20 @@ const BODY_SEAL_ASSETS: Record<string, string> = {
   MOVEMENT: 'movement',
   SLEEP: 'sleep',
 };
+
+const SOUL_SEAL_ASSETS: Record<string, string> = {
+  CONNECTION: 'connection',
+  SPIRITUALITY: 'spirituality',
+  PURPOSE: 'purpose',
+  VALUES: 'values',
+  ALTRUISM: 'altruism',
+  INSIGHT: 'insight',
+  GRATITUDE: 'gratitude',
+  NATURE: 'nature',
+  JOY: 'joy',
+  SELF_ESTEEM: 'self_esteem',
+};
+
 
 function normalizeToken(value: string | null | undefined): string {
   if (!value) return '';
@@ -152,9 +196,14 @@ export function resolveHabitAchievementSealCandidates(input: SealResolverInput):
   const traitTokens = traitCandidates(canonicalTrait, input);
 
   const candidates: string[] = [];
-  const bodyAsset = pillar === 'BODY' ? BODY_SEAL_ASSETS[canonicalTrait] : null;
-  if (bodyAsset) {
-    candidates.push(`/sellos/body/sello_body_${bodyAsset}.png`);
+  const directAssetByPillar: Partial<Record<PillarKey, Record<string, string>>> = {
+    BODY: BODY_SEAL_ASSETS,
+    SOUL: SOUL_SEAL_ASSETS,
+  };
+
+  const directAsset = directAssetByPillar[pillar]?.[canonicalTrait] ?? null;
+  if (directAsset) {
+    candidates.push(`/sellos/${pillar.toLowerCase()}/sello_${pillar.toLowerCase()}_${directAsset}.png`);
   }
 
   prefixes.forEach((prefix) => {
