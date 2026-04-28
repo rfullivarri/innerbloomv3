@@ -74,6 +74,13 @@ const TRAIT_ALIASES: Record<string, string> = {
   AUTOESTIMA: 'SELF_ESTEEM',
   SELFESTEEM: 'SELF_ESTEEM',
   SELF_ESTEEM: 'SELF_ESTEEM',
+  CALM: 'CALM',
+  EMPATHY: 'EMPATHY',
+  EXPRESSION: 'EXPRESSION',
+  FRIENDSHIP: 'FRIENDSHIP',
+  LOVE: 'LOVE',
+  PRESENCE: 'PRESENCE',
+  INTROSPECTION: 'INTROSPECTION',
 };
 
 const TRAIT_FILENAME_ALIASES: Record<string, string[]> = {
@@ -100,6 +107,13 @@ const TRAIT_FILENAME_ALIASES: Record<string, string[]> = {
   NATURE: ['NATURALEZA', 'NATURE'],
   JOY: ['GOZO', 'JOY'],
   SELF_ESTEEM: ['AUTOESTIMA', 'SELF_ESTEEM', 'SELFESTEEM'],
+  CALM: ['CALM'],
+  EMPATHY: ['EMPATHY'],
+  EXPRESSION: ['EXPRESSION'],
+  FRIENDSHIP: ['FRIENDSHIP'],
+  LOVE: ['LOVE'],
+  PRESENCE: ['PRESENCE'],
+  INTROSPECTION: ['INTROSPECTION'],
 };
 
 const BODY_SEAL_ASSETS: Record<string, string> = {
@@ -116,16 +130,26 @@ const BODY_SEAL_ASSETS: Record<string, string> = {
 };
 
 const SOUL_SEAL_ASSETS: Record<string, string> = {
+  // Traits actuales de Quick Start / producto
   CONNECTION: 'connection',
-  SPIRITUALITY: 'spirituality',
-  PURPOSE: 'purpose',
-  VALUES: 'values',
-  ALTRUISM: 'altruism',
-  INSIGHT: 'insight',
+  SPIRITUALITY: 'presence',
+  PURPOSE: 'expression',
+  VALUES: 'calm',
+  ALTRUISM: 'empathy',
+  INSIGHT: 'introspection',
   GRATITUDE: 'gratitude',
-  NATURE: 'nature',
+  NATURE: 'presence',
   JOY: 'joy',
-  SELF_ESTEEM: 'self_esteem',
+  SELF_ESTEEM: 'love',
+
+  // Nombres reales disponibles en /public/sellos/soul
+  CALM: 'calm',
+  EMPATHY: 'empathy',
+  EXPRESSION: 'expression',
+  FRIENDSHIP: 'friendship',
+  LOVE: 'love',
+  PRESENCE: 'presence',
+  INTROSPECTION: 'introspection',
 };
 
 
@@ -203,7 +227,11 @@ export function resolveHabitAchievementSealCandidates(input: SealResolverInput):
 
   const directAsset = directAssetByPillar[pillar]?.[canonicalTrait] ?? null;
   if (directAsset) {
-    candidates.push(`/sellos/${pillar.toLowerCase()}/sello_${pillar.toLowerCase()}_${directAsset}.png`);
+    if (pillar === 'SOUL') {
+      candidates.push(`/sellos/soul/soul_${directAsset}_transparent.png`);
+    } else {
+      candidates.push(`/sellos/${pillar.toLowerCase()}/sello_${pillar.toLowerCase()}_${directAsset}.png`);
+    }
   }
 
   prefixes.forEach((prefix) => {
