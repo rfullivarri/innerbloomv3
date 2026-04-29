@@ -2,6 +2,7 @@ export type ThemePreference = 'light' | 'dark' | 'auto';
 export type ResolvedTheme = 'light' | 'dark';
 
 export const THEME_PREFERENCE_STORAGE_KEY = 'ib-theme-preference';
+export const LEGACY_LANDING_THEME_STORAGE_KEY = 'ib:landing-theme-mode';
 const DARK_SCHEME_MEDIA_QUERY = '(prefers-color-scheme: dark)';
 
 export function readStoredThemePreference(): ThemePreference {
@@ -13,6 +14,22 @@ export function readStoredThemePreference(): ThemePreference {
   return storedPreference === 'light' || storedPreference === 'dark' || storedPreference === 'auto'
     ? storedPreference
     : 'dark';
+}
+
+export function migrateLegacyLandingThemePreference() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const current = window.localStorage.getItem(THEME_PREFERENCE_STORAGE_KEY);
+  if (current === 'light' || current === 'dark' || current === 'auto') {
+    return;
+  }
+
+  const legacy = window.localStorage.getItem(LEGACY_LANDING_THEME_STORAGE_KEY);
+  if (legacy === 'light' || legacy === 'dark') {
+    window.localStorage.setItem(THEME_PREFERENCE_STORAGE_KEY, legacy);
+  }
 }
 
 export function resolveThemeFromPreference(preference: ThemePreference): ResolvedTheme {
@@ -53,6 +70,7 @@ export function applyThemePreference(preference: ThemePreference): ResolvedTheme
 }
 
 export function applyStoredThemePreference(): ThemePreference {
+  migrateLegacyLandingThemePreference();
   const preference = readStoredThemePreference();
   applyThemePreference(preference);
   return preference;

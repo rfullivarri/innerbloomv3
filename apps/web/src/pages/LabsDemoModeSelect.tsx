@@ -24,7 +24,7 @@ export default function LabsDemoModeSelectPage({ legacyLabsPath = false }: DemoM
   const navigate = useNavigate();
   const sourceParam = new URLSearchParams(location.search).get('source');
   const source: DemoEntrySource = sourceParam === 'selector' || sourceParam === 'labs' ? sourceParam : 'landing';
-  const themeMode = readLandingThemeMode('dark');
+  const themeMode = readLandingThemeMode();
   const landingThemeBackground = getLandingThemeBackground(themeMode);
 
   useEffect(() => {

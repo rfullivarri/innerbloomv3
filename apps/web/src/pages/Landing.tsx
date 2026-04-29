@@ -40,8 +40,8 @@ import {
   type LandingThemeMode,
   getLandingThemeStyle,
   readLandingThemeMode,
-  writeLandingThemeMode,
 } from "../lib/landingTheme";
+import { useThemePreference } from "../theme/ThemePreferenceProvider";
 import "./Landing.css";
 import "./LandingThemeContrastPatch.css";
 
@@ -394,9 +394,8 @@ export default function LandingPage() {
       ? resolveAuthLanguage(window.location.search)
       : "es",
   );
-  const [themeMode, setThemeMode] = useState<LandingThemeMode>(() =>
-    readLandingThemeMode("dark"),
-  );
+  const { theme, setPreference } = useThemePreference();
+  const themeMode: LandingThemeMode = theme;
   const copy = OFFICIAL_LANDING_CONTENT[language];
   const visibleNavLinks = copy.navLinks.filter(
     (link) => !/^\/demo$/i.test(link.href) && !/^#?demo$/i.test(link.href),
@@ -432,10 +431,6 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    writeLandingThemeMode(themeMode);
-  }, [themeMode]);
-
-  useEffect(() => {
     const resolvedLanguage = resolveAuthLanguage(location.search);
     setLanguage(resolvedLanguage);
     syncLocaleLanguage(resolvedLanguage);
@@ -451,7 +446,7 @@ export default function LandingPage() {
     setManualLanguage(nextLanguage);
   };
   const toggleThemeMode = () => {
-    setThemeMode((current) => (current === "dark" ? "light" : "dark"));
+    setPreference(themeMode === "dark" ? "light" : "dark");
   };
 
   useEffect(() => {
