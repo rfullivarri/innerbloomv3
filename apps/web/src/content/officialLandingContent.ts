@@ -376,43 +376,43 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     how: {
       kicker: 'THE INNERBLOOM SYSTEM',
       title: 'How Innerbloom works',
-      intro: 'Start from your real level, move through weekly cycles, recalibrate over time, and build habits that actually last.',
-      closingLine: 'An achieved habit isn’t just a pretty streak. It’s something that has become part of you.',
-      closingBody: 'Innerbloom uses your progress to decide when to increase intensity, when to reduce it, and what your next step should be.',
+      intro: 'Innerbloom does not give you a fixed routine. It uses your decisions and real progress to adjust the system: when to increase intensity, when to lower it, and how to help you sustain habits over time.',
+      closingLine: 'Not a tracker. A system that adapts to your progress.',
+      closingBody: 'Innerbloom uses your progress to decide when to increase intensity, when to lower it, and what your next step should be.',
       steps: [
         {
-          title: 'Start realistic, not perfect',
+          title: 'Sets a possible starting point',
           badge: 'PERSONALIZED ONBOARDING',
           bullets: [
-            '🟢 Start from your real level',
-            '🌱 Build a base you can sustain',
+            '🟢 Asks the right questions to understand where you’re starting from',
+            '🌱 Creates your first tasks based on what you choose and can sustain',
           ],
-          chips: ['ONBOARDING · REALISTIC BASE'],
+          chips: ['ONBOARDING · REALISTIC START'],
         },
         {
-          title: 'Move through weekly cycles',
+          title: 'Turns your actions into information',
           badge: 'WEEKLY CYCLE',
           bullets: [
-            '📅 Move through weeks, not isolated days',
-            '🧭 Spot real patterns and adjust your plan',
+            '📅 Tracks which tasks you complete each week',
+            '📊 Uses GP, streaks, and progress to understand your consistency',
           ],
-          chips: ['WEEKLY CYCLE · PROGRESS AND PATTERNS'],
+          chips: ['WEEKLY CYCLE · REAL PROGRESS'],
         },
         {
-          title: 'Adjust the system as you grow',
+          title: 'Adjusts difficulty and intensity',
           badge: 'MONTHLY RECALIBRATION',
           bullets: [
-            '🔄 Recalibrate task difficulty as you evolve',
-            '📈 It suggests a higher intensity when your consistency gets stronger',
+            '🔁 If a task is becoming hard to sustain, the system detects it',
+            '📈 If your progress is solid, it can suggest a higher rhythm',
           ],
-          chips: ['RECALIBRATION · DIFFICULTY AND EVOLUTION'],
+          chips: ['RECALIBRATION · ADJUSTMENT AND RHYTHM'],
         },
         {
-          title: 'Turn consistency into real habits',
+          title: 'Recognizes consolidated habits',
           badge: 'ACHIEVED HABITS',
           bullets: [
-            '🏆 Turn consistency into lasting habits',
-            '🌿 Build habits that stay with you beyond one good week',
+            '🏆 Detects when a task has become part of your routine',
+            '🌿 You can keep measuring it or save it as an achieved habit',
           ],
           chips: ['ACHIEVED HABITS · CONSOLIDATION'],
         }
