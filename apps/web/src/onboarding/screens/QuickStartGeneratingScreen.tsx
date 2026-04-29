@@ -82,7 +82,7 @@ export function QuickStartGeneratingScreen({
         </div>
         <p className="mt-6 text-sm text-[color:var(--color-text-muted)]">{copy.bridgeHint}</p>
         <div className="mt-8 flex flex-col items-center gap-3">
-          <button type="button" onClick={onOpenGuidedDemo} disabled={isSubmitting || !submitCompleted} className="quickstart-primary-cta inline-flex items-center justify-center rounded-full border px-7 py-3 text-sm font-semibold !text-white transition duration-200 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-55" style={{ color: "#fff" }}>{isSubmitting ? copy.saving : submitCompleted ? copy.cta : copy.saving}</button>
+          <button type="button" onClick={onOpenGuidedDemo} disabled={isSubmitting || !submitCompleted} className="quickstart-primary-cta inline-flex items-center justify-center rounded-full border px-7 py-3 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-55">{isSubmitting ? copy.saving : submitCompleted ? copy.cta : copy.saving}</button>
           {submitCompleted ? <p className="text-sm text-emerald-500">{copy.done}</p> : null}
           {submitError ? <p className="text-sm text-rose-500">{submitError}</p> : null}
         </div>

@@ -1414,6 +1414,10 @@
     box-shadow: 0 10px 24px rgba(2, 6, 23, 0.32);
   }
 
+  :root[data-theme="light"] .quickstart-primary-cta {
+    color: #0f172a;
+  }
+
   .quickstart-primary-cta:hover {
     box-shadow: 0 14px 28px rgba(2, 6, 23, 0.38);
   }
