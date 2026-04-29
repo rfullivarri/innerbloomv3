@@ -1015,3 +1015,118 @@
   color: rgba(248, 250, 255, 0.88) !important;
   -webkit-text-fill-color: currentColor !important;
 }
+
+/* =========================================================
+   HERO PHONE LIGHT MODE — force dashboard text readable
+   Scope: ONLY official landing hero phone mock.
+   Do not affect the real dashboard.
+   ========================================================= */
+
+.landing[data-theme-mode="light"]
+  .hero-media
+  [data-light-scope="dashboard-v3"] {
+  --color-text: #171126;
+  --color-text-muted: rgba(45, 39, 70, 0.82);
+  --color-text-subtle: rgba(76, 68, 105, 0.72);
+
+  color: var(--color-text) !important;
+}
+
+.landing[data-theme-mode="light"]
+  .hero-media
+  [data-light-scope="dashboard-v3"]
+  :is(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    li,
+    button,
+    label
+  ) {
+  color: var(--color-text) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: none !important;
+}
+
+.landing[data-theme-mode="light"]
+  .hero-media
+  [data-light-scope="dashboard-v3"]
+  :is(
+    .text-slate-300,
+    .text-slate-400,
+    .text-slate-500,
+    .text-white\/60,
+    .text-white\/70,
+    .text-white\/80,
+    [class*="text-muted"],
+    [class*="text-subtle"]
+  ) {
+  color: var(--color-text-muted) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: none !important;
+}
+
+.landing[data-theme-mode="light"]
+  .hero-media
+  [data-light-scope="dashboard-v3"]
+  :is(
+    .text-white,
+    .text-slate-50,
+    .text-slate-100,
+    .text-slate-200,
+    [class*="text-white"],
+    [class*="text-slate-50"],
+    [class*="text-slate-100"],
+    [class*="text-slate-200"]
+  ) {
+  color: var(--color-text) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: none !important;
+}
+
+.landing[data-theme-mode="light"]
+  .hero-media
+  [data-light-scope="dashboard-v3"]
+  :is(
+    small,
+    [class*="muted"],
+    [class*="subtle"],
+    [class*="caption"],
+    [class*="secondary"]
+  ) {
+  color: var(--color-text-subtle) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: none !important;
+}
+
+.landing[data-theme-mode="light"]
+  .hero-media
+  [data-light-scope="dashboard-v3"]
+  :is(
+    svg,
+    path,
+    circle,
+    rect,
+    line,
+    polygon,
+    [data-emotion-card="legend-swatch"],
+    .emotion-highlight-indicator,
+    [role="progressbar"],
+    [role="progressbar"] *,
+    [class*="swatch"],
+    [class*="dot"],
+    [class*="heatmap"],
+    [class*="progress"],
+    [class*="bar"]
+  ) {
+  color: initial !important;
+  -webkit-text-fill-color: initial !important;
+  text-shadow: none !important;
+}
