@@ -319,13 +319,33 @@ function createInstrumentedRunner(options: {
       }
     },
     validateTasks: (payload, catalogs, placeholders, schema) => {
-      const result = baseDeps.validateTasks(payload, catalogs, placeholders, schema);
+      const repairedPayload = { ...payload };
+      let pillarCorrections = 0;
+      if (Array.isArray(payload.tasks)) {
+        repairedPayload.tasks = payload.tasks.map((task) => {
+          const expectedPillarCode = catalogs.traitToPillarCode?.get(task.trait_code);
+          if (!expectedPillarCode || expectedPillarCode === task.pillar_code) {
+            return task;
+          }
+          pillarCorrections += 1;
+          return {
+            ...task,
+            pillar_code: expectedPillarCode,
+          };
+        });
+      }
+
+      if (pillarCorrections > 0) {
+        payload.tasks = repairedPayload.tasks;
+      }
+
+      const result = baseDeps.validateTasks(repairedPayload, catalogs, placeholders, schema);
       const invalidTraitPillarPair =
-        result.valid || !Array.isArray(payload.tasks)
+        result.valid || !Array.isArray(repairedPayload.tasks)
           ? null
-          : payload.tasks
+          : repairedPayload.tasks
               .map((task) => {
-                const expectedPillarCode = catalogs.traitToPillarCode.get(task.trait_code);
+                const expectedPillarCode = catalogs.traitToPillarCode?.get(task.trait_code);
                 if (!expectedPillarCode || expectedPillarCode === task.pillar_code) {
                   return null;
                 }
@@ -344,9 +364,10 @@ function createInstrumentedRunner(options: {
         mode: options.mode,
         origin: options.origin,
         data: {
-          taskCount: payload.tasks?.length ?? 0,
+          taskCount: repairedPayload.tasks?.length ?? 0,
           errors: result.valid ? [] : result.errors,
           invalidTraitPillarPair,
+          pillarCorrections,
         },
       });
       return result;
@@ -619,6 +640,19 @@ async function runQuickStartManualTaskGeneration(args: {
     })
     .filter((task): task is NonNullable<typeof task> => task !== null);
 
+  const catalogTraitToPillar = context.catalogs.traitToPillarCode;
+  const adjustedTasks = normalizedTasks.map((task) => {
+    const expectedPillarCode = catalogTraitToPillar?.get(task.trait_code);
+    if (!expectedPillarCode || expectedPillarCode === task.pillar_code) {
+      return task;
+    }
+
+    return {
+      ...task,
+      pillar_code: expectedPillarCode,
+    };
+  });
+
   emitEvent({
     level: 'info',
     event: 'VALIDATION_OK',
@@ -626,11 +660,21 @@ async function runQuickStartManualTaskGeneration(args: {
     userId: args.userId,
     mode: args.mode,
     origin: args.origin,
-    data: { stage: 'quick_start normalized tasks', count: normalizedTasks.length },
+    data: {
+      stage: 'quick_start normalized tasks',
+      count: adjustedTasks.length,
+      pillarCorrections: adjustedTasks.reduce((acc, task, index) => {
+        const original = normalizedTasks[index];
+        if (original && original.pillar_code !== task.pillar_code) {
+          acc += 1;
+        }
+        return acc;
+      }, 0),
+    },
   });
 
   const tasks = assignBalancedDifficultiesByPillar({
-    tasks: normalizedTasks,
+    tasks: adjustedTasks,
     gameMode: normalizeGameModeForDifficultyEngine(gameModeCode),
     seed: `${args.userId}:${args.correlationId}`,
   });
