@@ -272,6 +272,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={isNativeApp ? <MobileAppEntry /> : <LandingPage />} />
         <Route path="/landing-v2" element={<LandingV2Page />} />
+        <Route path="/v2" element={<LandingV2Page />} />
         <Route path="/premium-timeline" element={<PremiumTimelineDemoPage />} />
         <Route path="/demo" element={<DemoDashboardPage />} />
         <Route path="/demo-mode-select" element={<DemoModeSelectPage />} />
