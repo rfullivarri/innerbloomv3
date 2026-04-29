@@ -221,11 +221,13 @@
 }
 
 .loopSplashScene {
+  --loop-splash-wordmark-width: min(178px, calc(100% - 62px));
   position: absolute;
   inset: 10px;
   border-radius: 30px;
   display: grid;
   place-items: center;
+  container-type: inline-size;
   box-sizing: border-box;
   padding-inline: clamp(12px, 5.5%, 18px);
   overflow: hidden;
@@ -268,7 +270,7 @@
 
 .loopSplashLockup {
   position: relative;
-  width: min(100%, 240px);
+  width: min(100%, 252px);
   max-width: 100%;
   display: inline-flex;
   align-items: center;
@@ -288,7 +290,7 @@
 }
 
 .loopSplashFlower {
-  width: clamp(50px, 18vw, 62px);
+  width: clamp(46px, 18cqw, 58px);
   flex: 0 0 auto;
   height: auto;
   z-index: 2;
@@ -307,12 +309,12 @@
   margin: 0;
   flex: 0 1 auto;
   width: 0;
-  max-width: calc(100% - clamp(62px, 20vw, 76px));
+  max-width: var(--loop-splash-wordmark-width);
   overflow: hidden;
   white-space: nowrap;
-  font-size: clamp(0.95rem, 1.47vw, 1.21rem);
+  font-size: clamp(0.82rem, 5.1cqw, 1.02rem);
   font-weight: 700;
-  letter-spacing: 0.32em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
   color: rgba(244, 239, 255, 0.96);
   text-shadow:
@@ -377,13 +379,13 @@
   }
 
   74% {
-    width: min(100%, 165px);
+    width: var(--loop-splash-wordmark-width);
     clip-path: inset(0 0 0 0);
     opacity: 1;
   }
 
   100% {
-    width: min(100%, 165px);
+    width: var(--loop-splash-wordmark-width);
     clip-path: inset(0 0 0 0);
     opacity: 1;
   }
