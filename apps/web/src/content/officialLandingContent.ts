@@ -33,7 +33,7 @@ export type LandingCopy = {
   };
   pillars: { kicker: string; title: string; intro: string; highlightLeadIn: string; highlight: string; items: Pillar[] };
   modes: { kicker: string; title: string; intro: string; items: Mode[] };
-  how: { kicker: string; title: string; intro: string; closingLine: string; steps: HowTimelineStep[] };
+  how: { kicker: string; title: string; intro: string; closingLine: string; closingBody: string; steps: HowTimelineStep[] };
   featureShowcase: { kicker: string; title: string; intro: string; items: FeatureShowcaseItem[] };
   demo: { title: string; text: string; banner: string; cta: string };
   testimonials: { title: string; intro: string; items: Testimonial[]; prev: string; next: string; groupLabel: string };
@@ -132,42 +132,43 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     how: {
       kicker: 'EL SISTEMA DE INNERBLOOM',
       title: 'Cómo funciona Innerbloom',
-      intro: 'Empieza desde tu nivel real, avanza en ciclos semanales, recalibra con el tiempo y construye hábitos que sí perduran.',
-      closingLine: 'Un hábito logrado no es una racha bonita. Es algo que ya forma parte de vos.',
+      intro: 'Innerbloom no te da una rutina fija. Usa tus decisiones y tu progreso real para ajustar el sistema: cuándo subir la intensidad, cuándo bajarla y cómo ayudarte a sostener hábitos en el tiempo.',
+      closingLine: 'No es un tracker. Es un sistema que se adapta a tu progreso.',
+      closingBody: 'Innerbloom usa tu progreso para decidir cuándo subir la intensidad, cuándo bajarla y cuál debería ser tu próximo paso.',
       steps: [
         {
-          title: 'Empieza realista, no perfecto',
+          title: 'Setea un inicio posible',
           badge: 'ONBOARDING PERSONALIZADO',
           bullets: [
-            '🟢 Empieza desde tu nivel real',
-            '🌱 Construye una base que puedas sostener',
+            '🟢 Te hace las preguntas justas para entender tu punto de partida',
+            '🌱 Crea tus primeras tareas según lo que elegís y podés sostener',
           ],
-          chips: ['ONBOARDING · BASE REALISTA'],
+          chips: ['ONBOARDING · INICIO REALISTA'],
         },
         {
-          title: 'Avanza en ciclos semanales',
+          title: 'Convierte tus acciones en información',
           badge: 'CICLO SEMANAL',
           bullets: [
-            '📅 Avanza por semanas, no por días sueltos',
-            '🧭 Detecta patrones reales y ajusta tu plan',
+            '📅 Registra qué tareas completás cada semana',
+            '📊 Usa GP, rachas y progreso para entender tu constancia',
           ],
-          chips: ['CICLO SEMANAL · PROGRESO Y PATRONES'],
+          chips: ['CICLO SEMANAL · PROGRESO REAL'],
         },
         {
-          title: 'Ajusta el sistema a medida que creces',
+          title: 'Ajusta dificultad e intensidad',
           badge: 'RECALIBRACIÓN MENSUAL',
           bullets: [
-            '🔄 Recalibra la dificultad de tus tareas según tu evolución',
-            '📈 Te propone una intensidad mayor cuando tu constancia se fortalece',
+            '🔁 Si una tarea te está costando, el sistema lo detecta',
+            '📈 Si tu progreso es sólido, puede proponerte subir de ritmo',
           ],
-          chips: ['RECALIBRACIÓN · DIFICULTAD Y EVOLUCIÓN'],
+          chips: ['RECALIBRACIÓN · AJUSTE Y RITMO'],
         },
         {
-          title: 'Convierte constancia en hábitos reales',
+          title: 'Reconoce hábitos consolidados',
           badge: 'HÁBITOS LOGRADOS',
           bullets: [
-            '🏆 Convierte constancia en hábitos duraderos',
-            '🌿 Construye hábitos que sigan contigo más allá de una buena semana',
+            '🏆 Detecta cuándo una tarea ya se volvió parte de tu rutina',
+            '🌿 Podés seguir midiéndola o guardarla como un logro alcanzado',
           ],
           chips: ['HÁBITOS LOGRADOS · CONSOLIDACIÓN'],
         }
@@ -377,6 +378,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       title: 'How Innerbloom works',
       intro: 'Start from your real level, move through weekly cycles, recalibrate over time, and build habits that actually last.',
       closingLine: 'An achieved habit isn’t just a pretty streak. It’s something that has become part of you.',
+      closingBody: 'Innerbloom uses your progress to decide when to increase intensity, when to reduce it, and what your next step should be.',
       steps: [
         {
           title: 'Start realistic, not perfect',
