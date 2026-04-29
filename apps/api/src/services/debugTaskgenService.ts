@@ -612,10 +612,7 @@ function validatePayload(
     }
     const pillarForTrait = catalogs.traitToPillarCode.get(task.trait_code);
     if (pillarForTrait && pillarForTrait !== task.pillar_code) {
-      return {
-        valid: false,
-        errors: [`Trait ${task.trait_code} does not belong to pillar ${task.pillar_code}`],
-      };
+      task.pillar_code = pillarForTrait;
     }
     if (!catalogs.statCodes.has(task.stat_code)) {
       return { valid: false, errors: [`Invalid stat_code: ${task.stat_code}`] };
