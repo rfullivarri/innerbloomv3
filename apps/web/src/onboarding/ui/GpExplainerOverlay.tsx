@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { ArrowRight, ArrowUp, CircleDot } from '../../components/icons';
 import { GpProgressBar } from './GpProgressBar';
 import type { OnboardingLanguage } from '../constants';
+import { useThemePreference } from '../../theme/ThemePreferenceProvider';
 
 interface GpExplainerOverlayProps {
   language?: OnboardingLanguage;
@@ -20,6 +21,7 @@ type ExplainerItem = {
 
 export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOverlayProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  const { theme } = useThemePreference();
 
   const copy = useMemo(
     () =>
@@ -153,7 +155,7 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[70]" aria-hidden={false}>
-      <div className="pointer-events-auto absolute inset-0 bg-black/55 backdrop-blur-sm" onClick={onClose} />
+      <div className="pointer-events-auto absolute inset-0 bg-[color:var(--color-overlay-2)] backdrop-blur-sm" onClick={onClose} />
 
       <div className="pointer-events-auto absolute inset-x-0 top-[7.15rem] px-3 sm:top-[7.8rem] sm:px-4">
         <div
@@ -162,21 +164,21 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
           aria-modal="true"
           aria-label={copy.title}
           tabIndex={-1}
-          className="relative mx-auto w-full max-w-sm rounded-3xl border border-white/20 bg-surface p-4 text-white shadow-[0_18px_40px_rgba(3,8,22,0.55)]"
+          className="relative mx-auto w-full max-w-sm rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-4 text-[color:var(--color-text)] shadow-[var(--shadow-elev-2)]"
         >
           <button
             type="button"
             onClick={onClose}
             aria-label={copy.closeLabel}
-            className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-white/5 text-sm text-white/75 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+            className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-sm text-[color:var(--color-text-muted)] transition hover:text-[color:var(--color-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]"
           >
             ✕
           </button>
 
           <div className="pr-8">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold tracking-wide text-white">{copy.title}</h2>
-              <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white/75">
+              <h2 className="text-sm font-semibold tracking-wide text-[color:var(--color-text)]">{copy.title}</h2>
+              <span className="shrink-0 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-2.5 py-0.5 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-muted)]">
                 {copy.chip}
               </span>
             </div>
@@ -186,9 +188,9 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
             </div>
           </div>
 
-          <ul className="mt-3 space-y-2 text-xs leading-relaxed text-white/80">
+          <ul className="mt-3 space-y-2 text-xs leading-relaxed text-[color:var(--color-text-muted)]">
             {copy.items.map((item) => {
-              const iconClassName = 'h-3.5 w-3.5 shrink-0 text-violet-200';
+              const iconClassName = 'h-3.5 w-3.5 shrink-0 text-[color:var(--color-accent-primary)]';
 
               return (
                 <li key={item.id} className="flex items-start gap-2">
@@ -204,7 +206,7 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
                       <span
                         key={`${item.id}-${segment.text}`}
                         className={[
-                          segment.emphasis === 'semibold' ? 'font-semibold text-white' : '',
+                          segment.emphasis === 'semibold' ? 'font-semibold text-[color:var(--color-text)]' : '',
                           segment.noWrap ? 'whitespace-nowrap' : '',
                         ]
                           .filter(Boolean)
@@ -222,7 +224,7 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
           <button
             type="button"
             onClick={onClose}
-            className="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-violet-300/45 bg-violet-500 px-3 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(76,29,149,0.3)] transition duration-200 hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-[0_14px_28px_rgba(76,29,149,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300"
+            className="ib-primary-button mt-4 inline-flex w-full items-center justify-center rounded-xl px-3 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]"
           >
             {copy.cta}
           </button>

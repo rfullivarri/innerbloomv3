@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { useThemePreference } from '../../theme/ThemePreferenceProvider';
 import type { OnboardingLanguage } from '../constants';
 
 type PathOption = 'traditional' | 'quick_start';
@@ -57,6 +58,7 @@ const getPathCardStyle = (isActive: boolean, variant: PathVariant) => {
 };
 
 export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQuickStart, onBack }: PathSelectStepProps) {
+  const { theme } = useThemePreference();
   const [selectedPath, setSelectedPath] = useState<PathOption | null>(null);
   const [isAdvancing, setIsAdvancing] = useState(false);
 
@@ -113,7 +115,7 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7"
+      className="onboarding-premium-root onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7"
     >
       <p className="text-xs uppercase tracking-[0.2em] text-white/50">{copy.step}</p>
       <h2 className="mt-2 text-3xl font-semibold text-white">{copy.title}</h2>
@@ -129,7 +131,7 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
             chips: [
               {
                 key: 'duration',
-                className: 'border-[#d8b4fe]/35 bg-[#d8b4fe]/20 text-[#f6e8ff]',
+                className: 'border-[color:var(--color-border-soft)] bg-[color:var(--onboarding-premium-overlay-soft)] text-[color:var(--color-text-muted)]',
                 text: copy.personalDuration,
               },
             ],
@@ -142,12 +144,12 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
             chips: [
               {
                 key: 'duration',
-                className: 'border-white/20 bg-white/10 text-white/75',
+                className: 'border-[color:var(--color-border-soft)] bg-[color:var(--onboarding-premium-overlay-soft)] text-[color:var(--color-text-muted)]',
                 text: copy.quickDuration,
               },
               {
                 key: 'label',
-                className: 'border-sky-200/30 bg-sky-200/12 text-sky-100/90',
+                className: 'border-[color:var(--color-border-soft)] bg-[color:var(--onboarding-premium-overlay-base)] text-[color:var(--color-text)]',
                 text: copy.quickLabel,
               },
             ],
@@ -167,10 +169,10 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
               aria-label={`${option.title}${isActive ? copy.selectedSuffix : ''}`}
               data-selected={isActive ? 'true' : 'false'}
               className={[
-                'glass-card onboarding-surface-inner onboarding-glass-border-soft relative flex h-full overflow-hidden rounded-3xl border p-4 text-left transition-all duration-250 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80 sm:p-5',
+                'glass-card onboarding-surface-inner onboarding-glass-border-soft relative flex h-full overflow-hidden rounded-3xl border p-4 text-left transition-all duration-250 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)] sm:p-5',
                 isActive
-                  ? 'ring-2 -translate-y-0.5 scale-[1.01] border-white/70 bg-white/[0.1] focus-visible:ring-4'
-                  : 'border-white/12 hover:border-white/35 hover:-translate-y-0.5 hover:bg-white/[0.04] focus-visible:border-white/45 focus-visible:ring-[#cf8bf3]/70',
+                  ? 'ring-2 -translate-y-0.5 scale-[1.01] border-[color:var(--color-border-strong)] bg-[color:var(--onboarding-premium-overlay-base)] focus-visible:ring-4'
+                  : 'border-[color:var(--color-border-soft)] hover:border-[color:var(--color-border-strong)] hover:-translate-y-0.5 hover:bg-[color:var(--onboarding-premium-overlay-soft)] focus-visible:border-[color:var(--color-border-strong)]',
                 isAdvancing && !isActive ? 'opacity-75' : '',
               ]
                 .filter(Boolean)
@@ -188,7 +190,7 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
 
               <span className="relative z-10 flex w-full flex-col gap-2.5">
                 <span className="flex items-start justify-between gap-3">
-                  <span className="flex items-center gap-2 text-lg font-semibold leading-tight text-white">
+                  <span className="flex items-center gap-2 text-lg font-semibold leading-tight text-[color:var(--color-text)]">
                     <span aria-hidden className="text-sm opacity-80">{option.emoji}</span>
                     {option.title}
                   </span>
@@ -208,7 +210,7 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
                   ) : null}
                 </span>
 
-                <p className="text-[0.95rem] leading-snug text-white/88">{option.description}</p>
+                <p className="text-[0.95rem] leading-snug text-[color:var(--color-text-muted)]">{option.description}</p>
 
                 <div className="mt-2 flex flex-wrap gap-2">
                   {option.chips.map((chip) => (
@@ -231,7 +233,7 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
           type="button"
           onClick={onBack}
           disabled={isAdvancing}
-          className="inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-2 text-sm font-medium text-white/80 transition hover:border-white/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#cf8bf3]/60 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-border-soft)] px-5 py-2 text-sm font-medium text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)] disabled:cursor-not-allowed disabled:opacity-60"
         >
           ← {copy.back}
         </button>
