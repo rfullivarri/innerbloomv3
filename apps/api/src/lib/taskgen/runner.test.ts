@@ -299,6 +299,48 @@ describe('runTaskGeneration', () => {
     expect('temperature' in requestBody).toBe(false);
   });
 
+
+  it('auto-fixes INSIGHT taxonomy mismatch and persists valid tasks after normalization', async () => {
+    process.env.OPENAI_API_KEY = 'test-key';
+    process.env.OPENAI_MODEL = 'gpt-vitest';
+
+    mockResponsesCreate.mockReset();
+
+    const snapshotUserId = 'dedb5d95-244c-47b7-922c-c256d8930723';
+    const mockPayload = {
+      user_id: snapshotUserId,
+      tasks_group_id: '34cb4c76-a37c-4b46-affd-42777dfcf567',
+      tasks: [
+        {
+          task: 'Reflect on one key learning',
+          pillar_code: 'BODY',
+          trait_code: 'INSIGHT',
+          stat_code: 'BODY_MOBILITY',
+          difficulty_code: 'Easy',
+          friction_score: 2,
+          friction_tier: 'LOW',
+        },
+      ],
+    };
+
+    mockResponsesCreate.mockResolvedValue({ output_text: JSON.stringify(mockPayload) });
+
+    const { runTaskGeneration } = await loadRunnerModule();
+
+    const result = await runTaskGeneration({
+      userId: snapshotUserId,
+      mode: 'flow',
+      source: 'snapshot',
+      dryRun: false,
+    });
+
+    expect(result.status).toBe('ok');
+    expect(result.meta.validation.valid).toBe(true);
+    expect(result.tasks?.[0]?.trait_code).toBe('INSIGHT');
+    expect(result.tasks?.[0]?.pillar_code).not.toBe('BODY');
+    expect(result.tasks?.[0]?.stat_code).toBe('INSIGHT');
+  });
+
   it('retries aborted OpenAI attempts before succeeding', async () => {
     process.env.OPENAI_API_KEY = 'test-key';
     process.env.OPENAI_MODEL = 'gpt-vitest';

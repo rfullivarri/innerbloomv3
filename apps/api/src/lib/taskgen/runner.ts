@@ -255,6 +255,72 @@ export type TaskgenResult = {
   error_code?: string;
 };
 
+
+
+type NormalizationMetrics = {
+  totalTasks: number;
+  invalidFiltered: number;
+  autoFixedTaxonomyMismatches: number;
+  keptTasks: number;
+  minRequiredTasks: number;
+};
+
+function normalizeAndValidatePayload(
+  payload: TaskPayload,
+  catalogs: ReturnType<typeof buildCatalogStrings>,
+  minRequiredTasks: number,
+): { payload: TaskPayload; metrics: NormalizationMetrics; normalizationErrors: string[] } {
+  const normalizedTasks: TaskPayload['tasks'] = [];
+  const normalizationErrors: string[] = [];
+  let autoFixedTaxonomyMismatches = 0;
+
+  for (const task of payload.tasks) {
+    const trait = catalogs.traitsByCode.get(task.trait_code);
+    if (!trait) {
+      normalizationErrors.push(`Invalid trait_code: ${task.trait_code}`);
+      continue;
+    }
+
+    const canonicalPillarCode = catalogs.pillarById.get(trait.pillar_id)?.code;
+    if (!canonicalPillarCode || !catalogs.pillarCodes.has(canonicalPillarCode)) {
+      normalizationErrors.push(`Unable to resolve canonical pillar for trait_code: ${task.trait_code}`);
+      continue;
+    }
+
+    let normalizedTask = task;
+    if (task.pillar_code !== canonicalPillarCode) {
+      normalizedTask = {
+        ...task,
+        pillar_code: canonicalPillarCode,
+        stat_code: task.trait_code,
+      };
+      autoFixedTaxonomyMismatches += 1;
+    }
+
+    if (!catalogs.statCodes.has(normalizedTask.stat_code)) {
+      normalizationErrors.push(`Invalid stat_code: ${normalizedTask.stat_code}`);
+      continue;
+    }
+    if (!catalogs.difficultyCodes.has(normalizedTask.difficulty_code)) {
+      normalizationErrors.push(`Invalid difficulty_code: ${normalizedTask.difficulty_code}`);
+      continue;
+    }
+
+    normalizedTasks.push(normalizedTask);
+  }
+
+  return {
+    payload: { ...payload, tasks: normalizedTasks },
+    metrics: {
+      totalTasks: payload.tasks.length,
+      invalidFiltered: payload.tasks.length - normalizedTasks.length,
+      autoFixedTaxonomyMismatches,
+      keptTasks: normalizedTasks.length,
+      minRequiredTasks,
+    },
+    normalizationErrors,
+  };
+}
 type SnapshotResolution = {
   snapshot: SnapshotData;
   source: TaskgenSource;
@@ -591,19 +657,9 @@ function validatePayload(
     }
     seenTasks.add(normalizedTask);
 
-    if (!catalogs.pillarCodes.has(task.pillar_code)) {
-      return { valid: false, errors: [`Invalid pillar_code: ${task.pillar_code}`] };
-    }
     const trait = catalogs.traitsByCode.get(task.trait_code);
     if (!trait) {
       return { valid: false, errors: [`Invalid trait_code: ${task.trait_code}`] };
-    }
-    const pillarForTrait = catalogs.pillarById.get(trait.pillar_id)?.code;
-    if (pillarForTrait && pillarForTrait !== task.pillar_code) {
-      return {
-        valid: false,
-        errors: [`Trait ${task.trait_code} does not belong to pillar ${task.pillar_code}`],
-      };
     }
     if (!catalogs.statCodes.has(task.stat_code)) {
       return { valid: false, errors: [`Invalid stat_code: ${task.stat_code}`] };
@@ -902,7 +958,7 @@ export async function runTaskGeneration(args: {
         seed: args.seed,
         placeholders,
         prompt_preview: promptPreview,
-        tasks: payload.tasks,
+        tasks: normalized.payload.tasks,
         meta: {
           schema_version: 'v1',
           validation,
@@ -1006,13 +1062,47 @@ export async function runTaskGeneration(args: {
       const response = openAiOutcome.response as OpenAIResponse;
       const outputText = response.output_text ?? '';
       const payload = JSON.parse(outputText) as TaskPayload;
+      const minRequiredTasks = Math.max(1, Number.parseInt(process.env.TASKGEN_MIN_REQUIRED_TASKS ?? '1', 10) || 1);
+      const normalized = normalizeAndValidatePayload(payload, catalogs, minRequiredTasks);
+      log('TASK_TAXONOMY_NORMALIZATION', {
+        model,
+        openaiModel: model,
+        userId: placeholders.USER_ID,
+        mode: args.mode,
+        ...normalized.metrics,
+      });
       const validation = validatePayload(
-        payload,
+        normalized.payload,
         extractPromptJsonSchema(prompt.response_format),
         catalogs,
         placeholders,
       );
       const total = Date.now() - start;
+      if (normalized.metrics.keptTasks < minRequiredTasks) {
+        const errors = [
+          ...validation.errors,
+          ...normalized.normalizationErrors,
+          `Insufficient valid tasks after normalization. Required ${minRequiredTasks}, got ${normalized.metrics.keptTasks}.`,
+        ];
+        const errorLog = await appendErrorLog(errors.join('; '));
+        return {
+          status: 'error',
+          user_id: placeholders.USER_ID,
+          mode: args.mode,
+          source: resolvedSource,
+          seed: args.seed,
+          placeholders,
+          prompt_preview: promptPreview,
+          tasks: normalized.payload.tasks,
+          meta: {
+            schema_version: 'v1',
+            validation: { valid: false, errors },
+            timings_ms: { total, openai: openaiDuration },
+          },
+          errors,
+          error_log: errorLog,
+        };
+      }
       if (!validation.valid) {
         const errorLog = await appendErrorLog(validation.errors.join('; '));
         return {
@@ -1042,7 +1132,7 @@ export async function runTaskGeneration(args: {
         seed: args.seed,
         placeholders,
         prompt_preview: promptPreview,
-        tasks: payload.tasks,
+        tasks: normalized.payload.tasks,
         meta: {
           schema_version: 'v1',
           validation,
