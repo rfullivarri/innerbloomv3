@@ -128,7 +128,7 @@ function getMonthSymbol(monthState: string | null | undefined): string {
 }
 
 function formatCompletionRatePercent(rate: number | null | undefined): string {
-  if (typeof rate !== 'number' || Number.isNaN(rate)) return '--';
+  if (typeof rate !== 'number' || !Number.isFinite(rate)) return '--';
   const safeRate = Math.max(0, rate);
   return `${Math.round(safeRate * 100)}%`;
 }
