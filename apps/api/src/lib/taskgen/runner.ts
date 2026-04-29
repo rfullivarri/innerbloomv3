@@ -971,7 +971,7 @@ export async function runTaskGeneration(args: {
         seed: args.seed,
         placeholders,
         prompt_preview: promptPreview,
-        tasks: normalized.payload.tasks,
+        tasks: payload.tasks,
         meta: {
           schema_version: 'v1',
           validation,
