@@ -30,6 +30,7 @@ import LandingRhythmSectionMvpPage from './pages/labs/LandingRhythmSectionMvpPag
 import EditorLabPage from './pages/labs/EditorLabPage';
 import PublicTasksDemoPage from './pages/labs/PublicTasksDemoPage';
 import HeroPhoneShowcaseLabPage from './pages/labs/HeroPhoneShowcaseLabPage';
+import InnerbloomSystemMapPage from './pages/labs/InnerbloomSystemMapPage';
 import { useGa4FunnelTracking } from './hooks/useGa4FunnelTracking';
 import { isNativeCapacitorPlatform } from './mobile/capacitor';
 import { writeMobileDebug } from './mobile/mobileDebug';
@@ -279,6 +280,7 @@ export default function App() {
         <Route path="/labs/logros" element={<LabsLogrosDemoPage />} />
         <Route path="/labs/tasks-demo" element={<PublicTasksDemoPage />} />
         <Route path="/labs/hero-phone-showcase" element={<HeroPhoneShowcaseLabPage />} />
+        <Route path="/labs/innerbloom-system-map" element={<InnerbloomSystemMapPage />} />
         <Route path="/demo/logros" element={<LabsLogrosDemoPage />} />
         <Route path="/demo/tasks" element={<PublicTasksDemoPage />} />
         <Route path="/labs/landing-rhythm-section" element={<LandingRhythmSectionMvpPage />} />

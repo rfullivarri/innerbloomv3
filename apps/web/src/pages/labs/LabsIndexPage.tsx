@@ -23,6 +23,11 @@ const LAB_EXPERIMENTS = [
     description: 'Experimental hero fold replacing static AI art with a looping Innerbloom product phone showcase.',
     href: '/labs/hero-phone-showcase',
   },
+  {
+    title: 'Innerbloom System Map',
+    description: 'Visual concept map explaining how Innerbloom adapts decisions, progress, engines, and outputs.',
+    href: '/labs/innerbloom-system-map',
+  },
 ];
 
 export default function LabsIndexPage() {
