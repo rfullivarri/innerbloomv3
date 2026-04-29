@@ -1,11 +1,9 @@
 # Innerbloom Landing Oficial (innerbloom.org) — Documento UX/UI para IA
 
-> **Scope exacto:** este documento describe la landing oficial que se renderiza en la ruta `/` (`Landing.tsx`). **No cubre** `/landing-v2`.
 
 ## 1) Identificación de pantalla y routing
 
 - La landing oficial está montada en la ruta raíz `/` y apunta al componente `LandingPage`.
-- Existe una landing alternativa en `/landing-v2`, pero es otro componente (`LandingV2Page`) y debe ignorarse para este análisis.
 
 ## 2) Objetivo de producto (UX intent)
 
@@ -230,4 +228,3 @@ Usa esta especificación cuando quieras recrear o analizar esta landing:
 
 ## 14) Nota de implementación
 
-Este documento describe el estado actual de código de la landing oficial de `innerbloom.org` dentro de este repo, y está pensado para que una IA (ChatGPT u otra) pueda reconstruir fielmente su UX/UI y sistema visual sin mezclarlo con `/landing-v2`.

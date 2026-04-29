@@ -194,43 +194,13 @@
   background: linear-gradient(120deg, #38bdf8, #22c55e);
 }
 
-:global(.landing-v2[data-theme='light']) .masterViewport {
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.92), rgba(226, 232, 240, 0.9));
-  border-color: rgba(148, 163, 184, 0.38);
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.15);
-}
 
-:global(.landing-v2[data-theme='light']) .slice {
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(241, 245, 249, 0.96));
-  border-color: rgba(148, 163, 184, 0.36);
-}
 
-:global(.landing-v2[data-theme='light']) .sliceHeader p {
-  color: #0f172a;
-}
 
-:global(.landing-v2[data-theme='light']) .sliceHeader span,
-:global(.landing-v2[data-theme='light']) .legend,
-:global(.landing-v2[data-theme='light']) .tabs span,
-:global(.landing-v2[data-theme='light']) .streakItem small {
-  color: #475569;
-}
 
-:global(.landing-v2[data-theme='light']) .tabs {
-  background: rgba(226, 232, 240, 0.9);
-}
 
-:global(.landing-v2[data-theme='light']) .tabs .active {
-  color: #1e293b;
-}
 
-:global(.landing-v2[data-theme='light']) .streakItem {
-  background: rgba(248, 250, 252, 0.95);
-}
 
-:global(.landing-v2[data-theme='light']) .streakHead strong {
-  color: #0f172a;
-}
 
 @media (max-width: 920px) {
   .composition {
