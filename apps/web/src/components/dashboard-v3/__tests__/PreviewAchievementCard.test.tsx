@@ -92,6 +92,21 @@ describe('PreviewAchievementCard', () => {
     expect(screen.getAllByTestId('recent-month-label')).toHaveLength(4);
   });
 
+
+  test('formats monthly ratios as percentages above 100 when needed', () => {
+    renderCard({
+      recentMonths: [
+        { periodKey: '2026-01', closed: true, completionRate: 0.8, state: 'building' },
+        { periodKey: '2026-02', closed: true, completionRate: 1, state: 'strong' },
+        { periodKey: '2026-03', closed: true, completionRate: 1.25, state: 'strong' },
+        { periodKey: '2026-04', closed: true, completionRate: 2.256, state: 'strong' },
+        { periodKey: '2026-05', closed: false, projectedCompletionRate: 2, state: 'projected_valid' },
+      ],
+    });
+
+    expect(screen.getAllByTestId('recent-month-progress').map((node) => node.textContent)).toEqual(['80%', '100%', '125%', '226%', '200%']);
+  });
+
   test('highlights the last 3 months in a grouped window that spans the intended 3-month range', () => {
     renderCard({
       recentMonths: [

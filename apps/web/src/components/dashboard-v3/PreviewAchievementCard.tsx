@@ -127,10 +127,14 @@ function getMonthSymbol(monthState: string | null | undefined): string {
   return '○';
 }
 
+function formatCompletionRatePercent(rate: number | null | undefined): string {
+  if (typeof rate !== 'number' || Number.isNaN(rate)) return '--';
+  const safeRate = Math.max(0, rate);
+  return `${Math.round(safeRate * 100)}%`;
+}
+
 function getMonthMetric(value: number | null | undefined): string {
-  if (typeof value !== 'number' || Number.isNaN(value)) return '--';
-  const normalized = value <= 1 ? value * 100 : value;
-  return `${Math.max(0, Math.min(100, Math.round(normalized)))}%`;
+  return formatCompletionRatePercent(value);
 }
 
 function RecentMonthNode({ entry, language, compact = false }: MonthNodeProps) {
