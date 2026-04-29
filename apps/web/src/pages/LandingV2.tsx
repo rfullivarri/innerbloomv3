@@ -7,6 +7,7 @@ import { FluidGradientBackground } from '../components/ui/FluidGradientBackgroun
 import { AdaptiveText } from '../components/landing/AdaptiveText';
 import { VisibleProgressMock } from '../components/landing/VisibleProgressMock';
 import { buildOnboardingPath } from '../onboarding/i18n';
+import { buildDemoModeSelectUrl } from '../lib/demoEntry';
 
 type Language = 'en' | 'es';
 
@@ -73,12 +74,12 @@ const t = {
       { href: '#faq', label: 'FAQ' }
     ] satisfies NavItem[],
     hero: {
-      title: 'Build habits with a system that adapts to your energy',
+      title: 'Your plan adapts to you.',
       subtitle:
         'Your habits chart the path; your consistency shapes how far you go. A personal growth journey balanced across Body, Mind, and Soul.',
-      cta: 'Start my Journey',
-      secondary: 'See the dashboard',
-      supporting: 'In under 3 minutes, we create your personalized starting point with guidance tailored to you.'
+      cta: 'Create my adaptive plan',
+      secondary: 'View demo',
+      supporting: 'Start simple. Grow week by week.'
     },
     highlights: {
       title: 'See the real dashboard',
@@ -199,10 +200,10 @@ const t = {
       ] satisfies Faq[]
     },
     next: {
-      title: 'Ready to play with your own data?',
-      description: 'We guide you step by step. Start free and change language anytime.',
-      primary: 'Start my Journey',
-      secondary: 'View the dashboard'
+      title: 'Build habits that grow with you.',
+      description: 'Start with an adaptive plan in Innerbloom.',
+      primary: 'Create my adaptive plan',
+      secondary: 'Explore demo'
     },
     langLabel: 'Language'
   },
@@ -216,12 +217,12 @@ const t = {
       { href: '#faq', label: 'FAQ' }
     ] satisfies NavItem[],
     hero: {
-      title: 'Construye hábitos con un sistema que se adapta a tu energía',
+      title: 'Tu plan se adapta a vos.',
       subtitle:
         'Tus hábitos marcan la ruta; tu constancia define hasta dónde llegas. Un viaje de crecimiento personal en equilibrio entre 🫀 Cuerpo, 🧠 Mente y 🏵️ Alma.',
-      cta: 'Comenzar mi Journey',
-      secondary: 'Ver el dashboard',
-      supporting: 'En menos de 3 minutos creamos tu punto de partida personalizado, con una orientación inicial hecha para ti.'
+      cta: 'Crear mi plan adaptativo',
+      secondary: 'Ver demo',
+      supporting: 'Empieza simple. Avanza semana a semana.'
     },
     highlights: {
       title: 'Muestra del producto real',
@@ -346,10 +347,10 @@ const t = {
       ] satisfies Faq[]
     },
     next: {
-      title: '¿Listo para ver tus datos reales?',
-      description: 'Te guiamos paso a paso. Empezá gratis y cambiá de idioma cuando quieras.',
-      primary: 'Comenzar mi Journey',
-      secondary: 'Ver el dashboard'
+      title: 'Construye hábitos que crezcan con vos.',
+      description: 'Empieza con un plan adaptativo en Innerbloom.',
+      primary: 'Crear mi plan adaptativo',
+      secondary: 'Ver demo'
     },
     langLabel: 'Idioma'
   }
@@ -751,12 +752,12 @@ function HighlightVisual({ visual, language }: { visual: Highlight['visual']; la
 export default function LandingV2Page() {
   const { userId } = useAuth();
   const isSignedIn = Boolean(userId);
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>('es');
   const copy = t[language];
   const heroTitle =
     language === 'es'
-      ? { lead: 'Convierte la experiencia en hábitos.', highlight: 'Convierte los hábitos en camino' }
-      : { lead: 'Turn experience into habits.', highlight: 'Turn habits into your path' };
+      ? { lead: 'Tu plan', highlight: 'se adapta a vos.' }
+      : { lead: 'Your plan', highlight: 'adapts to you.' };
   const heroMeta = useMemo(
     () =>
       language === 'es'
@@ -769,6 +770,23 @@ export default function LandingV2Page() {
     () => (isSignedIn ? { label: 'Go to dashboard', to: '/dashboard' } : { label: copy.hero.cta, to: buildOnboardingPath(language) }),
     [copy.hero.cta, isSignedIn, language]
   );
+  const demoCtaTo = useMemo(() => buildDemoModeSelectUrl({ language, source: 'landing' }), [language]);
+
+  useEffect(() => {
+    document.title = language === 'es' ? 'Innerbloom — App de hábitos adaptativa' : 'Innerbloom — Adaptive habit app';
+    const description =
+      language === 'es'
+        ? 'Crea un plan de hábitos que se adapta a tu progreso real. Innerbloom ajusta ritmo, dificultad y próximos pasos para ayudarte a sostener hábitos.'
+        : 'Create a habit plan that adapts to your real progress. Innerbloom adjusts pace, difficulty, and next steps.';
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'description');
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', description);
+  }, [language]);
+
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [activeModeIndex, setActiveModeIndex] = useState(0);
   const modesTrackId = useId();
@@ -956,7 +974,7 @@ export default function LandingV2Page() {
   return (
     <div className="landing-v2" data-theme={theme}>
       <header className="lv2-nav">
-        <Link className="lv2-brand" to="/landing-v2" aria-label="Innerbloom — Landing V2">
+        <Link className="lv2-brand" to="/v2" aria-label="Innerbloom — Landing V2">
           <img src="/IB-COLOR-LOGO.png" alt="Innerbloom" className="lv2-logo" width={40} height={40} loading="lazy" />
           <span className="lv2-brand-text">Innerbloom</span>
         </Link>
@@ -1000,9 +1018,9 @@ export default function LandingV2Page() {
                   <Link className={BUTTON_VARIANTS.primary} to={primaryCta.to}>
                     {primaryCta.label}
                   </Link>
-                  <a className={BUTTON_VARIANTS.ghost} href="#highlights">
+                  <Link className={BUTTON_VARIANTS.ghost} to={demoCtaTo}>
                     {copy.hero.secondary}
-                  </a>
+                  </Link>
                 </div>
                 <p className="lv2-support">{copy.hero.supporting}</p>
                 <p className="lv2-support">
@@ -1244,9 +1262,9 @@ export default function LandingV2Page() {
               <Link className={BUTTON_VARIANTS.primary} to={primaryCta.to}>
                 {copy.next.primary}
               </Link>
-              <a className={BUTTON_VARIANTS.ghost} href="#highlights">
+              <Link className={BUTTON_VARIANTS.ghost} to={demoCtaTo}>
                 {copy.next.secondary}
-              </a>
+              </Link>
             </div>
           </div>
         </section>

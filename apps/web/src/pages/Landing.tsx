@@ -14,6 +14,7 @@ import {
 } from "../content/officialDesignTokens";
 import {
   OFFICIAL_LANDING_CONTENT,
+  type LandingCopy,
   type Language,
 } from "../content/officialLandingContent";
 import {
@@ -383,7 +384,11 @@ function LanguageDropdown({
   );
 }
 
-export default function LandingPage() {
+type LandingPageProps = {
+  content?: Record<Language, LandingCopy>;
+};
+
+export default function LandingPage({ content = OFFICIAL_LANDING_CONTENT }: LandingPageProps) {
   const { userId } = useAuth();
   const { setManualLanguage, syncLocaleLanguage } = usePostLoginLanguage();
   const location = useLocation();
@@ -396,7 +401,7 @@ export default function LandingPage() {
   );
   const { theme, setPreference } = useThemePreference();
   const themeMode: LandingThemeMode = theme;
-  const copy = OFFICIAL_LANDING_CONTENT[language];
+  const copy = content[language];
   const visibleNavLinks = copy.navLinks.filter(
     (link) => !/^\/demo$/i.test(link.href) && !/^#?demo$/i.test(link.href),
   );
