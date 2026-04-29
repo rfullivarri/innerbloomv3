@@ -289,15 +289,12 @@ function normalizeAndValidatePayload(
 
     let normalizedTask = task;
     if (task.pillar_code !== canonicalPillarCode) {
-      const shouldAutoFixTaxonomyMismatch = !(task.trait_code === 'INSIGHT' && task.stat_code === task.trait_code);
-      if (shouldAutoFixTaxonomyMismatch) {
-        normalizedTask = {
-          ...task,
-          pillar_code: canonicalPillarCode,
-          stat_code: task.trait_code,
-        };
-        autoFixedTaxonomyMismatches += 1;
-      }
+      normalizedTask = {
+        ...task,
+        pillar_code: canonicalPillarCode,
+        stat_code: task.trait_code,
+      };
+      autoFixedTaxonomyMismatches += 1;
     }
 
     if (!catalogs.statCodes.has(normalizedTask.stat_code)) {

@@ -406,7 +406,7 @@ describe('runTaskGeneration', () => {
     expect(mockResponsesCreate).toHaveBeenCalledTimes(3);
   });
 
-  it('rejects INSIGHT when paired with a non-catalog pillar', async () => {
+  it('auto-fixes INSIGHT when paired with a non-catalog pillar', async () => {
     process.env.OPENAI_API_KEY = 'test-key';
     process.env.OPENAI_MODEL = 'gpt-vitest';
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'taskgen-insight-snapshot-'));
@@ -458,8 +458,10 @@ describe('runTaskGeneration', () => {
       dryRun: false,
     });
 
-    expect(result.status).toBe('error');
-    expect(result.errors?.[0]).toContain('Trait INSIGHT does not belong to pillar MIND');
+    expect(result.status).toBe('ok');
+    expect(result.meta.validation.valid).toBe(true);
+    expect(result.tasks?.[0]?.pillar_code).toBe('SOUL');
+    expect(result.tasks?.[0]?.stat_code).toBe('INSIGHT');
     await fs.rm(tempDir, { recursive: true, force: true });
     delete process.env.DB_SNAPSHOT_PATH;
   });
