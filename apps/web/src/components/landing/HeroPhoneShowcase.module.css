@@ -221,7 +221,7 @@
 }
 
 .loopSplashScene {
-  --loop-splash-wordmark-width: min(178px, calc(100% - 62px));
+  --loop-splash-wordmark-width: min(138px, calc(100% - 54px));
   position: absolute;
   inset: 10px;
   border-radius: 30px;
@@ -291,6 +291,7 @@
 
 .loopSplashFlower {
   width: clamp(46px, 18cqw, 58px);
+  margin-inline-end: -2px;
   flex: 0 0 auto;
   height: auto;
   z-index: 2;
