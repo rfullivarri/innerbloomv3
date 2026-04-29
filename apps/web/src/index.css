@@ -1098,6 +1098,31 @@
     box-shadow: var(--onboarding-glass-shadow);
   }
 
+
+
+  .ib-onboarding-divider {
+    color: var(--color-text-subtle);
+  }
+
+  .onboarding-surface-base .text-white,
+  .onboarding-surface-base .text-white\/90,
+  .onboarding-surface-base .text-white\/85,
+  .onboarding-surface-base .text-white\/80,
+  .onboarding-surface-base .text-white\/75,
+  .onboarding-surface-base .text-white\/70 {
+    color: var(--color-text);
+  }
+
+  .onboarding-surface-base .text-white\/65,
+  .onboarding-surface-base .text-white\/60,
+  .onboarding-surface-base .text-white\/55 {
+    color: var(--color-text-muted);
+  }
+
+  .onboarding-surface-base .text-white\/50 {
+    color: var(--color-text-subtle);
+  }
+
   .onboarding-mode-chip {
     border-radius: 9999px;
     background:

@@ -4,7 +4,7 @@ import type { Theme } from '@clerk/types';
 export const AUTH_LOGIN_MAX_WIDTH = 'max-w-full';
 export const AUTH_STACK_CLASS = 'mx-auto w-full max-w-xl space-y-3';
 export const AUTH_DIVIDER_CLASS =
-  'flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/45';
+  'flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-[color:var(--color-text-subtle)]';
 export const AUTH_CLERK_FORM_SHELL_CLASS = 'mx-auto w-full min-w-0 max-w-full px-1 sm:px-0';
 
 const baseLayout = {

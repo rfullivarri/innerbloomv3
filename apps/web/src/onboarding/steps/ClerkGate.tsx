@@ -2,6 +2,7 @@ import { SignIn, SignUp } from '@clerk/clerk-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useThemePreference } from '../../theme/ThemePreferenceProvider';
 import { GoogleOAuthButton } from '../../components/auth/GoogleOAuthButton';
 import { useAuth, useUser } from '../../auth/runtimeAuth';
 import { buildLocalizedAuthPath } from '../../lib/authLanguage';
@@ -40,19 +41,10 @@ const TAB_OPTIONS = {
 
 type TabId = (typeof TAB_OPTIONS)['es'][number]['id'];
 
-const clerkAppearance = createAuthAppearance({
-  layout: {
-    showOptionalFields: true
-  },
-  elements: {
-    footerActionText: 'text-white/50',
-    footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4',
-    formFieldSuccessText: 'text-sm text-emerald-200'
-  }
-});
 
 export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: ClerkGateProps) {
   const location = useLocation();
+  const { theme } = useThemePreference();
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const { user } = useUser();
   const mobileAuthSession = useMobileAuthSession();
@@ -64,6 +56,21 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
   const effectiveLoaded = isLoaded || hasNativeSession;
   const effectiveSignedIn = isSignedIn || hasNativeSession;
   const tabOptions = TAB_OPTIONS[language];
+  const isLight = theme === 'light';
+  const clerkAppearance = useMemo(() =>
+    createAuthAppearance({
+      mode: theme,
+      layout: {
+        showOptionalFields: true
+      },
+      elements: {
+        footerActionText: isLight ? 'text-[#51456f]/72' : 'text-white/50',
+        footerActionLink: isLight
+          ? 'font-semibold text-[#3a2b68] hover:text-[#171126] underline-offset-4'
+          : 'font-semibold text-white/70 hover:text-white underline-offset-4',
+        formFieldSuccessText: isLight ? 'text-sm text-emerald-700' : 'text-sm text-emerald-200'
+      }
+    }), [isLight, theme]);
   const copy = language === 'en'
     ? {
         loading: 'Loading secure access…',
@@ -167,7 +174,7 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.24, ease: 'easeOut' }}
-        className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl px-3 py-5 sm:p-6"
+        className="onboarding-premium-root onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl px-3 py-5 sm:p-6"
       >
         <div className="flex items-center justify-between border-b border-white/5 pb-4">
           <div>
@@ -175,21 +182,21 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
             <h2 className="text-2xl font-semibold text-white">{copy.create}</h2>
           </div>
         </div>
-        <div className="mt-4 flex gap-2 rounded-full bg-white/10 p-1 backdrop-blur">
+        <div className="onboarding-surface-inner mt-4 flex gap-2 rounded-full p-1 backdrop-blur">
           {tabOptions.map((option) => (
             <button
               key={option.id}
               type="button"
               onClick={() => setTab(option.id)}
               className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition ${
-                tab === option.id ? 'bg-white text-slate-900 shadow' : 'text-white/70 hover:text-white'
+                tab === option.id ? 'bg-[color:var(--color-surface-elevated)] text-[color:var(--color-text)] shadow' : 'text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]'
               }`}
             >
               {option.label}
             </button>
           ))}
         </div>
-        <div className="mt-6 space-y-3 rounded-2xl bg-white/6 p-5 text-white/80">
+        <div className="onboarding-surface-inner mt-6 space-y-3 rounded-2xl p-5 text-[color:var(--color-text-muted)]">
           <p className="text-sm leading-6">
             {tab === 'sign-up'
               ? language === 'en'
@@ -202,7 +209,7 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
           <button
             type="button"
             onClick={() => void openNativeAuth(tab)}
-            className="inline-flex w-full items-center justify-center rounded-full bg-white px-6 py-2 text-sm font-semibold text-slate-900 shadow-lg transition hover:bg-slate-100"
+            className="ib-primary-button inline-flex w-full items-center justify-center rounded-full px-6 py-2 text-sm font-semibold text-white shadow-lg transition"
           >
             {tab === 'sign-up'
               ? language === 'en' ? 'Create account' : 'Crear cuenta'
@@ -218,7 +225,7 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.24, ease: 'easeOut' }}
-      className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl px-3 py-5 sm:p-6"
+      className="onboarding-premium-root onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl px-3 py-5 sm:p-6"
     >
       <div className="flex items-center justify-between border-b border-white/5 pb-4">
         <div>
@@ -226,14 +233,14 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
           <h2 className="text-2xl font-semibold text-white">{copy.create}</h2>
         </div>
       </div>
-      <div className="mt-4 flex gap-2 rounded-full bg-white/10 p-1 backdrop-blur">
+      <div className="onboarding-surface-inner mt-4 flex gap-2 rounded-full p-1 backdrop-blur">
         {tabOptions.map((option) => (
           <button
             key={option.id}
             type="button"
             onClick={() => setTab(option.id)}
             className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition ${
-              tab === option.id ? 'bg-white text-slate-900 shadow' : 'text-white/70 hover:text-white'
+              tab === option.id ? 'bg-[color:var(--color-surface-elevated)] text-[color:var(--color-text)] shadow' : 'text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]'
             }`}
           >
             {option.label}
@@ -246,10 +253,10 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
           mode={tab}
           redirectUrlComplete={currentUrl}
         />
-        <div className={AUTH_DIVIDER_CLASS}>
-          <span className="h-px flex-1 bg-white/12" aria-hidden />
+        <div className={`${AUTH_DIVIDER_CLASS} ib-onboarding-divider`}>
+          <span className="h-px flex-1 bg-[color:var(--color-border-soft)]" aria-hidden />
           <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
-          <span className="h-px flex-1 bg-white/12" aria-hidden />
+          <span className="h-px flex-1 bg-[color:var(--color-border-soft)]" aria-hidden />
         </div>
         <AnimatePresence mode="wait" initial={false} presenceAffectsLayout={false}>
           {tab === 'sign-up' ? (
