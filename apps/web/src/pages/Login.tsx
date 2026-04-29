@@ -19,7 +19,7 @@ import {
 export default function LoginPage() {
   const location = useLocation();
   const language = resolveAuthLanguage(location.search);
-  const themeMode = readLandingThemeMode('dark');
+  const themeMode = readLandingThemeMode();
   const isLightTheme = themeMode === 'light';
   const isNativeApp = isNativeCapacitorPlatform();
 

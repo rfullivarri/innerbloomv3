@@ -34,7 +34,7 @@ export default function DemoDashboardPage() {
   const demoHubPath = getPublicDemoHubPath(location.search);
   const { theme, setPreference } = useThemePreference();
   const [showGuidedTour, setShowGuidedTour] = useState(true);
-  const landingThemeMode = readLandingThemeMode('dark');
+  const landingThemeMode = readLandingThemeMode();
   const landingThemeBackground = getLandingThemeBackground(landingThemeMode);
   const hasLoggedGuidedStart = useRef(false);
   const dailyQuestModalRef = useRef<DailyQuestModalHandle | null>(null);

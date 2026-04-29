@@ -1,8 +1,7 @@
 import type { CSSProperties } from 'react';
+import { readStoredThemePreference, resolveThemeFromPreference, type ResolvedTheme } from '../theme/themePreference';
 
 export type LandingThemeMode = 'dark' | 'light';
-
-export const LANDING_THEME_STORAGE_KEY = 'ib:landing-theme-mode';
 
 const LANDING_BACKGROUNDS: Record<LandingThemeMode, { base: string; gradient: string }> = {
   dark: {
@@ -21,19 +20,10 @@ export function isLandingThemeMode(value: string | null): value is LandingThemeM
   return value === 'dark' || value === 'light';
 }
 
-export function readLandingThemeMode(defaultMode: LandingThemeMode = 'dark'): LandingThemeMode {
-  if (typeof window === 'undefined') {
-    return defaultMode;
-  }
-  const stored = window.localStorage.getItem(LANDING_THEME_STORAGE_KEY);
-  return isLandingThemeMode(stored) ? stored : defaultMode;
-}
-
-export function writeLandingThemeMode(mode: LandingThemeMode) {
-  if (typeof window === 'undefined') {
-    return;
-  }
-  window.localStorage.setItem(LANDING_THEME_STORAGE_KEY, mode);
+export function readLandingThemeMode(): LandingThemeMode {
+  const preference = readStoredThemePreference();
+  const resolvedTheme: ResolvedTheme = resolveThemeFromPreference(preference);
+  return resolvedTheme;
 }
 
 export function getLandingThemeBackground(mode: LandingThemeMode) {

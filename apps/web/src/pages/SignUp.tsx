@@ -21,7 +21,7 @@ export default function SignUpPage() {
   const signUpContainerRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
   const language = resolveAuthLanguage(location.search);
-  const themeMode = readLandingThemeMode('dark');
+  const themeMode = readLandingThemeMode();
   const isLightTheme = themeMode === 'light';
   const isNativeApp = isNativeCapacitorPlatform();
 
