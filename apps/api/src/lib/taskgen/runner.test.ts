@@ -405,6 +405,64 @@ describe('runTaskGeneration', () => {
     expect(result.errors?.[0]).toContain('OpenAI request timed out or was aborted');
     expect(mockResponsesCreate).toHaveBeenCalledTimes(3);
   });
+
+  it('rejects INSIGHT when paired with a non-catalog pillar', async () => {
+    process.env.OPENAI_API_KEY = 'test-key';
+    process.env.OPENAI_MODEL = 'gpt-vitest';
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'taskgen-insight-snapshot-'));
+    const snapshotPath = path.join(tempDir, 'snapshot.json');
+    await fs.writeFile(
+      snapshotPath,
+      JSON.stringify({
+        samples: {
+          users: [{ user_id: TEST_USER_ID, tasks_group_id: 'debug-group', game_mode_id: 1 }],
+          cat_game_mode: [{ game_mode_id: 1, code: 'FLOW', name: 'Flow' }],
+          cat_pillar: [
+            { pillar_id: 1, code: 'BODY', name: 'Body' },
+            { pillar_id: 2, code: 'MIND', name: 'Mind' },
+            { pillar_id: 3, code: 'SOUL', name: 'Soul' },
+          ],
+          cat_trait: [{ trait_id: 26, pillar_id: 3, code: 'INSIGHT', name: 'Insight' }],
+          cat_difficulty: [{ difficulty_id: 1, code: 'Easy', name: 'Easy' }],
+          onboarding_session: [],
+        },
+      }),
+      'utf8',
+    );
+    process.env.DB_SNAPSHOT_PATH = snapshotPath;
+
+    mockResponsesCreate.mockReset();
+    mockResponsesCreate.mockResolvedValue({
+      output_text: JSON.stringify({
+        user_id: TEST_USER_ID,
+        tasks_group_id: 'debug-group',
+        tasks: [
+          {
+            task: 'Invalid insight pairing task',
+            pillar_code: 'MIND',
+            trait_code: 'INSIGHT',
+            stat_code: 'INSIGHT',
+            difficulty_code: 'Easy',
+            friction_score: 10,
+            friction_tier: 'LOW',
+          },
+        ],
+      }),
+    });
+
+    const { runTaskGeneration } = await loadRunnerModule();
+    const result = await runTaskGeneration({
+      userId: TEST_USER_ID,
+      mode: 'flow',
+      source: 'snapshot',
+      dryRun: false,
+    });
+
+    expect(result.status).toBe('error');
+    expect(result.errors?.[0]).toContain('Trait INSIGHT does not belong to pillar MIND');
+    await fs.rm(tempDir, { recursive: true, force: true });
+    delete process.env.DB_SNAPSHOT_PATH;
+  });
 });
 
 afterAll(() => {
