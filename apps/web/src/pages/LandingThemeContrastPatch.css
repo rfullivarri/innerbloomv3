@@ -39,21 +39,21 @@
   color-scheme: dark;
 }
 
-/* The phone/dashboard mock must remain visually dark even in landing light mode. */
-.landing[data-theme-mode="light"] .hero-media,
+/* In light landing mode, force the hero phone dashboard mock to use legible light tokens. */
 .landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"],
 .landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] * {
-  --color-text: #edf2ff;
-  --color-text-muted: rgba(216, 224, 245, 0.82);
-  --color-text-subtle: rgba(170, 181, 210, 0.72);
-  --color-surface: #080d1b;
-  --color-surface-elevated: #0b1224;
-  --color-border-subtle: rgba(171, 188, 230, 0.22);
+  --color-text: #171126;
+  --color-text-muted: rgba(45, 39, 70, 0.78);
+  --color-text-subtle: rgba(76, 68, 105, 0.66);
+  --color-surface: #f8fafc;
+  --color-surface-elevated: rgba(255, 255, 255, 0.94);
+  --color-border-subtle: rgba(80, 70, 120, 0.14);
+  --color-border-soft: rgba(80, 70, 120, 0.18);
 }
 
-/* Undo the landing h/p overrides inside the phone. */
-.landing[data-theme-mode="light"] .hero-media :is(h1, h2, h3, h4, h5, h6) {
-  color: var(--color-text, #edf2ff) !important;
+/* Undo landing heading overrides inside the phone by inheriting dashboard tokens. */
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] :is(h1, h2, h3, h4, h5, h6) {
+  color: inherit !important;
 }
 
 .landing[data-theme-mode="light"] .hero-media :is(p, span, small, li, div) {
@@ -70,6 +70,26 @@
 .landing[data-theme-mode="light"] .hero-media [data-demo-anchor="emotion-chart"] :is(h1, h2, h3, p, span),
 .landing[data-theme-mode="light"] .hero-media [data-demo-anchor="streaks"] :is(h1, h2, h3, p, span) {
   color: inherit;
+}
+
+
+/* Targeted readability anchors for the light-mode hero phone demo only. */
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] [data-demo-anchor="overall-progress"] :is(h1, h2, h3, h4, p, span, small, li),
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] [data-demo-anchor="emotion-chart"] :is(h1, h2, h3, h4, p, span, small, li),
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] [data-demo-anchor="streaks"] :is(h1, h2, h3, h4, p, span, small, li) {
+  color: inherit;
+}
+
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] [data-demo-anchor="overall-progress"] [class*="text-white"],
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] [data-demo-anchor="emotion-chart"] [class*="text-white"],
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] [data-demo-anchor="streaks"] [class*="text-white"],
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] [data-demo-anchor="overall-progress"] [class*="text-slate-100"],
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] [data-demo-anchor="emotion-chart"] [class*="text-slate-100"],
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] [data-demo-anchor="streaks"] [class*="text-slate-100"],
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] [data-demo-anchor="overall-progress"] [class*="text-slate-200"],
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] [data-demo-anchor="emotion-chart"] [class*="text-slate-200"],
+.landing[data-theme-mode="light"] .hero-media [data-light-scope="dashboard-v3"] [data-demo-anchor="streaks"] [class*="text-slate-200"] {
+  color: var(--color-text) !important;
 }
 
 /* =========================================================
