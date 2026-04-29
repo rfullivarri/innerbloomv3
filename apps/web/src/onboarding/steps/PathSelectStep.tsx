@@ -16,7 +16,7 @@ interface PathSelectStepProps {
 
 const ADVANCE_DELAY_MS = 140;
 
-const getPathCardStyle = (isActive: boolean, variant: PathVariant) => {
+const getPathCardStyle = (isActive: boolean, variant: PathVariant, theme: 'light' | 'dark') => {
   const palettes: Record<PathVariant, { glow: string; softTint: string; accent: string; border: string; badgeBg: string; badgeText: string; badgeBorder: string }> = {
     traditional: {
       glow: 'rgba(196, 132, 252, 0.34)',
@@ -40,19 +40,33 @@ const getPathCardStyle = (isActive: boolean, variant: PathVariant) => {
 
   const palette = palettes[variant];
 
+  const isLight = theme === 'light';
+
   return {
     palette,
     cardStyle: isActive
       ? {
-          boxShadow: `0 0 0 1px rgba(255,255,255,0.26), 0 0 30px ${palette.glow}, 0 0 56px ${palette.softTint}`,
-          borderColor: palette.border,
-          background: `color-mix(in srgb, ${palette.softTint} 52%, rgba(8,14,38,0.78))`,
+          boxShadow: isLight
+            ? `0 0 0 1px ${palette.border}, 0 16px 32px rgba(15,23,42,0.13), 0 10px 22px ${palette.softTint}`
+            : `0 0 0 1px rgba(255,255,255,0.26), 0 0 30px ${palette.glow}, 0 0 56px ${palette.softTint}`,
+          borderColor: isLight ? palette.badgeBorder : palette.border,
+          background: isLight
+            ? variant === 'traditional'
+              ? 'linear-gradient(180deg, rgba(254,245,255,0.98), rgba(252,244,255,0.94))'
+              : 'linear-gradient(180deg, rgba(241,252,255,0.98), rgba(238,248,255,0.95))'
+            : `color-mix(in srgb, ${palette.softTint} 52%, rgba(8,14,38,0.78))`,
         }
       : {
-          background: 'linear-gradient(165deg, rgba(14,20,44,0.84) 0%, rgba(11,17,38,0.7) 55%, rgba(8,14,33,0.84) 100%)',
+          background: isLight
+            ? 'linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.94))'
+            : 'linear-gradient(165deg, rgba(14,20,44,0.84) 0%, rgba(11,17,38,0.7) 55%, rgba(8,14,33,0.84) 100%)',
+          borderColor: isLight ? 'rgba(148,163,184,0.24)' : undefined,
+          boxShadow: isLight ? '0 14px 34px rgba(15,23,42,0.08)' : undefined,
         },
     overlayStyle: {
-      background: `radial-gradient(circle at 18% 8%, color-mix(in srgb, ${palette.accent} 34%, transparent) 0%, color-mix(in srgb, ${palette.accent} 20%, transparent) 30%, color-mix(in srgb, ${palette.accent} 12%, transparent) 58%, transparent 100%)`,
+      background: isLight
+        ? `radial-gradient(circle at 18% 8%, color-mix(in srgb, ${palette.accent} 16%, transparent) 0%, color-mix(in srgb, ${palette.accent} 10%, transparent) 32%, color-mix(in srgb, ${palette.accent} 5%, transparent) 62%, transparent 100%)`
+        : `radial-gradient(circle at 18% 8%, color-mix(in srgb, ${palette.accent} 34%, transparent) 0%, color-mix(in srgb, ${palette.accent} 20%, transparent) 30%, color-mix(in srgb, ${palette.accent} 12%, transparent) 58%, transparent 100%)`,
     },
   };
 };
@@ -117,9 +131,9 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
       transition={{ duration: 0.2 }}
       className="onboarding-premium-root onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7"
     >
-      <p className="text-xs uppercase tracking-[0.2em] text-white/50">{copy.step}</p>
-      <h2 className="mt-2 text-3xl font-semibold text-white">{copy.title}</h2>
-      <p className="mt-2 text-sm text-white/70">{copy.subtitle}</p>
+      <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--color-text-subtle)]">{copy.step}</p>
+      <h2 className="mt-2 text-3xl font-semibold text-[color:var(--color-text)]">{copy.title}</h2>
+      <p className="mt-2 text-sm text-[color:var(--color-text-muted)]">{copy.subtitle}</p>
 
       <div className="mt-6 grid gap-3.5 sm:grid-cols-2">
         {[
@@ -156,7 +170,7 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
           },
         ].map((option) => {
           const isActive = selectedPath === option.id;
-          const { palette, cardStyle, overlayStyle } = getPathCardStyle(isActive, option.id);
+          const { palette, cardStyle, overlayStyle } = getPathCardStyle(isActive, option.id, theme);
 
           return (
             <motion.button
