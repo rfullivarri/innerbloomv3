@@ -330,11 +330,13 @@ function buildCatalogStrings(snapshot: SnapshotData) {
   }
 
   const traitsByCode = new Map<string, TraitRow>();
+  const traitToPillarCode = new Map<string, string>();
   const traitsByPillarCode = new Map<string, TraitRow[]>();
   for (const trait of traits) {
     traitsByCode.set(trait.code, trait);
     const pillar = pillarById.get(trait.pillar_id);
     const pillarCode = pillar?.code ?? `pillar_${trait.pillar_id}`;
+    traitToPillarCode.set(trait.code, pillarCode);
     if (!traitsByPillarCode.has(pillarCode)) {
       traitsByPillarCode.set(pillarCode, []);
     }
@@ -376,6 +378,7 @@ function buildCatalogStrings(snapshot: SnapshotData) {
     catalogDifficulty,
     pillarCodes,
     traitsByCode,
+    traitToPillarCode,
     pillarById,
     statCodes,
     difficultyCodes,
@@ -598,7 +601,7 @@ function validatePayload(
     if (!trait) {
       return { valid: false, errors: [`Invalid trait_code: ${task.trait_code}`] };
     }
-    const pillarForTrait = catalogs.pillarById.get(trait.pillar_id)?.code;
+    const pillarForTrait = catalogs.traitToPillarCode.get(task.trait_code);
     if (pillarForTrait && pillarForTrait !== task.pillar_code) {
       return {
         valid: false,

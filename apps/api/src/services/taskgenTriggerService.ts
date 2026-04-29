@@ -320,6 +320,22 @@ function createInstrumentedRunner(options: {
     },
     validateTasks: (payload, catalogs, placeholders, schema) => {
       const result = baseDeps.validateTasks(payload, catalogs, placeholders, schema);
+      const invalidTraitPillarPair =
+        result.valid || !Array.isArray(payload.tasks)
+          ? null
+          : payload.tasks
+              .map((task) => {
+                const expectedPillarCode = catalogs.traitToPillarCode.get(task.trait_code);
+                if (!expectedPillarCode || expectedPillarCode === task.pillar_code) {
+                  return null;
+                }
+                return {
+                  trait_code: task.trait_code,
+                  pillar_code: task.pillar_code,
+                  expected_pillar_code: expectedPillarCode,
+                };
+              })
+              .find((pair) => pair !== null) ?? null;
       emitEvent({
         level: result.valid ? 'info' : 'warn',
         event: result.valid ? 'VALIDATION_OK' : 'VALIDATION_FAILED',
@@ -330,6 +346,7 @@ function createInstrumentedRunner(options: {
         data: {
           taskCount: payload.tasks?.length ?? 0,
           errors: result.valid ? [] : result.errors,
+          invalidTraitPillarPair,
         },
       });
       return result;
