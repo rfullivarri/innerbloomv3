@@ -72,7 +72,6 @@ These currently mix rhythm/intensity with visual identity (avatar, color, media)
 
 8. **Landing/demo visuals assume mode = avatar identity**
    - `apps/web/src/pages/Landing.tsx`
-   - `apps/web/src/pages/LandingV2.tsx`
      - `MODE_VISUALS` binds each mode to video/image/thumbnail and expression copy.
 
 ---
@@ -161,7 +160,6 @@ These currently mix rhythm/intensity with visual identity (avatar, color, media)
 9. `apps/web/src/onboarding/quickStart.ts`
    - Move soft-tint/border/glow from mode accent to avatar theme.
 
-10. `apps/web/src/pages/Landing.tsx` and `apps/web/src/pages/LandingV2.tsx`
    - Keep rhythm explainer but decouple demo media from mode-only identity; represent avatar + expression-by-rhythm.
 
 ### D3. Global CSS tokens currently mode-specific
@@ -262,7 +260,6 @@ These currently mix rhythm/intensity with visual identity (avatar, color, media)
 ## Explicit “mode = avatar” assumptions found
 
 - `game mode -> avatar media` direct maps in:
-  - `ProfileCard`, `Landing`, `LandingV2`, `MissionsV2Board`, `MissionsV3Board`, `gameModeMeta`.
 - `game mode -> color theme` direct maps in:
   - `gameModeMeta`, `StreaksPanel`, quick-start style maps.
 - `game mode change -> avatar/image persistence mutation` in:

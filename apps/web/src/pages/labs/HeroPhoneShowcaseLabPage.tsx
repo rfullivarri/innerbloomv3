@@ -708,7 +708,7 @@ export default function HeroPhoneShowcaseLabPage() {
               {primaryCta.label}
             </Link>
             {!isSignedIn ? (
-              <a className={styles.secondaryCta} href="/landing-v2#highlights">
+              <a className={styles.secondaryCta} href="/#pillars">
                 Demos
               </a>
             ) : null}

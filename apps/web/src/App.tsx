@@ -5,7 +5,6 @@ import DashboardV3Page from './pages/DashboardV3';
 import TaskEditorPage from './pages/editor';
 import LoginPage from './pages/Login';
 import LandingPage from './pages/Landing';
-import LandingOfficialV2Page from './pages/LandingOfficialV2';
 import SignUpPage from './pages/SignUp';
 import DebugAiTaskgenPage from './pages/DebugAiTaskgen';
 import DevMissionsPage from './pages/DevMissionsPage';
@@ -271,8 +270,6 @@ export default function App() {
       <DevBanner />
       <Routes>
         <Route path="/" element={isNativeApp ? <MobileAppEntry /> : <LandingPage />} />
-        <Route path="/landing-v2" element={<LandingOfficialV2Page />} />
-        <Route path="/v2" element={<LandingOfficialV2Page />} />
         <Route path="/premium-timeline" element={<PremiumTimelineDemoPage />} />
         <Route path="/demo" element={<DemoDashboardPage />} />
         <Route path="/demo-mode-select" element={<DemoModeSelectPage />} />

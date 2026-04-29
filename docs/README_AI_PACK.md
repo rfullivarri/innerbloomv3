@@ -17,7 +17,6 @@ Desde esas dos fuentes consumen:
 1. Landing oficial (`/`): `apps/web/src/pages/Landing.tsx`
 2. AI Dossier (`/ai` y `/ai.json`): generado por `apps/web/src/content/aiBuild.ts` usando `apps/web/src/content/aiDossier.ts`
 
-> `/landing-v2` queda explícitamente fuera del flujo de datos del dossier.
 
 ## Cómo actualizar (1 solo lugar)
 1. Editar copy oficial en `apps/web/src/content/officialLandingContent.ts`.

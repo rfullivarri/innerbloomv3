@@ -64,7 +64,6 @@ Assumptions honored:
 ### Landing/demo/labs surfaces
 1. `apps/web/src/pages/Landing.tsx`
    - `MODE_VISUALS` maps each mode to avatar image/video assets and expression copy.
-2. `apps/web/src/pages/LandingV2.tsx`
    - Same `MODE_VISUALS` pattern with mode-bound avatar media.
 3. `apps/web/src/config/labsGameModes.ts`
    - Lab mode configs pull `accentColor` from `GAME_MODE_META`.
@@ -96,7 +95,6 @@ High risk = user-facing drift likely, broad blast radius, or inconsistent identi
 ## D) Surfaces that can safely wait (lower-risk / post-core)
 
 1. **Marketing/demo pages**
-   - `Landing.tsx`, `LandingV2.tsx`, `config/labsGameModes.ts`
    - Important for consistency, but not core authenticated product behavior.
 2. **`QuickStartSummaryStep.tsx` + `SummaryStep.tsx`**
    - Secondary onboarding summary polish compared with primary selection and dashboard surfaces.

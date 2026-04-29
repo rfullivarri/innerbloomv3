@@ -13,7 +13,6 @@ Incluye:
 
 ## 2) No alcance
 
-- **Fuera de alcance total:** la landing experimental `/landing-v2` y cualquier copy/estructura derivada de ella.
 - No se rediseña ni se remaqueta la landing oficial para humanos.
 - No se inventan features ni claims no presentes en código/assets/contenido oficial.
 - No se define una estrategia de indexación para secciones privadas (dashboard), excepto lo necesario para no mezclarlo con el dossier público.
@@ -86,7 +85,6 @@ Debe documentar explícitamente:
 
 ### SEO / estáticos
 - **Crear** `apps/web/public/llms.txt`.
-- **Crear o modificar** `apps/web/public/sitemap.xml` para incluir `/ai` y `/ai.json` (sin mezclar `/landing-v2` como fuente del dossier).
 - **Crear o modificar** metadata estructurada (JSON-LD) inyectada en `/ai` y opcionalmente en `/` si corresponde.
 
 ### Calidad
@@ -120,9 +118,6 @@ Debe documentar explícitamente:
    - Verificación: test automático que compare keys y texto base entre `/ai` y `/ai.json`.
    - Resultado esperado: mismo contenido semántico en ambos outputs.
 
-3. **Exclusión de landing-v2**
-   - Verificación: búsqueda en código/tests para asegurar que `/landing-v2` no sea source del dossier.
-   - Resultado esperado: sin dependencias ni imports desde `LandingV2` para dossier.
 
 4. **Design Dossier completo**
    - Verificación: checklist con campos obligatorios (paleta, tipografías, radius, sombras, spacing, gradientes, fondo, tokens).
