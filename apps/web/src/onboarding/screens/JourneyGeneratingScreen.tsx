@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getJourneyGenerationStatus } from '../../lib/api';
+import { useThemePreference } from '../../theme/ThemePreferenceProvider';
 
 interface JourneyGeneratingScreenProps {
   gameMode: string;
@@ -11,6 +12,8 @@ interface JourneyGeneratingScreenProps {
 const BULLET_REVEAL_MS = 1300;
 
 export function JourneyGeneratingScreen({ gameMode, language, onGoToDashboard, onOpenGuidedDemo }: JourneyGeneratingScreenProps) {
+  const { theme } = useThemePreference();
+  const isLight = theme === 'light';
   const copy = language === 'en'
     ? {
         title: 'We are calibrating your personal formula',
@@ -115,16 +118,16 @@ export function JourneyGeneratingScreen({ gameMode, language, onGoToDashboard, o
         </svg>
       </div>
 
-      <div className="pointer-events-none absolute inset-0 bg-black/55 backdrop-blur-sm" aria-hidden />
+      <div className={`pointer-events-none absolute inset-0 backdrop-blur-sm ${isLight ? 'bg-white/60' : 'bg-black/55'}`} aria-hidden />
 
       <section className="onboarding-premium-card relative z-10 w-full max-w-3xl rounded-3xl p-6 sm:p-10">
-        <div className="mb-6 flex items-center justify-center gap-2 text-center text-xs font-semibold uppercase tracking-[0.42em] text-white/65 sm:text-sm">
+        <div className={`mb-6 flex items-center justify-center gap-2 text-center text-xs font-semibold uppercase tracking-[0.42em] sm:text-sm ${isLight ? 'text-slate-500' : 'text-white/65'}`}>
           <span>Innerbloom</span>
           <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.9em] w-auto" />
         </div>
 
-        <h1 className="text-balance text-3xl font-semibold text-white sm:text-4xl">{copy.title}</h1>
-        <p className="mt-3 text-sm text-slate-300 sm:text-base">
+        <h1 className={`text-balance text-3xl font-semibold sm:text-4xl ${isLight ? 'text-slate-900' : 'text-white'}`}>{copy.title}</h1>
+        <p className={`mt-3 text-sm sm:text-base ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
           {copy.subtitle}
         </p>
 
@@ -135,7 +138,7 @@ export function JourneyGeneratingScreen({ gameMode, language, onGoToDashboard, o
             return (
               <li
                 key={bullet}
-                className={`flex items-start gap-3 text-sm text-slate-100/90 transition-all duration-500 sm:text-base ${
+                className={`flex items-start gap-3 text-sm transition-all duration-500 sm:text-base ${isLight ? 'text-slate-700' : 'text-slate-100/90'} ${
                   isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
                 }`}
               >
@@ -146,14 +149,14 @@ export function JourneyGeneratingScreen({ gameMode, language, onGoToDashboard, o
           })}
 
           <li
-            className={`flex items-start gap-3 text-sm text-white transition-all duration-500 sm:text-base ${
+            className={`flex items-start gap-3 text-sm transition-all duration-500 sm:text-base ${isLight ? 'text-slate-800' : 'text-white'} ${
               isSequenceComplete ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
             } drop-shadow-[0_0_10px_rgba(165,180,252,0.5)]`}
           >
             <span className="mt-2 h-2.5 w-2.5 rounded-full bg-sky-300" aria-hidden />
             <span>
               {copy.planLabel}{' '}
-              <span className="inline-flex rounded-full border border-emerald-300/35 bg-emerald-400/20 px-2 py-0.5 text-xs font-semibold text-emerald-100 align-middle">
+              <span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold align-middle ${isLight ? 'border-emerald-500/45 bg-emerald-100 text-emerald-700' : 'border-emerald-300/35 bg-emerald-400/20 text-emerald-100'}`}>
                 FREE
               </span>{' '}
               – {copy.includedMonths}
@@ -171,7 +174,7 @@ export function JourneyGeneratingScreen({ gameMode, language, onGoToDashboard, o
           />
         </div>
 
-        <p className="mt-8 text-sm text-slate-300 sm:text-base">
+        <p className={`mt-8 text-sm sm:text-base ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
           {copy.minutesHint}
           <br />
           {copy.bridgeHint}
