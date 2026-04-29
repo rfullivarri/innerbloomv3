@@ -168,7 +168,7 @@ export const dashboardTranslations = {
     en: 'Edit your base to make sure tasks fit your real energy.',
   },
   'dashboard.journeyReady.goDashboard': { es: 'Ir al Dashboard', en: 'Go to Dashboard' },
-  'dashboard.journeyReady.editBaseTasks': { es: 'Editar base / Editar tareas', en: 'Edit base / Edit tasks' },
+  'dashboard.journeyReady.editBaseTasks': { es: 'Editar tareas', en: 'Edit tasks' },
   'dashboard.streakTaskInsights.weeklyProgressAria': { es: 'Progreso semanal: {{progress}}%', en: 'Weekly progress: {{progress}}%' },
   'dashboard.streakTaskInsights.dialogAria': { es: 'Detalle de tarea', en: 'Task details' },
   'dashboard.streakTaskInsights.title': { es: 'Detalle de tarea', en: 'Task details' },
