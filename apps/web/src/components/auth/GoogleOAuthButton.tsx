@@ -26,6 +26,7 @@ export function GoogleOAuthButton({
 
   const isLoaded = mode === 'sign-up' ? isSignUpLoaded : isSignInLoaded;
   const isDisabled = !isLoaded || isRedirecting;
+  const shouldForceAccountSelection = forceAccountSelection || mode === 'sign-up';
 
   const copy = useMemo(
     () => {
@@ -65,7 +66,7 @@ export function GoogleOAuthButton({
           redirectUrlComplete,
           continueSignIn: false,
           continueSignUp: false,
-          oidcPrompt: forceAccountSelection ? 'select_account' : undefined,
+          oidcPrompt: shouldForceAccountSelection ? 'select_account' : undefined,
         });
       } else {
         if (!signIn) {
@@ -77,14 +78,14 @@ export function GoogleOAuthButton({
           redirectUrlComplete,
           continueSignIn: false,
           continueSignUp: false,
-          oidcPrompt: forceAccountSelection ? 'select_account' : undefined,
+          oidcPrompt: shouldForceAccountSelection ? 'select_account' : undefined,
         });
       }
     } catch (error) {
       console.error('[auth] Google OAuth redirect failed', error);
       setIsRedirecting(false);
     }
-  }, [forceAccountSelection, isLoaded, isRedirecting, mode, redirectUrlComplete, signIn, signUp]);
+  }, [isLoaded, isRedirecting, mode, redirectUrlComplete, shouldForceAccountSelection, signIn, signUp]);
 
   return (
     <button
