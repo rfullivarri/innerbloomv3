@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { useRequest, type AsyncStatus } from './useRequest';
-import { getUserJourney, getUserTasks, type UserJourneySummary } from '../lib/api';
+import { getJourneyGenerationStatus, getUserJourney, getUserTasks, type UserJourneySummary } from '../lib/api';
 import { clearJourneyGenerationPending, isJourneyGenerationPending } from '../lib/journeyGeneration';
 import { useOnboardingProgress } from './useOnboardingProgress';
 
@@ -18,6 +18,8 @@ export type DailyQuestReadiness = {
   canAutoOpenDailyQuestPopup: boolean;
   showOnboardingGuidance: boolean;
   showJourneyPreparing: boolean;
+  taskgenInProgress: boolean;
+  taskgenTimedOutWithError: boolean;
   tasksStatus: AsyncStatus;
   journeyStatus: AsyncStatus;
   journey: UserJourneySummary | null;
@@ -30,10 +32,14 @@ export function useDailyQuestReadiness(
 ): DailyQuestReadiness {
   const { enabled = true, isJourneyGenerating = false } = options;
   const onboardingProgress = useOnboardingProgress();
+  const TASKGEN_WAIT_WINDOW_MS = 8 * 60 * 1000;
   const { data: tasks, status: tasksStatus, reload: reloadTasks } = useRequest(() => getUserTasks(userId), [userId], {
     enabled,
   });
   const hasTasks = useMemo(() => (tasks?.length ?? 0) > 0, [tasks]);
+  const { data: generationState } = useRequest(() => getJourneyGenerationStatus(), [userId], {
+    enabled,
+  });
 
   const pendingJourneyGeneration = useMemo(() => {
     if (typeof window === 'undefined') {
@@ -48,6 +54,31 @@ export function useDailyQuestReadiness(
     () => !hasTasks && (isJourneyGenerating || pendingJourneyGeneration),
     [hasTasks, isJourneyGenerating, pendingJourneyGeneration],
   );
+
+  const taskgenInProgress = useMemo(() => {
+    if (hasTasks) return false;
+    const generatedAt = onboardingProgress.progress?.tasks_generated_at;
+    if (!generatedAt) return false;
+
+    const generatedAtTs = Date.parse(generatedAt);
+    if (Number.isNaN(generatedAtTs)) return false;
+
+    return Date.now() - generatedAtTs <= TASKGEN_WAIT_WINDOW_MS;
+  }, [hasTasks, onboardingProgress.progress?.tasks_generated_at]);
+
+  const taskgenTimedOutWithError = useMemo(() => {
+    if (hasTasks || taskgenInProgress) return false;
+    const generatedAt = onboardingProgress.progress?.tasks_generated_at;
+    if (!generatedAt) return false;
+
+    const generatedAtTs = Date.parse(generatedAt);
+    if (Number.isNaN(generatedAtTs)) return false;
+
+    const timedOut = Date.now() - generatedAtTs > TASKGEN_WAIT_WINDOW_MS;
+    const reason = generationState?.state?.failure_reason?.toUpperCase() ?? '';
+    const hasRecoverableError = reason === 'VALIDATION_FAILED' || reason === 'OPENAI_FAILED';
+    return timedOut && hasRecoverableError;
+  }, [generationState?.state?.failure_reason, hasTasks, onboardingProgress.progress?.tasks_generated_at, taskgenInProgress]);
 
   useEffect(() => {
     if (hasTasks) {
@@ -83,6 +114,8 @@ export function useDailyQuestReadiness(
     canAutoOpenDailyQuestPopup,
     showOnboardingGuidance,
     showJourneyPreparing,
+    taskgenInProgress,
+    taskgenTimedOutWithError,
     tasksStatus,
     journeyStatus,
     journey,

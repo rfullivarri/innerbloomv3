@@ -31,15 +31,27 @@ function renderAlerts(overrides: Partial<Parameters<typeof Alerts>[0]> = {}) {
 }
 
 describe('Alerts', () => {
-  it('shows the scheduler banner when no reminder has been scheduled', () => {
+  it('shows spinner banner when task generation is in progress and there are no tasks', () => {
+    renderAlerts({ hasTasks: false, taskgenInProgress: true, showJourneyPreparing: false });
+
+    expect(screen.getByText('Tu Journey se está preparando')).toBeInTheDocument();
+  });
+
+  it('shows success/scheduler state when tasks are already present', () => {
     renderAlerts();
 
     expect(screen.getByText('Último paso! Programa tu Daily Quest')).toBeInTheDocument();
   });
 
-  it('hides the scheduler banner when onboarding progress already has a scheduled reminder', () => {
-    renderAlerts({ dailyQuestScheduled: true });
+  it('shows recovery CTA when task generation timed out with recoverable error', () => {
+    renderAlerts({
+      hasTasks: false,
+      taskgenTimedOutWithError: true,
+      showJourneyPreparing: false,
+      showOnboardingGuidance: false,
+    });
 
-    expect(screen.queryByText('Último paso! Programa tu Daily Quest')).not.toBeInTheDocument();
+    expect(screen.getByText('Tardamos más de lo esperado')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Reintentar' })).toHaveAttribute('href', '/intro-journey');
   });
 });
