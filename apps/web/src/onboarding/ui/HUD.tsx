@@ -38,11 +38,18 @@ function ModeBadge({ mode }: { mode: GameMode | null }) {
   }
 
   const theme = getOnboardingRhythmTheme(mode);
-  const style = { '--chip-accent': theme.badgeAccent } as CSSProperties;
+  const style = {
+    '--chip-accent': theme.badgeAccent,
+    background: 'linear-gradient(135deg, rgba(91, 79, 140, 0.96), rgba(48, 55, 86, 0.98))',
+    color: '#ffffff',
+    borderColor: 'rgba(255,255,255,0.28)',
+    textShadow: '0 1px 2px rgba(7,10,24,0.35)',
+    boxShadow: '0 10px 24px rgba(34, 28, 72, 0.32)',
+  } as CSSProperties;
 
   return (
     <span
-      className="onboarding-mode-chip inline-flex items-center px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/85 shadow-[0_0_18px_rgba(8,12,24,0.5)] ring-1 ring-white/10"
+      className="onboarding-mode-chip inline-flex items-center rounded-full border px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white ring-1 ring-white/10"
       style={style}
     >
       {MODE_BADGE_LABELS[mode]}

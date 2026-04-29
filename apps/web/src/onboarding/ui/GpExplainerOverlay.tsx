@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useMemo, useRef } from 'react';
 import { ArrowRight, ArrowUp, CircleDot } from '../../components/icons';
 import { GpProgressBar } from './GpProgressBar';
@@ -22,6 +23,7 @@ type ExplainerItem = {
 export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOverlayProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const { theme } = useThemePreference();
+  const prefersReducedMotion = useReducedMotion();
 
   const copy = useMemo(
     () =>
@@ -184,7 +186,30 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
             </div>
 
             <div className="mt-3">
-              <GpProgressBar progress={40} totalGp={0} />
+              <div className="relative">
+                <GpProgressBar progress={40} totalGp={0} />
+                <div className="pointer-events-none absolute -top-2 right-2">
+                  {prefersReducedMotion ? (
+                    <span className="inline-flex rounded-full border border-emerald-500/35 bg-emerald-500/15 px-2 py-0.5 text-[0.56rem] font-semibold uppercase tracking-[0.15em] text-emerald-700 dark:text-emerald-300">
+                      + GP
+                    </span>
+                  ) : (
+                    <div className="relative h-9 w-16">
+                      {[0, 1, 2].map((pill) => (
+                        <motion.span
+                          key={pill}
+                          className="absolute right-0 inline-flex rounded-full border border-emerald-500/35 bg-emerald-500/15 px-2 py-0.5 text-[0.56rem] font-semibold uppercase tracking-[0.15em] text-emerald-700 dark:text-emerald-300"
+                          initial={{ opacity: 0, y: 8, scale: 0.92 }}
+                          animate={{ opacity: [0, 1, 1, 0], y: [8, 2, -8, -18], scale: [0.92, 1.04, 1, 0.98] }}
+                          transition={{ duration: 1.7, repeat: Infinity, ease: 'easeOut', delay: pill * 0.38 }}
+                        >
+                          + GP
+                        </motion.span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -224,7 +249,8 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
           <button
             type="button"
             onClick={onClose}
-            className="ib-primary-button mt-4 inline-flex w-full items-center justify-center rounded-xl px-3 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]"
+            className="ib-primary-button mt-4 inline-flex w-full items-center justify-center rounded-xl px-3 py-2 text-sm font-semibold !text-white transition duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]"
+            style={{ color: '#fff' }}
           >
             {copy.cta}
           </button>
