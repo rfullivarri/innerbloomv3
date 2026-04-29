@@ -30,7 +30,6 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
       language === 'en'
         ? {
             title: 'How Growth Points work',
-            chip: '+ GP',
             items: [
               {
                 id: 'earn',
@@ -64,7 +63,6 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
           }
         : {
             title: 'Cómo funcionan los GP',
-            chip: '+ GP',
             items: [
               {
                 id: 'earn',
@@ -178,11 +176,8 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
           </button>
 
           <div className="pr-8">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
               <h2 className="text-sm font-semibold tracking-wide text-[color:var(--color-text)]">{copy.title}</h2>
-              <span className="shrink-0 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-2.5 py-0.5 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-muted)]">
-                {copy.chip}
-              </span>
             </div>
 
             <div className="mt-3">
@@ -250,9 +245,11 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
             type="button"
             onClick={onClose}
             className="ib-primary-button mt-4 inline-flex w-full items-center justify-center rounded-xl px-3 py-2 text-sm font-semibold !text-white transition duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]"
-            style={{ color: '#fff' }}
+            style={{ color: '#fff', textShadow: '0 1px 2px rgba(15, 23, 42, 0.22)' }}
           >
-            {copy.cta}
+            <span className="relative z-10 text-white" style={{ color: '#fff' }}>
+              {copy.cta}
+            </span>
           </button>
         </div>
       </div>
