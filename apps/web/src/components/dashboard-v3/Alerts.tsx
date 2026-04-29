@@ -7,6 +7,8 @@ interface AlertsProps {
   firstTasksConfirmed: boolean;
   completedFirstDailyQuest: boolean;
   showJourneyPreparing: boolean;
+  taskgenInProgress?: boolean;
+  taskgenTimedOutWithError?: boolean;
   tasksStatus: AsyncStatus;
   journeyStatus: AsyncStatus;
   journey: UserJourneySummary | null;
@@ -29,6 +31,8 @@ export function Alerts({
   firstTasksConfirmed,
   completedFirstDailyQuest,
   showJourneyPreparing,
+  taskgenInProgress = false,
+  taskgenTimedOutWithError = false,
   tasksStatus,
   journeyStatus,
   journey,
@@ -57,7 +61,7 @@ export function Alerts({
 
   const shouldShowOnboardingGuidance = showOnboardingGuidance ?? (!hasTasks || !firstTasksConfirmed);
 
-  if (tasksStatus === 'success' && shouldShowOnboardingGuidance && !hasTasks && !showJourneyPreparing) {
+  if (tasksStatus === 'success' && shouldShowOnboardingGuidance && !hasTasks && !showJourneyPreparing && !taskgenInProgress && !taskgenTimedOutWithError) {
     return (
       <div className="ib-onboarding-alert ib-onboarding-alert--info rounded-2xl p-4 text-sm">
         <div className="flex items-start gap-3">
@@ -79,7 +83,7 @@ export function Alerts({
 
   return (
     <div className="space-y-4">
-      {showJourneyPreparing && !suppressJourneyPreparing && (
+      {(showJourneyPreparing || taskgenInProgress) && !suppressJourneyPreparing && (
         <div className="ib-onboarding-alert ib-onboarding-alert--progress rounded-2xl p-4 text-sm">
           <div className="flex items-start gap-3">
             <span
@@ -91,6 +95,26 @@ export function Alerts({
               <p className="ib-onboarding-alert__body">Estamos generando tus primeras misiones personalizadas.</p>
               <p className="ib-onboarding-alert__body">Esto puede tardar unos minutos.</p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {taskgenTimedOutWithError && !showJourneyPreparing && !taskgenInProgress && (
+        <div className="ib-onboarding-alert ib-onboarding-alert--warning rounded-2xl p-4 text-sm">
+          <div className="flex items-start gap-3">
+            <span className="ib-onboarding-alert__dot mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full" aria-hidden />
+            <div className="space-y-1">
+              <p className="ib-onboarding-alert__title font-semibold">Tardamos más de lo esperado</p>
+              <p className="ib-onboarding-alert__body">
+                Hubo un problema al generar tus tareas. Reintentá el onboarding o contactá a soporte si persiste.
+              </p>
+            </div>
+            <Link
+              to="/intro-journey"
+              className="ib-onboarding-alert__cta ib-chip-solid ib-chip-solid--warning ml-auto inline-flex rounded-full px-3 py-1 text-xs font-semibold"
+            >
+              Reintentar
+            </Link>
           </div>
         </div>
       )}

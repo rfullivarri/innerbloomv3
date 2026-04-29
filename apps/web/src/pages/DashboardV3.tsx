@@ -1275,6 +1275,8 @@ export function DashboardOverview({
             firstTasksConfirmed={dailyQuestReadiness.firstTasksConfirmed}
             completedFirstDailyQuest={dailyQuestReadiness.completedFirstDailyQuest}
             showJourneyPreparing={dailyQuestReadiness.showJourneyPreparing}
+            taskgenInProgress={dailyQuestReadiness.taskgenInProgress}
+            taskgenTimedOutWithError={dailyQuestReadiness.taskgenTimedOutWithError}
             tasksStatus={dailyQuestReadiness.tasksStatus}
             journeyStatus={dailyQuestReadiness.journeyStatus}
             journey={dailyQuestReadiness.journey}
