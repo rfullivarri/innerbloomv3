@@ -13,6 +13,7 @@ import { NavButtons } from './ui/NavButtons';
 import { GameModeChip as SharedGameModeChip, buildGameModeChip } from '../components/common/GameModeChip';
 import { buildAvatarPreviewProfile, getAvatarOptionById, resolveAvatarPickerPreviewImage } from '../lib/avatarCatalog';
 import { getOnboardingRhythmTheme } from './utils/onboardingRhythmTheme';
+import { useThemePreference } from '../theme/ThemePreferenceProvider';
 
 type Pillar = 'Body' | 'Mind' | 'Soul';
 type Step = 'body' | 'mind' | 'soul' | 'moderation' | 'summary' | 'setup';
@@ -687,6 +688,8 @@ interface IntegratedQuickStartFlowProps {
 }
 
 export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gameMode: initialGameMode, avatarId, onBackToPathSelect, onExit, onRestart }: IntegratedQuickStartFlowProps) {
+  const { theme } = useThemePreference();
+  const isLight = theme === 'light';
   const navigate = useNavigate();
   const language = initialLanguage;
   const [step, setStep] = useState<Step>('body');
@@ -1206,12 +1209,12 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
 
         {step === 'setup' ? (
           <section className="quickstart-premium-card relative mx-auto mt-5 w-full max-w-3xl rounded-3xl p-5 sm:p-8">
-            <div className="mb-5 flex items-center justify-center gap-2 text-center text-[0.68rem] font-semibold uppercase tracking-[0.36em] text-white/65 sm:text-xs">
+            <div className={`mb-5 flex items-center justify-center gap-2 text-center text-[0.68rem] font-semibold uppercase tracking-[0.36em] sm:text-xs ${isLight ? 'text-slate-500' : 'text-white/65'}`}>
               <span>Innerbloom</span>
               <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.8em] w-auto" />
             </div>
-            <h1 className="text-balance text-2xl font-semibold text-white sm:text-3xl">{copy.setupTitle}</h1>
-            <p className="mt-2 text-sm text-slate-300">{copy.setupSubtitle}</p>
+            <h1 className={`text-balance text-2xl font-semibold sm:text-3xl ${isLight ? 'text-slate-900' : 'text-white'}`}>{copy.setupTitle}</h1>
+            <p className={`mt-2 text-sm ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>{copy.setupSubtitle}</p>
             <ul className="mt-6 space-y-3">
               {setupSteps.slice(0, setupProgress).map((setupStep, index) => {
                 const complete = setupProgress >= setupSteps.length;
@@ -1219,7 +1222,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
                 return (
                   <li
                     key={setupStep}
-                    className="flex items-center gap-3 text-sm text-slate-100/90 transition-all duration-500"
+                    className={`flex items-center gap-3 text-sm transition-all duration-500 ${isLight ? 'text-slate-700' : 'text-slate-100/90'}`}
                   >
                     <span className={`quickstart-setup-dot h-2.5 w-2.5 rounded-full ${!complete && index === setupProgress - 1 ? 'animate-pulse' : ''}`} />
                     <span>
@@ -1257,7 +1260,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
                 }
               }
             `}</style>
-            <p className="mt-4 text-sm text-slate-300">{copy.setupBridgeHint}</p>
+            <p className={`mt-4 text-sm ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>{copy.setupBridgeHint}</p>
             {setupProgress >= setupSteps.length ? <p className="mt-3 text-sm text-emerald-100">{copy.setupDone}</p> : null}
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
               <motion.button
