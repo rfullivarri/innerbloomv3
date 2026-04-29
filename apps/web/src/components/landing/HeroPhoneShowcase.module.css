@@ -275,7 +275,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(4px, 0.85vw, 6px);
+  gap: clamp(1px, 0.25vw, 3px);
   padding-inline: clamp(4px, 1.8vw, 10px);
   box-sizing: border-box;
   transform-origin: center center;
