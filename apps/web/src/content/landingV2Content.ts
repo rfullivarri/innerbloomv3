@@ -39,14 +39,14 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
     },
     modes: {
       ...OFFICIAL_LANDING_CONTENT.es.modes,
-      kicker: 'SISTEMA DE RITMO SEMANAL',
-      title: 'Elegí un ritmo sostenible.',
-      intro: 'Cuatro intensidades para avanzar sin romperte.',
+      kicker: 'AVATARES DE INNERBLOOM',
+      title: 'Elige cómo quieres verte dentro del sistema.',
+      intro: 'Tu avatar acompaña tu experiencia, pero el centro sigue siendo tu progreso.',
       items: [
-        { id: 'low', title: 'LOW', state: '1× semana', goal: 'Empieza liviano.' },
-        { id: 'chill', title: 'CHILL', state: '2× semana', goal: 'Crea constancia.' },
-        { id: 'flow', title: 'FLOW', state: '3× semana', goal: 'Sostén impulso.' },
-        { id: 'evolve', title: 'EVOLVE', state: '4× semana', goal: 'Sube estructura.' },
+        { id: 'low', title: '🐈 RED CAT', state: '', goal: 'Energía visible para empezar con presencia.' },
+        { id: 'chill', title: '🐻 GREEN BEAR', state: '', goal: 'Estabilidad y calma para sostener el proceso.' },
+        { id: 'flow', title: '🦎 BLUE AMPHIBIAN', state: '', goal: 'Adaptabilidad para avanzar con flexibilidad.' },
+        { id: 'evolve', title: '🦉 VIOLET OWL', state: '', goal: 'Visión y criterio para subir de nivel.' },
       ],
     },
     pillars: {
