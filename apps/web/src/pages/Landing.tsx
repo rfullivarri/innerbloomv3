@@ -854,6 +854,7 @@ export default function LandingPage() {
             <PremiumTimeline
               steps={copy.how.steps}
               closingLine={copy.how.closingLine}
+              closingBody={copy.how.closingBody}
               className="mt-2"
             />
           </div>

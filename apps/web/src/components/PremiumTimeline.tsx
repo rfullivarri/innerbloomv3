@@ -12,6 +12,7 @@ export type TimelineStep = {
 type PremiumTimelineProps = {
   steps: TimelineStep[];
   closingLine: string;
+  closingBody?: string;
   className?: string;
   axisX?: number;
   lineOffsetX?: number;
@@ -65,6 +66,7 @@ const catmullRomToBezierPath = (points: Point[]) => {
 export default function PremiumTimeline({
   steps,
   closingLine,
+  closingBody,
   className,
   axisX,
   lineOffsetX = 56,
@@ -525,7 +527,8 @@ export default function PremiumTimeline({
             backgroundImage: 'radial-gradient(circle at 18% 48%, rgba(152,214,255,0.14), transparent 55%)',
           }}
         >
-          {closingLine}
+          <p className="font-semibold leading-snug">{closingLine}</p>
+          {closingBody ? <p className="mt-2">{closingBody}</p> : null}
         </motion.div>
       </div>
     </section>
