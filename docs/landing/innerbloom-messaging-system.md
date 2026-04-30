@@ -113,11 +113,67 @@ Todo eso puede aparecer después, pero no debe ser el primer mensaje.
 
 ---
 
-## 8. Jerarquía recomendada para landing mobile-first
+## 8. Audiencias y landings por intención
 
-### 1. Hero: promesa humana
+No todos llegan con el mismo contexto. Hay que separar al menos dos rutas mentales.
 
-**Objetivo:** que el usuario entienda que esto es para gente real, no para rutinas perfectas.
+### Audiencia A — usuarios que ya probaron apps de hábitos
+
+**Estado mental:** frustración, cansancio, sensación de “otra vez abandoné”.  
+**Lo que necesitan escuchar:** no sos el problema; el sistema rígido no te ayudó a retomar.  
+**Landing recomendada:** Anti-perfection / Retomar sin empezar de cero.  
+**Hook:** Hábitos sostenibles para gente real.  
+**Segunda sección:** identificación con frustración.
+
+Esta audiencia entiende rápido palabras como habit tracker, racha, checklist, rutina, progreso y abandono.
+
+### Audiencia B — nuevos usuarios que nunca usaron un habit tracker
+
+**Estado mental:** deseo amplio de mejorar, ordenar hábitos o sentirse mejor; no necesariamente hay culpa/frustración con apps.  
+**Lo que necesitan escuchar:** empezar es simple; no necesitás saber qué hacer; Innerbloom te guía.  
+**Landing recomendada:** Guided Journey / Primeros hábitos.  
+**Hook posible:** Empezá simple. Crecé con el tiempo.  
+**Segunda sección:** claridad de “qué hago al entrar”.
+
+Esta audiencia no tiene por qué sentirse frustrada con apps. Si le hablamos demasiado de “apps que fallan”, puede no identificarse. Para ellos conviene mostrar un camino simple y visual: elegís ritmo, activás hábitos, ves progreso, el sistema se ajusta.
+
+### Audiencia C — usuarios que buscan progreso visual / gamificación
+
+**Estado mental:** motivación por métricas, niveles, streaks, evolución y feedback.  
+**Lo que necesitan escuchar:** cada acción cuenta y se vuelve visible.  
+**Landing recomendada:** Progress / Visible Growth.  
+**Hook posible:** Hacé visible el progreso que normalmente no ves.  
+**Segunda sección:** producto real y señales de avance.
+
+### Audiencia D — usuarios wellness / balance
+
+**Estado mental:** búsqueda de calma, equilibrio, autocuidado, cuerpo/mente/vínculos.  
+**Lo que necesitan escuchar:** no es productividad fría; es una forma más humana de ordenar tu cuidado.  
+**Landing recomendada:** Body / Mind / Soul.  
+**Hook posible:** Hábitos para cuerpo, mente y vida interior.
+
+### Conclusión estratégica
+
+La landing principal no debe hablar solo a usuarios frustrados con habit trackers, porque deja afuera a nuevos clientes. Pero tampoco debe ser tan genérica que pierda fuerza.
+
+La landing principal debería usar una promesa universal:
+
+> Hábitos sostenibles para gente real.
+
+Y después combinar dos capas:
+
+1. Identificación emocional suave: “esto entiende mi vida real”.
+2. Claridad de producto: “esto me guía y se ajusta”.
+
+La frustración debe estar presente, pero no como culpa ni como ataque exclusivo a otras apps. Debe expresarse como vida real: empezar, cortar, retomar, seguir.
+
+---
+
+## 9. Jerarquía recomendada para landing principal mobile-first
+
+### 1. Hero: promesa humana universal
+
+**Objetivo:** que tanto usuarios nuevos como usuarios frustrados entiendan que Innerbloom no exige perfección.
 
 Copy aprobado:
 
@@ -126,46 +182,46 @@ Construí una rutina que cambia con vos: más simple cuando cuesta, más desafia
 
 ---
 
-### 2. Identificación: “esto soy yo”
+### 2. Identificación amplia: “la vida no es constante”
 
-**Objetivo:** capturar el dolor antes de explicar features.
+**Objetivo:** capturar frustración sin depender de que la persona haya usado una app antes.
 
-Posible título:
+Título recomendado:
 
-**No te falta disciplina. Te sobra una rutina imposible.**
+**Tu vida cambia. Tu rutina debería acompañarte.**
 
-Posible subtítulo:
+Subtítulo recomendado:
 
-La mayoría de las apps de hábitos funcionan mientras todo va bien. Innerbloom está pensado para los días reales: cuando estás cansado, ocupado o volviendo a empezar.
+Hay días con foco, días pesados y semanas que se cortan. Innerbloom está pensado para ayudarte a seguir, no para exigirte perfección.
 
 Bloques posibles:
 
-**Arrancás con motivación**  
-Pero el ritmo no siempre se sostiene.
+**Cuando arrancás**  
+Te ayuda a empezar con hábitos posibles.
 
-**Fallás una semana**  
-Y muchas apps te hacen sentir que volviste a cero.
+**Cuando cuesta**  
+Baja la carga para que puedas retomar.
 
-**Innerbloom ajusta el camino**  
-Para que puedas retomar sin abandonar.
+**Cuando avanzás**  
+Sube el desafío para que sigas creciendo.
 
 Visual sugerido:
 
-Una secuencia simple tipo “vida real”: una racha que no se rompe dramáticamente, sino que se recalibra. Puede ser un camino orgánico con un desvío suave que vuelve a conectar.
+Una línea orgánica tipo Journey que atraviesa tres estados: empezar, cuesta, avanzar. La línea no se rompe; se adapta. Esta metáfora sirve para usuarios nuevos y para usuarios frustrados.
 
 ---
 
 ### 3. Diferencial: “no solo mide; se ajusta”
 
-**Objetivo:** explicar por qué Innerbloom no es otro habit tracker.
+**Objetivo:** explicar por qué Innerbloom no es otro habit tracker, sin volverlo técnico.
 
-Posible título:
+Título recomendado:
 
-**No solo registra hábitos. Los recalibra.**
+**No solo marca hábitos. Te ayuda a sostenerlos.**
 
-Posible subtítulo:
+Subtítulo recomendado:
 
-Tu progreso, tus rachas y tu ritmo ayudan a ajustar la experiencia para que puedas seguir avanzando sin romperte.
+Tu progreso deja señales: ritmo, GP, rachas y dificultad. Innerbloom usa esas señales para ajustar la experiencia.
 
 Bloques posibles:
 
@@ -173,14 +229,14 @@ Bloques posibles:
 Elegís cuánto podés sostener.
 
 **Dificultad**  
-Las tareas pueden volverse más simples o más desafiantes.
+Más simple cuando cuesta. Más desafiante cuando avanzás.
 
 **Progreso**  
-Cada acción deja una señal: GP, rachas y evolución.
+Cada acción suma señales visibles.
 
 Visual sugerido:
 
-Inspiración tipo Brilliant: tarjetas flotantes con señales del producto. En Innerbloom podrían ser mini tarjetas: “Ritmo”, “GP”, “Racha”, “Body”, “Mind”, “Soul”, “Dificultad”, “Retomar”, con algunas completas y otras en progreso.
+Tarjetas flotantes al estilo Brilliant, pero con lenguaje Innerbloom: Ritmo, GP, Racha, Body, Mind, Soul, Dificultad, Retomar. Algunas cards completas, otras “en progreso”.
 
 ---
 
@@ -188,11 +244,11 @@ Inspiración tipo Brilliant: tarjetas flotantes con señales del producto. En In
 
 **Objetivo:** demostrar que existe producto real, no solo promesa.
 
-Posible título:
+Título recomendado:
 
 **Mirá cómo crece tu Journey.**
 
-Posible subtítulo:
+Subtítulo recomendado:
 
 Tareas, GP, rachas, emociones y balance en una experiencia simple de seguir.
 
@@ -210,7 +266,7 @@ Mantener mockup del móvil con dashboard real. Priorizar pantallas que muestren 
 
 **Objetivo:** explicar cómo se empieza sin abrumar.
 
-Posible título:
+Título recomendado:
 
 **Empezás con poco. Ajustás con el tiempo.**
 
@@ -238,11 +294,11 @@ Mantener la línea/viborita actual, pero usarla como camino de progreso, no como
 
 **Objetivo:** mostrar orden sin convertirlo en filosofía pesada.
 
-Posible título:
+Título recomendado:
 
 **Hábitos para cuerpo, mente y vida interior.**
 
-Posible subtítulo:
+Subtítulo recomendado:
 
 Body, Mind y Soul organizan tu progreso sin convertir tu rutina en una lista infinita.
 
@@ -267,11 +323,11 @@ Tres cards muy limpias o tres sellos/insignias premium. El objetivo visual debe 
 
 **Objetivo:** mostrar que no todos empiezan igual.
 
-Posible título:
+Título recomendado:
 
 **No todos necesitan el mismo ritmo.**
 
-Posible subtítulo:
+Subtítulo recomendado:
 
 Elegí una intensidad sostenible y cambiala cuando tu Journey lo pida.
 
@@ -295,11 +351,11 @@ Mantener cards existentes. Reducir texto. Hacer que la frecuencia sea lo más vi
 
 ---
 
-### 8. Comparación
+### 8. Comparación opcional
 
-**Objetivo:** posicionar Innerbloom contra el habit tracker clásico.
+**Objetivo:** posicionar Innerbloom contra el habit tracker clásico. Esta sección puede ser más útil en landing específica para usuarios que ya buscan habit tracker.
 
-Posible título:
+Título posible:
 
 **Un habit tracker te muestra si cumpliste. Innerbloom te ayuda a seguir.**
 
@@ -323,11 +379,11 @@ Dos columnas con contraste suave. No hacerlo agresivo ni corporativo.
 
 **Objetivo:** cerrar con permiso emocional y acción.
 
-Posible título:
+Título recomendado:
 
 **Empezá donde estás. No donde “deberías” estar.**
 
-Posible subtítulo:
+Subtítulo recomendado:
 
 Construí hábitos sostenibles con una experiencia que cambia con vos.
 
@@ -337,11 +393,11 @@ Comenzar mi Journey
 
 ---
 
-## 9. Estrategias de landing a explorar
+## 10. Estrategias de landing a explorar
 
-### Landing A — Real Life / Anti-perfection
+### Landing A — Main / Real Life Adaptive Habits
 
-Usuario objetivo: personas que abandonan apps de hábitos porque sienten culpa o frustración.
+Usuario objetivo: audiencia amplia, incluyendo nuevos usuarios y usuarios que ya probaron apps.
 
 Promesa:
 
@@ -349,13 +405,27 @@ Hábitos sostenibles para gente real.
 
 Ángulo:
 
-No necesitás una rutina perfecta. Necesitás una experiencia que se ajuste cuando la vida cambia.
+La vida cambia. Tu rutina debería acompañarte.
 
 Esta debería ser la landing principal.
 
 ---
 
-### Landing B — Progress / Visible Growth
+### Landing B — Anti-perfection / Retomar
+
+Usuario objetivo: personas que abandonan apps de hábitos porque sienten frustración.
+
+Promesa:
+
+No empieces de cero otra vez.
+
+Ángulo:
+
+Cuando una semana se corta, Innerbloom usa esa señal para ayudarte a retomar.
+
+---
+
+### Landing C — Progress / Visible Growth
 
 Usuario objetivo: personas motivadas por ver avance, métricas, rachas y progreso visual.
 
@@ -371,7 +441,7 @@ Usar más producto real, dashboard y visuales.
 
 ---
 
-### Landing C — Adaptive Habit Tracker
+### Landing D — Adaptive Habit Tracker
 
 Usuario objetivo: personas que buscan habit tracker, app de hábitos, rutina o productividad.
 
@@ -385,7 +455,7 @@ SEO/conversión más directa. Comparar con habit trackers comunes.
 
 ---
 
-### Landing D — Body / Mind / Soul
+### Landing E — Body / Mind / Soul
 
 Usuario objetivo: personas más wellness, balance, autoconocimiento, cuidado personal.
 
@@ -399,7 +469,7 @@ Balance, ritual, calma, identidad, progreso integral.
 
 ---
 
-## 10. Dirección visual inspirada en Brilliant, adaptada a Innerbloom
+## 11. Dirección visual inspirada en Brilliant, adaptada a Innerbloom
 
 Las capturas de Brilliant funcionan porque no explican todo con texto. Usan secciones limpias, muy poco copy y visuales conceptuales que hacen de “prueba visual” del mensaje.
 
@@ -442,7 +512,7 @@ Una racha interrumpida que se transforma en una señal de ajuste, no en un reset
 
 ---
 
-## 11. Preguntas abiertas para definir antes de escribir copy final
+## 12. Preguntas abiertas para definir antes de escribir copy final
 
 ### Promesa
 
@@ -476,14 +546,14 @@ Una racha interrumpida que se transforma en una señal de ajuste, no en un reset
 
 ---
 
-## 12. Próximo paso recomendado
+## 13. Próximo paso recomendado
 
 Resolver primero estas 5 decisiones:
 
-1. Promesa principal: sostener, retomar, adaptar o visualizar progreso.
-2. Nivel de promesa adaptativa: qué es real hoy vs roadmap.
-3. Usuario principal de la landing A.
-4. Visual principal de la sección 2.
-5. Estructura final de landing A.
+1. Confirmar que la landing principal usará enfoque amplio: vida real + rutina que cambia.
+2. Definir si la segunda sección será “Tu vida cambia. Tu rutina debería acompañarte.”
+3. Confirmar qué partes adaptativas están funcionando hoy vs roadmap.
+4. Elegir visual principal para la sección 2: camino vivo, cards flotantes o móvil/producto.
+5. Decidir si crearemos una landing separada para usuarios de habit trackers frustrados.
 
 Después de eso, escribir copy final por sección y prompts visuales para cada imagen/animación.
