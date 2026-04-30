@@ -619,6 +619,7 @@ export default function DashboardV3Page() {
 
   const handleActivateModerationSuggestion = useCallback(async () => {
     if (selectedModerationSuggestions.length === 0) {
+      resolveModerationSuggestion();
       return;
     }
 
