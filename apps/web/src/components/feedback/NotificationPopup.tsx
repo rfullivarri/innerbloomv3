@@ -106,7 +106,7 @@ export function NotificationPopup({
             <a
               href={cta.href ?? '#'}
               onClick={onCtaClick}
-              className="ib-feedback-popup-cta inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:opacity-95"
+              className="ib-feedback-popup-cta ib-daily-quest-innerbloom-gradient inline-flex w-full items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold text-white shadow-[var(--shadow-innerbloom-cta)] transition hover:opacity-95"
             >
               {cta.label}
             </a>

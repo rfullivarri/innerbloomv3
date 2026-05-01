@@ -28,9 +28,9 @@ VALUES (
   'active',
   80,
   'Acabás de llegar al nivel {{level}}. Seguí así.',
-  'Ver recompensas',
+  'Revisar mis logros',
   '/dashboard-v3/rewards',
-  '{"level":"5","cta":"Ver recompensas"}',
+  '{"level":"5","cta":"Revisar mis logros"}',
   '{"title":"¡Subiste de nivel!","messageTemplate":"Acabás de llegar al nivel {{level}}. Seguí así.","emoji":"🏆"}'
 ),
 (
