@@ -27,6 +27,7 @@ import { AdaptiveText } from "../components/landing/AdaptiveText";
 import { CookieConsentBanner } from "../components/landing/CookieConsentBanner";
 import { useLandingAnalytics } from "../components/landing/useLandingAnalytics";
 import { HeroPhoneShowcase } from "../components/landing/HeroPhoneShowcase";
+import WeatherCycleOrb from "../components/landing/WeatherCycleOrb";
 import { LabsWeeklyRhythmSystemSection } from "../components/labs/LabsWeeklyRhythmSystemSection";
 import { buildOnboardingPath } from "../onboarding/i18n";
 import { usePostLoginLanguage } from "../i18n/postLoginLanguage";
@@ -803,12 +804,15 @@ export default function LandingPage({ content = OFFICIAL_LANDING_CONTENT }: Land
               {language === "es" ? "EL PROBLEMA REAL" : "THE REAL PROBLEM"}
             </p>
 
-            <AdaptiveText
-              as="h2"
-              className="truth-problem-title truth-problem-title--outside"
-            >
-              {copy.problem.title}
-            </AdaptiveText>
+            <div className="truth-problem-heading-wrap">
+              <AdaptiveText
+                as="h2"
+                className="truth-problem-title truth-problem-title--outside"
+              >
+                {copy.problem.title}
+              </AdaptiveText>
+              <WeatherCycleOrb />
+            </div>
 
             <div className="truth-problem-body">
               <div className="truth-problem-block truth-problem-block--left">
