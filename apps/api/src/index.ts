@@ -7,6 +7,7 @@ import fastifyRawBody from 'fastify-raw-body';
 import app from './app.js';
 import { dbReady, endPool } from './db.js';
 import { logRegisteredRoutes } from './lib/route-logger.js';
+import { runMonthlyMaintenanceWatchdog } from './services/monthlyMaintenanceWatchdog.js';
 
 const fastify = Fastify({
   logger: true,
@@ -48,6 +49,22 @@ async function start(): Promise<void> {
     await configureServer;
     await fastify.listen({ port, host });
     fastify.log.info(`API listening on http://${host}:${port}`);
+
+    const watchdogEnabled = process.env.ENABLE_MONTHLY_WATCHDOG !== '0';
+    if (watchdogEnabled) {
+      void runMonthlyMaintenanceWatchdog(new Date()).catch((error: unknown) => {
+        fastify.log.error({ err: error }, 'Monthly maintenance watchdog failed on startup');
+      });
+
+      const intervalMs = 6 * 60 * 60 * 1000;
+      const interval = setInterval(() => {
+        void runMonthlyMaintenanceWatchdog(new Date()).catch((error: unknown) => {
+          fastify.log.error({ err: error }, 'Monthly maintenance watchdog failed on interval');
+        });
+      }, intervalMs);
+
+      interval.unref();
+    }
   } catch (error) {
     fastify.log.error({ err: error }, 'Unable to start server');
     process.exit(1);
