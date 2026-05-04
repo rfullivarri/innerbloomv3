@@ -387,10 +387,9 @@ function LanguageDropdown({
 
 type LandingPageProps = {
   content?: Record<Language, LandingCopy>;
-  className?: string;
 };
 
-export default function LandingPage({ content = OFFICIAL_LANDING_CONTENT, className }: LandingPageProps) {
+export default function LandingPage({ content = OFFICIAL_LANDING_CONTENT }: LandingPageProps) {
   const { userId } = useAuth();
   const { setManualLanguage, syncLocaleLanguage } = usePostLoginLanguage();
   const location = useLocation();
@@ -643,7 +642,7 @@ export default function LandingPage({ content = OFFICIAL_LANDING_CONTENT, classN
 
   return (
     <div
-      className={className ? `landing ${className}` : "landing"}
+      className="landing"
       style={landingStyle}
       data-theme-mode={themeMode}
     >
