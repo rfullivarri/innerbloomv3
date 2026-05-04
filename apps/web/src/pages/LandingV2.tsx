@@ -11,5 +11,5 @@ export default function LandingV2Page() {
     }
   }, []);
 
-  return <LandingPage content={LANDING_V2_CONTENT} />;
+  return <LandingPage content={LANDING_V2_CONTENT} className="landing--v2" />;
 }

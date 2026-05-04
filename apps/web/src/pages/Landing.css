@@ -3602,6 +3602,7 @@
   .landing .weather-cycle-orb__ambient {
     transition: none;
   }
+
 }
 
 
@@ -3642,5 +3643,38 @@
   .landing .weather-cycle-orb__image {
     width: 110%;
     height: 110%;
+  }
+}
+
+.landing--v2 .weather-cycle-orb.weather-cycle-orb--static {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  animation: landing-v2-orb-float 5s ease-in-out infinite alternate;
+}
+
+@media (max-width: 840px) {
+  .landing--v2 .truth-problem-heading-wrap {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .landing--v2 .weather-cycle-orb {
+    order: 0;
+  }
+
+  .landing--v2 .weather-cycle-orb.weather-cycle-orb--static {
+    width: clamp(151px, 43vw, 210px);
+  }
+}
+
+@keyframes landing-v2-orb-float {
+  0% { transform: translateY(-4px); }
+  100% { transform: translateY(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing--v2 .weather-cycle-orb.weather-cycle-orb--static {
+    animation: none;
   }
 }
