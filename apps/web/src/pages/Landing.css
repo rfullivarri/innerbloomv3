@@ -3653,3 +3653,284 @@
   0% { transform: translateY(-4px); }
   100% { transform: translateY(4px); }
 }
+
+/* ---------- Landing V2 narrative-only layout ---------- */
+
+.landing.landing--v2-narrative .truth-problem {
+  overflow: visible;
+  padding: clamp(74px, 8vw, 112px) 0 clamp(64px, 7vw, 98px);
+}
+
+.landing.landing--v2-narrative .truth-problem-section {
+  max-width: 1080px;
+  gap: clamp(30px, 4vw, 54px);
+}
+
+.landing.landing--v2-narrative .truth-problem-title--outside {
+  max-width: min(760px, 100%);
+  text-align: center;
+  font-size: clamp(2rem, 2.3vw + 1.25rem, 3.55rem);
+}
+
+.landing.landing--v2-narrative .truth-problem-v2-stage {
+  width: min(1040px, 100%);
+  display: grid;
+  grid-template-columns: minmax(190px, 1fr) minmax(260px, 340px) minmax(190px, 1fr);
+  align-items: center;
+  justify-items: center;
+  gap: clamp(22px, 4vw, 54px);
+}
+
+.landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static {
+  width: clamp(270px, 28vw, 360px);
+  max-width: min(82vw, 360px);
+  margin: 0;
+}
+
+.landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb__image {
+  width: 116%;
+  height: 116%;
+  filter: drop-shadow(0 24px 48px rgba(80, 60, 140, 0.24));
+}
+
+.landing.landing--v2-narrative .truth-problem-block {
+  width: 100%;
+  max-width: 280px;
+  padding: clamp(14px, 1.8vw, 18px);
+  border-radius: 24px;
+  border: 1px solid rgba(238, 246, 255, 0.16);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025));
+  box-shadow: 0 18px 42px rgba(16, 12, 42, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.landing.landing--v2-narrative .truth-problem-copy {
+  gap: 8px;
+}
+
+.landing.landing--v2-narrative .truth-problem-primary {
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.landing.landing--v2-narrative .truth-problem-secondary {
+  line-height: 1.45;
+}
+
+.landing.landing--v2-narrative .how .container.narrow {
+  max-width: 1080px;
+}
+
+.landing .v2-method-shell {
+  display: grid;
+  gap: clamp(44px, 6vw, 78px);
+}
+
+.landing .v2-method-heading {
+  max-width: 760px;
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+  text-align: center;
+}
+
+.landing .v2-method-heading h2 {
+  margin: 0;
+  font-size: clamp(2rem, 2.2vw + 1.25rem, 3.45rem);
+  line-height: 1.06;
+  text-wrap: balance;
+}
+
+.landing .v2-method-intro {
+  margin: 0 auto;
+  max-width: 68ch;
+}
+
+.landing .v2-method-steps {
+  display: grid;
+  gap: clamp(54px, 7vw, 96px);
+}
+
+.landing .v2-method-step {
+  display: grid;
+  grid-template-columns: minmax(0, 0.88fr) minmax(340px, 1.12fr);
+  align-items: center;
+  gap: clamp(30px, 5vw, 72px);
+  min-height: clamp(360px, 43vw, 520px);
+}
+
+.landing .v2-method-step--visual-first {
+  grid-template-columns: minmax(340px, 1.12fr) minmax(0, 0.88fr);
+}
+
+.landing .v2-method-step-copy {
+  display: grid;
+  align-content: center;
+  gap: 14px;
+  max-width: 430px;
+}
+
+.landing .v2-method-step--visual-first .v2-method-step-copy {
+  justify-self: end;
+}
+
+.landing .v2-method-step-badge {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 220, 255, 0.26);
+  background: rgba(255, 255, 255, 0.075);
+  padding: 8px 13px;
+  color: var(--landing-kicker, rgba(213, 227, 255, 0.72));
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.landing .v2-method-step-title {
+  margin: 0;
+  color: var(--landing-heading-strong, rgba(248, 250, 255, 0.98));
+  font-size: clamp(1.58rem, 1.2vw + 1.24rem, 2.3rem);
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.landing .v2-method-step-description {
+  margin: 0;
+  color: var(--landing-text-body, rgba(214, 229, 255, 0.82));
+  font-size: clamp(1rem, 0.34vw + 0.95rem, 1.12rem);
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.landing .v2-method-visual {
+  position: relative;
+  min-height: clamp(280px, 35vw, 430px);
+  width: 100%;
+  overflow: hidden;
+  border-radius: clamp(28px, 3vw, 40px);
+  border: 1px solid rgba(238, 246, 255, 0.2);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 255, 255, 0.18), transparent 36%),
+    radial-gradient(circle at 78% 78%, rgba(130, 210, 255, 0.12), transparent 46%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+  box-shadow:
+    0 28px 72px rgba(26, 18, 64, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.landing .v2-method-visual::before {
+  content: "";
+  position: absolute;
+  inset: 16px;
+  border-radius: calc(clamp(28px, 3vw, 40px) - 10px);
+  border: 1px dashed rgba(238, 246, 255, 0.18);
+  opacity: 0.85;
+}
+
+.landing .v2-method-visual-glow {
+  position: absolute;
+  inset: 18%;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(212, 162, 255, 0.16), rgba(130, 210, 255, 0.08) 48%, transparent 70%);
+  filter: blur(10px);
+}
+
+.landing.landing--v2-narrative[data-theme-mode="light"] .truth-problem-block,
+.landing[data-theme-mode="light"] .v2-method-visual {
+  border-color: rgba(119, 101, 164, 0.16);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 255, 255, 0.76), transparent 42%),
+    radial-gradient(circle at 78% 78%, rgba(130, 210, 255, 0.13), transparent 48%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.58), rgba(246, 241, 255, 0.34));
+  box-shadow:
+    0 24px 62px rgba(64, 54, 104, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.landing[data-theme-mode="light"] .v2-method-step-badge {
+  border-color: rgba(119, 101, 164, 0.18);
+  background: rgba(255, 255, 255, 0.48);
+}
+
+@media (max-width: 840px) {
+  .landing.landing--v2-narrative .truth-problem {
+    padding: clamp(58px, 14vw, 82px) 0;
+  }
+
+  .landing.landing--v2-narrative .truth-problem-v2-stage {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static {
+    width: clamp(190px, 62vw, 278px);
+    max-width: 86vw;
+    grid-row: 1;
+    margin-bottom: 8px;
+  }
+
+  .landing.landing--v2-narrative .truth-problem-v2-stage .truth-problem-block--left {
+    grid-row: 2;
+  }
+
+  .landing.landing--v2-narrative .truth-problem-v2-stage .truth-problem-block--right {
+    grid-row: 3;
+  }
+
+  .landing.landing--v2-narrative .truth-problem-block {
+    max-width: min(100%, 430px);
+  }
+
+  .landing .v2-method-shell {
+    gap: 36px;
+  }
+
+  .landing .v2-method-steps {
+    gap: 52px;
+  }
+
+  .landing .v2-method-step,
+  .landing .v2-method-step--visual-first {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    gap: 22px;
+  }
+
+  .landing .v2-method-step--visual-first .v2-method-step-copy,
+  .landing .v2-method-step-copy {
+    justify-self: stretch;
+    max-width: 100%;
+    order: 1;
+  }
+
+  .landing .v2-method-visual {
+    min-height: clamp(230px, 64vw, 310px);
+    order: 2;
+  }
+}
+
+@media (max-width: 430px) {
+  .landing.landing--v2-narrative .truth-problem-section,
+  .landing.landing--v2-narrative .how .container.narrow {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .landing.landing--v2-narrative .truth-problem-title--outside,
+  .landing .v2-method-heading h2 {
+    font-size: clamp(1.86rem, 9vw, 2.32rem);
+  }
+
+  .landing .v2-method-step-title {
+    font-size: clamp(1.42rem, 7vw, 1.82rem);
+  }
+
+  .landing .v2-method-visual {
+    border-radius: 26px;
+  }
+}
