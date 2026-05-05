@@ -8,8 +8,7 @@ import {
   runTaskDifficultyCalibrationBackfill,
 } from '../services/taskDifficultyCalibrationService.js';
 import { createRateLimitMiddleware } from '../middlewares/rate-limit.js';
-import { runUserMonthlyModeUpgradeAggregation } from '../services/modeUpgradeMonthlyAggregationService.js';
-import { runMonthlyHabitAchievementDetection } from '../services/habitAchievementService.js';
+import { runMonthlyPipelineForPeriod } from '../services/monthlyPipelineService.js';
 
 const router = Router();
 
@@ -114,21 +113,13 @@ router.post(
       ? await runTaskDifficultyCalibrationBackfill(now)
       : await runMonthlyTaskDifficultyCalibration(now);
 
-    const modeUpgradeAggregation = shouldBackfill ? null : await runUserMonthlyModeUpgradeAggregation({ now });
-    const habitAchievement = shouldBackfill || !modeUpgradeAggregation
-      ? null
-      : await runMonthlyHabitAchievementDetection({
-          now,
-          periodStart: modeUpgradeAggregation.periodStart,
-          nextPeriodStart: modeUpgradeAggregation.nextPeriodStart,
-        });
+    const pipeline = shouldBackfill ? null : await runMonthlyPipelineForPeriod({ now });
 
     res.json({
       ok: true,
       backfill: shouldBackfill,
       ...result,
-      mode_upgrade_aggregation: modeUpgradeAggregation,
-      habit_achievement: habitAchievement,
+      monthly_pipeline: pipeline,
     });
   }),
 );

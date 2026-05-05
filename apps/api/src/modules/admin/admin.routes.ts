@@ -39,6 +39,8 @@ import {
   getAdminUserModeUpgradeCtaOverride,
   putAdminUserModeUpgradeCtaOverride,
   deleteAdminUserModeUpgradeCtaOverride,
+  getAdminMonthlyPipelineStatus,
+  postAdminMonthlyPipelineRun,
 } from './admin.handlers.js';
 import { requireAdmin } from './admin.middleware.js';
 
@@ -72,6 +74,8 @@ adminRouter.get('/task-difficulty-calibration/audit', getAdminTaskDifficultyCali
 adminRouter.post('/mode-upgrade-aggregation/run', postAdminRunModeUpgradeAggregation);
 adminRouter.post('/habit-achievement/retroactive/run', postAdminRunHabitAchievementRetroactive);
 adminRouter.get('/habit-achievement/retroactive/diagnostics', getAdminHabitAchievementDiagnostics);
+adminRouter.get('/monthly-pipeline/status', getAdminMonthlyPipelineStatus);
+adminRouter.post('/monthly-pipeline/run', postAdminMonthlyPipelineRun);
 adminRouter.post('/user/:userId/run-monthly-review', postAdminRunMonthlyReview);
 adminRouter.post('/user/:userId/mode-upgrade-analysis/run', postAdminRunModeUpgradeAnalysis);
 adminRouter.get('/user/:userId/mode-upgrade-cta-override', getAdminUserModeUpgradeCtaOverride);
