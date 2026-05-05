@@ -385,11 +385,71 @@ function LanguageDropdown({
   );
 }
 
+type LandingPageVariant = "default" | "v2Narrative";
+
 type LandingPageProps = {
   content?: Record<Language, LandingCopy>;
+  variant?: LandingPageVariant;
 };
 
-export default function LandingPage({ content = OFFICIAL_LANDING_CONTENT }: LandingPageProps) {
+function LandingV2NarrativeMethod({ how }: { how: LandingCopy["how"] }) {
+  return (
+    <div className="v2-method-shell">
+      <div className="v2-method-heading">
+        <AdaptiveText as="h2">{how.title}</AdaptiveText>
+        <AdaptiveText as="p" className="section-sub v2-method-intro">
+          {how.intro}
+        </AdaptiveText>
+      </div>
+
+      <div className="v2-method-steps">
+        {how.steps.map((step, index) => {
+          const isVisualFirst = index % 2 === 1;
+          const copyBlock = (
+            <div className="v2-method-step-copy">
+              <span className="v2-method-step-badge">{step.badge}</span>
+              <AdaptiveText as="h3" className="v2-method-step-title">
+                {step.title}
+              </AdaptiveText>
+              <AdaptiveText as="p" className="v2-method-step-description">
+                {step.bullets[0]}
+              </AdaptiveText>
+            </div>
+          );
+          const visualBlock = (
+            <div className="v2-method-visual" aria-hidden>
+              <div className="v2-method-visual-glow" />
+            </div>
+          );
+
+          return (
+            <article
+              className={`v2-method-step ${isVisualFirst ? "v2-method-step--visual-first" : ""}`}
+              key={step.badge}
+            >
+              {isVisualFirst ? (
+                <>
+                  {visualBlock}
+                  {copyBlock}
+                </>
+              ) : (
+                <>
+                  {copyBlock}
+                  {visualBlock}
+                </>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export default function LandingPage({
+  content = OFFICIAL_LANDING_CONTENT,
+  variant = "default",
+}: LandingPageProps) {
   const { userId } = useAuth();
   const { setManualLanguage, syncLocaleLanguage } = usePostLoginLanguage();
   const location = useLocation();
@@ -403,6 +463,7 @@ export default function LandingPage({ content = OFFICIAL_LANDING_CONTENT }: Land
   const { theme, setPreference } = useThemePreference();
   const themeMode: LandingThemeMode = theme;
   const copy = content[language];
+  const isV2Narrative = variant === "v2Narrative";
   const visibleNavLinks = copy.navLinks.filter(
     (link) => !/^\/demo$/i.test(link.href) && !/^#?demo$/i.test(link.href),
   );
@@ -642,7 +703,7 @@ export default function LandingPage({ content = OFFICIAL_LANDING_CONTENT }: Land
 
   return (
     <div
-      className="landing"
+      className={isV2Narrative ? "landing landing--v2-narrative" : "landing"}
       style={landingStyle}
       data-theme-mode={themeMode}
     >
@@ -800,67 +861,116 @@ export default function LandingPage({ content = OFFICIAL_LANDING_CONTENT }: Land
           id="why"
         >
           <div className="container narrow truth-problem-section">
-            <p className="truth-problem-kicker">
-              {language === "es" ? "EL PROBLEMA REAL" : "THE REAL PROBLEM"}
-            </p>
+            {isV2Narrative ? (
+              <>
+                <AdaptiveText
+                  as="h2"
+                  className="truth-problem-title truth-problem-title--outside"
+                >
+                  {copy.problem.title}
+                </AdaptiveText>
 
-            <div className="truth-problem-heading-wrap">
-              <AdaptiveText
-                as="h2"
-                className="truth-problem-title truth-problem-title--outside"
-              >
-                {copy.problem.title}
-              </AdaptiveText>
-              <WeatherCycleOrb />
-            </div>
+                <div className="truth-problem-v2-stage">
+                  <div className="truth-problem-block truth-problem-block--left">
+                    <span className="truth-problem-icon truth-problem-icon--x" aria-hidden>
+                      ×
+                    </span>
+                    <div className="truth-problem-copy">
+                      <AdaptiveText as="p" className="truth-problem-primary">
+                        {renderMultilineText(copy.problem.leftPrimary)}
+                      </AdaptiveText>
+                      <AdaptiveText as="p" className="truth-problem-secondary">
+                        {renderMultilineText(copy.problem.leftSecondary)}
+                      </AdaptiveText>
+                    </div>
+                  </div>
+                  <WeatherCycleOrb />
+                  <div className="truth-problem-block truth-problem-block--right">
+                    <span className="truth-problem-icon truth-problem-icon--check" aria-hidden>
+                      ✓
+                    </span>
+                    <div className="truth-problem-copy">
+                      <AdaptiveText as="p" className="truth-problem-primary">
+                        {renderMultilineText(copy.problem.rightPrimary)}
+                      </AdaptiveText>
+                      <AdaptiveText as="p" className="truth-problem-secondary">
+                        {renderMultilineText(copy.problem.rightSecondary)}
+                      </AdaptiveText>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="truth-problem-kicker">
+                  {language === "es" ? "EL PROBLEMA REAL" : "THE REAL PROBLEM"}
+                </p>
 
-            <div className="truth-problem-body">
-              <div className="truth-problem-block truth-problem-block--left">
-                <span className="truth-problem-icon truth-problem-icon--x" aria-hidden>
-                  ×
-                </span>
-                <div className="truth-problem-copy">
-                  <AdaptiveText as="p" className="truth-problem-primary">
-                    {renderMultilineText(copy.problem.leftPrimary)}
+                <div className="truth-problem-heading-wrap">
+                  <AdaptiveText
+                    as="h2"
+                    className="truth-problem-title truth-problem-title--outside"
+                  >
+                    {copy.problem.title}
                   </AdaptiveText>
-                  <AdaptiveText as="p" className="truth-problem-secondary">
-                    {renderMultilineText(copy.problem.leftSecondary)}
-                  </AdaptiveText>
+                  <WeatherCycleOrb />
                 </div>
-              </div>
-              <div className="truth-problem-divider" aria-hidden />
-              <div className="truth-problem-block truth-problem-block--right">
-                <span className="truth-problem-icon truth-problem-icon--check" aria-hidden>
-                  ✓
-                </span>
-                <div className="truth-problem-copy">
-                  <AdaptiveText as="p" className="truth-problem-primary">
-                    {renderMultilineText(copy.problem.rightPrimary)}
-                  </AdaptiveText>
-                  <AdaptiveText as="p" className="truth-problem-secondary">
-                    {renderMultilineText(copy.problem.rightSecondary)}
-                  </AdaptiveText>
+
+                <div className="truth-problem-body">
+                  <div className="truth-problem-block truth-problem-block--left">
+                    <span className="truth-problem-icon truth-problem-icon--x" aria-hidden>
+                      ×
+                    </span>
+                    <div className="truth-problem-copy">
+                      <AdaptiveText as="p" className="truth-problem-primary">
+                        {renderMultilineText(copy.problem.leftPrimary)}
+                      </AdaptiveText>
+                      <AdaptiveText as="p" className="truth-problem-secondary">
+                        {renderMultilineText(copy.problem.leftSecondary)}
+                      </AdaptiveText>
+                    </div>
+                  </div>
+                  <div className="truth-problem-divider" aria-hidden />
+                  <div className="truth-problem-block truth-problem-block--right">
+                    <span className="truth-problem-icon truth-problem-icon--check" aria-hidden>
+                      ✓
+                    </span>
+                    <div className="truth-problem-copy">
+                      <AdaptiveText as="p" className="truth-problem-primary">
+                        {renderMultilineText(copy.problem.rightPrimary)}
+                      </AdaptiveText>
+                      <AdaptiveText as="p" className="truth-problem-secondary">
+                        {renderMultilineText(copy.problem.rightSecondary)}
+                      </AdaptiveText>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </section>
 
         <section className="how section-pad reveal-on-scroll" id="how">
           <div className="container narrow">
-            <div className="how-heading">
-              <p className="how-kicker">{copy.how.kicker}</p>
-              <AdaptiveText as="h2">{copy.how.title}</AdaptiveText>
-              <AdaptiveText as="p" className="section-sub how-intro">
-                {copy.how.intro}
-              </AdaptiveText>
-            </div>
-            <PremiumTimeline
-              steps={copy.how.steps}
-              closingLine={copy.how.closingLine}
-              closingBody={copy.how.closingBody}
-              className="mt-2"
-            />
+            {isV2Narrative ? (
+              <LandingV2NarrativeMethod how={copy.how} />
+            ) : (
+              <>
+                <div className="how-heading">
+                  <p className="how-kicker">{copy.how.kicker}</p>
+                  <AdaptiveText as="h2">{copy.how.title}</AdaptiveText>
+                  <AdaptiveText as="p" className="section-sub how-intro">
+                    {copy.how.intro}
+                  </AdaptiveText>
+                </div>
+                <PremiumTimeline
+                  steps={copy.how.steps}
+                  closingLine={copy.how.closingLine}
+                  closingBody={copy.how.closingBody}
+                  className="mt-2"
+                />
+              </>
+            )}
           </div>
         </section>
 
