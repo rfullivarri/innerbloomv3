@@ -68,6 +68,8 @@ import {
 } from '../../services/taskDifficultyCalibrationService.js';
 import { runUserMonthlyModeUpgradeAggregation } from '../../services/modeUpgradeMonthlyAggregationService.js';
 import { runRetroactiveHabitAchievementDetection } from '../../services/habitAchievementService.js';
+import { getMonthlyPipelineStatus, runMonthlyPipelineForPeriod } from '../../services/monthlyPipelineService.js';
+import { pool } from '../../db.js';
 
 const taskgenForceRunRequestSchema = z
   .object({
@@ -422,4 +424,38 @@ export const postAdminRunTaskDifficultyCalibration = asyncHandler(async (req: Re
     mode: body.mode,
     ...result,
   });
+});
+
+
+export const getAdminMonthlyPipelineStatus = asyncHandler(async (req: Request, res: Response) => {
+  const periodKey = String(req.query.periodKey ?? '');
+  if (!/^\d{4}-\d{2}$/.test(periodKey)) {
+    throw new HttpError(400, 'invalid_period_key', 'periodKey must be YYYY-MM');
+  }
+
+  const run = await getMonthlyPipelineStatus(periodKey);
+  const [recal, agg, hab] = await Promise.all([
+    pool.query(`SELECT source, COUNT(*)::int AS count FROM task_difficulty_recalibrations WHERE to_char(period_end, 'YYYY-MM') = $1 GROUP BY source`, [periodKey]),
+    pool.query(`SELECT COUNT(*)::int AS count FROM user_monthly_mode_upgrade_stats WHERE period_key = $1`, [periodKey]),
+    pool.query(`SELECT COUNT(*)::int AS count FROM task_habit_achievements WHERE to_char(detected_period_end, 'YYYY-MM') = $1`, [periodKey]),
+  ]);
+
+  res.json({
+    ok: true,
+    periodKey,
+    run,
+    recalibrations_by_source: recal.rows,
+    mode_upgrade_stats_count: agg.rows[0]?.count ?? 0,
+    habit_achievements_detected_count: hab.rows[0]?.count ?? 0,
+  });
+});
+
+export const postAdminMonthlyPipelineRun = asyncHandler(async (req: Request, res: Response) => {
+  const periodKey = String(req.body?.periodKey ?? '');
+  const force = Boolean(req.body?.force ?? false);
+  if (!/^\d{4}-\d{2}$/.test(periodKey)) {
+    throw new HttpError(400, 'invalid_period_key', 'periodKey must be YYYY-MM');
+  }
+  const result = await runMonthlyPipelineForPeriod({ periodKey, force, now: new Date() });
+  res.json({ ok: true, ...result });
 });
