@@ -416,11 +416,22 @@ function LandingV2NarrativeMethod({ how }: { how: LandingCopy["how"] }) {
               </AdaptiveText>
             </div>
           );
-          const visualBlock = (
-            <div className="v2-method-visual" aria-hidden>
-              <div className="v2-method-visual-glow" />
-            </div>
-          );
+          const visualBlock =
+            index === 0 ? (
+              <div className="v2-method-visual v2-method-visual--image" aria-hidden>
+                <img
+                  src="/landing/paso1.png"
+                  alt=""
+                  className="v2-method-visual-image"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            ) : (
+              <div className="v2-method-visual" aria-hidden>
+                <div className="v2-method-visual-glow" />
+              </div>
+            );
 
           return (
             <article

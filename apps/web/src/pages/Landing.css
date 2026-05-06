@@ -3823,6 +3823,50 @@
   -webkit-backdrop-filter: blur(14px);
 }
 
+.landing .v2-method-visual--image {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.landing .v2-method-visual.v2-method-visual--image::before,
+.landing .v2-method-visual.v2-method-visual--image::after {
+  content: none;
+}
+
+.landing .v2-method-visual-image {
+  display: block;
+  width: min(100%, 520px);
+  height: auto;
+  object-fit: contain;
+  animation: v2-method-step-image-float 5.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes v2-method-step-image-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing .v2-method-visual-image {
+    animation: none;
+  }
+}
+
 .landing .v2-method-visual::before {
   content: "";
   position: absolute;
@@ -3850,6 +3894,14 @@
   box-shadow:
     0 24px 62px rgba(64, 54, 104, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.landing[data-theme-mode="light"] .v2-method-visual--image {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .landing[data-theme-mode="light"] .v2-method-step-badge {
