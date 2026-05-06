@@ -85,7 +85,17 @@ export async function runMonthlyPipelineForPeriod(params: { periodKey?: string; 
     console.info('[monthly-pipeline] stage started', { periodKey, stage, attempt });
     const habit = await runMonthlyHabitAchievementDetection({ now, periodStart: aggregation.periodStart, nextPeriodStart: aggregation.nextPeriodStart });
     metadata.habitAchievement = habit;
-    console.info('[monthly-pipeline] stage completed', { periodKey, stage, attempt, pendingCreated: habit.pendingCreated, evaluated: habit.evaluated });
+    console.info('[monthly-pipeline] stage completed', {
+      periodKey,
+      stage,
+      attempt,
+      evaluated: habit.evaluated,
+      qualified: habit.qualified,
+      pendingCreated: habit.pendingCreated,
+      skipped: habit.skipped,
+      ignored: habit.ignored,
+      errors: habit.errors,
+    });
 
     await pool.query(
       `UPDATE monthly_pipeline_runs

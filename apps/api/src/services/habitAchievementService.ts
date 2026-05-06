@@ -8,6 +8,7 @@ type RecalibrationPeriodRow = {
   expected_target: number | string;
   completions_done: number | string;
   completion_rate: number | string;
+  source?: HabitAchievementSource;
 };
 
 type GpSnapshotRow = {
@@ -40,8 +41,9 @@ type RetroactiveHabitAchievementCandidateRow = HabitAchievementCandidateRow & {
 
 type HabitAchievementSource = 'cron' | 'admin_run' | 'admin_monthly_backfill';
 
-const MONTHLY_HABIT_ACHIEVEMENT_SOURCES: readonly HabitAchievementSource[] = ['cron'];
-const RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES: readonly HabitAchievementSource[] = ['cron', 'admin_monthly_backfill'];
+const CANONICAL_HABIT_ACHIEVEMENT_SOURCES: readonly HabitAchievementSource[] = ['cron', 'admin_monthly_backfill'];
+const MONTHLY_HABIT_ACHIEVEMENT_SOURCES: readonly HabitAchievementSource[] = CANONICAL_HABIT_ACHIEVEMENT_SOURCES;
+const RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES: readonly HabitAchievementSource[] = CANONICAL_HABIT_ACHIEVEMENT_SOURCES;
 
 type RewardsHabitRow = {
   task_id: string;
@@ -63,6 +65,16 @@ type RewardsHabitRow = {
 
 type PendingCountRow = {
   pending_count: number | string;
+};
+
+export type HabitAchievementTaskOutcome = {
+  taskId: string;
+  userId: string;
+  outcome: 'skipped_existing_record' | 'ignored_not_qualified' | 'qualified_pending_created' | 'error';
+  reason: HabitAchievementEvaluation['reason'] | 'already_has_active_achievement_record' | 'create_pending_failed' | 'evaluation_failed' | null;
+  detectedPeriodEnd: string | null;
+  monthsEvaluated: number | null;
+  sources: HabitAchievementSource[];
 };
 
 type TaskAchievementStateRow = {
@@ -383,14 +395,28 @@ export async function evaluateTaskHabitAchievement(params: {
 }): Promise<HabitAchievementEvaluation> {
   const allowedSources = params.allowedSources ?? MONTHLY_HABIT_ACHIEVEMENT_SOURCES;
   const rowsResult = await pool.query<RecalibrationPeriodRow>(
-    `SELECT period_end::text AS period_end,
-            expected_target,
-            completions_done,
-            completion_rate
-       FROM task_difficulty_recalibrations
-      WHERE task_id = $1::uuid
-        AND source = ANY($3::text[])
-      ORDER BY period_end DESC
+    `SELECT ranked.period_end::text AS period_end,
+            ranked.expected_target,
+            ranked.completions_done,
+            ranked.completion_rate,
+            ranked.source
+       FROM (
+         SELECT r.period_end,
+                r.expected_target,
+                r.completions_done,
+                r.completion_rate,
+                r.source,
+                ROW_NUMBER() OVER (
+                  PARTITION BY r.period_end
+                  ORDER BY CASE r.source WHEN 'cron' THEN 1 WHEN 'admin_monthly_backfill' THEN 2 ELSE 3 END ASC,
+                           r.analyzed_at DESC
+                ) AS rn
+           FROM task_difficulty_recalibrations r
+          WHERE r.task_id = $1::uuid
+            AND r.source = ANY($3::text[])
+       ) ranked
+      WHERE ranked.rn = 1
+      ORDER BY ranked.period_end DESC
       LIMIT $2`,
     [
       params.taskId,
@@ -790,7 +816,12 @@ export async function getTaskHabitAchievementState(taskId: string, userId: strin
 export type MonthlyHabitAchievementRun = {
   expiredResolved: number;
   evaluated: number;
+  qualified: number;
   pendingCreated: number;
+  skipped: number;
+  ignored: number;
+  errors: number;
+  outcomes: HabitAchievementTaskOutcome[];
 };
 
 export type RetroactiveHabitAchievementRun = {
@@ -813,6 +844,7 @@ export type RetroactiveHabitAchievementRun = {
   skipped: number;
   ignored: number;
   errors: number;
+  outcomes: HabitAchievementTaskOutcome[];
 };
 
 export type HabitAchievementDiagnosticsRow = {
@@ -850,44 +882,115 @@ export async function runMonthlyHabitAchievementDetection(params: {
 }): Promise<MonthlyHabitAchievementRun> {
   const now = params.now ?? new Date();
   const expiredResolved = await resolveExpiredPendingHabitAchievements(now);
+  const sources = [...MONTHLY_HABIT_ACHIEVEMENT_SOURCES];
 
   const candidateResult = await pool.query<HabitAchievementCandidateRow>(
     `SELECT DISTINCT r.task_id, r.user_id
        FROM task_difficulty_recalibrations r
        JOIN tasks t ON t.task_id = r.task_id
-      WHERE r.source = 'cron'
+      WHERE r.source = ANY($4::text[])
         AND r.period_end >= $1::date
         AND r.period_end < $2::date
         AND ${buildHabitAchievementFilter('t')}
         AND ($3::uuid IS NULL OR r.user_id = $3::uuid)`,
-    [params.periodStart, params.nextPeriodStart, params.userId ?? null],
+    [params.periodStart, params.nextPeriodStart, params.userId ?? null, sources],
   );
 
   let evaluated = 0;
+  let qualified = 0;
   let pendingCreated = 0;
+  let skipped = 0;
+  let ignored = 0;
+  let errors = 0;
+  const outcomes: HabitAchievementTaskOutcome[] = [];
 
   for (const row of candidateResult.rows) {
-    const latest = await getLatestAchievement(row.task_id, row.user_id);
-    if (latest && latest.status !== 'expired_pending') {
-      continue;
-    }
+    try {
+      const latest = await getLatestAchievement(row.task_id, row.user_id);
+      if (latest && latest.status !== 'expired_pending') {
+        skipped += 1;
+        outcomes.push({
+          taskId: row.task_id,
+          userId: row.user_id,
+          outcome: 'skipped_existing_record',
+          reason: 'already_has_active_achievement_record',
+          detectedPeriodEnd: null,
+          monthsEvaluated: null,
+          sources,
+        });
+        continue;
+      }
 
-    const evaluation = await evaluateTaskHabitAchievement({ taskId: row.task_id });
-    evaluated += 1;
-    if (!evaluation.qualifies) {
-      continue;
-    }
+      const evaluation = await evaluateTaskHabitAchievement({ taskId: row.task_id, allowedSources: sources });
+      evaluated += 1;
+      if (!evaluation.qualifies) {
+        ignored += 1;
+        outcomes.push({
+          taskId: row.task_id,
+          userId: row.user_id,
+          outcome: 'ignored_not_qualified',
+          reason: evaluation.reason,
+          detectedPeriodEnd: evaluation.detectedPeriodEnd,
+          monthsEvaluated: evaluation.monthsEvaluated,
+          sources,
+        });
+        continue;
+      }
 
-    await createPendingHabitAchievement({
-      taskId: row.task_id,
-      userId: row.user_id,
-      evaluation,
-      now,
-    });
-    pendingCreated += 1;
+      qualified += 1;
+      await createPendingHabitAchievement({
+        taskId: row.task_id,
+        userId: row.user_id,
+        evaluation,
+        now,
+      });
+      pendingCreated += 1;
+      outcomes.push({
+        taskId: row.task_id,
+        userId: row.user_id,
+        outcome: 'qualified_pending_created',
+        reason: null,
+        detectedPeriodEnd: evaluation.detectedPeriodEnd,
+        monthsEvaluated: evaluation.monthsEvaluated,
+        sources,
+      });
+    } catch (error) {
+      errors += 1;
+      const reason = error instanceof Error ? error.message : 'unknown_error';
+      console.error('[habit-achievement] monthly task evaluation failed', {
+        taskId: row.task_id,
+        userId: row.user_id,
+        periodStart: params.periodStart,
+        nextPeriodStart: params.nextPeriodStart,
+        reason,
+      });
+      outcomes.push({
+        taskId: row.task_id,
+        userId: row.user_id,
+        outcome: 'error',
+        reason: 'evaluation_failed',
+        detectedPeriodEnd: null,
+        monthsEvaluated: null,
+        sources,
+      });
+    }
   }
 
-  return { expiredResolved, evaluated, pendingCreated };
+  console.info('[habit-achievement] monthly detection completed', {
+    periodStart: params.periodStart,
+    nextPeriodStart: params.nextPeriodStart,
+    userId: params.userId ?? null,
+    sources,
+    candidates: candidateResult.rows.length,
+    evaluated,
+    qualified,
+    pendingCreated,
+    skipped,
+    ignored,
+    errors,
+  });
+
+  return { expiredResolved, evaluated, qualified, pendingCreated, skipped, ignored, errors, outcomes };
 }
 
 export async function runRetroactiveHabitAchievementDetection(params: {
@@ -933,22 +1036,42 @@ export async function runRetroactiveHabitAchievementDetection(params: {
   let skipped = 0;
   let ignored = 0;
   let errors = 0;
+  const sources = [...RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES];
+  const outcomes: HabitAchievementTaskOutcome[] = [];
 
   for (const row of candidates) {
     try {
       const latest = await getLatestAchievement(row.task_id, row.user_id);
       if (latest && latest.status !== 'expired_pending') {
         skipped += 1;
+        outcomes.push({
+          taskId: row.task_id,
+          userId: row.user_id,
+          outcome: 'skipped_existing_record',
+          reason: 'already_has_active_achievement_record',
+          detectedPeriodEnd: null,
+          monthsEvaluated: null,
+          sources,
+        });
         continue;
       }
 
       const evaluation = await evaluateTaskHabitAchievement({
         taskId: row.task_id,
-        allowedSources: RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES,
+        allowedSources: sources,
       });
       evaluated += 1;
       if (!evaluation.qualifies) {
         ignored += 1;
+        outcomes.push({
+          taskId: row.task_id,
+          userId: row.user_id,
+          outcome: 'ignored_not_qualified',
+          reason: evaluation.reason,
+          detectedPeriodEnd: evaluation.detectedPeriodEnd,
+          monthsEvaluated: evaluation.monthsEvaluated,
+          sources,
+        });
         continue;
       }
 
@@ -960,10 +1083,48 @@ export async function runRetroactiveHabitAchievementDetection(params: {
         now,
       });
       pendingCreated += 1;
-    } catch {
+      outcomes.push({
+        taskId: row.task_id,
+        userId: row.user_id,
+        outcome: 'qualified_pending_created',
+        reason: null,
+        detectedPeriodEnd: evaluation.detectedPeriodEnd,
+        monthsEvaluated: evaluation.monthsEvaluated,
+        sources,
+      });
+    } catch (error) {
       errors += 1;
+      const reason = error instanceof Error ? error.message : 'unknown_error';
+      console.error('[habit-achievement] retroactive task evaluation failed', {
+        taskId: row.task_id,
+        userId: row.user_id,
+        reason,
+      });
+      outcomes.push({
+        taskId: row.task_id,
+        userId: row.user_id,
+        outcome: 'error',
+        reason: 'evaluation_failed',
+        detectedPeriodEnd: null,
+        monthsEvaluated: null,
+        sources,
+      });
     }
   }
+
+  console.info('[habit-achievement] retroactive detection completed', {
+    scope: params.userId ? 'single_user' : 'all_users',
+    userId: params.userId ?? null,
+    sources,
+    rawHistoricalCandidates,
+    candidatesConsidered: candidates.length,
+    evaluated,
+    qualified,
+    pendingCreated,
+    skipped,
+    ignored,
+    errors,
+  });
 
   return {
     scope: params.userId ? 'single_user' : 'all_users',
@@ -985,6 +1146,7 @@ export async function runRetroactiveHabitAchievementDetection(params: {
     skipped,
     ignored,
     errors,
+    outcomes,
   };
 }
 
@@ -1021,25 +1183,36 @@ export async function getUserRetroactiveHabitAchievementDiagnostics(params: {
       task_id: string;
     }
   >(
-    `SELECT ranked.task_id,
-            ranked.period_end::text AS period_end,
-            ranked.expected_target,
-            ranked.completions_done,
-            ranked.completion_rate
+    `SELECT limited.task_id,
+            limited.period_end::text AS period_end,
+            limited.expected_target,
+            limited.completions_done,
+            limited.completion_rate,
+            limited.source
        FROM (
-         SELECT r.task_id,
-                r.period_end,
-                r.expected_target,
-                r.completions_done,
-                r.completion_rate,
-                ROW_NUMBER() OVER (PARTITION BY r.task_id ORDER BY r.period_end DESC) AS rn
-           FROM task_difficulty_recalibrations r
-          WHERE r.user_id = $1::uuid
-            AND r.task_id = ANY($2::uuid[])
-            AND r.source = ANY($3::text[])
-       ) ranked
-      WHERE ranked.rn <= $4
-      ORDER BY ranked.task_id, ranked.period_end DESC`,
+         SELECT deduped.*,
+                ROW_NUMBER() OVER (PARTITION BY deduped.task_id ORDER BY deduped.period_end DESC) AS task_rn
+           FROM (
+             SELECT r.task_id,
+                    r.period_end,
+                    r.expected_target,
+                    r.completions_done,
+                    r.completion_rate,
+                    r.source,
+                    ROW_NUMBER() OVER (
+                      PARTITION BY r.task_id, r.period_end
+                      ORDER BY CASE r.source WHEN 'cron' THEN 1 WHEN 'admin_monthly_backfill' THEN 2 ELSE 3 END ASC,
+                               r.analyzed_at DESC
+                    ) AS period_rn
+               FROM task_difficulty_recalibrations r
+              WHERE r.user_id = $1::uuid
+                AND r.task_id = ANY($2::uuid[])
+                AND r.source = ANY($3::text[])
+           ) deduped
+          WHERE deduped.period_rn = 1
+       ) limited
+      WHERE limited.task_rn <= $4
+      ORDER BY limited.task_id, limited.period_end DESC`,
     [params.userId, taskIds, [...RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES], maxPeriods],
   );
 
@@ -1063,6 +1236,7 @@ export async function getUserRetroactiveHabitAchievementDiagnostics(params: {
       expected_target: row.expected_target,
       completions_done: row.completions_done,
       completion_rate: row.completion_rate,
+      source: row.source,
     });
     periodsByTask.set(row.task_id, current);
   }

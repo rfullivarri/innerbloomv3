@@ -255,6 +255,7 @@ export type AdminHabitAchievementRetroactiveRunResponse = {
   skipped: number;
   ignored: number;
   errors: number;
+  outcomes?: AdminHabitAchievementTaskOutcome[];
 };
 
 export type AdminHabitAchievementDiagnosticsReason =
@@ -266,6 +267,20 @@ export type AdminHabitAchievementDiagnosticsReason =
   | 'month_below_floor'
   | 'already_has_active_achievement_record'
   | 'qualifies';
+
+export type AdminHabitAchievementTaskOutcome = {
+  taskId: string;
+  userId: string;
+  outcome: 'skipped_existing_record' | 'ignored_not_qualified' | 'qualified_pending_created' | 'error';
+  reason:
+    | AdminHabitAchievementDiagnosticsReason
+    | 'create_pending_failed'
+    | 'evaluation_failed'
+    | null;
+  detectedPeriodEnd: string | null;
+  monthsEvaluated: number | null;
+  sources: Array<'cron' | 'admin_monthly_backfill' | 'admin_run'>;
+};
 
 export type AdminHabitAchievementDiagnosticsRow = {
   taskId: string;
