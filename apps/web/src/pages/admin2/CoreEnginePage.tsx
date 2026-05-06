@@ -13,6 +13,7 @@ import {
   fetchAdminModeUpgradeCtaOverride,
   runAdminHabitAchievementRetroactive,
   runAdminModeUpgradeAnalysis,
+  runAdminMonthlyPipeline,
   runAdminMonthlyReview,
   runAdminTaskDifficultyCalibration,
   upsertAdminModeUpgradeCtaOverride,
@@ -29,6 +30,12 @@ const NEXT_MODE_BY_CODE: Record<'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE', 'CHILL' | '
   FLOW: 'EVOLVE',
   EVOLVE: null,
 };
+
+
+function getLastClosedMonthPeriodKey(now = new Date()): string {
+  const previousMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));
+  return `${previousMonth.getUTCFullYear()}-${String(previousMonth.getUTCMonth() + 1).padStart(2, '0')}`;
+}
 
 function normalizeMode(value: string | null | undefined): 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE' | null {
   const normalized = (value ?? '').trim().toUpperCase();
@@ -60,6 +67,13 @@ export function CoreEnginePage() {
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [runningMonthly, setRunningMonthly] = useState(false);
   const [runningRolling, setRunningRolling] = useState(false);
+
+  const [pipelinePeriodKey, setPipelinePeriodKey] = useState(() => getLastClosedMonthPeriodKey());
+  const [pipelineForce, setPipelineForce] = useState(true);
+  const [pipelineRunAllUsers, setPipelineRunAllUsers] = useState(false);
+  const [runningPipeline, setRunningPipeline] = useState(false);
+  const [pipelineResult, setPipelineResult] = useState<Awaited<ReturnType<typeof runAdminMonthlyPipeline>> | null>(null);
+  const [pipelineError, setPipelineError] = useState<string | null>(null);
 
   const [manualModeTarget, setManualModeTarget] = useState<'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE'>('LOW');
   const [manualModeReason, setManualModeReason] = useState('admin_override_manual_mode_change');
@@ -175,6 +189,30 @@ export function CoreEnginePage() {
   useEffect(() => {
     void loadHabitDiagnostics();
   }, [loadHabitDiagnostics]);
+
+
+  const runMonthlyPipelineReplay = useCallback(async () => {
+    if (!selectedUser && !pipelineRunAllUsers) return;
+    setRunningPipeline(true);
+    setPipelineError(null);
+    try {
+      const result = await runAdminMonthlyPipeline({
+        periodKey: pipelinePeriodKey,
+        force: pipelineForce,
+        userId: pipelineRunAllUsers ? undefined : selectedUser?.id,
+      });
+      setPipelineResult(result);
+      if (!pipelineRunAllUsers && selectedUser) {
+        await loadModeData();
+        await loadHabitDiagnostics();
+      }
+    } catch (error) {
+      console.error(error);
+      setPipelineError('No se pudo reejecutar el monthly pipeline.');
+    } finally {
+      setRunningPipeline(false);
+    }
+  }, [loadHabitDiagnostics, loadModeData, pipelineForce, pipelinePeriodKey, pipelineRunAllUsers, selectedUser]);
 
   const runMonthly = useCallback(async () => {
     if (!selectedUser) return;
@@ -323,6 +361,79 @@ export function CoreEnginePage() {
             </button>
           </article>
         </div>
+
+
+        <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 text-sm">
+          <h3 className="font-semibold">Monthly Pipeline Replay</h3>
+          <p className="text-xs text-[color:var(--admin-muted)]">
+            Reejecuta el mismo circuito mensual del cron para un período cerrado. Útil para validar Habit Achievement y Rhythm Upgrade con force=true.
+          </p>
+          <div className="mt-3 grid gap-3 text-xs md:grid-cols-4">
+            <label className="flex flex-col gap-1">
+              <span className="text-[color:var(--admin-muted)]">periodKey</span>
+              <input
+                value={pipelinePeriodKey}
+                onChange={(event) => setPipelinePeriodKey(event.target.value)}
+                placeholder="YYYY-MM"
+                className="rounded border border-[color:var(--admin-border)] bg-transparent px-2 py-1"
+              />
+            </label>
+            <label className="flex items-center gap-2 self-end">
+              <input type="checkbox" checked={pipelineForce} onChange={(event) => setPipelineForce(event.target.checked)} />
+              force
+            </label>
+            <label className="flex items-center gap-2 self-end">
+              <input type="checkbox" checked={pipelineRunAllUsers} onChange={(event) => setPipelineRunAllUsers(event.target.checked)} />
+              correr para todos
+            </label>
+            <p className="self-end rounded border border-[color:var(--admin-border)] px-2 py-1">
+              scope: <strong>{pipelineRunAllUsers ? 'all_users' : selectedUser?.id ?? 'sin selección'}</strong>
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void runMonthlyPipelineReplay()}
+            disabled={runningPipeline || (!selectedUser && !pipelineRunAllUsers) || !/^\d{4}-\d{2}$/.test(pipelinePeriodKey)}
+            className={`mt-3 ${BTN_PRIMARY}`}
+          >
+            {runningPipeline ? 'Running…' : 'Force Monthly Pipeline'}
+          </button>
+          {pipelineError ? <p className="mt-2 text-xs text-red-300">{pipelineError}</p> : null}
+          {pipelineResult ? (
+            <div className="mt-3 rounded-lg border border-[color:var(--admin-border)] p-3 text-xs">
+              <div className="grid gap-2 md:grid-cols-4">
+                <p>periodKey: <strong>{pipelineResult.periodKey}</strong></p>
+                <p>attempt: <strong>{pipelineResult.attempt ?? '—'}</strong></p>
+                <p>userId: <strong>{pipelineResult.userId ?? 'all_users'}</strong></p>
+                <p>skipped: <strong>{pipelineResult.skipped ? pipelineResult.reason ?? 'yes' : 'no'}</strong></p>
+                <p>calibration evaluated: <strong>{pipelineResult.calibration?.evaluated ?? '—'}</strong></p>
+                <p>aggregation processed: <strong>{pipelineResult.aggregation?.processed ?? '—'}</strong></p>
+                <p>aggregation scope: <strong>{pipelineResult.aggregation?.scope ?? '—'}</strong></p>
+              </div>
+              {pipelineResult.habitAchievement ? (
+                <div className="mt-3 rounded border border-[color:var(--admin-border)] p-2">
+                  <p className="font-semibold">Habit Achievement</p>
+                  <p>
+                    evaluated {pipelineResult.habitAchievement.evaluated} · qualified {pipelineResult.habitAchievement.qualified} · pendingCreated {pipelineResult.habitAchievement.pendingCreated}
+                  </p>
+                  <p>
+                    skipped {pipelineResult.habitAchievement.skipped} · ignored {pipelineResult.habitAchievement.ignored} · errors {pipelineResult.habitAchievement.errors}
+                  </p>
+                  {pipelineResult.habitAchievement.outcomes?.length ? (
+                    <div className="mt-2 max-h-36 overflow-auto rounded border border-[color:var(--admin-border)] p-2">
+                      <p className="font-semibold">first outcomes</p>
+                      {pipelineResult.habitAchievement.outcomes.slice(0, 12).map((outcome) => (
+                        <p key={`${outcome.taskId}-${outcome.outcome}-${outcome.detectedPeriodEnd ?? 'none'}`} className="text-[11px] text-[color:var(--admin-muted)]">
+                          {outcome.taskId}: {outcome.outcome} · {outcome.reason ?? 'ok'} · {outcome.detectedPeriodEnd ?? '—'} · {outcome.sources.join('+')}
+                        </p>
+                      ))}
+                    </div>
+                  ) : <p className="mt-2 text-[11px] text-[color:var(--admin-muted)]">No outcomes returned.</p>}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </article>
 
         <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 text-sm">
           <div className="flex items-center justify-between gap-2">

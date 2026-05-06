@@ -237,6 +237,42 @@ export type AdminModeUpgradeAnalysis = {
   tasks: AdminModeUpgradeTask[];
 };
 
+
+export type AdminMonthlyPipelineRunResponse = {
+  ok: boolean;
+  periodKey: string;
+  attempt?: number;
+  skipped?: boolean;
+  reason?: 'period_locked' | 'already_succeeded';
+  userId?: string | null;
+  calibration?: {
+    evaluated: number;
+    adjusted: number;
+    skipped: number;
+    ignored: number;
+    actionBreakdown: { up: number; keep: number; down: number };
+    errors: unknown[];
+  };
+  aggregation?: {
+    periodKey: string;
+    periodStart: string;
+    nextPeriodStart: string;
+    scope: 'single_user' | 'all_users';
+    processed: number;
+    persisted: number;
+  };
+  habitAchievement?: {
+    expiredResolved: number;
+    evaluated: number;
+    qualified: number;
+    pendingCreated: number;
+    skipped: number;
+    ignored: number;
+    errors: number;
+    outcomes: AdminHabitAchievementTaskOutcome[];
+  };
+};
+
 export type AdminHabitAchievementRetroactiveRunResponse = {
   ok: boolean;
   source: 'admin_retroactive_habit_achievement';

@@ -17,6 +17,7 @@ const {
   mockResolveModeById,
   mockChangeUserGameMode,
   mockRunRetroactiveHabitAchievement,
+  mockRunMonthlyPipelineForPeriod,
 } = vi.hoisted(() => ({
   mockQuery: vi.fn<(sql: string, params?: unknown[]) => Promise<{ rows: QueryRow[] }>>(),
   authMiddlewareMock: (req: Request, _res: Response, next: NextFunction) => {
@@ -79,6 +80,23 @@ const {
     ignored: 1,
     errors: 0,
   })),
+  mockRunMonthlyPipelineForPeriod: vi.fn(async (params: { periodKey: string; force?: boolean; userId?: string; now?: Date }) => ({
+    periodKey: params.periodKey,
+    attempt: 2,
+    userId: params.userId ?? null,
+    calibration: { evaluated: 3, adjusted: 1, skipped: 0, ignored: 0, actionBreakdown: { up: 1, keep: 1, down: 1 }, errors: [] },
+    aggregation: { periodKey: params.periodKey, periodStart: '2026-04-01', nextPeriodStart: '2026-05-01', scope: params.userId ? 'single_user' : 'all_users', processed: params.userId ? 1 : 3, persisted: params.userId ? 1 : 3 },
+    habitAchievement: {
+      expiredResolved: 0,
+      evaluated: 1,
+      qualified: 1,
+      pendingCreated: 1,
+      skipped: 0,
+      ignored: 0,
+      errors: 0,
+      outcomes: [{ taskId: 'task-1', userId: params.userId ?? 'user-1', outcome: 'qualified_pending_created', reason: null, detectedPeriodEnd: '2026-04-30', monthsEvaluated: 3, sources: ['cron'] }],
+    },
+  })),
 }));
 
 vi.mock('../../db.js', () => ({
@@ -130,6 +148,11 @@ vi.mock('../../services/habitAchievementService.js', () => ({
   runRetroactiveHabitAchievementDetection: (...args: unknown[]) => mockRunRetroactiveHabitAchievement(...args),
 }));
 
+vi.mock('../../services/monthlyPipelineService.js', () => ({
+  getMonthlyPipelineStatus: vi.fn(async () => null),
+  runMonthlyPipelineForPeriod: (...args: unknown[]) => mockRunMonthlyPipelineForPeriod(...args),
+}));
+
 import app from '../../app.js';
 
 describe('Admin routes', () => {
@@ -144,6 +167,7 @@ describe('Admin routes', () => {
     mockResolveModeById.mockClear();
     mockChangeUserGameMode.mockClear();
     mockRunRetroactiveHabitAchievement.mockClear();
+    mockRunMonthlyPipelineForPeriod.mockClear();
     mockTrigger.mockReturnValue('corr-force');
     clearTaskgenEvents();
     mockQuery.mockImplementation(async (sql: string) => {
@@ -898,6 +922,64 @@ describe('Admin routes', () => {
     expect(mockRunModeUpgradeAggregation).toHaveBeenCalledWith({
       userId: '00000000-0000-4000-8000-000000000001',
       periodKey: '2026-01',
+    });
+  });
+
+
+
+  it('runs monthly pipeline replay with force=true for all users', async () => {
+    const response = await request(app)
+      .post('/api/admin/monthly-pipeline/run')
+      .set('Authorization', 'Bearer token')
+      .send({ periodKey: '2026-04', force: true });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      ok: true,
+      periodKey: '2026-04',
+      userId: null,
+      habitAchievement: {
+        evaluated: 1,
+        qualified: 1,
+        pendingCreated: 1,
+        skipped: 0,
+        ignored: 0,
+        errors: 0,
+      },
+    });
+    expect(mockRunMonthlyPipelineForPeriod).toHaveBeenCalledWith({
+      periodKey: '2026-04',
+      force: true,
+      userId: undefined,
+      now: expect.any(Date),
+    });
+  });
+
+  it('runs monthly pipeline replay with force=true for a selected user', async () => {
+    const response = await request(app)
+      .post('/api/admin/monthly-pipeline/run')
+      .set('Authorization', 'Bearer token')
+      .send({ periodKey: '2026-04', force: true, userId: '00000000-0000-4000-8000-000000000001' });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      ok: true,
+      periodKey: '2026-04',
+      userId: '00000000-0000-4000-8000-000000000001',
+      habitAchievement: {
+        outcomes: [
+          expect.objectContaining({
+            userId: '00000000-0000-4000-8000-000000000001',
+            outcome: 'qualified_pending_created',
+          }),
+        ],
+      },
+    });
+    expect(mockRunMonthlyPipelineForPeriod).toHaveBeenCalledWith({
+      periodKey: '2026-04',
+      force: true,
+      userId: '00000000-0000-4000-8000-000000000001',
+      now: expect.any(Date),
     });
   });
 

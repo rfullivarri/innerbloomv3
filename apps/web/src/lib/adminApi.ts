@@ -8,6 +8,7 @@ import type {
   AdminModeUpgradeCtaOverride,
   AdminHabitAchievementRetroactiveRunResponse,
   AdminHabitAchievementDiagnosticsResponse,
+  AdminMonthlyPipelineRunResponse,
   AdminUser,
   AdminUserSubscriptionResponse,
   SubscriptionStatus,
@@ -238,6 +239,35 @@ export async function clearAdminModeUpgradeCtaOverride(userId: string) {
   }
 
   return response.json() as Promise<{ ok: boolean }>;
+}
+
+
+export async function runAdminMonthlyPipeline(payload: { periodKey: string; force?: boolean; userId?: string }) {
+  const url = buildApiUrl('/admin/monthly-pipeline/run');
+  const response = await apiAuthorizedFetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      periodKey: payload.periodKey,
+      force: payload.force,
+      userId: payload.userId,
+    }),
+  });
+
+  if (!response.ok) {
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+    throw new ApiError(response.status, body, url);
+  }
+
+  return response.json() as Promise<AdminMonthlyPipelineRunResponse>;
 }
 
 export async function runAdminMonthlyReview(userId: string) {
