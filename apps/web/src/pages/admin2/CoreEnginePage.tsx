@@ -305,6 +305,16 @@ export function CoreEnginePage() {
             {habitResult ? <div className="mt-2 rounded-lg border border-[color:var(--admin-border)] p-2 text-xs">
               <p>pendingCreated {habitResult.pendingCreated} · qualified {habitResult.qualified} · evaluated {habitResult.evaluated}</p>
               <p>skipped {habitResult.skipped} · ignored {habitResult.ignored} · expiredResolved {habitResult.expiredResolved} · errors {habitResult.errors}</p>
+              {habitResult.outcomes?.length ? (
+                <div className="mt-2 max-h-28 overflow-auto rounded border border-[color:var(--admin-border)] p-2">
+                  <p className="font-semibold">task outcomes ({habitResult.outcomes.length})</p>
+                  {habitResult.outcomes.slice(0, 12).map((outcome) => (
+                    <p key={`${outcome.taskId}-${outcome.outcome}-${outcome.detectedPeriodEnd ?? 'none'}`} className="text-[11px] text-[color:var(--admin-muted)]">
+                      {outcome.taskId}: {outcome.outcome} · {outcome.reason ?? 'ok'} · {outcome.detectedPeriodEnd ?? '—'} · {outcome.sources.join('+')}
+                    </p>
+                  ))}
+                </div>
+              ) : null}
             </div> : null}
             {habitError ? <p className="mt-2 text-xs text-red-300">{habitError}</p> : null}
             <button type="button" onClick={() => void runHabit()} disabled={runningHabit || (!selectedUser && !habitRunAllUsers)} className={`mt-3 ${BTN_PRIMARY}`}>{runningHabit ? 'Running…' : 'Run Habit Achievement Retroactive'}</button>

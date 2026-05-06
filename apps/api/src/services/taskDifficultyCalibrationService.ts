@@ -226,6 +226,12 @@ export type TaskDifficultyCalibrationRun = {
 
 type CalibrationRunSource = 'cron' | 'admin_run' | 'admin_monthly_backfill';
 
+const MONTHLY_CALIBRATION_CURSOR_SOURCES: readonly CalibrationRunSource[] = ['cron', 'admin_monthly_backfill'];
+
+export function resolveCalibrationCursorSources(source: CalibrationRunSource): readonly CalibrationRunSource[] | null {
+  return source === 'admin_run' ? null : MONTHLY_CALIBRATION_CURSOR_SOURCES;
+}
+
 type RunCalibrationOptions = {
   now?: Date;
   userId?: string;
@@ -282,14 +288,18 @@ async function runTaskDifficultyCalibrationEngine(options: RunCalibrationOptions
         continue;
       }
 
-      const lastResult = await pool.query<LastCalibrationRow>(
-        `SELECT period_end::text AS period_end
-           FROM task_difficulty_recalibrations
-          WHERE task_id = $1
-          ORDER BY period_end DESC
-          LIMIT 1`,
-        [task.task_id],
-      );
+      const cursorSources = resolveCalibrationCursorSources(source);
+      const lastResult = cursorSources
+        ? await pool.query<LastCalibrationRow>(
+            `SELECT period_end::text AS period_end
+               FROM task_difficulty_recalibrations
+              WHERE task_id = $1
+                AND source = ANY($2::text[])
+              ORDER BY period_end DESC
+              LIMIT 1`,
+            [task.task_id, [...cursorSources]],
+          )
+        : { rows: [] as LastCalibrationRow[] };
 
       const period = source === 'admin_run'
         ? {

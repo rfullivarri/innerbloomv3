@@ -87,14 +87,14 @@ describe('habitAchievementService evaluation', () => {
     expect(result.qualifies).toBe(true);
   });
 
-  it('keeps monthly source policy strict to cron by default', async () => {
+  it('uses canonical monthly sources by default and excludes admin_run', async () => {
     mockQuery.mockResolvedValueOnce({ rows: [] });
 
     await evaluateTaskHabitAchievement({ taskId: 'task-1' });
 
     expect(mockQuery).toHaveBeenCalledWith(
       expect.stringContaining('source = ANY($3::text[])'),
-      expect.arrayContaining(['task-1', expect.any(Number), ['cron']]),
+      expect.arrayContaining(['task-1', expect.any(Number), ['cron', 'admin_monthly_backfill']]),
     );
   });
 });
@@ -231,11 +231,22 @@ describe('habitAchievementService lifecycle transitions', () => {
       now: new Date('2026-04-01T00:00:00.000Z'),
     });
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       expiredResolved: 0,
       evaluated: 1,
+      qualified: 1,
       pendingCreated: 1,
+      skipped: 0,
+      ignored: 0,
+      errors: 0,
     });
+    expect(result.outcomes).toEqual([
+      expect.objectContaining({
+        taskId: 'task-1',
+        outcome: 'qualified_pending_created',
+        sources: ['cron', 'admin_monthly_backfill'],
+      }),
+    ]);
   });
 
   it('runs retroactive detection with admin summary counters', async () => {
@@ -299,7 +310,7 @@ describe('habitAchievementService lifecycle transitions', () => {
       now: new Date('2026-04-01T00:00:00.000Z'),
     });
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       scope: 'all_users',
       userId: null,
       backfill: {
@@ -320,6 +331,10 @@ describe('habitAchievementService lifecycle transitions', () => {
       ignored: 0,
       errors: 0,
     });
+    expect(result.outcomes).toEqual([
+      expect.objectContaining({ taskId: 'task-1', outcome: 'qualified_pending_created' }),
+      expect.objectContaining({ taskId: 'task-2', outcome: 'skipped_existing_record' }),
+    ]);
   });
 
   it('retroactive run evaluates historical cron candidates even when current task state is inactive/excluded', async () => {
@@ -359,7 +374,7 @@ describe('habitAchievementService lifecycle transitions', () => {
       now: new Date('2026-04-01T00:00:00.000Z'),
     });
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       scope: 'single_user',
       userId: '11111111-1111-4111-8111-111111111111',
       backfill: {
@@ -403,7 +418,7 @@ describe('habitAchievementService lifecycle transitions', () => {
       userId: '11111111-1111-4111-8111-111111111111',
     });
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       scope: 'single_user',
       userId: '11111111-1111-4111-8111-111111111111',
       backfill: {
@@ -436,7 +451,7 @@ describe('habitAchievementService lifecycle transitions', () => {
       userId: '11111111-1111-4111-8111-111111111111',
     });
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       scope: 'single_user',
       userId: '11111111-1111-4111-8111-111111111111',
       backfill: {

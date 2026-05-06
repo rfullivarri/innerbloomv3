@@ -4,6 +4,7 @@ import {
   decideDifficultyChange,
   resolveWeeklyTarget,
   isTaskEligibleForCalibration,
+  resolveCalibrationCursorSources,
 } from '../taskDifficultyCalibrationService.js';
 
 describe('taskDifficultyCalibrationService', () => {
@@ -29,6 +30,12 @@ describe('taskDifficultyCalibrationService', () => {
     );
 
     expect(selected).toEqual({ gameModeId: 2, weeklyTarget: 5 });
+  });
+
+  it('keeps admin_run out of the monthly calibration cursor', () => {
+    expect(resolveCalibrationCursorSources('cron')).toEqual(['cron', 'admin_monthly_backfill']);
+    expect(resolveCalibrationCursorSources('admin_monthly_backfill')).toEqual(['cron', 'admin_monthly_backfill']);
+    expect(resolveCalibrationCursorSources('admin_run')).toBeNull();
   });
 
   it('supports first-month eligibility and preserves monthly cadence afterwards', () => {
