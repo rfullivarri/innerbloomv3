@@ -12,7 +12,7 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
       alt: 'Mockup del dashboard real de Innerbloom en móvil.',
     },
     problem: {
-      title: 'Tu vida cambia. Tu rutina debería acompañarte.',
+      title: 'Si tu vida cambia, tu rutina debería acompañarte.',
       leftPrimary: 'Cuando arrancás',
       leftSecondary: 'Te ayuda a empezar con hábitos posibles.',
       rightPrimary: 'Cuando cuesta',
@@ -132,7 +132,7 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
       alt: 'Innerbloom real dashboard phone mockup.',
     },
     problem: {
-      title: 'Your life changes. Your routine should keep up.',
+      title: 'When your life changes, your routine should keep up.',
       leftPrimary: 'When you begin',
       leftSecondary: 'It helps you start with habits you can actually sustain.',
       rightPrimary: 'When life gets hard',
@@ -180,7 +180,7 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
     demo: {
       title: 'See how your Journey grows.',
       text: 'Tasks, GP, streaks, emotions, and balance in one experience that’s easy to follow.',
-      banner: 'Real product. Real progress.',
+      banner: 'Real product, real progress.',
       cta: 'View demo',
     },
     testimonials: {

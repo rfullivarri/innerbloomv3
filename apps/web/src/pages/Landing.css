@@ -3934,3 +3934,117 @@
     border-radius: 26px;
   }
 }
+
+/* V2-only refinements requested for the adaptive-life and demo sections. */
+.landing.landing--v2-narrative .truth-problem-section {
+  max-width: 1180px;
+}
+
+.landing.landing--v2-narrative .truth-problem-v2-stage {
+  width: min(1160px, 100%);
+  grid-template-columns: minmax(180px, 0.75fr) minmax(360px, 540px) minmax(180px, 0.75fr);
+  gap: clamp(12px, 2.2vw, 32px);
+}
+
+.landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static {
+  width: clamp(405px, 38vw, 540px);
+  max-width: min(88vw, 540px);
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+}
+
+.landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static::before,
+.landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static::after {
+  content: none;
+  display: none;
+}
+
+.landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.landing.landing--v2-narrative .visible-progress-top--v2-text-only {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+}
+
+.landing.landing--v2-narrative .visible-progress-top--v2-text-only .visible-progress-copy {
+  justify-items: center;
+  max-width: 760px;
+  padding-top: 0;
+  text-align: center;
+}
+
+.landing.landing--v2-narrative .visible-progress-top--v2-text-only .demo-title {
+  max-width: 18ch;
+}
+
+.landing.landing--v2-narrative .visible-progress-top--v2-text-only .demo-sub {
+  max-width: 58ch;
+}
+
+.landing.landing--v2-narrative .feature-showcase .container {
+  gap: clamp(12px, 1.5vw, 18px);
+}
+
+.landing.landing--v2-narrative .demo-bridge {
+  width: min(100%, 760px);
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: clamp(5px, 0.6vw, 7px) clamp(7px, 0.8vw, 10px);
+  gap: clamp(8px, 1vw, 12px);
+  border-radius: 999px;
+}
+
+.landing.landing--v2-narrative .demo-bridge::before {
+  inset: -3px 2px -4px;
+  border-radius: 999px;
+  filter: blur(8px);
+}
+
+.landing.landing--v2-narrative .demo-bridge::after {
+  border-radius: 999px;
+}
+
+.landing.landing--v2-narrative .demo-bridge-copy {
+  padding-left: clamp(8px, 1vw, 12px);
+  line-height: 1.25;
+}
+
+.landing.landing--v2-narrative .demo-actions .ib-primary-button {
+  padding: 0.48rem 0.9rem;
+  min-height: 34px;
+}
+
+@media (max-width: 840px) {
+  .landing.landing--v2-narrative .truth-problem-v2-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static {
+    width: clamp(285px, 76vw, 417px);
+    max-width: 92vw;
+  }
+
+  .landing.landing--v2-narrative .demo-bridge {
+    width: min(100%, 520px);
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding: 8px 9px;
+    gap: 7px;
+  }
+
+  .landing.landing--v2-narrative .demo-bridge-copy {
+    padding-left: 0;
+    text-align: center;
+  }
+
+  .landing.landing--v2-narrative .demo-actions {
+    justify-content: center;
+  }
+}

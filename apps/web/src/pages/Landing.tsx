@@ -979,7 +979,9 @@ export default function LandingPage({
           id="demo"
         >
           <div className="container narrow">
-            <div className="visible-progress-top">
+            <div
+              className={`visible-progress-top ${isV2Narrative ? "visible-progress-top--v2-text-only" : ""}`}
+            >
               <div className="visible-progress-copy">
                 <AdaptiveText as="h2" className="demo-title">
                   {copy.demo.title}
@@ -989,7 +991,8 @@ export default function LandingPage({
                 </AdaptiveText>
               </div>
 
-              <div className="visible-progress-module" aria-hidden>
+              {!isV2Narrative ? (
+                <div className="visible-progress-module" aria-hidden>
                 <div className="visible-progress-viewport">
                   <div className="visible-progress-scene">
                     <div className="visible-scene-region visible-scene-region--balance visible-scene-fragment visible-scene-fragment--radar">
@@ -1293,7 +1296,8 @@ export default function LandingPage({
                     </div>
                   </div>
                 </div>
-              </div>
+                </div>
+              ) : null}
             </div>
 
             <div className="demo-bridge">
