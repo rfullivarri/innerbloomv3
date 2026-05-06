@@ -1,5 +1,8 @@
 import { pool } from '../db.js';
-import { runMonthlyTaskDifficultyCalibration } from './taskDifficultyCalibrationService.js';
+import {
+  runMonthlyTaskDifficultyCalibration,
+  runMonthlyTaskDifficultyCalibrationForUser,
+} from './taskDifficultyCalibrationService.js';
 import { runUserMonthlyModeUpgradeAggregation } from './modeUpgradeMonthlyAggregationService.js';
 import { runMonthlyHabitAchievementDetection } from './habitAchievementService.js';
 
@@ -34,9 +37,10 @@ async function upsertPendingRun(periodKey: string): Promise<void> {
   );
 }
 
-export async function runMonthlyPipelineForPeriod(params: { periodKey?: string; now?: Date; force?: boolean }) {
+export async function runMonthlyPipelineForPeriod(params: { periodKey?: string; now?: Date; force?: boolean; userId?: string }) {
   const now = params.now ?? new Date();
   const periodKey = params.periodKey ?? previousMonthPeriodKey(now);
+  const userId = params.userId;
   const lockKey = lockKeyForPeriod(periodKey);
   const lock = await pool.query<{ locked: boolean }>('SELECT pg_try_advisory_lock($1) AS locked', [lockKey]);
   if (!lock.rows[0]?.locked) return { periodKey, skipped: true, reason: 'period_locked' as const };
@@ -71,19 +75,26 @@ export async function runMonthlyPipelineForPeriod(params: { periodKey?: string; 
 
     stage = 'growth_calibration';
     console.info('[monthly-pipeline] stage started', { periodKey, stage, attempt });
-    const calibration = await runMonthlyTaskDifficultyCalibration(now);
+    const calibration = userId
+      ? await runMonthlyTaskDifficultyCalibrationForUser({ userId, now })
+      : await runMonthlyTaskDifficultyCalibration(now);
     metadata.calibration = calibration;
     console.info('[monthly-pipeline] stage completed', { periodKey, stage, attempt, evaluated: calibration.evaluated, adjusted: calibration.adjusted });
 
     stage = 'mode_upgrade_aggregation';
     console.info('[monthly-pipeline] stage started', { periodKey, stage, attempt });
-    const aggregation = await runUserMonthlyModeUpgradeAggregation({ now, periodKey });
+    const aggregation = await runUserMonthlyModeUpgradeAggregation({ now, periodKey, userId });
     metadata.aggregation = aggregation;
     console.info('[monthly-pipeline] stage completed', { periodKey, stage, attempt, processed: aggregation.processed });
 
     stage = 'habit_achievement';
     console.info('[monthly-pipeline] stage started', { periodKey, stage, attempt });
-    const habit = await runMonthlyHabitAchievementDetection({ now, periodStart: aggregation.periodStart, nextPeriodStart: aggregation.nextPeriodStart });
+    const habit = await runMonthlyHabitAchievementDetection({
+      now,
+      periodStart: aggregation.periodStart,
+      nextPeriodStart: aggregation.nextPeriodStart,
+      userId,
+    });
     metadata.habitAchievement = habit;
     console.info('[monthly-pipeline] stage completed', {
       periodKey,
@@ -104,7 +115,7 @@ export async function runMonthlyPipelineForPeriod(params: { periodKey?: string; 
       [periodKey, stage, JSON.stringify(metadata)],
     );
     console.info('[monthly-pipeline] succeeded', { periodKey, attempt });
-    return { periodKey, attempt, calibration, aggregation, habitAchievement: habit };
+    return { periodKey, attempt, userId: userId ?? null, calibration, aggregation, habitAchievement: habit };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'unknown_error';
     await pool.query(

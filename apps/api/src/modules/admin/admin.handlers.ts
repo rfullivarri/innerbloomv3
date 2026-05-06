@@ -107,6 +107,15 @@ const jobIdParamSchema = z.object({
 const reminderSendBody = reminderSendBodySchema.default({ channel: 'email' });
 const feedbackDefinitionParamsSchema = z.object({ id: z.string().min(1) });
 
+const monthlyPipelineRunBodySchema = z.object({
+  periodKey: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}$/, { message: 'periodKey must be YYYY-MM' }),
+  force: z.coerce.boolean().default(false),
+  userId: z.string().uuid({ message: 'Invalid user id' }).optional(),
+});
+
 export const getAdminUsers = asyncHandler(async (req: Request, res: Response) => {
   const query = listUsersQuerySchema.parse(req.query);
   const result = await listUsers(query);
@@ -451,11 +460,12 @@ export const getAdminMonthlyPipelineStatus = asyncHandler(async (req: Request, r
 });
 
 export const postAdminMonthlyPipelineRun = asyncHandler(async (req: Request, res: Response) => {
-  const periodKey = String(req.body?.periodKey ?? '');
-  const force = Boolean(req.body?.force ?? false);
-  if (!/^\d{4}-\d{2}$/.test(periodKey)) {
-    throw new HttpError(400, 'invalid_period_key', 'periodKey must be YYYY-MM');
-  }
-  const result = await runMonthlyPipelineForPeriod({ periodKey, force, now: new Date() });
+  const body = monthlyPipelineRunBodySchema.parse(req.body ?? {});
+  const result = await runMonthlyPipelineForPeriod({
+    periodKey: body.periodKey,
+    force: body.force,
+    userId: body.userId,
+    now: new Date(),
+  });
   res.json({ ok: true, ...result });
 });
