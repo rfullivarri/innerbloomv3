@@ -63,7 +63,7 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
           chips: [],
         },
         {
-          title: 'Avanzás con misiones pequeñas.',
+          title: 'Avanzás con acciones pequeñas.',
           badge: 'Paso 3',
           bullets: ['Tu plan se transforma en acciones claras para Body, Mind y Soul.'],
           chips: [],
@@ -79,7 +79,7 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
     featureShowcase: { kicker: '', title: '', intro: '', items: [] },
     demo: {
       title: 'Visualizá tu Journey antes de empezarlo.',
-      text: 'Energía, emociones, misiones, GP y rachas en una experiencia simple de seguir.',
+      text: 'Energía, emociones, acciones, GP y rachas en una experiencia simple de seguir.',
       banner: 'Producto real, progreso real.',
       cta: 'Ver demo',
     },
@@ -172,14 +172,14 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
       steps: [
         { title: 'Tell us where you are.', badge: 'Step 1', bullets: ['A short onboarding captures your energy, goals, and friction points.'], chips: [] },
         { title: 'Get your starting rhythm.', badge: 'Step 2', bullets: ['Innerbloom defines an intensity that matches your current capacity: Low, Chill, Flow, or Evolve.'], chips: [] },
-        { title: 'Move through tiny missions.', badge: 'Step 3', bullets: ['Your plan becomes clear actions across Body, Mind, and Soul.'], chips: [] },
+        { title: 'Move through small actions.', badge: 'Step 3', bullets: ['Your plan becomes clear actions across Body, Mind, and Soul.'], chips: [] },
         { title: 'Adjust without restarting.', badge: 'Step 4', bullets: ['Progress, mood, and streaks help the system recalibrate with you.'], chips: [] },
       ],
     },
     featureShowcase: { kicker: '', title: '', intro: '', items: [] },
     demo: {
       title: 'Visualize your Journey before you start.',
-      text: 'Energy, emotions, missions, GP, and streaks in one experience that’s easy to follow.',
+      text: 'Energy, emotions, actions, GP, and streaks in one experience that’s easy to follow.',
       banner: 'Real product, real progress.',
       cta: 'View demo',
     },

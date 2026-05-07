@@ -139,20 +139,20 @@ const PILLAR_EXAMPLES_LABEL: Record<Language, string> = {
 
 const V2_METHOD_VISUALS = [
   [
-    "/landing-v2/method/step-01-signal-seal.jpg",
-    "/landing-v2/method/step-01-context-lens.jpg",
+    "/landing-v2/method/step-01-onboarding-context.jpg",
+    "/landing-v2/method/step-01-real-life-board.jpg",
   ],
   [
-    "/landing-v2/method/step-02-rhythm-orb.jpg",
-    "/landing-v2/method/step-02-mode-talisman.jpg",
+    "/landing-v2/method/step-02-rhythm-avatar-split.jpg",
+    "/landing-v2/method/step-02-rhythm-control.jpg",
   ],
   [
-    "/landing-v2/method/step-03-mission-token.jpg",
-    "/landing-v2/method/step-03-triad-path.jpg",
+    "/landing-v2/method/step-03-action-cards.jpg",
+    "/landing-v2/method/step-03-progress-phone.jpg",
   ],
   [
-    "/landing-v2/method/step-04-calibration-compass.jpg",
-    "/landing-v2/method/step-04-loop-medallion.jpg",
+    "/landing-v2/method/step-04-recalibration-dashboard.jpg",
+    "/landing-v2/method/step-04-adjusted-plan.jpg",
   ],
 ] as const;
 

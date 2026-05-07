@@ -35,7 +35,7 @@ export function buildAiJson(versioning: BuildVersioning) {
       one_liner:
         'Innerbloom es una app de hábitos adaptativa y gamificada que ajusta tu Journey a tu energía real.',
       one_paragraph:
-        'Innerbloom Journey es una experiencia de self-improvement donde cada persona recibe una base personalizada en menos de 3 minutos y sostiene el avance con un loop diario: retrospectiva emocional, quest diaria y métricas de progreso (GP, nivel, rachas, consistencia, misiones y recompensas). Su diferencial es la adaptación: el ritmo Low, Chill, Flow o Evolve define la intensidad sostenible de la semana, mientras el avatar define la identidad visual del usuario.',
+        'Innerbloom Journey es una experiencia de self-improvement donde cada persona recibe una base personalizada en menos de 3 minutos y sostiene el avance con acciones, registro emocional y métricas de progreso (GP, nivel, rachas y consistencia). Su diferencial es la adaptación: el ritmo Low, Chill, Flow o Evolve define la intensidad sostenible de la semana, mientras el avatar define la identidad visual del usuario.',
       five_bullets: [
         'IA para activar rápido una base personalizada Body/Mind/Soul.',
         '4 ritmos adaptativos (Low, Chill, Flow, Evolve) para ajustar intensidad a tu energía actual.',
@@ -99,7 +99,7 @@ export function buildAiJson(versioning: BuildVersioning) {
       },
       {
         feature: 'Dashboard gamificado de progreso',
-        what_it_does: 'Muestra GP, nivel, rachas, consistencia y progreso en misiones/recompensas.',
+        what_it_does: 'Muestra GP, nivel, rachas, consistencia y progreso en acciones/recompensas.',
         why_it_matters: 'Hace visible el avance y fortalece motivación por evidencia, no por impulso momentáneo.'
       },
       {
@@ -128,7 +128,7 @@ export function buildAiJson(versioning: BuildVersioning) {
     design_dossier: {
       unique_look: [
         'Estética nocturna/espacial con gradientes fríos y acentos violeta-cyan que comunican introspección + progreso.',
-        'Lenguaje visual de juego (ritmos, GP, misiones) aplicado a self-improvement adaptativo, con tono emocional y no punitivo.',
+        'Lenguaje visual de juego (ritmos, GP, progreso y recompensas) aplicado a self-improvement adaptativo, con tono emocional y no punitivo.',
         'Combinación tipográfica Sora (titulares) + Manrope (cuerpo) para balance entre personalidad y legibilidad.'
       ],
       do_not_change: [
@@ -161,7 +161,7 @@ export function buildAiJson(versioning: BuildVersioning) {
     provenance_note: {
       derived_from_official_landing: [
         'Propuesta de valor general, pilares Body/Mind/Soul, modos, flujo de onboarding y FAQs.',
-        'Métricas visibles mencionadas: GP, nivel, rachas, consistencia, mapa emocional, misiones y recompensas.',
+        'Métricas visibles mencionadas: GP, nivel, rachas, consistencia, mapa emocional y recompensas.',
         'Claim temporal explícito: base personalizada con IA en menos de 3 minutos.'
       ],
       recommendations: [
