@@ -137,6 +137,25 @@ const PILLAR_EXAMPLES_LABEL: Record<Language, string> = {
   en: "Suggested tasks:",
 };
 
+const V2_METHOD_VISUALS = [
+  [
+    "/landing-v2/method/step-01-signal-seal.jpg",
+    "/landing-v2/method/step-01-context-lens.jpg",
+  ],
+  [
+    "/landing-v2/method/step-02-rhythm-orb.jpg",
+    "/landing-v2/method/step-02-mode-talisman.jpg",
+  ],
+  [
+    "/landing-v2/method/step-03-mission-token.jpg",
+    "/landing-v2/method/step-03-triad-path.jpg",
+  ],
+  [
+    "/landing-v2/method/step-04-calibration-compass.jpg",
+    "/landing-v2/method/step-04-loop-medallion.jpg",
+  ],
+] as const;
+
 function renderMultilineText(text: string) {
   return text.split("\n").map((line, index) => (
     <Fragment key={`${line}-${index}`}>
@@ -405,6 +424,7 @@ function LandingV2NarrativeMethod({ how }: { how: LandingCopy["how"] }) {
       <div className="v2-method-steps">
         {how.steps.map((step, index) => {
           const isVisualFirst = index % 2 === 1;
+          const visualSources = V2_METHOD_VISUALS[index] ?? V2_METHOD_VISUALS[0];
           const copyBlock = (
             <div className="v2-method-step-copy">
               <span className="v2-method-step-badge">{step.badge}</span>
@@ -416,22 +436,20 @@ function LandingV2NarrativeMethod({ how }: { how: LandingCopy["how"] }) {
               </AdaptiveText>
             </div>
           );
-          const visualBlock =
-            index === 0 ? (
-              <div className="v2-method-visual v2-method-visual--image" aria-hidden>
+          const visualBlock = (
+            <div className="v2-method-visual v2-method-visual--image" aria-hidden>
+              {visualSources.map((src, visualIndex) => (
                 <img
-                  src="/landing/paso1.png"
+                  key={src}
+                  src={src}
                   alt=""
-                  className="v2-method-visual-image"
+                  className={`v2-method-visual-image ${visualIndex === 0 ? "is-primary" : "is-secondary"}`}
                   loading="lazy"
                   decoding="async"
                 />
-              </div>
-            ) : (
-              <div className="v2-method-visual" aria-hidden>
-                <div className="v2-method-visual-glow" />
-              </div>
-            );
+              ))}
+            </div>
+          );
 
           return (
             <article

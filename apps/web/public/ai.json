@@ -20,14 +20,14 @@
     "policy": "Este AI Dossier se mantiene fiel a la landing oficial. No inventa features ni claims no presentes en la landing."
   },
   "positioning": {
-    "one_liner": "Innerbloom convierte hábitos diarios en un journey gamificado de progreso visible con equilibrio entre Cuerpo, Mente y Alma.",
-    "one_paragraph": "Innerbloom Journey es una experiencia de self-improvement donde cada persona define su camino inicial, recibe una base personalizada con IA en menos de 3 minutos y sostiene el avance con un loop diario: retrospectiva emocional, quest diaria y métricas de progreso (GP, nivel, rachas, consistencia, misiones y recompensas). El producto se adapta a la energía real del momento para facilitar constancia sin culpa.",
+    "one_liner": "Innerbloom es una app de hábitos adaptativa y gamificada que ajusta tu Journey a tu energía real.",
+    "one_paragraph": "Innerbloom Journey es una experiencia de self-improvement donde cada persona recibe una base personalizada en menos de 3 minutos y sostiene el avance con un loop diario: retrospectiva emocional, quest diaria y métricas de progreso (GP, nivel, rachas, consistencia, misiones y recompensas). Su diferencial es la adaptación: el ritmo Low, Chill, Flow o Evolve define la intensidad sostenible de la semana, mientras el avatar define la identidad visual del usuario.",
     "five_bullets": [
       "IA para activar rápido una base personalizada Body/Mind/Soul.",
-      "4 modos (Low, Chill, Flow, Evolve) para ajustar el sistema a tu energía actual.",
+      "4 ritmos adaptativos (Low, Chill, Flow, Evolve) para ajustar intensidad a tu energía actual.",
+      "Avatar independiente del ritmo: Red Cat, Green Bear, Blue Amphibian o Violet Owl pueden convivir con cualquier ritmo.",
       "Loop diario de Daily Quest + emociones para transformar reflexión en acción.",
-      "Dashboard con métricas de progreso visibles: GP, nivel, rachas y mapa emocional.",
-      "Enfoque de equilibrio integral para sostener hábitos semanas y meses, no solo días."
+      "Dashboard con métricas de progreso visibles: GP, nivel, rachas y mapa emocional."
     ]
   },
   "icp": {
@@ -60,28 +60,23 @@
   "features": [
     {
       "feature": "Base personalizada con IA (Body/Mind/Soul)",
-      "what_it_does": "Genera una base inicial personalizada después de responder preguntas y elegir modo.",
+      "what_it_does": "Genera una base inicial personalizada después de responder preguntas sobre contexto, objetivos y energía.",
       "why_it_matters": "Reduce fricción de arranque y transforma intención difusa en plan accionable."
     },
     {
-      "feature": "🐈 RED CAT",
-      "what_it_does": "Modo pensado para cuando estás ",
-      "why_it_matters": "Un avatar vibrante para quienes quieren mostrarse con presencia y personalidad."
+      "feature": "Ritmos adaptativos: Low, Chill, Flow, Evolve",
+      "what_it_does": "Define la intensidad semanal del Journey: Low 1x/semana, Chill 2x/semana, Flow 3x/semana y Evolve 4x/semana.",
+      "why_it_matters": "El sistema no exige la misma carga todos los días: adapta tareas, objetivos y crecimiento a la capacidad real del usuario."
     },
     {
-      "feature": "🐻 GREEN BEAR",
-      "what_it_does": "Modo pensado para cuando estás ",
-      "why_it_matters": "Un avatar sereno y cercano para quienes priorizan calidez y estabilidad."
+      "feature": "Avatar visual independiente",
+      "what_it_does": "Permite elegir una identidad visual como Red Cat, Green Bear, Blue Amphibian o Violet Owl sin fijar el ritmo.",
+      "why_it_matters": "Hace que Innerbloom sea más personal sin confundir apariencia con intensidad: Red Cat puede estar en Low, Chill, Flow o Evolve."
     },
     {
-      "feature": "🦎 BLUE AMPHIBIAN",
-      "what_it_does": "Modo pensado para cuando estás ",
-      "why_it_matters": "Un avatar adaptable para quienes disfrutan explorar y moverse entre contextos."
-    },
-    {
-      "feature": "🦉 VIOLET OWL",
-      "what_it_does": "Modo pensado para cuando estás ",
-      "why_it_matters": "Un avatar con carácter y visión para quienes quieren proyectar claridad y criterio."
+      "feature": "Regla de producto: ritmo conduce comportamiento, avatar conduce apariencia",
+      "what_it_does": "El ritmo controla frecuencia, task generation, calibración y sugerencias; el avatar controla color, glow, media e identidad visual.",
+      "why_it_matters": "Evita una lectura errónea del producto: cambiar avatar no cambia la dificultad, y cambiar ritmo no debería cambiar quién sos visualmente."
     },
     {
       "feature": "Daily Quest + registro emocional",
@@ -102,26 +97,26 @@
   "onboarding_narrative": [
     {
       "step": 1,
-      "title": "Empieza realista, no perfecto",
-      "experience": "🟢 Empieza desde tu nivel real 🌱 Construye una base que puedas sostener",
-      "outcome": "Entrás con dirección y un modo alineado a tu energía."
+      "title": "Setea un inicio posible",
+      "experience": "🟢 Te hace las preguntas justas para entender tu punto de partida 🌱 Crea tus primeras tareas según lo que elegís y podés sostener",
+      "outcome": "Entrás con dirección y un ritmo alineado a tu energía."
     },
     {
       "step": 2,
-      "title": "Avanza en ciclos semanales",
-      "experience": "📅 Avanza por semanas, no por días sueltos 🧭 Detecta patrones reales y ajusta tu plan",
+      "title": "Convierte tus acciones en información",
+      "experience": "📅 Registra qué tareas completás cada semana 📊 Usa GP, rachas y progreso para entender tu constancia",
       "outcome": "Salís con una base concreta para comenzar hoy."
     },
     {
       "step": 3,
-      "title": "Ajusta el sistema a medida que creces",
-      "experience": "🔄 Recalibra la dificultad de tus tareas según tu evolución 📈 Te propone una intensidad mayor cuando tu constancia se fortalece",
+      "title": "Ajusta dificultad e intensidad",
+      "experience": "🔁 Si una tarea te está costando, el sistema lo detecta 📈 Si tu progreso es sólido, puede proponerte subir de ritmo",
       "outcome": "Convertís tu día en aprendizaje práctico y señal accionable."
     },
     {
       "step": 4,
-      "title": "Convierte constancia en hábitos reales",
-      "experience": "🏆 Convierte constancia en hábitos duraderos 🌿 Construye hábitos que sigan contigo más allá de una buena semana",
+      "title": "Reconoce hábitos consolidados",
+      "experience": "🏆 Detecta cuándo una tarea ya se volvió parte de tu rutina 🌿 Podés seguir midiéndola o guardarla como un logro alcanzado",
       "outcome": "Visualizás progreso acumulado y próximos desafíos."
     }
   ],
@@ -154,12 +149,13 @@
   "design_dossier": {
     "unique_look": [
       "Estética nocturna/espacial con gradientes fríos y acentos violeta-cyan que comunican introspección + progreso.",
-      "Lenguaje visual de juego (moods, GP, misiones) aplicado a self-improvement, con tono emocional y no punitivo.",
+      "Lenguaje visual de juego (ritmos, GP, misiones) aplicado a self-improvement adaptativo, con tono emocional y no punitivo.",
       "Combinación tipográfica Sora (titulares) + Manrope (cuerpo) para balance entre personalidad y legibilidad."
     ],
     "do_not_change": [
       "No romper la narrativa de equilibrio Body/Mind/Soul: es el núcleo estratégico del producto.",
-      "No eliminar ni diluir los 4 moods (Low, Chill, Flow, Evolve): explican la adaptación por energía.",
+      "No eliminar ni diluir los 4 ritmos (Low, Chill, Flow, Evolve): explican la adaptación por energía.",
+      "No volver a mezclar avatar y ritmo: avatar es apariencia; ritmo es intensidad/comportamiento.",
       "No sustituir la base oscura ni los acentos brand (primary/secondary): son parte central del reconocimiento visual.",
       "No mover el foco de constancia progresiva hacia promesas de resultados instantáneos."
     ],
@@ -177,9 +173,10 @@
       ]
     },
     "suggested_improvements": [
-      "Agregar un bloque comparativo por mood (cuándo usar cada uno) para reducir duda de entrada.",
+      "Agregar un bloque comparativo por ritmo (cuándo usar cada uno) para reducir duda de entrada.",
       "Incluir microcopy contextual en onboarding que anticipe “retomar sin culpa” antes del primer corte de racha.",
-      "Incorporar casos de uso técnicos (ej. estudiante/dev/creativo) reutilizando testimonios ya existentes."
+      "Incorporar casos de uso técnicos (ej. estudiante/dev/creativo) reutilizando testimonios ya existentes.",
+      "Explicar visualmente que Red Cat es un avatar elegible y no un ritmo."
     ]
   },
   "provenance_note": {
@@ -202,8 +199,8 @@
     "llms": "https://innerbloom.org/llms.txt"
   },
   "versioning": {
-    "version": "ceecfa87",
-    "lastUpdated": "2026-04-26T10:58:51.635Z"
+    "version": "2636c369",
+    "lastUpdated": "2026-05-07T09:10:00.028Z"
   },
   "design_tokens": {
     "palette": {

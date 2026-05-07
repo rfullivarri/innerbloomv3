@@ -3824,16 +3824,22 @@
 }
 
 .landing .v2-method-visual--image {
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  overflow: visible;
-  display: flex;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(34, 197, 94, 0.16), transparent 40%),
+    radial-gradient(circle at 78% 78%, rgba(20, 184, 166, 0.12), transparent 48%),
+    linear-gradient(145deg, rgba(5, 12, 11, 0.84), rgba(11, 21, 18, 0.72));
+  border: 1px solid rgba(187, 247, 208, 0.16);
+  box-shadow:
+    0 28px 72px rgba(6, 28, 52, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 0.72fr);
   align-items: center;
-  justify-content: center;
-  padding: 0;
+  gap: clamp(12px, 2vw, 22px);
+  padding: clamp(12px, 2vw, 22px);
 }
 
 .landing .v2-method-visual.v2-method-visual--image::before,
@@ -3843,11 +3849,19 @@
 
 .landing .v2-method-visual-image {
   display: block;
-  width: min(100%, 520px);
-  height: auto;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border-radius: clamp(18px, 2vw, 26px);
+  object-fit: cover;
   animation: v2-method-step-image-float 5.5s ease-in-out infinite;
   will-change: transform;
+}
+
+.landing .v2-method-visual-image.is-secondary {
+  height: 72%;
+  opacity: 0.86;
+  animation-delay: -1.8s;
 }
 
 @keyframes v2-method-step-image-float {
@@ -3897,11 +3911,14 @@
 }
 
 .landing[data-theme-mode="light"] .v2-method-visual--image {
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  border-color: rgba(34, 197, 94, 0.16);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(34, 197, 94, 0.08), transparent 40%),
+    radial-gradient(circle at 78% 78%, rgba(20, 184, 166, 0.08), transparent 48%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.74), rgba(233, 241, 255, 0.48));
+  box-shadow:
+    0 24px 62px rgba(64, 54, 104, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
 }
 
 .landing[data-theme-mode="light"] .v2-method-step-badge {
@@ -3964,6 +3981,10 @@
     min-height: clamp(230px, 64vw, 310px);
     order: 2;
   }
+
+  .landing .v2-method-visual--image {
+    grid-template-columns: minmax(0, 1fr) minmax(96px, 0.64fr);
+  }
 }
 
 @media (max-width: 430px) {
@@ -3984,6 +4005,15 @@
 
   .landing .v2-method-visual {
     border-radius: 26px;
+  }
+
+  .landing .v2-method-visual--image {
+    grid-template-columns: 1fr;
+    min-height: clamp(240px, 78vw, 330px);
+  }
+
+  .landing .v2-method-visual-image.is-secondary {
+    display: none;
   }
 }
 

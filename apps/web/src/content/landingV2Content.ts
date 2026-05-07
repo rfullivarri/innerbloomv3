@@ -7,8 +7,8 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
       titleLead: 'Hábitos sostenibles para',
       titleHighlight: 'gente real.',
       subtitle:
-        'Construí una rutina que cambia con vos: más simple cuando cuesta, más desafiante cuando avanzás.',
-      note: 'Progreso real, sin empezar de cero.',
+        'Construí un Journey adaptativo: más simple cuando cuesta, más desafiante cuando avanzás.',
+      note: 'Ritmo adaptable, progreso visible.',
       alt: 'Mockup del dashboard real de Innerbloom en móvil.',
     },
     problem: {
@@ -33,8 +33,8 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
     },
     modes: {
       kicker: 'RITMOS',
-      title: 'No todos necesitan el mismo ritmo.',
-      intro: 'Elegí una intensidad sostenible y cambiala cuando tu Journey lo pida.',
+      title: 'Tu avatar no define tu ritmo.',
+      intro: 'Red Cat, Green Bear, Blue Amphibian o Violet Owl son identidad visual. Low, Chill, Flow y Evolve son intensidad adaptable.',
       items: [
         { id: 'low', title: 'Low', state: '1x semana', goal: 'Empezar liviano.' },
         { id: 'chill', title: 'Chill', state: '2x semana', goal: 'Crear constancia.' },
@@ -44,42 +44,42 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
     },
     how: {
       kicker: '',
-      title: 'Un método que cambia contigo.',
+      title: 'Un método simple para días que no siempre son simples.',
       intro:
-        'Tus acciones se convierten en señales para ajustar el ritmo, sostener tu progreso y reconocer cuándo un hábito ya forma parte de tu vida.',
+        'No necesitás una rutina perfecta. Empezás desde donde estás, recibís un ritmo posible y el sistema se ajusta cuando tu vida cambia.',
       closingLine: '',
       closingBody: '',
       steps: [
         {
-          title: 'Empieza posible, no perfecto.',
+          title: 'Contás dónde estás.',
           badge: 'Paso 1',
-          bullets: ['Define un punto de partida real y crea hábitos que puedas sostener hoy.'],
+          bullets: ['Un onboarding corto entiende tu energía, objetivos y puntos de fricción.'],
           chips: [],
         },
         {
-          title: 'Cada acción deja una señal.',
+          title: 'Recibís tu ritmo inicial.',
           badge: 'Paso 2',
-          bullets: ['Registra tareas, GP, rachas y dificultad para entender cómo avanzas realmente.'],
+          bullets: ['Innerbloom define una intensidad acorde a tu capacidad actual: Low, Chill, Flow o Evolve.'],
           chips: [],
         },
         {
-          title: 'Ajusta sobre la marcha.',
+          title: 'Avanzás con misiones pequeñas.',
           badge: 'Paso 3',
-          bullets: ['Reduce la carga cuando cuesta y sube el desafío cuando estás listo para avanzar.'],
+          bullets: ['Tu plan se transforma en acciones claras para Body, Mind y Soul.'],
           chips: [],
         },
         {
-          title: 'Convierte acciones en hábitos.',
+          title: 'Ajustás sin volver a empezar.',
           badge: 'Paso 4',
-          bullets: ['Reconoce qué acciones ya forman parte de tu rutina y guárdalas como logros reales.'],
+          bullets: ['Progreso, ánimo y rachas ayudan al sistema a recalibrar contigo.'],
           chips: [],
         },
       ],
     },
     featureShowcase: { kicker: '', title: '', intro: '', items: [] },
     demo: {
-      title: 'Mirá cómo crece tu Journey.',
-      text: 'Tareas, GP, rachas, emociones y balance en una experiencia simple de seguir.',
+      title: 'Visualizá tu Journey antes de empezarlo.',
+      text: 'Energía, emociones, misiones, GP y rachas en una experiencia simple de seguir.',
       banner: 'Producto real, progreso real.',
       cta: 'Ver demo',
     },
@@ -127,8 +127,8 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
       titleLead: 'Sustainable habits for',
       titleHighlight: 'real people.',
       subtitle:
-        'Build a routine that changes with you: simpler when life gets hard, more challenging when you’re ready to grow.',
-      note: 'Real progress, without starting over.',
+        'Build an adaptive Journey: simpler when life gets hard, more challenging when you’re ready to grow.',
+      note: 'Adaptive rhythm, visible progress.',
       alt: 'Innerbloom real dashboard phone mockup.',
     },
     problem: {
@@ -153,8 +153,8 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
     },
     modes: {
       kicker: 'PACE',
-      title: 'Not everyone needs the same pace.',
-      intro: 'Choose a sustainable intensity and change it when your Journey asks for it.',
+      title: 'Your avatar does not define your rhythm.',
+      intro: 'Red Cat, Green Bear, Blue Amphibian, and Violet Owl are visual identity. Low, Chill, Flow, and Evolve are adaptive intensity.',
       items: [
         { id: 'low', title: 'Low', state: '1x week', goal: 'Start light.' },
         { id: 'chill', title: 'Chill', state: '2x week', goal: 'Build consistency.' },
@@ -164,22 +164,22 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
     },
     how: {
       kicker: '',
-      title: 'A method that changes with you.',
+      title: 'A simple method for days that are not always simple.',
       intro:
-        'Your actions become signals to adjust your pace, sustain your progress, and recognize when a habit has become part of your life.',
+        'No perfect routine required. Start where you are, get a rhythm that fits, and let the system adjust as life changes.',
       closingLine: '',
       closingBody: '',
       steps: [
-        { title: 'Start possible, not perfect.', badge: 'Step 1', bullets: ['Define a real starting point and create habits you can sustain today.'], chips: [] },
-        { title: 'Every action leaves a signal.', badge: 'Step 2', bullets: ['Track tasks, GP, streaks, and difficulty to understand how you’re really progressing.'], chips: [] },
-        { title: 'Adjust as you go.', badge: 'Step 3', bullets: ['Lower the load when it gets hard and raise the challenge when you’re ready to move forward.'], chips: [] },
-        { title: 'Turn actions into habits.', badge: 'Step 4', bullets: ['Recognize which actions are already part of your routine and save them as real achievements.'], chips: [] },
+        { title: 'Tell us where you are.', badge: 'Step 1', bullets: ['A short onboarding captures your energy, goals, and friction points.'], chips: [] },
+        { title: 'Get your starting rhythm.', badge: 'Step 2', bullets: ['Innerbloom defines an intensity that matches your current capacity: Low, Chill, Flow, or Evolve.'], chips: [] },
+        { title: 'Move through tiny missions.', badge: 'Step 3', bullets: ['Your plan becomes clear actions across Body, Mind, and Soul.'], chips: [] },
+        { title: 'Adjust without restarting.', badge: 'Step 4', bullets: ['Progress, mood, and streaks help the system recalibrate with you.'], chips: [] },
       ],
     },
     featureShowcase: { kicker: '', title: '', intro: '', items: [] },
     demo: {
-      title: 'See how your Journey grows.',
-      text: 'Tasks, GP, streaks, emotions, and balance in one experience that’s easy to follow.',
+      title: 'Visualize your Journey before you start.',
+      text: 'Energy, emotions, missions, GP, and streaks in one experience that’s easy to follow.',
       banner: 'Real product, real progress.',
       cta: 'View demo',
     },
