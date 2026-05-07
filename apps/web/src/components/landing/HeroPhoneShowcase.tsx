@@ -78,6 +78,7 @@ function resolveDashboardProgress(elapsedInLoop: number) {
 }
 
 type HeroShowcasePhase = "dashboard" | "splash";
+type HeroPhoneShowcaseVariant = "default" | "v3Right";
 
 function useHeroShowcaseTimeline({
   dashboardReady,
@@ -149,12 +150,17 @@ function useHeroShowcaseTimeline({
 function PhoneFrame({
   children,
   frameRef,
+  variant = "default",
 }: {
   children: ReactNode;
   frameRef?: RefObject<HTMLDivElement | null>;
+  variant?: HeroPhoneShowcaseVariant;
 }) {
   return (
-    <div ref={frameRef} className={styles.phoneFrame}>
+    <div
+      ref={frameRef}
+      className={`${styles.phoneFrame} ${variant === "v3Right" ? styles.phoneFrameModernRight : ""}`}
+    >
       <div className={styles.phoneIsland} aria-hidden>
         <span className={styles.phoneIslandLens} />
       </div>
@@ -347,7 +353,11 @@ function LoopSplashScene() {
   );
 }
 
-export function HeroPhoneShowcase() {
+export function HeroPhoneShowcase({
+  variant = "default",
+}: {
+  variant?: HeroPhoneShowcaseVariant;
+}) {
   const [dashboardReady, setDashboardReady] = useState(false);
   const [demoDataReady, setDemoDataReady] = useState(false);
   const [isHeroActive, setIsHeroActive] = useState(true);
@@ -396,7 +406,7 @@ export function HeroPhoneShowcase() {
   }, []);
 
   return (
-    <PhoneFrame frameRef={phoneFrameRef}>
+    <PhoneFrame frameRef={phoneFrameRef} variant={variant}>
       <div
         className={styles.phoneScreenBackground}
         style={{ "--hero-purple-afternoon": purpleAfternoonSolid } as CSSProperties}

@@ -23,6 +23,50 @@
   position: relative;
 }
 
+.phoneFrameModernRight {
+  border-radius: 46px;
+  background:
+    linear-gradient(
+      146deg,
+      #eff3fb 0%,
+      #858fa2 9%,
+      #202733 23%,
+      #080b12 54%,
+      #505b70 82%,
+      #f1f5fb 100%
+    );
+  padding: 9px;
+  box-shadow:
+    0 30px 84px rgba(7, 8, 18, 0.64),
+    0 10px 32px rgba(112, 91, 193, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.34),
+    inset 0 -8px 18px rgba(0, 0, 0, 0.42);
+  transform: perspective(1350px) rotateY(7deg) rotateX(0.8deg) rotateZ(-0.35deg);
+}
+
+.phoneFrameModernRight::before {
+  border-radius: 45px;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.04) 18%,
+      rgba(10, 14, 22, 0.16) 34%,
+      rgba(230, 238, 248, 0.06) 56%,
+      rgba(10, 14, 22, 0.18) 78%,
+      rgba(255, 255, 255, 0.24) 100%
+    );
+}
+
+.phoneFrameModernRight::after {
+  left: -1.5px;
+  right: auto;
+  top: 24%;
+  height: 18%;
+  opacity: 0.86;
+}
+
 .phoneFrame::before {
   content: "";
   position: absolute;
