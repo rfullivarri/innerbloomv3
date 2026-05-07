@@ -156,12 +156,6 @@ const V2_METHOD_VISUALS = [
   ],
 ] as const;
 
-const V3_PILLAR_VISUALS = [
-  { label: "BODY", src: "/sellos/body/sello_body_energy.png" },
-  { label: "MIND", glyph: "M" },
-  { label: "SOUL", src: "/sellos/soul/soul_presence_transparent.png" },
-] as const;
-
 function renderMultilineText(text: string) {
   return text.split("\n").map((line, index) => (
     <Fragment key={`${line}-${index}`}>
@@ -487,152 +481,24 @@ function LandingNarrativeMethod({
   );
 }
 
-function LandingV3ConversionVisual({
-  index,
-  language,
-}: {
-  index: number;
-  language: Language;
-}) {
-  if (index === 0) {
-    return (
-      <div className="v3-method-visual v3-method-visual--context" aria-hidden>
-        <div className="v3-method-arch">
-          <img src="/IB-COLOR-LOGO.png" alt="" className="v3-method-logo" />
-          <div className="v3-method-form">
-            <span className="v3-form-line v3-form-line--wide" />
-            <span className="v3-form-line" />
-            <div className="v3-form-pills">
-              <span />
-              <span />
-              <span />
-            </div>
-            <div className="v3-form-slider">
-              <span />
-            </div>
-            <div className="v3-form-dots">
-              {Array.from({ length: 6 }).map((_, dotIndex) => (
-                <span key={dotIndex} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (index === 1) {
-    const rhythmLabels = ["Low", "Chill", "Flow", "Evolve"];
-    const avatarLabels = ["Red Cat", "Green Bear", "Blue Amphibian", "Violet Owl"];
-    const avatarIds: Array<"low" | "chill" | "flow" | "evolve"> = [
-      "low",
-      "chill",
-      "flow",
-      "evolve",
-    ];
-
-    return (
-      <div className="v3-method-visual v3-method-visual--rhythm" aria-hidden>
-        <div className="v3-rhythm-panel">
-          {rhythmLabels.map((label, rhythmIndex) => (
-            <div className="v3-rhythm-row" key={label}>
-              <span className="v3-rhythm-label">{label}</span>
-              <span className="v3-rhythm-track">
-                <span style={{ width: `${34 + rhythmIndex * 18}%` }} />
-              </span>
-            </div>
-          ))}
-        </div>
-        <div className="v3-avatar-panel">
-          {avatarIds.map((avatarId, avatarIndex) => {
-            const visual = MODE_VISUALS[language][avatarId];
-            return (
-              <figure className="v3-avatar-chip" key={avatarId}>
-                <img src={visual.thumbImage} alt="" />
-                <figcaption>{avatarLabels[avatarIndex]}</figcaption>
-              </figure>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  if (index === 2) {
-    return (
-      <div className="v3-method-visual v3-method-visual--actions" aria-hidden>
-        <div className="v3-pillar-stack">
-          {V3_PILLAR_VISUALS.map((pillar, pillarIndex) => (
-            <article className="v3-pillar-action" key={pillar.label}>
-              {"src" in pillar ? (
-                <img src={pillar.src} alt="" />
-              ) : (
-                <span className="v3-pillar-glyph">{pillar.glyph}</span>
-              )}
-              <div>
-                <strong>{pillar.label}</strong>
-                <span />
-                <span />
-              </div>
-              <i style={{ "--action-delay": `${pillarIndex * 90}ms` } as CSSProperties} />
-            </article>
-          ))}
-        </div>
-        <div className="v3-progress-card">
-          <span className="v3-progress-ring" />
-          <span className="v3-progress-line" />
-          <span className="v3-progress-dots">
-            <i />
-            <i />
-            <i />
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="v3-method-visual v3-method-visual--recalibration" aria-hidden>
-      <div className="v3-plan-card v3-plan-card--before">
-        {Array.from({ length: 20 }).map((_, cellIndex) => (
-          <span key={cellIndex} className={cellIndex % 3 === 0 ? "is-filled" : ""} />
-        ))}
-      </div>
-      <div className="v3-plan-card v3-plan-card--after">
-        {Array.from({ length: 20 }).map((_, cellIndex) => (
-          <span key={cellIndex} className={[1, 6, 12, 18].includes(cellIndex) ? "is-filled" : ""} />
-        ))}
-        <i className="v3-plan-path" />
-      </div>
-      <div className="v3-calibration-control">
-        <span />
-      </div>
-    </div>
-  );
-}
-
-function LandingV3ConversionMethod({
-  how,
-  language,
-}: {
-  how: LandingCopy["how"];
-  language: Language;
-}) {
+function LandingV3ConversionMethod({ how }: { how: LandingCopy["how"] }) {
   return (
     <div className="v2-method-shell v3-method-shell">
       <div className="v2-method-heading">
-        <span className="v3-method-kicker">{how.kicker}</span>
         <AdaptiveText as="h2">{how.title}</AdaptiveText>
         <AdaptiveText as="p" className="section-sub v2-method-intro">
           {how.intro}
         </AdaptiveText>
       </div>
 
-      <div className="v2-method-steps">
+      <div className="v3-method-card-grid">
         {how.steps.map((step, index) => {
-          const isVisualFirst = index % 2 === 1;
-          const copyBlock = (
-            <div className="v2-method-step-copy">
+          return (
+            <article
+              className="v3-method-card"
+              key={step.badge}
+              style={{ "--delay": `${index * 80}ms` } as CSSProperties}
+            >
               <span className="v2-method-step-badge">{step.badge}</span>
               <AdaptiveText as="h3" className="v2-method-step-title">
                 {step.title}
@@ -640,26 +506,6 @@ function LandingV3ConversionMethod({
               <AdaptiveText as="p" className="v2-method-step-description">
                 {step.bullets[0]}
               </AdaptiveText>
-            </div>
-          );
-          const visualBlock = <LandingV3ConversionVisual index={index} language={language} />;
-
-          return (
-            <article
-              className={`v2-method-step v3-method-step ${isVisualFirst ? "v2-method-step--visual-first" : ""}`}
-              key={step.badge}
-            >
-              {isVisualFirst ? (
-                <>
-                  {visualBlock}
-                  {copyBlock}
-                </>
-              ) : (
-                <>
-                  {copyBlock}
-                  {visualBlock}
-                </>
-              )}
             </article>
           );
         })}
@@ -1181,7 +1027,7 @@ export default function LandingPage({
         <section className="how section-pad reveal-on-scroll" id="how">
           <div className="container narrow">
             {isV3Conversion ? (
-              <LandingV3ConversionMethod how={copy.how} language={language} />
+              <LandingV3ConversionMethod how={copy.how} />
             ) : isV2Narrative ? (
               <LandingNarrativeMethod how={copy.how} visuals={V2_METHOD_VISUALS} />
             ) : (
