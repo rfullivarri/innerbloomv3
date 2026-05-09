@@ -102,6 +102,19 @@ function getRecalibrationActionLabel(action: RecalibrationAction, t: Translate):
   return t('dashboard.streakTaskInsights.recalibration.action.keep');
 }
 
+function getRecalibrationChipLabel(action: RecalibrationAction, language: PostLoginLanguage): string {
+  if (action === 'down') {
+    return language === 'es' ? 'Bajó la dificultad' : 'Difficulty lowered';
+  }
+  if (action === 'up') {
+    return language === 'es' ? 'Subió la dificultad' : 'Difficulty increased';
+  }
+  if (action === 'keep') {
+    return language === 'es' ? 'Se mantuvo' : 'Kept';
+  }
+  return language === 'es' ? 'Sin ajuste reciente' : 'No recent adjustment';
+}
+
 function localizeDifficultyChipLabel(
   difficulty: string | null | undefined,
   locale: PostLoginLanguage,
@@ -124,68 +137,78 @@ function RecalibrationTrendIndicator({
   latest,
   eligible,
   tooltipLabel,
-  onToggleTooltip,
-  onOpenTooltip,
-  tooltipOpen,
-  onCloseTooltip,
+  expandedLabel,
   tooltipId,
 }: {
   latest: RecalibrationRecord | null;
   eligible: boolean;
   tooltipLabel: string;
-  onToggleTooltip: () => void;
-  onOpenTooltip: () => void;
-  tooltipOpen: boolean;
-  onCloseTooltip: () => void;
+  expandedLabel: string;
   tooltipId: string;
 }) {
   const action = normalizeRecalibrationAction(latest?.action);
 
-  const config: Record<Exclude<RecalibrationAction, 'none'>, { icon: string; tone: string }> = {
-    down: { icon: '↓', tone: 'border-emerald-500/70 bg-emerald-300 text-emerald-950 dark:border-emerald-400/60 dark:bg-emerald-500 dark:text-emerald-950' },
-    keep: { icon: '•', tone: 'border-amber-500/70 bg-amber-300 text-amber-950 dark:border-amber-400/60 dark:bg-amber-400 dark:text-amber-950' },
-    up: { icon: '↑', tone: 'border-rose-500/70 bg-rose-300 text-rose-950 dark:border-rose-400/60 dark:bg-rose-500 dark:text-rose-950' },
+  const config: Record<Exclude<RecalibrationAction, 'none'>, { icon: string; tone: string; glow: string }> = {
+    down: {
+      icon: '↓',
+      tone: 'border-emerald-300/70 bg-emerald-400 text-emerald-950 dark:border-emerald-300/70 dark:bg-emerald-500 dark:text-emerald-950',
+      glow: 'shadow-[0_0_0_3px_rgba(16,185,129,0.18),0_10px_24px_rgba(16,185,129,0.28)]',
+    },
+    keep: {
+      icon: '•',
+      tone: 'border-amber-300/80 bg-amber-300 text-amber-950 dark:border-amber-300/80 dark:bg-amber-400 dark:text-amber-950',
+      glow: 'shadow-[0_0_0_3px_rgba(251,191,36,0.16),0_10px_24px_rgba(251,191,36,0.22)]',
+    },
+    up: {
+      icon: '↑',
+      tone: 'border-rose-300/75 bg-rose-400 text-rose-950 dark:border-rose-300/70 dark:bg-rose-500 dark:text-rose-950',
+      glow: 'shadow-[0_0_0_3px_rgba(244,63,94,0.17),0_10px_24px_rgba(244,63,94,0.26)]',
+    },
   };
 
   const fallback = !latest || action === 'none' || !eligible;
+  const [isExpanded, setIsExpanded] = useState(false);
+  const autoPreviewKey = `${latest?.recalibratedAt ?? latest?.periodStart ?? latest?.periodEnd ?? 'none'}-${action}-${eligible ? 'eligible' : 'blocked'}`;
 
   useEffect(() => {
-    if (!tooltipOpen) return;
-    const listener = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (!target?.closest('[data-recalibration-tooltip]')) {
-        onCloseTooltip();
-      }
-    };
-    document.addEventListener('mousedown', listener);
-    return () => document.removeEventListener('mousedown', listener);
-  }, [onCloseTooltip, tooltipOpen]);
+    if (fallback) {
+      setIsExpanded(false);
+      return;
+    }
+    setIsExpanded(true);
+    const timeout = window.setTimeout(() => setIsExpanded(false), 1500);
+    return () => window.clearTimeout(timeout);
+  }, [autoPreviewKey, fallback]);
 
   return (
     <div className="relative" data-recalibration-tooltip>
       <button
         type="button"
-        onClick={onToggleTooltip}
-        onMouseEnter={onOpenTooltip}
-        onMouseLeave={onCloseTooltip}
+        onClick={() => setIsExpanded((current) => !current)}
         className={cx(
-          'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/50',
-          fallback ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] text-[color:var(--color-slate-300)]' : config[action].tone,
+          'inline-flex h-7 shrink-0 items-center overflow-hidden rounded-full border text-xs font-bold leading-none transition-[width,max-width,box-shadow,filter] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/50',
+          isExpanded ? 'w-[9.5rem] max-w-[9.5rem] pr-3' : 'w-7 max-w-7 justify-start pr-0',
+          fallback
+            ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] text-[color:var(--color-slate-300)] shadow-[0_0_0_3px_rgba(148,163,184,0.10)]'
+            : `${config[action].tone} ${config[action].glow}`,
         )}
         aria-label={tooltipLabel}
-        aria-describedby={tooltipOpen ? tooltipId : undefined}
+        aria-expanded={isExpanded}
+        aria-describedby={isExpanded ? tooltipId : undefined}
       >
-        {fallback ? '•' : config[action].icon}
-      </button>
-      {tooltipOpen && (
-        <div
+        <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center text-base font-black leading-none" aria-hidden>
+          {fallback ? '•' : config[action].icon}
+        </span>
+        <span
           id={tooltipId}
-          role="tooltip"
-          className="absolute left-0 top-8 z-20 w-64 max-w-[calc(100vw-3rem)] rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] p-2 text-xs text-[color:var(--color-slate-200)] shadow-xl"
+          className={cx(
+            'whitespace-nowrap transition-opacity duration-200',
+            isExpanded ? 'opacity-100' : 'pointer-events-none opacity-0',
+          )}
         >
-          {tooltipLabel}
-        </div>
-      )}
+          {fallback ? tooltipLabel : expandedLabel}
+        </span>
+      </button>
     </div>
   );
 }
@@ -568,8 +591,8 @@ export function TaskInsightsModal({
   const recalibrationHistory = (recalibration?.history ?? []).slice(0, 3);
   const recalibrationLatest = recalibration?.latest ?? recalibrationHistory[0] ?? null;
   const isRecalibrationEligible = recalibration?.eligible ?? Boolean(recalibrationLatest || recalibrationHistory.length);
-  const [isRecalibrationTooltipOpen, setIsRecalibrationTooltipOpen] = useState(false);
   const recalibrationTooltipId = useId();
+  const recalibrationAction = normalizeRecalibrationAction(recalibrationLatest?.action);
 
   const xpPerCompletion = useMemo(() => {
     if (monthTotal > 0 && monthXp > 0) {
@@ -669,10 +692,7 @@ export function TaskInsightsModal({
                     ? t('dashboard.streakTaskInsights.recalibration.tooltip.latest')
                     : t('dashboard.streakTaskInsights.recalibration.tooltip.empty')
                 }
-                tooltipOpen={isRecalibrationTooltipOpen}
-                onToggleTooltip={() => setIsRecalibrationTooltipOpen((prev) => !prev)}
-                onOpenTooltip={() => setIsRecalibrationTooltipOpen(true)}
-                onCloseTooltip={() => setIsRecalibrationTooltipOpen(false)}
+                expandedLabel={getRecalibrationChipLabel(recalibrationAction, language)}
                 tooltipId={recalibrationTooltipId}
               />
             </div>
@@ -696,7 +716,7 @@ export function TaskInsightsModal({
               <div className="space-y-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="space-y-1">
-                    <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">{t('dashboard.streakTaskInsights.activity')}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)] dark:text-slate-300">{t('dashboard.streakTaskInsights.activity')}</p>
                     <div className="flex justify-center">
                       <div className="inline-flex w-full max-w-[240px] items-center justify-between gap-1 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-2 py-0.5 text-[11px] font-semibold text-[color:var(--color-slate-100)]">
                         {[
@@ -755,12 +775,12 @@ export function TaskInsightsModal({
               </div>
             )}
             {status === 'success' && previewAchievement && (
-              <PreviewAchievementCard previewAchievement={previewAchievement} language={language} />
+              <PreviewAchievementCard previewAchievement={previewAchievement} language={language} variant="landing" />
             )}
             {status === 'success' && !previewAchievement && (
               <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">{t('dashboard.streakTaskInsights.weeklyProgress')}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)] dark:text-slate-300">{t('dashboard.streakTaskInsights.weeklyProgress')}</p>
                   <span className="text-xs text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.goal', { goal: weeklyGoal })}</span>
                 </div>
                 <WeeklyCompletionDonut
@@ -781,7 +801,7 @@ export function TaskInsightsModal({
 
             <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">{t('dashboard.streakTaskInsights.recalibration.title')}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)] dark:text-slate-300">{t('dashboard.streakTaskInsights.recalibration.title')}</p>
                 {recalibrationLatest?.recalibratedAt && (
                   <span className="text-[11px] text-[color:var(--color-slate-400)]">
                     {t('dashboard.streakTaskInsights.recalibration.latest', { date: formatCompactDate(recalibrationLatest.recalibratedAt, language) })}
