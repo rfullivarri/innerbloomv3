@@ -181,7 +181,7 @@ describe('RewardsSection achieved shelf overlays', () => {
     expect(screen.getByText('↑ 1')).toBeInTheDocument();
     expect(screen.getByText('• 1')).toBeInTheDocument();
     expect(screen.getByText('↓ 1')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'View results' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /↑ 1.*↓ 1.*2026-03/ })).toBeInTheDocument();
   });
 
   it('renders growth calibration empty state when there are no results', async () => {
@@ -206,7 +206,7 @@ describe('RewardsSection achieved shelf overlays', () => {
     getTaskInsightsMock.mockResolvedValue(insightsResponse);
 
     render(<RewardsSection userId="user-123" initialData={initialData} />);
-    fireEvent.click(screen.getByRole('button', { name: 'View results' }));
+    fireEvent.click(screen.getByRole('button', { name: /↑ 1.*↓ 1.*2026-03/ }));
 
     expect(await screen.findByText('Task')).toBeInTheDocument();
     expect(screen.getAllByText('Hydrate').length).toBeGreaterThan(0);
@@ -217,7 +217,7 @@ describe('RewardsSection achieved shelf overlays', () => {
     expect(screen.getAllByText('↓').length).toBeGreaterThan(0);
   });
 
-  it('makes non-achieved tasks clickable and opens preview overlay with preview achievement card', async () => {
+  it('makes non-achieved tasks clickable and opens the habit development back face', async () => {
     getRewardsHistoryMock.mockResolvedValue(initialData);
     getTaskInsightsMock.mockResolvedValue(insightsResponse);
 
@@ -228,7 +228,8 @@ describe('RewardsSection achieved shelf overlays', () => {
     const previewButton = screen.getByRole('button', { name: /Read 10 pages/i });
     fireEvent.click(previewButton);
 
-    expect(await screen.findByText('Seal path')).toBeInTheDocument();
+    expect(await screen.findByText('Achievement locked')).toBeInTheDocument();
+    expect(await screen.findByText('Habit development')).toBeInTheDocument();
     expect(await screen.findByLabelText('preview achievement score 74')).toBeInTheDocument();
     await waitFor(() => expect(getTaskInsightsMock).toHaveBeenCalledWith('task-preview'));
   });
@@ -241,11 +242,15 @@ describe('RewardsSection achieved shelf overlays', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Hydrate/i }));
 
-    expect(await screen.findByText('Tap again to view the back side')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /Tap again to view the back side/i }));
-
+    expect(await screen.findByText('Achievement unlocked')).toBeInTheDocument();
+    expect(await screen.findByText('GP before')).toBeInTheDocument();
     expect(await screen.findByText('Keep maintained')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Hydrate/i }));
+
+    await waitFor(() =>
+      expect(screen.queryByText('Achievement unlocked')).not.toBeInTheDocument(),
+    );
     expect(toggleTaskHabitAchievementMaintainedMock).not.toHaveBeenCalled();
   });
 
@@ -255,7 +260,6 @@ describe('RewardsSection achieved shelf overlays', () => {
 
     render(<RewardsSection userId="user-123" initialData={initialData} />);
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Carousel' }));
     fireEvent.click(screen.getByRole('button', { name: /Read 10 pages/i }));
 
     expect(await screen.findByText('Habit development')).toBeInTheDocument();
