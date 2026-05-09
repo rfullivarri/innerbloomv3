@@ -1469,10 +1469,18 @@ function AchievedShelf({
                     activeCarouselIndex === index;
                   const isAchieved = habit.status !== "not_achieved";
                   const slotLabel = getSealBadge(habit);
+                  const cardStatusLabel = isAchieved
+                    ? language === "es"
+                      ? "hábito logrado"
+                      : "achieved habit"
+                    : language === "es"
+                      ? "hábito bloqueado"
+                      : "locked habit";
                   return (
-                    <button
+                    <div
                       key={habit.id}
-                      type="button"
+                      role="button"
+                      tabIndex={0}
                       data-achievement-carousel-index={index}
                       data-demo-anchor={
                         demoAnchors?.achievedCardTaskId === habit.taskId
@@ -1482,15 +1490,30 @@ function AchievedShelf({
                             : undefined
                       }
                       onClick={() => handleCarouselCardClick(habit.id, index)}
-                      className={`ib-card-contour-shadow relative h-[27.5rem] w-[86%] shrink-0 snap-center overflow-hidden rounded-3xl border p-3.5 text-left transition sm:h-[24rem] sm:w-[22.5rem] sm:p-4 lg:h-[29rem] lg:w-[calc((100%-2rem)/3)] lg:max-w-[25rem] lg:snap-start lg:p-5 xl:h-[30rem] ${
-                        isAchieved
-                          ? "border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] shadow-[0_16px_30px_rgba(2,8,23,0.14)] dark:shadow-[0_16px_30px_rgba(2,8,23,0.34)]"
-                          : "border-dashed border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-1)]/82 shadow-[0_12px_24px_rgba(2,8,23,0.1)] dark:border-[color:var(--color-border-subtle)] dark:shadow-[0_12px_24px_rgba(2,8,23,0.22)]"
-                      }`}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          handleCarouselCardClick(habit.id, index);
+                        }
+                      }}
+                      aria-pressed={isFlipped}
+                      aria-label={`${habit.taskName}, ${cardStatusLabel}`}
+                      className="relative h-[27.5rem] w-[86%] shrink-0 snap-center bg-transparent p-0 text-left [perspective:1000px] sm:h-[24rem] sm:w-[22.5rem] lg:h-[29rem] lg:w-[calc((100%-2rem)/3)] lg:max-w-[25rem] lg:snap-start xl:h-[30rem]"
                     >
-                      {!isFlipped ? (
+                      <div
+                        className={`relative h-full w-full transition-transform ease-[cubic-bezier(0.2,0.82,0.2,1)] [transform-style:preserve-3d] ${
+                          prefersReducedMotion ? "duration-0" : "duration-700"
+                        } ${isFlipped ? "[transform:rotateY(180deg)]" : ""}`}
+                      >
                         <div
-                          className="relative flex h-full flex-col text-center"
+                          aria-hidden={isFlipped}
+                          className={`ib-card-contour-shadow absolute inset-0 flex h-full flex-col overflow-hidden rounded-[1.9rem] border p-3.5 text-center [backface-visibility:hidden] sm:p-4 lg:p-5 ${
+                            isAchieved
+                              ? activeCarouselIndex === index
+                                ? "border-amber-400/80 bg-[color:var(--color-surface-elevated)] shadow-[0_0_0_1px_rgba(251,191,36,0.16),0_20px_42px_rgba(2,8,23,0.16)] dark:bg-[rgba(7,13,16,0.78)] dark:shadow-[0_0_0_1px_rgba(251,191,36,0.16),0_22px_44px_rgba(0,0,0,0.26)]"
+                                : "border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] shadow-[0_16px_30px_rgba(2,8,23,0.12)] dark:bg-[rgba(7,13,16,0.62)] dark:shadow-[0_16px_30px_rgba(2,8,23,0.32)]"
+                              : "border-dashed border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-1)]/82 shadow-[0_12px_24px_rgba(2,8,23,0.1)] dark:border-[color:var(--color-border-subtle)] dark:bg-[rgba(7,13,16,0.58)] dark:shadow-[0_12px_24px_rgba(2,8,23,0.22)]"
+                          }`}
                           data-demo-anchor={
                             demoAnchors?.achievedCardTaskId === habit.taskId
                               ? demoAnchors?.achievedCardFront
@@ -1524,74 +1547,95 @@ function AchievedShelf({
                               }
                             />
                           </div>
-                          <div className="mt-auto space-y-1 pb-2">
-                            <p className="text-lg font-semibold text-[color:var(--color-text-strong)]">
+                          <div className="mt-auto space-y-2 pb-2">
+                            <p className="text-xl font-semibold leading-tight text-[color:var(--color-text-strong)]">
                               {habit.taskName}
                             </p>
-                            <p className="line-clamp-1 text-sm font-medium text-[color:var(--color-text-muted)]">
+                            <p className="line-clamp-1 text-base font-medium text-[color:var(--color-text-muted)]">
                               {habit.trait?.name ??
                                 (language === "es"
                                   ? "Rasgo en progreso"
                                   : "Trait in progress")}
                             </p>
-                            <p className="text-[11px] text-[color:var(--color-text-subtle)]">
-                              {language === "es"
-                                ? "Toca para ver más"
-                                : "Tap to see more"}
-                            </p>
+                            {isAchieved ? (
+                              <span className="mx-auto inline-flex w-fit rotate-[-2deg] rounded-full border border-emerald-400/45 bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700 shadow-[0_8px_18px_rgba(16,185,129,0.12)] dark:text-emerald-200">
+                                {language === "es"
+                                  ? "Hábito logrado"
+                                  : "Achieved habit"}
+                              </span>
+                            ) : (
+                              <p className="text-[11px] text-[color:var(--color-text-subtle)]">
+                                {language === "es"
+                                  ? "Toca para ver más"
+                                  : "Tap to see more"}
+                              </p>
+                            )}
                           </div>
                         </div>
-                      ) : isAchieved ? (
+
                         <div
-                          className="flex h-full flex-col gap-3 overflow-hidden"
-                          data-demo-anchor={demoAnchors?.achievedCardBack}
+                          aria-hidden={!isFlipped}
+                          className={`ib-card-contour-shadow absolute inset-0 flex h-full flex-col overflow-hidden rounded-[1.9rem] border p-3.5 text-left shadow-[0_18px_38px_rgba(2,8,23,0.18)] [backface-visibility:hidden] [transform:rotateY(180deg)] sm:p-4 lg:p-5 ${
+                            isAchieved
+                              ? "border-amber-400/85 bg-[radial-gradient(circle_at_50%_18%,rgba(251,191,36,0.12),transparent_46%),var(--color-surface-elevated)] dark:bg-[radial-gradient(circle_at_50%_18%,rgba(251,191,36,0.16),transparent_46%),rgba(7,13,16,0.84)]"
+                              : "border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] dark:bg-[rgba(7,13,16,0.84)]"
+                          }`}
+                          data-demo-anchor={
+                            isAchieved
+                              ? demoAnchors?.achievedCardBack
+                              : demoAnchors?.blockedCardBack
+                          }
                         >
-                          <AchievedHabitBackContent
-                            habit={habit}
-                            language={language}
-                            disableRemote={disableRemote}
-                            maintainPendingHabitId={maintainPendingHabitId}
-                            onToggleMaintainedWithPending={
-                              handleToggleMaintained
-                            }
-                          />
-                          <p className="mt-auto text-xs text-[color:var(--color-text-dim)]">
-                            {language === "es"
-                              ? "Toca otra vez para volver al frente"
-                              : "Tap again to return to front"}
-                          </p>
+                          {isFlipped ? (
+                            isAchieved ? (
+                              <>
+                                <AchievedHabitBackContent
+                                  habit={habit}
+                                  language={language}
+                                  disableRemote={disableRemote}
+                                  maintainPendingHabitId={maintainPendingHabitId}
+                                  onToggleMaintainedWithPending={
+                                    handleToggleMaintained
+                                  }
+                                  compact
+                                />
+                                <p className="mt-auto text-xs text-[color:var(--color-text-dim)]">
+                                  {language === "es"
+                                    ? "Toca otra vez para volver al frente"
+                                    : "Tap again to return to front"}
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <div className="space-y-0.5 sm:space-y-0">
+                                  <p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-text-dim)]">
+                                    {language === "es"
+                                      ? "Logro bloqueado"
+                                      : "Achievement locked"}
+                                  </p>
+                                  <h3 className="text-[15px] font-semibold leading-[1.2] text-[color:var(--color-text-strong)] sm:text-base">
+                                    {habit.taskName}
+                                  </h3>
+                                </div>
+                                <div className="min-h-0 flex-1">
+                                  <LockedAchievementHabitDevelopment
+                                    habit={habit}
+                                    language={language}
+                                    disableRemote={disableRemote}
+                                    mockPreviewAchievementByTaskId={
+                                      mockPreviewAchievementByTaskId
+                                    }
+                                    loadOnVisible={isFlipped}
+                                    compact={useCompactLockedPreview}
+                                    embedded
+                                  />
+                                </div>
+                              </>
+                            )
+                          ) : null}
                         </div>
-                      ) : (
-                        <div
-                          className="flex h-full flex-col gap-1 overflow-hidden sm:gap-0.5"
-                          data-demo-anchor={demoAnchors?.blockedCardBack}
-                        >
-                          <div className="space-y-0.5 sm:space-y-0">
-                            <p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-text-dim)]">
-                              {language === "es"
-                                ? "Logro bloqueado"
-                                : "Achievement locked"}
-                            </p>
-                            <h3 className="text-[15px] font-semibold leading-[1.2] text-[color:var(--color-text-strong)] sm:text-base">
-                              {habit.taskName}
-                            </h3>
-                          </div>
-                          <div className="min-h-0 flex-1">
-                            <LockedAchievementHabitDevelopment
-                              habit={habit}
-                              language={language}
-                              disableRemote={disableRemote}
-                              mockPreviewAchievementByTaskId={
-                                mockPreviewAchievementByTaskId
-                              }
-                              loadOnVisible={isFlipped}
-                              compact={useCompactLockedPreview}
-                              embedded
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </button>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
@@ -2105,6 +2149,7 @@ function AchievedHabitBackContent({
   maintainPendingHabitId,
   onToggleMaintainedWithPending,
   centerAligned = false,
+  compact = false,
 }: {
   habit: HabitAchievementShelfItem;
   language: "es" | "en";
@@ -2115,11 +2160,68 @@ function AchievedHabitBackContent({
     enabled: boolean,
   ) => Promise<void>;
   centerAligned?: boolean;
+  compact?: boolean;
 }) {
   const traitLabel =
     habit.trait?.name ||
     habit.trait?.code ||
     (language === "es" ? "Sin rasgo visible" : "No visible trait");
+
+  if (compact) {
+    const achievedDate = habit.achievedAt?.slice(0, 10) ?? "—";
+    return (
+      <div className="flex h-full w-full flex-col justify-center gap-3">
+        <div className="space-y-2 text-center">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-amber-600 dark:text-amber-300">
+            {language === "es" ? "Logro desbloqueado" : "Achievement unlocked"}
+          </p>
+          <p className="text-xl font-semibold leading-tight text-[color:var(--color-text-strong)]">
+            {habit.taskName}
+          </p>
+          <p className="text-base leading-tight text-[color:var(--color-text-muted)]">
+            {traitLabel}
+          </p>
+        </div>
+        <dl className="mt-2 grid gap-0 text-sm">
+          <div className="flex items-center justify-between gap-4 border-t border-[color:var(--color-border-subtle)] py-2">
+            <dt className="text-[color:var(--color-text-muted)]">
+              {language === "es" ? "Logrado" : "Achieved"}
+            </dt>
+            <dd className="font-semibold text-[color:var(--color-text-strong)]">
+              {achievedDate}
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-4 border-t border-[color:var(--color-border-subtle)] py-2">
+            <dt className="text-[color:var(--color-text-muted)]">
+              {language === "es" ? "GP antes" : "GP before"}
+            </dt>
+            <dd className="font-semibold text-[color:var(--color-text-strong)]">
+              {habit.gpBeforeAchievement} GP
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-4 border-t border-[color:var(--color-border-subtle)] py-2">
+            <dt className="text-[color:var(--color-text-muted)]">
+              {language === "es" ? "GP mantenido" : "Maintained GP"}
+            </dt>
+            <dd className="font-semibold text-[color:var(--color-text-strong)]">
+              {habit.gpSinceMaintain} GP
+            </dd>
+          </div>
+        </dl>
+        <div className="border-t border-[color:var(--color-border-subtle)] pt-2">
+          <MaintainToggleRow
+            language={language}
+            checked={habit.maintainEnabled}
+            disabled={disableRemote || maintainPendingHabitId === habit.id}
+            onToggle={() => {
+              void onToggleMaintainedWithPending(habit, !habit.maintainEnabled);
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`flex w-full flex-col gap-1.5 ${centerAligned ? "items-center text-center" : ""}`}
