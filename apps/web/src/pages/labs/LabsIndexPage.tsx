@@ -9,6 +9,11 @@ const LAB_EXPERIMENTS = [
     href: '/labs/landing-rhythm-section',
   },
   {
+    title: 'Avatar CTA Carousel',
+    description: 'Mocked final landing CTA section with adaptive avatar card stack in light and dark mode.',
+    href: '/labs/avatar-cta-carousel',
+  },
+  {
     title: 'Demo Mode Select',
     description: 'Legacy labs route for selecting LOW / CHILL / FLOW / EVOLVE before opening demo.',
     href: '/labs/demo-mode-select',
