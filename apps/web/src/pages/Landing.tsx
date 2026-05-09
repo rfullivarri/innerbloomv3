@@ -28,6 +28,10 @@ import { CookieConsentBanner } from "../components/landing/CookieConsentBanner";
 import { useLandingAnalytics } from "../components/landing/useLandingAnalytics";
 import { HeroPhoneShowcase } from "../components/landing/HeroPhoneShowcase";
 import WeatherCycleOrb from "../components/landing/WeatherCycleOrb";
+import { DEMO_USER_ID } from "../components/demo/DemoDashboardOverviewScene";
+import { StreaksPanel } from "../components/dashboard-v3/StreaksPanel";
+import { QuickStartTasksStep } from "../onboarding/steps/QuickStartTasksStep";
+import { QUICK_START_TASKS } from "../onboarding/quickStart";
 import { LabsWeeklyRhythmSystemSection } from "../components/labs/LabsWeeklyRhythmSystemSection";
 import { buildOnboardingPath } from "../onboarding/i18n";
 import { usePostLoginLanguage } from "../i18n/postLoginLanguage";
@@ -481,7 +485,294 @@ function LandingNarrativeMethod({
   );
 }
 
-function LandingV3ConversionMethod({ how }: { how: LandingCopy["how"] }) {
+function LandingV3MethodVisual({ index, language }: { index: number; language: Language }) {
+  const [animatedMinutes, setAnimatedMinutes] = useState("15");
+
+  useEffect(() => {
+    if (index !== 0) return undefined;
+
+    const values = ["1", "15", "15", "1"];
+    let frame = 0;
+    const interval = window.setInterval(() => {
+      frame = (frame + 1) % values.length;
+      setAnimatedMinutes(values[frame]);
+    }, 760);
+
+    return () => window.clearInterval(interval);
+  }, [index]);
+
+  if (index === 0) {
+    const tasks = QUICK_START_TASKS[language].Body.slice(0, 4);
+    return (
+      <div className="v3-step-visual v3-method-product-visual v3-method-quickstart" aria-hidden>
+        <div className="v3-method-quickstart__scene">
+          <p className="v3-quickstart-phase-title v3-quickstart-phase-title--tasks">
+            {language === "es" ? "Customizá tus tareas" : "Customize your tasks"}
+          </p>
+          <QuickStartTasksStep
+            language={language}
+            pillar="Body"
+            tasks={tasks}
+            selectedIds={tasks.slice(0, 3).map((task) => task.id)}
+            inputValues={{ "Body-ENERGIA": animatedMinutes, "Body-SUENO": "7" }}
+            minimum={1}
+            gameMode="LOW"
+            balancedBonusActive={false}
+            onToggleTask={() => undefined}
+            onInputChange={() => undefined}
+            onBack={() => undefined}
+            onConfirm={() => undefined}
+          />
+          <div className="v3-rhythm-preview">
+            <p className="v3-quickstart-phase-title v3-quickstart-phase-title--rhythm">
+              {language === "es" ? "Elegí tu ritmo" : "Choose your rhythm"}
+            </p>
+            {[
+              { label: "Low", value: "1x/week", days: 1 },
+              { label: "Chill", value: "2x/week", days: 2 },
+              { label: "Flow", value: "3x/week", days: 3 },
+              { label: "Evolve", value: "4x/week", days: 4 },
+            ].map((rhythm) => (
+              <div className={`v3-rhythm-preview__row ${rhythm.label === "Chill" ? "is-selected" : ""}`} key={rhythm.label}>
+                <span>{rhythm.label}</span>
+                <div className="v3-rhythm-preview__week">
+                  {Array.from({ length: 7 }, (_, dayIndex) => (
+                    <i className={dayIndex < rhythm.days ? "is-active" : ""} key={dayIndex} />
+                  ))}
+                </div>
+                <b>{rhythm.value}</b>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (index === 1) {
+    return (
+      <div className="v3-step-visual v3-method-product-visual v3-method-streaks" data-light-scope="dashboard-v3" aria-hidden>
+        <div className="v3-method-streaks__tilt">
+          <StreaksPanel userId={DEMO_USER_ID} gameMode="flow" weeklyTarget={3} avatarProfile={null} />
+        </div>
+      </div>
+    );
+  }
+
+  if (index === 2) {
+    return (
+      <div className="v3-step-visual v3-method-product-visual v3-method-adjustment" data-light-scope="dashboard-v3" aria-hidden>
+        <LandingV3AdjustmentVisual language={language} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="v3-step-visual v3-method-product-visual v3-method-logros" data-light-scope="dashboard-v3" aria-hidden>
+      <LandingV3LogrosVisual language={language} />
+    </div>
+  );
+}
+
+function LandingV3AdjustmentVisual({ language }: { language: Language }) {
+  const isSpanish = language === "es";
+  const demoRef = useRef<HTMLDivElement | null>(null);
+  const [hasEntered, setHasEntered] = useState(false);
+
+  useEffect(() => {
+    const node = demoRef.current;
+    if (!node || hasEntered) return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setHasEntered(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.42 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasEntered]);
+
+  return (
+    <div className={`v3-adjustment-demo ${hasEntered ? "is-visible" : ""}`} ref={demoRef}>
+      <section className="v3-adjustment-task">
+        <p>{isSpanish ? "Detalle de tarea" : "Task detail"}</p>
+        <h4>{isSpanish ? "Revisar gastos del día" : "Review daily expenses"}</h4>
+        <div className="v3-adjustment-meta">
+          <span>{isSpanish ? "Autocontrol" : "Self-control"}</span>
+          <span>{isSpanish ? "Fácil" : "Easy"}</span>
+          <span className="v3-adjustment-down">
+            <i aria-hidden>→</i>
+            <b>{isSpanish ? "Bajó la dificultad" : "Difficulty lowered"}</b>
+          </span>
+        </div>
+      </section>
+
+      <section className="v3-adjustment-health">
+        <p>{isSpanish ? "Desarrollo del hábito" : "Habit development"}</p>
+        <span className="v3-adjustment-status">{isSpanish ? "Hábito fuerte" : "Strong habit"}</span>
+        <div className="v3-adjustment-health-grid">
+          <div className="v3-adjustment-score">
+            <svg viewBox="0 0 120 120" aria-hidden>
+              <circle cx="60" cy="60" r="44" />
+              <circle cx="60" cy="60" r="44" />
+            </svg>
+            <strong>89</strong>
+            <span>Score</span>
+          </div>
+          <div className="v3-adjustment-scale">
+            <i />
+            <span>100</span>
+            <span>80</span>
+            <span>50</span>
+            <span>0</span>
+          </div>
+        </div>
+        <div className="v3-adjustment-months">
+          <span><i className="is-fail">×</i>feb<br /><b>33%</b></span>
+          <span><i className="is-warn">•</i>mar<br /><b>68%</b></span>
+          <span><i className="is-ok">✓</i>abr<br /><b>108%</b></span>
+          <span><i className="is-now">↻</i>may<br /><b>88%</b></span>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+const V3_LOGROS_SETS = {
+  BODY: {
+    label: "Body",
+    icon: "🫀",
+    cards: [
+      { name: "2L de agua", trait: "Hidratación", src: "/sellos/body/sello_body_hydration.png", flip: true, achievedAt: "2026-03-18", gpBefore: "1.240 GP" },
+      { name: "10.000 pasos", trait: "Movilidad", src: "/sellos/body/sello_body_hydration.png", locked: true },
+      { name: "Dormir 8hs", trait: "Sueño", src: "/sellos/body/sello_body_nutrition.png" },
+      { name: "Gym", trait: "Fuerza", src: "/sellos/body/sello_body_nutrition.png", locked: true },
+    ],
+  },
+  MIND: {
+    label: "Mind",
+    icon: "🧠",
+    cards: [
+      { name: "Inglés", trait: "Focus", src: "/sellos/mind/sello_mind_focus.png", flip: true, achievedAt: "2026-04-02", gpBefore: "980 GP" },
+      { name: "Leer 20m", trait: "Claridad", src: "/sellos/mind/sello_mind_focus.png", locked: true },
+      { name: "Lectura 20m", trait: "Claridad", src: "/sellos/mind/sello_mind_focus.png" },
+      { name: "Journaling", trait: "Memoria", src: "/sellos/mind/sello_mind_focus.png", locked: true },
+    ],
+  },
+  SOUL: {
+    label: "Soul",
+    icon: "🌼",
+    cards: [
+      { name: "Llamar familia", trait: "Conexión", src: "/sellos/soul/soul_connection_transparent.png", flip: true, achievedAt: "2026-04-16", gpBefore: "760 GP" },
+      { name: "Pausa diaria", trait: "Presencia", src: "/sellos/soul/soul_connection_transparent.png", locked: true },
+      { name: "Salir sin móvil", trait: "Calma", src: "/sellos/soul/soul_connection_transparent.png" },
+      { name: "Juego", trait: "Play", src: "/sellos/soul/soul_connection_transparent.png", locked: true },
+    ],
+  },
+} as const;
+
+function LandingV3LogrosVisual({ language }: { language: Language }) {
+  const [active, setActive] = useState<{ pillar: keyof typeof V3_LOGROS_SETS; index: number }>({
+    pillar: "BODY",
+    index: 0,
+  });
+
+  useEffect(() => {
+    const cycle: Array<{ pillar: keyof typeof V3_LOGROS_SETS; index: number }> = [
+      { pillar: "BODY", index: 0 },
+      { pillar: "BODY", index: 1 },
+      { pillar: "MIND", index: 0 },
+      { pillar: "MIND", index: 1 },
+      { pillar: "SOUL", index: 0 },
+      { pillar: "SOUL", index: 1 },
+    ];
+    let frame = 0;
+
+    const interval = window.setInterval(() => {
+      frame = (frame + 1) % cycle.length;
+      setActive(cycle[frame]);
+    }, 5200);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const current = V3_LOGROS_SETS[active.pillar];
+  const isSpanish = language === "es";
+  return (
+    <div className="v3-method-logros__scene" style={{ "--active-card": active.index } as CSSProperties}>
+      <p className="v3-logros-shelf-title">{isSpanish ? "Estante de hábitos" : "Habit shelf"}</p>
+      <div className="v3-logros-tabs">
+        {(Object.keys(V3_LOGROS_SETS) as Array<keyof typeof V3_LOGROS_SETS>).map((pillar) => (
+          <span className={pillar === active.pillar ? "is-active" : ""} key={pillar}>
+            <i>{V3_LOGROS_SETS[pillar].icon}</i>
+            {isSpanish
+              ? pillar === "BODY"
+                ? "Cuerpo"
+                : pillar === "MIND"
+                  ? "Mente"
+                  : "Alma"
+              : V3_LOGROS_SETS[pillar].label}
+          </span>
+        ))}
+      </div>
+
+      <div className="v3-logros-viewport">
+        <div className="v3-logros-track" key={active.pillar}>
+          {current.cards.map((card, index) => (
+            <article className={`v3-logros-card ${index === active.index ? "is-center" : ""} ${card.locked ? "is-locked" : ""} ${card.flip ? "is-flippable" : ""}`} key={`${active.pillar}-${card.name}`}>
+              <div className="v3-logros-card__inner">
+                <div className="v3-logros-card__face v3-logros-card__front">
+                  {card.locked ? (
+                    <span className="v3-logros-lock">{isSpanish ? "Bloqueado" : "Locked"}</span>
+                  ) : null}
+                  <img src={card.src} alt="" />
+                  <strong>{card.name}</strong>
+                  <p>{card.trait}</p>
+                  {!card.locked ? (
+                    <span className="v3-logros-achieved">{isSpanish ? "Hábito logrado" : "Achieved habit"}</span>
+                  ) : null}
+                </div>
+                {card.flip ? (
+                  <div className="v3-logros-card__face v3-logros-card__back">
+                    <span>{isSpanish ? "Logro desbloqueado" : "Achievement unlocked"}</span>
+                    <strong>{card.name}</strong>
+                    <p>{card.trait}</p>
+                    <dl>
+                      <div>
+                        <dt>{isSpanish ? "Logrado" : "Achieved"}</dt>
+                        <dd>{card.achievedAt}</dd>
+                      </div>
+                      <div>
+                        <dt>{isSpanish ? "GP antes" : "GP before"}</dt>
+                        <dd>{card.gpBefore}</dd>
+                      </div>
+                      <div className="v3-logros-keep-row">
+                        <dt>{isSpanish ? "Mantener activo" : "Keep active"}</dt>
+                        <dd>
+                          <span className="v3-logros-keep-toggle" aria-hidden>
+                            <i />
+                          </span>
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+                ) : null}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+      <div className="v3-logros-count">{active.index + 1} / {current.cards.length}</div>
+    </div>
+  );
+}
+
+function LandingV3ConversionMethod({ how, language }: { how: LandingCopy["how"]; language: Language }) {
   return (
     <div className="v2-method-shell v3-method-shell">
       <div className="v2-method-heading">
@@ -495,17 +786,20 @@ function LandingV3ConversionMethod({ how }: { how: LandingCopy["how"] }) {
         {how.steps.map((step, index) => {
           return (
             <article
-              className="v3-method-card"
+              className={`v3-method-card v3-method-card--${index % 2 === 0 ? "visual-right" : "visual-left"}`}
               key={step.badge}
               style={{ "--delay": `${index * 80}ms` } as CSSProperties}
             >
-              <span className="v2-method-step-badge">{step.badge}</span>
-              <AdaptiveText as="h3" className="v2-method-step-title">
-                {step.title}
-              </AdaptiveText>
-              <AdaptiveText as="p" className="v2-method-step-description">
-                {step.bullets[0]}
-              </AdaptiveText>
+              <LandingV3MethodVisual index={index} language={language} />
+              <div className="v3-method-card-copy">
+                <span className="v2-method-step-badge">{step.badge}</span>
+                <AdaptiveText as="h3" className="v2-method-step-title">
+                  {step.title}
+                </AdaptiveText>
+                <AdaptiveText as="p" className="v2-method-step-description">
+                  {step.bullets[0]}
+                </AdaptiveText>
+              </div>
             </article>
           );
         })}
@@ -1027,7 +1321,7 @@ export default function LandingPage({
         <section className="how section-pad reveal-on-scroll" id="how">
           <div className="container narrow">
             {isV3Conversion ? (
-              <LandingV3ConversionMethod how={copy.how} />
+              <LandingV3ConversionMethod how={copy.how} language={language} />
             ) : isV2Narrative ? (
               <LandingNarrativeMethod how={copy.how} visuals={V2_METHOD_VISUALS} />
             ) : (
@@ -1056,7 +1350,7 @@ export default function LandingPage({
         >
           <div className="container narrow">
             <div
-              className={`visible-progress-top ${isV2Narrative ? "visible-progress-top--v2-text-only" : ""}`}
+              className={`visible-progress-top ${isNarrativeVariant ? "visible-progress-top--v2-text-only" : ""}`}
             >
               <div className="visible-progress-copy">
                 <AdaptiveText as="h2" className="demo-title">
@@ -1067,7 +1361,7 @@ export default function LandingPage({
                 </AdaptiveText>
               </div>
 
-              {!isV2Narrative ? (
+              {!isNarrativeVariant ? (
                 <div className="visible-progress-module" aria-hidden>
                 <div className="visible-progress-viewport">
                   <div className="visible-progress-scene">
