@@ -34,6 +34,14 @@ const REWARDS_PILLAR_ORDER = [
   { code: "SOUL", name: "Soul" },
 ] as const;
 
+function scrollElementToLeft(element: HTMLElement, left: number, behavior: ScrollBehavior) {
+  if (typeof element.scrollTo === "function") {
+    element.scrollTo({ left, behavior });
+    return;
+  }
+  element.scrollLeft = left;
+}
+
 type AchievementViewMode = "shelves" | "carousel";
 
 interface RewardsSectionProps {
@@ -1032,7 +1040,7 @@ function AchievedShelf({
     setFlippedCarouselHabitId(null);
     setActiveCarouselIndex(0);
     if (carouselTrackRef.current) {
-      carouselTrackRef.current.scrollTo({ left: 0, behavior: "auto" });
+      scrollElementToLeft(carouselTrackRef.current, 0, "auto");
     }
   }, [activePillarCode, carouselTrackRef, setActiveCarouselIndex]);
 
@@ -1068,10 +1076,7 @@ function AchievedShelf({
       const itemLeft = target.offsetLeft;
       const centeredLeft =
         itemLeft - (horizontalContainer.clientWidth - target.clientWidth) / 2;
-      horizontalContainer.scrollTo({
-        left: Math.max(0, centeredLeft),
-        behavior: "auto",
-      });
+      scrollElementToLeft(horizontalContainer, Math.max(0, centeredLeft), "auto");
     }
   }, []);
 
@@ -1095,10 +1100,7 @@ function AchievedShelf({
       if (preventPageScrollOnProgrammaticFocus) {
         const centeredLeft =
           targetCard.offsetLeft - (track.clientWidth - targetCard.clientWidth) / 2;
-        track.scrollTo({
-          left: Math.max(0, centeredLeft),
-          behavior,
-        });
+        scrollElementToLeft(track, Math.max(0, centeredLeft), behavior);
       } else if (typeof targetCard.scrollIntoView === "function") {
         targetCard.scrollIntoView({
           behavior,
@@ -1825,6 +1827,8 @@ function LockedAchievementHabitDevelopment({
           language={language}
           size={compact ? "compact" : "default"}
           surface={embedded ? "ghost" : "default"}
+          variant="landing"
+          showInfoControls={!embedded}
         />
       </div>
     );
@@ -1948,6 +1952,7 @@ function NotAchievedPreviewOverlay({
               previewAchievement={previewAchievement}
               language={language}
               size={compact ? "compact" : "default"}
+              variant="landing"
             />
           ) : null}
           {(status === "success" || isLocalPreview) && !previewAchievement ? (

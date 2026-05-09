@@ -1730,6 +1730,89 @@ const DEMO_USER_TASKS: UserTask[] = [
   { id: 'task-cena', title: 'Cena antes de las 22hs', pillarId: 'Body', traitId: null, statId: 'Nutrición', difficultyId: '2', isActive: true, xp: 45, createdAt: null, updatedAt: null, completedAt: null, archivedAt: null },
 ];
 
+type DemoRecalibrationAction = NonNullable<StreakPanelTask['latestRecalibrationAction']>;
+
+const DEMO_TASK_RECALIBRATION_ACTIONS: Record<string, DemoRecalibrationAction> = {
+  'task-correr': 'down',
+  'task-no-dulces': 'up',
+  'task-gym': 'keep',
+  'task-pantallas': 'down',
+  'task-ayuno': 'keep',
+  'task-cena': 'up',
+};
+
+const DEMO_DIFFICULTY_LABELS: Record<DemoRecalibrationAction, string> = {
+  down: 'Fácil',
+  keep: 'Media',
+  up: 'Difícil',
+};
+
+function getDemoRecalibrationAction(taskId: string): DemoRecalibrationAction {
+  return DEMO_TASK_RECALIBRATION_ACTIONS[taskId] ?? 'keep';
+}
+
+function getDemoDifficultyLabel(taskId: string): string {
+  return DEMO_DIFFICULTY_LABELS[getDemoRecalibrationAction(taskId)];
+}
+
+function getDemoRecalibration(taskId: string): NonNullable<TaskInsightsResponse['recalibration']> {
+  const action = getDemoRecalibrationAction(taskId);
+  const completionRate = action === 'down' ? 0.9 : action === 'up' ? 0.36 : 0.68;
+  const expectedTarget = action === 'down' ? 10 : action === 'up' ? 8 : 6;
+  const completions = Math.round(expectedTarget * completionRate);
+  const periodLabel = '2026-04';
+  const reason =
+    action === 'down'
+      ? 'La tasa de cumplimiento fue alta y la próxima dificultad baja para sostener consistencia.'
+      : action === 'up'
+        ? 'La tasa de cumplimiento quedó baja y la próxima dificultad sube para recalibrar el objetivo.'
+        : 'La tasa de cumplimiento quedó en rango y la dificultad se mantiene.';
+  const latest = {
+    action,
+    periodLabel,
+    periodStart: '2026-04-01',
+    periodEnd: '2026-04-30',
+    expectedTarget,
+    completions,
+    completionRate,
+    ruleMatched: action === 'down' ? 'high_completion' : action === 'up' ? 'low_completion' : 'stable_completion',
+    reason,
+    clampApplied: false,
+    clampReason: null,
+    recalibratedAt: '2026-05-01T00:00:00.000Z',
+  };
+  return { eligible: true, latest, history: [latest] };
+}
+
+function getDemoPreviewAchievement(taskId: string): NonNullable<TaskInsightsResponse['previewAchievement']> {
+  const action = getDemoRecalibrationAction(taskId);
+  const score = action === 'down' ? 89 : action === 'up' ? 44 : 74;
+  const status = action === 'down' ? 'strong' : action === 'up' ? 'fragile' : 'building';
+  return {
+    score,
+    status,
+    consolidationStrength: action === 'down' ? 84 : action === 'up' ? 38 : 66,
+    windowProximity: {
+      slots: ['invalid', 'floor_only', 'valid', 'projected_valid'],
+    },
+    currentMonth: {
+      periodKey: '2026-05',
+      completionRateSoFar: 0.73,
+      projectedMonthEndRate: 0.88,
+      expectedTargetSoFar: 6,
+      completionsDoneSoFar: 5,
+      expectedTargetMonthEnd: 8,
+      projectedCompletionsMonthEnd: 7,
+    },
+    recentMonths: [
+      { periodKey: '2026-02', completionRate: 0.4, state: 'weak', closed: true },
+      { periodKey: '2026-03', completionRate: 0.68, state: 'building', closed: true },
+      { periodKey: '2026-04', completionRate: 1.08, state: 'valid', closed: true },
+      { periodKey: '2026-05', projectedCompletionRate: 0.88, state: 'projected_valid', closed: false },
+    ],
+  };
+}
+
 function cloneDemo<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
@@ -2571,13 +2654,25 @@ export type TaskInsightsResponse = {
             id?: string | null;
             label?: string | null;
             state?: 'locked' | 'pending' | 'valid' | 'achieved' | string | null;
-          }
+        }
       >;
+    } | null;
+    currentMonth?: {
+      periodKey?: string | null;
+      completionRateSoFar?: number | null;
+      projectedMonthEndRate?: number | null;
+      expectedTargetSoFar?: number | null;
+      completionsDoneSoFar?: number | null;
+      expectedTargetMonthEnd?: number | null;
+      projectedCompletionsMonthEnd?: number | null;
     } | null;
     recentMonths?: Array<{
       periodKey?: string | null;
       month?: string | null;
       value?: number | null;
+      completionRate?: number | null;
+      projectedCompletionRate?: number | null;
+      closed?: boolean | null;
       state?: 'weak' | 'building' | 'strong' | 'locked' | 'valid' | string | null;
     }>;
   } | null;
@@ -2619,14 +2714,14 @@ export async function getUserStreakPanel(
   params: { pillar: StreakPanelPillar; range: StreakPanelRange; mode?: string; query?: string },
 ): Promise<StreakPanelResponse> {
   if (isDashboardDemoModeEnabled()) {
-    const tasks: StreakPanelTask[] = [
-      { id: 'task-correr', name: '10.000 pasos / Correr', stat: 'Movilidad', weekDone: 2, streakDays: 4, metrics: { week: { count: 2, xp: 110 }, month: { count: 11, xp: 560, weeks: [2, 4, 3, 2] }, qtr: { count: 31, xp: 1540, weeks: [2, 4, 3, 2, 5, 3], weekTotals: [2, 4, 3, 2, 5, 3] } } },
-      { id: 'task-no-dulces', name: 'No dulces', stat: 'Nutrición', weekDone: 0, streakDays: 0, metrics: { week: { count: 0, xp: 0 }, month: { count: 3, xp: 130, weeks: [0, 1, 1, 1] }, qtr: { count: 9, xp: 390, weeks: [0, 1, 1, 1, 2, 4], weekTotals: [0, 1, 1, 1, 2, 4] } } },
-      { id: 'task-gym', name: 'gym', stat: 'Energía', weekDone: 0, streakDays: 0, metrics: { week: { count: 0, xp: 0 }, month: { count: 5, xp: 250, weeks: [1, 2, 1, 1] }, qtr: { count: 14, xp: 700, weeks: [1, 2, 1, 1, 4, 5], weekTotals: [1, 2, 1, 1, 4, 5] } } },
-      { id: 'task-pantallas', name: '20` Sin pantallas antes de dormir', stat: 'Recuperación', weekDone: 0, streakDays: 0, metrics: { week: { count: 0, xp: 0 }, month: { count: 6, xp: 210, weeks: [1, 1, 2, 2] }, qtr: { count: 12, xp: 420, weeks: [1, 1, 2, 2, 3, 3], weekTotals: [1, 1, 2, 2, 3, 3] } } },
-      { id: 'task-ayuno', name: 'Ayuno hasta las 14hs', stat: 'Nutrición', weekDone: 2, streakDays: 2, metrics: { week: { count: 2, xp: 90 }, month: { count: 9, xp: 405, weeks: [2, 2, 3, 2] }, qtr: { count: 26, xp: 1170, weeks: [2, 2, 3, 2, 7, 10], weekTotals: [2, 2, 3, 2, 7, 10] } } },
-      { id: 'task-cena', name: 'Cena antes de las 22hs', stat: 'Nutrición', weekDone: 2, streakDays: 2, metrics: { week: { count: 2, xp: 90 }, month: { count: 8, xp: 360, weeks: [2, 2, 2, 2] }, qtr: { count: 22, xp: 990, weeks: [2, 2, 2, 2, 7, 7], weekTotals: [2, 2, 2, 2, 7, 7] } } },
-    ];
+	    const tasks: StreakPanelTask[] = [
+	      { id: 'task-correr', name: '10.000 pasos / Correr', stat: 'Movilidad', difficultyLabel: getDemoDifficultyLabel('task-correr'), latestRecalibrationAction: getDemoRecalibrationAction('task-correr'), weekDone: 2, streakDays: 4, metrics: { week: { count: 2, xp: 110 }, month: { count: 11, xp: 560, weeks: [2, 4, 3, 2] }, qtr: { count: 31, xp: 1540, weeks: [2, 4, 3, 2, 5, 3], weekTotals: [2, 4, 3, 2, 5, 3] } } },
+	      { id: 'task-no-dulces', name: 'No dulces', stat: 'Nutrición', difficultyLabel: getDemoDifficultyLabel('task-no-dulces'), latestRecalibrationAction: getDemoRecalibrationAction('task-no-dulces'), weekDone: 0, streakDays: 0, metrics: { week: { count: 0, xp: 0 }, month: { count: 3, xp: 130, weeks: [0, 1, 1, 1] }, qtr: { count: 9, xp: 390, weeks: [0, 1, 1, 1, 2, 4], weekTotals: [0, 1, 1, 1, 2, 4] } } },
+	      { id: 'task-gym', name: 'gym', stat: 'Energía', difficultyLabel: getDemoDifficultyLabel('task-gym'), latestRecalibrationAction: getDemoRecalibrationAction('task-gym'), weekDone: 0, streakDays: 0, metrics: { week: { count: 0, xp: 0 }, month: { count: 5, xp: 250, weeks: [1, 2, 1, 1] }, qtr: { count: 14, xp: 700, weeks: [1, 2, 1, 1, 4, 5], weekTotals: [1, 2, 1, 1, 4, 5] } } },
+	      { id: 'task-pantallas', name: '20` Sin pantallas antes de dormir', stat: 'Recuperación', difficultyLabel: getDemoDifficultyLabel('task-pantallas'), latestRecalibrationAction: getDemoRecalibrationAction('task-pantallas'), weekDone: 0, streakDays: 0, metrics: { week: { count: 0, xp: 0 }, month: { count: 6, xp: 210, weeks: [1, 1, 2, 2] }, qtr: { count: 12, xp: 420, weeks: [1, 1, 2, 2, 3, 3], weekTotals: [1, 1, 2, 2, 3, 3] } } },
+	      { id: 'task-ayuno', name: 'Ayuno hasta las 14hs', stat: 'Nutrición', difficultyLabel: getDemoDifficultyLabel('task-ayuno'), latestRecalibrationAction: getDemoRecalibrationAction('task-ayuno'), weekDone: 2, streakDays: 2, metrics: { week: { count: 2, xp: 90 }, month: { count: 9, xp: 405, weeks: [2, 2, 3, 2] }, qtr: { count: 26, xp: 1170, weeks: [2, 2, 3, 2, 7, 10], weekTotals: [2, 2, 3, 2, 7, 10] } } },
+	      { id: 'task-cena', name: 'Cena antes de las 22hs', stat: 'Nutrición', difficultyLabel: getDemoDifficultyLabel('task-cena'), latestRecalibrationAction: getDemoRecalibrationAction('task-cena'), weekDone: 2, streakDays: 2, metrics: { week: { count: 2, xp: 90 }, month: { count: 8, xp: 360, weeks: [2, 2, 2, 2] }, qtr: { count: 22, xp: 990, weeks: [2, 2, 2, 2, 7, 7], weekTotals: [2, 2, 2, 2, 7, 7] } } },
+	    ];
     const topStreaks = tasks
       .filter((entry) => (params.pillar === 'Body' ? true : params.pillar === 'Mind' ? entry.id === 'task-pantallas' : entry.id === 'task-no-dulces'))
       .sort((a, b) => b.streakDays - a.streakDays)
@@ -2657,7 +2752,13 @@ export async function getTaskInsights(
   if (isDashboardDemoModeEnabled()) {
     const task = DEMO_USER_TASKS.find((entry) => entry.id === taskId);
     return {
-      task: { id: taskId, name: task?.title ?? 'Task demo', stat: task?.statId ?? null, description: 'Detalle de hábito en modo demo.' },
+      task: {
+        id: taskId,
+        name: task?.title ?? 'Task demo',
+        stat: task?.statId ?? null,
+        description: 'Detalle de hábito en modo demo.',
+        difficultyLabel: getDemoDifficultyLabel(taskId),
+      },
       month: { totalCount: 9, totalXp: 405, days: [
         { date: '2026-02-03', count: 1 }, { date: '2026-02-05', count: 1 }, { date: '2026-02-08', count: 2 },
         { date: '2026-02-13', count: 1 }, { date: '2026-02-16', count: 1 }, { date: '2026-02-20', count: 1 },
@@ -2674,20 +2775,8 @@ export async function getTaskInsights(
           { weekStart: '2026-02-23', weekEnd: '2026-03-01', count: 3, hit: true },
         ],
       },
-      previewAchievement: {
-        score: 74,
-        status: 'building',
-        consolidationStrength: 66,
-        windowProximity: {
-          slots: ['valid', 'floor_only', 'projected_invalid'],
-        },
-        recentMonths: [
-          { periodKey: '2025-12', value: 42, state: 'weak' },
-          { periodKey: '2026-01', value: 61, state: 'building' },
-          { periodKey: '2026-02', value: 74, state: 'building' },
-        ],
-      },
-      recalibration: { eligible: true },
+      previewAchievement: getDemoPreviewAchievement(taskId),
+      recalibration: getDemoRecalibration(taskId),
     };
   }
   const normalized: Record<string, string | undefined> = {

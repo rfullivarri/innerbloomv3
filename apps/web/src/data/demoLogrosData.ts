@@ -283,14 +283,13 @@ export function getDemoLogrosPreviewByTaskId(_language: PostLoginLanguage): Reco
       status: 'fragile',
       consolidationStrength: 41,
       recentMonths: [
-        { periodKey: '2025-12', completionRate: 0.28, state: 'invalid', closed: true },
-        { periodKey: '2026-01', completionRate: 0.43, state: 'weak', closed: true },
-        { periodKey: '2026-02', completionRate: 0.51, state: 'building', closed: true },
-        { periodKey: '2026-03', completionRate: 0.49, state: 'floor_only', closed: true },
-        { periodKey: '2026-04', projectedCompletionRate: 0.58, state: 'projected_floor_only', closed: false },
+        { periodKey: '2026-02', completionRate: 0.4, state: 'weak', closed: true },
+        { periodKey: '2026-03', completionRate: 0.68, state: 'building', closed: true },
+        { periodKey: '2026-04', completionRate: 1.08, state: 'valid', closed: true },
+        { periodKey: '2026-05', projectedCompletionRate: 0.58, state: 'projected_floor_only', closed: false },
       ],
       windowProximity: {
-        slots: ['invalid', 'floor_only', 'projected_floor_only'],
+        slots: ['invalid', 'floor_only', 'valid', 'projected_floor_only'],
       },
     },
     'task-family-call': {
@@ -298,14 +297,13 @@ export function getDemoLogrosPreviewByTaskId(_language: PostLoginLanguage): Reco
       status: 'building',
       consolidationStrength: 69,
       recentMonths: [
-        { periodKey: '2025-12', completionRate: 0.38, state: 'weak', closed: true },
-        { periodKey: '2026-01', completionRate: 0.61, state: 'building', closed: true },
-        { periodKey: '2026-02', completionRate: 0.8, state: 'strong', closed: true },
-        { periodKey: '2026-03', completionRate: 0.7, state: 'building', closed: true },
-        { periodKey: '2026-04', projectedCompletionRate: 0.77, state: 'projected_valid', closed: false },
+        { periodKey: '2026-02', completionRate: 0.4, state: 'weak', closed: true },
+        { periodKey: '2026-03', completionRate: 0.68, state: 'building', closed: true },
+        { periodKey: '2026-04', completionRate: 1.08, state: 'valid', closed: true },
+        { periodKey: '2026-05', projectedCompletionRate: 0.77, state: 'projected_valid', closed: false },
       ],
       windowProximity: {
-        slots: ['floor_only', 'valid', 'valid'],
+        slots: ['invalid', 'floor_only', 'valid', 'projected_valid'],
       },
     },
     'task-english': {
@@ -313,10 +311,10 @@ export function getDemoLogrosPreviewByTaskId(_language: PostLoginLanguage): Reco
       status: 'strong',
       consolidationStrength: 81,
       recentMonths: [
-        { periodKey: '2025-12', completionRate: 0.67, state: 'building', closed: true },
-        { periodKey: '2026-01', completionRate: 0.84, state: 'strong', closed: true },
-        { periodKey: '2026-02', completionRate: 0.85, state: 'strong', closed: true },
-        { periodKey: '2026-03', completionRate: 0.88, state: 'strong', closed: true },
+        { periodKey: '2026-02', completionRate: 0.4, state: 'weak', closed: true },
+        { periodKey: '2026-03', completionRate: 0.68, state: 'building', closed: true },
+        { periodKey: '2026-04', completionRate: 1.08, state: 'valid', closed: true },
+        { periodKey: '2026-05', projectedCompletionRate: 0.88, state: 'projected_valid', closed: false },
       ],
     },
   } as Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;

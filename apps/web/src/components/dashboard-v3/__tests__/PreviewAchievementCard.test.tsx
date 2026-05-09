@@ -77,7 +77,7 @@ describe('PreviewAchievementCard', () => {
       expect(node.className).not.toContain(' border ');
     });
     expect(within(months[0]).getByText('✓')).toBeInTheDocument();
-    expect(within(months[1]).getByLabelText('2026-02-weak').querySelector('.bg-amber-50')).not.toBeNull();
+    expect(within(months[1]).getByText('✕')).toBeInTheDocument();
     expect(within(months[2]).getByText('✕')).toBeInTheDocument();
     expect(within(months[3]).getByLabelText('2026-04-projected_valid').querySelector('.animate-spin')).not.toBeNull();
     expect(within(months[0]).getByText('ene')).toBeInTheDocument();
