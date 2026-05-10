@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { useAuth } from '../auth/runtimeAuth';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
+import { LANDING_V3_CONTENT } from '../content/landingV3Content';
 import { useBackendUser } from '../hooks/useBackendUser';
 import { useOnboardingProgress } from '../hooks/useOnboardingProgress';
 import { resolveAuthLanguage } from '../lib/authLanguage';
+import { LandingV3MethodVisual } from '../pages/Landing';
 import { isNativeCapacitorPlatform, openUrlInCapacitorBrowser } from './capacitor';
 import {
   buildNativeMobileAuthUrl,
@@ -15,6 +17,8 @@ import {
   type MobileAuthMode,
 } from './mobileAuthSession';
 import type { OnboardingProgress } from '../lib/api';
+
+const NATIVE_WELCOME_SLIDE_MS = 5200;
 
 type MobileEntryCopy = {
   loadingTitle: string;
@@ -107,17 +111,58 @@ function MobileEntryError({
   );
 }
 
+function NativeWelcomeCarousel({ language }: { language: 'es' | 'en' }) {
+  const slides = LANDING_V3_CONTENT[language].how.steps;
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % slides.length);
+    }, NATIVE_WELCOME_SLIDE_MS);
+
+    return () => window.clearInterval(interval);
+  }, [slides.length]);
+
+  const activeSlide = slides[activeIndex] ?? slides[0];
+
+  return (
+    <section className="native-welcome-carousel" aria-live="polite">
+      <div className="native-welcome-copy" key={`copy-${activeIndex}`}>
+        <span>{activeSlide.badge}</span>
+        <h1>{activeSlide.title}</h1>
+      </div>
+      <div className="native-welcome-visual-shell landing landing--v3-conversion" data-theme-mode="dark" key={`visual-${activeIndex}`}>
+        <LandingV3MethodVisual index={activeIndex} language={language} />
+        <div className="native-welcome-carousel-controls" aria-label="Carousel progress">
+          {slides.map((slide, index) => (
+            <span
+              className={index === activeIndex ? 'is-active' : ''}
+              key={slide.badge}
+              aria-label={`${index + 1} / ${slides.length}`}
+            >
+              {index === activeIndex ? (
+                <i
+                  style={{ animationDuration: `${NATIVE_WELCOME_SLIDE_MS}ms` }}
+                  key={`progress-${activeIndex}`}
+                />
+              ) : null}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function MobileWelcome() {
   const language = resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
   const copy = language === 'en'
     ? {
-        title: 'Welcome',
         googleSignIn: 'Log in with Google',
         signIn: 'Log in',
         signUp: 'Create account',
       }
     : {
-        title: 'Bienvenido',
         googleSignIn: 'Iniciar sesión con Google',
         signIn: 'Iniciar sesión',
         signUp: 'Crear cuenta',
@@ -140,7 +185,7 @@ function MobileWelcome() {
   };
 
   return (
-    <div className="relative flex h-dvh max-h-dvh min-h-dvh items-center justify-center overflow-hidden bg-[#050b2f] bg-[url('/native-welcome-bg.png')] bg-cover bg-center px-5 pb-[calc(env(safe-area-inset-bottom,0px)+0.85rem)] pt-[calc(env(safe-area-inset-top,0px)+0.65rem)] text-white">
+    <div className="native-welcome-root relative flex h-dvh max-h-dvh min-h-dvh items-center justify-center overflow-hidden px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.7rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] text-white">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(5,11,47,0.18)_0%,rgba(5,11,47,0.1)_38%,rgba(5,11,47,0.68)_100%)]"
@@ -152,13 +197,11 @@ function MobileWelcome() {
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col px-1 pb-[clamp(0.25rem,1.2dvh,0.75rem)] pt-[clamp(1rem,3dvh,1.5rem)]">
-          <div className="flex min-h-0 flex-1 flex-col pt-[clamp(1rem,3.2dvh,1.75rem)]">
-            <div className="pt-[clamp(11rem,31dvh,17rem)] text-center">
-              <h1 className="text-[clamp(2rem,5.2dvh,2.4rem)] font-semibold tracking-tight text-white">{copy.title}</h1>
-            </div>
+        <div className="flex min-h-0 flex-1 flex-col pb-[clamp(0.2rem,1dvh,0.55rem)] pt-[clamp(0.45rem,1.45dvh,0.85rem)]">
+          <div className="flex min-h-0 flex-1 flex-col">
+            <NativeWelcomeCarousel language={language} />
 
-            <div className="mt-auto space-y-[clamp(0.55rem,1.5dvh,0.75rem)] px-2 pt-[clamp(1rem,4dvh,2.5rem)]">
+            <div className="mt-auto space-y-[clamp(0.5rem,1.35dvh,0.7rem)] px-2 pt-[clamp(0.8rem,2.5dvh,1.45rem)]">
               <button
                 type="button"
                 onClick={() => void openNativeAuth('sign-up')}

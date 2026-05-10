@@ -628,13 +628,20 @@
     }
   }
 
+  .native-welcome-root {
+    background:
+      radial-gradient(circle at 72% 18%, rgba(143, 91, 255, 0.24), transparent 38%),
+      radial-gradient(circle at 24% 78%, rgba(72, 190, 255, 0.14), transparent 42%),
+      linear-gradient(180deg, #0a0714 0%, #05050b 100%);
+  }
+
   .native-welcome-carousel {
     position: relative;
     display: grid;
     min-height: 0;
     flex: 1;
-    grid-template-rows: minmax(104px, 0.45fr) minmax(260px, 1fr);
-    gap: clamp(0.9rem, 2.1dvh, 1.25rem);
+    grid-template-rows: minmax(88px, 0.36fr) minmax(268px, 1fr);
+    gap: clamp(0.55rem, 1.45dvh, 0.85rem);
     overflow: hidden;
     border-radius: clamp(1.6rem, 4.5dvh, 2.4rem);
     border: 1px solid rgba(224, 214, 255, 0.16);
@@ -645,13 +652,13 @@
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.09),
       0 28px 70px rgba(2, 6, 23, 0.18);
-    padding: clamp(1.15rem, 3.2dvh, 1.6rem);
+    padding: clamp(0.85rem, 2.15dvh, 1.15rem);
   }
 
   .native-welcome-copy {
     display: grid;
     align-content: end;
-    gap: 0.55rem;
+    gap: 0.38rem;
     text-align: center;
     animation: native-welcome-rise 620ms var(--motion-ease-enter, ease-out) both;
   }
@@ -668,7 +675,7 @@
     margin: 0 auto;
     max-width: 14ch;
     color: #fff;
-    font-size: clamp(1.82rem, 4.7dvh, 2.35rem);
+    font-size: clamp(1.56rem, 4.2dvh, 2.08rem);
     font-weight: 700;
     letter-spacing: -0.05em;
     line-height: 0.98;
@@ -705,6 +712,48 @@
   .native-welcome-visual-shell::after {
     opacity: 0.56;
     transform: rotate(12deg) scale(1.12);
+  }
+
+  .native-welcome-visual-shell.landing {
+    min-height: 0;
+    color: #fff;
+    font-family: var(--font-body);
+    background: transparent;
+  }
+
+  .native-welcome-visual-shell .v3-step-visual {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .native-welcome-visual-shell .v3-method-product-visual {
+    overflow: hidden;
+  }
+
+  .native-welcome-visual-shell .v3-method-quickstart__scene {
+    transform: scale(0.46);
+    transform-origin: center center;
+  }
+
+  .native-welcome-visual-shell .v3-method-streaks__tilt {
+    transform: scale(0.52) rotateX(0deg) rotateY(0deg);
+    transform-origin: center center;
+  }
+
+  .native-welcome-visual-shell .v3-adjustment-demo,
+  .native-welcome-visual-shell .v3-method-logros__scene {
+    transform: scale(0.48);
+    transform-origin: center center;
+  }
+
+  .native-welcome-visual-shell .v3-method-logros__scene {
+    width: 210%;
+    max-width: none;
   }
 
   .native-welcome-visual {

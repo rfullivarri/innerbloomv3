@@ -485,7 +485,7 @@ function LandingNarrativeMethod({
   );
 }
 
-function LandingV3MethodVisual({ index, language }: { index: number; language: Language }) {
+export function LandingV3MethodVisual({ index, language }: { index: number; language: Language }) {
   const [animatedMinutes, setAnimatedMinutes] = useState("15");
 
   useEffect(() => {
