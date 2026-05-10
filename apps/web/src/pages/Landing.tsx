@@ -485,7 +485,15 @@ function LandingNarrativeMethod({
   );
 }
 
-export function LandingV3MethodVisual({ index, language }: { index: number; language: Language }) {
+export function LandingV3MethodVisual({
+  index,
+  language,
+  logrosCycleMs,
+}: {
+  index: number;
+  language: Language;
+  logrosCycleMs?: number;
+}) {
   const [animatedMinutes, setAnimatedMinutes] = useState("15");
 
   useEffect(() => {
@@ -569,7 +577,7 @@ export function LandingV3MethodVisual({ index, language }: { index: number; lang
 
   return (
     <div className="v3-step-visual v3-method-product-visual v3-method-logros" data-light-scope="dashboard-v3" aria-hidden>
-      <LandingV3LogrosVisual language={language} />
+      <LandingV3LogrosVisual language={language} cycleMs={logrosCycleMs} />
     </div>
   );
 }
@@ -676,7 +684,7 @@ const V3_LOGROS_SETS = {
   },
 } as const;
 
-function LandingV3LogrosVisual({ language }: { language: Language }) {
+function LandingV3LogrosVisual({ language, cycleMs = 5200 }: { language: Language; cycleMs?: number }) {
   const [active, setActive] = useState<{ pillar: keyof typeof V3_LOGROS_SETS; index: number }>({
     pillar: "BODY",
     index: 0,
@@ -696,10 +704,10 @@ function LandingV3LogrosVisual({ language }: { language: Language }) {
     const interval = window.setInterval(() => {
       frame = (frame + 1) % cycle.length;
       setActive(cycle[frame]);
-    }, 5200);
+    }, cycleMs);
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [cycleMs]);
 
   const current = V3_LOGROS_SETS[active.pillar];
   const isSpanish = language === "es";
