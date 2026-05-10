@@ -115,13 +115,17 @@ function NativeWelcomeCarousel({ language }: { language: 'es' | 'en' }) {
   const slides = LANDING_V3_CONTENT[language].how.steps;
   const [activeIndex, setActiveIndex] = useState(0);
 
+  const handleDotSelect = (index: number) => {
+    setActiveIndex(index);
+  };
+
   useEffect(() => {
-    const interval = window.setInterval(() => {
+    const timeout = window.setTimeout(() => {
       setActiveIndex((current) => (current + 1) % slides.length);
     }, NATIVE_WELCOME_SLIDE_MS);
 
-    return () => window.clearInterval(interval);
-  }, [slides.length]);
+    return () => window.clearTimeout(timeout);
+  }, [activeIndex, slides.length]);
 
   const activeSlide = slides[activeIndex] ?? slides[0];
 
@@ -133,12 +137,16 @@ function NativeWelcomeCarousel({ language }: { language: 'es' | 'en' }) {
       </div>
       <div className="native-welcome-visual-shell landing landing--v3-conversion" data-theme-mode="dark" key={`visual-${activeIndex}`}>
         <LandingV3MethodVisual index={activeIndex} language={language} />
-        <div className="native-welcome-carousel-controls" aria-label="Carousel progress">
+        <div className="native-welcome-carousel-controls" aria-label="Carousel progress" role="tablist">
           {slides.map((slide, index) => (
-            <span
+            <button
+              type="button"
               className={index === activeIndex ? 'is-active' : ''}
               key={slide.badge}
               aria-label={`${index + 1} / ${slides.length}`}
+              aria-selected={index === activeIndex}
+              role="tab"
+              onClick={() => handleDotSelect(index)}
             >
               {index === activeIndex ? (
                 <i
@@ -146,7 +154,7 @@ function NativeWelcomeCarousel({ language }: { language: 'es' | 'en' }) {
                   key={`progress-${activeIndex}`}
                 />
               ) : null}
-            </span>
+            </button>
           ))}
         </div>
       </div>
