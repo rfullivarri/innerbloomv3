@@ -30,6 +30,7 @@ import { HeroPhoneShowcase } from "../components/landing/HeroPhoneShowcase";
 import WeatherCycleOrb from "../components/landing/WeatherCycleOrb";
 import { DEMO_USER_ID } from "../components/demo/DemoDashboardOverviewScene";
 import { StreaksPanel } from "../components/dashboard-v3/StreaksPanel";
+import type { StreakPanelResponse } from "../lib/api";
 import { QuickStartTasksStep } from "../onboarding/steps/QuickStartTasksStep";
 import { QUICK_START_TASKS } from "../onboarding/quickStart";
 import { LabsWeeklyRhythmSystemSection } from "../components/labs/LabsWeeklyRhythmSystemSection";
@@ -485,7 +486,17 @@ function LandingNarrativeMethod({
   );
 }
 
-export function LandingV3MethodVisual({ index, language }: { index: number; language: Language }) {
+export function LandingV3MethodVisual({
+  index,
+  language,
+  logrosCycleMs,
+  nativePreview = false,
+}: {
+  index: number;
+  language: Language;
+  logrosCycleMs?: number;
+  nativePreview?: boolean;
+}) {
   const [animatedMinutes, setAnimatedMinutes] = useState("15");
 
   useEffect(() => {
@@ -550,10 +561,48 @@ export function LandingV3MethodVisual({ index, language }: { index: number; lang
   }
 
   if (index === 1) {
+    const previewData: StreakPanelResponse | undefined = nativePreview
+      ? {
+          topStreaks: [
+            { id: "body-steps", name: language === "es" ? "10.000 pasos / Correr" : "10,000 steps / Running", stat: language === "es" ? "Movilidad" : "Mobility", weekDone: 2, streakDays: 4 },
+            { id: "body-fasting", name: language === "es" ? "Ayuno hasta las 14hs" : "Fasting until 2 PM", stat: language === "es" ? "Nutrición" : "Nutrition", weekDone: 2, streakDays: 2 },
+          ],
+          tasks: [
+            {
+              id: "body-steps",
+              name: language === "es" ? "10.000 pasos / Correr" : "10,000 steps / Running",
+              stat: language === "es" ? "Movilidad" : "Mobility",
+              difficultyLabel: language === "es" ? "Fácil" : "Easy",
+              latestRecalibrationAction: "down",
+              weekDone: 2,
+              streakDays: 4,
+              metrics: {
+                week: { count: 2, xp: 96 },
+                month: { count: 8, xp: 312, weeks: [1, 2, 2, 3] },
+                qtr: { count: 23, xp: 940, weeks: [1, 2, 2, 3], weekTotals: [4, 4, 4, 4] },
+              },
+            },
+            {
+              id: "body-fasting",
+              name: language === "es" ? "Ayuno hasta las 14hs" : "Fasting until 2 PM",
+              stat: language === "es" ? "Nutrición" : "Nutrition",
+              difficultyLabel: language === "es" ? "Media" : "Medium",
+              latestRecalibrationAction: "keep",
+              weekDone: 2,
+              streakDays: 2,
+              metrics: {
+                week: { count: 2, xp: 82 },
+                month: { count: 7, xp: 252, weeks: [1, 2, 1, 3] },
+                qtr: { count: 21, xp: 810, weeks: [1, 2, 1, 3], weekTotals: [4, 4, 4, 4] },
+              },
+            },
+          ],
+        }
+      : undefined;
     return (
       <div className="v3-step-visual v3-method-product-visual v3-method-streaks" data-light-scope="dashboard-v3" aria-hidden>
         <div className="v3-method-streaks__tilt">
-          <StreaksPanel userId={DEMO_USER_ID} gameMode="flow" weeklyTarget={3} avatarProfile={null} />
+          <StreaksPanel userId={DEMO_USER_ID} gameMode="flow" weeklyTarget={3} avatarProfile={null} previewData={previewData} />
         </div>
       </div>
     );
@@ -569,7 +618,7 @@ export function LandingV3MethodVisual({ index, language }: { index: number; lang
 
   return (
     <div className="v3-step-visual v3-method-product-visual v3-method-logros" data-light-scope="dashboard-v3" aria-hidden>
-      <LandingV3LogrosVisual language={language} />
+      <LandingV3LogrosVisual language={language} cycleMs={logrosCycleMs} />
     </div>
   );
 }
@@ -676,7 +725,7 @@ const V3_LOGROS_SETS = {
   },
 } as const;
 
-function LandingV3LogrosVisual({ language }: { language: Language }) {
+function LandingV3LogrosVisual({ language, cycleMs = 5200 }: { language: Language; cycleMs?: number }) {
   const [active, setActive] = useState<{ pillar: keyof typeof V3_LOGROS_SETS; index: number }>({
     pillar: "BODY",
     index: 0,
@@ -696,10 +745,10 @@ function LandingV3LogrosVisual({ language }: { language: Language }) {
     const interval = window.setInterval(() => {
       frame = (frame + 1) % cycle.length;
       setActive(cycle[frame]);
-    }, 5200);
+    }, cycleMs);
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [cycleMs]);
 
   const current = V3_LOGROS_SETS[active.pillar];
   const isSpanish = language === "es";

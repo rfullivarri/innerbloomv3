@@ -628,457 +628,165 @@
     }
   }
 
+  
   .native-welcome-root {
+    position: relative;
+    isolation: isolate;
     background:
-      radial-gradient(circle at 72% 18%, rgba(143, 91, 255, 0.24), transparent 38%),
-      radial-gradient(circle at 24% 78%, rgba(72, 190, 255, 0.14), transparent 42%),
-      linear-gradient(180deg, #0a0714 0%, #05050b 100%);
+      radial-gradient(140% 95% at 12% -16%, rgba(129, 140, 248, 0.44), transparent 52%),
+      radial-gradient(115% 75% at 88% -10%, rgba(168, 85, 247, 0.34), transparent 58%),
+      radial-gradient(125% 120% at 50% 120%, rgba(8, 47, 122, 0.44), transparent 72%),
+      linear-gradient(178deg, #03071b 0%, #070f2c 44%, #090b21 100%);
   }
 
   .native-welcome-carousel {
-    position: relative;
-    display: grid;
+    display: flex;
     min-height: 0;
+    height: 100%;
     flex: 1;
-    grid-template-rows: minmax(88px, 0.36fr) minmax(268px, 1fr);
-    gap: clamp(0.55rem, 1.45dvh, 0.85rem);
-    overflow: hidden;
-    border-radius: clamp(1.6rem, 4.5dvh, 2.4rem);
-    border: 1px solid rgba(224, 214, 255, 0.16);
-    background:
-      radial-gradient(circle at 16% 12%, rgba(124, 58, 237, 0.18), transparent 36%),
-      radial-gradient(circle at 80% 76%, rgba(252, 185, 155, 0.18), transparent 42%),
-      linear-gradient(145deg, rgba(4, 9, 42, 0.28), rgba(10, 15, 59, 0.16));
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.09),
-      0 28px 70px rgba(2, 6, 23, 0.18);
-    padding: clamp(0.85rem, 2.15dvh, 1.15rem);
+    flex-direction: column;
+    gap: clamp(0.24rem, 0.78dvh, 0.45rem);
   }
 
   .native-welcome-copy {
     display: grid;
-    align-content: end;
-    gap: 0.38rem;
+    gap: 0.35rem;
     text-align: center;
+    padding-inline: clamp(0.25rem, 0.9dvw, 0.45rem);
     animation: native-welcome-rise 620ms var(--motion-ease-enter, ease-out) both;
   }
 
   .native-welcome-copy span {
-    color: rgba(226, 232, 255, 0.58);
-    font-size: clamp(0.62rem, 1.45dvh, 0.72rem);
-    font-weight: 800;
-    letter-spacing: 0.28em;
+    font-size: clamp(0.62rem, 1.15dvh, 0.72rem);
+    letter-spacing: 0.22em;
     text-transform: uppercase;
+    color: rgba(196, 210, 255, 0.72);
+    font-weight: 600;
   }
 
   .native-welcome-copy h1 {
-    margin: 0 auto;
-    max-width: 14ch;
+    margin: 0;
+    font-size: clamp(1.34rem, 2.85dvh, 1.72rem);
+    font-weight: 800;
+    line-height: 1.14;
     color: #fff;
-    font-size: clamp(1.56rem, 4.2dvh, 2.08rem);
-    font-weight: 700;
-    letter-spacing: -0.05em;
-    line-height: 0.98;
     text-wrap: balance;
   }
 
   .native-welcome-visual-shell {
     position: relative;
     min-height: 0;
+    flex: 1;
     overflow: hidden;
-    border-radius: clamp(1.35rem, 4dvh, 2rem);
-    border: 1px solid rgba(224, 214, 255, 0.14);
-    background:
-      radial-gradient(circle at 48% 72%, rgba(253, 185, 155, 0.18), transparent 34%),
-      radial-gradient(circle at 58% 40%, rgba(139, 92, 246, 0.22), transparent 36%),
-      linear-gradient(155deg, rgba(3, 9, 36, 0.84), rgba(16, 22, 70, 0.62));
-    animation: native-welcome-rise 720ms var(--motion-ease-enter, ease-out) both;
-  }
-
-  .native-welcome-visual-shell::before,
-  .native-welcome-visual-shell::after {
-    content: "";
-    position: absolute;
-    inset: -22%;
-    pointer-events: none;
-    background:
-      linear-gradient(124deg, transparent 18%, rgba(167, 112, 239, 0.18) 42%, transparent 64%),
-      linear-gradient(151deg, transparent 28%, rgba(253, 185, 155, 0.16) 54%, transparent 72%);
-    filter: blur(1px);
-    opacity: 0.9;
-    transform: rotate(-8deg);
-  }
-
-  .native-welcome-visual-shell::after {
-    opacity: 0.56;
-    transform: rotate(12deg) scale(1.12);
+    border-radius: 1.5rem;
+    border: 1px solid rgba(191, 219, 254, 0.04);
+    background: linear-gradient(180deg, rgba(17, 24, 54, 0.74), rgba(9, 14, 38, 0.76));
+    box-shadow: 0 14px 40px rgba(4, 8, 29, 0.35);
   }
 
   .native-welcome-visual-shell.landing {
-    min-height: 0;
-    color: #fff;
-    font-family: var(--font-body);
-    background: transparent;
+    width: 100%;
+    margin: 0;
+    padding: clamp(0.2rem, 0.8dvh, 0.4rem) clamp(0.16rem, 0.75dvw, 0.28rem) clamp(2.15rem, 5.4dvh, 2.9rem);
   }
 
   .native-welcome-visual-shell .v3-step-visual {
-    position: relative;
-    z-index: 1;
-    width: 100%;
+    --v3-method-visual-viewport-height: min(45dvh, 360px);
+    margin-inline: auto;
+    width: min(100%, 460px);
+    max-width: 460px;
     height: 100%;
-    min-height: 0;
-    border: 0;
-    background: transparent;
   }
 
   .native-welcome-visual-shell .v3-method-product-visual {
-    overflow: hidden;
+    margin: 0;
   }
 
-  .native-welcome-visual-shell .v3-method-quickstart__scene {
-    transform: scale(0.46);
-    transform-origin: center center;
+  .native-welcome-visual-shell .v3-method-quickstart__scene { transform: scale(0.82); }
+  .native-welcome-visual-shell .v3-method-streaks__tilt { transform: scale(0.96); transform-origin: center 54%; }
+  .native-welcome-visual-shell .v3-adjustment-demo { transform: scale(0.96); transform-origin: center 56%; }
+  .native-welcome-visual-shell .v3-method-logros__scene { transform: scale(0.88); transform-origin: center 55%; width: min(116%, 530px); margin-left: auto; margin-right: auto; }
+
+  .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__scene {
+    transform: scale(0.8);
+    transform-origin: center 44%;
+  }
+  .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__titles {
+    margin-bottom: 0.08rem;
+  }
+  .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__tasks {
+    gap: 0.22rem;
+  }
+  .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__scene .quick-start-task-step {
+    width: min(115%, 540px);
+    margin-inline: auto;
+  }
+  .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__scene .quick-start-task-step [class*="task"] {
+    line-height: 1.15;
+  }
+  .native-welcome-carousel[data-native-step="1"] .native-welcome-carousel-controls {
+    inset: auto 0 clamp(0.32rem, 1.2dvh, 0.6rem) 0;
   }
 
-  .native-welcome-visual-shell .v3-method-streaks__tilt {
-    transform: scale(0.52) rotateX(0deg) rotateY(0deg);
-    transform-origin: center center;
+  .native-welcome-carousel[data-native-step="2"] .native-welcome-visual-shell .v3-method-streaks__tilt {
+    transform: scale(1.15);
+    transform-origin: center 56%;
+  }
+  .native-welcome-carousel[data-native-step="2"] .native-welcome-visual-shell [data-light-scope="dashboard-v3"] {
+    overflow: visible;
   }
 
-  .native-welcome-visual-shell .v3-adjustment-demo,
-  .native-welcome-visual-shell .v3-method-logros__scene {
-    transform: scale(0.48);
-    transform-origin: center center;
+  .native-welcome-carousel[data-native-step="3"] .native-welcome-visual-shell .v3-adjustment-demo {
+    transform: scale(1.05);
+    transform-origin: center 61%;
   }
 
-  .native-welcome-visual-shell .v3-method-logros__scene {
-    width: 210%;
-    max-width: none;
-  }
-
-  .native-welcome-visual {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    height: 100%;
-    min-height: 238px;
-    place-items: center;
-    overflow: hidden;
-  }
-
-  .native-welcome-orbit {
-    position: absolute;
-    border-radius: 999px;
-    border: 1px solid rgba(226, 232, 255, 0.18);
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.16), transparent 62%);
-    animation: native-welcome-pulse 3.2s ease-in-out infinite;
-  }
-
-  .native-welcome-orbit--large {
-    width: 14rem;
-    height: 14rem;
-  }
-
-  .native-welcome-orbit--small {
-    width: 8rem;
-    height: 8rem;
-    animation-delay: 680ms;
-  }
-
-  .native-welcome-plan-card,
-  .native-welcome-quest-card,
-  .native-welcome-adjust-card {
-    position: absolute;
-    border: 1px solid rgba(224, 214, 255, 0.18);
-    background: rgba(255, 255, 255, 0.09);
-    box-shadow: 0 18px 46px rgba(2, 6, 23, 0.24);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-  }
-
-  .native-welcome-plan-card {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    border-radius: 1.25rem;
-    padding: 0.78rem 0.95rem;
-    animation: native-welcome-drift 4.2s ease-in-out infinite;
-  }
-
-  .native-welcome-plan-card span {
-    display: block;
-    width: 1.05rem;
-    height: 1.05rem;
-    border-radius: 999px;
-    background: linear-gradient(135deg, #8b5cf6, #7dd3fc);
-  }
-
-  .native-welcome-plan-card strong {
-    color: #fff;
-    font-size: 0.78rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-  }
-
-  .native-welcome-plan-card--main {
-    transform: translate3d(-42px, -22px, 0);
-  }
-
-  .native-welcome-plan-card--ghost {
-    opacity: 0.68;
-    transform: translate3d(54px, 48px, 0);
-    animation-delay: 420ms;
-  }
-
-  .native-welcome-signal-grid,
-  .native-welcome-meter {
-    position: absolute;
-    inset: 16%;
-    display: grid;
-    gap: 0.7rem;
-  }
-
-  .native-welcome-signal-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .native-welcome-signal-grid span {
-    border-radius: 1.25rem;
-    background: rgba(255, 255, 255, 0.065);
-    animation: native-welcome-pulse 3s ease-in-out infinite;
-  }
-
-  .native-welcome-signal-grid span:nth-child(2) {
-    animation-delay: 250ms;
-  }
-
-  .native-welcome-signal-grid span:nth-child(3) {
-    animation-delay: 500ms;
-  }
-
-  .native-welcome-signal-grid span:nth-child(4) {
-    animation-delay: 750ms;
-  }
-
-  .native-welcome-quest-card {
-    display: flex;
-    width: min(78%, 16rem);
-    align-items: center;
-    gap: 0.8rem;
-    border-radius: 1.35rem;
-    padding: 1rem;
-    animation: native-welcome-rise 3.4s ease-in-out infinite;
-  }
-
-  .native-welcome-quest-card i {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 999px;
-    background: linear-gradient(135deg, #cf8bf3, #fdb99b);
-  }
-
-  .native-welcome-quest-card div {
-    display: grid;
-    flex: 1;
-    gap: 0.55rem;
-  }
-
-  .native-welcome-quest-card span {
-    height: 0.55rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.22);
-  }
-
-  .native-welcome-quest-card span:last-child {
-    width: 62%;
-  }
-
-  .native-welcome-gp-pill {
-    position: absolute;
-    right: 18%;
-    bottom: 22%;
-    border-radius: 999px;
-    background: linear-gradient(90deg, rgba(139, 92, 246, 0.9), rgba(253, 185, 155, 0.86));
-    padding: 0.45rem 0.8rem;
-    color: #fff;
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    animation: native-welcome-drift 3.8s ease-in-out infinite;
-  }
-
-  .native-welcome-meter {
-    align-content: center;
-  }
-
-  .native-welcome-meter span {
-    height: 0.7rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.12);
-    overflow: hidden;
-  }
-
-  .native-welcome-meter span::before {
-    content: "";
-    display: block;
-    height: 100%;
-    width: 70%;
-    border-radius: inherit;
-    background: linear-gradient(90deg, #7dd3fc, #8b5cf6, #fdb99b);
-    animation: native-welcome-progress 3.4s ease-in-out infinite alternate;
-    transform-origin: left center;
-  }
-
-  .native-welcome-meter span:nth-child(2)::before {
-    width: 52%;
-    animation-delay: 350ms;
-  }
-
-  .native-welcome-meter span:nth-child(3)::before {
-    width: 86%;
-    animation-delay: 700ms;
-  }
-
-  .native-welcome-adjust-card {
-    display: grid;
-    width: 7.3rem;
-    height: 7.3rem;
-    place-items: center;
-    border-radius: 999px;
-    animation: native-welcome-pulse 3.2s ease-in-out infinite;
-  }
-
-  .native-welcome-adjust-card b {
-    color: #fff;
-    font-size: 2.1rem;
-    letter-spacing: -0.08em;
-  }
-
-  .native-welcome-adjust-card i {
-    position: absolute;
-    inset: 0.7rem;
-    border-radius: 999px;
-    border: 2px solid rgba(125, 211, 252, 0.48);
-    border-top-color: rgba(253, 185, 155, 0.86);
-  }
-
-  .native-welcome-adjust-line {
-    position: absolute;
-    bottom: 21%;
-    width: min(74%, 15rem);
-    height: 0.55rem;
-    overflow: hidden;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.12);
-  }
-
-  .native-welcome-adjust-line span {
-    display: block;
-    width: 62%;
-    height: 100%;
-    border-radius: inherit;
-    background: linear-gradient(90deg, #38bdf8, #cf8bf3);
-    animation: native-welcome-progress 3.8s ease-in-out infinite alternate;
-    transform-origin: left center;
-  }
-
-  .native-welcome-badge {
-    display: grid;
-    width: 8.7rem;
-    height: 8.7rem;
-    place-items: center;
-    border-radius: 999px;
-    border: 1px solid rgba(224, 214, 255, 0.22);
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.12), rgba(139, 92, 246, 0.12));
-    box-shadow: 0 22px 60px rgba(139, 92, 246, 0.24);
-    animation: native-welcome-rise 4s ease-in-out infinite;
-  }
-
-  .native-welcome-badge img {
-    width: 72%;
-    height: 72%;
-    object-fit: contain;
-  }
-
-  .native-welcome-level-ring {
-    position: absolute;
-    width: 12rem;
-    height: 12rem;
-    border-radius: 999px;
-    border: 1px solid rgba(253, 185, 155, 0.24);
-    animation: native-welcome-pulse 3.4s ease-in-out infinite;
-  }
-
-  .native-welcome-growth-row {
-    position: absolute;
-    bottom: 18%;
-    display: flex;
-    gap: 0.45rem;
-    border-radius: 999px;
-    border: 1px solid rgba(224, 214, 255, 0.14);
-    background: rgba(255, 255, 255, 0.08);
-    padding: 0.48rem 0.72rem;
-  }
-
-  .native-welcome-growth-row span {
-    color: rgba(255, 255, 255, 0.86);
-    font-size: 0.72rem;
-    font-weight: 800;
+  .native-welcome-carousel[data-native-step="4"] .native-welcome-visual-shell .v3-method-logros__scene {
+    transform: scale(1.06);
+    transform-origin: center 56%;
   }
 
   .native-welcome-carousel-controls {
     position: absolute;
-    z-index: 2;
-    right: 50%;
-    bottom: 0.82rem;
-    display: inline-flex;
+    inset: auto 0 clamp(0.5rem, 1.9dvh, 0.95rem) 0;
+    display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 0.55rem;
-    border-radius: 999px;
-    background: rgba(11, 15, 42, 0.38);
-    padding: 0.48rem 0.64rem;
-    transform: translateX(50%);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    gap: 0.44rem;
+    pointer-events: auto;
   }
 
-  .native-welcome-carousel-controls span {
-    display: block;
-    width: 0.42rem;
+  .native-welcome-carousel-controls button {
+    position: relative;
     height: 0.42rem;
-    overflow: hidden;
+    width: 1rem;
+    border: 0;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.48);
+    background: rgba(226, 232, 240, 0.28);
+    padding: 0;
+    overflow: hidden;
   }
 
-  .native-welcome-carousel-controls span.is-active {
-    width: 2.6rem;
-    background: rgba(255, 255, 255, 0.24);
+  .native-welcome-carousel-controls button.is-active {
+    width: 2.55rem;
+    background: rgba(226, 232, 240, 0.38);
   }
 
   .native-welcome-carousel-controls i {
-    display: block;
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    inset: 0;
     border-radius: inherit;
-    background: rgba(255, 255, 255, 0.88);
+    background: linear-gradient(90deg, #c4b5fd 0%, #f0abfc 100%);
     transform-origin: left center;
     animation: native-welcome-progress linear forwards;
   }
-
-  @media (max-height: 760px) {
+@media (max-height: 760px) {
     .native-welcome-carousel {
-      grid-template-rows: minmax(84px, 0.38fr) minmax(214px, 1fr);
-      gap: 0.8rem;
-      padding: 1rem;
-    }
-
-    .native-welcome-visual {
-      min-height: 210px;
+      gap: 0.55rem;
     }
 
     .native-welcome-copy h1 {
-      font-size: clamp(1.62rem, 4.25dvh, 2rem);
+      font-size: clamp(1.14rem, 2.2dvh, 1.28rem);
     }
   }
 }

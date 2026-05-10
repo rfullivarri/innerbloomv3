@@ -285,6 +285,7 @@ interface StreaksPanelProps {
   weeklyTarget?: number | null;
   avatarProfile?: AvatarProfile | null;
   forceLoadingTasks?: boolean;
+  previewData?: StreakPanelResponse | null;
 }
 
 type TaskHistory = {
@@ -667,7 +668,14 @@ function TaskItem({
   );
 }
 
-export function StreaksPanel({ userId, gameMode, weeklyTarget, avatarProfile, forceLoadingTasks = false }: StreaksPanelProps) {
+export function StreaksPanel({
+  userId,
+  gameMode,
+  weeklyTarget,
+  avatarProfile,
+  forceLoadingTasks = false,
+  previewData,
+}: StreaksPanelProps) {
   const { t, language } = usePostLoginLanguage();
   const [pillar, setPillar] = useState<Pillar>('Body');
   const [range, setRange] = useState<StreakPanelRange>('month');
@@ -690,7 +698,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, avatarProfile, fo
         mode: normalizedMode,
       }),
     [userId, pillar, normalizedMode, range],
-    { enabled: PANEL_ENABLED },
+    { enabled: PANEL_ENABLED && !previewData },
   );
 
   useEffect(() => {
@@ -707,8 +715,10 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, avatarProfile, fo
     return null;
   }
 
-  const tasks = data?.tasks ?? [];
-  const topStreaks = data?.topStreaks ?? [];
+  const resolvedData = previewData ?? data;
+  const resolvedStatus = previewData ? 'success' : status;
+  const tasks = resolvedData?.tasks ?? [];
+  const topStreaks = resolvedData?.topStreaks ?? [];
 
   const tasksById = useMemo(() => new Map(tasks.map((task) => [task.id, task])), [tasks]);
 
@@ -863,8 +873,8 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, avatarProfile, fo
     return null;
   }, [displayTasks, selectedTaskId, tasksById, topEntries]);
 
-  const isLoading = status === 'idle' || status === 'loading';
-  const isError = status === 'error';
+  const isLoading = resolvedStatus === 'idle' || resolvedStatus === 'loading';
+  const isError = resolvedStatus === 'error';
   const hasContent = !isLoading && !isError;
   const showTasksSkeleton = isLoading || forceLoadingTasks;
 
