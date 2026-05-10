@@ -669,7 +669,7 @@
     font-size: clamp(1.34rem, 2.85dvh, 1.72rem);
     font-weight: 800;
     line-height: 1.14;
-    color: rgba(255, 255, 255, 0.995);
+    color: #fff;
     text-wrap: balance;
   }
 
@@ -708,17 +708,24 @@
   .native-welcome-visual-shell .v3-method-logros__scene { transform: scale(0.88); transform-origin: center 55%; width: min(116%, 530px); margin-left: auto; margin-right: auto; }
 
   .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__scene {
-    transform: scale(0.78);
-    transform-origin: center 49%;
+    transform: scale(0.8);
+    transform-origin: center 44%;
   }
   .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__titles {
-    margin-bottom: 0.24rem;
+    margin-bottom: 0.08rem;
   }
   .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__tasks {
-    gap: 0.32rem;
+    gap: 0.22rem;
+  }
+  .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__scene .quick-start-task-step {
+    width: min(115%, 540px);
+    margin-inline: auto;
+  }
+  .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__scene .quick-start-task-step [class*="task"] {
+    line-height: 1.15;
   }
   .native-welcome-carousel[data-native-step="1"] .native-welcome-carousel-controls {
-    inset: auto 0 clamp(0.5rem, 1.65dvh, 0.8rem) 0;
+    inset: auto 0 clamp(0.32rem, 1.2dvh, 0.6rem) 0;
   }
 
   .native-welcome-carousel[data-native-step="2"] .native-welcome-visual-shell .v3-method-streaks__tilt {
@@ -730,8 +737,8 @@
   }
 
   .native-welcome-carousel[data-native-step="3"] .native-welcome-visual-shell .v3-adjustment-demo {
-    transform: scale(1.24);
-    transform-origin: center 57%;
+    transform: scale(1.05);
+    transform-origin: center 61%;
   }
 
   .native-welcome-carousel[data-native-step="4"] .native-welcome-visual-shell .v3-method-logros__scene {

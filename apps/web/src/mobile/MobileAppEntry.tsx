@@ -136,7 +136,7 @@ function NativeWelcomeCarousel({ language }: { language: 'es' | 'en' }) {
         <h1>{activeSlide.title}</h1>
       </div>
       <div className="native-welcome-visual-shell landing landing--v3-conversion" data-theme-mode="dark" data-native-step={activeIndex + 1} key={`visual-${activeIndex}`}>
-        <LandingV3MethodVisual index={activeIndex} language={language} logrosCycleMs={activeIndex === 3 ? 2100 : undefined} />
+        <LandingV3MethodVisual index={activeIndex} language={language} logrosCycleMs={activeIndex === 3 ? 2100 : undefined} nativePreview />
         <div className="native-welcome-carousel-controls" aria-label="Carousel progress" role="tablist">
           {slides.map((slide, index) => (
             <button
