@@ -6,6 +6,7 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
     ...LANDING_V2_CONTENT.es,
     how: {
       ...LANDING_V2_CONTENT.es.how,
+      kicker: 'EL SISTEMA',
       steps: [
         {
           title: 'Empieza posible, no perfecto.',
@@ -35,16 +36,21 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
     },
     demo: {
       ...LANDING_V2_CONTENT.es.demo,
-      title: 'Mira tu Journey.',
+      title: 'Haz visible tu progreso',
       text: 'Energía, emociones, acciones, GP y rachas en una experiencia simple de seguir.',
       banner: 'Explora cómo se ve tu crecimiento',
       cta: 'Explorar demo',
+    },
+    testimonials: {
+      ...LANDING_V2_CONTENT.es.testimonials,
+      title: 'Primeras experiencias',
     },
   },
   en: {
     ...LANDING_V2_CONTENT.en,
     how: {
       ...LANDING_V2_CONTENT.en.how,
+      kicker: 'THE SYSTEM',
       steps: [
         {
           title: 'Start possible, not perfect.',
@@ -74,10 +80,14 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
     },
     demo: {
       ...LANDING_V2_CONTENT.en.demo,
-      title: 'See your Journey.',
+      title: 'Make visible your progress',
       text: 'Energy, emotions, actions, GP, and streaks in one experience that is easy to follow.',
       banner: 'Explore what your growth looks like',
       cta: 'Explore demo',
+    },
+    testimonials: {
+      ...LANDING_V2_CONTENT.en.testimonials,
+      title: 'Early experience',
     },
   },
 };
