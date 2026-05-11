@@ -425,6 +425,7 @@ function LandingNarrativeMethod({
   return (
     <div className="v2-method-shell">
       <div className="v2-method-heading">
+        <p className="how-kicker">{how.kicker}</p>
         <AdaptiveText as="h2">{how.title}</AdaptiveText>
         <AdaptiveText as="p" className="section-sub v2-method-intro">
           {how.intro}
@@ -776,6 +777,7 @@ function LandingV3ConversionMethod({ how, language }: { how: LandingCopy["how"];
   return (
     <div className="v2-method-shell v3-method-shell">
       <div className="v2-method-heading">
+        <p className="how-kicker">{how.kicker}</p>
         <AdaptiveText as="h2">{how.title}</AdaptiveText>
         <AdaptiveText as="p" className="section-sub v2-method-intro">
           {how.intro}
@@ -1232,6 +1234,11 @@ export default function LandingPage({
           <div className="container narrow truth-problem-section">
             {isNarrativeVariant || isOfficialDefault ? (
               <>
+                {isV3Conversion ? (
+                  <p className="section-kicker">
+                    {language === "es" ? "EL PROBLEMA PRINCIPAL" : "THE MAIN PROBLEM"}
+                  </p>
+                ) : null}
                 <AdaptiveText
                   as="h2"
                   className="truth-problem-title truth-problem-title--outside"
@@ -1354,6 +1361,7 @@ export default function LandingPage({
               className={`visible-progress-top ${isNarrativeVariant || isOfficialDefault ? "visible-progress-top--v2-text-only" : ""}`}
             >
               <div className="visible-progress-copy">
+                {isV3Conversion ? <p className="section-kicker">DEMO</p> : null}
                 <AdaptiveText as="h2" className="demo-title">
                   {copy.demo.title}
                 </AdaptiveText>
@@ -1687,6 +1695,8 @@ export default function LandingPage({
           </div>
         </section>
 
+        {isV3Conversion ? null : (
+          <>
         <section className="why section-pad reveal-on-scroll" id="pillars">
           <div className="container narrow">
             <p className="section-kicker">{copy.pillars.kicker}</p>
@@ -1834,6 +1844,9 @@ export default function LandingPage({
             </div>
           </div>
         </section>
+
+          </>
+        )}
 
         <section
           className="testimonials section-pad reveal-on-scroll"
