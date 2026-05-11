@@ -181,6 +181,46 @@ function splitPillarCopy(copy: string, language: Language) {
   return { definition, examples };
 }
 
+const DISCORD_URL = "https://discord.gg/wds35ykK";
+
+const DISCORD_CTA_COPY: Record<Language, { lead: string; link: string }> = {
+  en: {
+    lead: "Got questions or feedback?",
+    link: "Join us on Discord.",
+  },
+  es: {
+    lead: "¿Tienes preguntas o feedback?",
+    link: "Únete a nuestro Discord.",
+  },
+};
+
+function BackToTopButton({ language }: { language: Language }) {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsVisible(window.scrollY > 500);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  if (!isVisible) return null;
+
+  return (
+    <button
+      type="button"
+      className="landing-back-to-top"
+      aria-label={language === "es" ? "Volver arriba" : "Back to top"}
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+    >
+      <span aria-hidden="true">↑</span>
+      <span>Top</span>
+    </button>
+  );
+}
+
 const EMOTION_HEATMAP_ROWS: Array<
   Array<"calm" | "happy" | "focus" | "stress" | "neutral">
 > = [
@@ -1997,6 +2037,12 @@ export default function LandingPage({
                 </>
               )}
             </div>
+            <p className="landing-discord-cta">
+              {DISCORD_CTA_COPY[language].lead}{" "}
+              <a href={DISCORD_URL} target="_blank" rel="noreferrer">
+                {DISCORD_CTA_COPY[language].link}
+              </a>
+            </p>
           </div>
         </section>
       </main>
@@ -2051,8 +2097,25 @@ export default function LandingPage({
             </svg>
             <span>Join our subreddit</span>
           </a>
+          <a
+            className="footer-community-link"
+            data-analytics-cta="join_discord"
+            data-analytics-location="footer"
+            href={DISCORD_URL}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20.32 4.37a18.3 18.3 0 0 0-4.63-1.47.08.08 0 0 0-.08.04c-.2.36-.42.84-.58 1.22a17 17 0 0 0-5.06 0 12 12 0 0 0-.59-1.22.08.08 0 0 0-.08-.04A18.27 18.27 0 0 0 4.7 4.37a.07.07 0 0 0-.03.03C1.73 8.79.93 13.07 1.32 17.3a.1.1 0 0 0 .04.07 18.4 18.4 0 0 0 5.68 2.9.08.08 0 0 0 .09-.03c.44-.6.84-1.24 1.18-1.91a.08.08 0 0 0-.04-.11 12 12 0 0 1-1.8-.86.08.08 0 0 1-.01-.13q.19-.14.39-.3a.07.07 0 0 1 .08-.01c3.77 1.72 7.85 1.72 11.58 0a.07.07 0 0 1 .08.01q.2.17.39.3a.08.08 0 0 1-.01.13 12 12 0 0 1-1.8.86.08.08 0 0 0-.04.11c.35.67.74 1.3 1.18 1.9a.08.08 0 0 0 .09.04 18.34 18.34 0 0 0 5.69-2.9.08.08 0 0 0 .04-.07c.47-4.89-.79-9.14-3.36-12.9a.06.06 0 0 0-.03-.03M8.02 14.72c-1.14 0-2.08-1.05-2.08-2.34s.92-2.34 2.08-2.34 2.1 1.06 2.08 2.34-.92 2.34-2.08 2.34m7.67 0c-1.14 0-2.08-1.05-2.08-2.34s.92-2.34 2.08-2.34 2.1 1.06 2.08 2.34-.92 2.34-2.08 2.34"
+                fill="currentColor"
+              />
+            </svg>
+            <span>{language === "es" ? "Únete a Discord" : "Join us on Discord"}</span>
+          </a>
         </nav>
       </footer>
+      <BackToTopButton language={language} />
       <CookieConsentBanner
         language={language}
         isOpen={isCookiePanelOpen}
