@@ -6,7 +6,27 @@ Objetivo: conseguir al menos **1 usuario real, desconocido, dispuesto a probar I
 
 ---
 
-## 1. Principio central
+## 1. Cambio de criterio: no empezar con `/reddit-beta`
+
+Crear una landing específica tipo `/reddit-beta` puede ser útil más adelante, pero **no es prioridad para salir a Reddit ya**.
+
+Razón:
+
+- Reddit suele rechazar lo que huele demasiado armado, comercial o “growth funnel”.
+- Una landing con CTA directo a Discord puede sentirse demasiado profesional/marketinera para una etapa donde el objetivo es conversación cruda.
+- El objetivo inicial no es convertir tráfico frío. Es provocar respuestas reales y detectar gente con dolor.
+
+Decisión actual:
+
+> Publicar posts sin link inicial. Usar links solo cuando alguien muestre interés, pida ver el producto o responda con dolor real.
+
+Discord no se empuja en el post inicial. Se ofrece después, en contexto:
+
+> “If you’re open to trying it for a few days, I can send you the link. I also have a tiny feedback Discord, but no pressure.”
+
+---
+
+## 2. Principio central
 
 Reddit no debe tratarse como un canal de anuncios. Debe tratarse como un canal de conversación, discovery y reclutamiento de testers.
 
@@ -16,9 +36,10 @@ Mensaje base:
 
 Versión más directa:
 
-> Innerbloom is a habit tracker for people whose energy changes. It helps you build habits with flexible rhythms, emotional check-ins, and progress that doesn’t punish imperfect weeks.
+> I’m exploring a habit system for people whose energy changes — flexible rhythms, emotional check-ins, and progress that doesn’t punish imperfect weeks.
 
 No vender primero:
+
 - GP.
 - Levels.
 - Avatares.
@@ -26,62 +47,64 @@ No vender primero:
 - “AI-powered”.
 - “Revolutionary”.
 - “Wellness ecosystem”.
+- Discord como CTA inicial.
+- Link en el primer post salvo que la comunidad lo permita claramente.
 
 Sí vender primero:
+
 - Hábitos sostenibles.
 - Vida real imperfecta.
 - Baja energía.
 - Retomar sin empezar de cero.
 - Ritmos flexibles.
-- Feedback honesto de early testers.
+- Preguntas honestas.
+- Founder buscando crítica real.
 
 ---
 
-## 2. URLs y cuándo usar cada una
+## 3. URLs y cuándo usarlas
 
-### `/reddit-beta` — futura landing de reclutamiento
+### Sin link inicial — opción por defecto
 
-Uso principal: cuando el post busca testers reales y feedback brutal.
+Uso principal: primer post en casi todos los subreddits.
 
-Cuándo usarla:
-- Posts founder-led.
-- Posts tipo “I’m looking for early testers”.
-- Subreddits donde la transparencia funciona mejor que la landing comercial.
-- Conversaciones donde alguien dice “I’d try this”.
+Cuándo usarlo:
+
+- Cuando no conocemos bien la tolerancia a autopromo.
+- Cuando el subreddit es sensible.
+- Cuando el objetivo es validar problema.
+- Cuando queremos sonar como persona, no como marca.
 
 Mensaje:
 
-> I’m not looking for polished testimonials. I’m looking for a few real early users who will try Innerbloom and tell me what feels useful, confusing, annoying, or unnecessary.
-
-CTA ideal:
-
-> Join the early feedback Discord
+> I’m building something around this problem, but I don’t want to turn this into a pitch. I’m trying to understand whether this actually resonates.
 
 ---
 
 ### `/v3` — landing para new users
 
-Uso principal: usuarios más amplios que todavía no saben si quieren una app de hábitos, pero conectan con la idea de hábitos sostenibles para vida real.
+Uso principal: usuarios más amplios que no necesariamente vienen comparando habit trackers.
 
 Cuándo usarla:
-- `r/selfimprovement`.
-- `r/DecidingToBeBetter`.
-- `r/Journaling`.
-- Conversaciones donde el usuario necesita entender el producto completo.
-- Gente que no viene comparando herramientas.
+
+- Si alguien pide link después de un post en `r/selfimprovement`, `r/DecidingToBeBetter` o `r/Journaling`.
+- Si el usuario necesita entender la promesa completa.
+- Si el dolor es amplio: “quiero mejorar, pero no sostengo rutinas”.
 
 Mensaje:
 
 > Sustainable habits for real people. A routine that becomes simpler when life gets hard and more challenging when you’re ready to grow.
 
 Fortaleza:
+
 - Es más amigable para usuarios nuevos.
 - Explica la promesa general.
 - No depende de que la persona ya haya usado habit trackers.
 
 Riesgo:
-- Puede sentirse más “landing” y menos “beta founder conversation”.
-- Para Reddit puede convertir peor que `/reddit-beta` si el usuario es escéptico.
+
+- Puede sentirse más “landing” que conversación Reddit.
+- Mejor compartirla solo cuando el usuario ya mostró interés.
 
 ---
 
@@ -90,6 +113,7 @@ Riesgo:
 Hipótesis de uso: esta landing apunta más a usuarios que ya usaron apps de hábitos o entienden el problema de los trackers tradicionales.
 
 Cuándo usarla:
+
 - Cuando el post habla explícitamente de “habit trackers”.
 - Cuando el usuario compara apps.
 - Cuando alguien pregunta por alternativas a trackers rígidos.
@@ -100,13 +124,9 @@ Mensaje:
 > A habit tracker alternative for people who lose momentum when life gets messy.
 
 Riesgo:
-- Si tiene demasiada información, puede ser demasiado pesada para tráfico frío de Reddit.
-- Si el post ya hizo mucho trabajo explicando el problema, la landing puede funcionar.
-- Si el usuario viene con baja paciencia, mejor `/reddit-beta`.
 
-Recomendación:
-- Usar `/` solo para audiencias que ya entienden la categoría habit tracker.
-- No usar `/` como primera opción para burnout, journaling o self-improvement amplio.
+- Si tiene mucha información, puede ser pesada para tráfico frío de Reddit.
+- Mejor usarla cuando el usuario ya está caliente por conversación.
 
 ---
 
@@ -115,188 +135,94 @@ Recomendación:
 Uso principal: mostrar producto real, flujo, gamificación o progreso visual.
 
 Cuándo usarla:
-- `r/productivity`.
-- `r/habitica`.
-- `r/theXeffect`.
-- Usuarios que piden ver cómo funciona.
-- Usuarios que preguntan por mecánica, no por filosofía.
+
+- Si alguien en `r/productivity`, `r/habitica` o `r/theXeffect` pide ver cómo funciona.
+- Si la conversación ya está en mecánicas, gamificación, ritmo o sistema.
+- Si el usuario no quiere filosofía y pide producto.
 
 Mensaje:
 
 > If you’re into habit systems, I’d love feedback on the actual flow. The idea is visible progress + flexible intensity instead of fixed checklists and punishing streaks.
 
-Riesgo:
-- Si se comparte demasiado pronto, puede sentirse como demo promocional.
-- Mejor usarla después de explicar el problema.
+---
+
+### Discord
+
+No usar como CTA público inicial.
+
+Cuándo ofrecerlo:
+
+- Cuando alguien pide link.
+- Cuando alguien deja un comentario largo con dolor real.
+- Cuando alguien dice que probaría el producto.
+- Cuando alguien da feedback útil y parece posible tester.
+
+Mensaje:
+
+> I also have a tiny feedback Discord for early testers, but no pressure. The main thing I need is blunt feedback after someone actually tries it.
 
 ---
 
-## 3. Matriz subreddit → objetivo → URL → comunicación
+## 4. Matriz subreddit → objetivo → link strategy → comunicación
 
-| Subreddit | Usuario potencial | Objetivo | URL recomendada | Ángulo | Qué decir | Qué evitar |
-|---|---|---|---|---|---|---|
-| `r/NonZeroDay` | Personas que valoran hacer algo mínimo incluso en días malos | Conseguir tester alineado con small steps | `/reddit-beta` | Baja energía + pasos mínimos | “A habit system for low-energy days and imperfect weeks.” | Gamificación, GP, pitch comercial |
-| `r/getdisciplined` | Personas que quieren disciplina pero fallan por inconsistencia | Validar intensidad adaptable | `/reddit-beta` o `/` | Disciplina flexible | “Discipline should have adjustable intensity.” | Sonar anti-disciplina o demasiado wellness |
-| `r/selfimprovement` | Gente amplia que quiere mejorar | Captar usuario general | `/v3` | Hábitos sostenibles | “Sustainable habits for real people.” | Lenguaje startup/producto excesivo |
-| `r/productivity` | Usuarios de sistemas, Notion, Todoist, trackers | Feedback racional de producto | `/demo-mode-select` o `/` | Tracker adaptable | “Most trackers are fixed checklists; I’m testing adaptive intensity.” | Demasiada emoción sin producto concreto |
-| `r/habitica` | Usuarios que entienden gamificación de hábitos | Validar diferenciación gamificada | `/demo-mode-select` | Progreso visible sin castigo excesivo | “Gamified progress without punishing missed weeks.” | Atacar Habitica directamente |
-| `r/theXeffect` | Gente que valora tracking visual y rachas | Validar progreso visual / no reset total | `/demo-mode-select` | Fallar también da información | “What if a broken streak became a signal, not a reset?” | Decir que las rachas no sirven |
-| `r/Journaling` | Personas que registran emociones e introspección | Validar emoción + hábitos | `/v3` | Emotion check-ins | “Mood is not noise; it can help adjust your routine.” | Vender productividad dura |
-| `r/burnout` | Personas cansadas o saturadas | Discovery sensible, no venta | Sin link inicial; luego `/v3` | Rutina de baja carga | “I’m trying to understand if habit systems should lower the load when energy is gone.” | Prometer curar burnout |
-| `r/ADHD` | Personas con problemas de ejecución y constancia | Discovery cuidadoso | Sin link inicial; luego `/reddit-beta` si piden | Sistemas menos rígidos | “No medical claims — I’m exploring if rigid trackers make people quit faster.” | Decir “sirve para ADHD” |
-| `r/DecidingToBeBetter` | Gente que quiere cambiar sin juicio | Beta tester emocionalmente alineado | `/v3` o `/reddit-beta` | Retomar sin culpa | “Start where you are, not where you think you should be.” | Tono startup/hype |
-
----
-
-## 4. Prioridad inicial
-
-No atacar todos los subreddits. Ejecutar por tandas.
-
-Semana 1:
-1. `r/NonZeroDay` → `/reddit-beta`
-2. `r/getdisciplined` → `/reddit-beta`
-3. `r/selfimprovement` → `/v3`
-
-Semana 2, solo si hubo señales:
-4. `r/productivity` → `/demo-mode-select`
-5. `r/Journaling` → `/v3`
-6. `r/theXeffect` → `/demo-mode-select`
-
-Evitar inicialmente:
-- `r/burnout` como canal de link directo.
-- `r/ADHD` como canal de marketing.
-
-Usarlos solo para escuchar, comentar con respeto y aprender.
+| Subreddit | Usuario potencial | Objetivo | Link strategy | URL si piden | Ángulo | Qué decir | Qué evitar |
+|---|---|---|---|---|---|---|---|
+| `r/NonZeroDay` | Personas que valoran hacer algo mínimo incluso en días malos | Detectar dolor + conseguir tester alineado | Sin link inicial | `/v3` o `/` según conversación | Baja energía + pasos mínimos | “A habit system for low-energy days and imperfect weeks.” | Gamificación, GP, pitch comercial |
+| `r/getdisciplined` | Personas que quieren disciplina pero fallan por inconsistencia | Validar intensidad adaptable | Sin link inicial | `/` si hablan de trackers; `/v3` si hablan de vida/rutina | Disciplina flexible | “Discipline should have adjustable intensity.” | Sonar anti-disciplina o demasiado wellness |
+| `r/selfimprovement` | Gente amplia que quiere mejorar | Captar usuario general | Sin link inicial | `/v3` | Hábitos sostenibles | “Sustainable habits for real people.” | Lenguaje startup/producto excesivo |
+| `r/productivity` | Usuarios de sistemas, Notion, Todoist, trackers | Feedback racional de producto | Sin link inicial | `/demo-mode-select` o `/` | Tracker adaptable | “Most trackers are fixed checklists; I’m testing adaptive intensity.” | Demasiada emoción sin producto concreto |
+| `r/habitica` | Usuarios que entienden gamificación de hábitos | Validar diferenciación gamificada | Sin link inicial | `/demo-mode-select` | Progreso visible sin castigo excesivo | “Gamified progress without punishing missed weeks.” | Atacar Habitica directamente |
+| `r/theXeffect` | Gente que valora tracking visual y rachas | Validar progreso visual / no reset total | Sin link inicial | `/demo-mode-select` | Fallar también da información | “What if a broken streak became a signal, not a reset?” | Decir que las rachas no sirven |
+| `r/Journaling` | Personas que registran emociones e introspección | Validar emoción + hábitos | Sin link inicial | `/v3` | Emotion check-ins | “Mood is not noise; it can help adjust your routine.” | Vender productividad dura |
+| `r/burnout` | Personas cansadas o saturadas | Discovery sensible, no venta | Sin link inicial, casi siempre | `/v3` solo si piden | Rutina de baja carga | “Should habit systems lower the load when energy is gone?” | Prometer curar burnout |
+| `r/ADHD` | Personas con problemas de ejecución y constancia | Discovery cuidadoso | Sin link inicial | Link solo por DM si piden | Sistemas menos rígidos | “No medical claims — I’m exploring if rigid trackers make people quit faster.” | Decir “sirve para ADHD” |
+| `r/DecidingToBeBetter` | Gente que quiere cambiar sin juicio | Beta tester emocionalmente alineado | Sin link inicial | `/v3` | Retomar sin culpa | “Start where you are, not where you think you should be.” | Tono startup/hype |
 
 ---
 
-## 5. Métrica de éxito
+## 5. Cadencia de publicación
 
-No medir upvotes como métrica principal.
+No publicar 5 posts el mismo día.
 
-Métricas reales:
+Ritmo recomendado:
 
-| Métrica | Éxito inicial |
-|---|---:|
-| Comentarios reales | 5+ |
-| Personas que dicen “this resonates” | 2+ |
-| Personas que piden link | 1–3 |
-| Personas que entran a Discord | 1 |
-| Persona que prueba Innerbloom | 1 |
-| Feedback real después de probar | 1 |
+> 1 post por día, en 1 subreddit distinto, con ángulo distinto.
 
-Objetivo final de esta etapa:
+Objetivo:
 
-> 1 usuario crudo real usando Innerbloom y dando feedback.
+- Evitar spam.
+- Poder responder comentarios.
+- Aprender de cada post antes del siguiente.
+- Ajustar el ángulo según objeciones reales.
 
 ---
 
-## 6. Prompt para Codex: crear `/reddit-beta`
+## 6. Calendario inicial de 10 días
 
-```text
-Implement a dedicated Reddit beta landing page for Innerbloom at `/reddit-beta`.
+| Día | Subreddit | Objetivo | Post | Link inicial | URL si piden |
+|---:|---|---|---|---|---|
+| 1 | `r/NonZeroDay` | Validar low-energy / small steps | Post A | No | `/v3` o `/` |
+| 2 | `r/getdisciplined` | Validar disciplina adaptable | Post B | No | `/` o `/v3` |
+| 3 | Responder comentarios | No publicar | Follow-ups | No | Según conversación |
+| 4 | `r/selfimprovement` | Usuario amplio | Post C | No | `/v3` |
+| 5 | `r/productivity` | Feedback producto | Post D | No | `/demo-mode-select` |
+| 6 | Responder comentarios | No publicar | Follow-ups | No | Según conversación |
+| 7 | `r/Journaling` | Validar emotion check-ins | Post E | No | `/v3` |
+| 8 | `r/theXeffect` | Validar streak/progreso visual | Post F | No | `/demo-mode-select` |
+| 9 | `r/DecidingToBeBetter` | Reinicio sin culpa | Post G | No | `/v3` |
+| 10 | Revisión | No publicar | Analizar señales | No | — |
 
-Goal:
-This page is not a generic marketing landing. It is designed for Reddit users who may be skeptical of self-promotion and are willing to become early testers. The page should feel honest, founder-led, and focused on the problem: habit trackers often fail when real life gets messy.
-
-Use the existing Innerbloom design system. Do not invent a new visual language. Keep it premium, calm, mobile-first, and consistent with the current landing /v3 aesthetics.
-
-Core message:
-“A habit tracker for real life, not perfect weeks.”
-
-Audience:
-People who have tried habit trackers or self-improvement systems but fall off when they lose energy, miss streaks, feel burned out, or have inconsistent weeks.
-
-Page structure:
-
-1. Hero
-H1:
-A habit tracker for real life, not perfect weeks.
-
-Subcopy:
-Innerbloom helps you build habits with flexible rhythms, emotional check-ins, and progress that doesn’t disappear when you miss a day.
-
-Primary CTA:
-Join the early feedback Discord
-
-Secondary CTA:
-See how it works
-
-Microcopy under CTA:
-Built for early testers. Brutal feedback welcome.
-
-2. Problem section
-Title:
-Most habit apps work until life gets messy.
-
-Body:
-Streaks break. Energy drops. Work gets heavy. You miss a few days and suddenly the app feels like proof that you failed.
-
-Innerbloom starts from a different assumption: your routine should adapt when your life changes.
-
-3. How Innerbloom is different
-Use 3 simple cards:
-- Flexible rhythms
-  Low, Chill, Flow, and Evolve let you choose an intensity you can actually sustain.
-- Emotional check-ins
-  Track how you feel, not just what you completed.
-- Progress without full reset
-  Missed days become signals to adjust, not reasons to start from zero.
-
-4. Who this is for
-Title:
-This might be for you if…
-
-Checklist:
-- You start habit trackers motivated and abandon after a bad week.
-- Losing a streak makes you feel like you failed.
-- Your energy changes a lot from week to week.
-- You want structure, but not pressure.
-- You want to help shape an early product with honest feedback.
-
-5. Simple product flow
-Title:
-How it works
-
-Steps:
-1. Choose your rhythm.
-2. Activate habits across Body, Mind, and Soul.
-3. Complete daily quests and check in with your emotion.
-4. Watch your progress adapt over time.
-
-6. Founder note
-Title:
-Why I’m sharing this on Reddit
-
-Copy:
-I’m not looking for polished testimonials. I’m looking for a few real early users who will try Innerbloom and tell me what feels useful, confusing, annoying, or unnecessary.
-
-CTA:
-Join the early feedback Discord
-
-Implementation requirements:
-- Add the route `/reddit-beta` without breaking existing landing routes.
-- Reuse existing landing /v3 layout primitives and design tokens where possible.
-- Do not create a visually separate microsite.
-- Use responsive mobile-first layout.
-- Add analytics CTA attributes if the existing landing analytics convention uses `data-analytics-cta`.
-- If there is an existing i18n/content structure, put the copy into a content file instead of hardcoding it.
-- Keep the copy exactly as provided unless technical/i18n structure requires splitting strings.
-- Do not change the current `/`, `/v3`, `/onboarding`, `/intro-journey`, or `/demo-mode-select` routes.
-- Do not change existing landing copy.
-- Do not change global design tokens.
-- Add or update tests only if the project already has route/render smoke tests for landing pages.
-```
+Nota: si los primeros posts generan conversación, pausar el calendario y responder. La prioridad es convertir comentarios en conversación, no completar el calendario.
 
 ---
 
 ## 7. Post templates por subreddit
 
-### 7.1 `r/NonZeroDay`
+### Post A — `r/NonZeroDay`
 
 Objetivo: encontrar usuario que conecte con baja energía y pasos mínimos.
 
-URL: `/reddit-beta` si existe. Si no, `/v3`.
+Link inicial: no.
 
 ```text
 Title:
@@ -307,7 +233,7 @@ One thing I like about the “non-zero day” idea is that it doesn’t require 
 
 Most habit trackers don’t really feel built that way. They often reward clean streaks and make missed days feel like failure.
 
-I’m building a small habit app called Innerbloom around flexible rhythms instead:
+I’m building a small habit app around flexible rhythms instead:
 - Low: one small commitment
 - Chill: a manageable rhythm
 - Flow: steady progress
@@ -315,22 +241,22 @@ I’m building a small habit app called Innerbloom around flexible rhythms inste
 
 The idea is not to optimize everything. It’s to help people keep going when their energy changes.
 
-I’m looking for a few early testers who care about habits but dislike rigid streak systems. I’d especially love feedback from people who believe in small non-zero actions.
+I’m trying to understand if this is actually useful or if I’m overcomplicating something simple.
 
-Does this sound useful, or am I overcomplicating something simple?
+For people who believe in non-zero days: would a flexible habit rhythm help, or does it defeat the point?
 ```
 
 ---
 
-### 7.2 `r/getdisciplined`
+### Post B — `r/getdisciplined`
 
 Objetivo: validar disciplina adaptable.
 
-URL: `/reddit-beta`.
+Link inicial: no.
 
 ```text
 Title:
-I’m trying to build a habit system for people who lose discipline when life gets messy
+I’m trying to understand if discipline should have adjustable intensity
 
 Post:
 A lot of discipline advice assumes a stable version of you: same energy, same schedule, same motivation, same ability to execute.
@@ -339,28 +265,26 @@ That’s not how my life works.
 
 I can be consistent for a while, then one stressful week breaks the rhythm, and suddenly the habit tracker becomes another place where I feel behind.
 
-I’m building an early habit app called Innerbloom around this idea: discipline should have adjustable intensity.
+I’m building an early habit system around this idea: discipline should have adjustable intensity.
 
-Instead of one fixed standard, you choose a current rhythm:
+Instead of one fixed standard, the system would let you work with a current rhythm:
 - Low
 - Chill
 - Flow
 - Evolve
 
-The app combines habits, emotional check-ins, and visible progress, with the goal of helping you restart without feeling like you failed.
+The goal is not to make excuses. The goal is to keep the habit alive when life gets messy, then raise the challenge again when you have capacity.
 
-I’m looking for honest early feedback from people who struggle with consistency. Not looking for praise — I want to know if this is actually useful.
-
-What usually breaks your habit systems?
+For people who struggle with consistency: would this help, or do you think fixed discipline is the whole point?
 ```
 
 ---
 
-### 7.3 `r/selfimprovement`
+### Post C — `r/selfimprovement`
 
 Objetivo: usuario amplio que quiere mejorar sin rutina perfecta.
 
-URL: `/v3`.
+Link inicial: no.
 
 ```text
 Title:
@@ -373,25 +297,23 @@ A lot of us don’t quit habits because we don’t care. We quit because one str
 
 Then the app or tracker that was supposed to help starts feeling like evidence that we failed.
 
-I’m building a small app called Innerbloom around a different idea: sustainable habits for real people, not perfect weeks.
+I’m building a small habit system around a different idea: sustainable habits for real people, not perfect weeks.
 
-The app uses flexible rhythms, emotional check-ins, and visible progress to help people restart without feeling like they’re back to zero.
+The idea is flexible rhythms, emotional check-ins, and visible progress that helps people restart without feeling like they’re back to zero.
 
 I’d love honest feedback:
 - Does this problem feel real?
 - What makes you abandon self-improvement systems?
 - Would a flexible rhythm help, or is the real issue somewhere else?
-
-If people are interested, I can share the early version.
 ```
 
 ---
 
-### 7.4 `r/productivity`
+### Post D — `r/productivity`
 
 Objetivo: feedback de herramienta/producto.
 
-URL: `/demo-mode-select` o `/`.
+Link inicial: no.
 
 ```text
 Title:
@@ -404,7 +326,7 @@ Most habit trackers seem to assume your week is stable enough for a fixed routin
 
 When that happens, the system usually doesn’t adapt. You just miss tasks, lose streaks, and feel behind.
 
-I’m building a small app called Innerbloom that tries a different approach:
+I’m testing a different approach:
 - choose a rhythm based on current capacity
 - track habits across body, mind, and personal well-being
 - include emotional check-ins
@@ -417,41 +339,37 @@ For people who use habit/productivity tools: would flexible intensity make you m
 
 ---
 
-### 7.5 `r/habitica`
+### Post E — `r/Journaling`
 
-Objetivo: validar diferencial gamificado sin atacar Habitica.
+Objetivo: validar emoción + hábitos.
 
-URL: `/demo-mode-select`.
+Link inicial: no.
 
 ```text
 Title:
-Question for people who like gamified habit apps: what makes you stop using them?
+Can mood tracking make habit tracking more useful?
 
 Post:
-I’m building an early habit app and I’d love feedback from people who already understand gamified habit systems.
+I’m building a small habit system and I’d love input from people who journal or track their mood.
 
-I’m not trying to copy Habitica or replace it. I’m exploring a slightly different angle.
+Most habit trackers only ask: did you do the thing or not?
 
-The problem I’m focused on is what happens when life gets messy: low energy, missed days, broken streaks, too many tasks, or the feeling that you’re suddenly behind.
+But a lot of the time, the reason I do or don’t follow through has more to do with energy, mood, stress, or emotional state than with the habit itself.
 
-Innerbloom uses visible progress, rhythms, and emotional check-ins, but the goal is less about punishment and more about helping people adjust and keep going.
+The idea I’m exploring is combining habits with emotional check-ins. Your mood would not just be a journal entry — it could become a signal that your routine needs to become lighter, steadier, or more structured.
 
-For people who enjoy gamified systems:
-- What keeps you engaged?
-- What makes you drop off?
-- Do streaks motivate you or eventually make you quit?
-- Would adaptive difficulty/rhythm actually matter?
+I’m trying to understand if this is actually useful or if journaling and habit tracking should stay separate.
 
-Happy to share the demo if this kind of feedback request is allowed.
+For people who journal: would you want habits and mood in the same system, or would that feel like too much?
 ```
 
 ---
 
-### 7.6 `r/theXeffect`
+### Post F — `r/theXeffect`
 
 Objetivo: validar progreso visual y no reset total.
 
-URL: `/demo-mode-select`.
+Link inicial: no.
 
 ```text
 Title:
@@ -462,7 +380,7 @@ I like visual tracking because it makes effort visible. But I’m wondering abou
 
 For some people, a broken streak is motivating. For others, it becomes the reason they stop completely.
 
-I’m building a habit app called Innerbloom that tries to treat missed days as information, not just failure.
+I’m building a habit system that tries to treat missed days as information, not just failure.
 
 The idea is:
 - track habits visually
@@ -476,37 +394,11 @@ For people here who use visual tracking: would that make the system better, or d
 
 ---
 
-### 7.7 `r/Journaling`
-
-Objetivo: validar emoción + hábitos.
-
-URL: `/v3`.
-
-```text
-Title:
-Can mood tracking make habit tracking more useful?
-
-Post:
-I’m building a small app and I’d love input from people who journal or track their mood.
-
-Most habit trackers only ask: did you do the thing or not?
-
-But a lot of the time, the reason I do or don’t follow through has more to do with energy, mood, stress, or emotional state than with the habit itself.
-
-Innerbloom combines habits with emotional check-ins. The idea is that your mood is not noise — it can be a signal that your routine needs to become lighter, steadier, or more structured.
-
-I’m trying to understand if this is actually useful or if journaling and habit tracking should stay separate.
-
-For people who journal: would you want habits and mood in the same system, or would that feel like too much?
-```
-
----
-
-### 7.8 `r/DecidingToBeBetter`
+### Post G — `r/DecidingToBeBetter`
 
 Objetivo: usuario con deseo de cambio sin presión.
 
-URL: `/v3` o `/reddit-beta`.
+Link inicial: no.
 
 ```text
 Title:
@@ -517,22 +409,50 @@ One thing I keep thinking about is how many self-improvement tools are designed 
 
 But the harder part is not starting when you feel great. It’s restarting after you fell off.
 
-I’m building a small habit app called Innerbloom around that idea: start where you are, choose a rhythm you can sustain, and adjust when life changes.
+I’m building a small habit system around that idea: start where you are, choose a rhythm you can sustain, and adjust when life changes.
 
 It includes flexible habit rhythms, emotional check-ins, and visible progress, but the main goal is simple: help people keep going without needing a perfect routine.
 
-I’m looking for a few early users who are willing to try it and tell me honestly what feels helpful or useless.
+I’m trying to understand if this kind of tool would actually help or if the problem is better solved without an app.
 
-Does this kind of tool sound useful to anyone here, or do you think the problem is better solved without an app?
+Does this resonate with anyone here?
 ```
 
 ---
 
-### 7.9 `r/burnout`
+### Optional — `r/habitica`
+
+Objetivo: validar diferencial gamificado sin atacar Habitica.
+
+Link inicial: no.
+
+```text
+Title:
+Question for people who like gamified habit apps: what makes you stop using them?
+
+Post:
+I’m building an early habit system and I’d love feedback from people who already understand gamified habit apps.
+
+I’m not trying to copy Habitica or replace it. I’m exploring a slightly different angle.
+
+The problem I’m focused on is what happens when life gets messy: low energy, missed days, broken streaks, too many tasks, or the feeling that you’re suddenly behind.
+
+The system I’m testing uses visible progress, rhythms, and emotional check-ins, but the goal is less about punishment and more about helping people adjust and keep going.
+
+For people who enjoy gamified systems:
+- What keeps you engaged?
+- What makes you drop off?
+- Do streaks motivate you or eventually make you quit?
+- Would adaptive difficulty/rhythm actually matter?
+```
+
+---
+
+### Optional — `r/burnout`
 
 Objetivo: escuchar y validar con sensibilidad. No vender.
 
-URL: no incluir link inicial.
+Link inicial: no.
 
 ```text
 Title:
@@ -556,11 +476,11 @@ I’m asking because I’m building something in this area, but I’m mostly try
 
 ---
 
-### 7.10 `r/ADHD`
+### Optional — `r/ADHD`
 
 Objetivo: discovery cuidadoso. No hacer claims.
 
-URL: no incluir link inicial.
+Link inicial: no.
 
 ```text
 Title:
@@ -612,7 +532,15 @@ Really appreciate that. I’m looking for a few people to test the early version
 
 Here’s the link: [URL]
 
-If you’re open to it, I’d also love to invite you to the small feedback Discord so you can tell me what feels confusing, useful, or unnecessary after trying it.
+If you try it, the most useful thing would be telling me what feels confusing, useful, annoying, or unnecessary after a few days.
+```
+
+### When someone may be a strong tester
+
+```text
+This is really useful context. If you’re open to trying the early version for a few days, I can send you the link.
+
+No pressure to join anything. I do have a tiny feedback Discord, but the main thing I need is honest feedback from someone who has actually struggled with habit systems.
 ```
 
 ### When someone criticizes the idea
@@ -628,7 +556,7 @@ When you say this would not help, is it because habit apps in general are the wr
 ```text
 Totally fair. I’m the founder, and I should have made that clearer. I’m not trying to hide that or spam the subreddit.
 
-Happy to remove the link and keep this as a discussion if that’s more appropriate here.
+Happy to remove anything that feels promotional and keep this as a discussion if that’s more appropriate here.
 ```
 
 ---
@@ -637,9 +565,9 @@ Happy to remove the link and keep this as a discussion if that’s more appropri
 
 - Read subreddit rules before posting.
 - Do not post the same text across many subreddits on the same day.
-- Start with one subreddit.
-- Do not put link in first paragraph.
-- If a community is sensitive, do not include link in the post.
+- One post per day maximum.
+- No link in the initial post by default.
+- No Discord CTA in the initial post.
 - Reply to comments before posting elsewhere.
 - Do not argue with negative feedback.
 - Treat every comment as research.
@@ -656,13 +584,15 @@ Recommended fields for content queue:
 | Date | Posting date |
 | Subreddit | Community |
 | Post angle | Low energy, tracker frustration, journaling, etc. |
-| URL used | `/reddit-beta`, `/v3`, `/`, `/demo-mode-select`, none |
+| Link initial | Yes/no |
+| URL shared later | `/v3`, `/`, `/demo-mode-select`, none |
 | Post title | Exact title |
 | Status | Draft, posted, removed, pending, responded |
 | Upvotes | Surface metric only |
 | Comments | Number of comments |
 | Resonance comments | People saying it resonates |
 | Link requests | Number of users asking for link |
+| Discord offered | Yes/no |
 | Discord joins | Number of joins attributed |
 | Testers activated | Number of users who actually tried product |
 | Feedback received | Yes/no + notes |
@@ -673,12 +603,18 @@ Recommended fields for content queue:
 
 ## 11. Final recommendation
 
-Start with:
+Do not build `/reddit-beta` before posting.
 
-1. `r/NonZeroDay` using `/reddit-beta`.
-2. `r/getdisciplined` using `/reddit-beta`.
-3. `r/selfimprovement` using `/v3`.
+Start posting with no-link discovery posts:
 
-If `/reddit-beta` is not implemented yet, use `/v3` but frame the post as founder-led beta recruitment and only share the link after people show interest.
+1. `r/NonZeroDay` — low-energy days / non-zero actions.
+2. `r/getdisciplined` — adjustable discipline.
+3. `r/selfimprovement` — quitting systems when life gets messy.
+
+Use URLs only after interest:
+
+- `/v3` for broad users.
+- `/` for habit-tracker-aware users.
+- `/demo-mode-select` for product/gamification/visual tracking users.
 
 Do not over-expand. The goal is not traffic. The goal is one real user.
