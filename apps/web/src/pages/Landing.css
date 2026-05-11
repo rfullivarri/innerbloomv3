@@ -2398,7 +2398,7 @@
 
 .landing .footer {
   border-top: 1px solid var(--line);
-  padding: 32px 18px;
+  padding: 32px 18px clamp(84px, 10vw, 120px);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -2409,7 +2409,10 @@
 
 .landing .footer-links {
   display: flex;
-  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  padding-right: clamp(96px, 8vw, 132px);
 }
 
 .landing .footer-links a {
@@ -2548,9 +2551,10 @@
 .landing .footer-community-link {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   min-height: 36px;
-  padding: 6px 10px;
+  min-width: 36px;
+  padding: 6px;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
   transition:
@@ -2560,14 +2564,15 @@
 }
 
 .landing .footer-community-link svg {
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   opacity: 0.82;
   flex: 0 0 auto;
 }
 
-.landing .footer-community-link span {
-  line-height: 1.1;
+.landing .footer-community-link--reddit svg {
+  width: 26px;
+  height: 26px;
 }
 
 .landing .footer-community-link:hover {
@@ -2641,6 +2646,14 @@
   .landing .landing-back-to-top {
     right: 16px;
     bottom: 16px;
+  }
+
+  .landing .footer {
+    padding-bottom: 76px;
+  }
+
+  .landing .footer-links {
+    padding-right: 0;
   }
 }
 
