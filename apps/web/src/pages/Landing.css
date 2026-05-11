@@ -2030,21 +2030,21 @@
   isolation: isolate;
   margin: 2px auto 0;
   width: min(100%, 980px);
-  padding: clamp(13px, 1.6vw, 17px) clamp(15px, 2vw, 22px);
+  padding: clamp(11px, 1.4vw, 14px) clamp(14px, 1.8vw, 20px);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: clamp(12px, 1.8vw, 20px);
+  gap: clamp(10px, 1.6vw, 16px);
 }
 
 .landing .demo-bridge::before {
   content: "";
   position: absolute;
-  inset: -7px 4px -8px;
+  inset: -6px 4px -7px;
   z-index: -2;
   border-radius: var(--landing-glass-radius-md);
   background: var(--landing-glass-glow);
-  filter: blur(11px);
+  filter: blur(10px);
 }
 
 .landing .demo-bridge::after {
@@ -2052,9 +2052,9 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  border-radius: var(--landing-glass-radius-md);
+  border-radius: 24px;
   background: var(--landing-glass-bg);
-  border: 1px solid var(--landing-glass-border);
+  border: 1px solid rgba(199, 178, 255, 0.2);
   box-shadow: var(--landing-glass-shadow);
 }
 
@@ -2077,9 +2077,9 @@
 
 .landing .demo-bridge-copy {
   margin: 0;
-  font-size: 0.91rem;
+  font-size: 0.89rem;
   color: rgba(229, 239, 255, 0.86);
-  line-height: 1.5;
+  line-height: 1.42;
 }
 
 .landing .demo-actions {
@@ -2579,6 +2579,69 @@
 .landing .footer-community-link:focus-visible {
   outline: 2px solid #120a1c;
   outline-offset: 2px;
+}
+
+.landing .landing-discord-cta {
+  margin: 14px auto 0;
+  max-width: 52ch;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--subtle);
+}
+
+.landing .landing-discord-cta a {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 42%, transparent);
+}
+
+.landing .landing-discord-cta a:hover {
+  color: var(--ink);
+  border-bottom-color: color-mix(in srgb, currentColor 72%, transparent);
+}
+
+.landing .landing-back-to-top {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 35;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  background: color-mix(in srgb, var(--bg) 56%, transparent);
+  color: var(--ink);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 22px rgba(8, 9, 18, 0.2);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  transition: transform 150ms ease, background-color 150ms ease;
+}
+
+.landing .landing-back-to-top:hover {
+  transform: translateY(-1px);
+}
+
+.landing[data-theme-mode="light"] .landing-back-to-top {
+  background: rgba(255, 255, 255, 0.78);
+  color: rgba(56, 41, 89, 0.96);
+  border-color: rgba(156, 129, 214, 0.28);
+}
+
+.landing[data-theme-mode="dark"] .landing-back-to-top {
+  background: rgba(12, 13, 26, 0.72);
+}
+
+@media (max-width: 768px) {
+  .landing .landing-back-to-top {
+    right: 16px;
+    bottom: 16px;
+  }
 }
 
 @keyframes meshFloat {
@@ -3948,10 +4011,6 @@
   max-width: 760px;
   margin-left: auto;
   margin-right: auto;
-}
-
-.landing.landing--v3-conversion .demo-bridge {
-  border-color: rgba(199, 178, 255, 0.2);
 }
 
 .landing .v3-method-card-grid {
