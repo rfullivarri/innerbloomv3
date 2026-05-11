@@ -321,11 +321,11 @@ function RealDashboardScene({
   );
 }
 
-function LoopSplashScene() {
+function LoopSplashScene({ variant = "default" }: { variant?: HeroPhoneShowcaseVariant }) {
   const brandCharacters = "INNERBLOOM".split("");
 
   return (
-    <section className={styles.loopSplashScene} aria-hidden>
+    <section className={`${styles.loopSplashScene} ${variant === "v3Right" ? styles.loopSplashSceneV3 : ""}`} aria-hidden>
       <div className={styles.loopSplashDepthGlow} />
       <div className={styles.loopSplashLockupShell}>
         <div className={styles.loopSplashLockup}>
@@ -423,7 +423,7 @@ export function HeroPhoneShowcase({
           aria-hidden
         />
       )}
-      {phase === "splash" ? <LoopSplashScene /> : null}
+      {phase === "splash" ? <LoopSplashScene variant={variant} /> : null}
     </PhoneFrame>
   );
 }

@@ -3661,7 +3661,8 @@
   padding: clamp(74px, 8vw, 112px) 0 clamp(64px, 7vw, 98px);
 }
 
-.landing.landing--v2-narrative .truth-problem-section {
+.landing.landing--v2-narrative .truth-problem-section,
+.landing .truth-problem--orb-layout .truth-problem-section {
   max-width: 1080px;
   gap: clamp(30px, 4vw, 54px);
 }
@@ -3672,7 +3673,8 @@
   font-size: clamp(2rem, 2.3vw + 1.25rem, 3.55rem);
 }
 
-.landing.landing--v2-narrative .truth-problem-v2-stage {
+.landing.landing--v2-narrative .truth-problem-v2-stage,
+.landing .truth-problem--orb-layout .truth-problem-v2-stage {
   width: min(1040px, 100%);
   display: grid;
   grid-template-columns: minmax(190px, 1fr) minmax(260px, 340px) minmax(190px, 1fr);
@@ -3681,7 +3683,8 @@
   gap: clamp(22px, 4vw, 54px);
 }
 
-.landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static {
+.landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static,
+.landing .truth-problem--orb-layout .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static {
   width: clamp(270px, 28vw, 360px);
   max-width: min(82vw, 360px);
   margin: 0;
@@ -4423,17 +4426,20 @@
 }
 
 /* V2-only refinements requested for the adaptive-life and demo sections. */
-.landing.landing--v2-narrative .truth-problem-section {
+.landing.landing--v2-narrative .truth-problem-section,
+.landing .truth-problem--orb-layout .truth-problem-section {
   max-width: 1180px;
 }
 
-.landing.landing--v2-narrative .truth-problem-v2-stage {
+.landing.landing--v2-narrative .truth-problem-v2-stage,
+.landing .truth-problem--orb-layout .truth-problem-v2-stage {
   width: min(1160px, 100%);
   grid-template-columns: minmax(180px, 0.75fr) minmax(360px, 540px) minmax(180px, 0.75fr);
   gap: clamp(12px, 2.2vw, 32px);
 }
 
-.landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static {
+.landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static,
+.landing .truth-problem--orb-layout .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static {
   width: clamp(405px, 38vw, 540px);
   max-width: min(88vw, 540px);
   border: none;
@@ -4444,35 +4450,38 @@
 }
 
 .landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static::before,
-.landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static::after {
+.landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static::after,
+.landing .truth-problem--orb-layout .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static::before,
+.landing .truth-problem--orb-layout .truth-problem-v2-stage .weather-cycle-orb.weather-cycle-orb--static::after {
   content: none;
   display: none;
 }
 
-.landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb__image {
+.landing.landing--v2-narrative .truth-problem-v2-stage .weather-cycle-orb__image,
+.landing .truth-problem--orb-layout .truth-problem-v2-stage .weather-cycle-orb__image {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.landing.landing--v2-narrative .visible-progress-top--v2-text-only {
+.landing .visible-progress-top--v2-text-only {
   grid-template-columns: 1fr;
   justify-items: center;
   text-align: center;
 }
 
-.landing.landing--v2-narrative .visible-progress-top--v2-text-only .visible-progress-copy {
+.landing .visible-progress-top--v2-text-only .visible-progress-copy {
   justify-items: center;
   max-width: 760px;
   padding-top: 0;
   text-align: center;
 }
 
-.landing.landing--v2-narrative .visible-progress-top--v2-text-only .demo-title {
+.landing .visible-progress-top--v2-text-only .demo-title {
   max-width: 18ch;
 }
 
-.landing.landing--v2-narrative .visible-progress-top--v2-text-only .demo-sub {
+.landing .visible-progress-top--v2-text-only .demo-sub {
   max-width: 58ch;
 }
 

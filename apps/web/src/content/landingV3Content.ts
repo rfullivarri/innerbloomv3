@@ -37,6 +37,8 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
       ...LANDING_V2_CONTENT.es.demo,
       title: 'Mira tu Journey.',
       text: 'Energía, emociones, acciones, GP y rachas en una experiencia simple de seguir.',
+      banner: 'Explora cómo se ve tu crecimiento',
+      cta: 'Explorar demo',
     },
   },
   en: {
@@ -74,6 +76,8 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
       ...LANDING_V2_CONTENT.en.demo,
       title: 'See your Journey.',
       text: 'Energy, emotions, actions, GP, and streaks in one experience that is easy to follow.',
+      banner: 'Explore what your growth looks like',
+      cta: 'Explore demo',
     },
   },
 };

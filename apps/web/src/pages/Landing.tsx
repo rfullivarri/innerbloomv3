@@ -828,6 +828,7 @@ export default function LandingPage({
   const isV2Narrative = variant === "v2Narrative";
   const isV3Conversion = variant === "v3Conversion";
   const isNarrativeVariant = isV2Narrative || isV3Conversion;
+  const isOfficialDefault = variant === "default";
   const visibleNavLinks = copy.navLinks.filter(
     (link) => !/^\/demo$/i.test(link.href) && !/^#?demo$/i.test(link.href),
   );
@@ -1225,11 +1226,11 @@ export default function LandingPage({
         </section>
 
         <section
-          className="truth-problem section-pad reveal-on-scroll"
+          className={`truth-problem section-pad reveal-on-scroll ${isOfficialDefault ? "truth-problem--orb-layout" : ""}`}
           id="why"
         >
           <div className="container narrow truth-problem-section">
-            {isNarrativeVariant ? (
+            {isNarrativeVariant || isOfficialDefault ? (
               <>
                 <AdaptiveText
                   as="h2"
@@ -1350,7 +1351,7 @@ export default function LandingPage({
         >
           <div className="container narrow">
             <div
-              className={`visible-progress-top ${isNarrativeVariant ? "visible-progress-top--v2-text-only" : ""}`}
+              className={`visible-progress-top ${isNarrativeVariant || isOfficialDefault ? "visible-progress-top--v2-text-only" : ""}`}
             >
               <div className="visible-progress-copy">
                 <AdaptiveText as="h2" className="demo-title">
@@ -1361,7 +1362,7 @@ export default function LandingPage({
                 </AdaptiveText>
               </div>
 
-              {!isNarrativeVariant ? (
+              {!isNarrativeVariant && !isOfficialDefault ? (
                 <div className="visible-progress-module" aria-hidden>
                 <div className="visible-progress-viewport">
                   <div className="visible-progress-scene">
