@@ -294,7 +294,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       startJourney: 'Crear mi plan adaptativo',
       guidedDemo: 'Demos'
     },
-    footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
+    footer: { copyright: '© Innerbloom. All rights reserved.', faq: 'FAQ' }
   },
   en: {
     navLinks: [],
@@ -538,6 +538,6 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       startJourney: 'Create my adaptive plan',
       guidedDemo: 'Demos'
     },
-    footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
+    footer: { copyright: '© Innerbloom. All rights reserved.', faq: 'FAQ' }
   }
 };

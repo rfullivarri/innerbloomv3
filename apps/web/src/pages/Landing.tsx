@@ -2082,12 +2082,14 @@ export default function LandingPage({
             {language === "es" ? "Cookies" : "Cookies"}
           </button>
           <a
-            className="footer-community-link"
+            className="footer-community-link footer-community-link--reddit"
             data-analytics-cta="join_subreddit"
             data-analytics-location="footer"
             href="https://www.reddit.com/r/InnerbloomJourney/"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="Join our subreddit"
+            title="Join our subreddit"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path
@@ -2095,7 +2097,6 @@ export default function LandingPage({
                 fill="currentColor"
               />
             </svg>
-            <span>Join our subreddit</span>
           </a>
           <a
             className="footer-community-link"
@@ -2104,6 +2105,8 @@ export default function LandingPage({
             href={DISCORD_URL}
             target="_blank"
             rel="noreferrer"
+            aria-label="Join us on Discord"
+            title="Join us on Discord"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path
@@ -2111,7 +2114,6 @@ export default function LandingPage({
                 fill="currentColor"
               />
             </svg>
-            <span>{language === "es" ? "Únete a Discord" : "Join us on Discord"}</span>
           </a>
         </nav>
       </footer>
