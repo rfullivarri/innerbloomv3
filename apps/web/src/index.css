@@ -763,7 +763,7 @@
 
   .native-welcome-carousel[data-native-step="3"] {
     --native-welcome-visual-scale: 0.78;
-    --native-welcome-visual-y: -2px;
+    --native-welcome-visual-y: clamp(8px, 1.2dvh, 16px);
   }
 
   .native-welcome-carousel[data-native-step="4"] {
@@ -829,7 +829,7 @@
 
     .native-welcome-carousel[data-native-step="3"] {
       --native-welcome-visual-scale: 0.74;
-      --native-welcome-visual-y: 0px;
+      --native-welcome-visual-y: clamp(4px, 0.8dvh, 10px);
     }
 
   }
@@ -858,7 +858,7 @@
 
     .native-welcome-carousel[data-native-step="3"] {
       --native-welcome-visual-scale: 0.82;
-      --native-welcome-visual-y: -4px;
+      --native-welcome-visual-y: clamp(10px, 1.4dvh, 18px);
     }
   }
 
@@ -873,7 +873,7 @@
 
     .native-welcome-carousel[data-native-step="3"] {
       --native-welcome-visual-scale: 0.84;
-      --native-welcome-visual-y: -4px;
+      --native-welcome-visual-y: clamp(12px, 1.6dvh, 20px);
     }
   }
 }
