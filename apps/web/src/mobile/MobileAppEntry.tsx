@@ -209,7 +209,7 @@ function MobileWelcome() {
           <div className="flex min-h-0 flex-1 flex-col">
             <NativeWelcomeCarousel language={language} />
 
-            <div className="mt-auto space-y-[clamp(0.5rem,1.35dvh,0.7rem)] px-2 pt-[clamp(0.8rem,2.5dvh,1.45rem)]">
+            <div className="native-welcome-actions mt-auto space-y-[clamp(0.5rem,1.35dvh,0.7rem)] px-2 pt-[clamp(0.8rem,2.5dvh,1.45rem)]">
               <button
                 type="button"
                 onClick={() => void openNativeAuth('sign-up')}

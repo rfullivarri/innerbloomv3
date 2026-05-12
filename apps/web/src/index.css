@@ -640,6 +640,10 @@
   }
 
   .native-welcome-carousel {
+    --native-welcome-shell-height: clamp(292px, min(39dvh, 43svh), 348px);
+    --native-welcome-visual-viewport-height: clamp(252px, min(35dvh, 39svh), 312px);
+    --native-welcome-visual-scale: 0.68;
+    --native-welcome-visual-y: 0px;
     display: flex;
     min-height: 0;
     height: 100%;
@@ -677,6 +681,7 @@
     position: relative;
     min-height: 0;
     flex: 1;
+    max-height: var(--native-welcome-shell-height);
     overflow: hidden;
     border-radius: 1.5rem;
     border: 1px solid rgba(191, 219, 254, 0.04);
@@ -691,7 +696,7 @@
   }
 
   .native-welcome-visual-shell .v3-step-visual {
-    --v3-method-visual-viewport-height: clamp(260px, min(37dvh, 41svh), 332px);
+    --v3-method-visual-viewport-height: var(--native-welcome-visual-viewport-height);
     margin-inline: auto;
     width: min(100%, 460px);
     max-width: 460px;
@@ -702,14 +707,21 @@
     margin: 0;
   }
 
-  .native-welcome-visual-shell .v3-method-quickstart__scene { transform: scale(0.68); transform-origin: center top; }
-  .native-welcome-visual-shell .v3-method-streaks__tilt { transform: scale(0.7); transform-origin: center top; }
-  .native-welcome-visual-shell .v3-adjustment-demo { transform: scale(0.68); transform-origin: center top; }
+  .native-welcome-visual-shell .v3-method-quickstart__scene { transform: translateY(var(--native-welcome-visual-y)) scale(var(--native-welcome-visual-scale)); transform-origin: center top; }
+  .native-welcome-visual-shell .v3-method-streaks__tilt { transform: translateY(var(--native-welcome-visual-y)) scale(var(--native-welcome-visual-scale)); transform-origin: center top; }
+  .native-welcome-visual-shell .v3-adjustment-demo { transform: translateY(var(--native-welcome-visual-y)) scale(var(--native-welcome-visual-scale)); transform-origin: center top; }
   .native-welcome-visual-shell .v3-method-logros__scene { transform: scale(0.74); transform-origin: center 54%; width: min(116%, 530px); margin-left: auto; margin-right: auto; }
 
-  .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__scene {
-    transform: scale(0.68);
-    transform-origin: center top;
+  .native-welcome-actions {
+    --native-welcome-actions-shift: clamp(12px, 2dvh, 26px);
+    transform: translateY(var(--native-welcome-actions-shift));
+    padding-bottom: clamp(0.15rem, 0.6dvh, 0.45rem);
+    margin-bottom: calc(var(--native-welcome-actions-shift) * -1);
+  }
+
+  .native-welcome-carousel[data-native-step="1"] {
+    --native-welcome-visual-scale: 0.46;
+    --native-welcome-visual-y: 4px;
   }
   .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__titles {
     margin-bottom: 0.08rem;
@@ -728,22 +740,22 @@
     inset: auto 0 clamp(0.32rem, 1.2dvh, 0.6rem) 0;
   }
 
-  .native-welcome-carousel[data-native-step="2"] .native-welcome-visual-shell .v3-method-streaks__tilt {
-    transform: scale(0.7);
-    transform-origin: center top;
+  .native-welcome-carousel[data-native-step="2"] {
+    --native-welcome-visual-scale: 0.61;
+    --native-welcome-visual-y: 2px;
   }
   .native-welcome-carousel[data-native-step="2"] .native-welcome-visual-shell [data-light-scope="dashboard-v3"] {
     overflow: visible;
   }
 
-  .native-welcome-carousel[data-native-step="3"] .native-welcome-visual-shell .v3-adjustment-demo {
-    transform: scale(0.68);
-    transform-origin: center top;
+  .native-welcome-carousel[data-native-step="3"] {
+    --native-welcome-visual-scale: 0.68;
+    --native-welcome-visual-y: 0px;
   }
 
-  .native-welcome-carousel[data-native-step="4"] .native-welcome-visual-shell .v3-method-logros__scene {
-    transform: scale(0.74);
-    transform-origin: center 54%;
+  .native-welcome-carousel[data-native-step="4"] {
+    --native-welcome-visual-scale: 0.74;
+    --native-welcome-visual-y: 0px;
   }
 
   .native-welcome-carousel-controls {
@@ -786,24 +798,21 @@
     }
 
     .native-welcome-visual-shell .v3-step-visual {
-      --v3-method-visual-viewport-height: clamp(236px, min(34dvh, 38svh), 292px);
+      --native-welcome-visual-viewport-height: clamp(228px, min(32dvh, 36svh), 280px);
     }
 
-    .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__scene {
-      transform: scale(0.64);
+    .native-welcome-actions {
+      --native-welcome-actions-shift: clamp(8px, 1.5dvh, 16px);
     }
 
-    .native-welcome-carousel[data-native-step="2"] .native-welcome-visual-shell .v3-method-streaks__tilt {
-      transform: scale(0.66);
+    .native-welcome-carousel[data-native-step="1"] {
+      --native-welcome-visual-scale: 0.42;
     }
 
-    .native-welcome-carousel[data-native-step="3"] .native-welcome-visual-shell .v3-adjustment-demo {
-      transform: scale(0.64);
+    .native-welcome-carousel[data-native-step="2"] {
+      --native-welcome-visual-scale: 0.58;
     }
 
-    .native-welcome-carousel[data-native-step="4"] .native-welcome-visual-shell .v3-method-logros__scene {
-      transform: scale(0.72);
-    }
   }
 
   @media (min-height: 900px) {
@@ -812,23 +821,19 @@
     }
 
     .native-welcome-visual-shell .v3-step-visual {
-      --v3-method-visual-viewport-height: clamp(280px, min(39dvh, 43svh), 348px);
+      --native-welcome-visual-viewport-height: clamp(264px, min(36dvh, 40svh), 326px);
     }
 
-    .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__scene {
-      transform: scale(0.7);
+    .native-welcome-actions {
+      --native-welcome-actions-shift: clamp(14px, 2.2dvh, 28px);
     }
 
-    .native-welcome-carousel[data-native-step="2"] .native-welcome-visual-shell .v3-method-streaks__tilt {
-      transform: scale(0.72);
+    .native-welcome-carousel[data-native-step="1"] {
+      --native-welcome-visual-scale: 0.5;
     }
 
-    .native-welcome-carousel[data-native-step="3"] .native-welcome-visual-shell .v3-adjustment-demo {
-      transform: scale(0.7);
-    }
-
-    .native-welcome-carousel[data-native-step="4"] .native-welcome-visual-shell .v3-method-logros__scene {
-      transform: scale(0.76);
+    .native-welcome-carousel[data-native-step="2"] {
+      --native-welcome-visual-scale: 0.64;
     }
   }
 }
