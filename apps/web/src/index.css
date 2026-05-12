@@ -762,8 +762,8 @@
   }
 
   .native-welcome-carousel[data-native-step="3"] {
-    --native-welcome-visual-scale: 0.68;
-    --native-welcome-visual-y: 0px;
+    --native-welcome-visual-scale: 0.78;
+    --native-welcome-visual-y: -2px;
   }
 
   .native-welcome-carousel[data-native-step="4"] {
@@ -827,6 +827,11 @@
       --native-welcome-visual-scale: 0.58;
     }
 
+    .native-welcome-carousel[data-native-step="3"] {
+      --native-welcome-visual-scale: 0.74;
+      --native-welcome-visual-y: 0px;
+    }
+
   }
 
   @media (min-height: 900px) {
@@ -850,6 +855,11 @@
     .native-welcome-carousel[data-native-step="2"] {
       --native-welcome-visual-scale: 0.64;
     }
+
+    .native-welcome-carousel[data-native-step="3"] {
+      --native-welcome-visual-scale: 0.82;
+      --native-welcome-visual-y: -4px;
+    }
   }
 
   @media (min-height: 980px) {
@@ -859,6 +869,11 @@
 
     .native-welcome-visual-shell .v3-step-visual {
       --native-welcome-visual-viewport-height: clamp(350px, 47dvh, 450px);
+    }
+
+    .native-welcome-carousel[data-native-step="3"] {
+      --native-welcome-visual-scale: 0.84;
+      --native-welcome-visual-y: -4px;
     }
   }
 }
