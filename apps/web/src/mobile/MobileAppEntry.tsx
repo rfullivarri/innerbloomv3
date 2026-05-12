@@ -175,6 +175,31 @@ function MobileWelcome() {
         signIn: 'Iniciar sesión',
         signUp: 'Crear cuenta',
       };
+  const [viewportClassName, setViewportClassName] = useState('');
+
+  useEffect(() => {
+    const computeViewportClass = () => {
+      const runtimeHeight = window.visualViewport?.height ?? window.innerHeight;
+      const ratio = runtimeHeight / Math.max(window.innerHeight, 1);
+      if (runtimeHeight < 760 || ratio < 0.92) {
+        setViewportClassName('native-welcome--dense-viewport');
+        return;
+      }
+      if (runtimeHeight < 820 || ratio < 0.96) {
+        setViewportClassName('native-welcome--compact-viewport');
+        return;
+      }
+      setViewportClassName('');
+    };
+
+    computeViewportClass();
+    window.addEventListener('resize', computeViewportClass);
+    window.visualViewport?.addEventListener('resize', computeViewportClass);
+    return () => {
+      window.removeEventListener('resize', computeViewportClass);
+      window.visualViewport?.removeEventListener('resize', computeViewportClass);
+    };
+  }, []);
 
   const openNativeAuth = async (mode: 'sign-in' | 'sign-up') => {
     setForceNativeWelcome(false);
@@ -193,7 +218,7 @@ function MobileWelcome() {
   };
 
   return (
-    <div className="native-welcome-root relative flex h-dvh max-h-dvh min-h-dvh items-center justify-center overflow-hidden px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.7rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] text-white">
+    <div className={`native-welcome-root ${viewportClassName} relative flex h-dvh max-h-dvh min-h-dvh items-center justify-center overflow-hidden px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.7rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] text-white`}>
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(5,11,47,0.18)_0%,rgba(5,11,47,0.1)_38%,rgba(5,11,47,0.68)_100%)]"
