@@ -691,7 +691,7 @@
   }
 
   .native-welcome-visual-shell .v3-step-visual {
-    --v3-method-visual-viewport-height: min(45dvh, 360px);
+    --v3-method-visual-viewport-height: clamp(260px, min(37dvh, 41svh), 332px);
     margin-inline: auto;
     width: min(100%, 460px);
     max-width: 460px;
@@ -702,14 +702,14 @@
     margin: 0;
   }
 
-  .native-welcome-visual-shell .v3-method-quickstart__scene { transform: scale(0.82); }
-  .native-welcome-visual-shell .v3-method-streaks__tilt { transform: scale(0.96); transform-origin: center 54%; }
-  .native-welcome-visual-shell .v3-adjustment-demo { transform: scale(0.96); transform-origin: center 56%; }
-  .native-welcome-visual-shell .v3-method-logros__scene { transform: scale(0.88); transform-origin: center 55%; width: min(116%, 530px); margin-left: auto; margin-right: auto; }
+  .native-welcome-visual-shell .v3-method-quickstart__scene { transform: scale(0.68); transform-origin: center top; }
+  .native-welcome-visual-shell .v3-method-streaks__tilt { transform: scale(0.7); transform-origin: center top; }
+  .native-welcome-visual-shell .v3-adjustment-demo { transform: scale(0.68); transform-origin: center top; }
+  .native-welcome-visual-shell .v3-method-logros__scene { transform: scale(0.74); transform-origin: center 54%; width: min(116%, 530px); margin-left: auto; margin-right: auto; }
 
   .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__scene {
-    transform: scale(0.8);
-    transform-origin: center 44%;
+    transform: scale(0.68);
+    transform-origin: center top;
   }
   .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__titles {
     margin-bottom: 0.08rem;
@@ -729,21 +729,21 @@
   }
 
   .native-welcome-carousel[data-native-step="2"] .native-welcome-visual-shell .v3-method-streaks__tilt {
-    transform: scale(1.15);
-    transform-origin: center 56%;
+    transform: scale(0.7);
+    transform-origin: center top;
   }
   .native-welcome-carousel[data-native-step="2"] .native-welcome-visual-shell [data-light-scope="dashboard-v3"] {
     overflow: visible;
   }
 
   .native-welcome-carousel[data-native-step="3"] .native-welcome-visual-shell .v3-adjustment-demo {
-    transform: scale(1.05);
-    transform-origin: center 61%;
+    transform: scale(0.68);
+    transform-origin: center top;
   }
 
   .native-welcome-carousel[data-native-step="4"] .native-welcome-visual-shell .v3-method-logros__scene {
-    transform: scale(1.06);
-    transform-origin: center 56%;
+    transform: scale(0.74);
+    transform-origin: center 54%;
   }
 
   .native-welcome-carousel-controls {
@@ -780,13 +780,55 @@
     transform-origin: left center;
     animation: native-welcome-progress linear forwards;
   }
-@media (max-height: 760px) {
+@media (max-height: 820px) {
     .native-welcome-carousel {
-      gap: 0.55rem;
+      gap: clamp(0.2rem, 0.6dvh, 0.34rem);
     }
 
-    .native-welcome-copy h1 {
-      font-size: clamp(1.14rem, 2.2dvh, 1.28rem);
+    .native-welcome-visual-shell .v3-step-visual {
+      --v3-method-visual-viewport-height: clamp(236px, min(34dvh, 38svh), 292px);
+    }
+
+    .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__scene {
+      transform: scale(0.64);
+    }
+
+    .native-welcome-carousel[data-native-step="2"] .native-welcome-visual-shell .v3-method-streaks__tilt {
+      transform: scale(0.66);
+    }
+
+    .native-welcome-carousel[data-native-step="3"] .native-welcome-visual-shell .v3-adjustment-demo {
+      transform: scale(0.64);
+    }
+
+    .native-welcome-carousel[data-native-step="4"] .native-welcome-visual-shell .v3-method-logros__scene {
+      transform: scale(0.72);
+    }
+  }
+
+  @media (min-height: 900px) {
+    .native-welcome-carousel {
+      gap: clamp(0.28rem, 0.92dvh, 0.54rem);
+    }
+
+    .native-welcome-visual-shell .v3-step-visual {
+      --v3-method-visual-viewport-height: clamp(280px, min(39dvh, 43svh), 348px);
+    }
+
+    .native-welcome-carousel[data-native-step="1"] .native-welcome-visual-shell .v3-method-quickstart__scene {
+      transform: scale(0.7);
+    }
+
+    .native-welcome-carousel[data-native-step="2"] .native-welcome-visual-shell .v3-method-streaks__tilt {
+      transform: scale(0.72);
+    }
+
+    .native-welcome-carousel[data-native-step="3"] .native-welcome-visual-shell .v3-adjustment-demo {
+      transform: scale(0.7);
+    }
+
+    .native-welcome-carousel[data-native-step="4"] .native-welcome-visual-shell .v3-method-logros__scene {
+      transform: scale(0.76);
     }
   }
 }
