@@ -640,8 +640,8 @@
   }
 
   .native-welcome-carousel {
-    --native-welcome-shell-height: clamp(292px, min(39dvh, 43svh), 348px);
-    --native-welcome-visual-viewport-height: clamp(252px, min(35dvh, 39svh), 312px);
+    --native-welcome-shell-height: clamp(320px, 48dvh, 460px);
+    --native-welcome-visual-viewport-height: clamp(278px, 41dvh, 390px);
     --native-welcome-visual-scale: 0.68;
     --native-welcome-visual-y: 0px;
     display: flex;
@@ -650,6 +650,19 @@
     flex: 1;
     flex-direction: column;
     gap: clamp(0.24rem, 0.78dvh, 0.45rem);
+  }
+  .native-welcome-frame {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .native-welcome-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
   }
 
   .native-welcome-copy {
@@ -681,7 +694,8 @@
     position: relative;
     min-height: 0;
     flex: 1;
-    max-height: var(--native-welcome-shell-height);
+    height: var(--native-welcome-shell-height);
+    max-height: 100%;
     overflow: hidden;
     border-radius: 1.5rem;
     border: 1px solid rgba(191, 219, 254, 0.04);
@@ -713,10 +727,9 @@
   .native-welcome-visual-shell .v3-method-logros__scene { transform: scale(0.74); transform-origin: center 54%; width: min(116%, 530px); margin-left: auto; margin-right: auto; }
 
   .native-welcome-actions {
-    --native-welcome-actions-shift: clamp(12px, 2dvh, 26px);
+    --native-welcome-actions-shift: clamp(4px, 0.8dvh, 12px);
     transform: translateY(var(--native-welcome-actions-shift));
-    padding-bottom: clamp(0.15rem, 0.6dvh, 0.45rem);
-    margin-bottom: calc(var(--native-welcome-actions-shift) * -1);
+    padding-bottom: clamp(0.08rem, 0.35dvh, 0.25rem);
   }
 
   .native-welcome-carousel[data-native-step="1"] {
@@ -795,14 +808,15 @@
 @media (max-height: 820px) {
     .native-welcome-carousel {
       gap: clamp(0.2rem, 0.6dvh, 0.34rem);
+      --native-welcome-shell-height: clamp(280px, 42dvh, 360px);
     }
 
     .native-welcome-visual-shell .v3-step-visual {
-      --native-welcome-visual-viewport-height: clamp(228px, min(32dvh, 36svh), 280px);
+      --native-welcome-visual-viewport-height: clamp(238px, 36dvh, 310px);
     }
 
     .native-welcome-actions {
-      --native-welcome-actions-shift: clamp(8px, 1.5dvh, 16px);
+      --native-welcome-actions-shift: clamp(2px, 0.45dvh, 8px);
     }
 
     .native-welcome-carousel[data-native-step="1"] {
@@ -818,14 +832,15 @@
   @media (min-height: 900px) {
     .native-welcome-carousel {
       gap: clamp(0.28rem, 0.92dvh, 0.54rem);
+      --native-welcome-shell-height: clamp(380px, 52dvh, 520px);
     }
 
     .native-welcome-visual-shell .v3-step-visual {
-      --native-welcome-visual-viewport-height: clamp(264px, min(36dvh, 40svh), 326px);
+      --native-welcome-visual-viewport-height: clamp(320px, 45dvh, 420px);
     }
 
     .native-welcome-actions {
-      --native-welcome-actions-shift: clamp(14px, 2.2dvh, 28px);
+      --native-welcome-actions-shift: clamp(4px, 0.75dvh, 10px);
     }
 
     .native-welcome-carousel[data-native-step="1"] {
@@ -834,6 +849,16 @@
 
     .native-welcome-carousel[data-native-step="2"] {
       --native-welcome-visual-scale: 0.64;
+    }
+  }
+
+  @media (min-height: 980px) {
+    .native-welcome-carousel {
+      --native-welcome-shell-height: clamp(420px, 54dvh, 560px);
+    }
+
+    .native-welcome-visual-shell .v3-step-visual {
+      --native-welcome-visual-viewport-height: clamp(350px, 47dvh, 450px);
     }
   }
 }

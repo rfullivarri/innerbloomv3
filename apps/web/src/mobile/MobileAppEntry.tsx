@@ -198,7 +198,7 @@ function MobileWelcome() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(5,11,47,0.18)_0%,rgba(5,11,47,0.1)_38%,rgba(5,11,47,0.68)_100%)]"
       />
-      <div className="relative z-10 flex h-full w-full max-w-md flex-col">
+      <div className="native-welcome-frame relative z-10 flex h-full w-full max-w-md flex-col">
         <div className="shrink-0 pt-[clamp(0.25rem,1.1dvh,0.75rem)] text-center">
           <div className="flex items-center justify-center text-[clamp(0.82rem,2.1dvh,1.06rem)] font-semibold uppercase tracking-[0.42em] text-white/66">
             <BrandWordmark className="gap-3.5" textClassName="tracking-[0.42em]" iconClassName="h-[3.2em]" />
@@ -206,21 +206,21 @@ function MobileWelcome() {
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col pb-[clamp(0.2rem,1dvh,0.55rem)] pt-[clamp(0.45rem,1.45dvh,0.85rem)]">
-          <div className="flex min-h-0 flex-1 flex-col">
+          <div className="native-welcome-main flex min-h-0 flex-1 flex-col">
             <NativeWelcomeCarousel language={language} />
 
             <div className="native-welcome-actions mt-auto space-y-[clamp(0.5rem,1.35dvh,0.7rem)] px-2 pt-[clamp(0.8rem,2.5dvh,1.45rem)]">
               <button
                 type="button"
                 onClick={() => void openNativeAuth('sign-up')}
-                className="inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-[clamp(0.75rem,1.8dvh,0.875rem)] text-sm font-semibold text-white shadow-[0_20px_44px_rgba(124,58,237,0.35)] transition hover:bg-[#8b5cf6]"
+                className="inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-[clamp(0.7rem,1.68dvh,0.82rem)] text-sm font-semibold text-white shadow-[0_20px_44px_rgba(124,58,237,0.35)] transition hover:bg-[#8b5cf6]"
               >
                 {copy.signUp}
               </button>
               <button
                 type="button"
                 onClick={() => void openNativeGoogleAuth()}
-                className="inline-flex w-full items-center justify-center gap-3 rounded-full border border-slate-200/90 bg-white px-5 py-[clamp(0.75rem,1.8dvh,0.875rem)] text-sm font-semibold text-slate-900 shadow-[0_20px_44px_rgba(15,23,42,0.22)] transition hover:bg-slate-50"
+                className="inline-flex w-full items-center justify-center gap-3 rounded-full border border-slate-200/90 bg-white px-5 py-[clamp(0.7rem,1.68dvh,0.82rem)] text-sm font-semibold text-slate-900 shadow-[0_20px_44px_rgba(15,23,42,0.22)] transition hover:bg-slate-50"
               >
                 <svg
                   viewBox="0 0 48 48"
@@ -239,7 +239,7 @@ function MobileWelcome() {
               <button
                 type="button"
                 onClick={() => void openNativeAuth('sign-in')}
-                className="inline-flex w-full items-center justify-center rounded-full border border-white/18 bg-white/8 px-5 py-[clamp(0.75rem,1.8dvh,0.875rem)] text-sm font-semibold text-white transition hover:bg-white/12"
+                className="inline-flex w-full items-center justify-center rounded-full border border-white/18 bg-white/8 px-5 py-[clamp(0.7rem,1.68dvh,0.82rem)] text-sm font-semibold text-white transition hover:bg-white/12"
               >
                 {copy.signIn}
               </button>
