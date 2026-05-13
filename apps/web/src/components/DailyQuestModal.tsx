@@ -6,9 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent,
-  type PointerEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -24,7 +22,6 @@ import {
   type ModerationTrackerType,
   type SubmitDailyQuestResponse,
 } from '../lib/api';
-import { useHoldToClose } from '../hooks/useHoldToClose';
 import { HABIT_ACHIEVEMENT_UPDATED_EVENT } from '../lib/habitAchievementEvents';
 import { useRequest } from '../hooks/useRequest';
 import { ModerationWidget } from './moderation/ModerationWidget';
@@ -60,7 +57,6 @@ export type DailyQuestModalHandle = {
 type PendingSubmission = {
   emotion: number;
   tasks: string[];
-  notes: string;
 };
 
 const overlayVariants = {
@@ -74,10 +70,6 @@ const modalVariants = {
 };
 
 const HARD_CELEBRATION_DURATION_MS = 900;
-
-const CELEBRATION_PANEL_DURATION_MS = 1800;
-
-const DEFAULT_HOLD_TO_CLOSE_DURATION_MS = 2000;
 
 const CELEBRATION_MESSAGE_KEYS = [
   'dailyQuest.celebration.message.1',
@@ -356,7 +348,6 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
   const [hasCompletedToday, setHasCompletedToday] = useState(false);
   const [selectedEmotion, setSelectedEmotion] = useState<number | null>(null);
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
-  const [notes, setNotes] = useState('');
   const [toast, setToast] = useState<ToastState | null>(null);
   const [pendingSubmission, setPendingSubmission] = useState<PendingSubmission | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -365,15 +356,6 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
   const [successCelebration, setSuccessCelebration] = useState<CelebrationOverlayState | null>(null);
   const [srAnnouncement, setSrAnnouncement] = useState('');
   const [xpBubble, setXpBubble] = useState<{ id: number; delta: number } | null>(null);
-  const [isCelebrationHoldReady, setIsCelebrationHoldReady] = useState(false);
-
-  const {
-    progress: celebrationHoldProgress,
-    isHolding: isCelebrationHolding,
-    startHold: startCelebrationHold,
-    cancelHold: cancelCelebrationHold,
-    resetHold: resetCelebrationHold,
-  } = useHoldToClose();
 
   const toastTimer = useRef<TimeoutHandle | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -490,7 +472,6 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
 
     setSelectedEmotion(null);
     setSelectedTasks([]);
-    setNotes('');
   }, [definition?.date, pendingSubmission]);
 
   useEffect(() => {
@@ -512,13 +493,6 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       }
     };
   }, []);
-
-  useEffect(() => {
-    if (!successCelebration) {
-      resetCelebrationHold();
-      setIsCelebrationHoldReady(false);
-    }
-  }, [resetCelebrationHold, successCelebration]);
 
   const hardTaskIds = useMemo(() => {
     if (!definition) {
@@ -648,15 +622,13 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
         clearTimeout(successCelebrationTimeoutRef.current);
         successCelebrationTimeoutRef.current = null;
       }
-      resetCelebrationHold();
-      setIsCelebrationHoldReady(false);
       setSuccessCelebration(null);
       setSrAnnouncement('');
       shouldRestoreFocusRef.current = options?.restoreFocus !== false;
       setIsManualOpen(false);
       setIsOpen(false);
     },
-    [resetCelebrationHold],
+    [],
   );
 
   const completeSuccessCelebration = useCallback(() => {
@@ -664,12 +636,10 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       clearTimeout(successCelebrationTimeoutRef.current);
       successCelebrationTimeoutRef.current = null;
     }
-    resetCelebrationHold();
-    setIsCelebrationHoldReady(false);
     setSuccessCelebration(null);
     setHasCompletedToday(true);
     closeModal({ restoreFocus: true });
-  }, [closeModal, resetCelebrationHold]);
+  }, [closeModal]);
 
   const openDailyQuest = useCallback(() => {
     if (!enabled) {
@@ -836,11 +806,9 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       return;
     }
 
-    const trimmedNotes = notes.trim();
     const snapshot: PendingSubmission = {
       emotion: selectedEmotion,
       tasks: [...selectedTasks],
-      notes: trimmedNotes,
     };
 
     setPendingSubmission(snapshot);
@@ -851,14 +819,13 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
         date: currentDate,
         emotion_id: selectedEmotion,
         tasks_done: selectedTasks,
-        notes: trimmedNotes.length > 0 ? trimmedNotes : null,
+        notes: null,
       });
 
       setPendingSubmission(null);
       setIsSubmitting(false);
       setSelectedEmotion(null);
       setSelectedTasks([]);
-      setNotes('');
       const celebrationExtras: {
         detail?: string;
         action?: ToastAction;
@@ -876,21 +843,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
         action: celebrationExtras.action,
       });
       onComplete?.(response);
-      resetCelebrationHold();
-      setIsCelebrationHoldReady(false);
       setSrAnnouncement(t('dailyQuest.toast.savedSuccess'));
-      if (successCelebrationTimeoutRef.current) {
-        clearTimeout(successCelebrationTimeoutRef.current);
-      }
-      if (typeof window !== 'undefined') {
-        successCelebrationTimeoutRef.current = window.setTimeout(() => {
-          setIsCelebrationHoldReady(true);
-          successCelebrationTimeoutRef.current = null;
-        }, CELEBRATION_PANEL_DURATION_MS);
-      } else {
-        setIsCelebrationHoldReady(true);
-        completeSuccessCelebration();
-      }
       void reloadStatus();
     } catch (error) {
       console.error('Failed to submit daily quest', error);
@@ -963,7 +916,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                     layout={false}
                     data-demo-anchor="daily-quest-intro"
                     data-daily-quest-sticky-header="true"
-                    className="ib-daily-quest-header sticky top-[env(safe-area-inset-top)] z-10 flex flex-col justify-center border-b px-4 py-3 backdrop-blur md:py-4"
+                    className="ib-daily-quest-header sticky top-0 z-10 flex flex-col justify-center border-b px-4 pb-2 pt-[calc(env(safe-area-inset-top,0px)+0.65rem)] backdrop-blur md:pb-3"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1.5">
@@ -988,7 +941,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   </motion.header>
 
                   <div
-                    className="flex-1 overflow-y-auto -webkit-overflow-scrolling-touch px-4 pb-28 pt-4"
+                    className="flex-1 overflow-y-auto -webkit-overflow-scrolling-touch px-4 pb-20 pt-3"
                     data-daily-quest-scroll-container="true"
                     aria-live="polite"
                   >
@@ -1196,18 +1149,6 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                             </div>
                           </section>
 
-                          <section className="flex flex-col gap-2">
-                            <label htmlFor="daily-quest-notes" className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-text-dim)]">
-                              {t('dailyQuest.notes.label')}
-                            </label>
-                            <textarea
-                              id="daily-quest-notes"
-                              value={notes}
-                              onChange={(event) => setNotes(event.target.value)}
-                              placeholder={t('dailyQuest.notes.placeholder')}
-                              className="ib-daily-quest-surface min-h-[96px] resize-y rounded-2xl border px-3 py-3 text-sm text-[color:var(--color-text)] placeholder:text-[color:var(--color-text-subtle)] focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
-                            />
-                          </section>
                         </>
                       )}
                     </div>
@@ -1216,12 +1157,12 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   <motion.footer
                     layout={false}
                     data-demo-anchor="daily-quest-footer"
-                    className="ib-daily-quest-footer sticky bottom-[env(safe-area-inset-bottom)] z-10 border-t px-4 py-2 backdrop-blur md:py-3"
+                    className="ib-daily-quest-footer sticky bottom-0 z-10 border-t px-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.45rem)] pt-2 backdrop-blur md:pt-3"
                   >
-                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                      <div className="relative text-white">
+                    <div className="grid grid-cols-[minmax(3.5rem,0.34fr)_1fr] items-end gap-3">
+                      <div className="relative min-w-0 text-white">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-faint)]">{t('dailyQuest.footer.gpLabel')}</p>
-                        <p className="mt-1 text-2xl font-bold md:text-3xl">
+                        <p className="mt-0.5 text-2xl font-bold md:text-3xl">
                           <span
                             data-testid="xp-counter"
                             className="ib-daily-quest-gp-value text-amber-200 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]"
@@ -1269,7 +1210,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                       </div>
                     </div>
                     {showEmotionHelper && (
-                      <p id={helperTextId} className="text-[11px] text-rose-200/80 md:text-right">
+                      <p id={helperTextId} className="mt-1 text-[11px] text-rose-200/80 md:text-right">
                         {t('dailyQuest.helper.selectEmotion')}
                       </p>
                     )}
@@ -1282,7 +1223,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.24, ease: 'easeOut' }}
-                        className="absolute inset-0 z-40 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm"
+                        className="ib-daily-quest-success-backdrop absolute inset-0 z-40 flex items-center justify-center backdrop-blur-sm"
                       >
                         <div className="pointer-events-none absolute inset-0 overflow-hidden">
                           {successCelebration.confetti.map((piece) => (
@@ -1311,14 +1252,23 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.96 }}
                           transition={{ duration: 0.28, ease: 'easeOut' }}
-                          className="relative z-10 mx-4 flex max-w-sm flex-col items-center gap-3 rounded-2xl border border-white/15 bg-[color:var(--color-overlay-2)] px-6 py-5 text-center text-sm font-semibold text-white shadow-[0_24px_80px_rgba(56,189,248,0.35)]"
+                          className="ib-daily-quest-success-card relative z-10 mx-4 flex max-w-sm flex-col items-center gap-4 rounded-3xl border px-6 py-6 text-center shadow-[0_24px_80px_rgba(56,189,248,0.24)]"
                         >
-                          <span className="text-base md:text-lg">{successCelebration.message}</span>
-                          <span className="ib-chip-solid ib-chip-solid--success rounded-full px-3 py-1 text-[11px] font-semibold">
+                          <motion.span
+                            aria-hidden="true"
+                            className="ib-daily-quest-success-orb"
+                            initial={{ scale: 0.72, opacity: 0 }}
+                            animate={{ scale: [0.72, 1.04, 1], opacity: 1 }}
+                            transition={{ duration: 0.5, ease: 'easeOut' }}
+                          />
+                          <span className="ib-daily-quest-success-message text-lg font-semibold leading-snug md:text-xl">
+                            {successCelebration.message}
+                          </span>
+                          <span className="ib-daily-quest-success-points rounded-full px-3 py-1 text-xs font-semibold">
                             +{successCelebration.xpDelta} GP
                           </span>
                           {successCelebration.detail && (
-                            <p className="text-sm font-normal text-white/90">
+                            <p className="text-sm font-normal text-[color:var(--color-text-muted)]">
                               {successCelebration.detail}
                             </p>
                           )}
@@ -1330,64 +1280,13 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                               {successCelebration.action.label}
                             </a>
                           )}
-                          {isCelebrationHoldReady && (
-                            <div className="mt-1 flex w-full flex-col items-center gap-2 text-[12px] text-white/80" id="daily-quest-celebration-hold-instructions">
-                              <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[color:var(--color-text-dim)]">
-                                {t('dailyQuest.celebration.holdInstruction')}
-                              </span>
-                              <motion.button
-                                type="button"
-                                className="relative flex w-full max-w-xs items-center justify-center overflow-hidden rounded-full border border-white/25 bg-[color:var(--color-overlay-2)] px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.3em] text-white shadow-[0_18px_38px_rgba(16,185,129,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                                onPointerDown={(event: PointerEvent<HTMLButtonElement>) => {
-                                  event.preventDefault();
-                                  startCelebrationHold({
-                                    durationMs: DEFAULT_HOLD_TO_CLOSE_DURATION_MS,
-                                    onComplete: completeSuccessCelebration,
-                                  });
-                                }}
-                                onPointerUp={cancelCelebrationHold}
-                                onPointerCancel={cancelCelebrationHold}
-                                onPointerLeave={cancelCelebrationHold}
-                                onKeyDown={(event: ReactKeyboardEvent<HTMLButtonElement>) => {
-                                  if (event.key === ' ' || event.key === 'Enter') {
-                                    event.preventDefault();
-                                    startCelebrationHold({
-                                      durationMs: DEFAULT_HOLD_TO_CLOSE_DURATION_MS,
-                                      onComplete: completeSuccessCelebration,
-                                    });
-                                  }
-                                }}
-                                onKeyUp={(event: ReactKeyboardEvent<HTMLButtonElement>) => {
-                                  if (event.key === ' ' || event.key === 'Enter') {
-                                    event.preventDefault();
-                                    cancelCelebrationHold();
-                                  }
-                                }}
-                                aria-describedby="daily-quest-celebration-hold-instructions"
-                                animate={{ scale: isCelebrationHolding ? 1.05 : 1 }}
-                                transition={{ duration: 0.18, ease: 'easeOut' }}
-                              >
-                                <motion.span
-                                  className="absolute inset-0 rounded-full bg-[color:var(--color-overlay-4)]"
-                                  initial={false}
-                                  animate={{
-                                    opacity: celebrationHoldProgress > 0 ? 0.65 : 0,
-                                    scale: celebrationHoldProgress > 0 ? 1.08 : 1,
-                                  }}
-                                  transition={{ duration: 0.18, ease: 'easeOut' }}
-                                />
-                                <span className="relative z-10">{t('dailyQuest.celebration.holdButton')}</span>
-                              </motion.button>
-                              <div className="h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-[color:var(--color-overlay-3)]">
-                                <motion.div
-                                  className="h-full rounded-full bg-white/90"
-                                  initial={{ width: '0%' }}
-                                  animate={{ width: `${Math.min(Math.max(celebrationHoldProgress, 0), 1) * 100}%` }}
-                                  transition={{ duration: 0.1, ease: 'linear' }}
-                                />
-                              </div>
-                            </div>
-                          )}
+                          <button
+                            type="button"
+                            onClick={completeSuccessCelebration}
+                            className="ib-daily-quest-success-cta mt-1 inline-flex h-11 w-full items-center justify-center rounded-full px-5 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                          >
+                            {t('dailyQuest.celebration.cta')}
+                          </button>
                         </motion.div>
                       </motion.div>
                     )}
