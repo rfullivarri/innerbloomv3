@@ -307,8 +307,8 @@
   --loop-splash-flower-width: clamp(62px, 23cqw, 82px);
   --loop-splash-wordmark-size: clamp(0.98rem, 6.25cqw, 1.28rem);
   position: absolute;
-  inset: 10px;
-  border-radius: 30px;
+  inset: 0;
+  border-radius: inherit;
   display: grid;
   place-items: center;
   container-type: inline-size;
