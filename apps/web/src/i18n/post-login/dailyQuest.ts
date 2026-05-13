@@ -17,11 +17,6 @@ export const dailyQuestTranslations = {
   'dailyQuest.pillars.body': { es: 'Cuerpo', en: 'Body' },
   'dailyQuest.pillars.mind': { es: 'Mente', en: 'Mind' },
   'dailyQuest.pillars.soul': { es: 'Alma', en: 'Soul' },
-  'dailyQuest.notes.label': { es: 'Notas opcionales', en: 'Optional notes' },
-  'dailyQuest.notes.placeholder': {
-    es: '¿Algo que quieras destacar de tu día?',
-    en: 'Anything you want to highlight from your day?',
-  },
   'dailyQuest.actions.later': { es: 'Más tarde', en: 'Later' },
   'dailyQuest.actions.confirm': { es: 'Confirmar', en: 'Confirm' },
   'dailyQuest.actions.saving': { es: 'Guardando…', en: 'Saving…' },
@@ -43,11 +38,7 @@ export const dailyQuestTranslations = {
     en: 'Reminder snoozed. Come back whenever you want to complete your Daily Quest.',
   },
   'dailyQuest.toast.savedSuccess': { es: 'Registro guardado con éxito.', en: 'Saved successfully.' },
-  'dailyQuest.celebration.holdInstruction': {
-    es: 'Mantené presionado 2 segundos para cerrar',
-    en: 'Press and hold for 2 seconds to close',
-  },
-  'dailyQuest.celebration.holdButton': { es: 'Mantené presionado', en: 'Press and hold' },
+  'dailyQuest.celebration.cta': { es: 'OK, vamos', en: "OK, let's go" },
   'dailyQuest.celebration.message.1': {
     es: 'Registro guardado. ¡Arrancaste con todo! 💥 Seguimos sumando GP hoy.',
     en: "Entry saved. You're off to a strong start! 💥 Let's keep adding GP today.",
