@@ -165,7 +165,7 @@ const DashboardMenuTrigger = forwardRef<
       ref={ref}
       type="button"
       onClick={onClick}
-      className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2 text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40"
+      className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-2 text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--ib-surface-card-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40"
       aria-label={ariaLabel}
     >
       <svg
@@ -1004,7 +1004,7 @@ export function DashboardMenu({
                             <button
                               type="button"
                               onClick={handleGoToSubscription}
-                              className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)]"
+                              className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--ib-surface-card-hover)]"
                             >
                               <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
                                 <path d="M12 3a4 4 0 0 0-4 4v2" />
@@ -1016,7 +1016,7 @@ export function DashboardMenu({
                             <button
                               type="button"
                               onClick={handleGoToPricing}
-                              className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)]"
+                              className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--ib-surface-card-hover)]"
                             >
                               <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
                                 <path d="M6 19V9" />
@@ -1103,7 +1103,7 @@ export function DashboardMenu({
                           <p className="mb-1 text-xs text-[color:var(--color-widget-menu-label)]">
                             {t('dashboard.menu.availableWidgets')}
                           </p>
-                          <div className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]">
+                          <div className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)]">
                             <div className="flex items-start gap-2 px-3 py-2">
                               <button
                                 type="button"
@@ -1385,7 +1385,7 @@ export function DashboardMenu({
                                   key={mode}
                                   type="button"
                                   onClick={() => handleSelectGameMode(mode)}
-                                  className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'dashboard-menu-selection-active bg-[color:var(--color-overlay-3)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
+                                  className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'dashboard-menu-selection-active bg-[color:var(--ib-surface-card-active)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] hover:bg-[color:var(--ib-surface-card-hover)]'}`}
                                 >
                                   <div className="ml-2 space-y-2">
                                     <div className="flex items-center justify-between gap-2">
@@ -1504,7 +1504,7 @@ export function DashboardMenu({
                                   key={avatarOption.avatarId}
                                   type="button"
                                   onClick={() => setSelectedAvatarId(avatarOption.avatarId)}
-                                  className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'dashboard-menu-selection-active bg-[color:var(--color-overlay-3)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
+                                  className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'dashboard-menu-selection-active bg-[color:var(--ib-surface-card-active)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] hover:bg-[color:var(--ib-surface-card-hover)]'}`}
                                 >
                                   <div className="ml-2 space-y-2">
                                     <div className="flex items-center justify-between gap-2">
@@ -1628,7 +1628,7 @@ export function DashboardMenu({
                           type="button"
                           onClick={handleCloseDeleteAccount}
                           disabled={isDeletingAccount}
-                          className="flex-1 rounded-2xl border border-[color:var(--color-border-subtle)] px-3 py-3 text-sm font-semibold text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] disabled:opacity-60"
+                          className="flex-1 rounded-2xl border border-[color:var(--color-border-subtle)] px-3 py-3 text-sm font-semibold text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--ib-surface-card-hover)] disabled:opacity-60"
                         >
                           {t("dashboard.menu.cancel")}
                         </button>

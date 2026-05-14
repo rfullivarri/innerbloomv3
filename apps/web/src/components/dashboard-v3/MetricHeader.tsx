@@ -167,7 +167,7 @@ export function MetricHeader({
               {t("dashboard.metricHeader.progress")}
             </DashboardMeta>
             <div
-              className="relative h-6 w-full overflow-hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] shadow-[inset_0_2px_8px_rgba(15,23,42,0.12)] sm:h-[30px]"
+              className="relative h-6 w-full overflow-hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card-active)] shadow-[inset_0_2px_8px_rgba(15,23,42,0.12)] sm:h-[30px]"
               role="progressbar"
               aria-label={t("dashboard.metricHeader.progressAria")}
               aria-valuemin={0}

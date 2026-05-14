@@ -1529,7 +1529,7 @@
   }
 
   .ib-light-elevated-surface {
-    background: var(--color-overlay-1);
+    background: var(--ib-surface-card);
     border: 1px solid var(--color-border-subtle);
     box-shadow: var(--IB_SURFACE_CARD_LIGHT);
   }
@@ -6364,7 +6364,7 @@
 
   :root[data-theme="dark"] [data-light-scope="editor"] .editor-pillar-chip {
     border-color: var(--color-border-subtle);
-    background: var(--color-overlay-1);
+    background: var(--ib-surface-card);
     color: var(--color-slate-200);
   }
 
@@ -6372,7 +6372,7 @@
     [data-light-scope="editor"]
     .editor-pillar-chip:hover {
     border-color: var(--color-border-soft);
-    background: var(--color-overlay-2);
+    background: var(--ib-surface-card-hover);
   }
 
   :root[data-theme="dark"]
@@ -6539,7 +6539,7 @@
   .create-task-ai-modal__close {
     border-color: var(--color-border-subtle);
     color: var(--color-slate-200);
-    background: var(--color-overlay-1);
+    background: var(--ib-surface-card);
   }
 
   .create-task-ai-modal__close:hover {
@@ -6668,7 +6668,7 @@
 
   .edit-task-modal__status-checkbox {
     border: 1px solid var(--color-border-soft);
-    background: var(--color-overlay-2);
+    background: var(--ib-surface-card-active);
     color: var(--color-accent-primary);
   }
 

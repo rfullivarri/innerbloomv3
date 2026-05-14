@@ -882,7 +882,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       subtitle={t('dashboard.emotionChart.lastSixMonths')}
       rightSlot={<InfoDotTarget id="emotion" placement="right" className="flex items-center" />}
     >
-      {showSkeleton && <div className="h-48 w-full animate-pulse rounded-ib-md bg-[color:var(--color-overlay-2)]" />}
+      {showSkeleton && <div className="h-48 w-full animate-pulse rounded-ib-md bg-[color:var(--ib-surface-card-active)]" />}
 
       {showError && <p className="text-sm text-rose-300">{t('dashboard.emotionChart.loadError')}</p>}
 
@@ -974,7 +974,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
           </div>
           <div ref={summaryRef} data-emotion-card="summary">
             {highlight ? (
-              <div className="summary-inner ib-card-contour-shadow w-full rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left sm:p-4">
+              <div className="summary-inner ib-card-contour-shadow w-full rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3 text-left sm:p-4">
                 <div
                   className="emotion-highlight-indicator h-10 w-10 shrink-0 rounded-full"
                   style={{ backgroundColor: highlight.color }}
@@ -991,7 +991,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
                 </div>
               </div>
             ) : (
-              <div className="summary-inner ib-card-contour-shadow rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-xs text-[color:var(--color-text-subtle)] sm:p-4">
+              <div className="summary-inner ib-card-contour-shadow rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3 text-xs text-[color:var(--color-text-subtle)] sm:p-4">
                 <div className="summary-content">
                   <span className="summary-description">
                     {t('dashboard.emotionChart.insufficientData')}

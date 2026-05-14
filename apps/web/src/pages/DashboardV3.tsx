@@ -1644,25 +1644,25 @@ function deriveGameModeFromProfile(mode?: string | null): GameMode | null {
 function ProfileSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="h-6 w-48 animate-pulse rounded bg-[color:var(--color-overlay-2)]" />
+      <div className="h-6 w-48 animate-pulse rounded bg-[color:var(--ib-surface-card-active)]" />
       <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="lg:col-span-12">
-          <div className="h-32 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
+          <div className="h-32 w-full animate-pulse rounded-2xl bg-[color:var(--ib-surface-card-active)]" />
         </div>
         <div className="space-y-4 md:space-y-5 lg:col-span-4">
-          <div className="h-36 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
-          <div className="h-64 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
-          <div className="h-56 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
-          <div className="h-48 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
+          <div className="h-36 w-full animate-pulse rounded-2xl bg-[color:var(--ib-surface-card-active)]" />
+          <div className="h-64 w-full animate-pulse rounded-2xl bg-[color:var(--ib-surface-card-active)]" />
+          <div className="h-56 w-full animate-pulse rounded-2xl bg-[color:var(--ib-surface-card-active)]" />
+          <div className="h-48 w-full animate-pulse rounded-2xl bg-[color:var(--ib-surface-card-active)]" />
         </div>
         <div className="space-y-4 md:space-y-5 lg:col-span-4">
-          <div className="h-64 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
-          <div className="h-64 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
+          <div className="h-64 w-full animate-pulse rounded-2xl bg-[color:var(--ib-surface-card-active)]" />
+          <div className="h-64 w-full animate-pulse rounded-2xl bg-[color:var(--ib-surface-card-active)]" />
         </div>
         <div className="space-y-4 md:space-y-5 lg:col-span-4">
-          <div className="h-72 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
-          <div className="h-72 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
-          <div className="h-48 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
+          <div className="h-72 w-full animate-pulse rounded-2xl bg-[color:var(--ib-surface-card-active)]" />
+          <div className="h-72 w-full animate-pulse rounded-2xl bg-[color:var(--ib-surface-card-active)]" />
+          <div className="h-48 w-full animate-pulse rounded-2xl bg-[color:var(--ib-surface-card-active)]" />
         </div>
       </div>
     </div>
@@ -1741,10 +1741,10 @@ function DashboardFallback() {
             className="min-h-[180px]"
           >
             <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)]" />
+              <div className="h-12 w-12 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card-active)]" />
               <div className="space-y-2 text-xs text-[color:var(--color-slate-300)]">
-                <div className="h-3 w-24 rounded bg-[color:var(--color-overlay-2)]" />
-                <div className="h-3 w-16 rounded bg-[color:var(--color-overlay-2)]" />
+                <div className="h-3 w-24 rounded bg-[color:var(--ib-surface-card-active)]" />
+                <div className="h-3 w-16 rounded bg-[color:var(--ib-surface-card-active)]" />
               </div>
             </div>
             <p className="mt-4 text-xs text-[color:var(--color-slate-400)]">

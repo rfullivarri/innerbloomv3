@@ -113,7 +113,7 @@ function Chip({
     <button
       type="button"
       onClick={() => onCycle(tracker.type, nextStatus(tracker.statusToday))}
-      className={`relative w-full overflow-hidden rounded-ib-lg border px-3 pb-6 pt-[0.3125rem] text-left transition-all duration-200 hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)] sm:px-3.5 sm:pb-6 sm:pt-1.5 ${chipStateClass(tracker.statusToday)}`}
+      className={`relative w-full overflow-hidden rounded-ib-lg border px-3 pb-6 pt-[0.3125rem] text-left transition-all duration-200 hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--ib-surface-card-hover)] sm:px-3.5 sm:pb-6 sm:pt-1.5 ${chipStateClass(tracker.statusToday)}`}
       title={hint}
       {...longPressBind}
     >
@@ -189,7 +189,7 @@ export function ModerationWidget({
         className={`grid gap-2.5 sm:gap-3 ${activeCount === 1 ? "grid-cols-1" : ""} ${activeCount === 2 ? "grid-cols-2" : ""} ${activeCount === 3 ? "grid-cols-3 max-[360px]:grid-cols-2" : ""}`}
       >
         {loading && (
-          <div className="h-20 animate-pulse rounded-ib-lg border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]" />
+          <div className="h-20 animate-pulse rounded-ib-lg border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)]" />
         )}
         {!loading &&
           enabled.map((tracker) => (

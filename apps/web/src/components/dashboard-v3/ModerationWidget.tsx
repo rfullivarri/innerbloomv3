@@ -41,7 +41,7 @@ export function ModerationWidget({
 
   return (
     <section
-      className={`rounded-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-widget-menu-item-title)] shadow-[var(--shadow-elev-1)] ${compact ? "p-3" : "p-4"}`}
+      className={`rounded-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] text-[color:var(--color-widget-menu-item-title)] shadow-[var(--shadow-elev-1)] ${compact ? "p-3" : "p-4"}`}
       {...longPressBind}
       aria-label={t('dashboard.menu.moderation')}
     >
@@ -64,7 +64,7 @@ export function ModerationWidget({
         {enabled.map((type) => (
           <div
             key={type}
-            className="rounded-[1.35rem] border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-3 py-2 shadow-[var(--shadow-elev-1)]"
+            className="rounded-[1.35rem] border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card-active)] px-3 py-2 shadow-[var(--shadow-elev-1)]"
           >
             <div className="flex items-start justify-between gap-2">
               <ModerationTrackerIcon

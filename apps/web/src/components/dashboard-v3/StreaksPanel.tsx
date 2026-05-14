@@ -139,7 +139,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
       subtitle="Vista read-only"
       rightSlot={
         <span className="inline-flex items-center gap-2 text-xs text-[color:var(--color-slate-400)]">
-          <span className="hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-slate-300)] md:inline-flex">
+          <span className="hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-slate-300)] md:inline-flex">
             Beta
           </span>
           <span aria-hidden>⚡</span>
@@ -157,7 +157,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
               className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60 ${
                 isActive
                   ? 'border-indigo-300/60 bg-indigo-300/15 text-indigo-100'
-                  : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-slate-300)] hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--color-overlay-2)]'
+                  : 'border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] text-[color:var(--color-slate-300)] hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--ib-surface-card-hover)]'
               }`}
             >
               {filter.label}
@@ -177,7 +177,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
               className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60 ${
                 isActive
                   ? 'border-amber-300/60 bg-amber-300/15 text-amber-100'
-                  : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-slate-300)] hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--color-overlay-2)]'
+                  : 'border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] text-[color:var(--color-slate-300)] hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--ib-surface-card-hover)]'
               }`}
             >
               {filter.label}
@@ -186,7 +186,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
         })}
       </div>
 
-      {status === 'loading' && <div className="h-56 w-full animate-pulse rounded-ib-md bg-[color:var(--color-overlay-2)]" />}
+      {status === 'loading' && <div className="h-56 w-full animate-pulse rounded-ib-md bg-[color:var(--ib-surface-card-active)]" />}
 
       {status === 'error' && (
         <p className="text-sm text-rose-300">No pudimos cargar tus tareas activas.</p>
@@ -195,7 +195,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
       {status === 'success' && data && (
         <div className="flex flex-col gap-4">
           <p className="text-xs text-[color:var(--color-slate-400)]">
-            La API actual aún no expone <code className="rounded bg-[color:var(--color-overlay-2)] px-1 py-px text-[10px]">daily_log_raw</code>. Listamos tus tareas activas y calculamos el GP semanal total como referencia.
+            La API actual aún no expone <code className="rounded bg-[color:var(--ib-surface-card-active)] px-1 py-px text-[10px]">daily_log_raw</code>. Listamos tus tareas activas y calculamos el GP semanal total como referencia.
           </p>
 
           <div className="rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-panel)] p-4">
@@ -213,8 +213,8 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
                     <p className="text-xs text-[color:var(--color-slate-400)]">Pilar: {task.pillarId ?? '—'}</p>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-[color:var(--color-slate-300)]">
-                    <span className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1 text-[color:var(--color-slate-100)]">+{task.xp ?? 0} GP</span>
-                    <span className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1">✓×—</span>
+                    <span className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-2 py-1 text-[color:var(--color-slate-100)]">+{task.xp ?? 0} GP</span>
+                    <span className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-2 py-1">✓×—</span>
                   </div>
                 </div>
               </article>
