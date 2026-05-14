@@ -38,7 +38,7 @@ export function JourneyReadyModal({
         <h2 className="font-display text-2xl font-semibold text-[color:var(--color-text)]">{t('dashboard.journeyReady.title')}</h2>
         <p className="mt-2 text-sm text-[color:var(--color-text-muted)]">{t('dashboard.journeyReady.subtitle')}</p>
 
-        <div className="mt-4 rounded-2xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] p-3">
+        <div className="mt-4 rounded-2xl border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card-active)] p-3">
           <button type="button" onClick={() => setExpanded((value) => !value)} className="text-sm font-semibold text-[color:var(--color-text)]">
             {t('dashboard.journeyReady.viewTasks', { count: tasks.length })}
           </button>
@@ -53,7 +53,7 @@ export function JourneyReadyModal({
           ) : null}
         </div>
 
-        <div className="mt-4 rounded-2xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] p-3 text-sm">
+        <div className="mt-4 rounded-2xl border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card-active)] p-3 text-sm">
           <p className="font-semibold text-[color:var(--color-text)]">{t('dashboard.journeyReady.firstStep')}</p>
           <p className="text-[color:var(--color-text-muted)]">{t('dashboard.journeyReady.firstStepHelp')}</p>
         </div>

@@ -262,7 +262,7 @@ export function UpgradeRecommendationModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex items-center rounded-full border border-[color:var(--color-border-soft)] px-4 py-2 text-sm font-semibold text-[color:var(--color-text)] transition hover:bg-[color:var(--color-overlay-1)]"
+                className="inline-flex items-center rounded-full border border-[color:var(--color-border-soft)] px-4 py-2 text-sm font-semibold text-[color:var(--color-text)] transition hover:bg-[color:var(--ib-surface-card-hover)]"
               >
                 {t('dashboard.upgradeCta.close')}
               </button>

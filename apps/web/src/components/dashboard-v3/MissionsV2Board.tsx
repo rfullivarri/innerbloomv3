@@ -636,14 +636,14 @@ function ClaimModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-full rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-100)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-4)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300 sm:w-auto"
+              className="w-full rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card-active)] px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-100)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-4)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300 sm:w-auto"
             >
               Ver en trofeos
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300 sm:w-auto"
+              className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--ib-surface-card-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300 sm:w-auto"
             >
               Cerrar
             </button>

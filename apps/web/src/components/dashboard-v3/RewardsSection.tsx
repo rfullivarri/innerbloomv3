@@ -391,7 +391,7 @@ function GrowthCalibrationShelf({
         <button
           type="button"
           onClick={onOpenResults}
-          className="mt-3 w-full rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left transition hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
+          className="mt-3 w-full rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3 text-left transition hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--ib-surface-card-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
         >
           <p className="text-lg font-bold tracking-[0.02em] text-[color:var(--color-text)] sm:text-xl">
             <span className="text-rose-300">
@@ -411,7 +411,7 @@ function GrowthCalibrationShelf({
           ) : null}
         </button>
       ) : (
-        <div className="mt-3 rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
+        <div className="mt-3 rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-4 text-sm text-[color:var(--color-text-muted)]">
           {language === "es"
             ? "Todavía no hay resultados de Growth Calibration. Tus próximos ajustes aparecerán aquí."
             : "There are no Growth Calibration results yet. Your next adjustments will appear here."}
@@ -450,7 +450,7 @@ function MonthlyWrapupShelf({
       </div>
       {latest ? (
         <div className="mt-3 space-y-2">
-          <div className="w-full rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left">
+          <div className="w-full rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3 text-left">
             <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
               {latest.periodKey}
             </p>
@@ -466,7 +466,7 @@ function MonthlyWrapupShelf({
             />
           </div>
           {previous ? (
-            <div className="w-full rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/70 p-3 text-left">
+            <div className="w-full rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3 text-left">
               <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
                 {previous.periodKey}
               </p>
@@ -477,7 +477,7 @@ function MonthlyWrapupShelf({
           ) : null}
         </div>
       ) : (
-        <div className="mt-3 rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
+        <div className="mt-3 rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-4 text-sm text-[color:var(--color-text-muted)]">
           {language === "es"
             ? "Aún no tienes Wrap-Ups mensuales. Tus próximos resúmenes aparecerán aquí."
             : "You don't have monthly wrap-ups yet. Your next summaries will appear here."}
@@ -524,7 +524,7 @@ function WeeklyWrapupShelf({
                 key={item.id}
                 type="button"
                 onClick={() => onOpen?.(item)}
-                className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left"
+                className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3 text-left"
               >
                 <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
                   {item.weekStart} → {item.weekEnd}
@@ -553,7 +553,7 @@ function WeeklyWrapupShelf({
           })}
         </div>
       ) : (
-        <div className="mt-3 rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
+        <div className="mt-3 rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-4 text-sm text-[color:var(--color-text-muted)]">
           {language === "es"
             ? "Aún no tienes Weekly Wrap-Ups. Tus próximos resúmenes semanales aparecerán aquí."
             : "You don't have weekly wrap-ups yet. Your next weekly summaries will appear here."}
@@ -652,7 +652,7 @@ function GrowthCalibrationResultsModal({
 
         <div className="max-h-[70vh] overflow-auto p-3 sm:p-4">
           {growthCalibration.latestResults.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
+            <p className="rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-4 text-sm text-[color:var(--color-text-muted)]">
               {language === "es"
                 ? "Todavía no hay resultados de Growth Calibration. Tus próximos ajustes aparecerán aquí."
                 : "There are no Growth Calibration results yet. Your next adjustments will appear here."}
@@ -792,7 +792,7 @@ function CompletionDots({
             className={`flex h-6 w-6 items-center justify-center rounded-full border text-[10px] font-semibold ${
               isDone
                 ? "border-[#d8b4fe] bg-[#e9d5ff] text-[#7c3aed] shadow-sm dark:border-violet-300/50 dark:bg-violet-500/45 dark:text-violet-100"
-                : "border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]"
+                : "border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] text-[color:var(--color-text-muted)]"
             }`}
           >
             {dayLabels[index]}
@@ -1403,13 +1403,13 @@ function AchievedShelf({
       {!isCarouselView && isShelfFocusStep ? (
         <div
           data-demo-anchor="logros-shelves-pillars"
-          className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/95 p-3 shadow-[0_16px_32px_rgba(0,0,0,0.2)] ring-1 ring-[color:var(--color-accent-primary)]/35"
+          className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3 shadow-[0_16px_32px_rgba(0,0,0,0.2)] ring-1 ring-[color:var(--color-accent-primary)]/35"
         >
           <div className="grid grid-cols-3 gap-2">
             {normalizedGroups.map((group) => (
               <div
                 key={`${group.pillar.code}-demo-column`}
-                className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-3 text-center"
+                className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-2 py-3 text-center"
               >
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--color-text)]">
                   {resolvePillarHeader(group.pillar, language)}
@@ -1512,7 +1512,7 @@ function AchievedShelf({
                               ? activeCarouselIndex === index
                                 ? "border-amber-400/80 bg-[color:var(--color-surface-elevated)] shadow-[0_0_0_1px_rgba(251,191,36,0.16),0_20px_42px_rgba(2,8,23,0.16)] dark:bg-[rgba(7,13,16,0.78)] dark:shadow-[0_0_0_1px_rgba(251,191,36,0.16),0_22px_44px_rgba(0,0,0,0.26)]"
                                 : "border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] shadow-[0_16px_30px_rgba(2,8,23,0.12)] dark:bg-[rgba(7,13,16,0.62)] dark:shadow-[0_16px_30px_rgba(2,8,23,0.32)]"
-                              : "border-dashed border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-1)]/82 shadow-[0_12px_24px_rgba(2,8,23,0.1)] dark:border-[color:var(--color-border-subtle)] dark:bg-[rgba(7,13,16,0.58)] dark:shadow-[0_12px_24px_rgba(2,8,23,0.22)]"
+                              : "border-dashed border-[color:var(--color-border-strong)] bg-[color:var(--ib-surface-card)] shadow-[0_12px_24px_rgba(2,8,23,0.1)] dark:border-[color:var(--color-border-subtle)] dark:bg-[rgba(7,13,16,0.58)] dark:shadow-[0_12px_24px_rgba(2,8,23,0.22)]"
                           }`}
                           data-demo-anchor={
                             demoAnchors?.achievedCardTaskId === habit.taskId
@@ -1523,7 +1523,7 @@ function AchievedShelf({
                           }
                         >
                           {!isAchieved ? (
-                            <span className="absolute right-0 top-0 z-20 rounded-full border border-amber-300/65 bg-amber-200/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-900 shadow-[0_8px_18px_rgba(180,83,9,0.24)] dark:border-amber-300/35 dark:bg-[color:var(--color-overlay-1)] dark:text-[color:var(--color-text-dim)]">
+                            <span className="absolute right-0 top-0 z-20 rounded-full border border-amber-300/65 bg-amber-200/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-900 shadow-[0_8px_18px_rgba(180,83,9,0.24)] dark:border-amber-300/35 dark:bg-[color:var(--ib-surface-card)] dark:text-[color:var(--color-text-dim)]">
                               {language === "es" ? "Bloqueado" : "Locked"}
                             </span>
                           ) : null}
@@ -1644,7 +1644,7 @@ function AchievedShelf({
                   type="button"
                   onClick={() => scrollCarouselToIndex(activeCarouselIndex - 1)}
                   disabled={activeCarouselIndex <= 0}
-                  className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)] shadow-[0_6px_14px_rgba(15,23,42,0.08)] transition hover:bg-[color:var(--color-overlay-2)] disabled:opacity-50"
+                  className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)] shadow-[0_6px_14px_rgba(15,23,42,0.08)] transition hover:bg-[color:var(--ib-surface-card-hover)] disabled:opacity-50"
                 >
                   {language === "es" ? "Anterior" : "Previous"}
                 </button>
@@ -1658,14 +1658,14 @@ function AchievedShelf({
                   disabled={
                     activeCarouselIndex >= activePillarHabits.length - 1
                   }
-                  className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)] shadow-[0_6px_14px_rgba(15,23,42,0.08)] transition hover:bg-[color:var(--color-overlay-2)] disabled:opacity-50"
+                  className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)] shadow-[0_6px_14px_rgba(15,23,42,0.08)] transition hover:bg-[color:var(--ib-surface-card-hover)] disabled:opacity-50"
                 >
                   {language === "es" ? "Siguiente" : "Next"}
                 </button>
               </div>
             </>
           ) : (
-            <p className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
+            <p className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-4 text-sm text-[color:var(--color-text-muted)]">
               {language === "es"
                 ? "Sin tareas seguidas en este pilar todavía."
                 : "No tracked tasks in this pillar yet."}
@@ -1702,7 +1702,7 @@ function AchievedShelf({
                       type="button"
                       data-demo-anchor={blockedAnchor}
                       onClick={() => setPreviewHabit(habit)}
-                      className={`flex shrink-0 flex-col items-center justify-center rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/55 px-3 text-center opacity-80 transition hover:border-[color:var(--color-border-strong)] hover:opacity-100 ${isShelfFocusStep ? "h-32 w-24 py-3" : "h-40 w-32 py-4"}`}
+                      className={`flex shrink-0 flex-col items-center justify-center rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-3 text-center opacity-80 transition hover:border-[color:var(--color-border-strong)] hover:opacity-100 ${isShelfFocusStep ? "h-32 w-24 py-3" : "h-40 w-32 py-4"}`}
                     >
                       <HabitAchievementSeal
                         pillar={habit.pillar ?? group.pillar.code}
@@ -1740,14 +1740,14 @@ function AchievedShelf({
                       setActiveHabitId(habit.id);
                       setShowBackFace(false);
                     }}
-                    className={`flex shrink-0 flex-col items-center justify-center rounded-2xl border px-3 text-center transition ${isShelfFocusStep ? "h-32 w-24 py-3" : "h-40 w-32 py-4"} ${active ? "border-violet-300/60 bg-violet-500/10" : "border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-[color:var(--color-border-strong)]"}`}
+                    className={`flex shrink-0 flex-col items-center justify-center rounded-2xl border px-3 text-center transition ${isShelfFocusStep ? "h-32 w-24 py-3" : "h-40 w-32 py-4"} ${active ? "border-violet-300/60 bg-violet-500/10" : "border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] hover:border-[color:var(--color-border-strong)]"}`}
                   >
                     <HabitAchievementSeal
                       pillar={habit.pillar ?? group.pillar.code}
                       traitCode={habit.trait?.code}
                       traitName={habit.trait?.name}
                       alt={`${habit.taskName} seal`}
-                      className={`flex items-center justify-center overflow-hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] shadow-[0_10px_30px_rgba(0,0,0,0.22)] ${isShelfFocusStep ? "h-16 min-h-16 w-16 min-w-16 max-h-16 max-w-16" : "h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20"}`}
+                      className={`flex items-center justify-center overflow-hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] shadow-[0_10px_30px_rgba(0,0,0,0.22)] ${isShelfFocusStep ? "h-16 min-h-16 w-16 min-w-16 max-h-16 max-w-16" : "h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20"}`}
                       imgClassName="h-full w-full object-cover"
                       fallback={
                         <span className="text-3xl leading-none">
@@ -1844,7 +1844,7 @@ function LockedAchievementHabitDevelopment({
     loadOnVisible && !showLoading && !showError && !previewAchievement;
   if (showLoading) {
     return (
-      <p className="rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2.5 text-xs text-[color:var(--color-text-muted)]">
+      <p className="rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-2.5 text-xs text-[color:var(--color-text-muted)]">
         {language === "es"
           ? "Cargando desarrollo del hábito…"
           : "Loading habit development…"}
@@ -1880,7 +1880,7 @@ function LockedAchievementHabitDevelopment({
 
   if (showEmpty) {
     return (
-      <p className="rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2.5 text-xs text-[color:var(--color-text-muted)]">
+      <p className="rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-2.5 text-xs text-[color:var(--color-text-muted)]">
         {language === "es"
           ? "Aún no hay datos suficientes de desarrollo del hábito para esta tarea."
           : "There is not enough habit development data for this task yet."}
@@ -1977,7 +1977,7 @@ function NotAchievedPreviewOverlay({
 
         <div className="mt-4">
           {status === "loading" && !isLocalPreview ? (
-            <div className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
+            <div className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-4 text-sm text-[color:var(--color-text-muted)]">
               {language === "es"
                 ? "Cargando vista previa del logro…"
                 : "Loading achievement preview…"}
@@ -2000,7 +2000,7 @@ function NotAchievedPreviewOverlay({
             />
           ) : null}
           {(status === "success" || isLocalPreview) && !previewAchievement ? (
-            <div className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
+            <div className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-4 text-sm text-[color:var(--color-text-muted)]">
               {language === "es"
                 ? "Sigue registrando esta tarea para desbloquear el sello."
                 : "Keep logging this task to unlock the seal."}
@@ -2091,7 +2091,7 @@ function AchievementFocusOverlay({
               className="flex h-full flex-col items-center justify-center gap-4 text-center"
               data-demo-anchor={demoAnchors?.achievementFront}
             >
-              <div className="flex h-[min(60vw,18rem)] min-h-44 w-[min(60vw,18rem)] min-w-44 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-7xl shadow-[0_20px_50px_rgba(0,0,0,0.24)] sm:h-[75%] sm:max-h-72 sm:min-h-56 sm:w-[75%] sm:max-w-72 sm:min-w-56 sm:text-8xl">
+              <div className="flex h-[min(60vw,18rem)] min-h-44 w-[min(60vw,18rem)] min-w-44 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card)] text-7xl shadow-[0_20px_50px_rgba(0,0,0,0.24)] sm:h-[75%] sm:max-h-72 sm:min-h-56 sm:w-[75%] sm:max-w-72 sm:min-w-56 sm:text-8xl">
                 <HabitAchievementSeal
                   pillar={habit.pillar}
                   traitCode={habit.trait?.code}
@@ -2250,7 +2250,7 @@ function AchievedHabitBackContent({
         : {habit.gpSinceMaintain}
       </p>
       <div
-        className={`mt-0.5 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-1.5 ${centerAligned ? "w-full max-w-sm" : ""}`}
+        className={`mt-0.5 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-2.5 py-1.5 ${centerAligned ? "w-full max-w-sm" : ""}`}
       >
         <MaintainToggleRow
           language={language}

@@ -948,9 +948,9 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                     <div className="flex flex-col gap-6 pb-6">
                       {showSkeleton && (
                         <div className="ib-daily-quest-surface flex flex-col gap-3 rounded-2xl border p-4 text-sm text-[color:var(--color-text-faint)]">
-                          <div className="h-3 w-24 animate-pulse rounded-full bg-[color:var(--color-overlay-2)]" />
-                          <div className="h-3 w-3/4 animate-pulse rounded-full bg-[color:var(--color-overlay-2)]" />
-                          <div className="h-3 w-5/6 animate-pulse rounded-full bg-[color:var(--color-overlay-2)]" />
+                          <div className="h-3 w-24 animate-pulse rounded-full bg-[color:var(--ib-surface-card-active)]" />
+                          <div className="h-3 w-3/4 animate-pulse rounded-full bg-[color:var(--ib-surface-card-active)]" />
+                          <div className="h-3 w-5/6 animate-pulse rounded-full bg-[color:var(--ib-surface-card-active)]" />
                         </div>
                       )}
 

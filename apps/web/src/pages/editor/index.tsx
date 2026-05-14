@@ -138,8 +138,8 @@ function ModalPickerField({
             }}
             className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition ${
               value === ""
-                ? "bg-[color:var(--color-overlay-2)] text-[color:var(--color-text)]"
-                : "text-[color:var(--color-text)] hover:bg-[color:var(--color-overlay-1)]"
+                ? "bg-[color:var(--ib-surface-card-active)] text-[color:var(--color-text)]"
+                : "text-[color:var(--color-text)] hover:bg-[color:var(--ib-surface-card-hover)]"
             }`}
           >
             <span>{placeholder}</span>
@@ -156,8 +156,8 @@ function ModalPickerField({
               }}
               className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition ${
                 option.value === value
-                  ? "bg-[color:var(--color-overlay-2)] text-[color:var(--color-text)]"
-                  : "text-[color:var(--color-text)] hover:bg-[color:var(--color-overlay-1)]"
+                  ? "bg-[color:var(--ib-surface-card-active)] text-[color:var(--color-text)]"
+                  : "text-[color:var(--color-text)] hover:bg-[color:var(--ib-surface-card-hover)]"
               }`}
             >
               <span>{option.label}</span>
@@ -975,7 +975,7 @@ export default function TaskEditorPage({ publicDemo = false }: TaskEditorPagePro
               <Link
                 to={demoHubPath}
                 aria-label={language === "es" ? "Cerrar demo de Tareas y volver al hub público" : "Close Tasks demo and return to the public hub"}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-lg leading-none text-[color:var(--color-text)]"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] text-lg leading-none text-[color:var(--color-text)]"
               >
                 <span aria-hidden>×</span>
               </Link>
@@ -1275,7 +1275,7 @@ function TaskFilters({
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder={t("editor.filters.search.placeholder")}
-              className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </div>
         </label>
@@ -1286,7 +1286,7 @@ function TaskFilters({
           <select
             value={selectedPillar}
             onChange={(event) => onPillarChange(event.target.value)}
-            className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
+            className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             {pillars.map((pillar) => (
               <option
@@ -1373,7 +1373,7 @@ function TaskFilters({
                 value={searchTerm}
                 onChange={(event) => onSearchChange(event.target.value)}
                 placeholder={t("editor.filters.search.placeholder")}
-                className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
+                className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-4 py-2 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
               />
             </label>
             <div className="flex gap-2 overflow-x-auto pb-1 [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
@@ -1424,7 +1424,7 @@ function TaskFilters({
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder={t("editor.filters.search.placeholder")}
-              className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </div>
         </label>
@@ -1435,7 +1435,7 @@ function TaskFilters({
           <select
             value={selectedPillar}
             onChange={(event) => onPillarChange(event.target.value)}
-            className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
+            className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             {pillars.map((pillar) => (
               <option
@@ -1612,7 +1612,7 @@ function TaskListMobile({
 
   // TODO: incorporar gestos de swipe cuando exista infraestructura compartida en el proyecto.
   return (
-    <ul className="divide-y divide-white/5 overflow-visible rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]">
+    <ul className="divide-y divide-white/5 overflow-visible rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)]">
       {tasks.map((task) => {
         const isMenuOpen = openMenuTaskId === task.id;
         const isDuplicating = duplicatingTaskId === task.id;
@@ -1623,7 +1623,7 @@ function TaskListMobile({
             <button
               type="button"
               onClick={() => onEditTask(task)}
-              className="flex w-full flex-col gap-2 px-3 py-2.5 text-left transition hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+              className="flex w-full flex-col gap-2 px-3 py-2.5 text-left transition hover:bg-[color:var(--ib-surface-card-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
             >
               <div className="flex items-start justify-between gap-3">
                 <p className="line-clamp-1 pr-8 text-sm font-semibold text-white">
@@ -1656,7 +1656,7 @@ function TaskListMobile({
                     current === task.id ? null : task.id,
                   );
                 }}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-base text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] text-base text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:bg-[color:var(--ib-surface-card-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
               >
                 <span aria-hidden>⋯</span>
                 <span className="sr-only">{t("editor.task.actions.more")}</span>
@@ -1670,7 +1670,7 @@ function TaskListMobile({
                       setOpenMenuTaskId(null);
                       onEditTask(task);
                     }}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-[color:var(--color-slate-100)] transition hover:bg-[color:var(--color-overlay-2)]"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-[color:var(--color-slate-100)] transition hover:bg-[color:var(--ib-surface-card-hover)]"
                   >
                     {t("editor.button.edit")}
                   </button>
@@ -1687,7 +1687,7 @@ function TaskListMobile({
                     className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
                       !onDuplicateTask
                         ? "cursor-not-allowed text-slate-500"
-                        : "text-[color:var(--color-slate-100)] hover:bg-[color:var(--color-overlay-2)]"
+                        : "text-[color:var(--color-slate-100)] hover:bg-[color:var(--ib-surface-card-hover)]"
                     } ${isDuplicating ? "opacity-70" : ""}`.trim()}
                   >
                     {isDuplicating
@@ -1735,7 +1735,7 @@ function TaskCard({
   const { language, t } = usePostLoginLanguage();
 
   return (
-    <article className="group relative flex flex-col gap-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 shadow-[0_8px_24px_rgba(15,23,42,0.35)] transition hover:border-[color:var(--color-border-soft)]">
+    <article className="group relative flex flex-col gap-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-4 shadow-[0_8px_24px_rgba(15,23,42,0.35)] transition hover:border-[color:var(--color-border-soft)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <h3 className="font-semibold text-[color:var(--color-slate-100)]">
           {task.title}
@@ -1906,7 +1906,7 @@ function TaskBoard({
         return (
           <section
             key={group.key}
-            className="flex min-h-[260px] flex-col rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4"
+            className="flex min-h-[260px] flex-col rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-4"
           >
             <header className="flex items-center justify-between border-b border-white/5 pb-3">
               <div className="space-y-1">
@@ -1927,7 +1927,7 @@ function TaskBoard({
             </header>
             <div className="mt-3 flex-1 space-y-2">
               {group.tasks.length === 0 ? (
-                <p className="rounded-xl border border-white/5 bg-[color:var(--color-overlay-1)] px-3 py-6 text-center text-xs text-slate-500">
+                <p className="rounded-xl border border-white/5 bg-[color:var(--ib-surface-card)] px-3 py-6 text-center text-xs text-slate-500">
                   {t("editor.board.emptyPillar")}
                 </p>
               ) : (
@@ -2178,7 +2178,7 @@ function TaskListSkeleton() {
       {Array.from({ length: 6 }).map((_, index) => (
         <div
           key={index}
-          className="h-40 animate-pulse rounded-2xl border border-white/5 bg-[color:var(--color-overlay-1)]"
+          className="h-40 animate-pulse rounded-2xl border border-white/5 bg-[color:var(--ib-surface-card)]"
         />
       ))}
     </div>
@@ -2187,7 +2187,7 @@ function TaskListSkeleton() {
 
 function TaskListEmpty({ message }: { message: string }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/40 px-6 py-12 text-center text-sm text-[color:var(--color-slate-300)]">
+    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-6 py-12 text-center text-sm text-[color:var(--color-slate-300)]">
       <span className="text-2xl" aria-hidden>
         🌱
       </span>
@@ -2212,7 +2212,7 @@ function TaskListError({
       <button
         type="button"
         onClick={onRetry}
-        className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:border-[color:var(--color-border-strong)]"
+        className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card-active)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:border-[color:var(--color-border-strong)]"
       >
         {t("editor.button.retry")}
       </button>
@@ -3651,7 +3651,7 @@ function SuggestionsLabModal({
                         )
                       }
                       aria-pressed={checked}
-                      className={`editor-suggestions-card group flex items-start gap-3 rounded-2xl border px-3 py-3 text-left transition ${checked ? "border-violet-300/60 bg-[linear-gradient(155deg,rgba(167,139,250,0.25),rgba(129,140,248,0.12))] shadow-[0_10px_24px_rgba(139,92,246,0.24)]" : "border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-white/25"}`}
+                      className={`editor-suggestions-card group flex items-start gap-3 rounded-2xl border px-3 py-3 text-left transition ${checked ? "border-violet-300/60 bg-[linear-gradient(155deg,rgba(167,139,250,0.25),rgba(129,140,248,0.12))] shadow-[0_10px_24px_rgba(139,92,246,0.24)]" : "border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] hover:border-white/25"}`}
                     >
                       <span
                         className={`editor-suggestions-card-selector mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] transition ${checked ? "border-violet-100 bg-violet-200/90 text-violet-700" : "border-white/25 text-transparent group-hover:border-white/40"}`}

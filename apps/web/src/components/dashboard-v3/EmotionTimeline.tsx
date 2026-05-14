@@ -544,7 +544,7 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
         </div>
       </header>
 
-      {status === 'loading' && <div className="mt-6 h-48 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />}
+      {status === 'loading' && <div className="mt-6 h-48 w-full animate-pulse rounded-2xl bg-[color:var(--ib-surface-card-active)]" />}
 
       {status === 'error' && <p className="mt-6 text-sm text-rose-300">Todavía no pudimos cargar tus emociones.</p>}
 
@@ -554,7 +554,7 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
             {LEGEND_ITEMS.map((name) => (
               <span
                 key={name}
-                className={`flex items-center gap-2 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-3 py-1 text-[13px] ${
+                className={`flex items-center gap-2 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card-active)] px-3 py-1 text-[13px] ${
                   name === 'Sin registro' ? 'text-text-subtle' : 'text-text-muted'
                 }`}
               >

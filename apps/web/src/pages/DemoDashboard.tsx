@@ -133,7 +133,7 @@ export default function DemoDashboardPage() {
         title="Dashboard"
         menuSlot={
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-1">
+            <div className="flex items-center gap-1 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-1">
               <button
                 type="button"
                 onClick={() => setManualLanguage('es')}
@@ -156,14 +156,14 @@ export default function DemoDashboardPage() {
             <button
               type="button"
               onClick={() => setPreference(theme === 'dark' ? 'light' : 'dark')}
-              className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-1.5 text-xs font-semibold text-[color:var(--color-text)]"
+              className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-3 py-1.5 text-xs font-semibold text-[color:var(--color-text)]"
             >
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
             <button
               type="button"
               onClick={() => dailyQuestModalRef.current?.open()}
-              className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-1.5 text-xs font-semibold text-[color:var(--color-text)]"
+              className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-3 py-1.5 text-xs font-semibold text-[color:var(--color-text)]"
             >
               Daily Quest
             </button>
@@ -176,7 +176,7 @@ export default function DemoDashboardPage() {
                 handleDemoExit();
               }}
               aria-label={language === 'es' ? 'Cerrar demo del Dashboard y volver al hub público' : 'Close Dashboard demo and return to the public hub'}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-lg font-semibold leading-none text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-overlay-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-bg)]"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] text-lg font-semibold leading-none text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--ib-surface-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-bg)]"
             >
               <span aria-hidden>×</span>
             </Link>

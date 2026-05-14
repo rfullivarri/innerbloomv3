@@ -189,7 +189,7 @@ function RecalibrationTrendIndicator({
           'inline-flex h-7 shrink-0 items-center overflow-hidden rounded-full border text-xs font-bold leading-none transition-[width,max-width,box-shadow,filter] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/50',
           isExpanded ? 'w-[9.5rem] max-w-[9.5rem] pr-3' : 'w-7 max-w-7 justify-start pr-0',
           fallback
-            ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] text-[color:var(--color-slate-300)] shadow-[0_0_0_3px_rgba(148,163,184,0.10)]'
+            ? 'border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card-active)] text-[color:var(--color-slate-300)] shadow-[0_0_0_3px_rgba(148,163,184,0.10)]'
             : `${config[action].tone} ${config[action].glow}`,
         )}
         aria-label={tooltipLabel}
@@ -367,7 +367,7 @@ function MonthMiniChart({ days, t }: { days: Array<{ date: string; count: number
           const height = 12 + ratio * 48;
           return (
             <div key={day.date} className="flex flex-col items-center justify-end gap-1 text-[10px] text-[color:var(--color-slate-400)]">
-              <div className="flex w-4 items-end justify-center rounded-full bg-[color:var(--color-overlay-1)]">
+              <div className="flex w-4 items-end justify-center rounded-full bg-[color:var(--ib-surface-card)]">
                 <div
                   className={cx(
                     'w-[10px] rounded-full bg-gradient-to-b from-violet-200 via-fuchsia-200 to-sky-200 transition-all',
@@ -432,13 +432,13 @@ function WeekMiniChart({
 
   return (
     <div className="mt-3 space-y-1.5">
-      <div className="flex items-end justify-between gap-2 rounded-2xl bg-[color:var(--color-overlay-1)] px-3 py-2">
+      <div className="flex items-end justify-between gap-2 rounded-2xl bg-[color:var(--ib-surface-card)] px-3 py-2">
         {timeline.map((day) => {
           const ratio = Math.min(1, Math.max(0, day.count / maxCount));
           const height = 10 + ratio * 48;
           return (
             <div key={day.label} className="flex flex-1 flex-col items-center justify-end gap-1 text-[11px] text-[color:var(--color-slate-300)]">
-              <div className="flex w-full items-end justify-center rounded-full bg-[color:var(--color-overlay-1)]">
+              <div className="flex w-full items-end justify-center rounded-full bg-[color:var(--ib-surface-card)]">
                 <div
                   className={cx(
                     'w-[14px] rounded-full bg-gradient-to-b from-violet-200 via-fuchsia-200 to-sky-200 transition-all',
@@ -500,7 +500,7 @@ function QuarterMiniChart({
               key={`${week.weekStart}-${week.weekEnd}-${index}`}
               className="flex flex-col items-center justify-end gap-1 text-[10px] text-[color:var(--color-slate-400)]"
             >
-              <div className="flex w-6 items-end justify-center rounded-full bg-[color:var(--color-overlay-1)]">
+              <div className="flex w-6 items-end justify-center rounded-full bg-[color:var(--ib-surface-card)]">
                 <div
                   className={cx(
                     'w-[14px] rounded-full transition-all',
@@ -703,7 +703,7 @@ export function TaskInsightsModal({
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-sm text-[color:var(--color-slate-200)] transition hover:border-white/25 hover:bg-[color:var(--color-overlay-2)]"
+            className="shrink-0 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card)] px-3 py-1 text-sm text-[color:var(--color-slate-200)] transition hover:border-white/25 hover:bg-[color:var(--ib-surface-card-hover)]"
             aria-label={t('dashboard.streakTaskInsights.closeAria')}
           >
             ✕
@@ -712,13 +712,13 @@ export function TaskInsightsModal({
 
         <div className="flex-1 overflow-y-auto px-4 pb-5 pt-2">
           <div className="mt-2 space-y-3">
-            <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3">
+            <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3">
               <div className="space-y-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="space-y-1">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)] dark:text-slate-300">{t('dashboard.streakTaskInsights.activity')}</p>
                     <div className="flex justify-center">
-                      <div className="inline-flex w-full max-w-[240px] items-center justify-between gap-1 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-2 py-0.5 text-[11px] font-semibold text-[color:var(--color-slate-100)]">
+                      <div className="inline-flex w-full max-w-[240px] items-center justify-between gap-1 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card)] px-2 py-0.5 text-[11px] font-semibold text-[color:var(--color-slate-100)]">
                         {[
                           { value: 'week', label: 'W' },
                           { value: 'month', label: 'M' },
@@ -734,7 +734,7 @@ export function TaskInsightsModal({
                                 'flex-1 rounded-full px-3 py-0.5 text-[11px] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface)]',
                                 isActive
                                   ? 'bg-white text-slate-900 shadow-inner shadow-white/30'
-                                  : 'text-[color:var(--color-slate-200)] hover:bg-[color:var(--color-overlay-2)]',
+                                  : 'text-[color:var(--color-slate-200)] hover:bg-[color:var(--ib-surface-card-hover)]',
                               )}
                               aria-pressed={isActive}
                             >
@@ -747,7 +747,7 @@ export function TaskInsightsModal({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-[color:var(--color-slate-100)]">
-                    <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2 py-0.5">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card-active)] px-2 py-0.5">
                       {numberFormatter.format(activityTotals.count)}d
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-400/10 px-2 py-0.5">
@@ -756,7 +756,7 @@ export function TaskInsightsModal({
                   </div>
                 </div>
               </div>
-              {status === 'loading' && <div className="mt-3 h-24 animate-pulse rounded-xl bg-[color:var(--color-overlay-2)]" aria-hidden />}
+              {status === 'loading' && <div className="mt-3 h-24 animate-pulse rounded-xl bg-[color:var(--ib-surface-card-active)]" aria-hidden />}
               {status === 'success' && activityScope === 'week' && (
                 <WeekMiniChart days={monthDays} referenceDate={referenceDate} t={t} language={language} />
               )}
@@ -767,10 +767,10 @@ export function TaskInsightsModal({
             </div>
 
             {status === 'loading' && (
-              <div className="h-36 animate-pulse rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)]" aria-hidden />
+              <div className="h-36 animate-pulse rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card-active)]" aria-hidden />
             )}
             {status === 'error' && (
-              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
+              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3 shadow-inner">
                 <p className="text-sm text-rose-300">{t('dashboard.streakTaskInsights.weeklyProgress.error', { message: error?.message ?? '—' })}</p>
               </div>
             )}
@@ -778,7 +778,7 @@ export function TaskInsightsModal({
               <PreviewAchievementCard previewAchievement={previewAchievement} language={language} variant="landing" />
             )}
             {status === 'success' && !previewAchievement && (
-              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
+              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3 shadow-inner">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)] dark:text-slate-300">{t('dashboard.streakTaskInsights.weeklyProgress')}</p>
                   <span className="text-xs text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.goal', { goal: weeklyGoal })}</span>
@@ -799,7 +799,7 @@ export function TaskInsightsModal({
             )}
 
 
-            <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
+            <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3 shadow-inner">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)] dark:text-slate-300">{t('dashboard.streakTaskInsights.recalibration.title')}</p>
                 {recalibrationLatest?.recalibratedAt && (
@@ -808,7 +808,7 @@ export function TaskInsightsModal({
                   </span>
                 )}
               </div>
-              {status === 'loading' && <div className="mt-2 h-16 animate-pulse rounded-xl bg-[color:var(--color-overlay-2)]" aria-hidden />}
+              {status === 'loading' && <div className="mt-2 h-16 animate-pulse rounded-xl bg-[color:var(--ib-surface-card-active)]" aria-hidden />}
               {status === 'success' && recalibrationHistory.length > 0 && (
                 <ul className="mt-2 space-y-1.5">
                   {recalibrationHistory.map((record, index) => {
@@ -833,7 +833,7 @@ export function TaskInsightsModal({
                     return (
                       <li
                         key={`${record.periodStart ?? 'period'}-${index}`}
-                        className="flex flex-col items-start gap-1.5 rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2.5 py-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3"
+                        className="flex flex-col items-start gap-1.5 rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card-active)] px-2.5 py-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3"
                       >
                         <div className="min-w-0">
                           <p className="text-[11px] font-semibold leading-tight text-[color:var(--color-slate-100)]">{formatPeriodLabel(record, language, t)}</p>
@@ -854,12 +854,12 @@ export function TaskInsightsModal({
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
+              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3 shadow-inner">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.currentStreak')}</p>
                 <p className="mt-1 text-3xl font-semibold text-[color:var(--color-text)]">🔥 {stats.currentStreak}</p>
                 <p className="text-xs text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.streak.weeksInRow')}</p>
               </div>
-              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
+              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3 shadow-inner">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.bestStreak')}</p>
                 <p className="mt-1 text-3xl font-semibold text-[color:var(--color-text)]">{stats.bestStreak}</p>
                 <p className="text-xs text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.streak.bestLabel')}</p>

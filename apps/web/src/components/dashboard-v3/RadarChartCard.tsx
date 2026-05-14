@@ -316,7 +316,7 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
         </InfoDotTarget>
       }
     >
-      {status === 'loading' && <div className="h-[260px] w-full animate-pulse rounded-ib-md bg-[color:var(--color-overlay-2)]" />}
+      {status === 'loading' && <div className="h-[260px] w-full animate-pulse rounded-ib-md bg-[color:var(--ib-surface-card-active)]" />}
 
       {status === 'error' && (
         <p className="text-sm text-rose-300">{t('dashboard.radar.loadError')}</p>
