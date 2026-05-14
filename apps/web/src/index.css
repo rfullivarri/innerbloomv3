@@ -34,23 +34,39 @@
     --onboarding-premium-overlay-soft: rgba(255, 255, 255, 0.06);
     --onboarding-premium-overlay-base: rgba(255, 255, 255, 0.1);
 
-    --color-surface: #010409;
-    --color-surface-muted: #05070b;
-    --color-surface-elevated: #0b0f14;
-    --color-surface-highlight: #11161d;
+    --ib-dark-surface-app: #010409;
+    --ib-dark-surface-section: #05080d;
+    --ib-dark-surface-panel: #0a0f16;
+    --ib-dark-surface-card: #121820;
+    --ib-dark-surface-card-hover: #171f2a;
+    --ib-dark-surface-card-active: #1b2532;
+    --ib-surface-app: var(--ib-dark-surface-app);
+    --ib-surface-section: var(--ib-dark-surface-section);
+    --ib-surface-panel: var(--ib-dark-surface-panel);
+    --ib-surface-card: var(--ib-dark-surface-card);
+    --ib-surface-card-hover: var(--ib-dark-surface-card-hover);
+    --ib-surface-card-active: var(--ib-dark-surface-card-active);
+    --surface-app: var(--ib-surface-app);
+    --surface-section: var(--ib-surface-section);
+    --surface-card: var(--ib-surface-card);
+    --surface-elevated: var(--ib-surface-panel);
+    --color-surface: var(--ib-surface-app);
+    --color-surface-muted: var(--ib-surface-section);
+    --color-surface-elevated: var(--ib-surface-panel);
+    --color-surface-highlight: var(--ib-surface-card);
     --color-text: #f8fafc;
     --color-text-muted: #cbd5f5;
     --color-text-subtle: #94a3b8;
     --color-accent-primary: #38bdf8;
     --color-accent-secondary: #8b5cf6;
-    --color-overlay-1: rgba(255, 255, 255, 0.04);
-    --color-overlay-2: rgba(255, 255, 255, 0.08);
-    --color-overlay-3: rgba(255, 255, 255, 0.12);
+    --color-overlay-1: rgba(255, 255, 255, 0.055);
+    --color-overlay-2: rgba(255, 255, 255, 0.09);
+    --color-overlay-3: rgba(255, 255, 255, 0.13);
     --color-overlay-4: rgba(255, 255, 255, 0.16);
     --color-overlay-5: rgba(255, 255, 255, 0.22);
-    --color-border-subtle: rgba(255, 255, 255, 0.075);
-    --color-border-soft: rgba(255, 255, 255, 0.115);
-    --color-border-strong: rgba(255, 255, 255, 0.18);
+    --color-border-subtle: rgba(255, 255, 255, 0.09);
+    --color-border-soft: rgba(255, 255, 255, 0.13);
+    --color-border-strong: rgba(255, 255, 255, 0.19);
     --color-text-strong: #ffffff;
     --color-text-dim: rgba(255, 255, 255, 0.7);
     --color-text-faint: rgba(255, 255, 255, 0.6);
@@ -115,8 +131,8 @@
     --color-quickaccess-cta-disabled-text: rgba(224, 231, 255, 0.62);
     --color-card-gradient: linear-gradient(
       180deg,
-      rgba(11, 15, 20, 0.96),
-      rgba(5, 7, 11, 0.98)
+      color-mix(in srgb, var(--ib-surface-panel) 96%, white 4%),
+      color-mix(in srgb, var(--ib-surface-section) 98%, black 2%)
     );
     --color-card-highlight-gradient: radial-gradient(
       ellipse at top,
@@ -128,16 +144,16 @@
     --color-card-border: var(--color-border-subtle);
     --color-glass-surface: linear-gradient(
       180deg,
-      rgba(11, 15, 20, 0.88),
-      rgba(5, 7, 11, 0.82)
+      color-mix(in srgb, var(--ib-surface-panel) 88%, transparent),
+      color-mix(in srgb, var(--ib-surface-section) 82%, transparent)
     );
     --color-glow-soft: rgba(139, 154, 180, 0.09);
     --shadow-elev-1: 0 8px 20px rgba(0, 0, 0, 0.28);
     --shadow-elev-2: 0 14px 36px rgba(2, 6, 23, 0.34);
     --glass-bg: linear-gradient(
       180deg,
-      rgba(11, 15, 20, 0.88),
-      rgba(5, 7, 11, 0.82)
+      color-mix(in srgb, var(--ib-surface-panel) 88%, transparent),
+      color-mix(in srgb, var(--ib-surface-section) 82%, transparent)
     );
     --glass-border: rgba(255, 255, 255, 0.085);
     --ib-premium-divider: color-mix(
@@ -161,23 +177,39 @@
 
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --color-surface: #010409;
-    --color-surface-muted: #05070b;
-    --color-surface-elevated: #0b0f14;
-    --color-surface-highlight: #11161d;
+    --ib-dark-surface-app: #010409;
+    --ib-dark-surface-section: #05080d;
+    --ib-dark-surface-panel: #0a0f16;
+    --ib-dark-surface-card: #121820;
+    --ib-dark-surface-card-hover: #171f2a;
+    --ib-dark-surface-card-active: #1b2532;
+    --ib-surface-app: var(--ib-dark-surface-app);
+    --ib-surface-section: var(--ib-dark-surface-section);
+    --ib-surface-panel: var(--ib-dark-surface-panel);
+    --ib-surface-card: var(--ib-dark-surface-card);
+    --ib-surface-card-hover: var(--ib-dark-surface-card-hover);
+    --ib-surface-card-active: var(--ib-dark-surface-card-active);
+    --surface-app: var(--ib-surface-app);
+    --surface-section: var(--ib-surface-section);
+    --surface-card: var(--ib-surface-card);
+    --surface-elevated: var(--ib-surface-panel);
+    --color-surface: var(--ib-surface-app);
+    --color-surface-muted: var(--ib-surface-section);
+    --color-surface-elevated: var(--ib-surface-panel);
+    --color-surface-highlight: var(--ib-surface-card);
     --color-text: #f8fafc;
     --color-text-muted: #cbd5f5;
     --color-text-subtle: #94a3b8;
     --color-accent-primary: #38bdf8;
     --color-accent-secondary: #8b5cf6;
-    --color-overlay-1: rgba(255, 255, 255, 0.04);
-    --color-overlay-2: rgba(255, 255, 255, 0.08);
-    --color-overlay-3: rgba(255, 255, 255, 0.12);
+    --color-overlay-1: rgba(255, 255, 255, 0.055);
+    --color-overlay-2: rgba(255, 255, 255, 0.09);
+    --color-overlay-3: rgba(255, 255, 255, 0.13);
     --color-overlay-4: rgba(255, 255, 255, 0.16);
     --color-overlay-5: rgba(255, 255, 255, 0.22);
-    --color-border-subtle: rgba(255, 255, 255, 0.075);
-    --color-border-soft: rgba(255, 255, 255, 0.115);
-    --color-border-strong: rgba(255, 255, 255, 0.18);
+    --color-border-subtle: rgba(255, 255, 255, 0.09);
+    --color-border-soft: rgba(255, 255, 255, 0.13);
+    --color-border-strong: rgba(255, 255, 255, 0.19);
     --color-text-strong: #ffffff;
     --color-text-dim: rgba(255, 255, 255, 0.7);
     --color-text-faint: rgba(255, 255, 255, 0.6);
@@ -219,8 +251,8 @@
     --color-quickaccess-cta-disabled-text: rgba(224, 231, 255, 0.62);
     --color-card-gradient: linear-gradient(
       180deg,
-      rgba(11, 15, 20, 0.96),
-      rgba(5, 7, 11, 0.98)
+      color-mix(in srgb, var(--ib-surface-panel) 96%, white 4%),
+      color-mix(in srgb, var(--ib-surface-section) 98%, black 2%)
     );
     --color-card-highlight-gradient: radial-gradient(
       ellipse at top,
@@ -232,16 +264,16 @@
     --color-card-border: var(--color-border-subtle);
     --color-glass-surface: linear-gradient(
       180deg,
-      rgba(11, 15, 20, 0.88),
-      rgba(5, 7, 11, 0.82)
+      color-mix(in srgb, var(--ib-surface-panel) 88%, transparent),
+      color-mix(in srgb, var(--ib-surface-section) 82%, transparent)
     );
     --color-glow-soft: rgba(139, 154, 180, 0.09);
     --shadow-elev-1: 0 8px 20px rgba(0, 0, 0, 0.28);
     --shadow-elev-2: 0 14px 36px rgba(2, 6, 23, 0.34);
     --glass-bg: linear-gradient(
       180deg,
-      rgba(11, 15, 20, 0.88),
-      rgba(5, 7, 11, 0.82)
+      color-mix(in srgb, var(--ib-surface-panel) 88%, transparent),
+      color-mix(in srgb, var(--ib-surface-section) 82%, transparent)
     );
     --glass-border: rgba(255, 255, 255, 0.085);
   }
@@ -255,10 +287,20 @@
         rgba(148, 163, 184, 0) 62%
       ),
       linear-gradient(180deg, #f8fafc 0%, #f4f6f8 52%, #eef2f6 100%);
-    --color-surface: #f7f8fa;
-    --color-surface-muted: #f1f3f6;
-    --color-surface-elevated: #ffffff;
-    --color-surface-highlight: #fafbfc;
+    --ib-surface-app: #f7f8fa;
+    --ib-surface-section: #f1f3f6;
+    --ib-surface-panel: #ffffff;
+    --ib-surface-card: #fafbfc;
+    --ib-surface-card-hover: #f3f6fb;
+    --ib-surface-card-active: #edf2f8;
+    --surface-app: var(--ib-surface-app);
+    --surface-section: var(--ib-surface-section);
+    --surface-card: var(--ib-surface-card);
+    --surface-elevated: var(--ib-surface-panel);
+    --color-surface: var(--ib-surface-app);
+    --color-surface-muted: var(--ib-surface-section);
+    --color-surface-elevated: var(--ib-surface-panel);
+    --color-surface-highlight: var(--ib-surface-card);
     --color-text: #0f172a;
     --color-text-muted: #334155;
     --color-text-subtle: #64748b;
@@ -7310,12 +7352,8 @@
   }
   [data-light-scope="daily-quest"].ib-daily-quest-shell {
     color: var(--color-text);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background-image: linear-gradient(
-      180deg,
-      rgba(11, 15, 20, 0.97),
-      rgba(5, 7, 11, 0.98)
-    );
+    border: 1px solid var(--color-border-subtle);
+    background-image: var(--color-card-gradient);
     box-shadow:
       0 34px 82px rgba(0, 0, 0, 0.56),
       inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -7323,11 +7361,11 @@
 
   [data-light-scope="daily-quest"] .ib-daily-quest-header,
   [data-light-scope="daily-quest"] .ib-daily-quest-footer {
-    border-color: rgba(255, 255, 255, 0.07);
+    border-color: var(--color-border-subtle);
     background-image: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.03),
-      rgba(255, 255, 255, 0.015)
+      color-mix(in srgb, var(--ib-surface-panel) 90%, transparent),
+      color-mix(in srgb, var(--ib-surface-section) 86%, transparent)
     );
   }
 
@@ -7336,11 +7374,11 @@
   [data-light-scope="daily-quest"] .ib-daily-quest-secondary-btn,
   [data-light-scope="daily-quest"] .ib-daily-quest-close-btn,
   [data-light-scope="daily-quest"] .ib-daily-quest-emotion-chip--inactive {
-    border-color: rgba(255, 255, 255, 0.08);
+    border-color: var(--color-border-soft);
     background-image: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.03),
-      rgba(255, 255, 255, 0.015)
+      color-mix(in srgb, var(--ib-surface-card) 96%, white 4%),
+      color-mix(in srgb, var(--ib-surface-card) 92%, black 8%)
     );
   }
 
@@ -7350,16 +7388,16 @@
   [data-light-scope="daily-quest"] .ib-daily-quest-emotion-chip--inactive:hover {
     background-image: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.09),
-      rgba(255, 255, 255, 0.04)
+      color-mix(in srgb, var(--ib-surface-card-hover) 96%, white 4%),
+      color-mix(in srgb, var(--ib-surface-card-hover) 92%, black 8%)
     );
   }
 
   [data-light-scope="daily-quest"] .ib-daily-quest-task-row--selected {
     background-image: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.12),
-      rgba(255, 255, 255, 0.05)
+      color-mix(in srgb, var(--ib-surface-card-active) 96%, white 4%),
+      color-mix(in srgb, var(--ib-surface-card-active) 92%, black 8%)
     );
   }
 

@@ -144,7 +144,7 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
 
       {status === 'success' && activeBucket && activeBucket.days.length > 0 && (
         <div className="space-y-4">
-          <div className="ib-card-contour-shadow rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4">
+          <div className="ib-card-contour-shadow rounded-ib-md border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card)] p-4">
             <LineChart days={activeBucket.days} language={language} />
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[color:var(--color-text-subtle)]">

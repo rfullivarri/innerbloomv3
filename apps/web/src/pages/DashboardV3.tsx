@@ -1705,7 +1705,7 @@ function ProfileErrorState({ onRetry, error }: ProfileErrorStateProps) {
 function DashboardFallback() {
   return (
     <div className="mt-8 space-y-6">
-      <section className="rounded-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-6 text-[color:var(--color-slate-200)] shadow-glow">
+      <section className="rounded-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-panel)] p-6 text-[color:var(--color-slate-200)] shadow-glow">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">
           Vista previa sin conexión
         </p>
@@ -1789,7 +1789,7 @@ function DashboardFallback() {
             className="min-h-[180px]"
           >
             <div className="space-y-2 text-xs text-[color:var(--color-slate-200)]">
-              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3">
+              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
                   Siguiente badge
                 </p>
@@ -1797,7 +1797,7 @@ function DashboardFallback() {
                   Disponible al reconectar
                 </p>
               </div>
-              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3">
+              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-3">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
                   Último logro
                 </p>
@@ -1813,7 +1813,7 @@ function DashboardFallback() {
 
 function FallbackMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-2">
+    <div className="flex items-center justify-between rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-3 py-2">
       <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-[color:var(--color-slate-400)]">
         {label}
       </span>
