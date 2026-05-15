@@ -27,9 +27,11 @@ import { AdaptiveText } from "../components/landing/AdaptiveText";
 import { CookieConsentBanner } from "../components/landing/CookieConsentBanner";
 import { useLandingAnalytics } from "../components/landing/useLandingAnalytics";
 import { HeroPhoneShowcase } from "../components/landing/HeroPhoneShowcase";
+import { AvatarCtaBanner } from "../components/landing/AvatarCtaBanner";
 import WeatherCycleOrb from "../components/landing/WeatherCycleOrb";
 import { DEMO_USER_ID } from "../components/demo/DemoDashboardOverviewScene";
 import { StreaksPanel } from "../components/dashboard-v3/StreaksPanel";
+import { EmotionChartCard } from "../components/dashboard-v3/EmotionChartCard";
 import type { StreakPanelResponse } from "../lib/api";
 import { QuickStartTasksStep } from "../onboarding/steps/QuickStartTasksStep";
 import { QUICK_START_TASKS } from "../onboarding/quickStart";
@@ -142,25 +144,6 @@ const PILLAR_EXAMPLES_LABEL: Record<Language, string> = {
   en: "Suggested tasks:",
 };
 
-const V2_METHOD_VISUALS = [
-  [
-    "/landing-v2/method/step-01-onboarding-context.jpg",
-    "/landing-v2/method/step-01-real-life-board.jpg",
-  ],
-  [
-    "/landing-v2/method/step-02-rhythm-avatar-split.jpg",
-    "/landing-v2/method/step-02-rhythm-control.jpg",
-  ],
-  [
-    "/landing-v2/method/step-03-action-cards.jpg",
-    "/landing-v2/method/step-03-progress-phone.jpg",
-  ],
-  [
-    "/landing-v2/method/step-04-recalibration-dashboard.jpg",
-    "/landing-v2/method/step-04-adjusted-plan.jpg",
-  ],
-] as const;
-
 function renderMultilineText(text: string) {
   return text.split("\n").map((line, index) => (
     <Fragment key={`${line}-${index}`}>
@@ -181,6 +164,19 @@ function splitPillarCopy(copy: string, language: Language) {
 
   return { definition, examples };
 }
+
+const DISCORD_URL = "https://discord.gg/wds35ykK";
+
+const DISCORD_CTA_COPY: Record<Language, { lead: string; link: string }> = {
+  en: {
+    lead: "Got questions or feedback?",
+    link: "Join us on Discord.",
+  },
+  es: {
+    lead: "¿Tienes preguntas o feedback?",
+    link: "Únete a nuestro Discord.",
+  },
+};
 
 const EMOTION_HEATMAP_ROWS: Array<
   Array<"calm" | "happy" | "focus" | "stress" | "neutral">
@@ -416,72 +412,78 @@ type LandingPageProps = {
   variant?: LandingPageVariant;
 };
 
-function LandingNarrativeMethod({
-  how,
-  visuals,
-}: {
-  how: LandingCopy["how"];
-  visuals: readonly (readonly string[])[];
-}) {
+type LandingEmotionMockRow = {
+  date: string;
+  emotion: string;
+};
+
+const LANDING_V3_EMOTION_PATTERN = [
+  "Motivación",
+  "Cansancio",
+  "Calma",
+  "Felicidad",
+  "Motivación",
+  "Frustración",
+  "Calma",
+  "Tristeza",
+  "Ansiedad",
+  "Motivación",
+  "Calma",
+  "Cansancio",
+] as const;
+
+const LANDING_V3_EMOTION_MOCK_DATA: LandingEmotionMockRow[] = Array.from({ length: 138 }, (_, index) => {
+  const date = new Date(2026, 0, 1 + index);
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const pseudoRandomIndex = index * 17 + day * 11 + month * 23 + (index % 5) * 7 + Math.floor(index / 13) * 19;
+  const emotion = LANDING_V3_EMOTION_PATTERN[pseudoRandomIndex % LANDING_V3_EMOTION_PATTERN.length];
+
+  return {
+    date: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
+    emotion,
+  };
+});
+
+function publishLandingV3EmotionMockData(shouldDispatch = true) {
+  if (typeof window === "undefined") return;
+
+  window.data = {
+    ...(window.data ?? {}),
+    daily_emotion: LANDING_V3_EMOTION_MOCK_DATA,
+  };
+
+  if (!shouldDispatch) return;
+
+  window.dispatchEvent(
+    new CustomEvent("gj:data-ready", {
+      detail: {
+        data: {
+          daily_emotion: LANDING_V3_EMOTION_MOCK_DATA,
+        },
+      },
+    }),
+  );
+}
+
+function LandingV3EmotionChartVisual() {
+  publishLandingV3EmotionMockData(false);
+
+  useEffect(() => {
+    let frame = window.requestAnimationFrame(() => publishLandingV3EmotionMockData());
+    const interval = window.setInterval(() => {
+      frame = window.requestAnimationFrame(() => publishLandingV3EmotionMockData());
+    }, 9000);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearInterval(interval);
+    };
+  }, []);
+
   return (
-    <div className="v2-method-shell">
-      <div className="v2-method-heading">
-        <AdaptiveText as="h2">{how.title}</AdaptiveText>
-        <AdaptiveText as="p" className="section-sub v2-method-intro">
-          {how.intro}
-        </AdaptiveText>
-      </div>
-
-      <div className="v2-method-steps">
-        {how.steps.map((step, index) => {
-          const isVisualFirst = index % 2 === 1;
-          const visualSources = visuals[index] ?? visuals[0];
-          const copyBlock = (
-            <div className="v2-method-step-copy">
-              <span className="v2-method-step-badge">{step.badge}</span>
-              <AdaptiveText as="h3" className="v2-method-step-title">
-                {step.title}
-              </AdaptiveText>
-              <AdaptiveText as="p" className="v2-method-step-description">
-                {step.bullets[0]}
-              </AdaptiveText>
-            </div>
-          );
-          const visualBlock = (
-            <div className="v2-method-visual v2-method-visual--image" aria-hidden>
-              {visualSources.map((src, visualIndex) => (
-                <img
-                  key={src}
-                  src={src}
-                  alt=""
-                  className={`v2-method-visual-image ${visualIndex === 0 ? "is-primary" : "is-secondary"}`}
-                  loading="lazy"
-                  decoding="async"
-                />
-              ))}
-            </div>
-          );
-
-          return (
-            <article
-              className={`v2-method-step ${isVisualFirst ? "v2-method-step--visual-first" : ""}`}
-              key={step.badge}
-            >
-              {isVisualFirst ? (
-                <>
-                  {visualBlock}
-                  {copyBlock}
-                </>
-              ) : (
-                <>
-                  {copyBlock}
-                  {visualBlock}
-                </>
-              )}
-            </article>
-          );
-        })}
-      </div>
+    <div className="v3-method-emotion-chart" data-demo-anchor="emotion-chart">
+      <EmotionChartCard userId={DEMO_USER_ID} />
     </div>
   );
 }
@@ -601,8 +603,21 @@ export function LandingV3MethodVisual({
       : undefined;
     return (
       <div className="v3-step-visual v3-method-product-visual v3-method-streaks" data-light-scope="dashboard-v3" aria-hidden>
-        <div className="v3-method-streaks__tilt">
-          <StreaksPanel userId={DEMO_USER_ID} gameMode="flow" weeklyTarget={3} avatarProfile={null} previewData={previewData} />
+        <div className="v3-method-signals-loop">
+          <div className="v3-method-signals-slide v3-method-signals-slide--streaks">
+            <p className="v3-method-signal-title">
+              {language === "es" ? "Visualizá tu progreso" : "Visualize your progress"}
+            </p>
+            <div className="v3-method-streaks__tilt">
+              <StreaksPanel userId={DEMO_USER_ID} gameMode="flow" weeklyTarget={3} avatarProfile={null} previewData={previewData} />
+            </div>
+          </div>
+          <div className="v3-method-signals-slide v3-method-signals-slide--emotions">
+            <p className="v3-method-signal-title">
+              {language === "es" ? "Registrá tus emociones" : "Log your emotions"}
+            </p>
+            <LandingV3EmotionChartVisual />
+          </div>
         </div>
       </div>
     );
@@ -1280,6 +1295,11 @@ export default function LandingPage({
           <div className="container narrow truth-problem-section">
             {isNarrativeVariant ? (
               <>
+                {isV3Conversion ? (
+                  <p className="section-kicker">
+                    {language === "es" ? "EL PROBLEMA PRINCIPAL" : "THE MAIN PROBLEM"}
+                  </p>
+                ) : null}
                 <AdaptiveText
                   as="h2"
                   className="truth-problem-title truth-problem-title--outside"
@@ -1372,7 +1392,9 @@ export default function LandingPage({
             {isV3Conversion ? (
               <LandingV3ConversionMethod how={copy.how} language={language} />
             ) : isV2Narrative ? (
-              <LandingNarrativeMethod how={copy.how} visuals={V2_METHOD_VISUALS} />
+              <div className="landing landing--v3-conversion v2-official-method-scope">
+                <LandingV3ConversionMethod how={copy.how} language={language} />
+              </div>
             ) : (
               <>
                 <div className="how-heading">
@@ -1402,6 +1424,7 @@ export default function LandingPage({
               className={`visible-progress-top ${isNarrativeVariant ? "visible-progress-top--v2-text-only" : ""}`}
             >
               <div className="visible-progress-copy">
+                {isV3Conversion ? <p className="section-kicker">DEMO</p> : null}
                 <AdaptiveText as="h2" className="demo-title">
                   {copy.demo.title}
                 </AdaptiveText>
@@ -1735,6 +1758,8 @@ export default function LandingPage({
           </div>
         </section>
 
+        {isV3Conversion ? null : (
+          <>
         <section className="why section-pad reveal-on-scroll" id="pillars">
           <div className="container narrow">
             <p className="section-kicker">{copy.pillars.kicker}</p>
@@ -1882,6 +1907,20 @@ export default function LandingPage({
             </div>
           </div>
         </section>
+
+          </>
+        )}
+
+        {isV3Conversion ? (
+          <section className="avatar-cta-section section-pad reveal-on-scroll" id="avatar-start">
+            <div className="container">
+              <AvatarCtaBanner
+                language={language}
+                startHref={buildOnboardingPath(language)}
+              />
+            </div>
+          </section>
+        ) : null}
 
         <section
           className="testimonials section-pad reveal-on-scroll"
@@ -2032,6 +2071,12 @@ export default function LandingPage({
                 </>
               )}
             </div>
+            <p className="landing-discord-cta">
+              {DISCORD_CTA_COPY[language].lead}{" "}
+              <a href={DISCORD_URL} target="_blank" rel="noreferrer">
+                {DISCORD_CTA_COPY[language].link}
+              </a>
+            </p>
           </div>
         </section>
       </main>
@@ -2071,12 +2116,14 @@ export default function LandingPage({
             {language === "es" ? "Cookies" : "Cookies"}
           </button>
           <a
-            className="footer-community-link"
+            className="footer-community-link footer-community-link--reddit"
             data-analytics-cta="join_subreddit"
             data-analytics-location="footer"
             href="https://www.reddit.com/r/InnerbloomJourney/"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="Join our subreddit"
+            title="Join our subreddit"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path
@@ -2084,7 +2131,23 @@ export default function LandingPage({
                 fill="currentColor"
               />
             </svg>
-            <span>Join our subreddit</span>
+          </a>
+          <a
+            className="footer-community-link"
+            data-analytics-cta="join_discord"
+            data-analytics-location="footer"
+            href={DISCORD_URL}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Join us on Discord"
+            title="Join us on Discord"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20.32 4.37a18.3 18.3 0 0 0-4.63-1.47.08.08 0 0 0-.08.04c-.2.36-.42.84-.58 1.22a17 17 0 0 0-5.06 0 12 12 0 0 0-.59-1.22.08.08 0 0 0-.08-.04A18.27 18.27 0 0 0 4.7 4.37a.07.07 0 0 0-.03.03C1.73 8.79.93 13.07 1.32 17.3a.1.1 0 0 0 .04.07 18.4 18.4 0 0 0 5.68 2.9.08.08 0 0 0 .09-.03c.44-.6.84-1.24 1.18-1.91a.08.08 0 0 0-.04-.11 12 12 0 0 1-1.8-.86.08.08 0 0 1-.01-.13q.19-.14.39-.3a.07.07 0 0 1 .08-.01c3.77 1.72 7.85 1.72 11.58 0a.07.07 0 0 1 .08.01q.2.17.39.3a.08.08 0 0 1-.01.13 12 12 0 0 1-1.8.86.08.08 0 0 0-.04.11c.35.67.74 1.3 1.18 1.9a.08.08 0 0 0 .09.04 18.34 18.34 0 0 0 5.69-2.9.08.08 0 0 0 .04-.07c.47-4.89-.79-9.14-3.36-12.9a.06.06 0 0 0-.03-.03M8.02 14.72c-1.14 0-2.08-1.05-2.08-2.34s.92-2.34 2.08-2.34 2.1 1.06 2.08 2.34-.92 2.34-2.08 2.34m7.67 0c-1.14 0-2.08-1.05-2.08-2.34s.92-2.34 2.08-2.34 2.1 1.06 2.08 2.34-.92 2.34-2.08 2.34"
+                fill="currentColor"
+              />
+            </svg>
           </a>
         </nav>
       </footer>

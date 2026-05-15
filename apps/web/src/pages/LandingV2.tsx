@@ -16,5 +16,5 @@ export default function LandingV2Page() {
     };
   }, []);
 
-  return <LandingPage content={LANDING_V2_CONTENT} variant="v2Narrative" />;
+  return <LandingPage content={LANDING_V2_CONTENT} variant="v3Conversion" />;
 }

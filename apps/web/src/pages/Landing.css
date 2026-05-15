@@ -2398,7 +2398,7 @@
 
 .landing .footer {
   border-top: 1px solid var(--line);
-  padding: 32px 18px;
+  padding: 32px 18px clamp(84px, 10vw, 120px);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -2409,7 +2409,10 @@
 
 .landing .footer-links {
   display: flex;
-  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  padding-right: clamp(96px, 8vw, 132px);
 }
 
 .landing .footer-links a {
@@ -2548,9 +2551,10 @@
 .landing .footer-community-link {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   min-height: 36px;
-  padding: 6px 10px;
+  min-width: 36px;
+  padding: 6px;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
   transition:
@@ -2560,14 +2564,15 @@
 }
 
 .landing .footer-community-link svg {
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   opacity: 0.82;
   flex: 0 0 auto;
 }
 
-.landing .footer-community-link span {
-  line-height: 1.1;
+.landing .footer-community-link--reddit svg {
+  width: 26px;
+  height: 26px;
 }
 
 .landing .footer-community-link:hover {
@@ -2579,6 +2584,26 @@
 .landing .footer-community-link:focus-visible {
   outline: 2px solid #120a1c;
   outline-offset: 2px;
+}
+
+.landing .landing-discord-cta {
+  margin: 14px auto 0;
+  max-width: 52ch;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--subtle);
+}
+
+.landing .landing-discord-cta a {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 42%, transparent);
+}
+
+.landing .landing-discord-cta a:hover {
+  color: var(--ink);
+  border-bottom-color: color-mix(in srgb, currentColor 72%, transparent);
 }
 
 @keyframes meshFloat {
@@ -2745,6 +2770,14 @@
 }
 
 @media (max-width: 768px) {
+  .landing .footer {
+    padding-bottom: 76px;
+  }
+
+  .landing .footer-links {
+    padding-right: 0;
+  }
+
   .landing .grid-3 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -4537,6 +4570,12 @@
 }
 
 /* V3 local iteration: bigger adaptive-life object and UI-native method cards. */
+.landing .v2-official-method-scope.landing {
+  min-height: auto;
+  overflow: visible;
+  background: transparent;
+}
+
 .landing.landing--v3-conversion .truth-problem-section {
   max-width: 1380px;
 }
@@ -5002,6 +5041,48 @@
   min-height: clamp(420px, 42vw, 570px);
 }
 
+.landing.landing--v3-conversion .v3-method-signals-loop {
+  position: relative;
+  width: min(96%, 620px);
+  min-height: clamp(420px, 42vw, 570px);
+  display: grid;
+  place-items: center;
+  overflow: visible;
+}
+
+.landing.landing--v3-conversion .v3-method-signals-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 1.8vw, 24px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-36px) scale(0.98);
+  will-change: opacity, transform;
+}
+
+.landing.landing--v3-conversion .v3-method-signals-slide--streaks {
+  animation: v3-signal-streaks-loop 9s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+.landing.landing--v3-conversion .v3-method-signals-slide--emotions {
+  animation: v3-signal-emotions-loop 9s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+.landing.landing--v3-conversion .v3-method-signal-title {
+  margin: 0;
+  color: var(--landing-muted);
+  font-size: clamp(0.72rem, 1vw, 0.86rem);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 .landing.landing--v3-conversion .v3-method-streaks__tilt {
   width: min(92%, 590px);
   transform: translateY(-2px);
@@ -5057,6 +5138,68 @@
 }
 
 .landing.landing--v3-conversion .v3-method-streaks__tilt .flex.items-end.gap-1 > .w-2.rounded-sm:nth-child(5) {
+  animation-delay: 0.64s;
+}
+
+.landing.landing--v3-conversion .v3-method-emotion-chart {
+  width: min(92%, 590px);
+  filter: drop-shadow(0 28px 34px rgba(8, 10, 28, 0.34));
+  animation: v3-panel-breathe 5s ease-in-out infinite;
+}
+
+.landing.landing--v3-conversion .v3-method-emotion-chart .ib-card {
+  margin: 0 !important;
+}
+
+.landing.landing--v3-conversion .v3-method-emotion-chart [data-emotion-card="legend"] {
+  gap: 14px 18px !important;
+}
+
+.landing.landing--v3-conversion .v3-method-emotion-chart [data-emotion-card="legend-item"] {
+  min-width: max-content;
+}
+
+.landing.landing--v3-conversion .v3-method-emotion-chart [data-emotion-card="heatmap"] {
+  overflow: hidden;
+}
+
+.landing.landing--v3-conversion .v3-method-emotion-chart .emotion-col {
+  opacity: 1;
+  transform: none;
+  transform-origin: center;
+}
+
+.landing.landing--v3-conversion .v3-method-emotion-chart .emotion-cell {
+  opacity: 0.32;
+  transform: scale(0.74);
+  transform-origin: center;
+  animation: v3-emotion-cell-sparkle 9s ease-in-out infinite;
+}
+
+.landing.landing--v3-conversion .v3-method-emotion-chart .emotion-col:nth-child(6n + 1) .emotion-cell:nth-child(3n + 1),
+.landing.landing--v3-conversion .v3-method-emotion-chart .emotion-col:nth-child(6n + 4) .emotion-cell:nth-child(3n + 2) {
+  animation-delay: 0.04s;
+}
+
+.landing.landing--v3-conversion .v3-method-emotion-chart .emotion-col:nth-child(6n + 2) .emotion-cell:nth-child(3n + 3),
+.landing.landing--v3-conversion .v3-method-emotion-chart .emotion-col:nth-child(6n + 5) .emotion-cell:nth-child(3n + 1) {
+  animation-delay: 0.16s;
+}
+
+.landing.landing--v3-conversion .v3-method-emotion-chart .emotion-col:nth-child(6n + 3) .emotion-cell:nth-child(3n + 2),
+.landing.landing--v3-conversion .v3-method-emotion-chart .emotion-col:nth-child(6n + 6) .emotion-cell:nth-child(3n + 3) {
+  animation-delay: 0.28s;
+}
+
+.landing.landing--v3-conversion .v3-method-emotion-chart .emotion-col:nth-child(4n + 1) .emotion-cell:nth-child(2n) {
+  animation-delay: 0.4s;
+}
+
+.landing.landing--v3-conversion .v3-method-emotion-chart .emotion-col:nth-child(4n + 2) .emotion-cell:nth-child(2n + 1) {
+  animation-delay: 0.52s;
+}
+
+.landing.landing--v3-conversion .v3-method-emotion-chart .emotion-col:nth-child(4n + 3) .emotion-cell:nth-child(4n) {
   animation-delay: 0.64s;
 }
 
@@ -5781,6 +5924,38 @@
   42%, 68% { transform: scaleY(1.18); opacity: 1; }
 }
 
+@keyframes v3-signal-streaks-loop {
+  0%, 4% { opacity: 0; transform: translateY(-36px) scale(0.98); }
+  10%, 42% { opacity: 1; transform: translateY(0) scale(1); }
+  49%, 100% { opacity: 0; transform: translateY(72px) scale(0.98); }
+}
+
+@keyframes v3-signal-emotions-loop {
+  0%, 51% { opacity: 0; transform: translateY(-36px) scale(0.98); }
+  57%, 89% { opacity: 1; transform: translateY(0) scale(1); }
+  96%, 100% { opacity: 0; transform: translateY(72px) scale(0.98); }
+}
+
+@keyframes v3-emotion-cell-sparkle {
+  0%, 51% {
+    opacity: 0.2;
+    transform: scale(0.72);
+    filter: saturate(0.72) brightness(0.8);
+  }
+
+  63%, 89% {
+    opacity: 1;
+    transform: scale(1);
+    filter: saturate(1.12) brightness(1.1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: saturate(1) brightness(1);
+  }
+}
+
 @keyframes v3-fire-chip-zoom {
   0%, 100% { transform: scale(1); filter: brightness(1); }
   44%, 58% { transform: scale(1.08); filter: brightness(1.12); }
@@ -6087,6 +6262,15 @@
   }
 
   .landing.landing--v3-conversion .v3-method-streaks__tilt {
+    width: min(94%, 360px);
+  }
+
+  .landing.landing--v3-conversion .v3-method-signals-loop {
+    width: min(96%, 370px);
+    min-height: 390px;
+  }
+
+  .landing.landing--v3-conversion .v3-method-emotion-chart {
     width: min(94%, 360px);
   }
 
