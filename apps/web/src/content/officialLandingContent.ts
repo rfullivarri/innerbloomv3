@@ -55,12 +55,12 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
   es: {
     navLinks: [],
     hero: {
-      titleLead: 'Las apps de hábitos fallan',
-      titleHighlight: 'porque no cambian contigo.',
+      titleLead: 'Hábitos sostenibles para',
+      titleHighlight: 'personas reales.',
       subtitle:
-        'Innerbloom es una app de hábitos adaptativa que ajusta tu plan según tu capacidad real. Empieza desde donde estás, avanza en ciclos semanales y recalibra con el tiempo para ayudarte a construir hábitos que sí perduran.',
-      note: 'Empieza desde tu nivel real y avanza semana a semana.',
-      alt: 'Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey'
+        'Construí un Journey adaptativo: más simple cuando la vida se pone difícil, más desafiante cuando estás listo para crecer.',
+      note: 'Ritmo adaptativo, progreso visible.',
+      alt: 'Innerbloom adaptive habit dashboard shown on a mobile mockup.'
     },
     problem: {
       title: 'El problema no sos vos.',
@@ -291,7 +291,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       dashboard: 'Ir al dashboard',
       signup: 'Crear cuenta',
       login: 'Iniciar sesión',
-      startJourney: 'Crear mi plan adaptativo',
+      startJourney: 'Comenzar mi Journey',
       guidedDemo: 'Demos'
     },
     footer: { copyright: '© Innerbloom. All rights reserved.', faq: 'FAQ' }
@@ -299,12 +299,12 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
   en: {
     navLinks: [],
     hero: {
-      titleLead: 'Habit apps fail',
-      titleHighlight: 'because they don’t change with you.',
+      titleLead: 'Sustainable habits for',
+      titleHighlight: 'real people.',
       subtitle:
-        'Innerbloom is an adaptive habit app that adjusts your plan to your real capacity. Start from where you are, move through weekly cycles, and recalibrate over time so you can build habits that actually last.',
-      note: 'Start from your real level and move forward week by week.',
-      alt: 'Kid looking at a violet energy sphere in the night sky — Gamification Journey'
+        'Build an adaptive Journey: simpler when life gets hard, more challenging when you’re ready to grow.',
+      note: 'Adaptive rhythm, visible progress.',
+      alt: 'Innerbloom adaptive habit dashboard shown on a mobile mockup.'
     },
     problem: {
       title: 'You’re not the problem.',
@@ -535,7 +535,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       dashboard: 'Go to dashboard',
       signup: 'Create account',
       login: 'Log in',
-      startJourney: 'Create my adaptive plan',
+      startJourney: 'Start my Journey',
       guidedDemo: 'Demos'
     },
     footer: { copyright: '© Innerbloom. All rights reserved.', faq: 'FAQ' }

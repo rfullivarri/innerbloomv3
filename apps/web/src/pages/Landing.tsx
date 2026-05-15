@@ -1377,7 +1377,7 @@ export default function LandingPage({
                   isSignedIn ? "hero-actions--single" : ""
                 }`}
               >
-                {isSignedIn ? (
+                {isSignedIn && !isOfficialDefault ? (
                   <Link className={buttonClasses()} to="/dashboard">
                     {copy.auth.dashboard}
                   </Link>
