@@ -31,6 +31,7 @@ import { AvatarCtaBanner } from "../components/landing/AvatarCtaBanner";
 import WeatherCycleOrb from "../components/landing/WeatherCycleOrb";
 import { DEMO_USER_ID } from "../components/demo/DemoDashboardOverviewScene";
 import { StreaksPanel } from "../components/dashboard-v3/StreaksPanel";
+import type { StreakPanelResponse } from "../lib/api";
 import { EmotionChartCard } from "../components/dashboard-v3/EmotionChartCard";
 import { QuickStartTasksStep } from "../onboarding/steps/QuickStartTasksStep";
 import { QUICK_START_TASKS } from "../onboarding/quickStart";
@@ -604,7 +605,17 @@ function LandingV3EmotionChartVisual() {
   );
 }
 
-function LandingV3MethodVisual({ index, language }: { index: number; language: Language }) {
+export function LandingV3MethodVisual({
+  index,
+  language,
+  logrosCycleMs,
+  nativePreview = false,
+}: {
+  index: number;
+  language: Language;
+  logrosCycleMs?: number;
+  nativePreview?: boolean;
+}) {
   const [animatedMinutes, setAnimatedMinutes] = useState("15");
 
   useEffect(() => {
@@ -715,7 +726,13 @@ function LandingV3MethodVisual({ index, language }: { index: number; language: L
               {language === "es" ? "Visualizá tu progreso" : "Visualize your progress"}
             </p>
             <div className="v3-method-streaks__tilt">
-              <StreaksPanel userId={DEMO_USER_ID} gameMode="flow" weeklyTarget={3} avatarProfile={null} />
+              <StreaksPanel
+                userId={DEMO_USER_ID}
+                gameMode="flow"
+                weeklyTarget={3}
+                avatarProfile={null}
+                previewData={previewData}
+              />
             </div>
           </div>
           <div className="v3-method-signals-slide v3-method-signals-slide--emotions">
