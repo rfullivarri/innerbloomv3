@@ -16,10 +16,16 @@
   /* Light mode tokens extracted from Dashboard-v3 visual system */
 
   /* SURFACES */
-  --surface-app: #f8fafc;
-  --surface-section: #f1f5f9;
-  --surface-card: #ffffff;
-  --surface-elevated: #f8faff;
+  --ib-surface-app: #f8fafc;
+  --ib-surface-section: #f1f5f9;
+  --ib-surface-panel: #ffffff;
+  --ib-surface-card: #f8faff;
+  --ib-surface-card-hover: #f3f6fb;
+  --ib-surface-card-active: #edf2f8;
+  --surface-app: var(--ib-surface-app);
+  --surface-section: var(--ib-surface-section);
+  --surface-card: var(--ib-surface-card);
+  --surface-elevated: var(--ib-surface-panel);
 
   /* TEXT */
   --text-primary: #0f172a;
@@ -57,10 +63,22 @@
   /* Dark mode overrides extracted from Dashboard-v3 visual system */
 
   /* SURFACES */
-  --surface-app: #0f172a;
-  --surface-section: #111c33;
-  --surface-card: rgba(255, 255, 255, 0.05);
-  --surface-elevated: #182640;
+  --ib-dark-surface-app: #010409;
+  --ib-dark-surface-section: #05080d;
+  --ib-dark-surface-panel: #0a0f16;
+  --ib-dark-surface-card: #121820;
+  --ib-dark-surface-card-hover: #171f2a;
+  --ib-dark-surface-card-active: #1b2532;
+  --ib-surface-app: var(--ib-dark-surface-app);
+  --ib-surface-section: var(--ib-dark-surface-section);
+  --ib-surface-panel: var(--ib-dark-surface-panel);
+  --ib-surface-card: var(--ib-dark-surface-card);
+  --ib-surface-card-hover: var(--ib-dark-surface-card-hover);
+  --ib-surface-card-active: var(--ib-dark-surface-card-active);
+  --surface-app: var(--ib-surface-app);
+  --surface-section: var(--ib-surface-section);
+  --surface-card: var(--ib-surface-card);
+  --surface-elevated: var(--ib-surface-panel);
 
   /* TEXT */
   --text-primary: #f8fafc;
@@ -69,8 +87,8 @@
   --text-disabled: rgba(255, 255, 255, 0.6);
 
   /* BORDERS */
-  --border-subtle: rgba(255, 255, 255, 0.1);
-  --border-default: rgba(255, 255, 255, 0.2);
+  --border-subtle: rgba(255, 255, 255, 0.09);
+  --border-default: rgba(255, 255, 255, 0.13);
 
   /* ACCENTS */
   --accent-primary: #38bdf8;

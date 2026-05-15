@@ -6,6 +6,7 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
     ...LANDING_V2_CONTENT.es,
     how: {
       ...LANDING_V2_CONTENT.es.how,
+      kicker: 'EL SISTEMA',
       steps: [
         {
           title: 'Empieza posible, no perfecto.',
@@ -16,7 +17,7 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
         {
           title: 'Cada acción deja una señal.',
           badge: 'Paso 2',
-          bullets: ['Registra tareas, GP, rachas y dificultad para entender cómo avanzas realmente.'],
+          bullets: ['Registra tus acciones y emociones diarias para entender cómo avanzas a través de tus rachas y progreso.'],
           chips: [],
         },
         {
@@ -35,14 +36,21 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
     },
     demo: {
       ...LANDING_V2_CONTENT.es.demo,
-      title: 'Mira tu Journey.',
+      title: 'Haz visible tu progreso',
       text: 'Energía, emociones, acciones, GP y rachas en una experiencia simple de seguir.',
+      banner: 'Explora cómo se ve tu crecimiento',
+      cta: 'Explorar demo',
+    },
+    testimonials: {
+      ...LANDING_V2_CONTENT.es.testimonials,
+      title: 'Primeras experiencias',
     },
   },
   en: {
     ...LANDING_V2_CONTENT.en,
     how: {
       ...LANDING_V2_CONTENT.en.how,
+      kicker: 'THE SYSTEM',
       steps: [
         {
           title: 'Start possible, not perfect.',
@@ -53,7 +61,7 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
         {
           title: 'Every action leaves a signal.',
           badge: 'Step 2',
-          bullets: ['Track tasks, GP, streaks, and difficulty to understand how you are really moving.'],
+          bullets: ['Log your daily actions and emotions to see how your streaks and progress evolve.'],
           chips: [],
         },
         {
@@ -72,8 +80,14 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
     },
     demo: {
       ...LANDING_V2_CONTENT.en.demo,
-      title: 'See your Journey.',
+      title: 'Make visible your progress',
       text: 'Energy, emotions, actions, GP, and streaks in one experience that is easy to follow.',
+      banner: 'Explore what your growth looks like',
+      cta: 'Explore demo',
+    },
+    testimonials: {
+      ...LANDING_V2_CONTENT.en.testimonials,
+      title: 'Early experience',
     },
   },
 };

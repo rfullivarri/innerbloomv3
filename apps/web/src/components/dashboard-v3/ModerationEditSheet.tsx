@@ -55,14 +55,14 @@ export function ModerationEditSheet({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text-strong)] transition-colors hover:bg-[color:var(--color-overlay-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)]"
+            className="rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text-strong)] transition-colors hover:bg-[color:var(--ib-surface-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)]"
           >
             {t('dashboard.moderation.close')}
           </button>
         </div>
 
         {isLoading || !configs ? (
-          <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-dim)]">
+          <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] p-4 text-sm text-[color:var(--color-text-dim)]">
             {t('dashboard.moderation.loadingConfig')}
           </div>
         ) : (
@@ -83,7 +83,7 @@ export function ModerationEditSheet({
                       {type === 'alcohol' ? 'Alcohol' : type === 'tobacco' ? t('dashboard.moderation.tobacco') : t('dashboard.moderation.sugar')}
                     </p>
                     {isSwitchDisabled ? (
-                      <span className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[color:var(--color-text-faint)]">
+                      <span className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card-active)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[color:var(--color-text-faint)]">
                         {t('dashboard.moderation.disabled')}
                       </span>
                     ) : null}
@@ -101,7 +101,7 @@ export function ModerationEditSheet({
                       }}
                       className={`relative inline-flex h-7 w-12 items-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/55 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${
                         isSwitchDisabled
-                          ? "cursor-not-allowed border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)]"
+                          ? "cursor-not-allowed border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card-active)]"
                           : isPaused
                             ? "border-[color:var(--color-accent-primary)] bg-[color:var(--color-accent-primary)]/35"
                             : "border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-3)]"

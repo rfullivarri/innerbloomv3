@@ -302,10 +302,13 @@
 }
 
 .loopSplashScene {
-  --loop-splash-wordmark-width: min(138px, calc(100% - 54px));
+  --loop-splash-wordmark-width: min(190px, calc(100% - 30px));
+  --loop-splash-lockup-max-width: min(100%, 300px);
+  --loop-splash-flower-width: clamp(62px, 23cqw, 82px);
+  --loop-splash-wordmark-size: clamp(0.98rem, 6.25cqw, 1.28rem);
   position: absolute;
-  inset: 10px;
-  border-radius: 30px;
+  inset: 0;
+  border-radius: inherit;
   display: grid;
   place-items: center;
   container-type: inline-size;
@@ -330,6 +333,15 @@
   animation: loopSplashOverlay 4400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+
+.loopSplashSceneV3 {
+  --loop-splash-wordmark-width: min(142px, calc(100% - 52px));
+  --loop-splash-lockup-max-width: min(100%, 256px);
+  --loop-splash-flower-width: clamp(48px, 18cqw, 60px);
+  --loop-splash-wordmark-size: clamp(0.82rem, 5.1cqw, 1.04rem);
+}
+
+
 .loopSplashDepthGlow {
   position: absolute;
   inset: 0;
@@ -351,12 +363,12 @@
 
 .loopSplashLockup {
   position: relative;
-  width: min(100%, 252px);
+  width: var(--loop-splash-lockup-max-width);
   max-width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(1px, 0.25vw, 3px);
+  gap: clamp(1px, 0.4cqw, 4px);
   padding-inline: clamp(4px, 1.8vw, 10px);
   box-sizing: border-box;
   transform-origin: center center;
@@ -371,7 +383,7 @@
 }
 
 .loopSplashFlower {
-  width: clamp(46px, 18cqw, 58px);
+  width: var(--loop-splash-flower-width);
   margin-inline-end: -2px;
   flex: 0 0 auto;
   height: auto;
@@ -394,7 +406,7 @@
   max-width: var(--loop-splash-wordmark-width);
   overflow: hidden;
   white-space: nowrap;
-  font-size: clamp(0.82rem, 5.1cqw, 1.02rem);
+  font-size: var(--loop-splash-wordmark-size);
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;

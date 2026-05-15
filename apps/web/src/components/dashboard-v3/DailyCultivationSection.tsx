@@ -115,7 +115,7 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
             <label className="flex items-center gap-1.5 whitespace-nowrap text-[11px] uppercase tracking-[0.12em] text-[color:var(--color-text-muted)]">
               <span className="text-[11px]">{t('dashboard.dailyCultivation.month')}</span>
               <select
-                className="w-28 rounded-ib-sm border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1 text-xs text-[color:var(--color-text)] focus:border-white/20 focus:outline-none sm:w-32"
+                className="w-28 rounded-ib-sm border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-2 py-1 text-xs text-[color:var(--color-text)] focus:border-white/20 focus:outline-none sm:w-32"
                 value={selectedMonth ?? ''}
                 onChange={(event) => setSelectedMonth(event.target.value)}
               >
@@ -144,7 +144,7 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
 
       {status === 'success' && activeBucket && activeBucket.days.length > 0 && (
         <div className="space-y-4">
-          <div className="ib-card-contour-shadow rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4">
+          <div className="ib-card-contour-shadow rounded-ib-md border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card)] p-4">
             <LineChart days={activeBucket.days} language={language} />
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[color:var(--color-text-subtle)]">

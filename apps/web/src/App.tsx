@@ -32,6 +32,8 @@ import EditorLabPage from './pages/labs/EditorLabPage';
 import PublicTasksDemoPage from './pages/labs/PublicTasksDemoPage';
 import HeroPhoneShowcaseLabPage from './pages/labs/HeroPhoneShowcaseLabPage';
 import InnerbloomSystemMapPage from './pages/labs/InnerbloomSystemMapPage';
+import AvatarCtaCarouselLabPage from './pages/labs/AvatarCtaCarouselLabPage';
+import OnboardingRhythmSelectorLabPage from './pages/labs/OnboardingRhythmSelectorLabPage';
 import { useGa4FunnelTracking } from './hooks/useGa4FunnelTracking';
 import { isNativeCapacitorPlatform } from './mobile/capacitor';
 import { writeMobileDebug } from './mobile/mobileDebug';
@@ -283,6 +285,8 @@ export default function App() {
         <Route path="/labs/tasks-demo" element={<PublicTasksDemoPage />} />
         <Route path="/labs/hero-phone-showcase" element={<HeroPhoneShowcaseLabPage />} />
         <Route path="/labs/innerbloom-system-map" element={<InnerbloomSystemMapPage />} />
+        <Route path="/labs/avatar-cta-carousel" element={<AvatarCtaCarouselLabPage />} />
+        <Route path="/labs/onboarding-rhythm-selector" element={<OnboardingRhythmSelectorLabPage />} />
         <Route path="/demo/logros" element={<LabsLogrosDemoPage />} />
         <Route path="/demo/tasks" element={<PublicTasksDemoPage />} />
         <Route path="/labs/landing-rhythm-section" element={<LandingRhythmSectionMvpPage />} />

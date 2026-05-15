@@ -42,7 +42,7 @@ export function ThemeSwitcher() {
   }));
 
   return (
-    <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-3">
+    <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] px-3 py-3">
       <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)]">
         {t('dashboard.theme.appearance')}
       </p>

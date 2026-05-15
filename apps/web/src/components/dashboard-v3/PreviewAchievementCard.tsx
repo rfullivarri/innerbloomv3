@@ -303,7 +303,7 @@ export function PreviewAchievementCard({
           ? 'border-transparent bg-transparent shadow-none'
           : isLanding
             ? 'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-surface-elevated)] shadow-[var(--color-card-shadow)] dark:border-white/10 dark:bg-gradient-to-b dark:from-[rgba(7,10,16,0.96)] dark:to-[rgba(8,12,18,0.9)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
-            : 'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] shadow-inner',
+            : 'border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card)] shadow-inner',
         isLanding ? (isCompact ? 'p-2.5 pb-3 sm:p-3' : 'p-4 pb-4 sm:p-5') : isCompact ? 'p-2.5 pb-4' : 'p-3 pb-4',
       )}
     >
@@ -466,7 +466,7 @@ export function PreviewAchievementCard({
                 >
                   i
                 </summary>
-                <div className="pointer-events-none absolute left-0 top-6 z-10 hidden min-w-[11rem] rounded-lg border border-white/20 bg-[color:var(--color-overlay-1)]/95 p-2 text-[10px] leading-snug text-[color:var(--color-slate-100)] shadow-xl backdrop-blur-sm group-open:block group-hover:block">
+                <div className="pointer-events-none absolute left-0 top-6 z-10 hidden min-w-[11rem] rounded-lg border border-white/20 bg-[color:var(--ib-surface-card)] p-2 text-[10px] leading-snug text-[color:var(--color-slate-100)] shadow-xl backdrop-blur-sm group-open:block group-hover:block">
                   <p>{language === 'es' ? '✓ = mes fuerte' : '✓ = strong month'}</p>
                   <p>{language === 'es' ? '• = en construcción' : '• = building'}</p>
                   <p>{language === 'es' ? '✕ = mes débil' : '✕ = weak month'}</p>

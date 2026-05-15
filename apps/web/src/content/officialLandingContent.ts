@@ -224,9 +224,9 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     demo: {
-      title: 'Haz visible el progreso que normalmente no ves.',
+      title: 'Haz visible tu progreso',
       text: 'Innerbloom te muestra patrones, constancia y evolución para que avanzar no se sienta como todo o nada, sino como un proceso visible y real.',
-      banner: 'Explora cómo se ve tu crecimiento dentro de Innerbloom',
+      banner: 'Explora cómo se ve tu crecimiento',
       cta: 'Explorar demo'
     },
     testimonials: {
@@ -294,7 +294,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       startJourney: 'Crear mi plan adaptativo',
       guidedDemo: 'Demos'
     },
-    footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
+    footer: { copyright: '© Innerbloom. All rights reserved.', faq: 'FAQ' }
   },
   en: {
     navLinks: [],
@@ -468,9 +468,9 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     demo: {
-      title: 'Make visible the progress you normally don’t see.',
+      title: 'Make visible your progress',
       text: 'Innerbloom shows you patterns, consistency, and evolution so progress doesn’t feel all-or-nothing, but visible and real.',
-      banner: 'Explore what your growth looks like inside Innerbloom',
+      banner: 'Explore what your growth looks like',
       cta: 'Explore demo'
     },
     testimonials: {
@@ -538,6 +538,6 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       startJourney: 'Create my adaptive plan',
       guidedDemo: 'Demos'
     },
-    footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
+    footer: { copyright: '© Innerbloom. All rights reserved.', faq: 'FAQ' }
   }
 };
