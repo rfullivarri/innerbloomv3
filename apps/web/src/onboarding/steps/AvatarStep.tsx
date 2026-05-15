@@ -8,6 +8,7 @@ interface AvatarStepProps {
   rhythm: GameMode | null;
   selectedAvatarId: number | null;
   onSelectAvatar: (avatarId: number) => void;
+  onSkip?: () => void;
   onBack?: () => void;
   isSaving?: boolean;
 }
@@ -16,6 +17,7 @@ export function AvatarStep({
   language = 'es',
   selectedAvatarId,
   onSelectAvatar,
+  onSkip,
   onBack,
   isSaving = false,
 }: AvatarStepProps) {
@@ -26,6 +28,7 @@ export function AvatarStep({
         subtitle: 'Avatar controls visuals. Rhythm keeps controlling your journey behavior.',
         selected: 'Selected',
         back: 'Back',
+        skip: 'Skip',
         saving: 'Saving…',
       }
     : {
@@ -34,16 +37,29 @@ export function AvatarStep({
         subtitle: 'El avatar define lo visual. Tu ritmo sigue definiendo el comportamiento del Journey.',
         selected: 'Seleccionado',
         back: 'Volver',
+        skip: 'Omitir',
         saving: 'Guardando…',
       };
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
       <div className="glass-card onboarding-surface-base mx-auto max-w-4xl rounded-3xl p-4 sm:p-6">
-        <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-white/50">{copy.step}</p>
-          <h2 className="text-3xl font-semibold text-white">{copy.title}</h2>
-          <p className="text-sm text-white/70">{copy.subtitle}</p>
+        <header className="flex flex-col gap-4 border-b border-white/5 pb-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-[0.2em] text-white/50">{copy.step}</p>
+            <h2 className="text-3xl font-semibold text-white">{copy.title}</h2>
+            <p className="text-sm text-white/70">{copy.subtitle}</p>
+          </div>
+          {onSkip ? (
+            <button
+              type="button"
+              onClick={onSkip}
+              disabled={isSaving}
+              className="inline-flex shrink-0 items-center justify-center rounded-full border border-white/18 bg-white/[0.08] px-4 py-2 text-sm font-semibold text-white/82 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:border-white/30 hover:bg-white/[0.12] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#cf8bf3]/60 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {copy.skip}
+            </button>
+          ) : null}
         </header>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {AVATAR_OPTIONS.map((option) => {
@@ -88,7 +104,9 @@ export function AvatarStep({
           ) : (
             <span />
           )}
-          {isSaving ? <span className="text-xs font-medium uppercase tracking-[0.2em] text-white/60">{copy.saving}</span> : null}
+          <div className="flex items-center gap-3">
+            {isSaving ? <span className="text-xs font-medium uppercase tracking-[0.2em] text-white/60">{copy.saving}</span> : null}
+          </div>
         </div>
       </div>
     </motion.div>

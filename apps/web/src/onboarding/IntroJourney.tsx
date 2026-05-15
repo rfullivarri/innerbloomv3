@@ -39,6 +39,8 @@ const OPEN_TEXT_FIELDS: Partial<Record<StepId, 'bodyOpen' | 'soulOpen' | 'mindOp
   'foundations-mind': 'mindOpen',
 };
 
+const DEFAULT_SKIPPED_AVATAR_ID = 2;
+
 export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, submitError = null }: IntroJourneyProps) {
   const {
     state,
@@ -273,6 +275,32 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
     setHasDismissedGpExplainer(true);
   };
 
+  const handleAvatarChoice = (avatarId: number, options: { skip?: boolean } = {}) => {
+    if (isSavingAvatar) return;
+
+    setAvatarId(avatarId);
+    setAvatarStepError(null);
+    void (async () => {
+      try {
+        setIsSavingAvatar(true);
+        await changeCurrentUserAvatar(avatarId);
+        await markOnboardingProgress('avatar_selected', {
+          trigger: options.skip ? 'intro_journey_skip_default' : 'intro_journey',
+        });
+        goNext();
+      } catch (error) {
+        console.error('[onboarding] avatar select failed', error);
+        if (options.skip) {
+          goNext();
+          return;
+        }
+        setAvatarStepError(language === 'en' ? 'Could not save avatar. Try again.' : 'No pudimos guardar tu avatar. Intentá de nuevo.');
+      } finally {
+        setIsSavingAvatar(false);
+      }
+    })();
+  };
+
   const renderStep = () => {
     switch (stepId) {
       case 'clerk-gate':
@@ -312,24 +340,8 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
               rhythm={answers.mode}
               selectedAvatarId={answers.avatarId}
               isSaving={isSavingAvatar}
-              onSelectAvatar={(avatarId) => {
-                if (isSavingAvatar) return;
-                setAvatarId(avatarId);
-                setAvatarStepError(null);
-                void (async () => {
-                  try {
-                    setIsSavingAvatar(true);
-                    await changeCurrentUserAvatar(avatarId);
-                    await markOnboardingProgress('avatar_selected', { trigger: 'intro_journey' });
-                    goNext();
-                  } catch (error) {
-                    console.error('[onboarding] avatar select failed', error);
-                    setAvatarStepError(language === 'en' ? 'Could not save avatar. Try again.' : 'No pudimos guardar tu avatar. Intentá de nuevo.');
-                  } finally {
-                    setIsSavingAvatar(false);
-                  }
-                })();
-              }}
+              onSelectAvatar={(avatarId) => handleAvatarChoice(avatarId)}
+              onSkip={() => handleAvatarChoice(DEFAULT_SKIPPED_AVATAR_ID, { skip: true })}
               onBack={() => goToStep('mode-select')}
             />
             {avatarStepError ? <p className="text-center text-sm text-rose-200">{avatarStepError}</p> : null}

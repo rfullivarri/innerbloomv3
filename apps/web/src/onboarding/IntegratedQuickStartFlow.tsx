@@ -12,7 +12,6 @@ import { HUD } from './ui/HUD';
 import { NavButtons } from './ui/NavButtons';
 import { GameModeChip as SharedGameModeChip, buildGameModeChip } from '../components/common/GameModeChip';
 import { buildAvatarPreviewProfile, getAvatarOptionById, resolveAvatarPickerPreviewImage } from '../lib/avatarCatalog';
-import { getOnboardingRhythmTheme } from './utils/onboardingRhythmTheme';
 import { useThemePreference } from '../theme/ThemePreferenceProvider';
 
 type Pillar = 'Body' | 'Mind' | 'Soul';
@@ -602,7 +601,7 @@ function InlineTaskRow({
   return (
     <div ref={rowRef} className={`relative ${selected ? 'pt-5 pb-1' : ''}`}>
       {selected ? (
-        <div className="quickstart-task-row__back pointer-events-none absolute inset-x-0 top-0 bottom-1 rounded-2xl border px-4 pt-1.5 pb-3" aria-hidden>
+        <div className="quickstart-task-row__back pointer-events-none absolute inset-x-0 top-0 h-8 rounded-t-2xl border px-4 pt-1.5" aria-hidden>
           <span className="quickstart-task-trait-band block text-[10px] font-semibold uppercase leading-none tracking-[0.16em]">
             {copy.traitLabel}: {task.trait}
           </span>
@@ -1007,8 +1006,6 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
     }
 
     const tasks = copy.tasks[currentPillar];
-    const rhythmTheme = getOnboardingRhythmTheme(gameMode);
-    const modeStyle = { tint: rhythmTheme.softTint, border: rhythmTheme.border, glow: rhythmTheme.glow };
 
     return (
       <section className="quickstart-premium-card onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
@@ -1017,11 +1014,6 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
           <p className="mt-2 text-sm text-white/70">{copy.pillarSubtitles[currentPillar]}</p>
           <div
             className="quickstart-min-rule mt-3 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold"
-            style={{
-              borderColor: `color-mix(in srgb, ${modeStyle.border} 92%, rgba(255,255,255,0.14))`,
-              background: `linear-gradient(135deg, color-mix(in srgb, ${modeStyle.tint} 90%, rgba(10,14,30,0.72)), color-mix(in srgb, ${modeStyle.tint} 66%, rgba(10,14,30,0.58)))`,
-              boxShadow: `0 8px 20px ${modeStyle.glow}`,
-            }}
           >
             <span className="whitespace-nowrap">{copy.minRule(minimum)}</span>
             <span className="quickstart-min-rule__dot" aria-hidden>·</span>
@@ -1029,7 +1021,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
           </div>
           <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
             <span
-              className={`quickstart-bonus-pill inline-flex rounded-lg border px-3.5 py-1.5 text-[0.68rem] font-medium sm:text-[0.72rem] ${
+              className={`quickstart-bonus-pill inline-flex text-[0.68rem] font-medium sm:text-[0.72rem] ${
                 balancedBonusActive ? 'quickstart-bonus-pill--ready' : 'quickstart-bonus-pill--pending'
               }`}
             >
