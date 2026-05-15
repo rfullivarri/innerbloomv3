@@ -31,6 +31,7 @@ import { AvatarCtaBanner } from "../components/landing/AvatarCtaBanner";
 import WeatherCycleOrb from "../components/landing/WeatherCycleOrb";
 import { DEMO_USER_ID } from "../components/demo/DemoDashboardOverviewScene";
 import { StreaksPanel } from "../components/dashboard-v3/StreaksPanel";
+import { EmotionChartCard } from "../components/dashboard-v3/EmotionChartCard";
 import { QuickStartTasksStep } from "../onboarding/steps/QuickStartTasksStep";
 import { QUICK_START_TASKS } from "../onboarding/quickStart";
 import { LabsWeeklyRhythmSystemSection } from "../components/labs/LabsWeeklyRhythmSystemSection";
@@ -527,6 +528,82 @@ function LandingNarrativeMethod({
   );
 }
 
+type LandingEmotionMockRow = {
+  date: string;
+  emotion: string;
+};
+
+const LANDING_V3_EMOTION_PATTERN = [
+  "Motivación",
+  "Cansancio",
+  "Calma",
+  "Felicidad",
+  "Motivación",
+  "Frustración",
+  "Calma",
+  "Tristeza",
+  "Ansiedad",
+  "Motivación",
+  "Calma",
+  "Cansancio",
+] as const;
+
+const LANDING_V3_EMOTION_MOCK_DATA: LandingEmotionMockRow[] = Array.from({ length: 138 }, (_, index) => {
+  const date = new Date(2026, 0, 1 + index);
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const pseudoRandomIndex = index * 17 + day * 11 + month * 23 + (index % 5) * 7 + Math.floor(index / 13) * 19;
+  const emotion = LANDING_V3_EMOTION_PATTERN[pseudoRandomIndex % LANDING_V3_EMOTION_PATTERN.length];
+
+  return {
+    date: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
+    emotion,
+  };
+});
+
+function publishLandingV3EmotionMockData(shouldDispatch = true) {
+  if (typeof window === "undefined") return;
+
+  window.data = {
+    ...(window.data ?? {}),
+    daily_emotion: LANDING_V3_EMOTION_MOCK_DATA,
+  };
+
+  if (!shouldDispatch) return;
+
+  window.dispatchEvent(
+    new CustomEvent("gj:data-ready", {
+      detail: {
+        data: {
+          daily_emotion: LANDING_V3_EMOTION_MOCK_DATA,
+        },
+      },
+    }),
+  );
+}
+
+function LandingV3EmotionChartVisual() {
+  publishLandingV3EmotionMockData(false);
+
+  useEffect(() => {
+    let frame = window.requestAnimationFrame(() => publishLandingV3EmotionMockData());
+    const interval = window.setInterval(() => {
+      frame = window.requestAnimationFrame(() => publishLandingV3EmotionMockData());
+    }, 9000);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  return (
+    <div className="v3-method-emotion-chart" data-demo-anchor="emotion-chart">
+      <EmotionChartCard userId={DEMO_USER_ID} />
+    </div>
+  );
+}
+
 function LandingV3MethodVisual({ index, language }: { index: number; language: Language }) {
   const [animatedMinutes, setAnimatedMinutes] = useState("15");
 
@@ -594,8 +671,21 @@ function LandingV3MethodVisual({ index, language }: { index: number; language: L
   if (index === 1) {
     return (
       <div className="v3-step-visual v3-method-product-visual v3-method-streaks" data-light-scope="dashboard-v3" aria-hidden>
-        <div className="v3-method-streaks__tilt">
-          <StreaksPanel userId={DEMO_USER_ID} gameMode="flow" weeklyTarget={3} avatarProfile={null} />
+        <div className="v3-method-signals-loop">
+          <div className="v3-method-signals-slide v3-method-signals-slide--streaks">
+            <p className="v3-method-signal-title">
+              {language === "es" ? "Visualizá tu progreso" : "Visualize your progress"}
+            </p>
+            <div className="v3-method-streaks__tilt">
+              <StreaksPanel userId={DEMO_USER_ID} gameMode="flow" weeklyTarget={3} avatarProfile={null} />
+            </div>
+          </div>
+          <div className="v3-method-signals-slide v3-method-signals-slide--emotions">
+            <p className="v3-method-signal-title">
+              {language === "es" ? "Registrá tus emociones" : "Log your emotions"}
+            </p>
+            <LandingV3EmotionChartVisual />
+          </div>
         </div>
       </div>
     );

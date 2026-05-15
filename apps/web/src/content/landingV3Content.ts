@@ -17,7 +17,7 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
         {
           title: 'Cada acción deja una señal.',
           badge: 'Paso 2',
-          bullets: ['Registra tareas, GP, rachas y dificultad para entender cómo avanzas realmente.'],
+          bullets: ['Registra tus acciones y emociones diarias para entender cómo avanzas a través de tus rachas y progreso.'],
           chips: [],
         },
         {
@@ -61,7 +61,7 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
         {
           title: 'Every action leaves a signal.',
           badge: 'Step 2',
-          bullets: ['Track tasks, GP, streaks, and difficulty to understand how you are really moving.'],
+          bullets: ['Log your daily actions and emotions to see how your streaks and progress evolve.'],
           chips: [],
         },
         {
