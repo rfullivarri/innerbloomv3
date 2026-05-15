@@ -137,52 +137,38 @@ function RhythmWaveSelectorPreview({ theme, selectedRhythm, onSelectRhythm }: { 
   const isLight = theme === 'light';
 
   return (
-    <div
-      className={`rounded-[2rem] border p-3 shadow-2xl sm:p-4 md:rounded-[2.4rem] md:p-5 ${
-        isLight
-          ? 'border-[#d8cff3]/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.76),rgba(246,241,255,0.64))] shadow-[0_28px_80px_rgba(118,91,173,0.18)]'
-          : 'border-white/10 bg-[linear-gradient(145deg,rgba(12,13,29,0.82),rgba(22,17,45,0.58))] shadow-[0_28px_90px_rgba(8,7,20,0.58)]'
-      }`}
-    >
-      <div className="space-y-3 md:space-y-4" role="group" aria-label={`${theme} rhythm selector preview`}>
-        {RHYTHM_OPTIONS.map((option) => {
-          const selected = option.name === selectedRhythm;
-          return (
-            <button
-              key={option.name}
-              type="button"
-              className={`group relative grid min-h-[4.75rem] w-full grid-cols-[4.2rem_minmax(0,1fr)_4.7rem] items-center gap-2 overflow-hidden rounded-[1.45rem] border px-3 py-2 text-left transition duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d78bff]/70 focus-visible:ring-offset-2 sm:grid-cols-[5.5rem_minmax(0,1fr)_6.5rem] sm:gap-4 sm:px-5 md:min-h-[6.05rem] md:grid-cols-[7rem_minmax(0,1fr)_7.5rem] md:rounded-[1.8rem] md:px-6 ${
-                isLight ? 'focus-visible:ring-offset-[#fbfaff]' : 'focus-visible:ring-offset-[#090815]'
-              } ${
-                selected
-                  ? isLight
-                    ? 'border-[#b77cff]/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(244,235,255,0.76))] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_44px_rgba(154,104,255,0.18)]'
-                    : 'border-[#b66cff]/78 bg-[linear-gradient(135deg,rgba(33,25,62,0.72),rgba(14,14,30,0.74))] shadow-[inset_0_0_32px_rgba(169,85,247,0.13),0_20px_56px_rgba(87,50,156,0.22)]'
-                  : isLight
-                    ? 'border-[#ded5f4]/84 bg-[linear-gradient(135deg,rgba(255,255,255,0.70),rgba(247,243,255,0.58))] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] hover:border-[#c9b6f2] hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.86),rgba(247,243,255,0.7))]'
-                    : 'border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055),rgba(10,12,27,0.48))] shadow-[inset_0_1px_0_rgba(255,255,255,0.055)] hover:border-white/18 hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(10,12,27,0.56))]'
-              }`}
-              aria-pressed={selected}
-              onClick={() => onSelectRhythm(option.name)}
-            >
-              <div className={`pointer-events-none absolute inset-x-3 top-3 h-6 rounded-full blur-sm ${isLight ? 'bg-white/46' : 'bg-black/20'}`} />
-              <h3 className={`relative z-10 text-[1rem] font-semibold tracking-[-0.03em] sm:text-[1.2rem] md:text-[1.58rem] ${isLight ? 'text-[#181126]' : 'text-white/94'}`}>{option.name}</h3>
-              <div className="relative z-10 min-w-0">
-                <RhythmWave option={option} selected={selected} theme={theme} />
-              </div>
-              <div
-                className={`relative z-10 justify-self-end rounded-full border px-2.5 py-2 text-center text-[0.72rem] font-medium tracking-[-0.01em] sm:min-w-[5.8rem] sm:px-4 sm:text-sm md:text-base ${
-                  isLight
-                    ? 'border-[#cfc3ee]/86 bg-[#fffaff]/72 text-[#34274f] shadow-[inset_0_1px_0_rgba(255,255,255,0.92)]'
-                    : 'border-white/12 bg-white/[0.075] text-white/82 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
-                }`}
-              >
-                {option.frequency}
-              </div>
-            </button>
-          );
-        })}
-      </div>
+    <div className="space-y-3 md:space-y-4" role="group" aria-label={`${theme} rhythm selector preview`}>
+      {RHYTHM_OPTIONS.map((option) => {
+        const selected = option.name === selectedRhythm;
+        return (
+          <button
+            key={option.name}
+            type="button"
+            className={`group relative grid min-h-[4.75rem] w-full grid-cols-[4.2rem_minmax(0,1fr)_4.2rem] items-center gap-2 overflow-hidden rounded-[1.45rem] border px-3 py-2 text-left transition duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d78bff]/70 focus-visible:ring-offset-2 sm:grid-cols-[5.5rem_minmax(0,1fr)_5.6rem] sm:gap-4 sm:px-5 md:min-h-[6.05rem] md:grid-cols-[7rem_minmax(0,1fr)_6.5rem] md:rounded-[1.8rem] md:px-6 ${
+              isLight ? 'focus-visible:ring-offset-[#fbfaff]' : 'focus-visible:ring-offset-[#090815]'
+            } ${
+              selected
+                ? isLight
+                  ? 'border-[#b77cff]/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(244,235,255,0.76))] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_44px_rgba(154,104,255,0.18)]'
+                  : 'border-[#b66cff]/78 bg-[linear-gradient(135deg,rgba(33,25,62,0.72),rgba(14,14,30,0.74))] shadow-[inset_0_0_32px_rgba(169,85,247,0.13),0_20px_56px_rgba(87,50,156,0.22)]'
+                : isLight
+                  ? 'border-[#ded5f4]/84 bg-[linear-gradient(135deg,rgba(255,255,255,0.70),rgba(247,243,255,0.58))] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] hover:border-[#c9b6f2] hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.86),rgba(247,243,255,0.7))]'
+                  : 'border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055),rgba(10,12,27,0.48))] shadow-[inset_0_1px_0_rgba(255,255,255,0.055)] hover:border-white/18 hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(10,12,27,0.56))]'
+            }`}
+            aria-pressed={selected}
+            onClick={() => onSelectRhythm(option.name)}
+          >
+            <div className={`pointer-events-none absolute inset-x-3 top-3 h-6 rounded-full blur-sm ${isLight ? 'bg-white/32' : 'bg-black/14'}`} />
+            <h3 className={`relative z-10 text-[1rem] font-semibold tracking-[-0.03em] sm:text-[1.2rem] md:text-[1.58rem] ${isLight ? 'text-[#181126]' : 'text-white/94'}`}>{option.name}</h3>
+            <div className="relative z-10 min-w-0">
+              <RhythmWave option={option} selected={selected} theme={theme} />
+            </div>
+            <p className={`relative z-10 justify-self-end text-right text-[0.72rem] font-medium tracking-[-0.01em] sm:text-sm md:text-base ${isLight ? 'text-[#34274f]/82' : 'text-white/76'}`}>
+              {option.frequency}
+            </p>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -192,14 +178,9 @@ function PreviewSection({ theme, title }: { theme: RhythmTheme; title: string })
   const [selectedRhythm, setSelectedRhythm] = useState<RhythmOption['name']>('Flow');
 
   return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between gap-3 px-1">
-        <h2 className={`text-xl font-semibold tracking-[-0.03em] md:text-2xl ${isLight ? 'text-[#171126]' : 'text-white'}`}>{title}</h2>
-        <span className={`rounded-full border px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] ${isLight ? 'border-[#d8cff3] bg-white/60 text-[#5a4a7a]' : 'border-white/12 bg-white/[0.06] text-white/62'}`}>{selectedRhythm} selected</span>
-      </div>
-      <div className="rounded-[2.4rem] p-3 sm:p-5 md:p-7" style={getThemeSurface(theme)}>
-        <RhythmWaveSelectorPreview theme={theme} selectedRhythm={selectedRhythm} onSelectRhythm={setSelectedRhythm} />
-      </div>
+    <section className="space-y-4 p-1 sm:p-2 md:p-3" style={getThemeSurface(theme)}>
+      <h2 className={`px-1 text-lg font-semibold tracking-[-0.03em] md:text-xl ${isLight ? 'text-[#171126]' : 'text-white'}`}>{title}</h2>
+      <RhythmWaveSelectorPreview theme={theme} selectedRhythm={selectedRhythm} onSelectRhythm={setSelectedRhythm} />
     </section>
   );
 }
@@ -229,21 +210,20 @@ export default function OnboardingRhythmSelectorLabPage() {
           }
         }
       `}</style>
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-7 sm:px-6 md:gap-10 md:py-10">
-        <header className={`rounded-[2rem] border p-5 shadow-2xl backdrop-blur-xl md:p-7 ${themeMode === 'light' ? 'border-[#d8cff3]/80 bg-white/64 shadow-[0_22px_70px_rgba(118,91,173,0.16)]' : 'border-white/12 bg-white/[0.075] shadow-[0_24px_80px_rgba(4,4,12,0.42)]'}`}>
-          <Link to="/labs" className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition hover:-translate-y-0.5 ${themeMode === 'light' ? 'border-[#d8cff3] bg-white/68 text-[#4d3d72] hover:bg-white' : 'border-white/12 bg-white/[0.06] text-white/72 hover:bg-white/[0.1] hover:text-white'}`}>
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-7 px-4 py-7 sm:px-6 md:gap-9 md:py-10">
+        <header className="space-y-3">
+          <Link to="/labs" className={`inline-flex items-center gap-2 text-sm font-medium transition hover:opacity-80 ${themeMode === 'light' ? 'text-[#4d3d72]' : 'text-white/72 hover:text-white'}`}>
             <span aria-hidden>←</span>
             Back to labs
           </Link>
-          <p className={`mt-5 text-xs font-semibold uppercase tracking-[0.22em] ${themeMode === 'light' ? 'text-[#7a64ad]' : 'text-white/54'}`}>Visual prototype</p>
-          <h1 className="mt-2 max-w-3xl text-3xl font-semibold tracking-[-0.045em] md:text-5xl">Onboarding Rhythm Selector</h1>
-          <p className={`mt-3 max-w-3xl text-sm leading-relaxed md:text-base ${themeMode === 'light' ? 'text-[#3b305f]/78' : 'text-white/70'}`}>
-            Prototype for the new onboarding rhythm selector with sine-wave weekly intensity. This lab is isolated from the real onboarding flow.
+          <h1 className="max-w-3xl text-3xl font-semibold tracking-[-0.045em] md:text-5xl">Onboarding Rhythm Selector</h1>
+          <p className={`max-w-2xl text-sm leading-relaxed md:text-base ${themeMode === 'light' ? 'text-[#3b305f]/76' : 'text-white/68'}`}>
+            Sine-wave rhythm selector prototype, isolated from the real onboarding flow.
           </p>
         </header>
 
-        <PreviewSection theme="dark" title="Dark mode preview" />
-        <PreviewSection theme="light" title="Light mode preview" />
+        <PreviewSection theme="dark" title="Dark mode" />
+        <PreviewSection theme="light" title="Light mode" />
       </div>
     </main>
   );
