@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { useAuth } from '../auth/runtimeAuth';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
+import { LANDING_V3_CONTENT } from '../content/landingV3Content';
 import { useBackendUser } from '../hooks/useBackendUser';
 import { useOnboardingProgress } from '../hooks/useOnboardingProgress';
 import { resolveAuthLanguage } from '../lib/authLanguage';
+import { LandingV3MethodVisual } from '../pages/Landing';
 import { isNativeCapacitorPlatform, openUrlInCapacitorBrowser } from './capacitor';
 import {
   buildNativeMobileAuthUrl,
@@ -15,6 +17,8 @@ import {
   type MobileAuthMode,
 } from './mobileAuthSession';
 import type { OnboardingProgress } from '../lib/api';
+
+const NATIVE_WELCOME_SLIDE_MS = 5200;
 
 type MobileEntryCopy = {
   loadingTitle: string;
@@ -107,21 +111,95 @@ function MobileEntryError({
   );
 }
 
+function NativeWelcomeCarousel({ language }: { language: 'es' | 'en' }) {
+  const slides = LANDING_V3_CONTENT[language].how.steps;
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const handleDotSelect = (index: number) => {
+    setActiveIndex(index);
+  };
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setActiveIndex((current) => (current + 1) % slides.length);
+    }, NATIVE_WELCOME_SLIDE_MS);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeIndex, slides.length]);
+
+  const activeSlide = slides[activeIndex] ?? slides[0];
+
+  return (
+    <section className="native-welcome-carousel" aria-live="polite" data-native-step={activeIndex + 1}>
+      <div className="native-welcome-copy" key={`copy-${activeIndex}`}>
+        <span>{activeSlide.badge}</span>
+        <h1>{activeSlide.title}</h1>
+      </div>
+      <div className="native-welcome-visual-shell landing landing--v3-conversion" data-theme-mode="dark" data-native-step={activeIndex + 1} key={`visual-${activeIndex}`}>
+        <LandingV3MethodVisual index={activeIndex} language={language} logrosCycleMs={activeIndex === 3 ? 2100 : undefined} nativePreview />
+        <div className="native-welcome-carousel-controls" aria-label="Carousel progress" role="tablist">
+          {slides.map((slide, index) => (
+            <button
+              type="button"
+              className={index === activeIndex ? 'is-active' : ''}
+              key={slide.badge}
+              aria-label={`${index + 1} / ${slides.length}`}
+              aria-selected={index === activeIndex}
+              role="tab"
+              onClick={() => handleDotSelect(index)}
+            >
+              {index === activeIndex ? (
+                <i
+                  style={{ animationDuration: `${NATIVE_WELCOME_SLIDE_MS}ms` }}
+                  key={`progress-${activeIndex}`}
+                />
+              ) : null}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function MobileWelcome() {
   const language = resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
   const copy = language === 'en'
     ? {
-        title: 'Welcome',
         googleSignIn: 'Log in with Google',
         signIn: 'Log in',
         signUp: 'Create account',
       }
     : {
-        title: 'Bienvenido',
         googleSignIn: 'Iniciar sesión con Google',
         signIn: 'Iniciar sesión',
         signUp: 'Crear cuenta',
       };
+  const [viewportClassName, setViewportClassName] = useState('');
+
+  useEffect(() => {
+    const computeViewportClass = () => {
+      const runtimeHeight = window.visualViewport?.height ?? window.innerHeight;
+      const ratio = runtimeHeight / Math.max(window.innerHeight, 1);
+      if (runtimeHeight < 760 || ratio < 0.92) {
+        setViewportClassName('native-welcome--dense-viewport');
+        return;
+      }
+      if (runtimeHeight < 820 || ratio < 0.96) {
+        setViewportClassName('native-welcome--compact-viewport');
+        return;
+      }
+      setViewportClassName('');
+    };
+
+    computeViewportClass();
+    window.addEventListener('resize', computeViewportClass);
+    window.visualViewport?.addEventListener('resize', computeViewportClass);
+    return () => {
+      window.removeEventListener('resize', computeViewportClass);
+      window.visualViewport?.removeEventListener('resize', computeViewportClass);
+    };
+  }, []);
 
   const openNativeAuth = async (mode: 'sign-in' | 'sign-up') => {
     setForceNativeWelcome(false);
@@ -140,36 +218,34 @@ function MobileWelcome() {
   };
 
   return (
-    <div className="relative flex h-dvh max-h-dvh min-h-dvh items-center justify-center overflow-hidden bg-[#050b2f] bg-[url('/native-welcome-bg.png')] bg-cover bg-center px-5 pb-[calc(env(safe-area-inset-bottom,0px)+0.85rem)] pt-[calc(env(safe-area-inset-top,0px)+0.65rem)] text-white">
+    <div className={`native-welcome-root ${viewportClassName} relative flex h-dvh max-h-dvh min-h-dvh items-center justify-center overflow-hidden px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.7rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] text-white`}>
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(5,11,47,0.18)_0%,rgba(5,11,47,0.1)_38%,rgba(5,11,47,0.68)_100%)]"
       />
-      <div className="relative z-10 flex h-full w-full max-w-md flex-col">
+      <div className="native-welcome-frame relative z-10 flex h-full w-full max-w-md flex-col">
         <div className="shrink-0 pt-[clamp(0.25rem,1.1dvh,0.75rem)] text-center">
           <div className="flex items-center justify-center text-[clamp(0.82rem,2.1dvh,1.06rem)] font-semibold uppercase tracking-[0.42em] text-white/66">
             <BrandWordmark className="gap-3.5" textClassName="tracking-[0.42em]" iconClassName="h-[3.2em]" />
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col px-1 pb-[clamp(0.25rem,1.2dvh,0.75rem)] pt-[clamp(1rem,3dvh,1.5rem)]">
-          <div className="flex min-h-0 flex-1 flex-col pt-[clamp(1rem,3.2dvh,1.75rem)]">
-            <div className="pt-[clamp(11rem,31dvh,17rem)] text-center">
-              <h1 className="text-[clamp(2rem,5.2dvh,2.4rem)] font-semibold tracking-tight text-white">{copy.title}</h1>
-            </div>
+        <div className="flex min-h-0 flex-1 flex-col pb-[clamp(0.2rem,1dvh,0.55rem)] pt-[clamp(0.45rem,1.45dvh,0.85rem)]">
+          <div className="native-welcome-main flex min-h-0 flex-1 flex-col">
+            <NativeWelcomeCarousel language={language} />
 
-            <div className="mt-auto space-y-[clamp(0.55rem,1.5dvh,0.75rem)] px-2 pt-[clamp(1rem,4dvh,2.5rem)]">
+            <div className="native-welcome-actions mt-auto space-y-[clamp(0.5rem,1.35dvh,0.7rem)] px-2 pt-[clamp(0.8rem,2.5dvh,1.45rem)]">
               <button
                 type="button"
                 onClick={() => void openNativeAuth('sign-up')}
-                className="inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-[clamp(0.75rem,1.8dvh,0.875rem)] text-sm font-semibold text-white shadow-[0_20px_44px_rgba(124,58,237,0.35)] transition hover:bg-[#8b5cf6]"
+                className="inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-[clamp(0.7rem,1.68dvh,0.82rem)] text-sm font-semibold text-white shadow-[0_20px_44px_rgba(124,58,237,0.35)] transition hover:bg-[#8b5cf6]"
               >
                 {copy.signUp}
               </button>
               <button
                 type="button"
                 onClick={() => void openNativeGoogleAuth()}
-                className="inline-flex w-full items-center justify-center gap-3 rounded-full border border-slate-200/90 bg-white px-5 py-[clamp(0.75rem,1.8dvh,0.875rem)] text-sm font-semibold text-slate-900 shadow-[0_20px_44px_rgba(15,23,42,0.22)] transition hover:bg-slate-50"
+                className="inline-flex w-full items-center justify-center gap-3 rounded-full border border-slate-200/90 bg-white px-5 py-[clamp(0.7rem,1.68dvh,0.82rem)] text-sm font-semibold text-slate-900 shadow-[0_20px_44px_rgba(15,23,42,0.22)] transition hover:bg-slate-50"
               >
                 <svg
                   viewBox="0 0 48 48"
@@ -188,7 +264,7 @@ function MobileWelcome() {
               <button
                 type="button"
                 onClick={() => void openNativeAuth('sign-in')}
-                className="inline-flex w-full items-center justify-center rounded-full border border-white/18 bg-white/8 px-5 py-[clamp(0.75rem,1.8dvh,0.875rem)] text-sm font-semibold text-white transition hover:bg-white/12"
+                className="inline-flex w-full items-center justify-center rounded-full border border-white/18 bg-white/8 px-5 py-[clamp(0.7rem,1.68dvh,0.82rem)] text-sm font-semibold text-white transition hover:bg-white/12"
               >
                 {copy.signIn}
               </button>
