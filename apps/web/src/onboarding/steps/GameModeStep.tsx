@@ -4,6 +4,7 @@ import type { GameMode } from '../state';
 import type { OnboardingLanguage } from '../constants';
 import { GAME_MODE_META } from '../../lib/gameModeMeta';
 import { getOnboardingRhythmTheme } from '../utils/onboardingRhythmTheme';
+import { useThemePreference } from '../../theme/ThemePreferenceProvider';
 
 interface GameModeStepProps {
   language?: OnboardingLanguage;
@@ -115,6 +116,8 @@ function RhythmWave({ mode, active }: { mode: GameMode; active: boolean }) {
 }
 
 export function GameModeStep({ language = 'es', selected, onSelect, onBack }: GameModeStepProps) {
+  const { theme } = useThemePreference();
+  const isLight = theme === 'light';
   const copy = language === 'en'
     ? {
         step: 'Step 1 · Choose your rhythm',
@@ -174,20 +177,28 @@ export function GameModeStep({ language = 'es', selected, onSelect, onBack }: Ga
                 data-selected={isActive ? 'true' : 'false'}
                 className={[
                   'group relative grid min-h-[4.75rem] w-full grid-cols-[4.25rem_minmax(0,1fr)_4.9rem] items-center gap-2 overflow-hidden rounded-[1.45rem] border px-3 py-2 text-left transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d78bff]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:grid-cols-[5.5rem_minmax(0,1fr)_6.6rem] sm:gap-4 sm:px-5 md:min-h-[6.05rem] md:grid-cols-[7rem_minmax(0,1fr)_7.5rem] md:rounded-[1.8rem] md:px-6',
-                  isActive
-                    ? 'border-[#b66cff]/80 bg-[linear-gradient(135deg,rgba(33,25,62,0.72),rgba(14,14,30,0.74))] shadow-[inset_0_0_32px_rgba(169,85,247,0.13),0_20px_56px_rgba(87,50,156,0.22)]'
-                    : 'border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055),rgba(10,12,27,0.48))] shadow-[inset_0_1px_0_rgba(255,255,255,0.055)] hover:border-white/18 hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(10,12,27,0.56))]',
+                  isLight
+                    ? isActive
+                      ? 'border-[#8b5cf6]/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(245,240,255,0.88))] shadow-[0_18px_42px_rgba(139,92,246,0.16)]'
+                      : 'border-slate-200/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(248,250,252,0.82))] shadow-[0_10px_24px_rgba(15,23,42,0.06)] hover:border-[#c4b5fd] hover:bg-white'
+                    : isActive
+                      ? 'border-[#b66cff]/80 bg-[linear-gradient(135deg,rgba(33,25,62,0.72),rgba(14,14,30,0.74))] shadow-[inset_0_0_32px_rgba(169,85,247,0.13),0_20px_56px_rgba(87,50,156,0.22)]'
+                      : 'border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055),rgba(10,12,27,0.48))] shadow-[inset_0_1px_0_rgba(255,255,255,0.055)] hover:border-white/18 hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(10,12,27,0.56))]',
                 ]
                   .filter(Boolean)
                   .join(' ')}
                 style={isActive ? {
-                  boxShadow: `inset 0 0 32px rgba(169,85,247,0.13),0 20px 56px ${modeTheme.glow},0 0 0 1px ${modeTheme.border}`,
-                  borderColor: modeTheme.border,
-                  background: `linear-gradient(135deg, color-mix(in srgb, ${modeTheme.softTint} 52%, rgba(33,25,62,0.72)), rgba(14,14,30,0.74))`,
+                  boxShadow: isLight
+                    ? `0 18px 42px color-mix(in srgb, ${modeTheme.glow} 40%, transparent),0 0 0 1px color-mix(in srgb, ${modeTheme.border} 80%, white)`
+                    : `inset 0 0 32px rgba(169,85,247,0.13),0 20px 56px ${modeTheme.glow},0 0 0 1px ${modeTheme.border}`,
+                  borderColor: isLight ? `color-mix(in srgb, ${modeTheme.border} 80%, white)` : modeTheme.border,
+                  background: isLight
+                    ? `linear-gradient(135deg, rgba(255,255,255,0.97), color-mix(in srgb, ${modeTheme.softTint} 28%, rgba(248,250,252,0.92)))`
+                    : `linear-gradient(135deg, color-mix(in srgb, ${modeTheme.softTint} 52%, rgba(33,25,62,0.72)), rgba(14,14,30,0.74))`,
                 } : undefined}
               >
                 <span
-                  className="pointer-events-none absolute inset-x-3 top-3 h-6 rounded-full bg-black/20 blur-sm"
+                  className={`pointer-events-none absolute inset-x-3 top-3 h-6 rounded-full blur-sm ${isLight ? 'bg-white/55 opacity-70' : 'bg-black/20'}`}
                   aria-hidden
                 />
                 <h3 className="relative z-10 min-w-0 text-[1rem] font-semibold text-white/94 sm:text-[1.2rem] md:text-[1.58rem]">
