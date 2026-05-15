@@ -4,6 +4,11 @@ import { OFFICIAL_DESIGN_TOKENS } from '../../content/officialDesignTokens';
 
 const LAB_EXPERIMENTS = [
   {
+    title: 'Onboarding Rhythm Selector',
+    description: 'Prototype for the new onboarding rhythm selector with sine-wave weekly intensity.',
+    href: '/labs/onboarding-rhythm-selector',
+  },
+  {
     title: 'Landing Rhythm Section MVP',
     description: 'Experimental landing section focused on weekly rhythm intensity (decoupled from avatar identity).',
     href: '/labs/landing-rhythm-section',
