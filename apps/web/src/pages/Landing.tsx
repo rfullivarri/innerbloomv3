@@ -456,6 +456,7 @@ type LandingPageVariant = "default" | "v2Narrative" | "v3Conversion";
 type LandingPageProps = {
   content?: Record<Language, LandingCopy>;
   variant?: LandingPageVariant;
+  forcePublicHeroActions?: boolean;
 };
 
 function LandingNarrativeMethod({
@@ -999,6 +1000,7 @@ function LandingV3ConversionMethod({ how, language }: { how: LandingCopy["how"];
 export default function LandingPage({
   content = OFFICIAL_LANDING_CONTENT,
   variant = "default",
+  forcePublicHeroActions = false,
 }: LandingPageProps) {
   const { userId } = useAuth();
   const { setManualLanguage, syncLocaleLanguage } = usePostLoginLanguage();
@@ -1374,10 +1376,10 @@ export default function LandingPage({
               <p className="sub">{copy.hero.subtitle}</p>
               <div
                 className={`mt-6 flex flex-wrap items-center justify-center gap-3 hero-actions ${
-                  isSignedIn ? "hero-actions--single" : ""
+                  isSignedIn && !forcePublicHeroActions ? "hero-actions--single" : ""
                 }`}
               >
-                {isSignedIn && !isOfficialDefault ? (
+                {isSignedIn && !forcePublicHeroActions ? (
                   <Link className={buttonClasses()} to="/dashboard">
                     {copy.auth.dashboard}
                   </Link>

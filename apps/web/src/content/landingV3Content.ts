@@ -4,6 +4,14 @@ import { LANDING_V2_CONTENT } from './landingV2Content';
 export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
   es: {
     ...LANDING_V2_CONTENT.es,
+    hero: {
+      titleLead: 'Hábitos sostenibles para',
+      titleHighlight: 'personas reales.',
+      subtitle:
+        'Construí un Journey adaptativo: más simple cuando la vida se pone difícil, más desafiante cuando estás listo para crecer.',
+      note: 'Ritmo adaptativo, progreso visible.',
+      alt: 'Innerbloom adaptive habit dashboard shown on a mobile mockup.',
+    },
     how: {
       ...LANDING_V2_CONTENT.es.how,
       kicker: 'EL SISTEMA',
@@ -41,6 +49,11 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
       banner: 'Explora cómo se ve tu crecimiento',
       cta: 'Explorar demo',
     },
+    auth: {
+      ...LANDING_V2_CONTENT.es.auth,
+      startJourney: 'Comenzar mi Journey',
+      guidedDemo: 'Demos',
+    },
     testimonials: {
       ...LANDING_V2_CONTENT.es.testimonials,
       title: 'Primeras experiencias',
@@ -48,6 +61,14 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
   },
   en: {
     ...LANDING_V2_CONTENT.en,
+    hero: {
+      titleLead: 'Sustainable habits for',
+      titleHighlight: 'real people.',
+      subtitle:
+        'Build an adaptive Journey: simpler when life gets hard, more challenging when you’re ready to grow.',
+      note: 'Adaptive rhythm, visible progress.',
+      alt: 'Innerbloom adaptive habit dashboard shown on a mobile mockup.',
+    },
     how: {
       ...LANDING_V2_CONTENT.en.how,
       kicker: 'THE SYSTEM',
@@ -84,6 +105,11 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
       text: 'Energy, emotions, actions, GP, and streaks in one experience that is easy to follow.',
       banner: 'Explore what your growth looks like',
       cta: 'Explore demo',
+    },
+    auth: {
+      ...LANDING_V2_CONTENT.en.auth,
+      startJourney: 'Start my Journey',
+      guidedDemo: 'Demos',
     },
     testimonials: {
       ...LANDING_V2_CONTENT.en.testimonials,
