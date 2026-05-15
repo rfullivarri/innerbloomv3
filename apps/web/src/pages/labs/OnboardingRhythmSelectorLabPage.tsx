@@ -69,12 +69,17 @@ function RhythmWave({ option, selected, theme }: { option: RhythmOption; selecte
   const gradientId = `rhythm-wave-gradient-${rawId}`;
   const clipId = `rhythm-wave-clip-${rawId}`;
   const path = buildSinePath(option);
-  const animatedPathValues = buildAnimatedSinePathValues(option);
+  const animatedPathValues = selected ? buildAnimatedSinePathValues(option) : undefined;
   const node = getSinePoint(option);
   const activeWidth = WAVE_START_X + (WAVE_END_X - WAVE_START_X) * option.activeRatio;
   const mutedStroke = theme === 'light' ? 'rgba(144, 130, 172, 0.36)' : 'rgba(125, 128, 159, 0.34)';
-  const glowOpacity = selected ? (theme === 'light' ? 0.34 : 0.5) : theme === 'light' ? 0.16 : 0.22;
-  const animationDuration = selected ? '7.6s' : `${8.8 + option.activeRatio * 2}s`;
+  const waveStrokeWidth = 5.8;
+  const selectedWaveFilter = selected
+    ? theme === 'light'
+      ? 'drop-shadow(0 0 8px rgba(183, 124, 255, 0.24))'
+      : 'drop-shadow(0 0 10px rgba(199, 125, 255, 0.32))'
+    : undefined;
+  const animationDuration = '7.6s';
   const nodeStyle: CSSProperties = {
     left: `${(node.x / SVG_WIDTH) * 100}%`,
     top: `${(node.y / SVG_HEIGHT) * 100}%`,
@@ -93,27 +98,37 @@ function RhythmWave({ option, selected, theme }: { option: RhythmOption; selecte
             <rect x="0" y="0" width={activeWidth} height={SVG_HEIGHT} />
           </clipPath>
         </defs>
-        <path d={path} fill="none" stroke={mutedStroke} strokeLinecap="round" strokeLinejoin="round" strokeWidth={selected ? 5.8 : 5.2}>
-          <animate attributeName="d" dur={animationDuration} repeatCount="indefinite" values={animatedPathValues} />
+        <path d={path} fill="none" stroke={mutedStroke} strokeLinecap="round" strokeLinejoin="round" strokeWidth={waveStrokeWidth} vectorEffect="non-scaling-stroke">
+          {selected && <animate attributeName="d" dur={animationDuration} repeatCount="indefinite" values={animatedPathValues} />}
         </path>
-        <path d={path} fill="none" stroke={`url(#${gradientId})`} strokeLinecap="round" strokeLinejoin="round" strokeWidth={selected ? 14 : 10} opacity={glowOpacity} clipPath={`url(#${clipId})`} filter="blur(4px)">
-          <animate attributeName="d" dur={animationDuration} repeatCount="indefinite" values={animatedPathValues} />
-        </path>
-        <path d={path} fill="none" stroke={`url(#${gradientId})`} strokeLinecap="round" strokeLinejoin="round" strokeWidth={selected ? 6.8 : 5.8} opacity={selected ? 0.98 : 0.86} clipPath={`url(#${clipId})`}>
-          <animate attributeName="d" dur={animationDuration} repeatCount="indefinite" values={animatedPathValues} />
+        <path
+          d={path}
+          fill="none"
+          stroke={`url(#${gradientId})`}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={waveStrokeWidth}
+          opacity={selected ? 0.98 : 0.82}
+          clipPath={`url(#${clipId})`}
+          vectorEffect="non-scaling-stroke"
+          style={{ filter: selectedWaveFilter }}
+        >
+          {selected && <animate attributeName="d" dur={animationDuration} repeatCount="indefinite" values={animatedPathValues} />}
         </path>
       </svg>
-      <span
-        className={`rhythm-node pointer-events-none absolute z-10 aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full ${
-          selected ? 'w-9 sm:w-10' : 'w-7 sm:w-8'
-        } ${theme === 'light' ? 'shadow-[0_0_24px_rgba(183,124,255,0.22)]' : 'shadow-[0_0_28px_rgba(199,125,255,0.34)]'}`}
-        style={nodeStyle}
-        aria-hidden="true"
-      >
-        <span className={`absolute inset-[-45%] rounded-full blur-md ${selected ? 'opacity-70' : 'opacity-42'} ${theme === 'light' ? 'bg-[#c084fc]/24' : 'bg-[#c084fc]/34'}`} />
-        <span className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_38%_28%,#ffe1f6_0%,#f4a7df_22%,#b872ff_56%,#7c4dff_100%)]" />
-        <span className="absolute left-[32%] top-[17%] h-[24%] w-[24%] rounded-full bg-white/62 blur-[0.5px]" />
-      </span>
+      {selected && (
+        <span
+          className={`rhythm-node pointer-events-none absolute z-10 aspect-square w-9 -translate-x-1/2 -translate-y-1/2 rounded-full sm:w-10 ${
+            theme === 'light' ? 'shadow-[0_0_24px_rgba(183,124,255,0.22)]' : 'shadow-[0_0_28px_rgba(199,125,255,0.34)]'
+          }`}
+          style={nodeStyle}
+          aria-hidden="true"
+        >
+          <span className={`absolute inset-[-45%] rounded-full blur-md opacity-70 ${theme === 'light' ? 'bg-[#c084fc]/24' : 'bg-[#c084fc]/34'}`} />
+          <span className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_38%_28%,#ffe1f6_0%,#f4a7df_22%,#b872ff_56%,#7c4dff_100%)]" />
+          <span className="absolute left-[32%] top-[17%] h-[24%] w-[24%] rounded-full bg-white/62 blur-[0.5px]" />
+        </span>
+      )}
     </div>
   );
 }
