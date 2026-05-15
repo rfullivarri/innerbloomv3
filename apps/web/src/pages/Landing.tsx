@@ -27,6 +27,7 @@ import { AdaptiveText } from "../components/landing/AdaptiveText";
 import { CookieConsentBanner } from "../components/landing/CookieConsentBanner";
 import { useLandingAnalytics } from "../components/landing/useLandingAnalytics";
 import { HeroPhoneShowcase } from "../components/landing/HeroPhoneShowcase";
+import { AvatarCtaBanner } from "../components/landing/AvatarCtaBanner";
 import WeatherCycleOrb from "../components/landing/WeatherCycleOrb";
 import { DEMO_USER_ID } from "../components/demo/DemoDashboardOverviewScene";
 import { StreaksPanel } from "../components/dashboard-v3/StreaksPanel";
@@ -1887,6 +1888,17 @@ export default function LandingPage({
 
           </>
         )}
+
+        {isV3Conversion ? (
+          <section className="avatar-cta-section section-pad reveal-on-scroll" id="avatar-start">
+            <div className="container">
+              <AvatarCtaBanner
+                language={language}
+                startHref={buildOnboardingPath(language)}
+              />
+            </div>
+          </section>
+        ) : null}
 
         <section
           className="testimonials section-pad reveal-on-scroll"
