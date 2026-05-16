@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import type { OnboardingLanguage } from './constants';
-import type { GameMode } from './state';
+import type { GameMode, Pillar as OnboardingPillar, StepId } from './state';
 import { GAME_MODE_META } from '../lib/gameModeMeta';
 import { apiAuthorizedFetch, getCurrentUserProfile, markOnboardingProgress } from '../lib/api';
 import { setJourneyGenerationPending } from '../lib/journeyGeneration';
@@ -13,10 +13,13 @@ import { NavButtons } from './ui/NavButtons';
 import { GameModeChip as SharedGameModeChip, buildGameModeChip } from '../components/common/GameModeChip';
 import { buildAvatarPreviewProfile, getAvatarOptionById, resolveAvatarPickerPreviewImage } from '../lib/avatarCatalog';
 import { useThemePreference } from '../theme/ThemePreferenceProvider';
+import { QUICK_START_MINIMUMS, QUICK_START_TASKS, computeQuickStartGp, type ModerationOption } from './quickStart';
+import { QuickStartModerationStep } from './steps/QuickStartModerationStep';
+import { QuickStartSummaryStep } from './steps/QuickStartSummaryStep';
+import { QuickStartTasksStep } from './steps/QuickStartTasksStep';
 
 type Pillar = 'Body' | 'Mind' | 'Soul';
 type Step = 'body' | 'mind' | 'soul' | 'moderation' | 'summary' | 'setup';
-type ModerationOption = 'sugar' | 'tobacco' | 'alcohol';
 
 interface Task {
   id: string;
@@ -684,9 +687,192 @@ interface IntegratedQuickStartFlowProps {
   onBackToPathSelect: () => void;
   onExit: () => void;
   onRestart: () => void;
+  routeStepId?: StepId;
+  selectedTasksByPillar?: Record<OnboardingPillar, string[]>;
+  editableTaskValues?: Record<string, string>;
+  selectedModerations?: ModerationOption[];
+  isSubmitting?: boolean;
+  submitError?: string | null;
+  onToggleTask?: (pillar: OnboardingPillar, taskId: string) => void;
+  onTaskInputChange?: (taskKey: string, value: string) => void;
+  onToggleModeration?: (value: ModerationOption) => void;
+  onBack?: () => void;
+  onConfirm?: () => void;
+  onFinish?: () => void;
 }
 
-export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gameMode: initialGameMode, avatarId, onBackToPathSelect, onExit, onRestart }: IntegratedQuickStartFlowProps) {
+function ControlledQuickStartFlow({
+  language,
+  gameMode,
+  avatarId,
+  routeStepId,
+  selectedTasksByPillar,
+  editableTaskValues,
+  selectedModerations,
+  isSubmitting,
+  submitError,
+  onToggleTask,
+  onTaskInputChange,
+  onToggleModeration,
+  onBack,
+  onConfirm,
+  onFinish,
+  onExit,
+  onRestart,
+}: {
+  language: OnboardingLanguage;
+  gameMode: GameMode;
+  avatarId: number | null;
+  routeStepId: StepId;
+  selectedTasksByPillar: Record<OnboardingPillar, string[]>;
+  editableTaskValues: Record<string, string>;
+  selectedModerations: ModerationOption[];
+  isSubmitting: boolean;
+  submitError: string | null;
+  onToggleTask: (pillar: OnboardingPillar, taskId: string) => void;
+  onTaskInputChange: (taskKey: string, value: string) => void;
+  onToggleModeration: (value: ModerationOption) => void;
+  onBack: () => void;
+  onConfirm: () => void;
+  onFinish: () => void;
+  onExit: () => void;
+  onRestart: () => void;
+}) {
+  const quickStartGp = computeQuickStartGp(selectedTasksByPillar);
+  const route = [
+    'quick-start-body',
+    'quick-start-mind',
+    'quick-start-soul',
+    ...(selectedTasksByPillar.Body.includes('MODERACION') ? ['quick-start-moderation'] : []),
+    'avatar-select',
+    'quick-start-summary',
+  ] as StepId[];
+  const stepIndex = Math.max(0, route.indexOf(routeStepId));
+  const renderPillarStep = (pillar: OnboardingPillar) => (
+    <QuickStartTasksStep
+      language={language}
+      pillar={pillar}
+      tasks={QUICK_START_TASKS[language][pillar]}
+      selectedIds={selectedTasksByPillar[pillar]}
+      inputValues={editableTaskValues}
+      minimum={QUICK_START_MINIMUMS[gameMode]}
+      gameMode={gameMode}
+      balancedBonusActive={quickStartGp.balancedBonusActive}
+      onToggleTask={(taskId) => onToggleTask(pillar, taskId)}
+      onInputChange={(taskId, value) => onTaskInputChange(`${pillar}-${taskId}`, value)}
+      onBack={onBack}
+      onConfirm={onConfirm}
+    />
+  );
+
+  return (
+    <div className="quickstart-premium-root onboarding-premium-root min-h-screen min-h-dvh pb-12 pt-28 text-white sm:pt-32">
+      <HUD
+        language={language}
+        mode={gameMode}
+        stepIndex={stepIndex}
+        totalSteps={route.length}
+        xp={quickStartGp.xp}
+        onRestart={onRestart}
+        onExit={onExit}
+      />
+
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
+        {routeStepId === 'quick-start-body' ? renderPillarStep('Body') : null}
+        {routeStepId === 'quick-start-mind' ? renderPillarStep('Mind') : null}
+        {routeStepId === 'quick-start-soul' ? renderPillarStep('Soul') : null}
+        {routeStepId === 'quick-start-moderation' ? (
+          <QuickStartModerationStep
+            language={language}
+            selectedModerations={selectedModerations}
+            onToggle={onToggleModeration}
+            onBack={onBack}
+            onConfirm={onConfirm}
+          />
+        ) : null}
+        {routeStepId === 'quick-start-summary' ? (
+          <QuickStartSummaryStep
+            language={language}
+            gameMode={gameMode}
+            selectedAvatarId={avatarId}
+            selectedByPillar={selectedTasksByPillar}
+            tasksByPillar={QUICK_START_TASKS[language]}
+            xp={quickStartGp.xp}
+            onBack={onBack}
+            onConfirm={onFinish}
+            loading={isSubmitting}
+            submitError={submitError}
+          />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+export function IntegratedQuickStartFlow({
+  language: initialLanguage = 'es',
+  gameMode: initialGameMode,
+  avatarId,
+  onBackToPathSelect,
+  onExit,
+  onRestart,
+  routeStepId,
+  selectedTasksByPillar: controlledSelectedTasksByPillar,
+  editableTaskValues: controlledEditableTaskValues,
+  selectedModerations: controlledSelectedModerations,
+  isSubmitting: controlledIsSubmitting = false,
+  submitError: controlledSubmitError = null,
+  onToggleTask,
+  onTaskInputChange,
+  onToggleModeration,
+  onBack,
+  onConfirm,
+  onFinish,
+}: IntegratedQuickStartFlowProps) {
+  if (routeStepId) {
+    return (
+      <ControlledQuickStartFlow
+        language={initialLanguage}
+        gameMode={initialGameMode}
+        avatarId={avatarId}
+        routeStepId={routeStepId}
+        selectedTasksByPillar={controlledSelectedTasksByPillar ?? { Body: [], Mind: [], Soul: [] }}
+        editableTaskValues={controlledEditableTaskValues ?? {}}
+        selectedModerations={controlledSelectedModerations ?? []}
+        isSubmitting={controlledIsSubmitting}
+        submitError={controlledSubmitError}
+        onToggleTask={onToggleTask ?? (() => undefined)}
+        onTaskInputChange={onTaskInputChange ?? (() => undefined)}
+        onToggleModeration={onToggleModeration ?? (() => undefined)}
+        onBack={onBack ?? onBackToPathSelect}
+        onConfirm={onConfirm ?? (() => undefined)}
+        onFinish={onFinish ?? onConfirm ?? (() => undefined)}
+        onExit={onExit}
+        onRestart={onRestart}
+      />
+    );
+  }
+
+  return (
+    <UncontrolledIntegratedQuickStartFlow
+      language={initialLanguage}
+      gameMode={initialGameMode}
+      avatarId={avatarId}
+      onBackToPathSelect={onBackToPathSelect}
+      onExit={onExit}
+      onRestart={onRestart}
+    />
+  );
+}
+
+function UncontrolledIntegratedQuickStartFlow({
+  language: initialLanguage = 'es',
+  gameMode: initialGameMode,
+  avatarId,
+  onBackToPathSelect,
+  onExit,
+  onRestart,
+}: Pick<IntegratedQuickStartFlowProps, 'language' | 'gameMode' | 'avatarId' | 'onBackToPathSelect' | 'onExit' | 'onRestart'>) {
   const { theme } = useThemePreference();
   const isLight = theme === 'light';
   const navigate = useNavigate();

@@ -23,7 +23,7 @@ export function AvatarStep({
 }: AvatarStepProps) {
   const copy = language === 'en'
     ? {
-        step: 'Step 2 · Choose your avatar',
+        step: 'Optional · Choose your avatar',
         title: 'Which avatar feels like your space?',
         subtitle: 'Avatar controls visuals. Rhythm keeps controlling your journey behavior.',
         selected: 'Selected',
@@ -32,7 +32,7 @@ export function AvatarStep({
         saving: 'Saving…',
       }
     : {
-        step: 'Paso 2 · Elegí tu avatar',
+        step: 'Opcional · Elegí tu avatar',
         title: '¿Qué avatar representa tu espacio?',
         subtitle: 'El avatar define lo visual. Tu ritmo sigue definiendo el comportamiento del Journey.',
         selected: 'Seleccionado',

@@ -15,6 +15,7 @@ import { OpenTextStep } from './steps/OpenTextStep';
 import { PathSelectStep } from './steps/PathSelectStep';
 import { AvatarStep } from './steps/AvatarStep';
 import { IntegratedQuickStartFlow } from './IntegratedQuickStartFlow';
+import { OnboardingStructureStep } from './steps/OnboardingStructureStep';
 import { SummaryStep } from './steps/SummaryStep';
 import { GpExplainerOverlay } from './ui/GpExplainerOverlay';
 import { HUD } from './ui/HUD';
@@ -205,10 +206,11 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
   }, [isGpExplainerOpen]);
 
   useEffect(() => {
-    if (stepId !== 'avatar-select' && answers.mode && answers.avatarId == null) {
+    const avatarStepIndex = route.indexOf('avatar-select');
+    if (stepId !== 'avatar-select' && avatarStepIndex >= 0 && currentStepIndex > avatarStepIndex && answers.mode && answers.avatarId == null) {
       console.warn('[onboarding] missing avatar selection after rhythm step', { stepId, mode: answers.mode });
     }
-  }, [answers.avatarId, answers.mode, stepId]);
+  }, [answers.avatarId, answers.mode, currentStepIndex, route, stepId]);
 
   const handleChecklistConfirm = (target: StepId) => {
     const hadChecklist = awardedChecklists[target];
@@ -317,6 +319,14 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
             onBack={() => goToStep('clerk-gate')}
           />
         );
+      case 'structure-intro':
+        return (
+          <OnboardingStructureStep
+            language={language}
+            onBack={() => goToStep('mode-select')}
+            onContinue={goNext}
+          />
+        );
       case 'path-select':
         return (
           <PathSelectStep
@@ -342,7 +352,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
               isSaving={isSavingAvatar}
               onSelectAvatar={(avatarId) => handleAvatarChoice(avatarId)}
               onSkip={() => handleAvatarChoice(DEFAULT_SKIPPED_AVATAR_ID, { skip: true })}
-              onBack={() => goToStep('mode-select')}
+              onBack={goPrevious}
             />
             {avatarStepError ? <p className="text-center text-sm text-rose-200">{avatarStepError}</p> : null}
           </>
@@ -597,14 +607,31 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
 
   if (isQuickStartFlowActive) {
     return (
-      <IntegratedQuickStartFlow
-        language={language}
-        gameMode={answers.mode ?? 'CHILL'}
-        avatarId={answers.avatarId}
-        onBackToPathSelect={() => goToStep('path-select')}
-        onExit={handleExit}
-        onRestart={handleRestart}
-      />
+      <>
+        <div className={isGpExplainerOpen ? 'blur-[2px]' : ''}>
+          <IntegratedQuickStartFlow
+            language={language}
+            gameMode={answers.mode ?? 'CHILL'}
+            avatarId={answers.avatarId}
+            routeStepId={stepId}
+            selectedTasksByPillar={answers.quickStart.selectedTasksByPillar}
+            editableTaskValues={answers.quickStart.editableTaskValues}
+            selectedModerations={answers.quickStart.selectedModerations}
+            isSubmitting={isSubmitting}
+            submitError={submitError}
+            onToggleTask={toggleQuickStartTask}
+            onTaskInputChange={setQuickStartTaskInput}
+            onToggleModeration={toggleQuickStartModeration}
+            onBack={goPrevious}
+            onConfirm={goNext}
+            onFinish={handleFinish}
+            onBackToPathSelect={() => goToStep('structure-intro')}
+            onExit={handleExit}
+            onRestart={handleRestart}
+          />
+        </div>
+        {isGpExplainerOpen ? <GpExplainerOverlay language={language} onClose={handleCloseGpExplainer} /> : null}
+      </>
     );
   }
 

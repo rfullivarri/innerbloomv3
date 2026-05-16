@@ -6,6 +6,7 @@ export type Pillar = 'Body' | 'Mind' | 'Soul';
 export type StepId =
   | 'clerk-gate'
   | 'mode-select'
+  | 'structure-intro'
   | 'avatar-select'
   | 'path-select'
   | 'low-body'
@@ -34,6 +35,7 @@ export type OnboardingPath = 'traditional' | 'quick_start';
 const ALL_STEPS: StepId[] = [
   'clerk-gate',
   'mode-select',
+  'structure-intro',
   'avatar-select',
   'path-select',
   'low-body',
@@ -125,15 +127,18 @@ export interface OnboardingState {
 }
 
 const BASE_ROUTE: StepId[] = ['clerk-gate', 'mode-select'];
-const BASE_MODE_ROUTE: StepId[] = [...BASE_ROUTE, 'avatar-select', 'path-select'];
+const DEFAULT_MODE_ROUTE: StepId[] = [...BASE_ROUTE, 'structure-intro'];
+const TRADITIONAL_MODE_ROUTE: StepId[] = [...BASE_ROUTE, 'avatar-select', 'path-select'];
+const QUICK_START_MODE_ROUTE: StepId[] = [...BASE_ROUTE, 'structure-intro'];
 
 function buildQuickStartRoute(includeModeration: boolean): StepId[] {
   return [
-    ...BASE_MODE_ROUTE,
+    ...QUICK_START_MODE_ROUTE,
     'quick-start-body',
     'quick-start-mind',
     'quick-start-soul',
     ...(includeModeration ? (['quick-start-moderation'] as const) : []),
+    'avatar-select',
     'quick-start-summary',
   ];
 }
@@ -208,7 +213,7 @@ export function computeRouteForMode(
   }
 
   if (!onboardingPath) {
-    return BASE_MODE_ROUTE;
+    return DEFAULT_MODE_ROUTE;
   }
 
   if (onboardingPath === 'quick_start') {
@@ -216,7 +221,7 @@ export function computeRouteForMode(
   }
 
   const modeRoute = MODE_ROUTES[mode];
-  return [...BASE_MODE_ROUTE, ...modeRoute];
+  return [...TRADITIONAL_MODE_ROUTE, ...modeRoute];
 }
 
 export function applyChecklistSelection(
@@ -345,12 +350,12 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
       const nextAnswers = cloneAnswers(prev.answers);
       nextAnswers.mode = mode;
-      const nextRoute = computeRouteForMode(mode, null);
+      const nextRoute = computeRouteForMode(mode, 'quick_start', hasQuickStartModerationSelection(nextAnswers));
 
       return {
         ...prev,
         answers: nextAnswers,
-        onboardingPath: null,
+        onboardingPath: 'quick_start',
         route: nextRoute,
       };
     });
