@@ -604,7 +604,17 @@ function LandingV3EmotionChartVisual() {
   );
 }
 
-function LandingV3MethodVisual({ index, language }: { index: number; language: Language }) {
+export function LandingV3MethodVisual({
+  index,
+  language,
+  logrosCycleMs,
+  nativePreview = false,
+}: {
+  index: number;
+  language: Language;
+  logrosCycleMs?: number;
+  nativePreview?: boolean;
+}) {
   const [animatedMinutes, setAnimatedMinutes] = useState("15");
 
   useEffect(() => {
