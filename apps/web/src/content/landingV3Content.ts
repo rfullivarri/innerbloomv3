@@ -22,10 +22,10 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
     },
     how: {
       ...LANDING_V2_CONTENT.es.how,
-      kicker: 'MÉTODO ADAPTATIVO',
-      title: 'Un Journey que empieza simple y aprende de tu progreso.',
+      kicker: 'EL SISTEMA',
+      title: 'Un método simple para días que no siempre son simples.',
       intro:
-        'No necesitas llegar con una rutina perfecta. Innerbloom entiende tu punto de partida, propone un ritmo posible y recalibra con señales reales.',
+        'No necesitás una rutina perfecta. Empezá donde estás, encontrá un ritmo que encaje y dejá que el sistema se ajuste cuando la vida cambie.',
       steps: [
         {
           title: 'Empieza posible, no perfecto.',
@@ -90,10 +90,10 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
     },
     how: {
       ...LANDING_V2_CONTENT.en.how,
-      kicker: 'ADAPTIVE METHOD',
-      title: 'A Journey that starts simple and learns from your progress.',
+      kicker: 'THE SYSTEM',
+      title: 'A simple method for days that are not always simple.',
       intro:
-        'No perfect routine required. Innerbloom understands your starting point, gives you a sustainable rhythm, and recalibrates from real signals.',
+        'No perfect routine required. Start where you are, get a rhythm that fits, and let the system adjust as life changes.',
       steps: [
         {
           title: 'Start possible, not perfect.',

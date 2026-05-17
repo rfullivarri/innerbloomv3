@@ -154,7 +154,7 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
       ],
     },
     demo: {
-      title: 'Entendé por qué seguís — o dónde solés frenar.',
+      title: 'Haz visible tu progreso',
       text:
         'Acciones, emociones, rachas y energía en una vista clara para que tu progreso sea más fácil de entender y sostener.',
       banner: 'Explorá tu ritmo real',
@@ -389,7 +389,7 @@ export const LANDING_V2_CONTENT: Record<Language, LandingCopy> = {
       ],
     },
     demo: {
-      title: 'See why you keep going — or where you usually stop.',
+      title: 'Make visible your progress',
       text:
         'Actions, emotions, streaks, and energy in one clear view, so your progress becomes easier to understand and easier to sustain.',
       banner: 'Explore your real rhythm',
