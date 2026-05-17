@@ -21,6 +21,21 @@ export const QUICK_START_MINIMUMS: Record<GameMode, number> = {
   EVOLVE: 3,
 };
 
+export const QUICK_START_SUGGESTED_RANGES: Record<GameMode, { min: number; max: number }> = {
+  LOW: { min: 1, max: 2 },
+  CHILL: { min: 2, max: 3 },
+  FLOW: { min: 3, max: 5 },
+  EVOLVE: { min: 5, max: 7 },
+};
+
+export function getQuickStartSuggestedRule(gameMode: GameMode, language: OnboardingLanguage): string {
+  const range = QUICK_START_SUGGESTED_RANGES[gameMode];
+
+  return language === 'en'
+    ? `Suggested: ${range.min} to ${range.max}`
+    : `Sugerido: ${range.min} a ${range.max}`;
+}
+
 export const QUICK_START_TASKS: Record<OnboardingLanguage, Record<Pillar, QuickStartTask[]>> = {
   es: {
     Body: [

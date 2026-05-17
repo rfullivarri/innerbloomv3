@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import type { OnboardingLanguage } from '../constants';
 import { NavButtons } from '../ui/NavButtons';
 import type { GameMode, Pillar } from '../state';
-import type { QuickStartTask } from '../quickStart';
+import { getQuickStartSuggestedRule, type QuickStartTask } from '../quickStart';
 
 interface QuickStartTasksStepProps {
   language?: OnboardingLanguage;
@@ -166,7 +166,7 @@ export function QuickStartTasksStep({
             ? 'Tune your mental focus while keeping the current onboarding feel.'
             : 'Choose habits that support connection and inner alignment.',
         minRule: `Minimum: ${minimum} tasks`,
-        suggestedRule: 'Suggested: 9 to 12',
+        suggestedRule: getQuickStartSuggestedRule(gameMode, language),
         minimumRequired: 'You need to select the minimum to continue.',
         continue: 'Continue',
         back: 'Back',
@@ -184,7 +184,7 @@ export function QuickStartTasksStep({
             ? 'Ajustá tu foco mental sin salir del ritmo del onboarding actual.'
             : 'Definí hábitos que te ayuden a mantener centro y conexión.',
         minRule: `Mínimo: ${minimum} tareas`,
-        suggestedRule: 'Sugerido: 9 a 12',
+        suggestedRule: getQuickStartSuggestedRule(gameMode, language),
         minimumRequired: 'Necesitás seleccionar el mínimo para continuar.',
         continue: 'Continuar',
         back: 'Volver',

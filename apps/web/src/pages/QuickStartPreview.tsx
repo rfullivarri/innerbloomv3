@@ -16,6 +16,7 @@ import { NavButtons } from '../onboarding/ui/NavButtons';
 import { GameModeChip as SharedGameModeChip, buildGameModeChip } from '../components/common/GameModeChip';
 import { buildAvatarPreviewProfile, getAvatarOptionById, resolveAvatarPickerPreviewImage } from '../lib/avatarCatalog';
 import { getOnboardingRhythmTheme } from '../onboarding/utils/onboardingRhythmTheme';
+import { QUICK_START_MINIMUMS, getQuickStartSuggestedRule } from '../onboarding/quickStart';
 
 type Pillar = 'Body' | 'Mind' | 'Soul';
 type Step = 'game-mode' | 'avatar' | 'branch' | 'body' | 'mind' | 'soul' | 'moderation' | 'summary' | 'setup';
@@ -53,7 +54,7 @@ interface Translations {
   pillarTitles: Record<Pillar, string>;
   pillarSubtitles: Record<Pillar, string>;
   minRule: (min: number) => string;
-  suggestedRule: string;
+  suggestedRule: (gameMode: GameMode) => string;
   minimumRequired: string;
   traitLabel: string;
   taskHelpLabel: string;
@@ -112,13 +113,6 @@ interface QuickStartPreviewDraft {
   completedSteps: Partial<Record<Step, boolean>>;
 }
 
-const MODE_MINIMUMS: Record<GameMode, number> = {
-  LOW: 1,
-  CHILL: 2,
-  FLOW: 3,
-  EVOLVE: 3,
-};
-
 const COPY: Record<OnboardingLanguage, Translations> = {
   es: {
     title: 'Vista previa de Inicio rápido',
@@ -150,7 +144,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
       Soul: 'Definí hábitos que te ayuden a mantener centro y conexión.',
     },
     minRule: (min) => `Mínimo: ${min} tareas`,
-    suggestedRule: 'Sugerido: 9 a 12',
+    suggestedRule: (gameMode) => getQuickStartSuggestedRule(gameMode, 'es'),
     minimumRequired: 'Necesitás seleccionar el mínimo para continuar.',
     traitLabel: 'RASGO',
     taskHelpLabel: 'Abrir ideas rápidas de la tarea',
@@ -361,7 +355,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
       Soul: 'Choose habits that support connection and inner alignment.',
     },
     minRule: (min) => `Minimum: ${min} tasks`,
-    suggestedRule: 'Suggested: 9 to 12',
+    suggestedRule: (gameMode) => getQuickStartSuggestedRule(gameMode, 'en'),
     minimumRequired: 'You need to select the minimum to continue.',
     traitLabel: 'TRAIT',
     taskHelpLabel: 'Open quick ideas for this task',
@@ -731,7 +725,7 @@ export default function QuickStartPreviewPage() {
   const selectedAvatarProfile = selectedAvatarOption ? buildAvatarPreviewProfile(selectedAvatarOption) : null;
   const selectedAvatarPreviewImage = selectedAvatarOption ? resolveAvatarPickerPreviewImage(selectedAvatarOption) : null;
 
-  const minimum = MODE_MINIMUMS[gameMode];
+  const minimum = QUICK_START_MINIMUMS[gameMode];
   const setupSteps = useMemo(
     () => copy.setupSteps.map((setupStep) => setupStep.replace('{mode}', copy.modeLabels[gameMode])),
     [copy.modeLabels, copy.setupSteps, gameMode],
@@ -1055,7 +1049,7 @@ export default function QuickStartPreviewPage() {
           >
             <span className="whitespace-nowrap">{copy.minRule(minimum)}</span>
             <span className="text-violet-100/60" aria-hidden>·</span>
-            <span className="whitespace-nowrap">{copy.suggestedRule}</span>
+            <span className="whitespace-nowrap">{copy.suggestedRule(gameMode)}</span>
           </div>
           <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
             <span
