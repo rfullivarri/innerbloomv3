@@ -9,6 +9,7 @@ type GoogleOAuthButtonProps = {
   redirectUrlComplete: string;
   className?: string;
   forceAccountSelection?: boolean;
+  allowCrossModeCompletion?: boolean;
 };
 
 const SSO_CALLBACK_PATH = '/sso-callback';
@@ -19,6 +20,7 @@ export function GoogleOAuthButton({
   redirectUrlComplete,
   className = '',
   forceAccountSelection = false,
+  allowCrossModeCompletion = false,
 }: GoogleOAuthButtonProps) {
   const { isLoaded: isSignInLoaded, signIn } = useSignIn();
   const { isLoaded: isSignUpLoaded, signUp } = useSignUp();
@@ -64,8 +66,8 @@ export function GoogleOAuthButton({
           strategy: 'oauth_google',
           redirectUrl: SSO_CALLBACK_PATH,
           redirectUrlComplete,
-          continueSignIn: false,
-          continueSignUp: false,
+          continueSignIn: allowCrossModeCompletion,
+          continueSignUp: allowCrossModeCompletion,
           oidcPrompt: shouldForceAccountSelection ? 'select_account' : undefined,
         });
       } else {
@@ -76,8 +78,8 @@ export function GoogleOAuthButton({
           strategy: 'oauth_google',
           redirectUrl: SSO_CALLBACK_PATH,
           redirectUrlComplete,
-          continueSignIn: false,
-          continueSignUp: false,
+          continueSignIn: allowCrossModeCompletion,
+          continueSignUp: allowCrossModeCompletion,
           oidcPrompt: shouldForceAccountSelection ? 'select_account' : undefined,
         });
       }
@@ -85,7 +87,7 @@ export function GoogleOAuthButton({
       console.error('[auth] Google OAuth redirect failed', error);
       setIsRedirecting(false);
     }
-  }, [isLoaded, isRedirecting, mode, redirectUrlComplete, shouldForceAccountSelection, signIn, signUp]);
+  }, [allowCrossModeCompletion, isLoaded, isRedirecting, mode, redirectUrlComplete, shouldForceAccountSelection, signIn, signUp]);
 
   return (
     <button
