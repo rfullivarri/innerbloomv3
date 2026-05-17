@@ -67,8 +67,8 @@ export function AvatarCtaBanner({
 
   return (
     <section className={`avatar-cta-banner ${className}`} aria-labelledby="avatar-cta-title">
+      <p className="avatar-cta-banner__kicker">{copy.kicker}</p>
       <div className="avatar-cta-banner__copy">
-        <p className="avatar-cta-banner__kicker">{copy.kicker}</p>
         <h2 id="avatar-cta-title" className="avatar-cta-banner__title">
           {copy.titleLead} <span>{copy.titleAccent}</span>
         </h2>

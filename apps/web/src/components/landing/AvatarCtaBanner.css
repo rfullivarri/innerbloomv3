@@ -9,6 +9,19 @@
   padding: clamp(0.4rem, 1.4vw, 1rem) 0;
 }
 
+.avatar-cta-banner__kicker {
+  grid-column: 1 / -1;
+  justify-self: center;
+  margin: 0 0 clamp(-0.3rem, -0.5vw, 0rem);
+  color: #8b5cf6;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(0.72rem, 1.4vw, 0.82rem);
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 .avatar-cta-banner__copy,
 .avatar-cta-banner__stage {
   position: relative;
@@ -17,17 +30,6 @@
 
 .avatar-cta-banner__copy {
   max-width: 610px;
-}
-
-.avatar-cta-banner__kicker {
-  margin: 0 0 0.72rem;
-  color: #8b5cf6;
-  font-family: var(--font-display, inherit);
-  font-size: clamp(0.72rem, 1.4vw, 0.82rem);
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-align: center;
-  text-transform: uppercase;
 }
 
 .avatar-cta-banner__title {
@@ -62,7 +64,9 @@
   flex-wrap: wrap;
   gap: 0.85rem;
   align-items: center;
+  justify-content: center;
   margin-top: 1.2rem;
+  max-width: 540px;
 }
 
 .avatar-cta-banner__button {
