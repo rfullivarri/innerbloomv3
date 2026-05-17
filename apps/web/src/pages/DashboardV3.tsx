@@ -912,6 +912,7 @@ export default function DashboardV3Page() {
               ...section,
               showPulseDot:
                 (section.key === "dashboard" && shouldShowDashboardDot) ||
+                (section.key === "dquest" && shouldShowFirstDailyQuestCta) ||
                 (section.key === "rewards" && pendingHabitDecisionCount > 0),
             }))}
             onSectionClick={(section) => {
@@ -1047,6 +1048,7 @@ export default function DashboardV3Page() {
                     <DailyQuestView
                       section={dquestSection}
                       onOpenDailyQuest={handleOpenDaily}
+                      onOpenReminderScheduler={handleOpenReminderScheduler}
                     />
                   }
                 />
@@ -1148,6 +1150,7 @@ export default function DashboardV3Page() {
                 },
                 showPulseDot:
                   (section.key === "dashboard" && shouldShowDashboardDot) ||
+                  (section.key === "dquest" && shouldShowFirstDailyQuestCta) ||
                   (section.key === "rewards" && pendingHabitDecisionCount > 0),
               };
             })}
@@ -1371,9 +1374,11 @@ function MissionsView({
 function DailyQuestView({
   section,
   onOpenDailyQuest,
+  onOpenReminderScheduler,
 }: {
   section: DashboardSectionConfig;
   onOpenDailyQuest: () => void;
+  onOpenReminderScheduler: () => void;
 }) {
   return (
     <div className="space-y-6">
@@ -1383,51 +1388,23 @@ function DailyQuestView({
         description={section.description}
         pageTitle={section.pageTitle}
       />
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-12 lg:gap-6">
-        <LegacyCard
-          className="lg:col-span-7"
-          title="Activá tu DQuest"
-          subtitle="Ritual de foco en menos de 5 minutos"
-          action={
-            <button
-              type="button"
-              onClick={onOpenDailyQuest}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-              style={{ background: 'var(--gradient-innerbloom)', boxShadow: 'var(--shadow-innerbloom-cta)' }}
-            >
-              Abrir Daily Quest
-            </button>
-          }
-        >
-          <div className="space-y-3 text-sm text-[color:var(--color-text-muted)]">
-            <p>
-              Generamos una misión corta y accionable para que mantengas la
-              racha. Abrila, confirma tu plan y marcala cuando la completes.
-            </p>
-            <ul className="space-y-2">
-              {[
-                "1 foco principal con claridad de impacto.",
-                "Recordatorios opcionales para no olvidarla.",
-                "Registro rápido del resultado y energía invertida.",
-              ].map((tip) => (
-                <li key={tip} className="flex items-start gap-2 text-[color:var(--color-text-muted)]">
-                  <span
-                    className="mt-1 inline-block h-2 w-2 rounded-full shadow-[0_0_12px_rgba(207,139,243,0.45)]"
-                    style={{ background: 'var(--gradient-innerbloom)' }}
-                    aria-hidden
-                  />
-                  <span>{tip}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </LegacyCard>
-        <LegacyCard
-          className="lg:col-span-5"
-          title="Consejos rápidos"
-          subtitle="Mantén el hábito vivo"
-        >
-          <div className="space-y-3 text-sm text-[color:var(--color-text-muted)]">
+      <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
+        <div className="space-y-4 lg:col-span-6">
+          <LegacyCard
+            title="Consejos rápidos"
+            subtitle="Mantén el hábito vivo"
+            action={
+              <button
+                type="button"
+                onClick={onOpenDailyQuest}
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                style={{ background: 'var(--gradient-innerbloom)', boxShadow: 'var(--shadow-innerbloom-cta)' }}
+              >
+                Abrir Daily Quest
+              </button>
+            }
+          >
+            <div className="space-y-3 text-sm text-[color:var(--color-text-muted)]">
             <p className="font-semibold text-[color:var(--color-text)]">
               DQuest es tu base diaria:
             </p>
@@ -1461,8 +1438,28 @@ function DailyQuestView({
                 </span>
               </li>
             </ul>
-          </div>
-        </LegacyCard>
+            </div>
+          </LegacyCard>
+          <section className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-[color:var(--color-text)]">
+                  Programá tu Daily Quest
+                </p>
+                <p className="mt-1 text-sm text-[color:var(--color-text-muted)]">
+                  Definí tu horario y recordatorio diario desde el scheduler.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenReminderScheduler}
+                className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/45"
+              >
+                Abrir scheduler
+              </button>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ type GoogleOAuthButtonProps = {
   redirectUrlComplete: string;
   className?: string;
   forceAccountSelection?: boolean;
+  allowCrossModeCompletion?: boolean;
 };
 
 const SSO_CALLBACK_PATH = '/sso-callback';
@@ -19,6 +20,7 @@ export function GoogleOAuthButton({
   redirectUrlComplete,
   className = '',
   forceAccountSelection = false,
+  allowCrossModeCompletion = false,
 }: GoogleOAuthButtonProps) {
   const { isLoaded: isSignInLoaded, signIn } = useSignIn();
   const { isLoaded: isSignUpLoaded, signUp } = useSignUp();
@@ -64,8 +66,8 @@ export function GoogleOAuthButton({
           strategy: 'oauth_google',
           redirectUrl: SSO_CALLBACK_PATH,
           redirectUrlComplete,
-          continueSignIn: false,
-          continueSignUp: false,
+          continueSignIn: allowCrossModeCompletion,
+          continueSignUp: allowCrossModeCompletion,
           oidcPrompt: shouldForceAccountSelection ? 'select_account' : undefined,
         });
       } else {
@@ -76,8 +78,8 @@ export function GoogleOAuthButton({
           strategy: 'oauth_google',
           redirectUrl: SSO_CALLBACK_PATH,
           redirectUrlComplete,
-          continueSignIn: false,
-          continueSignUp: false,
+          continueSignIn: allowCrossModeCompletion,
+          continueSignUp: allowCrossModeCompletion,
           oidcPrompt: shouldForceAccountSelection ? 'select_account' : undefined,
         });
       }
@@ -85,7 +87,7 @@ export function GoogleOAuthButton({
       console.error('[auth] Google OAuth redirect failed', error);
       setIsRedirecting(false);
     }
-  }, [isLoaded, isRedirecting, mode, redirectUrlComplete, shouldForceAccountSelection, signIn, signUp]);
+  }, [allowCrossModeCompletion, isLoaded, isRedirecting, mode, redirectUrlComplete, shouldForceAccountSelection, signIn, signUp]);
 
   return (
     <button
@@ -93,7 +95,7 @@ export function GoogleOAuthButton({
       onClick={() => void handleClick()}
       disabled={isDisabled}
       className={
-        `group inline-flex h-12 w-full items-center justify-center gap-3 rounded-full border border-slate-200/90 ` +
+        `auth-google-button group inline-flex h-12 w-full items-center justify-center gap-3 rounded-full border border-slate-200/90 ` +
         `bg-white px-4 text-sm font-semibold leading-none text-slate-800 shadow-[0_14px_34px_rgba(15,23,42,0.2)] ` +
         `transition-[background-color,box-shadow,border-color,color] duration-150 ` +
         `hover:border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:shadow-[0_14px_34px_rgba(15,23,42,0.24)] ` +
@@ -114,7 +116,7 @@ export function GoogleOAuthButton({
         <path fill="#4CAF50" d="M24 44c5.179 0 9.868-1.977 13.409-5.192l-6.19-5.238C29.146 35.091 26.715 36 24 36c-5.218 0-9.621-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44Z" />
         <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.091 5.571l.003-.002 6.19 5.238C36.971 39.202 44 34 44 24c0-1.341-.138-2.65-.389-3.917Z" />
       </svg>
-      <span className="!text-black">{isRedirecting ? copy.loading : copy.cta}</span>
+      <span className="auth-google-button__label !text-black">{isRedirecting ? copy.loading : copy.cta}</span>
     </button>
   );
 }
