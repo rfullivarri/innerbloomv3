@@ -1654,6 +1654,30 @@
     backdrop-filter: blur(20px);
   }
 
+  .quickstart-setup-card,
+  .onboarding-structure-card {
+    background:
+      radial-gradient(circle at 74% 42%, color-mix(in srgb, #8b5cf6 24%, transparent), transparent 34%),
+      radial-gradient(circle at 86% 22%, color-mix(in srgb, #38bdf8 10%, transparent), transparent 30%),
+      linear-gradient(135deg, rgba(255,255,255,0.085), rgba(139,92,246,0.095) 48%, rgba(56,189,248,0.045));
+    border-color: color-mix(in srgb, var(--color-accent-secondary) 26%, var(--color-border-soft));
+    box-shadow:
+      0 22px 60px rgba(2, 6, 23, 0.34),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  :root[data-theme="light"] .quickstart-setup-card,
+  :root[data-theme="light"] .onboarding-structure-card {
+    background:
+      radial-gradient(circle at 74% 42%, color-mix(in srgb, #a855f7 19%, transparent), transparent 34%),
+      radial-gradient(circle at 86% 20%, color-mix(in srgb, #38bdf8 13%, transparent), transparent 30%),
+      linear-gradient(135deg, rgba(255,255,255,0.88), rgba(245,240,255,0.72) 48%, rgba(239,246,255,0.68));
+    border-color: rgba(124,58,237,0.18);
+    box-shadow:
+      0 24px 64px rgba(64,54,104,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+
   .quickstart-premium-surface {
     background: color-mix(in srgb, var(--color-overlay-1) 74%, transparent);
     border-color: var(--color-border-subtle);
@@ -1666,10 +1690,12 @@
   }
 
   .quickstart-min-rule {
-    border-color: color-mix(in srgb, #8b5cf6 84%, white 16%);
-    background: #8b5cf6;
+    border-color: color-mix(in srgb, #8b5cf6 70%, white 30%);
+    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 55%, #7c3aed 100%);
     color: #ffffff;
-    box-shadow: 0 10px 22px color-mix(in srgb, #8b5cf6 22%, transparent);
+    box-shadow:
+      0 10px 22px color-mix(in srgb, #8b5cf6 25%, transparent),
+      inset 0 1px 0 rgba(255,255,255,0.24);
   }
 
   .quickstart-min-rule__dot {
@@ -1786,14 +1812,17 @@
   }
 
   .quickstart-primary-cta {
-    border-color: color-mix(in srgb, var(--color-accent-secondary) 42%, var(--color-border-soft));
+    border-color: color-mix(in srgb, #8b5cf6 48%, #f9a8d4);
     background: linear-gradient(
       135deg,
-      color-mix(in srgb, var(--color-accent-secondary) 62%, var(--color-surface-elevated)),
-      color-mix(in srgb, var(--color-accent-primary) 36%, var(--color-surface-highlight))
+      #8b5cf6 0%,
+      #c084fc 52%,
+      #f9a8a8 100%
     );
     color: #ffffff;
-    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.32);
+    box-shadow:
+      0 12px 28px rgba(139,92,246,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.24);
   }
 
   :root[data-theme="light"] .quickstart-primary-cta {
@@ -1801,7 +1830,9 @@
   }
 
   .quickstart-primary-cta:hover {
-    box-shadow: 0 14px 28px rgba(2, 6, 23, 0.38);
+    box-shadow:
+      0 16px 34px rgba(139,92,246,0.34),
+      inset 0 1px 0 rgba(255,255,255,0.26);
   }
 
   .quickstart-primary-cta:focus-visible {
@@ -1810,6 +1841,49 @@
 
   :root[data-theme="light"] .quickstart-task-row {
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  }
+
+  .onboarding-structure-dot--active {
+    background: linear-gradient(135deg, #a855f7, #f9a8a8);
+    box-shadow: 0 0 16px rgba(168,85,247,0.8);
+  }
+
+  .auth-mode-switch {
+    border: 1px solid color-mix(in srgb, var(--color-border-soft) 72%, transparent);
+  }
+
+  .auth-mode-switch__option--active {
+    background: #ffffff;
+    color: #111827;
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.24);
+  }
+
+  :root[data-theme="light"] .auth-mode-switch__option--active {
+    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 62%, #7c3aed 100%);
+    color: #ffffff;
+    box-shadow: 0 12px 26px rgba(139,92,246,0.24);
+  }
+
+  :root[data-theme="light"] .auth-google-button {
+    border-color: rgba(15,23,42,0.9);
+    background: #05070c;
+    color: #ffffff;
+    box-shadow: 0 16px 34px rgba(15,23,42,0.24);
+  }
+
+  :root[data-theme="light"] .auth-google-button:hover {
+    border-color: #000000;
+    background: #000000;
+    color: #ffffff;
+    box-shadow: 0 18px 38px rgba(15,23,42,0.3);
+  }
+
+  .auth-google-button__label {
+    color: #111827;
+  }
+
+  :root[data-theme="light"] .auth-google-button__label {
+    color: #ffffff;
   }
 
   :root[data-theme="light"] .quickstart-task-row--selected {

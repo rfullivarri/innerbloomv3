@@ -233,14 +233,14 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
           <h2 className="text-2xl font-semibold text-white">{copy.create}</h2>
         </div>
       </div>
-      <div className="onboarding-surface-inner mt-4 flex gap-2 rounded-full p-1 backdrop-blur">
+      <div className="auth-mode-switch onboarding-surface-inner mt-4 flex gap-2 rounded-full p-1 backdrop-blur">
         {tabOptions.map((option) => (
           <button
             key={option.id}
             type="button"
             onClick={() => setTab(option.id)}
-            className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition ${
-              tab === option.id ? 'bg-[color:var(--color-surface-elevated)] text-[color:var(--color-text)] shadow' : 'text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]'
+            className={`auth-mode-switch__option flex-1 rounded-full px-4 py-2 text-sm font-medium transition ${
+              tab === option.id ? 'auth-mode-switch__option--active' : 'text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]'
             }`}
           >
             {option.label}

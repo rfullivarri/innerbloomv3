@@ -141,6 +141,7 @@ export default function OnboardingIntroPage() {
       return (
         <QuickStartGeneratingScreen
           language={language}
+          gameMode={generationMode}
           isSubmitting={isSubmitting}
           submitCompleted={!isSubmitting}
           submitError={submitError}

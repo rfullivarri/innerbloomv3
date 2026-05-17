@@ -64,7 +64,7 @@ export function OnboardingStructureStep({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22 }}
-      className="onboarding-surface-base glass-card mx-auto grid w-full max-w-5xl gap-6 rounded-3xl p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center"
+      className="onboarding-structure-card onboarding-surface-base glass-card mx-auto grid w-full max-w-5xl gap-6 rounded-3xl p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center"
     >
       <div className="order-2 lg:order-1">
         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/50">{copy.eyebrow}</p>
@@ -82,8 +82,8 @@ export function OnboardingStructureStep({
                 }`}
               >
                 <span
-                  className={`mt-1.5 h-2 w-2 shrink-0 rounded-full transition ${
-                    isVisible ? 'bg-[#cf8bf3] shadow-[0_0_14px_rgba(207,139,243,0.8)]' : 'bg-white/20'
+                  className={`onboarding-structure-dot mt-1.5 h-2 w-2 shrink-0 rounded-full transition ${
+                    isVisible ? 'onboarding-structure-dot--active' : 'bg-white/20'
                   }`}
                   aria-hidden
                 />

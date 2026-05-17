@@ -1,12 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useThemePreference } from '../../theme/ThemePreferenceProvider';
 import type { OnboardingLanguage } from '../constants';
+import type { GameMode } from '../state';
 
 interface QuickStartGeneratingScreenProps {
   language?: OnboardingLanguage;
   isSubmitting?: boolean;
   submitCompleted?: boolean;
   submitError?: string | null;
+  gameMode?: string | GameMode | null;
   onOpenGuidedDemo: () => void;
 }
 
@@ -15,6 +17,7 @@ export function QuickStartGeneratingScreen({
   isSubmitting = false,
   submitCompleted = false,
   submitError = null,
+  gameMode = null,
   onOpenGuidedDemo,
 }: QuickStartGeneratingScreenProps) {
   const { theme } = useThemePreference();
@@ -23,11 +26,18 @@ export function QuickStartGeneratingScreen({
   const copy = language === 'en'
     ? {
         title: 'Configuring your Quick Start',
-        subtitle: 'We are applying your selection and reusing the real onboarding flow.',
+        subtitle: 'Applying your selection with the same calibration feel used in onboarding.',
         bridgeHint: "Next, you'll enter the guided demo to explore how Innerbloom is structured. You can skip it anytime.",
         done: '',
         cta: 'Go to guided demo',
         saving: 'Saving your Quick Start…',
+        steps: [
+          'Balancing Body, Mind and Soul',
+          'Calibrating your task difficulty',
+          'Preparing your initial plan',
+          'Activating your Rhythm: {mode}',
+          'Activating your plan – 2 months included',
+        ],
       }
     : {
         title: 'Configurando tu Inicio rápido',
@@ -36,11 +46,17 @@ export function QuickStartGeneratingScreen({
         done: '',
         cta: 'Ir a demo guiada',
         saving: 'Guardando tu Quick Start…',
+        steps: [
+          'Equilibrando Cuerpo, Mente y Alma',
+          'Calibrando la dificultad de tus tareas',
+          'Preparando tu plan inicial',
+          'Activando tu ritmo: {mode}',
+          'Activando tu plan – 2 meses incluidos',
+        ],
       };
 
-  const steps = useMemo(() => language === 'en'
-    ? ['Saving your selected tasks', 'Activating your starter base', 'Preparing your free plan']
-    : ['Guardando tus tareas seleccionadas', 'Activando tu base inicial', 'Preparando tu plan gratuito'], [language]);
+  const modeLabel = gameMode ? String(gameMode).toUpperCase() : language === 'en' ? 'Flow' : 'Flow';
+  const steps = copy.steps.map((step) => step.replace('{mode}', modeLabel));
   const [setupProgress, setSetupProgress] = useState(1);
 
   useEffect(() => {
@@ -59,7 +75,7 @@ export function QuickStartGeneratingScreen({
 
   return (
     <div className="quickstart-premium-root onboarding-premium-root min-h-screen min-h-dvh overflow-y-auto px-4 py-10">
-      <section className="quickstart-premium-card onboarding-premium-card relative mx-auto mt-5 w-full max-w-3xl rounded-3xl p-5 sm:p-8">
+      <section className="quickstart-premium-card quickstart-setup-card onboarding-premium-card relative mx-auto mt-5 w-full max-w-3xl rounded-3xl p-5 sm:p-8">
         <div className="mb-5 flex items-center justify-center gap-2 text-center text-[0.68rem] font-semibold uppercase tracking-[0.36em] text-[color:var(--color-text-subtle)] sm:text-xs">
           <span>Innerbloom</span>
           <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.8em] w-auto" />
