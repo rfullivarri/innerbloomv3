@@ -43,7 +43,7 @@ export function AvatarStep({
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-      <div className="glass-card onboarding-surface-base mx-auto max-w-4xl rounded-3xl p-4 sm:p-6">
+      <div className="avatar-step-card glass-card onboarding-surface-base mx-auto max-w-4xl rounded-3xl p-4 sm:p-6">
         <header className="flex flex-col gap-4 border-b border-white/5 pb-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex flex-col gap-2">
             <p className="text-xs uppercase tracking-[0.2em] text-white/50">{copy.step}</p>
@@ -73,7 +73,7 @@ export function AvatarStep({
                 disabled={isSaving}
                 aria-pressed={isActive}
                 aria-busy={isSaving}
-                className={`onboarding-surface-inner rounded-2xl border px-4 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#cf8bf3]/60 ${isActive ? 'border-white/80 bg-white/12' : 'border-white/20 bg-white/6 hover:border-white/35'} ${isSaving ? 'cursor-wait opacity-70' : ''}`}
+                className={`avatar-option-card rounded-2xl border px-4 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#cf8bf3]/60 ${isActive ? 'avatar-option-card--active' : ''} ${isSaving ? 'cursor-wait opacity-70' : ''}`}
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold text-white">{option.name}</p>

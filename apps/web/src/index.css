@@ -1805,10 +1805,11 @@
   .quickstart-progress-fill {
     background: linear-gradient(
       90deg,
-      color-mix(in srgb, var(--color-accent-secondary) 68%, #a5b4fc),
-      color-mix(in srgb, var(--color-accent-primary) 52%, #cbd5e1),
-      color-mix(in srgb, var(--color-accent-secondary) 60%, #818cf8)
+      #8b5cf6 0%,
+      #c084fc 44%,
+      #f9a8a8 100%
     );
+    box-shadow: 0 0 18px rgba(168,85,247,0.28);
   }
 
   .quickstart-primary-cta {
@@ -1841,6 +1842,49 @@
 
   :root[data-theme="light"] .quickstart-task-row {
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  }
+
+  .avatar-step-card {
+    background: var(--color-card-gradient);
+    border: 1px solid var(--color-border-soft);
+    box-shadow: var(--shadow-elev-2);
+    backdrop-filter: blur(20px);
+  }
+
+  .avatar-option-card {
+    background: var(--color-card-gradient);
+    border-color: var(--color-border-subtle);
+    color: var(--onboarding-premium-root-text);
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.22);
+  }
+
+  .avatar-option-card:hover {
+    border-color: var(--color-border-soft);
+    background: color-mix(in srgb, var(--color-overlay-1) 86%, var(--color-card-gradient));
+  }
+
+  .avatar-option-card--active {
+    border-color: color-mix(in srgb, var(--color-accent-secondary) 56%, var(--color-border-soft));
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-surface-elevated) 94%, var(--color-accent-secondary) 6%),
+      color-mix(in srgb, var(--color-surface-muted) 96%, var(--color-accent-secondary) 4%)
+    );
+    box-shadow:
+      0 14px 30px rgba(2, 6, 23, 0.28),
+      0 0 0 1px color-mix(in srgb, var(--color-accent-secondary) 12%, transparent);
+  }
+
+  :root[data-theme="light"] .avatar-option-card {
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  }
+
+  :root[data-theme="light"] .avatar-option-card--active {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, #ffffff 96%, #e0e7ff),
+      color-mix(in srgb, #f8fafc 94%, #e9d5ff)
+    );
   }
 
   .onboarding-structure-dot--active {
