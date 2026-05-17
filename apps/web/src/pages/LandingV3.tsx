@@ -25,5 +25,5 @@ export default function LandingV3Page() {
     };
   }, []);
 
-  return <LandingPage content={LANDING_V3_CONTENT} variant="v3Conversion" forcePublicHeroActions />;
+  return <LandingPage content={LANDING_V3_CONTENT} variant="v3Conversion" />;
 }
