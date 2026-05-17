@@ -12,6 +12,14 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
       note: 'Ritmo adaptativo, progreso visible.',
       alt: 'Innerbloom adaptive habit dashboard shown on a mobile mockup.',
     },
+    problem: {
+      title: 'No te falta disciplina. Te falta un sistema que se adapte.',
+      leftPrimary: 'Una rutina fija funciona solo en días ideales.',
+      leftSecondary: 'Cuando baja tu energía, se rompe la racha y aparece la culpa.',
+      rightPrimary: 'Innerbloom cambia el plan contigo.',
+      rightSecondary:
+        'Baja la carga cuando cuesta, sube el desafío cuando avanzas y te ayuda a retomar sin empezar de cero.',
+    },
     how: {
       ...LANDING_V2_CONTENT.es.how,
       kicker: 'EL SISTEMA',
@@ -68,6 +76,14 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
         'Build an adaptive Journey: simpler when life gets hard, more challenging when you’re ready to grow.',
       note: 'Adaptive rhythm, visible progress.',
       alt: 'Innerbloom adaptive habit dashboard shown on a mobile mockup.',
+    },
+    problem: {
+      title: 'You do not need more guilt. You need a system that adapts.',
+      leftPrimary: 'A fixed routine only works on ideal days.',
+      leftSecondary: 'When your energy drops, the streak breaks and the app makes it feel like you failed.',
+      rightPrimary: 'Innerbloom changes the plan with you.',
+      rightSecondary:
+        'It lowers the load when life gets hard, raises the challenge when you grow, and helps you restart without going back to zero.',
     },
     how: {
       ...LANDING_V2_CONTENT.en.how,
