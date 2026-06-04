@@ -138,7 +138,6 @@ function buildQuickStartRoute(includeModeration: boolean): StepId[] {
     'quick-start-mind',
     'quick-start-soul',
     ...(includeModeration ? (['quick-start-moderation'] as const) : []),
-    'avatar-select',
     'quick-start-summary',
   ];
 }
@@ -403,9 +402,13 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     setState((prev) => {
       const nextAnswers = cloneAnswers(prev.answers);
       const current = nextAnswers.quickStart.selectedTasksByPillar[pillar];
+      const exists = current.includes(taskId);
       nextAnswers.quickStart.selectedTasksByPillar[pillar] = current.includes(taskId)
         ? current.filter((item) => item !== taskId)
         : [...current, taskId];
+      if (exists) {
+        delete nextAnswers.quickStart.editableTaskValues[`${pillar}-${taskId}`];
+      }
 
       const shouldRebuildQuickStartRoute =
         prev.onboardingPath === 'quick_start' && pillar === 'Body' && taskId === 'MODERACION';

@@ -62,7 +62,6 @@ describe('computeRouteForMode', () => {
       'quick-start-body',
       'quick-start-mind',
       'quick-start-soul',
-      'avatar-select',
       'quick-start-summary',
     ]);
   });
@@ -77,7 +76,6 @@ describe('computeRouteForMode', () => {
       'quick-start-mind',
       'quick-start-soul',
       'quick-start-moderation',
-      'avatar-select',
       'quick-start-summary',
     ]);
   });

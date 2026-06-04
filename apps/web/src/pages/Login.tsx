@@ -19,6 +19,13 @@ import {
 export default function LoginPage() {
   const location = useLocation();
   const language = resolveAuthLanguage(location.search);
+  const searchParams = new URLSearchParams(location.search);
+  const redirectUrl = searchParams.get('redirect_url');
+  const safeRedirectUrl = redirectUrl && redirectUrl.startsWith('/') && !redirectUrl.startsWith('//') ? redirectUrl : null;
+  const fallbackRedirectUrl = safeRedirectUrl ?? DASHBOARD_PATH;
+  const signUpUrl = `${buildLocalizedAuthPath('/sign-up', language)}${
+    safeRedirectUrl ? `&redirect_url=${encodeURIComponent(safeRedirectUrl)}` : ''
+  }`;
   const themeMode = readLandingThemeMode();
   const isLightTheme = themeMode === 'light';
   const isNativeApp = isNativeCapacitorPlatform();
@@ -63,8 +70,9 @@ export default function LoginPage() {
               })}
               routing="path"
               path="/login"
-              signUpUrl={buildLocalizedAuthPath('/sign-up', language)}
+              signUpUrl={signUpUrl}
               fallbackRedirectUrl="/"
+              forceRedirectUrl="/"
             />
           </div>
         </div>
@@ -80,7 +88,7 @@ export default function LoginPage() {
       themeMode={themeMode}
     >
       <div className={AUTH_STACK_CLASS}>
-        <GoogleOAuthButton language={language} mode="sign-in" redirectUrlComplete={`${location.pathname}${location.search}${location.hash}`} />
+        <GoogleOAuthButton language={language} mode="sign-in" redirectUrlComplete={fallbackRedirectUrl} />
         <div className={`${AUTH_DIVIDER_CLASS} ${isLightTheme ? '!text-[#3b305f]/76' : ''}`}>
           <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/28' : 'bg-white/12'}`} aria-hidden />
           <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
@@ -101,8 +109,9 @@ export default function LoginPage() {
               })}
             routing="path"
             path="/login"
-            signUpUrl={buildLocalizedAuthPath('/sign-up', language)}
-            fallbackRedirectUrl={DASHBOARD_PATH}
+            signUpUrl={signUpUrl}
+            fallbackRedirectUrl={fallbackRedirectUrl}
+            forceRedirectUrl={fallbackRedirectUrl}
           />
         </div>
       </div>

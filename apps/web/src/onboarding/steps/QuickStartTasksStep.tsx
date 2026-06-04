@@ -4,6 +4,7 @@ import type { OnboardingLanguage } from '../constants';
 import { NavButtons } from '../ui/NavButtons';
 import type { GameMode, Pillar } from '../state';
 import { getQuickStartSuggestedRule, type QuickStartTask } from '../quickStart';
+import { TraitIcon } from '../../pages/labs/mobile-premium/MobilePremiumPrimitives';
 
 interface QuickStartTasksStepProps {
   language?: OnboardingLanguage;
@@ -44,12 +45,6 @@ function InlineTaskRow({
   const rowRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!selected) {
-      setShowSuggestions(false);
-    }
-  }, [selected]);
-
-  useEffect(() => {
     if (!showSuggestions) {
       return undefined;
     }
@@ -65,15 +60,7 @@ function InlineTaskRow({
   }, [showSuggestions]);
 
   return (
-    <div ref={rowRef} className={`relative ${selected ? 'pt-5 pb-1' : ''}`}>
-      {selected ? (
-        <div className="quickstart-task-row__back pointer-events-none absolute inset-x-0 top-0 h-8 rounded-t-2xl border px-4 pt-1.5" aria-hidden>
-          <span className="quickstart-task-trait-band block text-[10px] font-semibold uppercase leading-none tracking-[0.16em]">
-            {copy.traitLabel}: {task.trait}
-          </span>
-        </div>
-      ) : null}
-
+    <div ref={rowRef} className="relative">
       <motion.div
         whileTap={{ scale: 0.985 }}
         onClick={onToggle}
@@ -86,10 +73,18 @@ function InlineTaskRow({
         role="button"
         tabIndex={0}
         data-selected={selected ? 'true' : undefined}
-        className={`quickstart-task-row onboarding-surface-inner relative z-10 w-full rounded-2xl border px-4 py-3.5 text-left text-white/85 transition ${selected ? 'quickstart-task-row--selected' : ''}`}
+        className={`quickstart-task-row onboarding-surface-inner relative z-10 grid w-full grid-cols-[38px_minmax(0,1fr)_auto] items-center gap-3 rounded-[1.15rem] px-3 py-3.5 text-left text-white/85 transition ${selected ? 'quickstart-task-row--selected' : ''}`}
       >
-        <div className="flex items-center gap-2.5">
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-2 text-sm leading-relaxed sm:text-base">
+        <span className="quickstart-task-icon grid h-9 w-9 place-items-center rounded-full border">
+          {selected ? (
+            <span className="text-sm font-semibold">✓</span>
+          ) : (
+            <TraitIcon size={20} trait={task.trait} />
+          )}
+        </span>
+
+        <div className="min-w-0">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1.5 text-[0.98rem] leading-6 text-white/90">
             {task.inputBefore ? <span>{task.inputBefore}</span> : null}
             <span>{task.text}</span>
             {hasInput ? (
@@ -106,29 +101,35 @@ function InlineTaskRow({
             {task.inputAfter ? <span>{task.inputAfter}</span> : null}
             {task.helper ? <span className="w-full text-xs text-white/55">{task.helper}</span> : null}
           </div>
+          {selected ? (
+            <p className="quickstart-selected-trait mt-2 text-[0.66rem] font-semibold uppercase tracking-[0.2em]">
+              <span className="mr-1.5 text-white/38">{copy.traitLabel}</span>
+              {task.trait}
+            </p>
+          ) : null}
+        </div>
 
-          {selected && task.suggestions?.length ? (
+        {task.suggestions?.length ? (
             <button
               type="button"
               onClick={(event) => {
                 event.stopPropagation();
                 setShowSuggestions((prev) => !prev);
               }}
-              className="quickstart-task-help relative z-20 ml-auto inline-flex h-5 w-5 shrink-0 items-center justify-center self-start rounded-md border transition"
+              className="quickstart-task-help relative z-20 ml-auto inline-flex h-7 w-7 shrink-0 items-center justify-center self-start rounded-full border transition"
               aria-label={copy.taskHelpLabel}
               aria-expanded={showSuggestions}
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden>
                 <path d="M9 18h6" />
                 <path d="M10 22h4" />
-                <path d="M8.5 14.3a6 6 0 1 1 7 0c-.7.53-1.17 1.35-1.3 2.2l-.08.5h-4.24l-.08-.5a3.5 3.5 0 0 0-1.3-2.2Z" />
+                <path d="M8.5 14.3a6 6 0 1 1 7 0c-.7.53-1.17 1.35-1.3 2.2l-.08.5H9.88l-.08-.5a3.5 3.5 0 0 0-1.3-2.2Z" />
               </svg>
             </button>
-          ) : null}
-        </div>
+        ) : <span aria-hidden className="h-5 w-5" />}
       </motion.div>
 
-      {selected && task.suggestions?.length && showSuggestions ? (
+      {task.suggestions?.length && showSuggestions ? (
         <div
           className="quickstart-suggestions-panel absolute right-3 bottom-[calc(100%+0.35rem)] z-30 w-[min(18.5rem,calc(100%-1.5rem))] rounded-xl border p-3 text-xs backdrop-blur"
         >
@@ -169,6 +170,7 @@ export function QuickStartTasksStep({
         suggestedRule: getQuickStartSuggestedRule(gameMode, language),
         minimumRequired: 'You need to select the minimum to continue.',
         continue: 'Continue',
+        inputRequired: 'Complete the selected quantities before continuing.',
         back: 'Back',
         countPlaceholder: 'qty',
         traitLabel: 'TRAIT',
@@ -187,6 +189,7 @@ export function QuickStartTasksStep({
         suggestedRule: getQuickStartSuggestedRule(gameMode, language),
         minimumRequired: 'Necesitás seleccionar el mínimo para continuar.',
         continue: 'Continuar',
+        inputRequired: 'Completá las cantidades seleccionadas antes de continuar.',
         back: 'Volver',
         countPlaceholder: 'n',
         traitLabel: 'RASGO',
@@ -195,16 +198,23 @@ export function QuickStartTasksStep({
         bonusPending: 'Balanceá Cuerpo, Mente y Alma para sumar x1.5 GP',
   };
 
-  const canContinue = selectedIds.length >= minimum;
+  const selectedTasks = tasks.filter((task) => selectedIds.includes(task.id));
+  const hasMissingInput = selectedTasks.some((task) => {
+    if (!task.inputAfter && !task.inputBefore) {
+      return false;
+    }
+    return !String(inputValues[`${pillar}-${task.id}`] ?? '').trim();
+  });
+  const canContinue = selectedIds.length >= minimum && !hasMissingInput;
 
   return (
-    <section className="onboarding-premium-root quickstart-premium-card onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
-      <header className="mb-5 border-b border-white/10 pb-4">
+    <section className="onboarding-premium-root quickstart-premium-card onboarding-flow-panel mx-auto w-full max-w-3xl p-5 sm:p-7">
+      <header className="mb-6">
         <p className="text-xs uppercase tracking-[0.25em] text-white/55">{gameMode} · Quick Start</p>
         <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{copy.title}</h1>
         <p className="mt-2 text-sm text-white/70">{copy.subtitle}</p>
         <div
-          className="quickstart-min-rule mt-3 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold"
+          className="quickstart-min-rule mt-4 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold"
         >
           <span className="whitespace-nowrap">{copy.minRule}</span>
           <span className="quickstart-min-rule__dot" aria-hidden>·</span>
@@ -221,7 +231,7 @@ export function QuickStartTasksStep({
         </div>
       </header>
 
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {tasks.map((task) => {
           const selected = selectedIds.includes(task.id);
           return (
@@ -238,7 +248,8 @@ export function QuickStartTasksStep({
         })}
       </div>
 
-      {!canContinue ? <p className="mt-4 text-xs text-amber-200">{copy.minimumRequired}</p> : null}
+      {selectedIds.length < minimum ? <p className="mt-4 text-xs text-amber-200">{copy.minimumRequired}</p> : null}
+      {selectedIds.length >= minimum && hasMissingInput ? <p className="mt-4 text-xs text-amber-200">{copy.inputRequired}</p> : null}
 
       <NavButtons
         language={language}

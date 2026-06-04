@@ -21,6 +21,13 @@ export default function SignUpPage() {
   const signUpContainerRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
   const language = resolveAuthLanguage(location.search);
+  const searchParams = new URLSearchParams(location.search);
+  const redirectUrl = searchParams.get('redirect_url');
+  const safeRedirectUrl = redirectUrl && redirectUrl.startsWith('/') && !redirectUrl.startsWith('//') ? redirectUrl : null;
+  const fallbackRedirectUrl = safeRedirectUrl ?? '/intro-journey';
+  const signInUrl = `${buildLocalizedAuthPath('/login', language)}${
+    safeRedirectUrl ? `&redirect_url=${encodeURIComponent(safeRedirectUrl)}` : ''
+  }`;
   const themeMode = readLandingThemeMode();
   const isLightTheme = themeMode === 'light';
   const isNativeApp = isNativeCapacitorPlatform();
@@ -88,8 +95,9 @@ export default function SignUpPage() {
               appearance={appearance}
               routing="path"
               path="/sign-up"
-              signInUrl={buildLocalizedAuthPath('/login', language)}
+              signInUrl={signInUrl}
               fallbackRedirectUrl="/intro-journey"
+              forceRedirectUrl="/intro-journey"
             />
           </div>
         </div>
@@ -108,7 +116,7 @@ export default function SignUpPage() {
         <GoogleOAuthButton
           language={language}
           mode="sign-up"
-          redirectUrlComplete={`${location.pathname}${location.search}${location.hash}`}
+          redirectUrlComplete={fallbackRedirectUrl}
           forceAccountSelection
         />
         <div className={`${AUTH_DIVIDER_CLASS} ${isLightTheme ? '!text-[#3b305f]/76' : ''}`}>
@@ -124,9 +132,10 @@ export default function SignUpPage() {
             appearance={appearance}
             routing="path"
             path="/sign-up"
-            signInUrl={buildLocalizedAuthPath('/login', language)}
+            signInUrl={signInUrl}
             // post-signup must continue onboarding
-            fallbackRedirectUrl="/intro-journey"
+            fallbackRedirectUrl={fallbackRedirectUrl}
+            forceRedirectUrl={fallbackRedirectUrl}
           />
         </div>
       </div>

@@ -10,8 +10,6 @@ import { buildDemoUrl } from '../lib/demoEntry';
 import { GpExplainerOverlay } from './ui/GpExplainerOverlay';
 import { HUD } from './ui/HUD';
 import { NavButtons } from './ui/NavButtons';
-import { GameModeChip as SharedGameModeChip, buildGameModeChip } from '../components/common/GameModeChip';
-import { buildAvatarPreviewProfile, getAvatarOptionById, resolveAvatarPickerPreviewImage } from '../lib/avatarCatalog';
 import { useThemePreference } from '../theme/ThemePreferenceProvider';
 import {
   QUICK_START_MINIMUMS,
@@ -703,7 +701,6 @@ interface IntegratedQuickStartFlowProps {
 function ControlledQuickStartFlow({
   language,
   gameMode,
-  avatarId,
   routeStepId,
   selectedTasksByPillar,
   editableTaskValues,
@@ -721,7 +718,6 @@ function ControlledQuickStartFlow({
 }: {
   language: OnboardingLanguage;
   gameMode: GameMode;
-  avatarId: number | null;
   routeStepId: StepId;
   selectedTasksByPillar: Record<OnboardingPillar, string[]>;
   editableTaskValues: Record<string, string>;
@@ -743,7 +739,6 @@ function ControlledQuickStartFlow({
     'quick-start-mind',
     'quick-start-soul',
     ...(selectedTasksByPillar.Body.includes('MODERACION') ? ['quick-start-moderation'] : []),
-    'avatar-select',
     'quick-start-summary',
   ] as StepId[];
   const stepIndex = Math.max(0, route.indexOf(routeStepId));
@@ -793,7 +788,6 @@ function ControlledQuickStartFlow({
           <QuickStartSummaryStep
             language={language}
             gameMode={gameMode}
-            selectedAvatarId={avatarId}
             selectedByPillar={selectedTasksByPillar}
             tasksByPillar={QUICK_START_TASKS[language]}
             xp={quickStartGp.xp}
@@ -833,7 +827,6 @@ export function IntegratedQuickStartFlow({
       <ControlledQuickStartFlow
         language={initialLanguage}
         gameMode={initialGameMode}
-        avatarId={avatarId}
         routeStepId={routeStepId}
         selectedTasksByPillar={controlledSelectedTasksByPillar ?? { Body: [], Mind: [], Soul: [] }}
         editableTaskValues={controlledEditableTaskValues ?? {}}
@@ -867,7 +860,6 @@ export function IntegratedQuickStartFlow({
 function UncontrolledIntegratedQuickStartFlow({
   language: initialLanguage = 'es',
   gameMode: initialGameMode,
-  avatarId,
   onBackToPathSelect,
   onExit,
   onRestart,
@@ -892,9 +884,6 @@ function UncontrolledIntegratedQuickStartFlow({
   const [showGrowthPointsModal, setShowGrowthPointsModal] = useState(false);
   const [pendingGrowthPointsModal, setPendingGrowthPointsModal] = useState(true);
   const copy = COPY[language];
-  const selectedAvatarOption = getAvatarOptionById(avatarId);
-  const selectedAvatarProfile = selectedAvatarOption ? buildAvatarPreviewProfile(selectedAvatarOption) : null;
-  const selectedAvatarPreviewImage = selectedAvatarOption ? resolveAvatarPickerPreviewImage(selectedAvatarOption) : null;
 
   const minimum = QUICK_START_MINIMUMS[gameMode];
   const setupSteps = useMemo(
@@ -1316,16 +1305,7 @@ function UncontrolledIntegratedQuickStartFlow({
                   <div className="mt-4 space-y-3">
                     <div>
                       <p className="text-xs uppercase tracking-wide text-white/50">{copy.quickSummary.gameMode}</p>
-                      <span className="mt-2 inline-flex origin-left scale-75">
-                        <SharedGameModeChip {...buildGameModeChip(gameMode, { avatarProfile: selectedAvatarProfile })} />
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-wide text-white/50">Avatar</p>
-                      <p className="mt-1 inline-flex items-center gap-2 text-sm text-white/80">
-                        <span>{selectedAvatarOption?.name ?? '—'}</span>
-                        {selectedAvatarOption ? <img src={selectedAvatarPreviewImage ?? '/FlowMood.jpg'} alt={selectedAvatarOption.name} className="h-7 w-7 rounded-full border border-white/20 object-cover" /> : null}
-                      </p>
+                      <p className="mt-1 text-sm font-semibold uppercase tracking-[0.18em] text-white">{gameMode}</p>
                     </div>
                     <div>
                       <p className="text-xs uppercase tracking-wide text-white/50">{copy.quickSummary.state}</p>

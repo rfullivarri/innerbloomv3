@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { useEffect, type ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import { useAuth } from './auth/runtimeAuth';
 import DashboardV3Page from './pages/DashboardV3';
 import TaskEditorPage from './pages/editor';
@@ -34,6 +34,7 @@ import HeroPhoneShowcaseLabPage from './pages/labs/HeroPhoneShowcaseLabPage';
 import InnerbloomSystemMapPage from './pages/labs/InnerbloomSystemMapPage';
 import AvatarCtaCarouselLabPage from './pages/labs/AvatarCtaCarouselLabPage';
 import OnboardingRhythmSelectorLabPage from './pages/labs/OnboardingRhythmSelectorLabPage';
+import MobilePremiumLabPage from './pages/labs/MobilePremiumLabPage';
 import { useGa4FunnelTracking } from './hooks/useGa4FunnelTracking';
 import { isNativeCapacitorPlatform } from './mobile/capacitor';
 import { writeMobileDebug } from './mobile/mobileDebug';
@@ -212,16 +213,30 @@ function NativeDailyReminderSyncBridge() {
 
 function RequireUser({ children }: { children: ReactElement }) {
   const { isLoaded, userId } = useAuth();
+  const location = useLocation();
+  const [authLoadTimedOut, setAuthLoadTimedOut] = useState(false);
   const mobileAuthSession = useMobileAuthSession();
   const devBypass = DEV_USER_SWITCH_ACTIVE && import.meta.env.DEV;
-  const unauthenticatedRedirectPath = isNativeCapacitorPlatform() ? '/' : '/login';
+  const unauthenticatedRedirectPath = isNativeCapacitorPlatform()
+    ? '/'
+    : `/login?redirect_url=${encodeURIComponent(`${location.pathname}${location.search}${location.hash}`)}`;
   const hasNativeSession = isNativeCapacitorPlatform() && Boolean(mobileAuthSession?.token) && !shouldForceNativeWelcome();
+
+  useEffect(() => {
+    if (isLoaded || hasNativeSession) {
+      setAuthLoadTimedOut(false);
+      return undefined;
+    }
+
+    const timeout = window.setTimeout(() => setAuthLoadTimedOut(true), 2500);
+    return () => window.clearTimeout(timeout);
+  }, [hasNativeSession, isLoaded]);
 
   if (devBypass) {
     return children;
   }
 
-  if (!isLoaded && !hasNativeSession) {
+  if (!isLoaded && !hasNativeSession && !authLoadTimedOut) {
     return <div className="flex min-h-screen items-center justify-center text-text">Cargando…</div>;
   }
 
@@ -232,6 +247,16 @@ function RequireUser({ children }: { children: ReactElement }) {
   return children;
 }
 
+function getSafeLocalRedirect(search: string): string | null {
+  const redirectUrl = new URLSearchParams(search).get('redirect_url');
+
+  if (!redirectUrl || !redirectUrl.startsWith('/') || redirectUrl.startsWith('//')) {
+    return null;
+  }
+
+  return redirectUrl;
+}
+
 function RedirectIfSignedIn({
   children,
   redirectPath,
@@ -240,15 +265,28 @@ function RedirectIfSignedIn({
   redirectPath: string;
 }) {
   const { isLoaded, userId } = useAuth();
+  const location = useLocation();
+  const [authLoadTimedOut, setAuthLoadTimedOut] = useState(false);
   const mobileAuthSession = useMobileAuthSession();
   const hasNativeSession = isNativeCapacitorPlatform() && Boolean(mobileAuthSession?.token) && !shouldForceNativeWelcome();
+  const signedInRedirectPath = getSafeLocalRedirect(location.search) ?? redirectPath;
 
-  if (!isLoaded && !hasNativeSession) {
+  useEffect(() => {
+    if (isLoaded || hasNativeSession) {
+      setAuthLoadTimedOut(false);
+      return undefined;
+    }
+
+    const timeout = window.setTimeout(() => setAuthLoadTimedOut(true), 2500);
+    return () => window.clearTimeout(timeout);
+  }, [hasNativeSession, isLoaded]);
+
+  if (!isLoaded && !hasNativeSession && !authLoadTimedOut) {
     return <div className="flex min-h-screen items-center justify-center text-text">Cargando…</div>;
   }
 
   if (userId || hasNativeSession) {
-    return <Navigate to={redirectPath} replace />;
+    return <Navigate to={signedInRedirectPath} replace />;
   }
 
   return children;
@@ -287,6 +325,14 @@ export default function App() {
         <Route path="/labs/innerbloom-system-map" element={<InnerbloomSystemMapPage />} />
         <Route path="/labs/avatar-cta-carousel" element={<AvatarCtaCarouselLabPage />} />
         <Route path="/labs/onboarding-rhythm-selector" element={<OnboardingRhythmSelectorLabPage />} />
+        <Route
+          path="/labs/mobile-premium/*"
+          element={(
+            <RequireUser>
+              <MobilePremiumLabPage />
+            </RequireUser>
+          )}
+        />
         <Route path="/demo/logros" element={<LabsLogrosDemoPage />} />
         <Route path="/demo/tasks" element={<PublicTasksDemoPage />} />
         <Route path="/labs/landing-rhythm-section" element={<LandingRhythmSectionMvpPage />} />

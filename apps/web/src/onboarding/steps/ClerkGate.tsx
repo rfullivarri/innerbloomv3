@@ -1,7 +1,7 @@
 import { SignIn, SignUp } from '@clerk/clerk-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useThemePreference } from '../../theme/ThemePreferenceProvider';
 import { GoogleOAuthButton } from '../../components/auth/GoogleOAuthButton';
 import { useAuth, useUser } from '../../auth/runtimeAuth';
@@ -51,6 +51,7 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
   const { syncClerkSession } = useOnboarding();
   const [tab, setTab] = useState<TabId>('sign-up');
   const [hasAutoAdvanced, setHasAutoAdvanced] = useState(false);
+  const [authLoadTimedOut, setAuthLoadTimedOut] = useState(false);
   const isNativeApp = isNativeCapacitorPlatform();
   const hasNativeSession = isNativeApp && Boolean(mobileAuthSession?.token);
   const effectiveLoaded = isLoaded || hasNativeSession;
@@ -139,10 +140,33 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
     userId,
   ]);
 
+  useEffect(() => {
+    if (effectiveLoaded) {
+      setAuthLoadTimedOut(false);
+      return undefined;
+    }
+
+    const timeout = window.setTimeout(() => setAuthLoadTimedOut(true), 2500);
+    return () => window.clearTimeout(timeout);
+  }, [effectiveLoaded]);
+
   if (!effectiveLoaded) {
     return (
       <div className="mx-auto max-w-3xl rounded-3xl border border-white/10 bg-white/10 p-8 text-center text-white/70 backdrop-blur-2xl">
-        {copy.loading}
+        <p>{copy.loading}</p>
+        {authLoadTimedOut && import.meta.env.DEV ? (
+          <div className="mt-5 space-y-3">
+            <p className="text-sm text-white/55">
+              Clerk no respondió en local. Podés probar el flujo visual completo sin modificar datos reales.
+            </p>
+            <Link
+              to="/onboarding?devQuickStart=1"
+              className="ib-primary-button inline-flex items-center justify-center rounded-full px-6 py-2 text-sm font-semibold text-white"
+            >
+              Probar onboarding local
+            </Link>
+          </div>
+        ) : null}
       </div>
     );
   }

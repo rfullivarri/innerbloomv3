@@ -64,34 +64,40 @@ export function OnboardingStructureStep({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22 }}
-      className="onboarding-structure-card onboarding-surface-base glass-card mx-auto grid w-full max-w-5xl gap-6 rounded-3xl p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center"
+      className="onboarding-structure-card onboarding-flow-panel mx-auto flex w-full max-w-5xl flex-col gap-7 p-4 sm:p-6"
     >
-      <div className="order-2 lg:order-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/50">{copy.eyebrow}</p>
-        <h1 className="mt-3 text-balance text-3xl font-semibold text-white sm:text-4xl">{copy.title}</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base">{copy.subtitle}</p>
+      <div className="onboarding-structure-visual mx-auto flex w-full justify-center">
+        <EditorGuideWheel stepId={segment.stepId} locale={language} />
+      </div>
 
-        <ul className="mt-6 space-y-3">
+      <div className="onboarding-structure-copy">
+        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[color:var(--ib-onboarding-text-muted)]">{copy.eyebrow}</p>
+        <h1 className="mt-3 text-balance text-3xl font-semibold text-[color:var(--ib-onboarding-text)] sm:text-4xl">{copy.title}</h1>
+        <p className="mt-3 max-w-2xl text-base leading-relaxed text-[color:var(--ib-onboarding-text-secondary)]">{copy.subtitle}</p>
+
+        <div className="onboarding-structure-steps mt-7">
           {copy.bullets.map((bullet, index) => {
             const isVisible = index <= segment.bulletIndex;
             return (
-              <li
+              <div
                 key={bullet}
-                className={`flex items-start gap-3 text-sm transition duration-500 ${
-                  isVisible ? 'translate-y-0 opacity-100 text-white/86' : 'translate-y-1 opacity-35 text-white/55'
+                className={`onboarding-structure-step-row grid grid-cols-[2.25rem_minmax(0,1fr)] items-start gap-3 py-3.5 text-sm transition duration-500 ${
+                  isVisible ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-35'
                 }`}
               >
                 <span
-                  className={`onboarding-structure-dot mt-1.5 h-2 w-2 shrink-0 rounded-full transition ${
-                    isVisible ? 'onboarding-structure-dot--active' : 'bg-white/20'
+                  className={`onboarding-structure-step-index inline-flex h-7 w-7 items-center justify-center rounded-full text-[0.65rem] font-semibold ${
+                    isVisible ? 'onboarding-structure-step-index--active' : ''
                   }`}
                   aria-hidden
-                />
-                <span>{bullet}</span>
-              </li>
+                >
+                  {index + 1}
+                </span>
+                <span className="leading-relaxed text-[color:var(--ib-onboarding-text-secondary)]">{bullet}</span>
+              </div>
             );
           })}
-        </ul>
+        </div>
 
         <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button
@@ -109,10 +115,6 @@ export function OnboardingStructureStep({
             {copy.continue}
           </button>
         </div>
-      </div>
-
-      <div className="order-1 flex justify-center lg:order-2">
-        <EditorGuideWheel stepId={segment.stepId} locale={language} />
       </div>
     </motion.section>
   );

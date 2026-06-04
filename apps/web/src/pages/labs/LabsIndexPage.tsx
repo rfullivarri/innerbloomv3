@@ -38,6 +38,11 @@ const LAB_EXPERIMENTS = [
     description: 'Visual concept map explaining how Innerbloom adapts decisions, progress, engines, and outputs.',
     href: '/labs/innerbloom-system-map',
   },
+  {
+    title: 'Mobile Premium UI',
+    description: 'Isolated mobile sandbox for the next premium app direction, with local demo fallback only inside Labs.',
+    href: '/labs/mobile-premium',
+  },
 ];
 
 export default function LabsIndexPage() {
