@@ -289,8 +289,6 @@ export function WeeklyProgressRingCompact({
 
 export function MobilePremiumHeader({
   title,
-  eyebrow,
-  status,
   onMenuOpen,
 }: {
   title: string;
@@ -301,7 +299,7 @@ export function MobilePremiumHeader({
   onMenuOpen?: () => void;
 }) {
   return (
-    <header className="space-y-6">
+    <header className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <Link to="/labs" className="flex min-w-0 items-center gap-2">
           <InnerbloomBrand />
@@ -319,13 +317,7 @@ export function MobilePremiumHeader({
           </button>
         </div>
       </div>
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          {eyebrow ? <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--mp-text-muted)]">{eyebrow}</p> : <span />}
-          {status ? <SemanticChip tone="violet">{status}</SemanticChip> : null}
-        </div>
-        <h1 className="text-[1.85rem] font-semibold leading-[1.04] text-[color:var(--mp-text)]">{title}</h1>
-      </div>
+      <h1 className="text-[1.85rem] font-semibold leading-[1.04] text-[color:var(--mp-text)]">{title}</h1>
     </header>
   );
 }
@@ -354,7 +346,7 @@ export function MobilePremiumShell({
       <div className="mx-auto min-h-screen w-full max-w-[430px] bg-[image:var(--mp-shell-bg)]">
         <div className="min-h-screen px-5 pb-[calc(78px+env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))]">
           <MobilePremiumHeader eyebrow={eyebrow} onMenuOpen={onMenuOpen} onThemeToggle={onThemeToggle} status={status} theme={theme} title={title} />
-          <ThinSeparator className="my-6" />
+          <ThinSeparator className="my-5" />
           {children}
         </div>
         <PremiumBottomNav items={navItems} />

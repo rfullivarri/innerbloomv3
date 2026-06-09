@@ -555,13 +555,23 @@ function DashboardMotionStyles() {
         transform-origin: left;
         animation: mpBalanceSettle 760ms 640ms cubic-bezier(.2,.85,.25,1) both;
       }
+      @keyframes mpEnergyLineReveal {
+        from { stroke-dashoffset: 1; opacity: .15; }
+        to { stroke-dashoffset: 0; opacity: 1; }
+      }
+      .mp-energy-line-reveal {
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        animation: mpEnergyLineReveal 980ms cubic-bezier(.2,.85,.25,1) both;
+      }
       @media (prefers-reduced-motion: reduce) {
         .mp-level-progress-load,
         .mp-dashboard-card-in,
         .mp-emotion-orb-live,
         .mp-emotion-dot-in,
         .mp-balance-track-active::after,
-        .mp-balance-track-active .mp-balance-segment { animation: none !important; transform: none !important; opacity: inherit !important; }
+        .mp-balance-track-active .mp-balance-segment,
+        .mp-energy-line-reveal { animation: none !important; transform: none !important; opacity: inherit !important; stroke-dashoffset: 0 !important; }
       }
     `}</style>
   );
@@ -604,16 +614,19 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
         <text fill="var(--mp-text-muted)" fontSize="10" letterSpacing="1.2" x="4" y="184">HACE 7 DÍAS</text>
         <text fill="var(--mp-text-muted)" fontSize="10" letterSpacing="1.2" textAnchor="end" x="282" y="184">HOY</text>
         <path d={chart.riskArea} fill="url(#energy-risk-fade)" />
-        {chart.lines.map((line) => (
+        {chart.lines.map((line, index) => (
           <g key={line.metric.label}>
             <path
+              className="mp-energy-line-reveal"
               d={line.path}
               fill="none"
               opacity={line.metric === lowest ? 1 : 0.68}
+              pathLength={1}
               stroke={line.metric.color}
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={line.metric === lowest ? 2.8 : 1.8}
+              style={{ animationDelay: `${index * 110}ms` }}
             />
             <line
               opacity="0.48"
