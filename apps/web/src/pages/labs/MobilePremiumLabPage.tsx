@@ -663,7 +663,6 @@ function MobilePremiumLabPageInner() {
   const hasRealTasks = tasksState.status === 'success' && tasksState.tasks.length > 0;
   const bridgeTasks = hasRealTasks ? premiumAddedTasks : [...localOnboardingTasks, ...premiumAddedTasks];
   const tasks = hasRealTasks ? tasksState.tasks : mobilePremiumDemoTasks;
-  const isDemo = !effectiveBackendUserId || !hasRealTasks;
   const userName = backendUser.profile?.full_name || backendUser.profile?.email_primary || 'Innerbloom';
   const userEmail = backendUser.profile?.email_primary ?? null;
   const effectiveGameMode = localGameModeOverride ?? localOnboardingSnapshot?.gameMode ?? backendUser.profile?.game_mode ?? null;
@@ -853,11 +852,9 @@ function MobilePremiumLabPageInner() {
 
   return (
     <MobilePremiumShell
-      eyebrow="Mobile premium sandbox"
       navItems={navItems}
       onMenuOpen={() => setActiveOverlay('menu')}
       onThemeToggle={toggleTheme}
-      status={isDemo ? 'Demo local' : 'Data real'}
       theme={theme}
       title={ROUTE_LABELS[route]}
     >
@@ -2222,7 +2219,7 @@ function EmotionChartPanel({
       .slice(-183);
   }, [data, localSnapshot]);
   const heatmap = useMemo(() => buildEmotionWeekHeatmap(snapshots), [snapshots]);
-  const frequent = useMemo(() => resolveMostFrequentEmotion(snapshots), [snapshots]);
+  const frequent = useMemo(() => resolveMostFrequentEmotion(snapshots.slice(-15)), [snapshots]);
   const periodStart = heatmap.periodStart;
   const periodEnd = heatmap.periodEnd;
 
@@ -2481,10 +2478,14 @@ function resolveMostFrequentEmotion(snapshots: EmotionSnapshot[]) {
 function buildEmotionWeekHeatmap(snapshots: EmotionSnapshot[]) {
   const byDate = new Map(snapshots.map((snapshot) => [snapshot.date, snapshot.mood ?? null]));
   const today = startOfLocalDay(new Date());
-  const firstSnapshotDate = snapshots[0]?.date ? startOfLocalDay(new Date(`${snapshots[0].date}T00:00:00`)) : today;
-  const firstAvailableDate = firstSnapshotDate > today ? today : firstSnapshotDate;
-  const periodStartDate = new Date(firstAvailableDate.getFullYear(), firstAvailableDate.getMonth(), 1);
-  const periodEndDate = new Date(firstAvailableDate.getFullYear(), firstAvailableDate.getMonth() + 6, 0);
+  const latestSnapshotDate = snapshots[snapshots.length - 1]?.date
+    ? startOfLocalDay(new Date(`${snapshots[snapshots.length - 1].date}T00:00:00`))
+    : today;
+  const anchorDate = latestSnapshotDate > today ? latestSnapshotDate : today;
+  const totalDays = 26 * 7;
+  const historicalDays = Math.floor(totalDays * 0.75);
+  const periodStartDate = addLocalDays(anchorDate, -(historicalDays - 1));
+  const periodEndDate = addLocalDays(periodStartDate, totalDays - 1);
   const periodStart = toLocalIsoDate(periodStartDate);
   const periodEnd = toLocalIsoDate(periodEndDate);
   const startMonday = startOfMondayWeek(periodStartDate);

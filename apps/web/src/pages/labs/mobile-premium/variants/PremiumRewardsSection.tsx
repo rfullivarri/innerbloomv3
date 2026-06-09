@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-import { decideTaskHabitAchievement, getRewardsHistory, getTaskInsights, toggleTaskHabitAchievementMaintained, type HabitAchievementPillarGroup, type HabitAchievementShelfItem, type MonthlyWrappedRecord, type RewardsGrowthCalibrationRow, type RewardsHistorySummary, type TaskInsightsResponse, type WeeklyWrappedRecord } from '../../../../lib/api';
+import { decideTaskHabitAchievement, getRewardsHistory, getTaskInsights, getUserXpByTrait, toggleTaskHabitAchievementMaintained, type HabitAchievementPillarGroup, type HabitAchievementShelfItem, type MonthlyWrappedRecord, type RewardsGrowthCalibrationRow, type RewardsHistorySummary, type TaskInsightsResponse, type TraitXpEntry, type WeeklyWrappedRecord } from '../../../../lib/api';
 import { useRequest } from '../../../../hooks/useRequest';
 import { HabitAchievementSeal } from '../../../../components/dashboard-v3/HabitAchievementSeal';
 import { InnerbloomBrand, TraitIcon } from '../MobilePremiumPrimitives';
@@ -254,6 +254,11 @@ export function PremiumRewardsSection({
   const scrollFrameRef = useRef<number | null>(null);
   const { data, reload } = useRequest(
     () => getRewardsHistory(backendUserId ?? ''),
+    [backendUserId],
+    { enabled: Boolean(backendUserId) },
+  );
+  const { data: radarData } = useRequest(
+    () => getUserXpByTrait(backendUserId ?? ''),
     [backendUserId],
     { enabled: Boolean(backendUserId) },
   );
@@ -535,6 +540,7 @@ export function PremiumRewardsSection({
       {activeWeeklyWrapped ? (
         <PremiumWeeklyWrappedStory
           onClose={() => setActiveWeeklyWrapped(null)}
+          radarTraits={radarData?.traits ?? []}
           weekly={activeWeeklyWrapped}
         />
       ) : null}
@@ -635,27 +641,27 @@ function AchievementCarouselCard({
 function AchievementFrontFace({ habit }: { habit: HabitAchievementShelfItem; isActive: boolean }) {
   const achieved = isHabitAchieved(habit);
   return (
-    <>
+    <div className="flex h-full flex-col items-center">
       <HabitAchievementSeal
         alt={`${habit.taskName} seal`}
         disabled={!achieved}
         fallback={<TraitIcon size={120} trait={habit.trait?.name} />}
         imgClassName="h-full w-full object-contain"
-        className={`mx-auto grid h-36 w-36 place-items-center ${achieved ? '' : 'opacity-55 grayscale'}`}
+        className={`mx-auto grid h-32 w-32 shrink-0 place-items-center ${achieved ? '' : 'opacity-55 grayscale'}`}
         pillar={habit.pillar}
         traitCode={habit.trait?.code}
         traitName={habit.trait?.name}
       />
-      <h3 className="mt-4 text-2xl font-semibold leading-tight text-[color:var(--mp-text)]">
+      <h3 className="mt-3 line-clamp-3 text-[1.25rem] font-semibold leading-[1.1] text-[color:var(--mp-text)]">
         {habit.taskName}
       </h3>
-      <p className="mt-2 text-lg text-[color:var(--mp-text-secondary)]">{habit.trait?.name ?? 'Rasgo'}</p>
+      <p className="mt-1.5 text-base text-[color:var(--mp-text-secondary)]">{habit.trait?.name ?? 'Rasgo'}</p>
       <p className={`mt-3 text-xs font-semibold uppercase tracking-[0.12em] ${achieved ? 'text-[color:var(--mp-violet)]' : 'text-[color:var(--mp-amber)]'}`}>
         {achieved ? 'Hábito logrado' : 'Bloqueado'}
       </p>
       {achieved ? (
         <button
-          className="mt-4 rounded-full border border-[color:var(--mp-border)] px-4 py-2 text-xs font-semibold text-[color:var(--mp-text)]"
+          className="mt-auto rounded-full border border-[color:var(--mp-border)] px-4 py-1.5 text-xs font-semibold text-[color:var(--mp-text)]"
           onClick={(event) => {
             event.stopPropagation();
             shareAchievement(habit);
@@ -665,7 +671,7 @@ function AchievementFrontFace({ habit }: { habit: HabitAchievementShelfItem; isA
           Compartir
         </button>
       ) : null}
-    </>
+    </div>
   );
 }
 
@@ -1376,9 +1382,11 @@ function WeeklyWrappedRow({ onOpen, weekly }: { onOpen: () => void; weekly: Week
 
 function PremiumWeeklyWrappedStory({
   onClose,
+  radarTraits,
   weekly,
 }: {
   onClose: () => void;
+  radarTraits?: TraitXpEntry[];
   weekly: WeeklyWrappedRecord;
 }) {
   const payload = weekly.payload;
@@ -1918,6 +1926,7 @@ function PremiumWeeklyWrappedStory({
                 dominant={dominantPillar}
                 dominantPct={dominantPct}
                 message={sectionsByKey.get('pillar')?.body ?? `${dominantLabel} lideró tu energía estos días.`}
+                radarTraits={radarTraits}
                 xp={payload.summary?.pillarDominantStats?.xp ?? 0}
                 completions={payload.summary?.pillarDominantStats?.completions ?? 0}
               />
@@ -2709,7 +2718,7 @@ function WeeklyStorySlide({
       ref={registerSlide}
       style={{
         paddingBottom: 'calc(var(--weekly-safe-bottom) + 1.25rem)',
-        paddingTop: 'calc(var(--weekly-safe-top) + 3.75rem)',
+        paddingTop: 'calc(var(--weekly-safe-top) + 2.35rem)',
       }}
     >
       <svg aria-hidden="true" className="mp-weekly-arc-svg pointer-events-none absolute -right-24 -top-14 h-[42rem] w-[32rem]" fill="none" viewBox="0 0 430 760">
@@ -2721,14 +2730,14 @@ function WeeklyStorySlide({
         <path className="mp-weekly-arc-path" d="M-18 322C114 435 257 462 386 373C494 298 493 147 390 65" pathLength={1} stroke="var(--weekly-arc-soft)" strokeLinecap="round" strokeWidth="1" />
       </svg>
       <div className="mp-weekly-story-in relative z-10 flex min-h-0 w-full flex-col">
-        <div className="mb-[clamp(1.25rem,4.8dvh,2rem)]">
+        <div className="mb-[clamp(.85rem,3.2dvh,1.35rem)]">
           <InnerbloomBrand
             className="mp-weekly-fragment"
             markClassName="h-5 w-5"
             textClassName="text-[10px] tracking-[0.46em]"
             style={{ color: 'var(--weekly-brand)', transitionDelay: '0ms' }}
           />
-          <p className="mp-weekly-fragment mt-[clamp(1.5rem,4.2dvh,2rem)] text-xs font-semibold uppercase tracking-[0.34em]" style={{ color: accent, transitionDelay: '40ms' }}>{eyebrow}</p>
+          <p className="mp-weekly-fragment mt-[clamp(.9rem,2.4dvh,1.25rem)] text-xs font-semibold uppercase tracking-[0.34em]" style={{ color: accent, transitionDelay: '40ms' }}>{eyebrow}</p>
           <h2 className="mp-weekly-fragment mt-3 text-[clamp(2.45rem,10.5vw,3.35rem)] font-semibold leading-[0.96] tracking-[-0.035em] text-[color:var(--weekly-title)]" style={{ transitionDelay: '95ms' }}>{title}</h2>
         </div>
         <div className="flex min-h-0 flex-1 flex-col">{children}</div>
@@ -2963,6 +2972,7 @@ function WeeklyRadarAnalysisChart({
   dominant,
   dominantPct,
   message,
+  radarTraits,
   xp,
 }: {
   active: boolean;
@@ -2970,22 +2980,23 @@ function WeeklyRadarAnalysisChart({
   dominant: RewardsPillarCode;
   dominantPct: number;
   message: string;
+  radarTraits?: TraitXpEntry[];
   xp: number;
 }) {
   const size = 340;
   const center = size / 2;
   const radius = 108;
   const ringRadius = 122;
-  const axes = buildWeeklyRadarAxes(dominant);
-  const maxValue = Math.max(...axes.map((axis) => axis.value));
+  const axes = buildWeeklyRadarAxes(dominant, radarTraits);
+  const maxValue = Math.max(1, ...axes.map((axis) => axis.value));
   const points = axes.map((axis, index) => {
     const distance = radius * (axis.value / maxValue);
     const point = weeklyPolarPoint(center, center, distance, weeklyRadarAngle(index, axes.length));
     return `${point.x},${point.y}`;
   }).join(' ');
-  const ranges = buildWeeklyRadarRanges(axes.length);
+  const ranges = buildWeeklyRadarRanges(axes);
   const dominantIndex = WEEKLY_PILLAR_ORDER.indexOf(dominant);
-  const dominantRange = ranges[dominantIndex];
+  const dominantRange = ranges[dominantIndex] ?? { start: 0, end: Math.PI * 2 };
 
   return (
     <div className="mp-weekly-fragment flex min-h-0 flex-1 flex-col space-y-[clamp(1rem,3dvh,1.5rem)]" style={{ transitionDelay: '170ms' }}>
@@ -3801,7 +3812,29 @@ function weeklyMiniEnergyY(value: number) {
   return 12 + ((100 - Math.max(0, Math.min(100, value))) / 100) * 64;
 }
 
-function buildWeeklyRadarAxes(dominant: RewardsPillarCode) {
+function buildWeeklyRadarAxes(dominant: RewardsPillarCode, traits: TraitXpEntry[] = []) {
+  const realAxes = traits
+    .map((trait, index) => {
+      const pillar = normalizePillarCode(trait.pillar);
+      const value = Number.isFinite(trait.xp) ? Math.max(0, trait.xp) : 0;
+      if (!pillar || value <= 0) return null;
+      return {
+        key: `${trait.trait || trait.name || 'trait'}-${index}`,
+        pillar,
+        sortOrder: Number.isFinite(trait.sortOrder) ? trait.sortOrder ?? index : index,
+        value,
+      };
+    })
+    .filter((axis): axis is { key: string; pillar: RewardsPillarCode; sortOrder: number; value: number } => Boolean(axis))
+    .sort((left, right) => {
+      const pillarDiff = WEEKLY_PILLAR_ORDER.indexOf(left.pillar) - WEEKLY_PILLAR_ORDER.indexOf(right.pillar);
+      return pillarDiff || left.sortOrder - right.sortOrder || left.key.localeCompare(right.key);
+    });
+
+  if (realAxes.length >= 3) {
+    return realAxes;
+  }
+
   const body = [
     { key: 'recovery', value: 517 },
     { key: 'movement', value: 437 },
@@ -3828,14 +3861,25 @@ function buildWeeklyRadarAxes(dominant: RewardsPillarCode) {
   ];
 }
 
-function buildWeeklyRadarRanges(axisCount: number) {
+function buildWeeklyRadarRanges(axes: Array<{ pillar: RewardsPillarCode }>) {
+  const axisCount = Math.max(1, axes.length);
   const step = (Math.PI * 2) / axisCount;
-  return WEEKLY_PILLAR_ORDER.map((_, index) => {
-    const startIndex = index * 4;
-    const endIndex = startIndex + 3;
+  return WEEKLY_PILLAR_ORDER.map((pillar, fallbackIndex) => {
+    const indices = axes
+      .map((axis, index) => (axis.pillar === pillar ? index : -1))
+      .filter((index) => index >= 0);
+
+    if (!indices.length) {
+      const start = -Math.PI / 2 + fallbackIndex * ((Math.PI * 2) / WEEKLY_PILLAR_ORDER.length);
+      return {
+        start,
+        end: start + (Math.PI * 2) / WEEKLY_PILLAR_ORDER.length,
+      };
+    }
+
     return {
-      start: weeklyRadarAngle(startIndex, axisCount) - step / 2,
-      end: weeklyRadarAngle(endIndex, axisCount) + step / 2,
+      start: weeklyRadarAngle(indices[0], axisCount) - step / 2,
+      end: weeklyRadarAngle(indices[indices.length - 1], axisCount) + step / 2,
     };
   });
 }

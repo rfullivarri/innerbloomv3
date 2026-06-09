@@ -52,6 +52,7 @@ export type TaskEditDraft = {
 
 type ActiveWindowMonth = {
   month: string;
+  periodKey?: string | null;
   percent: number;
   projected?: boolean;
 };
@@ -447,9 +448,7 @@ export function PremiumTaskDetail({
   const detail = buildDetail(taskSummary, insights, weeklyGoal);
   const activity = buildActivity(scope, insights, weeklyGoal);
   const latestChip = resolveRecalibrationChip(detail.latestRecalibrationAction, detail.difficultyLabel);
-  const previousWindowMonths = detail.activeWindow.slice(0, -3);
-  const activeWindowMonths = detail.activeWindow.slice(-3);
-  const visiblePreviousWindowMonths = previousWindowMonths.slice(-1);
+  const activeWindowMonths = detail.activeWindow.slice(-4);
 
   return (
     <section className="space-y-7">
@@ -478,7 +477,7 @@ export function PremiumTaskDetail({
             <TraitIcon size={26} trait={detail.stat} />
           </div>
           <div className="min-w-0">
-            <h2 className="max-w-full break-words text-[1.7rem] font-semibold leading-[1.08] text-[color:var(--mp-text)]">{detail.name}</h2>
+            <h2 className="max-w-full break-words text-[1.38rem] font-semibold leading-[1.12] text-[color:var(--mp-text)]">{detail.name}</h2>
             <div className="mt-2.5 flex flex-wrap gap-2">
               <span className="inline-flex min-h-7 items-center gap-1.5 rounded-full bg-violet-400/12 px-2.5 text-xs font-semibold text-[color:var(--mp-violet)]">
                 <TraitIcon size={12} trait={detail.stat} />
@@ -522,17 +521,11 @@ export function PremiumTaskDetail({
                   <span>·</span>
                   <span className="text-[color:var(--mp-green)]">Fuerte ≥80</span>
                 </div>
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-2">
-                  <span aria-hidden="true" />
-                  <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:var(--mp-text-muted)]">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:var(--mp-text-muted)]">
                     <span className="h-px flex-1 bg-[color:var(--mp-border)]" />
                     <span>Ventana activa</span>
                     <span className="h-px flex-1 bg-[color:var(--mp-border)]" />
-                  </div>
-                  <div className="grid place-items-center">
-                    {visiblePreviousWindowMonths.map((month) => (
-                      <MonthHealthDot key={`${month.month}-${month.percent}`} month={month.month} percent={month.percent} projected={month.projected} />
-                    ))}
                   </div>
                   <div className="flex items-start justify-center gap-3">
                     {activeWindowMonths.map((month) => (
@@ -984,22 +977,28 @@ function resolveScore(insights: TaskInsightsResponse, task: PremiumTaskSummary, 
 
 function resolveActiveWindow(insights: TaskInsightsResponse): ActiveWindowMonth[] {
   const recent = insights.previewAchievement?.recentMonths ?? [];
-  const months = recent
-    .map((entry) => {
+  const months: ActiveWindowMonth[] = recent
+    .map((entry): ActiveWindowMonth | null => {
       const raw = entry.projectedCompletionRate ?? entry.completionRate ?? entry.value ?? 0;
       const normalized = normalizeCompletionPercent(raw);
       const month = entry.month ?? formatMonthFromPeriod(entry.periodKey);
       if (!month) return null;
       return {
+        periodKey: entry.periodKey ?? null,
         month,
         percent: Math.round(Math.max(0, Math.min(100, normalized))),
         projected: entry.closed === false || entry.projectedCompletionRate != null,
       };
     })
-    .filter((entry): entry is ActiveWindowMonth => Boolean(entry));
+    .filter((entry): entry is ActiveWindowMonth => entry !== null);
 
-  if (months.length > 0) return months.slice(-4);
-  return [{ month: formatMonthFromPeriod(new Date().toISOString()) ?? 'Mes', percent: 0, projected: true }];
+  if (months.length > 0) {
+    return months
+      .sort((a, b) => resolveMonthSortKey(a) - resolveMonthSortKey(b))
+      .slice(-4);
+  }
+  const currentPeriod = new Date().toISOString().slice(0, 7);
+  return [{ periodKey: currentPeriod, month: formatMonthFromPeriod(currentPeriod) ?? 'Mes', percent: 0, projected: true }];
 }
 
 function buildActivity(scope: ActivityScope, insights: TaskInsightsResponse, weeklyGoal: number) {
@@ -1021,19 +1020,10 @@ function buildActivity(scope: ActivityScope, insights: TaskInsightsResponse, wee
       bars: months,
     };
   }
-  const weeks = insights.weeks.timeline.slice(-5);
+  const weeks = buildCurrentMonthWeeks(insights.month.days, weeklyGoal);
   return {
     mode: 'week' as const,
-    bars: Array.from({ length: 5 }, (_, index) => {
-      const week = weeks[index];
-      const value = week?.count ?? 0;
-      return {
-        label: `sem ${index + 1}`,
-        value,
-        target: weeklyGoal,
-        complete: value >= weeklyGoal,
-      };
-    }),
+    bars: weeks,
   };
 }
 
@@ -1196,21 +1186,57 @@ function resolveDifficultyAdjustments(insights: TaskInsightsResponse, fallbackDi
 
 function buildLastSevenDays(days: Array<{ date: string; count: number }>) {
   const byDate = new Map(days.map((day) => [day.date, day.count]));
-  const latest = new Date();
-  const labels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-  const monday = new Date(latest);
-  const day = monday.getDay();
-  const diffToMonday = day === 0 ? -6 : 1 - day;
-  monday.setDate(monday.getDate() + diffToMonday);
+  const latest = startOfLocalDate(new Date());
+  const labels = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
   return Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(monday);
-    date.setDate(monday.getDate() + index);
-    const key = date.toISOString().slice(0, 10);
+    const date = new Date(latest);
+    date.setDate(latest.getDate() - (6 - index));
+    const key = toLocalDateKey(date);
     return {
-      label: labels[index],
+      label: labels[date.getDay()] ?? '',
       value: byDate.get(key) ?? 0,
     };
   });
+}
+
+function buildCurrentMonthWeeks(days: Array<{ date: string; count: number }>, weeklyGoal: number): ActivityBar[] {
+  const today = startOfLocalDate(new Date());
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  const weekCount = Math.ceil((monthEnd.getDate() + monthStart.getDay()) / 7);
+  const byDate = new Map(days.map((day) => [day.date, day.count]));
+  return Array.from({ length: weekCount }, (_, index) => {
+    const startDay = 1 + index * 7 - monthStart.getDay();
+    const endDay = Math.min(monthEnd.getDate(), startDay + 6);
+    let value = 0;
+    for (let day = Math.max(1, startDay); day <= endDay; day += 1) {
+      const key = toLocalDateKey(new Date(today.getFullYear(), today.getMonth(), day));
+      value += byDate.get(key) ?? 0;
+    }
+    return {
+      label: `sem ${index + 1}`,
+      value,
+      target: weeklyGoal,
+      complete: value >= weeklyGoal,
+    };
+  });
+}
+
+function startOfLocalDate(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function toLocalDateKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function resolveMonthSortKey(month: ActiveWindowMonth) {
+  if (month.periodKey && /^\d{4}-\d{2}/.test(month.periodKey)) {
+    const [year, rawMonth] = month.periodKey.split('-').map(Number);
+    return year * 12 + rawMonth;
+  }
+  const parsed = new Date(`${month.month} 1, ${new Date().getFullYear()}`);
+  return Number.isNaN(parsed.getTime()) ? 0 : parsed.getFullYear() * 12 + parsed.getMonth() + 1;
 }
 
 function buildThreeMonthActivity(insights: TaskInsightsResponse, weeklyGoal: number): ActivityBar[] {
