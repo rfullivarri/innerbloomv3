@@ -1,9 +1,8 @@
 import { motion } from 'framer-motion';
-import { useId, type CSSProperties } from 'react';
+import { useId } from 'react';
 import type { GameMode } from '../state';
 import type { OnboardingLanguage } from '../constants';
 import { GAME_MODE_META } from '../../lib/gameModeMeta';
-import { getOnboardingRhythmTheme } from '../utils/onboardingRhythmTheme';
 import { useThemePreference } from '../../theme/ThemePreferenceProvider';
 
 interface GameModeStepProps {
@@ -54,28 +53,14 @@ function buildAnimatedSinePathValues(mode: GameMode) {
     .join('; ');
 }
 
-function getSinePoint(mode: GameMode) {
-  const config = RHYTHM_WAVE_CONFIG[mode];
-  const progress = config.activeRatio;
-  const x = WAVE_START_X + (WAVE_END_X - WAVE_START_X) * progress;
-  const y = WAVE_CENTER_Y + Math.sin(progress * config.oscillations * Math.PI * 2 + WAVE_PHASE) * config.amplitude;
-
-  return { x, y };
-}
-
 function RhythmWave({ mode, active }: { mode: GameMode; active: boolean }) {
   const rawId = useId().replace(/:/g, '');
   const gradientId = `onboarding-rhythm-wave-gradient-${rawId}`;
   const clipId = `onboarding-rhythm-wave-clip-${rawId}`;
   const path = buildSinePath(mode);
   const animatedPathValues = buildAnimatedSinePathValues(mode);
-  const node = getSinePoint(mode);
   const activeWidth = WAVE_START_X + (WAVE_END_X - WAVE_START_X) * RHYTHM_WAVE_CONFIG[mode].activeRatio;
   const animationDuration = active ? '7.6s' : `${8.8 + RHYTHM_WAVE_CONFIG[mode].activeRatio * 2}s`;
-  const nodeStyle: CSSProperties = {
-    left: `${(node.x / SVG_WIDTH) * 100}%`,
-    top: `${(node.y / SVG_HEIGHT) * 100}%`,
-  };
 
   return (
     <div className="relative h-[3.35rem] w-full min-w-[8.25rem] overflow-visible sm:h-16" role="img" aria-label={`${mode} weekly rhythm wave`}>
@@ -100,17 +85,6 @@ function RhythmWave({ mode, active }: { mode: GameMode; active: boolean }) {
           <animate attributeName="d" dur={animationDuration} repeatCount="indefinite" values={animatedPathValues} />
         </path>
       </svg>
-      {active ? (
-        <span
-          className="rhythm-node pointer-events-none absolute z-10 aspect-square w-9 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-[0_0_28px_rgba(199,125,255,0.34)] sm:w-10"
-          style={nodeStyle}
-          aria-hidden="true"
-        >
-          <span className="absolute inset-[-45%] rounded-full bg-[#c084fc]/34 opacity-70 blur-md" />
-          <span className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_38%_28%,#ffe1f6_0%,#f4a7df_22%,#b872ff_56%,#7c4dff_100%)]" />
-          <span className="absolute left-[32%] top-[17%] h-[24%] w-[24%] rounded-full bg-white/62 blur-[0.5px]" />
-        </span>
-      ) : null}
     </div>
   );
 }
@@ -138,33 +112,16 @@ export function GameModeStep({ language = 'es', selected, onSelect, onBack }: Ga
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-      <style>{`
-        @keyframes rhythmNodeBreathe {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); }
-          48% { transform: translate(-50%, -50%) scale(1.08); }
-        }
-
-        .rhythm-node {
-          animation: rhythmNodeBreathe 4.8s ease-in-out infinite;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .rhythm-node {
-            animation: none;
-          }
-        }
-      `}</style>
-      <div className="glass-card onboarding-surface-base mx-auto max-w-4xl rounded-3xl p-4 sm:p-6">
-        <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
+      <div className="onboarding-flow-panel mx-auto max-w-4xl p-4 sm:p-6">
+        <header className="flex flex-col gap-2">
           <p className="text-xs uppercase tracking-[0.2em] text-white/50">{copy.step}</p>
           <h2 className="text-3xl font-semibold text-white">{copy.title}</h2>
           <p className="text-sm text-white/70">{copy.subtitle}</p>
         </header>
-        <div className="mt-6 space-y-3 md:space-y-4" role="group" aria-label={copy.title}>
+        <div className="mt-7 space-y-3 md:space-y-4" role="group" aria-label={copy.title}>
           {MODE_ORDER.map((mode) => {
             const content = MODE_CARD_CONTENT[mode];
             const isActive = selected === mode;
-            const modeTheme = getOnboardingRhythmTheme(mode);
 
             return (
               <motion.button
@@ -176,7 +133,7 @@ export function GameModeStep({ language = 'es', selected, onSelect, onBack }: Ga
                 aria-label={`${content.title} · ${content.frequency[language]}${isActive ? copy.selectedSuffix : ''}`}
                 data-selected={isActive ? 'true' : 'false'}
                 className={[
-                  'group relative grid min-h-[4.75rem] w-full grid-cols-[4.25rem_minmax(0,1fr)_4.9rem] items-center gap-2 overflow-hidden rounded-[1.45rem] border px-3 py-2 text-left transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d78bff]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:grid-cols-[5.5rem_minmax(0,1fr)_6.6rem] sm:gap-4 sm:px-5 md:min-h-[6.05rem] md:grid-cols-[7rem_minmax(0,1fr)_7.5rem] md:rounded-[1.8rem] md:px-6',
+                  'onboarding-rhythm-card group relative grid min-h-[4.75rem] w-full grid-cols-[4.25rem_minmax(0,1fr)_4.9rem] items-center gap-2 overflow-hidden rounded-[1.45rem] border px-3 py-2 text-left transition-all duration-300 ease-out focus-visible:outline-none sm:grid-cols-[5.5rem_minmax(0,1fr)_6.6rem] sm:gap-4 sm:px-5 md:min-h-[6.05rem] md:grid-cols-[7rem_minmax(0,1fr)_7.5rem] md:rounded-[1.8rem] md:px-6',
                   isLight
                     ? isActive
                       ? 'border-[#8b5cf6]/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(245,240,255,0.88))] shadow-[0_18px_42px_rgba(139,92,246,0.16)]'
@@ -187,20 +144,7 @@ export function GameModeStep({ language = 'es', selected, onSelect, onBack }: Ga
                 ]
                   .filter(Boolean)
                   .join(' ')}
-                style={isActive ? {
-                  boxShadow: isLight
-                    ? `0 18px 42px color-mix(in srgb, ${modeTheme.glow} 40%, transparent),0 0 0 1px color-mix(in srgb, ${modeTheme.border} 80%, white)`
-                    : `inset 0 0 32px rgba(169,85,247,0.13),0 20px 56px ${modeTheme.glow},0 0 0 1px ${modeTheme.border}`,
-                  borderColor: isLight ? `color-mix(in srgb, ${modeTheme.border} 80%, white)` : modeTheme.border,
-                  background: isLight
-                    ? `linear-gradient(135deg, rgba(255,255,255,0.97), color-mix(in srgb, ${modeTheme.softTint} 28%, rgba(248,250,252,0.92)))`
-                    : `linear-gradient(135deg, color-mix(in srgb, ${modeTheme.softTint} 52%, rgba(33,25,62,0.72)), rgba(14,14,30,0.74))`,
-                } : undefined}
               >
-                <span
-                  className={`pointer-events-none absolute inset-x-3 top-3 h-6 rounded-full blur-sm ${isLight ? 'bg-white/55 opacity-70' : 'bg-black/20'}`}
-                  aria-hidden
-                />
                 <h3 className="relative z-10 min-w-0 text-[1rem] font-semibold text-white/94 sm:text-[1.2rem] md:text-[1.58rem]">
                   {content.title.replace(' MOOD', '').replace(' Mood', '')}
                 </h3>

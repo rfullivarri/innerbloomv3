@@ -17,10 +17,29 @@ import {
 } from '../mobile/capacitor';
 import { buildNativeMobileAuthUrl } from '../mobile/mobileAuthSession';
 
-export default function SignUpPage() {
+type SignUpPageProps = {
+  authPath?: string;
+  defaultRedirectPath?: string;
+  secondaryActionHref?: string;
+  signInPath?: '/login' | '/login2';
+};
+
+export default function SignUpPage({
+  authPath = '/sign-up',
+  defaultRedirectPath = '/intro-journey',
+  secondaryActionHref,
+  signInPath = '/login',
+}: SignUpPageProps = {}) {
   const signUpContainerRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
   const language = resolveAuthLanguage(location.search);
+  const searchParams = new URLSearchParams(location.search);
+  const redirectUrl = searchParams.get('redirect_url');
+  const safeRedirectUrl = redirectUrl && redirectUrl.startsWith('/') && !redirectUrl.startsWith('//') ? redirectUrl : null;
+  const fallbackRedirectUrl = safeRedirectUrl ?? defaultRedirectPath;
+  const signInUrl = `${buildLocalizedAuthPath(signInPath, language)}${
+    safeRedirectUrl ? `&redirect_url=${encodeURIComponent(safeRedirectUrl)}` : ''
+  }`;
   const themeMode = readLandingThemeMode();
   const isLightTheme = themeMode === 'light';
   const isNativeApp = isNativeCapacitorPlatform();
@@ -87,9 +106,10 @@ export default function SignUpPage() {
             <SignUp
               appearance={appearance}
               routing="path"
-              path="/sign-up"
-              signInUrl={buildLocalizedAuthPath('/login', language)}
-              fallbackRedirectUrl="/intro-journey"
+              path={authPath}
+              signInUrl={signInUrl}
+              fallbackRedirectUrl={fallbackRedirectUrl}
+              forceRedirectUrl={fallbackRedirectUrl}
             />
           </div>
         </div>
@@ -101,14 +121,14 @@ export default function SignUpPage() {
     <AuthLayout
       title={language === 'en' ? 'Create your account' : 'Crear tu cuenta'}
       secondaryActionLabel={language === 'en' ? 'Back to home' : 'Volver al inicio'}
-      secondaryActionHref={`/?lang=${language}`}
+      secondaryActionHref={secondaryActionHref ?? `/?lang=${language}`}
       themeMode={themeMode}
     >
       <div className={AUTH_STACK_CLASS}>
         <GoogleOAuthButton
           language={language}
           mode="sign-up"
-          redirectUrlComplete={`${location.pathname}${location.search}${location.hash}`}
+          redirectUrlComplete={fallbackRedirectUrl}
           forceAccountSelection
         />
         <div className={`${AUTH_DIVIDER_CLASS} ${isLightTheme ? '!text-[#3b305f]/76' : ''}`}>
@@ -123,10 +143,11 @@ export default function SignUpPage() {
           <SignUp
             appearance={appearance}
             routing="path"
-            path="/sign-up"
-            signInUrl={buildLocalizedAuthPath('/login', language)}
+            path={authPath}
+            signInUrl={signInUrl}
             // post-signup must continue onboarding
-            fallbackRedirectUrl="/intro-journey"
+            fallbackRedirectUrl={fallbackRedirectUrl}
+            forceRedirectUrl={fallbackRedirectUrl}
           />
         </div>
       </div>

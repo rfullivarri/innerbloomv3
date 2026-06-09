@@ -2,9 +2,10 @@ interface GpProgressBarProps {
   progress: number;
   totalGp: number;
   className?: string;
+  hideTotal?: boolean;
 }
 
-export function GpProgressBar({ progress, totalGp, className }: GpProgressBarProps) {
+export function GpProgressBar({ progress, totalGp, className, hideTotal = false }: GpProgressBarProps) {
   const safeProgress = Number.isFinite(progress) ? Math.min(100, Math.max(0, progress)) : 0;
   const safeTotalGp = Number.isFinite(totalGp) ? Math.max(0, Math.round(totalGp)) : 0;
 
@@ -16,9 +17,11 @@ export function GpProgressBar({ progress, totalGp, className }: GpProgressBarPro
           style={{ width: `${safeProgress}%` }}
         />
       </div>
-      <div className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-white/80">
-        {safeTotalGp} GP
-      </div>
+      {hideTotal ? null : (
+        <div className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-white/80">
+          {safeTotalGp} GP
+        </div>
+      )}
     </div>
   );
 }

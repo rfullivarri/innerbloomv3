@@ -27,9 +27,9 @@ export function QuickStartGeneratingScreen({
     ? {
         title: 'Configuring your Quick Start',
         subtitle: 'Applying your selection with the same calibration feel used in onboarding.',
-        bridgeHint: "Next, you'll enter the guided demo to explore how Innerbloom is structured. You can skip it anytime.",
+        bridgeHint: "Next, you'll enter Innerbloom with your first tasks and onboarding banners ready.",
         done: '',
-        cta: 'Go to guided demo',
+        cta: 'Enter Innerbloom',
         saving: 'Saving your Quick Start…',
         steps: [
           'Balancing Body, Mind and Soul',
@@ -42,9 +42,9 @@ export function QuickStartGeneratingScreen({
     : {
         title: 'Configurando tu Inicio rápido',
         subtitle: 'Estamos aplicando tu selección y reutilizando el flujo real del onboarding.',
-        bridgeHint: 'Continúa hacia la demo guiada para conocer más de Innerbloom. Puedes saltarla cuando quieras.',
+        bridgeHint: 'Ahora vas a entrar a Innerbloom con tus primeras tareas y banners de onboarding listos.',
         done: '',
-        cta: 'Ir a demo guiada',
+        cta: 'Entrar a Innerbloom',
         saving: 'Guardando tu Quick Start…',
         steps: [
           'Equilibrando Cuerpo, Mente y Alma',

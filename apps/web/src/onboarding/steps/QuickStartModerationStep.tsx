@@ -66,7 +66,7 @@ export function QuickStartModerationStep({ language = 'es', selectedModerations,
       };
 
   return (
-    <section className="onboarding-premium-root quickstart-premium-card onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
+    <section className="onboarding-premium-root quickstart-premium-card onboarding-flow-panel mx-auto w-full max-w-3xl p-5 sm:p-7">
       <h1 className="text-2xl font-semibold text-white sm:text-3xl">{copy.title}</h1>
       <p className="mt-2 text-sm text-white/70">{copy.subtitle}</p>
       <p className="mt-2 text-xs text-white/55">{copy.hint}</p>

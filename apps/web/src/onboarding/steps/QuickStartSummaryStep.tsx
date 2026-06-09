@@ -3,13 +3,10 @@ import { NavButtons } from '../ui/NavButtons';
 import type { GameMode, Pillar } from '../state';
 import type { QuickStartTask } from '../quickStart';
 import { GAME_MODE_META } from '../../lib/gameModeMeta';
-import { buildGameModeChip, GameModeChip } from '../../components/common/GameModeChip';
-import { buildAvatarPreviewProfile, getAvatarOptionById, resolveAvatarPickerPreviewImage } from '../../lib/avatarCatalog';
 
 interface QuickStartSummaryStepProps {
   language?: OnboardingLanguage;
   gameMode: GameMode;
-  selectedAvatarId: number | null;
   selectedByPillar: Record<Pillar, string[]>;
   tasksByPillar: Record<Pillar, QuickStartTask[]>;
   xp: { Body: number; Mind: number; Soul: number; total: number };
@@ -29,7 +26,6 @@ const MODE_KEY: Record<GameMode, keyof typeof GAME_MODE_META> = {
 export function QuickStartSummaryStep({
   language = 'es',
   gameMode,
-  selectedAvatarId,
   selectedByPillar,
   tasksByPillar,
   xp,
@@ -77,82 +73,56 @@ export function QuickStartSummaryStep({
     acc[pillar] = selectedByPillar[pillar].map((id) => map.get(id) ?? id);
     return acc;
   }, { Body: [], Mind: [], Soul: [] });
-  const avatarOption = getAvatarOptionById(selectedAvatarId);
-  const avatarProfile = avatarOption ? buildAvatarPreviewProfile(avatarOption) : null;
-  const avatarPreviewImage = avatarOption ? resolveAvatarPickerPreviewImage(avatarOption) : null;
+  const modeMeta = GAME_MODE_META[MODE_KEY[gameMode]];
 
   return (
-    <section className="onboarding-premium-root quickstart-premium-card glass-card onboarding-surface-base mx-auto w-full max-w-5xl rounded-3xl p-6 sm:p-8">
-      <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
+    <section className="onboarding-premium-root quickstart-premium-card onboarding-flow-panel mx-auto w-full max-w-3xl p-5 sm:p-7">
+      <header className="flex flex-col gap-2">
         <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.eyebrow}</p>
         <h2 className="text-3xl font-semibold text-white">{copy.title}</h2>
         <p className="text-sm text-white/70">{copy.subtitle}</p>
       </header>
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
-        <div className="space-y-5">
-          <section className="quickstart-premium-surface rounded-2xl border p-5">
-            <header className="border-b border-white/5 pb-3">
-              <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.baseData}</p>
-            </header>
-            <div className="mt-4 space-y-3">
-              <div>
-                      <p className="text-xs uppercase tracking-wide text-white/50">{copy.gameMode}</p>
-                      <span className="mt-2 inline-flex origin-left scale-75">
-                  <GameModeChip {...buildGameModeChip(gameMode, { avatarProfile })} />
-                </span>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-white/50">Avatar</p>
-                <p className="mt-1 inline-flex items-center gap-2 text-sm text-white/80">
-                  <span>{avatarOption?.name ?? '—'}</span>
-                  {avatarOption ? <img src={avatarPreviewImage ?? '/FlowMood.jpg'} alt={avatarOption.name} className="h-7 w-7 rounded-full border border-white/20 object-cover" /> : null}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-white/50">{copy.state}</p>
-                <p className="mt-1 text-sm text-white/80">{GAME_MODE_META[MODE_KEY[gameMode]].state[language]}</p>
-              </div>
-            </div>
-          </section>
-          <section className="quickstart-premium-surface rounded-2xl border p-5">
-            <header className="border-b border-white/5 pb-3">
-              <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.pillars}</p>
-            </header>
-            <div className="mt-4 space-y-3">
-              <p className="text-sm text-white/70">{copy.selectedTraits}</p>
-              {(['Body', 'Mind', 'Soul'] as Pillar[]).map((pillar) => (
-                <div key={pillar} className="quickstart-premium-surface rounded-xl border p-3">
-                  <p className="text-sm font-semibold text-white">{pillar === 'Body' ? 'Body 🫀' : pillar === 'Mind' ? 'Mind 🧠' : 'Soul 🏵️'}</p>
-                  <p className="mt-1 text-xs text-white/70">{copy.selectedTasks}: {selectedByPillar[pillar].length}</p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {selectedTraits[pillar].length > 0
-                      ? selectedTraits[pillar].map((trait) => (
-                        <span key={`${pillar}-${trait}`} className="quickstart-pill rounded-full border px-2.5 py-1 text-[11px] font-medium">
-                          {trait}
-                        </span>
-                      ))
-                      : <span className="text-xs text-white/50">—</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+
+      <div className="quickstart-summary-meta mt-6 grid grid-cols-2 gap-0">
+        <div className="py-4 pr-4">
+          <p className="text-[0.68rem] uppercase tracking-[0.22em] text-white/45">{copy.gameMode}</p>
+          <p className="mt-2 text-base font-semibold uppercase tracking-[0.18em] text-white">{gameMode}</p>
         </div>
-        <aside className="space-y-5">
-          <section className="quickstart-premium-surface rounded-2xl border p-5">
-            <header className="border-b border-white/5 pb-3">
-              <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.gp}</p>
-            </header>
-            <div className="mt-4 space-y-2 text-sm text-white/85">
-              <p><span className="font-semibold text-white">Body 🫀:</span> {xp.Body} GP</p>
-              <p><span className="font-semibold text-white">Mind 🧠:</span> {xp.Mind} GP</p>
-              <p><span className="font-semibold text-white">Soul 🏵️:</span> {xp.Soul} GP</p>
-              <p className="mt-3 text-base font-semibold text-white">{copy.total}: {xp.total} GP</p>
-              <p className="text-xs text-white/60">{copy.baseHint}</p>
+        <div className="py-4 pl-4">
+          <p className="text-[0.68rem] uppercase tracking-[0.22em] text-white/45">{copy.state}</p>
+          <p className="mt-2 text-base text-white/80">{modeMeta.state[language]}</p>
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <p className="text-sm text-white/70">{copy.selectedTraits}</p>
+        <div className="quickstart-summary-pillars mt-3">
+        {(['Body', 'Mind', 'Soul'] as Pillar[]).map((pillar) => (
+          <section key={pillar} className="quickstart-summary-pillar py-4">
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="text-base font-semibold text-white">{pillar === 'Body' ? 'Body 🫀' : pillar === 'Mind' ? 'Mind 🧠' : 'Soul 🏵️'}</p>
+              <span className="text-xs text-white/45">{selectedByPillar[pillar].length} {copy.selectedTasks.toLowerCase()}</span>
+            </div>
+            <div className="quickstart-summary-traits mt-2 text-sm uppercase tracking-[0.12em]">
+              {selectedTraits[pillar].length > 0
+                ? selectedTraits[pillar].join(' · ')
+                : <span className="text-xs text-white/50">—</span>}
             </div>
           </section>
-        </aside>
+        ))}
+        </div>
       </div>
+
+      <section className="quickstart-summary-gp mt-6 py-4">
+        <p className="text-[0.68rem] uppercase tracking-[0.28em] text-white/45">{copy.gp}</p>
+        <div className="mt-4 grid grid-cols-3 gap-2 text-xs text-white/60">
+          <p><span className="block text-lg font-semibold text-white">{xp.Body}</span>Body</p>
+          <p><span className="block text-lg font-semibold text-white">{xp.Mind}</span>Mind</p>
+          <p><span className="block text-lg font-semibold text-white">{xp.Soul}</span>Soul</p>
+        </div>
+        <p className="mt-4 text-2xl font-semibold text-white">{copy.total}: {xp.total} GP</p>
+        <p className="mt-1 text-xs text-white/60">{copy.baseHint}</p>
+      </section>
 
       <NavButtons
         language={language}

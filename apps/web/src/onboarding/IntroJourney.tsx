@@ -29,6 +29,7 @@ interface IntroJourneyProps {
   onFinish?: (payload: ReturnType<typeof buildPayload>) => Promise<void> | void;
   isSubmitting?: boolean;
   submitError?: string | null;
+  skipAuthGateForDev?: boolean;
 }
 
 const OPEN_TEXT_FIELDS: Partial<Record<StepId, 'bodyOpen' | 'soulOpen' | 'mindOpen'>> = {
@@ -42,7 +43,13 @@ const OPEN_TEXT_FIELDS: Partial<Record<StepId, 'bodyOpen' | 'soulOpen' | 'mindOp
 
 const DEFAULT_SKIPPED_AVATAR_ID = 2;
 
-export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, submitError = null }: IntroJourneyProps) {
+export function IntroJourney({
+  language = 'es',
+  onFinish,
+  isSubmitting = false,
+  submitError = null,
+  skipAuthGateForDev = false,
+}: IntroJourneyProps) {
   const {
     state,
     setMode,
@@ -91,6 +98,12 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
       setShouldAutoAdvance(Boolean(hasEffectiveSession));
     }
   }, [authReady, hasEffectiveSession]);
+
+  useEffect(() => {
+    if (skipAuthGateForDev && stepId === 'clerk-gate') {
+      goNext();
+    }
+  }, [goNext, skipAuthGateForDev, stepId]);
 
   const showSnack = (amount?: number) => {
     if (!amount || amount <= 0) return;
@@ -211,6 +224,12 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
       console.warn('[onboarding] missing avatar selection after rhythm step', { stepId, mode: answers.mode });
     }
   }, [answers.avatarId, answers.mode, currentStepIndex, route, stepId]);
+
+  useEffect(() => {
+    if (onboardingPath === 'quick_start' && answers.avatarId == null) {
+      setAvatarId(DEFAULT_SKIPPED_AVATAR_ID);
+    }
+  }, [answers.avatarId, onboardingPath, setAvatarId]);
 
   const handleChecklistConfirm = (target: StepId) => {
     const hadChecklist = awardedChecklists[target];

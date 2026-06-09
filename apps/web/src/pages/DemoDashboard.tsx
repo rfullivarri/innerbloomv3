@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { useAuth } from '@clerk/clerk-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/layout/Navbar';
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
@@ -29,7 +28,6 @@ export default function DemoDashboardPage() {
   const { language, setManualLanguage } = usePostLoginLanguage();
   const location = useLocation();
   const navigate = useNavigate();
-  const { userId } = useAuth();
   const demoContext = resolveDemoEntryContext(location.search);
   const demoHubPath = getPublicDemoHubPath(location.search);
   const { theme, setPreference } = useThemePreference();
@@ -68,13 +66,13 @@ export default function DemoDashboardPage() {
   const handleDemoExit = useCallback(() => {
     emitDemoEvent('demo_exited', { from: '/demo', source: demoContext.source, mode: demoContext.mode });
 
-    if (demoContext.fromOnboarding && userId) {
+    if (demoContext.fromOnboarding) {
       navigate(dashboardPath, { state: { scrollToTopOnEnter: true, source: 'demo' } });
       return;
     }
 
     navigate(demoHubPath);
-  }, [dashboardPath, demoContext.fromOnboarding, demoContext.mode, demoHubPath, navigate, userId]);
+  }, [dashboardPath, demoContext.fromOnboarding, demoContext.mode, demoHubPath, navigate]);
 
   useEffect(() => {
     if (language !== demoContext.language) {
@@ -108,14 +106,14 @@ export default function DemoDashboardPage() {
   const handleGuidedCompleted = useCallback(() => {
     emitDemoEvent('demo_guided_completed', { totalSteps: guidedSteps.length, source: demoContext.source, mode: demoContext.mode });
 
-    if (demoContext.fromOnboarding && userId) {
+    if (demoContext.fromOnboarding) {
       dailyQuestModalRef.current?.close();
       navigate(dashboardPath, { state: { scrollToTopOnEnter: true, source: 'demo' } });
       return;
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [dashboardPath, demoContext.fromOnboarding, demoContext.mode, demoContext.source, guidedSteps.length, navigate, userId]);
+  }, [dashboardPath, demoContext.fromOnboarding, demoContext.mode, demoContext.source, guidedSteps.length, navigate]);
 
   return (
     <div

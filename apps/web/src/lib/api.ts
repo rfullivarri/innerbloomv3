@@ -237,6 +237,10 @@ const DEV_USER_HEADER = 'X-Innerbloom-Demo-User';
 const DEV_USER_SWITCH_ENABLED =
   import.meta.env.DEV &&
   String(import.meta.env.VITE_ENABLE_DEV_USER_SWITCH ?? 'false').toLowerCase() === 'true';
+const DEV_USER_ID_OVERRIDE =
+  typeof import.meta.env.VITE_DEV_USER_ID === 'string' && import.meta.env.VITE_DEV_USER_ID.trim()
+    ? import.meta.env.VITE_DEV_USER_ID.trim()
+    : null;
 
 export const DEV_USER_SWITCH_OPTIONS = [
   { id: 'user_demo_active', label: 'Active' },
@@ -266,12 +270,13 @@ function notifyDevUserListeners(userId: string | null) {
 }
 
 function applyDevUserOverride(init?: RequestInit): RequestInit {
-  if (!DEV_USER_SWITCH_ENABLED || !devUserOverride) {
+  const userId = getDevUserOverride();
+  if (!DEV_USER_SWITCH_ENABLED || !userId) {
     return init ?? {};
   }
 
   const headers = new Headers(init?.headers ?? {});
-  headers.set(DEV_USER_HEADER, devUserOverride);
+  headers.set(DEV_USER_HEADER, userId);
 
   return {
     ...(init ?? {}),
@@ -280,7 +285,7 @@ function applyDevUserOverride(init?: RequestInit): RequestInit {
 }
 
 export function getDevUserOverride(): string | null {
-  return DEV_USER_SWITCH_ENABLED ? devUserOverride : null;
+  return DEV_USER_SWITCH_ENABLED ? DEV_USER_ID_OVERRIDE ?? devUserOverride : null;
 }
 
 export function setDevUserOverride(nextUser: DevUserOption | null): void {
@@ -806,8 +811,9 @@ export async function apiAuthorizedGet<T>(
 }
 
 export async function apiAuthorizedFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const requestInit = applyDevUserOverride(init);
   const token = await resolveAuthToken();
-  const authedInit = applyAuthorization(init, token);
+  const authedInit = applyAuthorization(requestInit, token);
   const url = resolveApiUrl(path);
   return performApiRequest(url, authedInit);
 }

@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef } from 'react';
 import { ArrowRight, ArrowUp, CircleDot } from '../../components/icons';
 import { GpProgressBar } from './GpProgressBar';
 import type { OnboardingLanguage } from '../constants';
-import { useThemePreference } from '../../theme/ThemePreferenceProvider';
 
 interface GpExplainerOverlayProps {
   language?: OnboardingLanguage;
@@ -22,7 +21,6 @@ type ExplainerItem = {
 
 export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOverlayProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
-  const { theme } = useThemePreference();
   const prefersReducedMotion = useReducedMotion();
 
   const copy = useMemo(
@@ -155,65 +153,66 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[70]" aria-hidden={false}>
-      <div className="pointer-events-auto absolute inset-0 bg-[color:var(--color-overlay-2)] backdrop-blur-sm" onClick={onClose} />
+      <div className="pointer-events-auto absolute inset-0 bg-black/54 backdrop-blur-md" onClick={onClose} />
 
       <div className="pointer-events-auto absolute inset-x-0 top-[7.15rem] px-3 sm:top-[7.8rem] sm:px-4">
-        <div
+        <motion.div
           ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-label={copy.title}
           tabIndex={-1}
-          className="relative mx-auto w-full max-w-sm rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-4 text-[color:var(--color-text)] shadow-[var(--shadow-elev-2)]"
+          initial={{ opacity: 0, y: 12, scale: 0.985 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="onboarding-gp-modal relative mx-auto w-full max-w-sm rounded-[1.65rem] border p-4 text-[color:var(--ib-onboarding-text)]"
         >
           <button
             type="button"
             onClick={onClose}
             aria-label={copy.closeLabel}
-            className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-sm text-[color:var(--color-text-muted)] transition hover:text-[color:var(--color-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]"
+            className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center text-lg font-light text-[color:var(--ib-onboarding-text-muted)] transition hover:text-[color:var(--ib-onboarding-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ib-onboarding-violet)]"
           >
             ✕
           </button>
 
           <div className="pr-8">
             <div className="flex items-center gap-3">
-              <h2 className="text-sm font-semibold tracking-wide text-[color:var(--color-text)]">{copy.title}</h2>
+              <h2 className="text-lg font-semibold tracking-tight text-[color:var(--ib-onboarding-text)]">{copy.title}</h2>
             </div>
 
-            <div className="mt-3">
+            <div className="mt-5">
               <div className="relative">
-                <GpProgressBar progress={40} totalGp={0} />
-                <div className="pointer-events-none absolute -top-2 right-2">
+                <GpProgressBar progress={40} totalGp={0} hideTotal />
+                <div className="pointer-events-none absolute -top-3 right-1 h-10 w-16">
                   {prefersReducedMotion ? (
-                    <span className="inline-flex rounded-full border border-emerald-500/35 bg-emerald-500/15 px-2 py-0.5 text-[0.56rem] font-semibold uppercase tracking-[0.15em] text-emerald-700 dark:text-emerald-300">
+                    <span className="onboarding-gp-plus-pill absolute right-0 top-1 inline-flex rounded-full px-2 py-0.5 text-[0.58rem] font-semibold uppercase tracking-[0.16em]">
                       + GP
                     </span>
                   ) : (
-                    <div className="relative h-9 w-16">
-                      {[0, 1, 2].map((pill) => (
-                        <motion.span
-                          key={pill}
-                          className="absolute right-0 inline-flex rounded-full border border-emerald-500/35 bg-emerald-500/15 px-2 py-0.5 text-[0.56rem] font-semibold uppercase tracking-[0.15em] text-emerald-700 dark:text-emerald-300"
-                          initial={{ opacity: 0, y: 8, scale: 0.92 }}
-                          animate={{ opacity: [0, 1, 1, 0], y: [8, 2, -8, -18], scale: [0.92, 1.04, 1, 0.98] }}
-                          transition={{ duration: 1.7, repeat: Infinity, ease: 'easeOut', delay: pill * 0.38 }}
-                        >
-                          + GP
-                        </motion.span>
-                      ))}
-                    </div>
+                    [0, 1, 2].map((pill) => (
+                      <motion.span
+                        key={pill}
+                        className="onboarding-gp-plus-pill absolute right-0 inline-flex rounded-full px-2 py-0.5 text-[0.58rem] font-semibold uppercase tracking-[0.16em]"
+                        initial={{ opacity: 0, y: 9, scale: 0.92 }}
+                        animate={{ opacity: [0, 1, 1, 0], y: [9, 2, -9, -20], scale: [0.92, 1.04, 1, 0.98] }}
+                        transition={{ duration: 1.7, repeat: Infinity, ease: 'easeOut', delay: pill * 0.38 }}
+                      >
+                        + GP
+                      </motion.span>
+                    ))
                   )}
                 </div>
               </div>
             </div>
           </div>
 
-          <ul className="mt-3 space-y-2 text-xs leading-relaxed text-[color:var(--color-text-muted)]">
+          <ul className="mt-5 space-y-3 text-sm leading-relaxed text-[color:var(--ib-onboarding-text-secondary)]">
             {copy.items.map((item) => {
-              const iconClassName = 'h-3.5 w-3.5 shrink-0 text-[color:var(--color-accent-primary)]';
+              const iconClassName = 'mt-0.5 h-4 w-4 shrink-0 text-[color:var(--ib-onboarding-violet)]';
 
               return (
-                <li key={item.id} className="flex items-start gap-2">
+                <li key={item.id} className="onboarding-gp-modal__item flex items-start gap-3">
                   {item.icon === 'dot' ? (
                     <CircleDot className={iconClassName} />
                   ) : item.icon === 'arrow-right' ? (
@@ -226,7 +225,7 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
                       <span
                         key={`${item.id}-${segment.text}`}
                         className={[
-                          segment.emphasis === 'semibold' ? 'font-semibold text-[color:var(--color-text)]' : '',
+                          segment.emphasis === 'semibold' ? 'font-semibold text-[color:var(--ib-onboarding-text)]' : '',
                           segment.noWrap ? 'whitespace-nowrap' : '',
                         ]
                           .filter(Boolean)
@@ -244,14 +243,14 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
           <button
             type="button"
             onClick={onClose}
-            className="ib-primary-button mt-4 inline-flex w-full items-center justify-center rounded-xl px-3 py-2 text-sm font-semibold !text-white transition duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]"
+            className="quickstart-primary-cta mt-5 inline-flex w-full items-center justify-center rounded-full border px-4 py-3 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
             style={{ color: '#fff', textShadow: '0 1px 2px rgba(15, 23, 42, 0.22)' }}
           >
             <span className="relative z-10 text-white" style={{ color: '#fff' }}>
               {copy.cta}
             </span>
           </button>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

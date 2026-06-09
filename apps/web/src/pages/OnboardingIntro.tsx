@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IntroJourney } from '../onboarding/IntroJourney';
 import { type JourneyPayload } from '../onboarding/payload';
@@ -24,6 +24,7 @@ import {
   ONBOARDING_OG_IMAGE_WIDTH,
 } from '../lib/onboardingSeo';
 import { buildOnboardingOverlayScope } from '../lib/onboardingOverlayScope';
+import { clearLocalOnboardingSnapshot, writeLocalOnboardingSnapshotFromPayload } from './labs/mobile-premium/localOnboardingBridge';
 
 async function parseErrorMessage(response: Response) {
   const payload = await response.json().catch(() => ({}));
@@ -37,13 +38,33 @@ async function parseErrorMessage(response: Response) {
   return response.statusText || 'Error desconocido';
 }
 
-export default function OnboardingIntroPage() {
+type OnboardingIntroPageProps = {
+  defaultDashboardPath?: string;
+  quickStartDashboardPath?: string;
+  quickStartPreviewDashboardPath?: string;
+};
+
+export default function OnboardingIntroPage({
+  defaultDashboardPath = '/dashboard-v3',
+  quickStartDashboardPath = '/labs/mobile-premium/dashboard',
+  quickStartPreviewDashboardPath = '/labs/mobile-premium/dashboard?onboardingPreview=1',
+}: OnboardingIntroPageProps = {}) {
   const navigate = useNavigate();
   const language = typeof window !== 'undefined' ? resolveOnboardingLanguage(window.location.search) : 'es';
+  const devQuickStartPreview =
+    import.meta.env.DEV
+    && typeof window !== 'undefined'
+    && new URLSearchParams(window.location.search).has('devQuickStart');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [generationMode, setGenerationMode] = useState<string | null>(null);
   const [generationPath, setGenerationPath] = useState<'traditional' | 'quick_start' | null>(null);
+
+  useEffect(() => {
+    if (devQuickStartPreview) {
+      clearLocalOnboardingSnapshot();
+    }
+  }, [devQuickStartPreview]);
 
   usePageMeta({
     title: language === 'en' ? 'Innerbloom Onboarding · Build your base' : 'Innerbloom Onboarding · Crea tu base',
@@ -71,6 +92,14 @@ export default function OnboardingIntroPage() {
   const handleFinish = useCallback(
     async (payload: JourneyPayload) => {
       if (isSubmitting) {
+        return;
+      }
+
+      if (devQuickStartPreview) {
+        writeLocalOnboardingSnapshotFromPayload(payload);
+        setSubmitError(null);
+        setGenerationMode(payload.mode || 'CHILL');
+        setGenerationPath(payload.meta.onboarding_path ?? 'quick_start');
         return;
       }
 
@@ -133,7 +162,7 @@ export default function OnboardingIntroPage() {
         setIsSubmitting(false);
       }
     },
-    [isSubmitting, language],
+    [devQuickStartPreview, isSubmitting, language],
   );
 
   if (generationMode) {
@@ -145,7 +174,11 @@ export default function OnboardingIntroPage() {
           isSubmitting={isSubmitting}
           submitCompleted={!isSubmitting}
           submitError={submitError}
-          onOpenGuidedDemo={() => navigate(buildDemoUrl({ language, source: 'onboarding', mode: 'onboarding' }))}
+          onOpenGuidedDemo={() => {
+            navigate(devQuickStartPreview
+              ? quickStartPreviewDashboardPath
+              : quickStartDashboardPath);
+          }}
         />
       );
     }
@@ -154,7 +187,7 @@ export default function OnboardingIntroPage() {
       <JourneyGeneratingScreen
         gameMode={generationMode}
         language={language}
-        onGoToDashboard={() => navigate('/dashboard-v3')}
+        onGoToDashboard={() => navigate(defaultDashboardPath)}
         onOpenGuidedDemo={() => navigate(buildDemoUrl({ language, source: 'onboarding', mode: 'onboarding' }))}
       />
     );
@@ -162,7 +195,13 @@ export default function OnboardingIntroPage() {
 
   return (
     <OnboardingProvider>
-      <IntroJourney language={language} onFinish={handleFinish} isSubmitting={isSubmitting} submitError={submitError} />
+      <IntroJourney
+        language={language}
+        onFinish={handleFinish}
+        isSubmitting={isSubmitting}
+        submitError={submitError}
+        skipAuthGateForDev={devQuickStartPreview}
+      />
     </OnboardingProvider>
   );
 }
