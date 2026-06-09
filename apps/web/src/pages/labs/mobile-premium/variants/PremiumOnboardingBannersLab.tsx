@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { OnboardingProgress } from '../../../../lib/api';
 import { TraitIcon } from '../MobilePremiumPrimitives';
+import { DEFAULT_MOBILE_PREMIUM_BASE, normalizeMobilePremiumBasePath, useMobilePremiumBasePath } from '../mobilePremiumRouting';
 
-const LAB_BASE = '/labs/mobile-premium';
+const LAB_BASE = DEFAULT_MOBILE_PREMIUM_BASE;
 
 export type OnboardingBanner = {
   accent: 'violet' | 'green' | 'amber' | 'red' | 'blue';
@@ -81,6 +82,14 @@ export const ONBOARDING_BANNERS: OnboardingBanner[] = [
   },
 ];
 
+function withOnboardingBannerBase(banner: OnboardingBanner, basePath: string): OnboardingBanner {
+  const labBase = normalizeMobilePremiumBasePath(basePath);
+  return {
+    ...banner,
+    href: banner.href.replace(LAB_BASE, labBase),
+  };
+}
+
 const ACCENT_CLASS: Record<OnboardingBanner['accent'], { glow: string; text: string; line: string; bg: string }> = {
   amber: {
     bg: 'bg-amber-300/10',
@@ -114,24 +123,25 @@ const ACCENT_CLASS: Record<OnboardingBanner['accent'], { glow: string; text: str
   },
 };
 
-export function buildActiveOnboardingBanners(progress: OnboardingProgress | null | undefined): OnboardingBanner[] {
+export function buildActiveOnboardingBanners(progress: OnboardingProgress | null | undefined, basePath = LAB_BASE): OnboardingBanner[] {
+  const rebase = (banner: OnboardingBanner) => withOnboardingBannerBase(banner, basePath);
   if (!progress?.tasks_generated_at) {
-    return [ONBOARDING_BANNERS[3]];
+    return [rebase(ONBOARDING_BANNERS[3])];
   }
 
   if (!progress.first_task_edited_at) {
-    return [ONBOARDING_BANNERS[1]];
+    return [rebase(ONBOARDING_BANNERS[1])];
   }
 
   if (!progress.first_daily_quest_completed_at) {
-    return [ONBOARDING_BANNERS[0]];
+    return [rebase(ONBOARDING_BANNERS[0])];
   }
 
   if (!progress.daily_quest_scheduled_at) {
-    return [ONBOARDING_BANNERS[2]];
+    return [rebase(ONBOARDING_BANNERS[2])];
   }
 
-  return [ONBOARDING_BANNERS[5]];
+  return [rebase(ONBOARDING_BANNERS[5])];
 }
 
 export function PremiumOnboardingBannersLab({
@@ -143,10 +153,12 @@ export function PremiumOnboardingBannersLab({
   compact?: boolean;
   welcomeStorageKey?: string;
 }) {
+  const labBase = useMobilePremiumBasePath();
+  const effectiveBanners = banners.map((banner) => withOnboardingBannerBase(banner, labBase));
   const [welcomeVisible, setWelcomeVisible] = useState(() => (
     !welcomeStorageKey || typeof window === 'undefined' || window.localStorage.getItem(welcomeStorageKey) !== '1'
   ));
-  const hasWelcome = banners.some((banner) => banner.variant === 'welcome');
+  const hasWelcome = effectiveBanners.some((banner) => banner.variant === 'welcome');
 
   useEffect(() => {
     if (!hasWelcome) {
@@ -164,7 +176,7 @@ export function PremiumOnboardingBannersLab({
     return () => window.clearTimeout(timer);
   }, [hasWelcome, welcomeStorageKey]);
 
-  const visibleBanners = welcomeVisible ? banners : banners.filter((banner) => banner.variant !== 'welcome');
+  const visibleBanners = welcomeVisible ? effectiveBanners : effectiveBanners.filter((banner) => banner.variant !== 'welcome');
 
   return (
     <section className={`space-y-7 ${compact ? '' : 'pb-24'}`}>

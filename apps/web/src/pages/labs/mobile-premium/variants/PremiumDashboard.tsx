@@ -20,8 +20,8 @@ import {
 } from '../../../../lib/api';
 import { PremiumModerationCards } from './PremiumModerationCards';
 import { buildPremiumRowsFromLocalOnboarding, type LocalOnboardingSnapshot } from '../localOnboardingBridge';
+import { useMobilePremiumBasePath } from '../mobilePremiumRouting';
 
-const LAB_BASE = '/labs/mobile-premium';
 const STREAK_PILLARS: StreakPanelPillar[] = ['Body', 'Mind', 'Soul'];
 
 type DashboardTask = {
@@ -113,6 +113,7 @@ export function PremiumDashboard({
   onModerationOpen?: () => void;
   onModerationDetail?: (tracker: ModerationTracker) => void;
 }) {
+  const labBase = useMobilePremiumBasePath();
   const weeklyGoal = Math.max(1, Math.round(weeklyTarget ?? 3));
   const { data: streakData } = useRequest(
     async () => {
@@ -220,7 +221,7 @@ export function PremiumDashboard({
             </p>
             <Link
               className="mt-5 inline-flex h-10 items-center gap-3 rounded-full bg-violet-500 px-5 text-sm font-medium text-white shadow-[0_10px_22px_rgba(124,58,237,0.2)]"
-              to={`${LAB_BASE}/dquest`}
+              to={`${labBase}/dquest`}
             >
               Comenzar
               <span aria-hidden="true" className="text-base">›</span>
@@ -260,7 +261,7 @@ export function PremiumDashboard({
         <Link
           className={`min-h-[12rem] border-r border-[color:var(--mp-border)] py-5 pr-4 ${emotionVisible ? 'mp-dashboard-card-in' : 'opacity-0'}`}
           ref={emotionCardRef}
-          to={`${LAB_BASE}/emotion-chart`}
+          to={`${labBase}/emotion-chart`}
         >
           <MiniHeading heading="Emoción predominante" label="últimos 15 días" />
           <EmotionSummaryDots active={emotionVisible} summary={emotionSummary} />
@@ -268,7 +269,7 @@ export function PremiumDashboard({
         <Link
           className={`group min-h-[12rem] py-5 pl-4 ${balanceVisible ? 'mp-dashboard-card-in' : 'opacity-0'}`}
           ref={balanceCardRef}
-          to={`${LAB_BASE}/balance`}
+          to={`${labBase}/balance`}
         >
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-[color:var(--mp-text)]">Equilibrio</p>
@@ -278,7 +279,7 @@ export function PremiumDashboard({
         </Link>
       </div>
 
-      <Link className="block" to={`${LAB_BASE}/vision-general`}>
+      <Link className="block" to={`${labBase}/vision-general`}>
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-lg font-medium text-[color:var(--mp-text)]">Visión general</h2>
           <span className="text-xl text-[color:var(--mp-text-secondary)]">›</span>

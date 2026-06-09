@@ -75,8 +75,14 @@ import {
   updateLocalOnboardingTask,
   type LocalOnboardingSnapshot,
 } from './mobile-premium/localOnboardingBridge';
+import {
+  DEFAULT_MOBILE_PREMIUM_BASE,
+  MobilePremiumBasePathProvider,
+  normalizeMobilePremiumBasePath,
+  useMobilePremiumBasePath,
+} from './mobile-premium/mobilePremiumRouting';
 
-const LAB_BASE = '/labs/mobile-premium';
+const LAB_BASE = DEFAULT_MOBILE_PREMIUM_BASE;
 const LAB_THEME_STORAGE_KEY = 'innerbloom.mobilePremiumLab.theme';
 const LAB_ONBOARDING_PREVIEW_STORAGE_KEY = 'innerbloom.mobilePremiumLab.onboardingPreview';
 
@@ -468,9 +474,18 @@ function createFallbackHabit({
   };
 }
 
-export default function MobilePremiumLabPage() {
+export default function MobilePremiumLabPage({ basePath }: { basePath?: string } = {}) {
+  return (
+    <MobilePremiumBasePathProvider basePath={basePath}>
+      <MobilePremiumLabPageInner />
+    </MobilePremiumBasePathProvider>
+  );
+}
+
+function MobilePremiumLabPageInner() {
   const location = useLocation();
   const navigate = useNavigate();
+  const labBase = useMobilePremiumBasePath();
   const backendUser = useBackendUser();
   const clerk = useClerk();
   const runtimeUser = useUser();
@@ -482,7 +497,7 @@ export default function MobilePremiumLabPage() {
   const effectiveBackendUserId = onboardingPreview ? null : backendUser.backendUserId ?? getDevUserOverride();
   const tasksState = useUserTasks(effectiveBackendUserId);
   const onboardingProgressRequest = useOnboardingProgress({ enabled: Boolean(effectiveBackendUserId) });
-  const route = resolveLabRoute(location.pathname);
+  const route = resolveLabRoute(location.pathname, labBase);
   const [theme, setTheme] = useState<MobilePremiumTheme>(() => {
     if (typeof window === 'undefined') return 'dark';
     return window.localStorage.getItem(LAB_THEME_STORAGE_KEY) === 'light' ? 'light' : 'dark';
@@ -640,7 +655,7 @@ export default function MobilePremiumLabPage() {
   ]);
 
   if (!route) {
-    return <Navigate to={`${LAB_BASE}/dashboard`} replace />;
+    return <Navigate to={`${labBase}/dashboard`} replace />;
   }
 
   const localWeeklyGoal = resolveWeeklyGoal(localOnboardingSnapshot?.gameMode ?? backendUser.profile?.game_mode ?? null, backendUser.profile?.weekly_target ?? null);
@@ -658,7 +673,7 @@ export default function MobilePremiumLabPage() {
   const navItems = buildNavItems(route, {
     dquest: shouldGuideDailyQuest,
     tareas: shouldGuideTaskEdit,
-  });
+  }, labBase);
   const toggleTheme = () => setTheme((current) => (current === 'dark' ? 'light' : 'dark'));
   const selectedModerationTracker =
     premiumModerationState.trackers.find((tracker) => tracker.type === selectedModerationType) ??
@@ -666,7 +681,7 @@ export default function MobilePremiumLabPage() {
     null;
   const goToDashboard = () => {
     setActiveOverlay(null);
-    navigate(`${LAB_BASE}/dashboard`);
+    navigate(`${labBase}/dashboard`);
   };
   const handleRhythmSuggestionDismiss = async () => {
     if (!rhythmSuggestion || rhythmSuggestionSubmitting) return;
@@ -849,7 +864,7 @@ export default function MobilePremiumLabPage() {
       <section className="space-y-7">
         {shouldShowOnboardingGuide && effectiveOnboardingProgress && ['dashboard', 'tareas', 'logros'].includes(route) ? (
           <PremiumOnboardingBannersLab
-            banners={buildActiveOnboardingBanners(effectiveOnboardingProgress)}
+            banners={buildActiveOnboardingBanners(effectiveOnboardingProgress, labBase)}
             compact
             welcomeStorageKey={
               onboardingPreview && effectiveOnboardingProgress.onboarding_session_id
@@ -1007,7 +1022,7 @@ export default function MobilePremiumLabPage() {
           } else {
             setLocalOnboardingSnapshot(markLocalOnboardingStep('daily_quest_scheduled'));
           }
-          navigate(`${LAB_BASE}/dashboard`, { replace: true });
+          navigate(`${labBase}/dashboard`, { replace: true });
         }}
         onReviewProgress={() => {
           const firstEvent = dailyCompleteSummary?.response.feedback_events?.[0] ?? null;
@@ -1031,22 +1046,24 @@ export default function MobilePremiumLabPage() {
   );
 }
 
-function resolveLabRoute(pathname: string): LabRoute | null {
-  if (pathname === LAB_BASE || pathname === `${LAB_BASE}/`) {
+function resolveLabRoute(pathname: string, basePath = LAB_BASE): LabRoute | null {
+  const labBase = normalizeMobilePremiumBasePath(basePath);
+  if (pathname === labBase || pathname === `${labBase}/`) {
     return 'dashboard';
   }
 
-  const segment = pathname.replace(`${LAB_BASE}/`, '').split('/')[0];
+  const segment = pathname.replace(`${labBase}/`, '').split('/')[0];
   return LAB_ROUTES.some((item) => item.path === segment) ? (segment as LabRoute) : null;
 }
 
-function buildNavItems(activeRoute: LabRoute, onboardingCues: { dquest: boolean; tareas: boolean }): PremiumNavItem[] {
+function buildNavItems(activeRoute: LabRoute, onboardingCues: { dquest: boolean; tareas: boolean }, basePath = LAB_BASE): PremiumNavItem[] {
+  const labBase = normalizeMobilePremiumBasePath(basePath);
   const dashboardActiveRoutes: LabRoute[] = ['dashboard', 'emotion-chart', 'balance', 'vision-general'];
   const tasksActiveRoutes: LabRoute[] = ['tareas', 'task-detail'];
   return NAV_ROUTES.map((route) => {
     const item = LAB_ROUTES.find((candidate) => candidate.path === route)!;
     return {
-      to: `${LAB_BASE}/${item.path}`,
+      to: `${labBase}/${item.path}`,
       label: item.label,
       icon: <PremiumNavIcon route={route} />,
       end: item.path === 'dashboard',
@@ -1114,6 +1131,7 @@ function DashboardPanel({
   tasks: Array<{ title: string; xp: number | null; traitId?: string | null; statId?: string | null }>;
   userName: string;
 }) {
+  const labBase = useMobilePremiumBasePath();
   return (
     <>
       <section className="space-y-5">
@@ -1129,7 +1147,7 @@ function DashboardPanel({
             </p>
             <a
               className="mt-7 inline-flex min-h-12 items-center gap-5 rounded-full bg-violet-500 px-7 text-base font-semibold text-white shadow-[0_14px_34px_rgba(124,58,237,0.34)]"
-              href={`${LAB_BASE}/dquest`}
+              href={`${labBase}/dquest`}
             >
               Comenzar
               <span aria-hidden="true" className="text-xl">›</span>
@@ -1146,7 +1164,7 @@ function DashboardPanel({
       </section>
 
       <section className="space-y-4">
-        <MobileSectionHeader action="Ver" title="Visión general" to={`${LAB_BASE}/vision-general`} />
+        <MobileSectionHeader action="Ver" title="Visión general" to={`${labBase}/vision-general`} />
         <div className="space-y-0">
           <OverviewRow accent="green" label="Mejor racha actual" title={tasks[0]?.title ?? 'Dormir 8hs'} value="12d" />
           <OverviewRow accent="red" label="Necesita atención" title={tasks[1]?.title ?? 'No dulces'} value="0/12 mes" />
@@ -1156,14 +1174,14 @@ function DashboardPanel({
 
       <div className="grid grid-cols-2 border-y border-[color:var(--mp-border)]">
         <MiniInsight
-          href={`${LAB_BASE}/emotion-chart`}
+          href={`${labBase}/emotion-chart`}
           label="15 días"
           title="Calma"
           heading="Emoción predominante"
           visual={<EmotionDots />}
         />
         <MiniInsight
-          href={`${LAB_BASE}/balance`}
+          href={`${labBase}/balance`}
           label="Predominio Alma"
           title="76"
           heading="Equilibrio"
@@ -1181,7 +1199,7 @@ function DashboardPanel({
       </section>
 
       <ThinSeparator />
-      <a className="flex items-center justify-between gap-4 py-1 text-[color:var(--mp-text-secondary)]" href={`${LAB_BASE}/logros`}>
+      <a className="flex items-center justify-between gap-4 py-1 text-[color:var(--mp-text-secondary)]" href={`${labBase}/logros`}>
         <span className="flex items-center gap-4">
           <TraitIcon className="text-[color:var(--mp-text-muted)]" trait="creativity" />
           Pendientes en Logros: 2
@@ -1909,6 +1927,7 @@ function TaskDetailPanel({
   gameMode: string | null;
   weeklyTarget: number | null;
 }) {
+  const labBase = useMobilePremiumBasePath();
   const [scope, setScope] = useState<ActivityScope>('M');
   const weeklyGoal = Math.max(1, Math.round(weeklyTarget ?? FALLBACK_TASK_DETAIL.weeklyGoal));
   const { data } = useRequest(
@@ -1944,7 +1963,7 @@ function TaskDetailPanel({
           <Link
             aria-label="Volver a tareas"
             className="grid h-11 w-11 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-2xl text-[color:var(--mp-text)]"
-            to={`${LAB_BASE}/tareas`}
+            to={`${labBase}/tareas`}
           >
             ‹
           </Link>
@@ -2407,12 +2426,13 @@ function VisionPanel({
 }
 
 function LabBackHeader() {
+  const labBase = useMobilePremiumBasePath();
   return (
     <div className="flex items-center justify-between gap-4">
       <Link
         aria-label="Volver al Dashboard"
         className="grid h-10 w-10 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-[color:var(--mp-text)]"
-        to={`${LAB_BASE}/dashboard`}
+        to={`${labBase}/dashboard`}
       >
         ‹
       </Link>
@@ -2765,10 +2785,11 @@ function VisionNearHabitRow({ row }: { row: VisionTaskRow }) {
 }
 
 function VisionBaseRow({ row, metric }: { row: PremiumTaskRow; metric: ReactNode }) {
+  const labBase = useMobilePremiumBasePath();
   return (
     <Link
       className="grid grid-cols-[44px_minmax(0,1fr)_auto_16px] items-center gap-3 border-b border-[color:var(--mp-border)] py-4"
-      to={`${LAB_BASE}/task-detail?taskId=${encodeURIComponent(row.id)}`}
+      to={`${labBase}/task-detail?taskId=${encodeURIComponent(row.id)}`}
     >
       <span className="grid h-10 w-10 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-[color:var(--mp-violet)]">
         <TraitIcon size={20} trait={row.stat} />

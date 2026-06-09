@@ -14,8 +14,8 @@ import {
 import { normalizeGameModeValue, type GameMode } from '../../../../lib/gameMode';
 import { TraitIcon } from '../MobilePremiumPrimitives';
 import { habitDevelopmentStatusLabel, HabitStatusChip, PremiumScoreRing } from '../PremiumHabitDevelopment';
+import { useMobilePremiumBasePath } from '../mobilePremiumRouting';
 
-const LAB_BASE = '/labs/mobile-premium';
 const STREAK_PILLARS: StreakPanelPillar[] = ['Body', 'Mind', 'Soul'];
 const MODE_TIERS: Record<GameMode, number> = {
   Low: 1,
@@ -387,6 +387,7 @@ export function PremiumTaskDetail({
   }>;
   weeklyTarget: number | null;
 }) {
+  const labBase = useMobilePremiumBasePath();
   const [scope, setScope] = useState<ActivityScope>('M');
   const [editOpen, setEditOpen] = useState(false);
   const [localOverride, setLocalOverride] = useState<Partial<PremiumTaskSummary> | null>(null);
@@ -465,7 +466,7 @@ export function PremiumTaskDetail({
           <Link
             aria-label="Volver a tareas"
             className="grid h-11 w-11 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-2xl text-[color:var(--mp-text)]"
-            to={`${LAB_BASE}/tareas`}
+            to={`${labBase}/tareas`}
           >
             ‹
           </Link>
@@ -610,7 +611,7 @@ export function PremiumTaskDetail({
         <TaskEditSheet
           backendUserId={backendUserId}
           onClose={() => setEditOpen(false)}
-          onDeleted={() => navigate(`${LAB_BASE}/tareas`)}
+          onDeleted={() => navigate(`${labBase}/tareas`)}
           onSave={(draft) => {
             setLocalOverride({
               difficultyLabel: draft.difficultyLabel,

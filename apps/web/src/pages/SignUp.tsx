@@ -17,15 +17,27 @@ import {
 } from '../mobile/capacitor';
 import { buildNativeMobileAuthUrl } from '../mobile/mobileAuthSession';
 
-export default function SignUpPage() {
+type SignUpPageProps = {
+  authPath?: string;
+  defaultRedirectPath?: string;
+  secondaryActionHref?: string;
+  signInPath?: '/login' | '/login2';
+};
+
+export default function SignUpPage({
+  authPath = '/sign-up',
+  defaultRedirectPath = '/intro-journey',
+  secondaryActionHref,
+  signInPath = '/login',
+}: SignUpPageProps = {}) {
   const signUpContainerRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
   const language = resolveAuthLanguage(location.search);
   const searchParams = new URLSearchParams(location.search);
   const redirectUrl = searchParams.get('redirect_url');
   const safeRedirectUrl = redirectUrl && redirectUrl.startsWith('/') && !redirectUrl.startsWith('//') ? redirectUrl : null;
-  const fallbackRedirectUrl = safeRedirectUrl ?? '/intro-journey';
-  const signInUrl = `${buildLocalizedAuthPath('/login', language)}${
+  const fallbackRedirectUrl = safeRedirectUrl ?? defaultRedirectPath;
+  const signInUrl = `${buildLocalizedAuthPath(signInPath, language)}${
     safeRedirectUrl ? `&redirect_url=${encodeURIComponent(safeRedirectUrl)}` : ''
   }`;
   const themeMode = readLandingThemeMode();
@@ -94,10 +106,10 @@ export default function SignUpPage() {
             <SignUp
               appearance={appearance}
               routing="path"
-              path="/sign-up"
+              path={authPath}
               signInUrl={signInUrl}
-              fallbackRedirectUrl="/intro-journey"
-              forceRedirectUrl="/intro-journey"
+              fallbackRedirectUrl={fallbackRedirectUrl}
+              forceRedirectUrl={fallbackRedirectUrl}
             />
           </div>
         </div>
@@ -109,7 +121,7 @@ export default function SignUpPage() {
     <AuthLayout
       title={language === 'en' ? 'Create your account' : 'Crear tu cuenta'}
       secondaryActionLabel={language === 'en' ? 'Back to home' : 'Volver al inicio'}
-      secondaryActionHref={`/?lang=${language}`}
+      secondaryActionHref={secondaryActionHref ?? `/?lang=${language}`}
       themeMode={themeMode}
     >
       <div className={AUTH_STACK_CLASS}>
@@ -131,7 +143,7 @@ export default function SignUpPage() {
           <SignUp
             appearance={appearance}
             routing="path"
-            path="/sign-up"
+            path={authPath}
             signInUrl={signInUrl}
             // post-signup must continue onboarding
             fallbackRedirectUrl={fallbackRedirectUrl}

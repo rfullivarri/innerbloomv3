@@ -38,7 +38,17 @@ async function parseErrorMessage(response: Response) {
   return response.statusText || 'Error desconocido';
 }
 
-export default function OnboardingIntroPage() {
+type OnboardingIntroPageProps = {
+  defaultDashboardPath?: string;
+  quickStartDashboardPath?: string;
+  quickStartPreviewDashboardPath?: string;
+};
+
+export default function OnboardingIntroPage({
+  defaultDashboardPath = '/dashboard-v3',
+  quickStartDashboardPath = '/labs/mobile-premium/dashboard',
+  quickStartPreviewDashboardPath = '/labs/mobile-premium/dashboard?onboardingPreview=1',
+}: OnboardingIntroPageProps = {}) {
   const navigate = useNavigate();
   const language = typeof window !== 'undefined' ? resolveOnboardingLanguage(window.location.search) : 'es';
   const devQuickStartPreview =
@@ -166,8 +176,8 @@ export default function OnboardingIntroPage() {
           submitError={submitError}
           onOpenGuidedDemo={() => {
             navigate(devQuickStartPreview
-              ? '/labs/mobile-premium/dashboard?onboardingPreview=1'
-              : '/labs/mobile-premium/dashboard');
+              ? quickStartPreviewDashboardPath
+              : quickStartDashboardPath);
           }}
         />
       );
@@ -177,7 +187,7 @@ export default function OnboardingIntroPage() {
       <JourneyGeneratingScreen
         gameMode={generationMode}
         language={language}
-        onGoToDashboard={() => navigate('/dashboard-v3')}
+        onGoToDashboard={() => navigate(defaultDashboardPath)}
         onOpenGuidedDemo={() => navigate(buildDemoUrl({ language, source: 'onboarding', mode: 'onboarding' }))}
       />
     );

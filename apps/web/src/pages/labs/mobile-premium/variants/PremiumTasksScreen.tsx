@@ -11,8 +11,8 @@ import {
 } from '../../../../lib/api';
 import { normalizeGameModeValue, type GameMode } from '../../../../lib/gameMode';
 import { TraitIcon } from '../MobilePremiumPrimitives';
+import { useMobilePremiumBasePath } from '../mobilePremiumRouting';
 
-const LAB_BASE = '/labs/mobile-premium';
 const STREAK_PILLARS: StreakPanelPillar[] = ['Body', 'Mind', 'Soul'];
 const MODE_TIERS: Record<GameMode, number> = {
   Low: 1,
@@ -382,6 +382,7 @@ function normalizePremiumTaskRows(
 }
 
 function PremiumTaskProgressRow({ onboardingCue = false, task }: { onboardingCue?: boolean; task: PremiumTaskRow }) {
+  const labBase = useMobilePremiumBasePath();
   const difficultyTone = resolveDifficultyTone(task.difficultyLabel);
   const progress = `${task.weeklyDone}/${task.weeklyGoal}`;
   const progressValue = computeProgressPercent(task.weeklyDone, task.weeklyGoal);
@@ -395,7 +396,7 @@ function PremiumTaskProgressRow({ onboardingCue = false, task }: { onboardingCue
       } ${
         hasStreak ? 'grid-cols-[44px_minmax(0,1fr)_154px]' : 'grid-cols-[44px_minmax(0,1fr)_112px]'
       }`}
-      to={`${LAB_BASE}/task-detail?taskId=${encodeURIComponent(task.id)}`}
+      to={`${labBase}/task-detail?taskId=${encodeURIComponent(task.id)}`}
     >
       <div className="grid h-11 w-11 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface-strong)] text-[color:var(--mp-violet)]">
         <TraitIcon size={22} trait={task.stat} />

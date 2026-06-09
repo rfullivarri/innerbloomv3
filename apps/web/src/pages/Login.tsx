@@ -16,14 +16,26 @@ import {
   isNativeCapacitorPlatform,
 } from '../mobile/capacitor';
 
-export default function LoginPage() {
+type LoginPageProps = {
+  authPath?: string;
+  defaultRedirectPath?: string;
+  secondaryActionHref?: string;
+  signUpPath?: '/sign-up' | '/sign-up2';
+};
+
+export default function LoginPage({
+  authPath = '/login',
+  defaultRedirectPath = DASHBOARD_PATH,
+  secondaryActionHref,
+  signUpPath = '/sign-up',
+}: LoginPageProps = {}) {
   const location = useLocation();
   const language = resolveAuthLanguage(location.search);
   const searchParams = new URLSearchParams(location.search);
   const redirectUrl = searchParams.get('redirect_url');
   const safeRedirectUrl = redirectUrl && redirectUrl.startsWith('/') && !redirectUrl.startsWith('//') ? redirectUrl : null;
-  const fallbackRedirectUrl = safeRedirectUrl ?? DASHBOARD_PATH;
-  const signUpUrl = `${buildLocalizedAuthPath('/sign-up', language)}${
+  const fallbackRedirectUrl = safeRedirectUrl ?? defaultRedirectPath;
+  const signUpUrl = `${buildLocalizedAuthPath(signUpPath, language)}${
     safeRedirectUrl ? `&redirect_url=${encodeURIComponent(safeRedirectUrl)}` : ''
   }`;
   const themeMode = readLandingThemeMode();
@@ -69,7 +81,7 @@ export default function LoginPage() {
                 },
               })}
               routing="path"
-              path="/login"
+              path={authPath}
               signUpUrl={signUpUrl}
               fallbackRedirectUrl="/"
               forceRedirectUrl="/"
@@ -84,7 +96,7 @@ export default function LoginPage() {
     <AuthLayout
       title={language === 'en' ? 'Sign in' : 'Iniciar sesión'}
       secondaryActionLabel={language === 'en' ? 'Back to home' : 'Volver al inicio'}
-      secondaryActionHref={`/?lang=${language}`}
+      secondaryActionHref={secondaryActionHref ?? `/?lang=${language}`}
       themeMode={themeMode}
     >
       <div className={AUTH_STACK_CLASS}>
@@ -108,7 +120,7 @@ export default function LoginPage() {
                 },
               })}
             routing="path"
-            path="/login"
+            path={authPath}
             signUpUrl={signUpUrl}
             fallbackRedirectUrl={fallbackRedirectUrl}
             forceRedirectUrl={fallbackRedirectUrl}

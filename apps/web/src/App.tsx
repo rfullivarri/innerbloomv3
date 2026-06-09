@@ -211,7 +211,7 @@ function NativeDailyReminderSyncBridge() {
   return null;
 }
 
-function RequireUser({ children }: { children: ReactElement }) {
+function RequireUser({ children, loginPath = '/login' }: { children: ReactElement; loginPath?: string }) {
   const { isLoaded, userId } = useAuth();
   const location = useLocation();
   const [authLoadTimedOut, setAuthLoadTimedOut] = useState(false);
@@ -219,7 +219,7 @@ function RequireUser({ children }: { children: ReactElement }) {
   const devBypass = DEV_USER_SWITCH_ACTIVE && import.meta.env.DEV;
   const unauthenticatedRedirectPath = isNativeCapacitorPlatform()
     ? '/'
-    : `/login?redirect_url=${encodeURIComponent(`${location.pathname}${location.search}${location.hash}`)}`;
+    : `${loginPath}?redirect_url=${encodeURIComponent(`${location.pathname}${location.search}${location.hash}`)}`;
   const hasNativeSession = isNativeCapacitorPlatform() && Boolean(mobileAuthSession?.token) && !shouldForceNativeWelcome();
 
   useEffect(() => {
@@ -303,6 +303,8 @@ export default function App() {
   const dashboardAliases = ['/dashboard', '/dashboard-v3'].filter(
     (alias) => alias !== trimmedDashboardPath,
   );
+  const innerbloom2BasePath = '/innerbloom2';
+  const innerbloom2DashboardPath = `${innerbloom2BasePath}/dashboard`;
   useGa4FunnelTracking({ dashboardBasePath: trimmedDashboardPath });
 
   return (
@@ -333,6 +335,14 @@ export default function App() {
             </RequireUser>
           )}
         />
+        <Route
+          path="/innerbloom2/*"
+          element={(
+            <RequireUser loginPath="/login2">
+              <MobilePremiumLabPage basePath={innerbloom2BasePath} />
+            </RequireUser>
+          )}
+        />
         <Route path="/demo/logros" element={<LabsLogrosDemoPage />} />
         <Route path="/demo/tasks" element={<PublicTasksDemoPage />} />
         <Route path="/labs/landing-rhythm-section" element={<LandingRhythmSectionMvpPage />} />
@@ -346,6 +356,26 @@ export default function App() {
         />
         <Route path="/onboarding" element={<OnboardingIntroPage />} />
         <Route path="/intro-journey" element={<OnboardingIntroPage />} />
+        <Route
+          path="/onboarding2"
+          element={(
+            <OnboardingIntroPage
+              defaultDashboardPath={innerbloom2DashboardPath}
+              quickStartDashboardPath={innerbloom2DashboardPath}
+              quickStartPreviewDashboardPath={`${innerbloom2DashboardPath}?onboardingPreview=1`}
+            />
+          )}
+        />
+        <Route
+          path="/intro-journey2"
+          element={(
+            <OnboardingIntroPage
+              defaultDashboardPath={innerbloom2DashboardPath}
+              quickStartDashboardPath={innerbloom2DashboardPath}
+              quickStartPreviewDashboardPath={`${innerbloom2DashboardPath}?onboardingPreview=1`}
+            />
+          )}
+        />
         <Route
           path="/labs/quick-start"
           element={(
@@ -363,10 +393,36 @@ export default function App() {
           }
         />
         <Route
+          path="/login2/*"
+          element={
+            <RedirectIfSignedIn redirectPath={innerbloom2DashboardPath}>
+              <LoginPage
+                authPath="/login2"
+                defaultRedirectPath={innerbloom2DashboardPath}
+                secondaryActionHref="/v2"
+                signUpPath="/sign-up2"
+              />
+            </RedirectIfSignedIn>
+          }
+        />
+        <Route
           path="/sign-up/*"
           element={
             <RedirectIfSignedIn redirectPath={signedInRedirectPath}>
               <SignUpPage />
+            </RedirectIfSignedIn>
+          }
+        />
+        <Route
+          path="/sign-up2/*"
+          element={
+            <RedirectIfSignedIn redirectPath={innerbloom2DashboardPath}>
+              <SignUpPage
+                authPath="/sign-up2"
+                defaultRedirectPath="/onboarding2"
+                secondaryActionHref="/v2"
+                signInPath="/login2"
+              />
             </RedirectIfSignedIn>
           }
         />
