@@ -28,7 +28,7 @@ export function habitDevelopmentStatusLabel(score: number) {
   const tone = resolveTone(clampScore(score));
   if (tone === 'fragile') return 'Hábito frágil';
   if (tone === 'building') return 'Hábito en construcción';
-  return 'Cerca de hábito';
+  return 'Hábito fuerte';
 }
 
 export function HabitStatusChip({

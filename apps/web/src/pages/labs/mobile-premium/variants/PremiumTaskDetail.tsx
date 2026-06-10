@@ -448,7 +448,8 @@ export function PremiumTaskDetail({
   const detail = buildDetail(taskSummary, insights, weeklyGoal);
   const activity = buildActivity(scope, insights, weeklyGoal);
   const latestChip = resolveRecalibrationChip(detail.latestRecalibrationAction, detail.difficultyLabel);
-  const activeWindowMonths = detail.activeWindow.slice(-4);
+  const activeWindowMonths = detail.activeWindow.slice(-5);
+  const activeWindowStartIndex = Math.max(0, activeWindowMonths.length - 3);
 
   return (
     <section className="space-y-7">
@@ -460,11 +461,11 @@ export function PremiumTaskDetail({
         .mp-onboarding-edit-cue { animation: mpOnboardingEditCue 1.25s ease-in-out infinite; }
         @media (prefers-reduced-motion: reduce) { .mp-onboarding-edit-cue { animation: none !important; } }
       `}</style>
-      <header className="space-y-5">
-        <div className="grid grid-cols-[44px_1fr_44px] items-center">
+      <header className="space-y-3">
+        <div className="grid grid-cols-[40px_1fr_40px] items-center">
           <Link
             aria-label="Volver a tareas"
-            className="grid h-11 w-11 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-2xl text-[color:var(--mp-text)]"
+            className="grid h-10 w-10 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-xl text-[color:var(--mp-text)]"
             to={`${labBase}/tareas`}
           >
             ‹
@@ -472,13 +473,13 @@ export function PremiumTaskDetail({
           <span />
           <span />
         </div>
-        <div className="grid grid-cols-[52px_minmax(0,1fr)_auto] items-center gap-4">
-          <div className="grid h-14 w-14 place-items-center rounded-full border border-[color:var(--mp-border)] bg-violet-400/10 text-[color:var(--mp-violet)]">
-            <TraitIcon size={26} trait={detail.stat} />
+        <div className="grid grid-cols-[46px_minmax(0,1fr)_auto] items-center gap-3">
+          <div className="grid h-12 w-12 place-items-center rounded-full border border-[color:var(--mp-border)] bg-violet-400/10 text-[color:var(--mp-violet)]">
+            <TraitIcon size={23} trait={detail.stat} />
           </div>
           <div className="min-w-0">
-            <h2 className="max-w-full break-words text-[1.38rem] font-semibold leading-[1.12] text-[color:var(--mp-text)]">{detail.name}</h2>
-            <div className="mt-2.5 flex flex-wrap gap-2">
+            <h2 className="max-w-full break-words text-[1.18rem] font-semibold leading-[1.12] text-[color:var(--mp-text)]">{detail.name}</h2>
+            <div className="mt-2 flex flex-wrap gap-2">
               <span className="inline-flex min-h-7 items-center gap-1.5 rounded-full bg-violet-400/12 px-2.5 text-xs font-semibold text-[color:var(--mp-violet)]">
                 <TraitIcon size={12} trait={detail.stat} />
                 {detail.stat}
@@ -505,9 +506,9 @@ export function PremiumTaskDetail({
 
       <section className="space-y-4">
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--mp-violet)]">Desarrollo del hábito</p>
-        <div className="rounded-[1.25rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-5">
-          <div className="grid grid-cols-[104px_1fr] items-start gap-5">
-            <PremiumScoreRing animateKey={`${detail.id}-${detail.score}`} score={detail.score} />
+        <div className="rounded-[1.25rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-4">
+          <div className="grid grid-cols-[92px_1fr] items-start gap-4">
+            <PremiumScoreRing animateKey={`${detail.id}-${detail.score}`} score={detail.score} size="sm" />
             <div className="min-w-0">
               <div>
                 <HabitStatusChip label={detail.lifecycleLabel} score={detail.score} />
@@ -522,14 +523,27 @@ export function PremiumTaskDetail({
                   <span className="text-[color:var(--mp-green)]">Fuerte ≥80</span>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:var(--mp-text-muted)]">
-                    <span className="h-px flex-1 bg-[color:var(--mp-border)]" />
-                    <span>Ventana activa</span>
-                    <span className="h-px flex-1 bg-[color:var(--mp-border)]" />
-                  </div>
-                  <div className="flex items-start justify-center gap-3">
-                    {activeWindowMonths.map((month) => (
-                      <MonthHealthDot key={`${month.month}-${month.percent}`} month={month.month} percent={month.percent} projected={month.projected} />
+                  <div
+                    className="grid items-start gap-2"
+                    style={{ gridTemplateColumns: `repeat(${Math.max(activeWindowMonths.length, 3)}, minmax(0, 1fr))` }}
+                  >
+                    <div
+                      className="col-span-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:var(--mp-text-muted)]"
+                      style={{ gridColumn: `${activeWindowStartIndex + 1} / ${Math.max(activeWindowMonths.length, 3) + 1}` }}
+                    >
+                      <span className="h-px flex-1 bg-[color:var(--mp-border)]" />
+                      <span>Ventana activa</span>
+                      <span className="h-px flex-1 bg-[color:var(--mp-border)]" />
+                    </div>
+                    {activeWindowMonths.map((month, index) => (
+                      <MonthHealthDot
+                        active={index >= activeWindowStartIndex}
+                        compact={activeWindowMonths.length > 4}
+                        key={`${month.month}-${month.percent}`}
+                        month={month.month}
+                        percent={month.percent}
+                        projected={month.projected}
+                      />
                     ))}
                   </div>
                 </div>
@@ -1058,18 +1072,26 @@ function ActivityCompletionBar({ bar, heightClass }: { bar: ActivityBar; heightC
   );
 }
 
-function MonthHealthDot({ month, percent, projected }: ActiveWindowMonth) {
+function MonthHealthDot({
+  active = true,
+  compact = false,
+  month,
+  percent,
+  projected,
+}: ActiveWindowMonth & { active?: boolean; compact?: boolean }) {
   const tone = getScoreTone(percent);
+  const sizeClass = compact ? 'h-10 w-10 text-[11px]' : 'h-12 w-12 text-xs';
+  const projectedInset = compact ? '-inset-1' : '-inset-1.5';
   return (
-    <div className="text-center">
+    <div className={`min-w-0 text-center ${active ? '' : 'opacity-70'}`}>
       <div
-        className={`relative mx-auto grid h-12 w-12 place-items-center rounded-full border-2 bg-transparent text-xs font-semibold shadow-[0_10px_24px_rgba(0,0,0,0.24)] ${projected ? 'shadow-[0_0_26px_rgba(245,197,89,0.12)]' : ''}`}
+        className={`relative mx-auto grid ${sizeClass} place-items-center rounded-full border-2 bg-transparent font-semibold shadow-[0_10px_24px_rgba(0,0,0,0.24)] ${projected ? 'shadow-[0_0_26px_rgba(245,197,89,0.12)]' : ''}`}
         style={{ borderColor: tone.color, color: tone.color }}
       >
         {projected ? (
           <span
             aria-hidden="true"
-            className="absolute -inset-1.5 rounded-full border border-dashed opacity-70 motion-safe:animate-spin"
+            className={`absolute ${projectedInset} rounded-full border border-dashed opacity-70 motion-safe:animate-spin`}
             style={{ borderColor: tone.color, animationDuration: '5s' }}
           />
         ) : null}
@@ -1186,11 +1208,15 @@ function resolveDifficultyAdjustments(insights: TaskInsightsResponse, fallbackDi
 
 function buildLastSevenDays(days: Array<{ date: string; count: number }>) {
   const byDate = new Map(days.map((day) => [day.date, day.count]));
-  const latest = startOfLocalDate(new Date());
+  const today = startOfLocalDate(new Date());
+  const monday = new Date(today);
+  const day = today.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  monday.setDate(today.getDate() + diffToMonday);
   const labels = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
   return Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(latest);
-    date.setDate(latest.getDate() - (6 - index));
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + index);
     const key = toLocalDateKey(date);
     return {
       label: labels[date.getDay()] ?? '',

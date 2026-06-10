@@ -1462,7 +1462,7 @@ function PremiumWeeklyWrappedStory({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-[130] bg-black/90 backdrop-blur-2xl"
+      className="fixed inset-0 z-[130] min-h-[100dvh] bg-black/95 backdrop-blur-2xl"
       role="dialog"
     >
       <style>
@@ -1745,7 +1745,7 @@ function PremiumWeeklyWrappedStory({
         `}
       </style>
       <div
-        className="mp-weekly-story-root relative mx-auto h-full max-w-[430px] overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)]"
+        className="mp-weekly-story-root relative mx-auto h-[100dvh] min-h-[100svh] max-w-[430px] overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)]"
         data-weekly-mode={storyVisualMode}
       >
         <button
@@ -2084,12 +2084,12 @@ function PremiumMonthlyWrappedStory({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-[130] bg-black/90 backdrop-blur-2xl"
+      className="fixed inset-0 z-[130] min-h-[100dvh] bg-black/95 backdrop-blur-2xl"
       role="dialog"
     >
       <MonthlyStoryStyles />
       <div
-        className="mp-weekly-story-root relative mx-auto h-full max-w-[430px] overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)]"
+        className="mp-weekly-story-root relative mx-auto h-[100dvh] min-h-[100svh] max-w-[430px] overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)]"
         data-weekly-mode={storyVisualMode}
       >
         <button
@@ -2111,11 +2111,11 @@ function PremiumMonthlyWrappedStory({
             registerSlide={(el) => (storySlideRefs.current[0] = el)}
             title="Tu mes en movimiento"
           >
-            <div className="flex min-h-0 flex-1 flex-col justify-between gap-[clamp(2rem,6dvh,3rem)]">
+            <div className="flex min-h-0 flex-1 flex-col gap-[clamp(1.2rem,4dvh,2.2rem)]">
               <p className="mp-weekly-fragment text-sm uppercase tracking-[0.28em] text-[color:var(--weekly-muted)]" style={{ transitionDelay: '120ms' }}>
                 {monthlyData.periodLabel}
               </p>
-              <div className="mp-weekly-fragment relative grid flex-1 place-items-center" style={{ transitionDelay: '220ms' }}>
+              <div className="mp-weekly-fragment relative grid flex-[0.85] place-items-center" style={{ transitionDelay: '220ms' }}>
                 <span className="mp-weekly-story-glow absolute h-72 w-72 rounded-full bg-violet-400/20 blur-3xl" />
                 <div className="relative text-center">
                   <p className="mp-weekly-gradient-text text-[clamp(6.4rem,29vw,9rem)] font-semibold leading-none tracking-[-0.08em]">
@@ -2124,7 +2124,9 @@ function PremiumMonthlyWrappedStory({
                   <p className="mt-4 text-sm uppercase tracking-[0.34em] text-[color:var(--weekly-muted)]">días trackeados</p>
                 </div>
               </div>
-              <MonthlyCalendarStrip active={activeStorySlide === 0} days={monthlyData.calendarDays} />
+              <div className="pb-[clamp(.75rem,3dvh,1.6rem)]">
+                <MonthlyCalendarStrip active={activeStorySlide === 0} days={monthlyData.calendarDays} />
+              </div>
             </div>
           </WeeklyStorySlide>
 
@@ -2520,23 +2522,23 @@ function MonthlyNearHabitsStory({
   habits: MonthlyStoryData['nearHabits'];
 }) {
   return (
-    <div className="flex flex-1 flex-col justify-between gap-[clamp(1.5rem,5dvh,2.5rem)]">
-      <p className="mp-weekly-fragment text-xl leading-relaxed text-[color:var(--weekly-muted)]" style={{ transitionDelay: '120ms' }}>
+    <div className="flex flex-1 flex-col justify-between gap-[clamp(1rem,3dvh,1.6rem)]">
+      <p className="mp-weekly-fragment text-sm leading-relaxed text-[color:var(--weekly-muted)]" style={{ transitionDelay: '120ms' }}>
         Score mensual de la ventana activa. Verde marca meses dentro del objetivo.
       </p>
-      <div className="space-y-[clamp(1.2rem,3.8dvh,1.8rem)]">
+      <div className="space-y-[clamp(.85rem,2.4dvh,1.25rem)]">
         {habits.map((habit, index) => (
-          <div className="mp-weekly-fragment border-t border-[color:var(--weekly-line)] pt-5" key={`monthly-near-habit-${habit.title}`} style={{ transitionDelay: `${220 + index * 130}ms` }}>
+          <div className="mp-weekly-fragment border-t border-[color:var(--weekly-line)] pt-4" key={`monthly-near-habit-${habit.title}`} style={{ transitionDelay: `${220 + index * 130}ms` }}>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-2xl font-semibold leading-tight text-[color:var(--weekly-title)]">{habit.title}</p>
+                <p className="text-xl font-semibold leading-tight text-[color:var(--weekly-title)]">{habit.title}</p>
                 <p className="mt-1 text-sm text-[color:var(--weekly-muted)]">{habit.label}</p>
               </div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: getMonthlyScoreTone(habit.percent).color }}>
                 {getMonthlyScoreTone(habit.percent).label}
               </p>
             </div>
-            <div className="mt-5 grid grid-cols-3 gap-3">
+            <div className="mt-4 grid grid-cols-3 gap-3">
               {habit.months.map((month, monthIndex) => {
                 const tone = getMonthlyScoreTone(month.percent);
                 return (
@@ -2989,14 +2991,20 @@ function WeeklyRadarAnalysisChart({
   const ringRadius = 122;
   const axes = buildWeeklyRadarAxes(dominant, radarTraits);
   const maxValue = Math.max(1, ...axes.map((axis) => axis.value));
+  const pillarPercentages = resolveWeeklyRadarPillarPercentages(axes, dominant, dominantPct);
+  const effectiveDominant = resolveWeeklyRadarDominant(pillarPercentages);
+  const effectiveDominantIndex = WEEKLY_PILLAR_ORDER.indexOf(effectiveDominant);
+  const hasRealRadarTraits = (radarTraits ?? []).some((trait) => normalizePillarCode(trait.pillar) && Number.isFinite(trait.xp) && trait.xp > 0);
+  const effectiveMessage = hasRealRadarTraits
+    ? `${resolveRewardsPillarLabel(effectiveDominant)} lideró tu energía estos días. Seguí apoyándote en ese foco.`
+    : message || `${resolveRewardsPillarLabel(effectiveDominant)} lideró tu energía estos días. Seguí apoyándote en ese foco.`;
   const points = axes.map((axis, index) => {
     const distance = radius * (axis.value / maxValue);
     const point = weeklyPolarPoint(center, center, distance, weeklyRadarAngle(index, axes.length));
     return `${point.x},${point.y}`;
   }).join(' ');
   const ranges = buildWeeklyRadarRanges(axes);
-  const dominantIndex = WEEKLY_PILLAR_ORDER.indexOf(dominant);
-  const dominantRange = ranges[dominantIndex] ?? { start: 0, end: Math.PI * 2 };
+  const dominantRange = ranges[effectiveDominantIndex] ?? { start: 0, end: Math.PI * 2 };
 
   return (
     <div className="mp-weekly-fragment flex min-h-0 flex-1 flex-col space-y-[clamp(1rem,3dvh,1.5rem)]" style={{ transitionDelay: '170ms' }}>
@@ -3009,8 +3017,8 @@ function WeeklyRadarAnalysisChart({
               <stop offset="100%" stopColor="rgba(247,200,106,0.2)" />
             </linearGradient>
             <radialGradient id="weekly-radar-dominant">
-              <stop offset="0%" stopColor={`${getWeeklyPillarColor(dominant)}44`} />
-              <stop offset="100%" stopColor={`${getWeeklyPillarColor(dominant)}00`} />
+              <stop offset="0%" stopColor={`${getWeeklyPillarColor(effectiveDominant)}44`} />
+              <stop offset="100%" stopColor={`${getWeeklyPillarColor(effectiveDominant)}00`} />
             </radialGradient>
           </defs>
           <circle className="mp-weekly-radar-glow" cx={center} cy={center} fill="url(#weekly-radar-dominant)" r="150" />
@@ -3045,7 +3053,7 @@ function WeeklyRadarAnalysisChart({
           <path
             className="mp-weekly-radar-dominant-fill"
             d={weeklySectorPath(center, center, radius, dominantRange.start, dominantRange.end)}
-            fill={getWeeklyPillarColor(dominant)}
+            fill={getWeeklyPillarColor(effectiveDominant)}
             fillOpacity="0.18"
           />
           <polygon
@@ -3058,7 +3066,7 @@ function WeeklyRadarAnalysisChart({
           />
           {ranges.map((range, index) => {
             const pillar = WEEKLY_PILLAR_ORDER[index];
-            const selected = pillar === dominant;
+            const selected = pillar === effectiveDominant;
             return (
               <path
                 className={selected ? 'mp-weekly-radar-ring mp-weekly-radar-ring-selected' : 'mp-weekly-radar-ring'}
@@ -3073,22 +3081,40 @@ function WeeklyRadarAnalysisChart({
               />
             );
           })}
+          {WEEKLY_PILLAR_ORDER.map((pillar, index) => {
+            const labelPoint = weeklyPolarPoint(center, center, ringRadius + 22, -Math.PI / 2 + index * ((Math.PI * 2) / WEEKLY_PILLAR_ORDER.length));
+            return (
+              <text
+                className="mp-weekly-radar-label"
+                fill={getWeeklyPillarColor(pillar)}
+                fontSize="10"
+                fontWeight="700"
+                key={`weekly-radar-pillar-label-${pillar}`}
+                letterSpacing="0.18em"
+                textAnchor="middle"
+                x={labelPoint.x}
+                y={labelPoint.y}
+              >
+                {resolveRewardsPillarLabel(pillar)}
+              </text>
+            );
+          })}
           <circle className="mp-weekly-radar-center" cx={center} cy={center} fill="var(--weekly-title)" r="4.4" />
         </svg>
       </div>
 
       <div className="mp-weekly-radar-final pt-[clamp(.75rem,2.5dvh,1.25rem)]">
-        <p className="max-w-[21rem] text-lg leading-relaxed text-[color:var(--weekly-muted)]">{message}</p>
+        <p className="max-w-[21rem] text-lg leading-relaxed text-[color:var(--weekly-muted)]">{effectiveMessage}</p>
       </div>
 
       <div className="mp-weekly-radar-final grid grid-cols-[1.22fr_.89fr_.89fr] items-end gap-5 pt-[clamp(.65rem,2dvh,1rem)] text-center">
         {WEEKLY_PILLAR_ORDER.map((pillar, index) => {
-          const percent = resolveWeeklyRadarPercent(pillar, dominant, dominantPct);
-          const selected = pillar === dominant;
+          const percent = pillarPercentages[pillar];
+          const selected = pillar === effectiveDominant;
           return (
             <div className="min-w-0" key={`weekly-radar-metric-${pillar}`} style={{ color: getWeeklyPillarColor(pillar) }}>
               <p className={`${selected ? 'text-[clamp(3.85rem,14vw,4.35rem)]' : 'text-[clamp(2rem,8vw,2.4rem)]'} font-semibold leading-none tracking-[-0.04em]`}>
-                <AnimatedWeeklyNumber active={active && index <= dominantIndex + 2} duration={selected ? 1450 : 820} value={percent} />%
+                <AnimatedWeeklyNumber active={active && index <= effectiveDominantIndex + 2} duration={selected ? 1450 : 820} value={percent} />%
               </p>
               <p className="mt-2 text-[10px] uppercase tracking-[0.24em] text-[color:var(--weekly-muted)]">{resolveRewardsPillarLabel(pillar)}</p>
             </div>
@@ -3884,6 +3910,32 @@ function buildWeeklyRadarRanges(axes: Array<{ pillar: RewardsPillarCode }>) {
   });
 }
 
+function resolveWeeklyRadarPillarPercentages(axes: Array<{ pillar: RewardsPillarCode; value: number }>, dominant: RewardsPillarCode, dominantPct: number) {
+  const totals: Record<RewardsPillarCode, number> = { BODY: 0, MIND: 0, SOUL: 0 };
+  axes.forEach((axis) => {
+    totals[axis.pillar] += Math.max(0, axis.value);
+  });
+  const total = totals.BODY + totals.MIND + totals.SOUL;
+  if (total <= 0) {
+    return WEEKLY_PILLAR_ORDER.reduce((acc, pillar) => {
+      acc[pillar] = resolveWeeklyRadarPercent(pillar, dominant, dominantPct);
+      return acc;
+    }, { BODY: 0, MIND: 0, SOUL: 0 } as Record<RewardsPillarCode, number>);
+  }
+
+  const body = Math.round((totals.BODY / total) * 100);
+  const mind = Math.round((totals.MIND / total) * 100);
+  return {
+    BODY: body,
+    MIND: mind,
+    SOUL: Math.max(0, 100 - body - mind),
+  };
+}
+
+function resolveWeeklyRadarDominant(percentages: Record<RewardsPillarCode, number>) {
+  return WEEKLY_PILLAR_ORDER.reduce((best, pillar) => (percentages[pillar] > percentages[best] ? pillar : best), 'BODY' as RewardsPillarCode);
+}
+
 function resolveWeeklyRadarPercent(pillar: RewardsPillarCode, dominant: RewardsPillarCode, dominantPct: number) {
   if (pillar === dominant) return dominantPct;
   const rest = Math.max(0, 100 - dominantPct);
@@ -4058,9 +4110,9 @@ function resolveMonthlyCalibrationStory(growth: RewardsHistorySummary['growthCal
   const downTasks = rows.filter((row) => row.finalAction === 'down').map((row) => row.taskTitle).slice(0, 3);
   const keep = Math.max(growth.summary.keep, rows.filter((row) => row.finalAction === 'keep').length);
   return {
-    downTasks: downTasks.length ? downTasks : ['Minoxidil noche', '2L de agua'],
+    downTasks,
     keep,
-    upTasks: upTasks.length ? upTasks : ['Cocinar una receta nueva'],
+    upTasks,
   };
 }
 
