@@ -22,6 +22,10 @@ dbReady
   });
 
 const configureServer = (async () => {
+  fastify.addHook('onClose', async () => {
+    await endPool();
+  });
+
   await fastify.register(fastifyRawBody, {
     field: 'rawBody',
     global: true,
@@ -35,10 +39,6 @@ const configureServer = (async () => {
   fastify.get('/healthz', async () => ({ ok: true }));
 
   await logRegisteredRoutes({ expressApp: app, fastify });
-
-  fastify.addHook('onClose', async () => {
-    await endPool();
-  });
 })();
 
 const port = Number.parseInt(process.env.PORT ?? '3000', 10);

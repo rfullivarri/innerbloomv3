@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { decideTaskHabitAchievement, getRewardsHistory, getTaskInsights, getUserXpByTrait, toggleTaskHabitAchievementMaintained, type HabitAchievementPillarGroup, type HabitAchievementShelfItem, type MonthlyWrappedRecord, type RewardsGrowthCalibrationRow, type RewardsHistorySummary, type TaskInsightsResponse, type TraitXpEntry, type WeeklyWrappedRecord } from '../../../../lib/api';
 import { useRequest } from '../../../../hooks/useRequest';
 import { HabitAchievementSeal } from '../../../../components/dashboard-v3/HabitAchievementSeal';
@@ -11,7 +12,7 @@ type RewardsPillarCode = 'BODY' | 'MIND' | 'SOUL';
 type WeeklyStoryVisualMode = 'dark' | 'light';
 
 const WEEKLY_PILLAR_ORDER: RewardsPillarCode[] = ['BODY', 'MIND', 'SOUL'];
-const STORY_MODAL_LAYER_CLASS = 'fixed inset-0 isolate z-[9999] h-[100dvh] w-screen overflow-hidden bg-black';
+const STORY_MODAL_LAYER_CLASS = 'fixed bottom-0 left-0 right-0 top-0 isolate z-[9999] h-screen h-[100dvh] w-screen overflow-hidden bg-black';
 
 const FALLBACK_REWARDS_HISTORY: RewardsHistorySummary = {
   weeklyWrapups: [
@@ -538,22 +539,31 @@ export function PremiumRewardsSection({
           total={pendingReviewCount}
         />
       ) : null}
-      {activeWeeklyWrapped ? (
-        <PremiumWeeklyWrappedStory
-          onClose={() => setActiveWeeklyWrapped(null)}
-          radarTraits={radarData?.traits ?? []}
-          weekly={activeWeeklyWrapped}
-        />
-      ) : null}
-      {activeMonthlyWrapped ? (
-        <PremiumMonthlyWrappedStory
-          monthly={activeMonthlyWrapped}
-          onClose={() => setActiveMonthlyWrapped(null)}
-          rewards={rewards}
-        />
-      ) : null}
+      {activeWeeklyWrapped
+        ? renderStoryPortal(
+            <PremiumWeeklyWrappedStory
+              onClose={() => setActiveWeeklyWrapped(null)}
+              radarTraits={radarData?.traits ?? []}
+              weekly={activeWeeklyWrapped}
+            />,
+          )
+        : null}
+      {activeMonthlyWrapped
+        ? renderStoryPortal(
+            <PremiumMonthlyWrappedStory
+              monthly={activeMonthlyWrapped}
+              onClose={() => setActiveMonthlyWrapped(null)}
+              rewards={rewards}
+            />,
+          )
+        : null}
     </section>
   );
+}
+
+function renderStoryPortal(children: ReactNode) {
+  if (typeof document === 'undefined') return children;
+  return createPortal(children, document.body);
 }
 
 function CarouselProgressIndicator({ activeIndex, total }: { activeIndex: number; total: number }) {
@@ -660,9 +670,19 @@ function AchievementFrontFace({ habit }: { habit: HabitAchievementShelfItem; isA
       <p className={`mt-3 text-xs font-semibold uppercase tracking-[0.12em] ${achieved ? 'text-[color:var(--mp-violet)]' : 'text-[color:var(--mp-amber)]'}`}>
         {achieved ? 'Hábito logrado' : 'Bloqueado'}
       </p>
+      <div className="mt-auto w-full">
+        <div className={`mx-auto inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.12em] ${
+          achieved
+            ? 'border-violet-300/20 bg-violet-400/8 text-[color:var(--mp-violet)]'
+            : 'border-amber-300/24 bg-amber-300/8 text-[color:var(--mp-amber)]'
+        }`}>
+          <span aria-hidden="true" className="text-sm leading-none">↻</span>
+          <span>{achieved ? 'Ver desarrollo' : 'Tocar para ver desarrollo'}</span>
+        </div>
+      </div>
       {achieved ? (
         <button
-          className="mt-auto rounded-full border border-[color:var(--mp-border)] px-4 py-1.5 text-xs font-semibold text-[color:var(--mp-text)]"
+          className="mt-3 rounded-full border border-[color:var(--mp-border)] px-4 py-1.5 text-xs font-semibold text-[color:var(--mp-text)]"
           onClick={(event) => {
             event.stopPropagation();
             shareAchievement(habit);
@@ -1790,7 +1810,7 @@ function PremiumWeeklyWrappedStory({
         `}
       </style>
       <div
-        className="mp-weekly-story-root relative h-[100dvh] min-h-[100svh] w-full overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)]"
+        className="mp-weekly-story-root relative h-screen h-[100dvh] min-h-screen min-h-[100svh] w-screen overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)]"
         data-weekly-mode={storyVisualMode}
       >
         <button
@@ -2136,7 +2156,7 @@ function PremiumMonthlyWrappedStory({
     >
       <MonthlyStoryStyles />
       <div
-        className="mp-weekly-story-root relative h-[100dvh] min-h-[100svh] w-full overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)]"
+        className="mp-weekly-story-root relative h-screen h-[100dvh] min-h-screen min-h-[100svh] w-screen overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)]"
         data-weekly-mode={storyVisualMode}
       >
         <button
