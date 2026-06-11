@@ -703,7 +703,7 @@ function AchievementFrontFace({ habit }: { habit: HabitAchievementShelfItem; isA
 
       <span
         aria-hidden="true"
-        className="absolute bottom-4 right-4 text-base leading-none text-[color:var(--mp-text-muted)] opacity-55"
+        className="absolute bottom-2.5 right-2.5 text-base leading-none text-[color:var(--mp-text-muted)] opacity-45"
       >
         ↘
       </span>
