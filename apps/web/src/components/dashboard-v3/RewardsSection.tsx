@@ -454,11 +454,6 @@ function MonthlyWrapupShelf({
             <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
               {latest.periodKey}
             </p>
-            <p className="mt-1 text-sm font-semibold text-[color:var(--color-text)]">
-              {language === "es"
-                ? "Resumen mensual más reciente"
-                : "Most recent monthly summary"}
-            </p>
             <CompletionDots
               completionDays={latest.completionDays ?? []}
               range={resolveMonthRange(latest.periodKey)}
@@ -1564,10 +1559,10 @@ function AchievedShelf({
                                   : "Achieved habit"}
                               </span>
                             ) : (
-                              <p className="text-[11px] text-[color:var(--color-text-subtle)]">
+                              <p className="mx-auto inline-flex max-w-[14rem] items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--ib-surface-card-active)] px-3 py-1 text-[11px] font-semibold text-[color:var(--color-text-subtle)]">
                                 {language === "es"
-                                  ? "Toca para ver más"
-                                  : "Tap to see more"}
+                                  ? "Toca para ver el reverso"
+                                  : "Tap to see the back"}
                               </p>
                             )}
                           </div>

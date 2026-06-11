@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserDailyEnergy, type DailyEnergySnapshot } from '../../lib/api';
 import { Card } from '../ui/Card';
@@ -86,6 +86,30 @@ export function EnergyCard({ userId }: EnergyCardProps) {
   const { data, status } = useRequest(() => getUserDailyEnergy(userId), [userId]);
   const normalized = useMemo(() => normalize(data), [data]);
   const hasData = Boolean(data);
+  const chartRef = useRef<HTMLDivElement | null>(null);
+  const [chartEntered, setChartEntered] = useState(false);
+
+  useEffect(() => {
+    setChartEntered(false);
+  }, [userId]);
+
+  useEffect(() => {
+    const node = chartRef.current;
+    if (!node || status !== 'success' || !hasData || chartEntered) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting && entry.intersectionRatio >= 0.3) {
+          setChartEntered(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: [0.3, 0.55], rootMargin: '0px 0px -8% 0px' },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [chartEntered, hasData, status]);
 
   return (
     <Card
@@ -123,7 +147,7 @@ export function EnergyCard({ userId }: EnergyCardProps) {
       )}
 
       {status === 'success' && hasData && (
-        <div className="space-y-5">
+        <div ref={chartRef} className="space-y-5">
           {!normalized.hasHistory && (
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
               Sin datos suficientes para comparar con la semana anterior.
@@ -135,6 +159,7 @@ export function EnergyCard({ userId }: EnergyCardProps) {
             deltaPct={normalized.energy.Body.deltaPct}
             highlight={normalized.topGrowth?.pillar === 'HP'}
             showComparison={normalized.hasHistory}
+            animate={chartEntered}
           />
           <EnergyMeter
             label="Mood"
@@ -142,6 +167,7 @@ export function EnergyCard({ userId }: EnergyCardProps) {
             deltaPct={normalized.energy.Soul.deltaPct}
             highlight={normalized.topGrowth?.pillar === 'Mood'}
             showComparison={normalized.hasHistory}
+            animate={chartEntered}
           />
           <EnergyMeter
             label="Focus"
@@ -149,6 +175,7 @@ export function EnergyCard({ userId }: EnergyCardProps) {
             deltaPct={normalized.energy.Mind.deltaPct}
             highlight={normalized.topGrowth?.pillar === 'Focus'}
             showComparison={normalized.hasHistory}
+            animate={chartEntered}
           />
         </div>
       )}
@@ -162,6 +189,7 @@ interface EnergyMeterProps {
   deltaPct?: number | null;
   highlight?: boolean;
   showComparison?: boolean;
+  animate?: boolean;
 }
 
 const GRADIENTS: Record<PillarKey, string> = {
@@ -170,7 +198,7 @@ const GRADIENTS: Record<PillarKey, string> = {
   Focus: 'bg-gradient-to-r from-indigo-200 via-violet-300 to-purple-400',
 };
 
-function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparison = false }: EnergyMeterProps) {
+function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparison = false, animate = false }: EnergyMeterProps) {
   const { theme } = useThemePreference();
   const clamped = Math.max(0, Math.min(percent, 100));
   const width = clamped <= 4 ? 4 : clamped;
@@ -206,7 +234,7 @@ function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparis
       <div className="relative h-5 w-full overflow-hidden rounded-full bg-slate-200/90 shadow-none dark:bg-slate-900/40 dark:shadow-none">
         <div
           className={`${GRADIENTS[label]} h-full rounded-full transition-[width] duration-500 ease-out progress-fill--typing`}
-          style={{ width: `${width}%`, minWidth: clamped === 0 ? '1.5rem' : undefined }}
+          style={{ width: animate ? `${width}%` : '0%', minWidth: animate && clamped === 0 ? '1.5rem' : undefined }}
         />
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-[11px] font-semibold text-slate-950 dark:text-slate-100">

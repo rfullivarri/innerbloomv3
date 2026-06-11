@@ -186,8 +186,8 @@ function RecalibrationTrendIndicator({
         type="button"
         onClick={() => setIsExpanded((current) => !current)}
         className={cx(
-          'inline-flex h-7 shrink-0 items-center overflow-hidden rounded-full border text-xs font-bold leading-none transition-[width,max-width,box-shadow,filter] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/50',
-          isExpanded ? 'w-[9.5rem] max-w-[9.5rem] pr-3' : 'w-7 max-w-7 justify-start pr-0',
+          'inline-flex h-[1.4rem] shrink-0 items-center overflow-hidden rounded-full border text-[10px] font-bold leading-none transition-[width,max-width,box-shadow,filter] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/50',
+          isExpanded ? 'w-[7.7rem] max-w-[7.7rem] pr-2' : 'w-[1.4rem] max-w-[1.4rem] justify-start pr-0',
           fallback
             ? 'border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card-active)] text-[color:var(--color-slate-300)] shadow-[0_0_0_3px_rgba(148,163,184,0.10)]'
             : `${config[action].tone} ${config[action].glow}`,
@@ -196,7 +196,7 @@ function RecalibrationTrendIndicator({
         aria-expanded={isExpanded}
         aria-describedby={isExpanded ? tooltipId : undefined}
       >
-        <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center text-base font-black leading-none" aria-hidden>
+        <span className="inline-flex h-[1.4rem] w-[1.4rem] shrink-0 items-center justify-center text-sm font-black leading-none" aria-hidden>
           {fallback ? '•' : config[action].icon}
         </span>
         <span
@@ -669,10 +669,10 @@ export function TaskInsightsModal({
         aria-label={t('dashboard.streakTaskInsights.dialogAria')}
       >
         <div className="sticky top-0 z-10 flex items-start justify-between gap-2 border-b border-white/5 bg-[color:var(--color-surface)]/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--color-surface)]/85">
-          <div className="space-y-1">
+          <div className="min-w-0 flex-1 space-y-1 pr-2">
             <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.title')}</p>
             <h3 className="text-lg font-semibold leading-tight text-[color:var(--color-text)] md:text-xl">{activeTask?.name ?? t('dashboard.streakTaskInsights.taskFallback')}</h3>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden">
               {activeTask?.stat && <p className="text-sm text-[color:var(--color-slate-400)]">{activeTask.stat}</p>}
               {achievementSealVisible && (
                 <span className="inline-flex items-center rounded-full border border-amber-500 bg-amber-500 px-2 py-0.5 text-[11px] font-semibold text-amber-950">
@@ -680,7 +680,7 @@ export function TaskInsightsModal({
                 </span>
               )}
               {difficultyChipLabel && (
-                <span className="inline-flex items-center rounded-full border border-violet-200/80 bg-violet-100/90 px-2 py-0.5 text-[11px] font-medium text-violet-700 dark:border-white/30 dark:bg-white/10 dark:text-white/85">
+                <span className="inline-flex shrink-0 items-center rounded-full border border-violet-200/80 bg-violet-100/90 px-1.5 py-0.5 text-[9px] font-medium text-violet-700 dark:border-white/30 dark:bg-white/10 dark:text-white/85">
                   {difficultyChipLabel}
                 </span>
               )}
@@ -703,7 +703,7 @@ export function TaskInsightsModal({
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card)] px-3 py-1 text-sm text-[color:var(--color-slate-200)] transition hover:border-white/25 hover:bg-[color:var(--ib-surface-card-hover)]"
+            className="shrink-0 self-start rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card)] px-3 py-1 text-sm text-[color:var(--color-slate-200)] transition hover:border-white/25 hover:bg-[color:var(--ib-surface-card-hover)]"
             aria-label={t('dashboard.streakTaskInsights.closeAria')}
           >
             ✕

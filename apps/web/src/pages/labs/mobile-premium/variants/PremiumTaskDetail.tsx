@@ -462,7 +462,7 @@ export function PremiumTaskDetail({
         @media (prefers-reduced-motion: reduce) { .mp-onboarding-edit-cue { animation: none !important; } }
       `}</style>
       <header className="space-y-3">
-        <div className="grid grid-cols-[40px_1fr_40px] items-center">
+        <div className="grid grid-cols-[40px_1fr_auto] items-center gap-3">
           <Link
             aria-label="Volver a tareas"
             className="grid h-10 w-10 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-xl text-[color:var(--mp-text)]"
@@ -471,27 +471,6 @@ export function PremiumTaskDetail({
             ‹
           </Link>
           <span />
-          <span />
-        </div>
-        <div className="grid grid-cols-[46px_minmax(0,1fr)_auto] items-center gap-3">
-          <div className="grid h-12 w-12 place-items-center rounded-full border border-[color:var(--mp-border)] bg-violet-400/10 text-[color:var(--mp-violet)]">
-            <TraitIcon size={23} trait={detail.stat} />
-          </div>
-          <div className="min-w-0">
-            <h2 className="max-w-full break-words text-[1.18rem] font-semibold leading-[1.12] text-[color:var(--mp-text)]">{detail.name}</h2>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <span className="inline-flex min-h-7 items-center gap-1.5 rounded-full bg-violet-400/12 px-2.5 text-xs font-semibold text-[color:var(--mp-violet)]">
-                <TraitIcon size={12} trait={detail.stat} />
-                {detail.stat}
-              </span>
-              {detail.difficultyLabel ? (
-                <span className="inline-flex min-h-7 items-center rounded-full border border-[color:var(--mp-border)] px-2.5 text-xs font-semibold text-[color:var(--mp-text-secondary)]">
-                  {detail.difficultyLabel}
-                </span>
-              ) : null}
-              {detail.latestRecalibrationAction ? <RecalibrationPulseChip action={detail.latestRecalibrationAction} chip={latestChip} /> : null}
-            </div>
-          </div>
           <button
             className={`rounded-full border px-3 py-1.5 text-xs font-semibold text-[color:var(--mp-violet)] ${
               onboardingEditCue ? 'mp-onboarding-edit-cue border-violet-600 bg-violet-600 text-white' : 'border-[color:var(--mp-border)]'
@@ -501,6 +480,26 @@ export function PremiumTaskDetail({
           >
             Editar
           </button>
+        </div>
+        <div className="grid grid-cols-[46px_minmax(0,1fr)] items-center gap-3">
+          <div className="grid h-12 w-12 place-items-center rounded-full border border-[color:var(--mp-border)] bg-violet-400/10 text-[color:var(--mp-violet)]">
+            <TraitIcon size={23} trait={detail.stat} />
+          </div>
+          <div className="min-w-0">
+            <h2 className="max-w-full break-words text-[1.18rem] font-semibold leading-[1.12] text-[color:var(--mp-text)]">{detail.name}</h2>
+            <div className="mt-2 flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden">
+              <span className="inline-flex min-h-[1.4rem] items-center gap-1 rounded-full bg-violet-400/12 px-2 text-[0.68rem] font-semibold text-[color:var(--mp-violet)]">
+                <TraitIcon size={12} trait={detail.stat} />
+                {detail.stat}
+              </span>
+              {detail.difficultyLabel ? (
+                <span className="inline-flex min-h-[1.4rem] shrink-0 items-center rounded-full border border-[color:var(--mp-border)] px-2 text-[0.68rem] font-semibold text-[color:var(--mp-text-secondary)]">
+                  {detail.difficultyLabel}
+                </span>
+              ) : null}
+              {detail.latestRecalibrationAction ? <RecalibrationPulseChip action={detail.latestRecalibrationAction} chip={latestChip} /> : null}
+            </div>
+          </div>
         </div>
       </header>
 
@@ -1134,8 +1133,8 @@ function RecalibrationPulseChip({
       <style>
         {`
           @keyframes mpRecalChipCollapse {
-            0%, 68% { width: 9.5rem; padding-left: 0.45rem; padding-right: 0.8rem; }
-            100% { width: 2rem; padding-left: 0; padding-right: 0; }
+            0%, 68% { width: 7.6rem; padding-left: 0.35rem; padding-right: 0.65rem; }
+            100% { width: 1.6rem; padding-left: 0; padding-right: 0; }
           }
           @keyframes mpRecalChipLabel {
             0%, 58% { opacity: 1; transform: translateX(0); }
@@ -1144,21 +1143,21 @@ function RecalibrationPulseChip({
         `}
       </style>
       <span
-        className="relative inline-flex min-h-8 items-center overflow-hidden rounded-full border text-xs font-semibold shadow-[0_0_18px_rgba(245,197,89,0.12)]"
+        className="relative inline-flex min-h-[1.6rem] shrink-0 items-center overflow-hidden rounded-full border text-[0.68rem] font-semibold shadow-[0_0_18px_rgba(245,197,89,0.12)]"
         style={{
           backgroundColor: chip.color,
           borderColor: chip.color,
           color: chip.text,
-          width: shouldAnimate ? '9.5rem' : undefined,
+          width: shouldAnimate ? '7.6rem' : undefined,
           animation: shouldAnimate ? 'mpRecalChipCollapse 3.2s ease-in-out 0.25s forwards' : undefined,
         }}
       >
-        <span className="absolute left-0 top-0 grid h-8 w-8 place-items-center rounded-full leading-none">
+        <span className="absolute left-0 top-0 grid h-[1.6rem] w-[1.6rem] place-items-center rounded-full leading-none">
           <RecalibrationGlyph chip={chip} />
         </span>
         {shouldAnimate ? (
           <span
-            className="ml-8 whitespace-nowrap pr-3"
+            className="ml-[1.6rem] whitespace-nowrap pr-2"
             style={{ animation: 'mpRecalChipLabel 3.2s ease-in-out 0.25s forwards' }}
           >
             {chip.label}
@@ -1173,7 +1172,7 @@ function RecalibrationGlyph({ chip }: { chip: ReturnType<typeof resolveRecalibra
   if (chip.collapsedLabel === '•') {
     return (
       <span
-        className="block h-2.5 w-2.5 rounded-full"
+        className="block h-2 w-2 rounded-full"
         style={{ backgroundColor: chip.marker ?? chip.text }}
       />
     );
@@ -1181,7 +1180,7 @@ function RecalibrationGlyph({ chip }: { chip: ReturnType<typeof resolveRecalibra
 
   return (
     <span
-      className="text-xl font-semibold leading-none"
+      className="text-base font-semibold leading-none"
       style={{ color: chip.marker ?? chip.text }}
     >
       {chip.collapsedLabel}
