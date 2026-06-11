@@ -408,7 +408,11 @@ function PremiumTaskProgressRow({ onboardingCue = false, task }: { onboardingCue
             </span>
           ) : null}
           {task.achievementSealVisible ? (
-            <span aria-label="Hábito logrado" className="ml-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border border-violet-300/20 bg-violet-400/10 text-[0.65rem] text-violet-200">
+            <span
+              aria-label="Hábito logrado"
+              className="ml-0.5 shrink-0 text-[0.72rem] font-semibold text-[color:var(--mp-violet-strong)]"
+              title="Hábito logrado"
+            >
               ✦
             </span>
           ) : null}
@@ -643,7 +647,7 @@ function TaskLeadingBadge({ hasStreak, stat, streakDays }: { hasStreak: boolean;
     return (
       <div
         aria-label={`Racha de ${streakDays} días`}
-        className="grid h-11 w-11 place-items-center rounded-full border border-orange-300/30 bg-[radial-gradient(circle_at_35%_25%,rgba(251,146,60,0.24),rgba(17,17,19,0.94)_62%)] text-[color:var(--mp-amber)] shadow-[0_0_24px_rgba(251,146,60,0.12)]"
+        className="grid h-11 w-11 place-items-center rounded-full border border-orange-300/35 bg-orange-300/[0.06] text-[color:var(--mp-amber)]"
         title={`${streakDays} días de racha`}
       >
         <span className="flex flex-col items-center justify-center leading-none">
