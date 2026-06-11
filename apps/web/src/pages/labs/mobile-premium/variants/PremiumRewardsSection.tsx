@@ -652,7 +652,7 @@ function AchievementCarouselCard({
 function AchievementFrontFace({ habit }: { habit: HabitAchievementShelfItem; isActive: boolean }) {
   const achieved = isHabitAchieved(habit);
   return (
-    <div className="flex h-full flex-col items-center">
+    <div className="relative flex h-full flex-col items-center">
       <HabitAchievementSeal
         alt={`${habit.taskName} seal`}
         disabled={!achieved}
@@ -670,16 +670,17 @@ function AchievementFrontFace({ habit }: { habit: HabitAchievementShelfItem; isA
       <p className={`mt-3 text-xs font-semibold uppercase tracking-[0.12em] ${achieved ? 'text-[color:var(--mp-violet)]' : 'text-[color:var(--mp-amber)]'}`}>
         {achieved ? 'Hábito logrado' : 'Bloqueado'}
       </p>
-      <div className="mt-auto w-full">
-        <div className={`mx-auto inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.12em] ${
+      <span
+        aria-hidden="true"
+        className={`absolute right-3.5 top-3.5 grid h-7 w-7 place-items-center rounded-full border text-sm transition ${
           achieved
-            ? 'border-violet-300/20 bg-violet-400/8 text-[color:var(--mp-violet)]'
-            : 'border-amber-300/24 bg-amber-300/8 text-[color:var(--mp-amber)]'
-        }`}>
-          <span aria-hidden="true" className="text-sm leading-none">↻</span>
-          <span>{achieved ? 'Ver desarrollo' : 'Tocar para ver desarrollo'}</span>
-        </div>
-      </div>
+            ? 'border-violet-300/15 text-[color:var(--mp-violet)] opacity-55'
+            : 'border-[color:var(--mp-border)] text-[color:var(--mp-text-muted)] opacity-45'
+        }`}
+        title={achieved ? 'Ver desarrollo' : 'Ver desarrollo bloqueado'}
+      >
+        ↻
+      </span>
       {achieved ? (
         <button
           className="mt-3 rounded-full border border-[color:var(--mp-border)] px-4 py-1.5 text-xs font-semibold text-[color:var(--mp-text)]"
@@ -722,7 +723,9 @@ function AchievementBackFace({
           />
         </div>
       </div>
-      <p className="mt-auto text-xs text-[color:var(--mp-text-muted)]">Toca otra vez para volver al frente</p>
+      <p className="mt-auto text-center text-[10px] text-[color:var(--mp-text-muted)] opacity-60">
+        Toca para volver
+      </p>
     </div>
   );
 }
