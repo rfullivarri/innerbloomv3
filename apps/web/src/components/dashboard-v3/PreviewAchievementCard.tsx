@@ -102,7 +102,20 @@ function normalizeRecentMonths(recentMonths: PreviewAchievement['recentMonths'])
     .slice(-8);
 }
 
-function getMonthTone(state: string | null | undefined): string {
+function valueToMonthState(value: number | null | undefined): 'strong' | 'building' | 'weak' | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+  const percent = value > 3 ? value : value * 100;
+  if (percent >= 80) return 'strong';
+  if (percent >= 50) return 'building';
+  return 'weak';
+}
+
+function getMonthTone(state: string | null | undefined, value?: number | null): string {
+  const valueState = valueToMonthState(value);
+  if (valueState === 'strong') return 'bg-emerald-400 text-white';
+  if (valueState === 'building') return 'bg-amber-400 text-amber-950';
+  if (valueState === 'weak') return 'bg-rose-500 text-white';
+
   const normalized = String(state ?? '').toLowerCase();
   if (normalized === 'strong' || normalized === 'valid' || normalized === 'achieved') {
     return 'bg-emerald-400 text-white';
@@ -117,6 +130,14 @@ function getMonthTone(state: string | null | undefined): string {
     return 'bg-rose-500 text-white';
   }
   return 'bg-white/10 text-[color:var(--color-slate-300)]';
+}
+
+function getMonthMetricTone(value?: number | null): string {
+  const valueState = valueToMonthState(value);
+  if (valueState === 'strong') return 'text-emerald-300';
+  if (valueState === 'building') return 'text-amber-300';
+  if (valueState === 'weak') return 'text-rose-300';
+  return 'text-[color:var(--color-slate-100)]';
 }
 
 function getMonthSymbol(monthState: string | null | undefined): string {
@@ -171,7 +192,7 @@ function RecentMonthNode({ entry, language, compact = false, variant = 'default'
             : compact
               ? 'relative inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold leading-none shadow-[0_7px_16px_rgba(5,10,35,0.34)] sm:h-7 sm:w-7 sm:text-sm'
               : 'relative inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold leading-none shadow-[0_7px_16px_rgba(5,10,35,0.34)] sm:h-9 sm:w-9 sm:text-base',
-          getMonthTone(entry.state),
+          getMonthTone(entry.state, entry.value),
         )}
         aria-label={`${entry.periodKey ?? 'unknown'}-${entry.state ?? 'unknown'}`}
         data-month-symbol={monthSymbol}
@@ -194,7 +215,7 @@ function RecentMonthNode({ entry, language, compact = false, variant = 'default'
         {entry.periodKey ? monthLabel(entry.periodKey, language) : language === 'es' ? 'Sin mes' : 'No month'}
       </span>
       <span
-        className={cx('font-semibold leading-none', isLanding ? (compact ? 'text-sm text-[color:var(--color-text)] dark:text-slate-50' : 'text-base text-[color:var(--color-text)] dark:text-slate-50') : compact ? 'text-[9px] text-[color:var(--color-slate-100)]' : 'text-[10px] text-[color:var(--color-slate-100)]')}
+        className={cx('font-semibold leading-none', isLanding ? (compact ? 'text-sm' : 'text-base') : compact ? 'text-[9px]' : 'text-[10px]', getMonthMetricTone(entry.value))}
         data-testid="recent-month-progress"
       >
         {getMonthMetric(entry.value)}

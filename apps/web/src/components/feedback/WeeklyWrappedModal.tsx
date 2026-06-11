@@ -264,11 +264,11 @@ export function WeeklyWrappedModal({ payload, onDismiss, onComplete, onViewRewar
   // Fondo animado global aplicado al wrapper fijo que envuelve todas las slides del Weekly Wrapped (desktop y mobile usan este contenedor).
   return (
     <div
-      className="ib-weekly-wrapped-modal fixed inset-0 z-[260] flex overflow-hidden bg-slate-950/95 backdrop-blur weekly-wrapped-animated-bg"
+      className="ib-weekly-wrapped-modal fixed inset-0 z-[260] flex overflow-hidden bg-slate-950 weekly-wrapped-animated-bg"
       role="dialog"
       aria-modal
     >
-      <div className="absolute inset-0" onClick={dismissHandler} aria-hidden />
+      <div className="absolute inset-0 bg-slate-950" onClick={dismissHandler} aria-hidden />
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-16 left-6 h-64 w-64 animate-[spin_22s_linear_infinite] bg-[radial-gradient(circle_at_center,_rgba(99,179,237,0.18),_transparent_55%)] blur-2xl" />
@@ -793,7 +793,7 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
       <div className="space-y-2">
         <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
         <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(56,189,248,0.3)]">{headline}</h3>
-        <p className="text-sm text-emerald-50">{subline}</p>
+        <p className="text-xs leading-5 text-emerald-50/85">{subline}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
