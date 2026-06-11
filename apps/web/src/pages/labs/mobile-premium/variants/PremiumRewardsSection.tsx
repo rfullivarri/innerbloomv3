@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useId, useRef, useState } from 'react';
 import { decideTaskHabitAchievement, getRewardsHistory, getTaskInsights, getUserXpByTrait, toggleTaskHabitAchievementMaintained, type HabitAchievementPillarGroup, type HabitAchievementShelfItem, type MonthlyWrappedRecord, type RewardsGrowthCalibrationRow, type RewardsHistorySummary, type TaskInsightsResponse, type TraitXpEntry, type WeeklyWrappedRecord } from '../../../../lib/api';
 import { useRequest } from '../../../../hooks/useRequest';
 import { HabitAchievementSeal } from '../../../../components/dashboard-v3/HabitAchievementSeal';
@@ -11,6 +11,7 @@ type RewardsPillarCode = 'BODY' | 'MIND' | 'SOUL';
 type WeeklyStoryVisualMode = 'dark' | 'light';
 
 const WEEKLY_PILLAR_ORDER: RewardsPillarCode[] = ['BODY', 'MIND', 'SOUL'];
+const STORY_MODAL_LAYER_CLASS = 'fixed inset-0 isolate z-[9999] h-[100dvh] w-screen overflow-hidden bg-black';
 
 const FALLBACK_REWARDS_HISTORY: RewardsHistorySummary = {
   weeklyWrapups: [
@@ -771,6 +772,8 @@ function LockedHabitBackFace({ backendUserId, habit, isFlipped }: { backendUserI
       </div>
     );
   }
+  const visibleMonths = resolveHabitDevelopmentMonths(development.months);
+  const activeWindowStartIndex = Math.max(0, visibleMonths.length - 3);
   return (
     <div className="flex h-full flex-col justify-between text-center">
       <div>
@@ -792,16 +795,30 @@ function LockedHabitBackFace({ backendUserId, habit, isFlipped }: { backendUserI
           <span>·</span>
           <span className="text-[color:var(--mp-green)]">Fuerte ≥80</span>
         </div>
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-1">
-          <span aria-hidden="true" />
-          <div className="mb-2 flex items-center gap-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-[color:var(--mp-text-muted)]">
+        <div
+          className="grid items-start gap-1"
+          style={{ gridTemplateColumns: `repeat(${Math.max(visibleMonths.length, 3)}, minmax(0, 1fr))` }}
+        >
+          <div
+            className="mb-2 flex items-center gap-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-[color:var(--mp-text-muted)]"
+            style={{ gridColumn: `${activeWindowStartIndex + 1} / ${Math.max(visibleMonths.length, 3) + 1}` }}
+          >
             <span className="h-px flex-1 bg-[color:var(--mp-border)]" />
             <span>Ventana activa</span>
             <span className="h-px flex-1 bg-[color:var(--mp-border)]" />
           </div>
-          <div className="col-span-2 flex items-start justify-center gap-2">
-            {development.months.slice(-4).map((month) => (
-              <MonthHealthDot key={`${habit.id}-active-${month.month}`} month={month.month} percent={month.percent} projected={month.projected} />
+          <div
+            className="grid items-start gap-2"
+            style={{ gridColumn: `1 / ${Math.max(visibleMonths.length, 3) + 1}`, gridTemplateColumns: `repeat(${Math.max(visibleMonths.length, 3)}, minmax(0, 1fr))` }}
+          >
+            {visibleMonths.map((month, index) => (
+              <MonthHealthDot
+                active={index >= activeWindowStartIndex}
+                key={`${habit.id}-active-${month.periodKey ?? month.month}`}
+                month={month.month}
+                percent={month.percent}
+                projected={month.projected}
+              />
             ))}
           </div>
         </div>
@@ -927,10 +944,10 @@ function AchievementDetailRow({ label, value }: { label: string; value: string }
   );
 }
 
-function MonthHealthDot({ month, percent, projected }: { month: string; percent: number; projected?: boolean }) {
+function MonthHealthDot({ active = true, month, percent, projected }: { active?: boolean; month: string; percent: number; projected?: boolean }) {
   const tone = getScoreTone(percent);
   return (
-    <div className="text-center">
+    <div className={`text-center ${active ? '' : 'opacity-55'}`}>
       <div
         className={`relative mx-auto grid h-10 w-10 place-items-center rounded-full border-2 bg-transparent text-[11px] font-semibold ${projected ? 'shadow-[0_0_22px_rgba(245,197,89,0.12)]' : ''}`}
         style={{ borderColor: tone.color, color: tone.color }}
@@ -950,15 +967,51 @@ function MonthHealthDot({ month, percent, projected }: { month: string; percent:
   );
 }
 
+function resolveHabitDevelopmentMonths(months: Array<{ month: string; percent: number; projected?: boolean; periodKey?: string | null }>) {
+  return [...months]
+    .sort((a, b) => resolveHabitDevelopmentMonthSortKey(a) - resolveHabitDevelopmentMonthSortKey(b))
+    .slice(-4);
+}
+
+function resolveHabitDevelopmentMonthSortKey(month: { month: string; periodKey?: string | null }) {
+  if (month.periodKey && /^\d{4}-\d{2}/.test(month.periodKey)) {
+    const [year, rawMonth] = month.periodKey.split('-').map(Number);
+    return year * 12 + rawMonth;
+  }
+  const normalized = month.month.trim().toLowerCase().replace('.', '');
+  const monthIndexByLabel: Record<string, number> = {
+    ene: 1,
+    feb: 2,
+    mar: 3,
+    abr: 4,
+    may: 5,
+    jun: 6,
+    jul: 7,
+    ago: 8,
+    sep: 9,
+    sept: 9,
+    oct: 10,
+    nov: 11,
+    dic: 12,
+  };
+  const monthIndex = monthIndexByLabel[normalized];
+  if (monthIndex) {
+    return new Date().getFullYear() * 12 + monthIndex;
+  }
+  const parsed = new Date(`${month.month} 1, ${new Date().getFullYear()}`);
+  return Number.isNaN(parsed.getTime()) ? 0 : parsed.getFullYear() * 12 + parsed.getMonth() + 1;
+}
+
 function buildHabitDevelopmentPreview(habit: HabitAchievementShelfItem) {
   const score = Math.max(0, Math.min(100, Math.round(habit.gpSinceMaintain)));
-  const tone = getScoreTone(score);
+  const now = new Date();
+  const periodKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   return {
     score,
     status: habitDevelopmentStatusLabel(score),
     previousMonths: [],
     months: [
-      { month: new Intl.DateTimeFormat('es', { month: 'short' }).format(new Date()), percent: score, projected: true },
+      { month: new Intl.DateTimeFormat('es', { month: 'short' }).format(now), percent: score, projected: true, periodKey },
     ],
   };
 }
@@ -1009,6 +1062,7 @@ function buildHabitDevelopmentFromInsights(insights: TaskInsightsResponse) {
       return {
         month: entry.month ?? formatMonthFromPeriod(entry.periodKey) ?? 'Mes',
         percent: Math.max(0, Math.min(100, Math.round(normalized))),
+        periodKey: entry.periodKey ?? null,
         projected: entry.closed === false || entry.projectedCompletionRate != null,
       };
     })
@@ -1018,7 +1072,7 @@ function buildHabitDevelopmentFromInsights(insights: TaskInsightsResponse) {
     score,
     status: habitDevelopmentStatusLabel(score),
     previousMonths: [],
-    months: months.slice(-4),
+    months: resolveHabitDevelopmentMonths(months),
   };
 }
 
@@ -1418,6 +1472,8 @@ function PremiumWeeklyWrappedStory({
   const emotionSlideIndex = energySlideIndex + 1;
   const closingSlideIndex = emotionSlideIndex + 1;
 
+  useBodyScrollLock();
+
   useEffect(() => {
     const themeNode = document.querySelector('[data-mp-theme]');
     const theme = themeNode?.getAttribute('data-mp-theme');
@@ -1451,7 +1507,7 @@ function PremiumWeeklyWrappedStory({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-[130] min-h-[100dvh] bg-black/95 backdrop-blur-2xl"
+      className={STORY_MODAL_LAYER_CLASS}
       role="dialog"
     >
       <style>
@@ -2040,6 +2096,8 @@ function PremiumMonthlyWrappedStory({
   const [showSharePicker, setShowSharePicker] = useState(false);
   const [storyVisualMode, setStoryVisualMode] = useState<WeeklyStoryVisualMode>('dark');
 
+  useBodyScrollLock();
+
   useEffect(() => {
     const themeNode = document.querySelector('[data-mp-theme]');
     const theme = themeNode?.getAttribute('data-mp-theme');
@@ -2073,7 +2131,7 @@ function PremiumMonthlyWrappedStory({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-[130] min-h-[100dvh] bg-black"
+      className={STORY_MODAL_LAYER_CLASS}
       role="dialog"
     >
       <MonthlyStoryStyles />
@@ -2252,6 +2310,34 @@ function PremiumMonthlyWrappedStory({
       </div>
     </div>
   );
+}
+
+function useBodyScrollLock() {
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlOverflow = html.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyPosition = body.style.position;
+    const previousBodyWidth = body.style.width;
+    const previousBodyTop = body.style.top;
+    const scrollY = window.scrollY;
+
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.width = '100%';
+    body.style.top = `-${scrollY}px`;
+
+    return () => {
+      html.style.overflow = previousHtmlOverflow;
+      body.style.overflow = previousBodyOverflow;
+      body.style.position = previousBodyPosition;
+      body.style.width = previousBodyWidth;
+      body.style.top = previousBodyTop;
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
 }
 
 function MonthlyStoryStyles() {
@@ -2974,6 +3060,7 @@ function WeeklyRadarAnalysisChart({
   radarTraits?: TraitXpEntry[];
   xp: number;
 }) {
+  const uniqueId = useId().replace(/:/g, '_');
   const size = 340;
   const center = size / 2;
   const radius = 108;
@@ -3009,24 +3096,14 @@ function WeeklyRadarAnalysisChart({
               <stop offset="0%" stopColor={`${getWeeklyPillarColor(effectiveDominant)}44`} />
               <stop offset="100%" stopColor={`${getWeeklyPillarColor(effectiveDominant)}00`} />
             </radialGradient>
-            {ranges.map((range, index) => {
-              const midAngle = (range.start + range.end) / 2;
-              const reverseForBottomHalf = Math.sin(midAngle) > 0;
-              return (
-                <path
-                  d={weeklyArcPath(
-                    center,
-                    center,
-                    ringRadius + 21,
-                    reverseForBottomHalf ? range.end : range.start,
-                    reverseForBottomHalf ? range.start : range.end,
-                  )}
-                  fill="none"
-                  id={`weekly-radar-label-path-${WEEKLY_PILLAR_ORDER[index]}`}
-                  key={`weekly-radar-label-path-${WEEKLY_PILLAR_ORDER[index]}`}
-                />
-              );
-            })}
+            {ranges.map((range, index) => (
+              <path
+                d={weeklyArcPath(center, center, ringRadius + 17, range.start, range.end)}
+                fill="none"
+                id={`${uniqueId}-weekly-radar-label-path-${WEEKLY_PILLAR_ORDER[index]}`}
+                key={`weekly-radar-label-path-${WEEKLY_PILLAR_ORDER[index]}`}
+              />
+            ))}
           </defs>
           <circle className="mp-weekly-radar-glow" cx={center} cy={center} fill="url(#weekly-radar-dominant)" r="150" />
           {[0.25, 0.5, 0.75, 1].map((level) => (
@@ -3098,8 +3175,8 @@ function WeeklyRadarAnalysisChart({
               letterSpacing="0.18em"
               textAnchor="middle"
             >
-              <textPath href={`#weekly-radar-label-path-${pillar}`} startOffset="50%" textAnchor="middle">
-                {resolveRewardsPillarLabel(pillar)}
+              <textPath href={`#${uniqueId}-weekly-radar-label-path-${pillar}`} startOffset="50%" textAnchor="middle">
+                {resolveRewardsPillarLabel(pillar).toUpperCase()} {pillarPercentages[pillar]}%
               </textPath>
             </text>
           ))}
@@ -4175,7 +4252,7 @@ function clampMonthlyScore(value: number) {
 
 function getMonthlyScoreTone(percent: number) {
   if (percent >= 80) return { color: '#5BE282', label: 'OK' };
-  if (percent >= 60) return { color: '#F7C86A', label: 'En progreso' };
+  if (percent >= 50) return { color: '#F7C86A', label: 'En progreso' };
   return { color: '#FF6B6B', label: 'Frágil' };
 }
 

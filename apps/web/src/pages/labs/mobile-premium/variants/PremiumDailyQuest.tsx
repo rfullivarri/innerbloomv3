@@ -67,7 +67,6 @@ const FALLBACK_DQUEST_COMPLETED_TASKS = new Set(['dq-premium-sleep', 'dq-premium
 export function PremiumDailyQuest({
   extraTasks = [],
   hasSession,
-  onAlreadyCompleted,
   onConfirmFeedback,
   onModerationOpen,
   onModerationDetail,
@@ -80,7 +79,6 @@ export function PremiumDailyQuest({
 }: {
   extraTasks?: DQuestExtraTask[];
   hasSession: boolean;
-  onAlreadyCompleted?: () => void;
   onConfirmFeedback?: (summary: {
     emotionColor: string;
     emotionName: string;
@@ -103,7 +101,6 @@ export function PremiumDailyQuest({
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [snoozed, setSnoozed] = useState(false);
   const [submitState, setSubmitState] = useState<'idle' | 'submitting' | 'submitted' | 'error'>('idle');
-  const [completedNoticeShown, setCompletedNoticeShown] = useState(false);
 
   const statusRequest = useRequest(() => getDailyQuestStatus(), [hasSession], { enabled: hasSession });
   const definitionRequest = useRequest(
@@ -139,16 +136,6 @@ export function PremiumDailyQuest({
     setSnoozed(false);
     setSubmitState('idle');
   }, [definition.date, definition.emotionOptions, isFallback, onboardingPreview]);
-
-  useEffect(() => {
-    if (alreadyCompleted && !completedNoticeShown) {
-      setCompletedNoticeShown(true);
-      onAlreadyCompleted?.();
-    }
-    if (!alreadyCompleted && completedNoticeShown) {
-      setCompletedNoticeShown(false);
-    }
-  }, [alreadyCompleted, completedNoticeShown, onAlreadyCompleted]);
 
   const toggleTask = (taskId: string) => {
     setSelectedTasks((current) =>

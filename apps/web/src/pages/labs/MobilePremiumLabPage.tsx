@@ -926,7 +926,6 @@ function MobilePremiumLabPageInner() {
               onboardingPreview
               && localOnboardingSnapshot?.dquestHistory.some((record) => record.date === new Date().toISOString().slice(0, 10)),
             )}
-            onAlreadyCompleted={() => setActiveOverlay('dquest-completed')}
             moderationPendingType={moderationPendingType}
             moderationTrackers={premiumModerationState.trackers}
             onConfirmFeedback={(summary) => {
@@ -1024,7 +1023,7 @@ function MobilePremiumLabPageInner() {
         onReviewProgress={() => {
           const firstEvent = dailyCompleteSummary?.response.feedback_events?.[0] ?? null;
           setActiveFeedbackEvent(firstEvent);
-          setActiveOverlay(firstEvent?.type === 'level_up' ? 'level-feedback' : firstEvent?.type === 'streak_milestone' ? 'streak-feedback' : null);
+          setActiveOverlay(firstEvent?.type === 'level_up' ? 'level-feedback' : firstEvent?.type === 'streak_milestone' ? 'streak-feedback' : 'dquest-completed');
         }}
         onShowFeedbackEvent={(event) => {
           setActiveFeedbackEvent(event);
