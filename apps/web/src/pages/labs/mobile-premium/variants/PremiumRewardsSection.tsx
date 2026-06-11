@@ -651,48 +651,62 @@ function AchievementCarouselCard({
 
 function AchievementFrontFace({ habit }: { habit: HabitAchievementShelfItem; isActive: boolean }) {
   const achieved = isHabitAchieved(habit);
+
   return (
-    <div className="relative flex h-full flex-col items-center">
+    <div className="relative flex h-full flex-col items-center text-center">
       <HabitAchievementSeal
         alt={`${habit.taskName} seal`}
         disabled={!achieved}
-        fallback={<TraitIcon size={120} trait={habit.trait?.name} />}
+        fallback={<TraitIcon size={140} trait={habit.trait?.name} />}
         imgClassName="h-full w-full object-contain"
-        className={`mx-auto grid h-32 w-32 shrink-0 place-items-center ${achieved ? '' : 'opacity-55 grayscale'}`}
+        className={`mx-auto grid h-40 w-40 shrink-0 place-items-center ${
+          achieved ? '' : 'opacity-50 grayscale'
+        }`}
         pillar={habit.pillar}
         traitCode={habit.trait?.code}
         traitName={habit.trait?.name}
       />
-      <h3 className="mt-3 line-clamp-3 text-[1.25rem] font-semibold leading-[1.1] text-[color:var(--mp-text)]">
+
+      <h3 className="mt-3 line-clamp-3 text-[1.08rem] font-semibold leading-[1.12] text-[color:var(--mp-text)]">
         {habit.taskName}
       </h3>
-      <p className="mt-1.5 text-base text-[color:var(--mp-text-secondary)]">{habit.trait?.name ?? 'Rasgo'}</p>
-      <p className={`mt-3 text-xs font-semibold uppercase tracking-[0.12em] ${achieved ? 'text-[color:var(--mp-violet)]' : 'text-[color:var(--mp-amber)]'}`}>
-        {achieved ? 'Hábito logrado' : 'Bloqueado'}
+
+      <p className="mt-2 flex max-w-full items-center justify-center gap-2 overflow-hidden text-sm leading-none">
+        <span className="min-w-0 truncate text-[color:var(--mp-text-secondary)]">
+          {habit.trait?.name ?? 'Rasgo'}
+        </span>
+        <span className="shrink-0 text-[color:var(--mp-text-muted)]">·</span>
+        <span
+          className={`shrink-0 font-semibold ${
+            achieved
+              ? 'text-[color:var(--mp-violet-strong)]'
+              : 'text-[color:var(--mp-text-muted)]'
+          }`}
+        >
+          {achieved ? 'Logrado' : 'Bloqueado'}
+        </span>
       </p>
-      <span
-        aria-hidden="true"
-        className={`absolute right-3.5 top-3.5 grid h-7 w-7 place-items-center rounded-full border text-sm transition ${
-          achieved
-            ? 'border-violet-300/15 text-[color:var(--mp-violet)] opacity-55'
-            : 'border-[color:var(--mp-border)] text-[color:var(--mp-text-muted)] opacity-45'
-        }`}
-        title={achieved ? 'Ver desarrollo' : 'Ver desarrollo bloqueado'}
-      >
-        ↻
-      </span>
+
       {achieved ? (
         <button
-          className="mt-3 rounded-full border border-[color:var(--mp-border)] px-4 py-1.5 text-xs font-semibold text-[color:var(--mp-text)]"
+          className="mt-auto inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-[color:var(--mp-violet-strong)]"
           onClick={(event) => {
             event.stopPropagation();
             shareAchievement(habit);
           }}
           type="button"
         >
+          <span aria-hidden="true" className="text-sm leading-none">⇧</span>
           Compartir
         </button>
       ) : null}
+
+      <span
+        aria-hidden="true"
+        className="absolute bottom-4 right-4 text-base leading-none text-[color:var(--mp-text-muted)] opacity-55"
+      >
+        ↘
+      </span>
     </div>
   );
 }
