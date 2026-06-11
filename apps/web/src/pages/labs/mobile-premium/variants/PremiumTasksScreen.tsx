@@ -393,34 +393,33 @@ function PremiumTaskProgressRow({ onboardingCue = false, task }: { onboardingCue
     <Link
       className={`grid w-full items-center gap-3 rounded-[1rem] border-b border-[color:var(--mp-border)] py-5 text-left last:border-b-0 ${
         onboardingCue ? 'mp-onboarding-task-cue bg-violet-400/8 px-2' : ''
-      } ${
-        hasStreak ? 'grid-cols-[44px_minmax(0,1fr)_154px]' : 'grid-cols-[44px_minmax(0,1fr)_112px]'
-      }`}
+      } grid-cols-[44px_minmax(0,1fr)_118px]`}
       to={`${labBase}/task-detail?taskId=${encodeURIComponent(task.id)}`}
     >
-      <div className="grid h-11 w-11 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface-strong)] text-[color:var(--mp-violet)]">
-        <TraitIcon size={22} trait={task.stat} />
-      </div>
-      <div className="min-w-0">
-        <p className="truncate text-[1.2rem] leading-7 text-[color:var(--mp-text)]">{task.name}</p>
-        <div className="mt-1 flex min-w-0 items-center gap-2 text-sm text-[color:var(--mp-text-secondary)]">
-          <span className="truncate">{task.stat}</span>
-          <span className="text-[color:var(--mp-text-muted)]">·</span>
+      <TaskLeadingBadge hasStreak={hasStreak} stat={task.stat} streakDays={task.streakDays} />
+      <div className="min-w-0 overflow-hidden pr-1">
+        <p className="truncate text-[1.1rem] leading-7 text-[color:var(--mp-text)]">{task.name}</p>
+        <div className="mt-1 flex min-w-0 max-w-full items-center gap-1.5 overflow-hidden text-xs text-[color:var(--mp-text-secondary)]">
+          <span className="min-w-0 max-w-[7rem] truncate">{task.stat}</span>
+          <span className="shrink-0 text-[color:var(--mp-text-muted)]">·</span>
           {task.difficultyLabel ? (
-            <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${difficultyTone}`}>
+            <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${difficultyTone}`}>
               {task.difficultyLabel}
             </span>
           ) : null}
-          {task.achievementSealVisible ? <span className="text-violet-200">✦</span> : null}
+          {task.achievementSealVisible ? (
+            <span aria-label="Hábito logrado" className="ml-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border border-violet-300/20 bg-violet-400/10 text-[0.65rem] text-violet-200">
+              ✦
+            </span>
+          ) : null}
         </div>
         {shouldShowHabitLanguage ? (
           <p className="mt-1 text-xs font-medium text-[color:var(--mp-text-muted)]">hábito</p>
         ) : null}
       </div>
-      <div className={`grid items-center gap-2 justify-self-end ${hasStreak ? 'grid-cols-[60px_42px_34px_10px]' : 'grid-cols-[60px_42px_10px]'}`}>
+      <div className="grid grid-cols-[58px_42px_10px] items-center gap-2 justify-self-end">
         <CompactMonthWeeks weeks={task.monthWeeks} weeklyGoal={task.weeklyGoal} />
         <TinyProgressRing label={progress} value={progressValue} />
-        {hasStreak ? <StreakLabel streakDays={task.streakDays} /> : null}
         <span className="text-2xl font-light text-[color:var(--mp-text-secondary)]">›</span>
       </div>
     </Link>
@@ -618,7 +617,7 @@ function CompactMonthWeeks({ weeks, weeklyGoal }: { weeks: number[]; weeklyGoal:
   const normalized = Array.from({ length: 5 }, (_, index) => Number(weeks[index] ?? 0));
   const currentWeekIndex = normalized.reduce((latest, value, index) => (value > 0 ? index : latest), -1);
   return (
-    <div className="grid w-[60px] grid-cols-5 gap-1">
+    <div className="grid w-[58px] grid-cols-5 gap-1">
       {normalized.map((value, index) => {
         const reached = weeklyGoal > 0 && value >= weeklyGoal;
         const inProgress = !reached && value > 0 && index === currentWeekIndex;
@@ -635,6 +634,29 @@ function CompactMonthWeeks({ weeks, weeklyGoal }: { weeks: number[]; weeklyGoal:
           </span>
         );
       })}
+    </div>
+  );
+}
+
+function TaskLeadingBadge({ hasStreak, stat, streakDays }: { hasStreak: boolean; stat: string; streakDays: number }) {
+  if (hasStreak) {
+    return (
+      <div
+        aria-label={`Racha de ${streakDays} días`}
+        className="grid h-11 w-11 place-items-center rounded-full border border-orange-300/30 bg-[radial-gradient(circle_at_35%_25%,rgba(251,146,60,0.24),rgba(17,17,19,0.94)_62%)] text-[color:var(--mp-amber)] shadow-[0_0_24px_rgba(251,146,60,0.12)]"
+        title={`${streakDays} días de racha`}
+      >
+        <span className="flex flex-col items-center justify-center leading-none">
+          <span className="text-[1rem]" aria-hidden="true">🔥</span>
+          <span className="mt-0.5 text-[0.62rem] font-semibold tracking-[-0.02em]">{streakDays}d</span>
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid h-11 w-11 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface-strong)] text-[color:var(--mp-violet)]">
+      <TraitIcon size={22} trait={stat} />
     </div>
   );
 }
@@ -669,14 +691,6 @@ function TinyProgressRing({ value, label }: { value: number; label: string }) {
         {label}
       </div>
     </div>
-  );
-}
-
-function StreakLabel({ streakDays }: { streakDays: number }) {
-  return (
-    <span className="whitespace-nowrap text-right text-[0.72rem] font-semibold text-[color:var(--mp-text)]">
-      {streakDays >= 2 ? `🔥${streakDays}d` : '–'}
-    </span>
   );
 }
 
