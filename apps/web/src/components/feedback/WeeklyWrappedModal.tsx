@@ -127,6 +127,32 @@ export function WeeklyWrappedModal({ payload, onDismiss, onComplete, onViewRewar
   }, []);
 
   useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlOverflow = html.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyPosition = body.style.position;
+    const previousBodyWidth = body.style.width;
+    const previousBodyTop = body.style.top;
+    const scrollY = window.scrollY;
+
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.width = '100%';
+    body.style.top = `-${scrollY}px`;
+
+    return () => {
+      html.style.overflow = previousHtmlOverflow;
+      body.style.overflow = previousBodyOverflow;
+      body.style.position = previousBodyPosition;
+      body.style.width = previousBodyWidth;
+      body.style.top = previousBodyTop;
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!containerRef.current) return;
 
     const observer = new IntersectionObserver(
@@ -264,7 +290,7 @@ export function WeeklyWrappedModal({ payload, onDismiss, onComplete, onViewRewar
   // Fondo animado global aplicado al wrapper fijo que envuelve todas las slides del Weekly Wrapped (desktop y mobile usan este contenedor).
   return (
     <div
-      className="ib-weekly-wrapped-modal fixed inset-0 z-[260] flex overflow-hidden bg-slate-950 weekly-wrapped-animated-bg"
+      className="ib-weekly-wrapped-modal fixed inset-0 isolate z-[9999] flex h-[100dvh] w-screen overflow-hidden bg-slate-950 weekly-wrapped-animated-bg"
       role="dialog"
       aria-modal
     >

@@ -637,7 +637,7 @@ function DailyCompleteSheet({
         onClick={onReviewProgress ?? onClose}
         type="button"
       >
-        {feedbackEvents.length ? 'Ver feedback' : 'Ver mi progreso'}
+        {feedbackEvents.length ? 'Ver feedback' : 'Continuar'}
       </button>
       <PremiumFeedbackMotionStyles />
     </PremiumSheet>
