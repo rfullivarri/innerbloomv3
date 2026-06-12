@@ -1188,47 +1188,50 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
 
   return (
     <div
-      className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.25rem] border p-5 shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
+      className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.25rem] border px-[1.05rem] pb-[6.4rem] pt-[1.05rem] shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
       data-achievement-share-preview="true"
       ref={ref}
       style={{ background: bg, borderColor: line, color: text }}
     >
-      <svg aria-hidden="true" className="absolute -right-16 -top-14 h-64 w-48 opacity-60" fill="none" viewBox="0 0 120 180">
+      <svg aria-hidden="true" className="absolute -right-16 -top-16 h-60 w-44 opacity-50" fill="none" viewBox="0 0 120 180">
         <path d="M96 -8C54 52 72 93 122 132" stroke={isLight ? 'rgba(139,92,246,.2)' : 'rgba(167,139,250,.6)'} strokeWidth="1.2" />
       </svg>
       <div className="relative flex items-center justify-between gap-3">
         <InnerbloomBrand
-          markClassName="h-6 w-6"
-          textClassName="text-[10px] font-semibold uppercase tracking-[0.28em]"
+          markClassName="h-4 w-4"
+          textClassName="text-[8px] font-semibold uppercase tracking-[0.24em]"
           style={{ color: isLight ? '#6D4FC2' : '#C4B5FD' }}
         />
       </div>
 
-      <div className="relative mt-4 text-center">
-        <p className="text-[0.88rem] font-semibold uppercase tracking-[0.22em]" style={{ color: accent }}>Hábito logrado</p>
-        <p className="mt-1.5 text-[0.86rem] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
+      <div className="relative mt-2 text-center">
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em]" style={{ color: accent }}>Hábito logrado</p>
+        <p className="mt-0.5 text-[0.64rem] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
       </div>
 
-      <div className="relative mx-auto mt-3 grid h-[8.6rem] shrink-0 place-items-center">
+      <div className="relative mx-auto mt-2 grid h-[8.45rem] shrink-0 place-items-center">
         <AchievementShareSeal habit={habit} sealDataUrl={sealDataUrl} sealFailed={sealFailed} />
       </div>
 
-      <div className="relative mt-3 text-center">
-        <h4 className="mx-auto line-clamp-2 max-w-[15rem] text-[clamp(1.35rem,5.4vw,1.85rem)] font-semibold leading-[1.04]">{habit.taskName}</h4>
-        {traitLabel ? <p className="mt-1.5 text-sm font-medium" style={{ color: muted }}>{traitLabel}</p> : null}
-        {achievedLabel ? <p className="mt-2 text-[0.72rem] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
+      <div className="relative mt-2 text-center">
+        <h4 className="mx-auto line-clamp-2 max-w-[14rem] text-[clamp(0.92rem,4.1vw,1.18rem)] font-semibold leading-[1.02]">{habit.taskName}</h4>
+        {traitLabel ? <p className="mt-0.5 text-[0.66rem] font-medium" style={{ color: muted }}>{traitLabel}</p> : null}
+        {achievedLabel ? <p className="mt-1 text-[0.56rem] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
       </div>
 
-      <div className="relative mt-3 border-t pt-3" style={{ borderColor: line }}>
+      <div className="absolute bottom-[2rem] left-[1.05rem] right-[1.05rem] border-t pt-2.5" style={{ borderColor: line }}>
         {visibleMonths.length ? (
           <>
-            <p className="text-[9px] font-semibold uppercase tracking-[0.22em]" style={{ color: muted }}>Progreso mensual</p>
-            <div className="mt-2 grid gap-2.5" style={{ gridTemplateColumns: `repeat(${visibleMonths.length}, minmax(0, 1fr))` }}>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[8px] font-semibold uppercase tracking-[0.2em]" style={{ color: muted }}>Progreso mensual</p>
+              <p className="text-[0.54rem] font-medium" style={{ color: softMuted }}>últimos 3 meses</p>
+            </div>
+            <div className="mt-2 grid gap-2" style={{ gridTemplateColumns: `repeat(${visibleMonths.length}, minmax(0, 1fr))` }}>
               {visibleMonths.map((month) => (
                 <div className="min-w-0" key={`${month.periodKey ?? month.month}-${month.percent}`}>
-                  <div className="flex items-baseline justify-between gap-1">
-                    <span className="truncate text-[0.62rem] font-medium" style={{ color: muted }}>{month.month}</span>
-                    <span className="text-[0.72rem] font-semibold">{month.percent}%</span>
+                  <div className="text-center">
+                    <p className="truncate text-[0.58rem] font-medium" style={{ color: muted }}>{month.month}</p>
+                    <p className="mt-0.5 text-[0.78rem] font-semibold leading-none">{month.percent}%</p>
                   </div>
                   <div className="mt-1.5 h-1 overflow-hidden rounded-full" style={{ backgroundColor: isLight ? 'rgba(21,18,36,.1)' : 'rgba(255,255,255,.12)' }}>
                     <span
@@ -1239,17 +1242,17 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
                       }}
                     />
                   </div>
-                  {month.projected ? <p className="mt-1 text-[0.5rem] font-medium" style={{ color: softMuted }}>proy.</p> : null}
+                  {month.projected ? <p className="mt-0.5 text-center text-[0.48rem] font-medium" style={{ color: softMuted }}>proy.</p> : null}
                 </div>
               ))}
             </div>
           </>
         ) : (
-          <p className="text-center text-[0.68rem] font-medium" style={{ color: softMuted }}>Ventana activa completada</p>
+          <p className="text-center text-[0.62rem] font-medium" style={{ color: softMuted }}>Ventana activa completada</p>
         )}
       </div>
 
-      <p className="relative mt-auto shrink-0 pt-3 text-center text-[10px] font-semibold tracking-[0.18em]" style={{ color: softMuted }}>
+      <p className="absolute bottom-[0.8rem] left-[1.05rem] right-[1.05rem] text-center text-[9px] font-semibold tracking-[0.16em]" style={{ color: softMuted }}>
         innerbloomjourney.org
       </p>
     </div>
