@@ -21,7 +21,8 @@ const MODE_TIERS: Record<GameMode, number> = {
   Evolve: 4,
 };
 
-type TaskFilter = 'all' | StreakPanelPillar;
+type TaskListFilter = 'all' | 'streak' | 'hide-achieved';
+type PillarFilter = StreakPanelPillar | null;
 
 export type PremiumTaskRow = {
   id: string;
@@ -183,7 +184,9 @@ export function PremiumTasksScreen({
   onboardingEditCue?: boolean;
   onboardingPreview?: boolean;
 }) {
-  const [filter, setFilter] = useState<TaskFilter>('all');
+  const [listFilter, setListFilter] = useState<TaskListFilter>('all');
+  const [pillarFilter, setPillarFilter] = useState<PillarFilter>(null);
+  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const [internalAddedTasks, setInternalAddedTasks] = useState<PremiumTaskRow[]>([]);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [suggestionsError, setSuggestionsError] = useState<string | null>(null);
@@ -219,8 +222,13 @@ export function PremiumTasksScreen({
       seen.add(key);
       return true;
     });
-    return filter === 'all' ? uniqueRows : uniqueRows.filter((row) => row.pillar === filter);
-  }, [backendUserId, data, filter, localTasks, onboardingPreview, weeklyGoal]);
+    return uniqueRows.filter((row) => {
+      if (pillarFilter && row.pillar !== pillarFilter) return false;
+      if (listFilter === 'streak' && !hasActiveStreak(row)) return false;
+      if (listFilter === 'hide-achieved' && isAchievedHabit(row)) return false;
+      return true;
+    });
+  }, [backendUserId, data, listFilter, localTasks, onboardingPreview, pillarFilter, weeklyGoal]);
 
   const handleApplySuggestions = async (suggestions: SuggestedTask[]) => {
     setSuggestionsError(null);
@@ -304,26 +312,51 @@ export function PremiumTasksScreen({
         </button>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none]">
-        {[
-          ['all', 'Todas'],
-          ['Body', 'Cuerpo'],
-          ['Mind', 'Mente'],
-          ['Soul', 'Alma'],
-        ].map(([value, label]) => (
+      <div className="flex items-center gap-3 pb-1">
+        <div className="relative shrink-0">
           <button
-            className={`min-h-11 rounded-full border px-6 text-sm font-semibold transition ${
-              filter === value
+            aria-expanded={filterMenuOpen}
+            aria-label="Filtrar tareas"
+            className={`grid min-h-11 w-11 place-items-center rounded-full border transition ${
+              listFilter !== 'all' || filterMenuOpen
                 ? 'border-[color:var(--mp-violet-strong)] bg-[color:var(--mp-toggle-active-bg)] text-[color:var(--mp-violet-strong)] shadow-[inset_0_0_0_1px_var(--mp-violet-strong)]'
                 : 'border-[color:var(--mp-border)] text-[color:var(--mp-text-secondary)]'
             }`}
-            key={value}
-            onClick={() => setFilter(value as TaskFilter)}
+            onClick={() => setFilterMenuOpen((open) => !open)}
             type="button"
           >
-            {label}
+            <FilterGlyph />
           </button>
-        ))}
+          {filterMenuOpen ? (
+            <TaskListFilterMenu
+              activeFilter={listFilter}
+              onSelect={(nextFilter) => {
+                setListFilter(nextFilter);
+                setFilterMenuOpen(false);
+              }}
+            />
+          ) : null}
+        </div>
+        <div className="flex min-w-0 flex-1 gap-3 overflow-x-auto [scrollbar-width:none]">
+          {[
+            ['Body', 'Cuerpo'],
+            ['Mind', 'Mente'],
+            ['Soul', 'Alma'],
+          ].map(([value, label]) => (
+            <button
+              className={`min-h-11 shrink-0 rounded-full border px-6 text-sm font-semibold transition ${
+                pillarFilter === value
+                  ? 'border-[color:var(--mp-violet-strong)] bg-[color:var(--mp-toggle-active-bg)] text-[color:var(--mp-violet-strong)] shadow-[inset_0_0_0_1px_var(--mp-violet-strong)]'
+                  : 'border-[color:var(--mp-border)] text-[color:var(--mp-text-secondary)]'
+              }`}
+              key={value}
+              onClick={() => setPillarFilter((current) => current === value ? null : value as StreakPanelPillar)}
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-[minmax(0,1fr)_64px_92px] gap-3 border-b border-[color:var(--mp-border)] pb-2 text-xs text-[color:var(--mp-text-muted)]">
@@ -350,6 +383,53 @@ export function PremiumTasksScreen({
         />
       ) : null}
     </section>
+  );
+}
+
+function FilterGlyph() {
+  return (
+    <span aria-hidden="true" className="flex h-5 w-5 flex-col items-center justify-center gap-[4px]">
+      <span className="h-[2px] w-5 rounded-full bg-current" />
+      <span className="h-[2px] w-3.5 rounded-full bg-current" />
+      <span className="h-[2px] w-2 rounded-full bg-current" />
+    </span>
+  );
+}
+
+function TaskListFilterMenu({
+  activeFilter,
+  onSelect,
+}: {
+  activeFilter: TaskListFilter;
+  onSelect: (filter: TaskListFilter) => void;
+}) {
+  const options: Array<{ label: string; value: TaskListFilter }> = [
+    { label: 'Todo', value: 'all' },
+    { label: 'Solo tareas en racha', value: 'streak' },
+    { label: 'Ocultar hábitos logrados', value: 'hide-achieved' },
+  ];
+
+  return (
+    <div className="absolute left-0 top-[calc(100%+0.6rem)] z-20 w-[14.5rem] overflow-hidden rounded-[1rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-bg-elevated)] p-1.5 shadow-[0_18px_46px_rgba(0,0,0,0.45)]">
+      {options.map((option) => {
+        const active = activeFilter === option.value;
+        return (
+          <button
+            className={`flex min-h-10 w-full items-center justify-between gap-3 rounded-[0.8rem] px-3 text-left text-sm font-semibold transition ${
+              active
+                ? 'bg-violet-400/12 text-[color:var(--mp-violet)]'
+                : 'text-[color:var(--mp-text-secondary)] hover:bg-white/5 hover:text-[color:var(--mp-text)]'
+            }`}
+            key={option.value}
+            onClick={() => onSelect(option.value)}
+            type="button"
+          >
+            <span className="min-w-0 truncate">{option.label}</span>
+            {active ? <span className="shrink-0 text-xs text-[color:var(--mp-violet)]">✓</span> : null}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -381,13 +461,21 @@ function normalizePremiumTaskRows(
   return Array.from(byId.values());
 }
 
+function hasActiveStreak(task: PremiumTaskRow) {
+  return task.streakDays >= 2;
+}
+
+function isAchievedHabit(task: PremiumTaskRow) {
+  return Boolean(task.achievementSealVisible || task.lifecycleStatus === 'achieved' || task.lifecycleStatus === 'maintained');
+}
+
 function PremiumTaskProgressRow({ onboardingCue = false, task }: { onboardingCue?: boolean; task: PremiumTaskRow }) {
   const labBase = useMobilePremiumBasePath();
   const difficultyTone = resolveDifficultyTone(task.difficultyLabel);
   const progress = `${task.weeklyDone}/${task.weeklyGoal}`;
   const progressValue = computeProgressPercent(task.weeklyDone, task.weeklyGoal);
-  const shouldShowHabitLanguage = task.lifecycleStatus === 'achieved' || task.lifecycleStatus === 'maintained';
-  const hasStreak = task.streakDays >= 2;
+  const shouldShowHabitLanguage = isAchievedHabit(task);
+  const hasStreak = hasActiveStreak(task);
 
   return (
     <Link
