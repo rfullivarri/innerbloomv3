@@ -584,18 +584,55 @@ function DashboardMotionStyles() {
 function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergySummary> }) {
   const chartRef = useRef<HTMLElement | null>(null);
   const chartVisible = useInViewOnce(chartRef);
+  const [activeMetricLabel, setActiveMetricLabel] = useState<string | null>(null);
+  const [infoOpen, setInfoOpen] = useState(false);
   const lowest = energy.metrics.reduce((current, metric) => metric.percent < current.percent ? metric : current);
   const chart = buildEnergyChart(energy.metrics);
+  const activeMetric = activeMetricLabel
+    ? energy.metrics.find((metric) => metric.label === activeMetricLabel) ?? null
+    : null;
 
   return (
     <section ref={chartRef} className="pb-3 pt-2">
       <div className="flex items-baseline justify-between gap-4">
-        <h2 className="text-lg font-medium text-[color:var(--mp-text)]">Energía diaria</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-medium text-[color:var(--mp-text)]">Energía diaria</h2>
+          <button
+            aria-expanded={infoOpen}
+            aria-label="Ver explicación de Daily Energy"
+            className="grid h-6 w-6 place-items-center rounded-full border border-[color:var(--mp-border)] text-xs font-semibold text-[color:var(--mp-text-secondary)] transition hover:text-[color:var(--mp-text)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--mp-violet)]/70"
+            onClick={() => {
+              setInfoOpen((open) => !open);
+              setActiveMetricLabel(null);
+            }}
+            type="button"
+          >
+            i
+          </button>
+        </div>
         <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--mp-text-muted)]">7 días</p>
       </div>
 
+      {infoOpen ? (
+        <div className="mt-3 rounded-[0.9rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] px-4 py-3 text-xs leading-5 text-[color:var(--mp-text-secondary)]">
+          <p className="font-semibold text-[color:var(--mp-text)]">Daily Energy mide tres señales diarias:</p>
+          <p className="mt-2"><span className="font-semibold text-[color:var(--mp-body)]">HP · Cuerpo</span> mide tu energía física.</p>
+          <p><span className="font-semibold text-[#f5c56b]">Mood · Alma</span> mide tu estado emocional.</p>
+          <p><span className="font-semibold text-[#a78bfa]">Focus · Mente</span> mide tu claridad mental.</p>
+        </div>
+      ) : null}
+
+      {activeMetric && !infoOpen ? (
+        <div
+          className="mt-3 inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold"
+          style={{ borderColor: activeMetric.color, color: activeMetric.color }}
+        >
+          {activeMetric.label} · {activeMetric.pillar}
+        </div>
+      ) : null}
+
       <svg
-        aria-label={`Evolución de energía: ${energy.metrics.map((metric) => `${metric.pillar} ${metric.percent}%`).join(', ')}`}
+        aria-label={`Evolución de energía: ${energy.metrics.map((metric) => `${metric.label} ${metric.percent}%, ${metric.pillar}`).join(', ')}`}
         className="mt-5 block w-full overflow-visible"
         role="img"
         viewBox="0 0 390 190"
@@ -621,7 +658,24 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
         <text fill="var(--mp-text-muted)" fontSize="10" letterSpacing="1.2" textAnchor="end" x="282" y="184">HOY</text>
         <path d={chart.riskArea} fill="url(#energy-risk-fade)" />
         {chart.lines.map((line, index) => (
-          <g key={line.metric.label}>
+          <g
+            aria-label={`${line.metric.label} · ${line.metric.pillar}`}
+            className="cursor-pointer"
+            key={line.metric.label}
+            onClick={() => {
+              setActiveMetricLabel((label) => label === line.metric.label ? null : line.metric.label);
+              setInfoOpen(false);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                setActiveMetricLabel((label) => label === line.metric.label ? null : line.metric.label);
+                setInfoOpen(false);
+              }
+            }}
+            role="button"
+            tabIndex={0}
+          >
             <path
               className={`mp-energy-line ${chartVisible ? 'mp-energy-line-reveal' : ''}`}
               d={line.path}
@@ -650,7 +704,7 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
               r={line.metric === lowest ? 4.5 : 3.5}
             />
             <text fill={line.metric.color} fontSize="12" fontWeight={line.metric === lowest ? 600 : 400} x="300" y={line.labelY + 4}>
-              {line.metric.pillar}
+              {line.metric.label}
               <tspan dx="5" fill="var(--mp-data-value)" fontWeight="600">{line.metric.percent}%</tspan>
             </text>
           </g>

@@ -1154,6 +1154,10 @@ function GrowthCalibrationDetailView({
   const visibleResults = activeFilter ? results.filter((row) => row.finalAction === activeFilter) : results;
   const activeFilterEmptyLabel = activeFilter === 'up' ? 'subido dificultad' : activeFilter === 'down' ? 'bajado dificultad' : 'se hayan mantenido';
 
+  useEffect(() => {
+    window.scrollTo({ left: 0, top: 0, behavior: 'auto' });
+  }, []);
+
   return (
     <section className="space-y-6" onClick={() => setActiveFilter(null)}>
       <style>{`
@@ -1204,9 +1208,9 @@ function GrowthCalibrationDetailView({
       </header>
 
       <div className="grid grid-cols-3 border-y border-[color:var(--mp-border)] py-4" onClick={(event) => event.stopPropagation()}>
-        <CalibrationStat active={activeFilter === 'up'} icon="↑" label="Subió dificultad" onSelect={() => setActiveFilter('up')} tone="red" value={growth.summary.up} />
-        <CalibrationStat active={activeFilter === 'keep'} icon="•" label="Se mantuvo" onSelect={() => setActiveFilter('keep')} tone="amber" value={growth.summary.keep} />
-        <CalibrationStat active={activeFilter === 'down'} icon="↓" label="Bajó dificultad" onSelect={() => setActiveFilter('down')} tone="green" value={growth.summary.down} />
+        <CalibrationStat active={activeFilter === 'up'} icon="↑" label="Subió dificultad" onSelect={() => setActiveFilter((filter) => filter === 'up' ? null : 'up')} tone="red" value={growth.summary.up} />
+        <CalibrationStat active={activeFilter === 'keep'} icon="•" label="Se mantuvo" onSelect={() => setActiveFilter((filter) => filter === 'keep' ? null : 'keep')} tone="amber" value={growth.summary.keep} />
+        <CalibrationStat active={activeFilter === 'down'} icon="↓" label="Bajó dificultad" onSelect={() => setActiveFilter((filter) => filter === 'down' ? null : 'down')} tone="green" value={growth.summary.down} />
       </div>
 
       {results.length ? (
@@ -1312,8 +1316,11 @@ function CalibrationStat({
   if (onSelect) {
     return (
       <button
-        className={`flex items-center gap-3 border-r border-[color:var(--mp-border)] px-3 text-left transition last:border-r-0 ${active ? 'bg-white/[0.045]' : 'hover:bg-white/[0.025]'}`}
-        onClick={onSelect}
+        className={`flex items-center gap-3 border-r border-[color:var(--mp-border)] px-3 text-left transition last:border-r-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--mp-violet)]/60 ${active ? 'bg-white/[0.045]' : 'hover:bg-white/[0.025]'}`}
+        onClick={(event) => {
+          event.currentTarget.blur();
+          onSelect();
+        }}
         type="button"
       >
         {content}

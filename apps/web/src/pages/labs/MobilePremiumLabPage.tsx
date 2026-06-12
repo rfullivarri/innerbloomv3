@@ -1,4 +1,4 @@
-import { Children, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { Children, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useBackendUser } from '../../hooks/useBackendUser';
 import { useOnboardingProgress } from '../../hooks/useOnboardingProgress';
@@ -2197,6 +2197,7 @@ function EmotionChartPanel({
   localSnapshot?: LocalOnboardingSnapshot | null;
 }) {
   const [activeEmotionCell, setActiveEmotionCell] = useState<{ date: string; label: string; color?: string } | null>(null);
+  const heatmapScrollRef = useRef<HTMLDivElement | null>(null);
   const { data } = useRequest(
     async () => {
       if (!backendUserId) return [];
@@ -2228,6 +2229,41 @@ function EmotionChartPanel({
     return null;
   }, [snapshots]);
 
+  useEffect(() => {
+    const node = heatmapScrollRef.current;
+    if (!node || heatmap.columns.length <= 0) return undefined;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const maxScroll = Math.max(0, node.scrollWidth - node.clientWidth);
+    if (maxScroll <= 0) return undefined;
+
+    node.scrollLeft = 0;
+    if (reduceMotion) {
+      node.scrollLeft = maxScroll;
+      return undefined;
+    }
+
+    let frame = 0;
+    let start: number | null = null;
+    const timeout = window.setTimeout(() => {
+      const duration = 1700;
+      const tick = (timestamp: number) => {
+        start ??= timestamp;
+        const progress = Math.min(1, (timestamp - start) / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        node.scrollLeft = maxScroll * eased;
+        if (progress < 1) {
+          frame = window.requestAnimationFrame(tick);
+        }
+      };
+      frame = window.requestAnimationFrame(tick);
+    }, 260);
+
+    return () => {
+      window.clearTimeout(timeout);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [heatmap.columns.length]);
+
   return (
     <section className="space-y-5">
       <style>{`
@@ -2236,9 +2272,9 @@ function EmotionChartPanel({
           to { opacity: 1; transform: translateX(0); }
         }
         @keyframes mpEmotionChartDotIn {
-          0% { opacity: 0; transform: scale(.45); filter: saturate(.65); }
-          62% { opacity: 1; transform: scale(1.16); filter: saturate(1.25); }
-          100% { opacity: 1; transform: scale(1); filter: saturate(1); }
+          0% { background-color: transparent; opacity: 0; transform: scale(.45); filter: saturate(.65); }
+          62% { background-color: var(--mp-emotion-dot-color); opacity: 1; transform: scale(1.16); filter: saturate(1.25); }
+          100% { background-color: var(--mp-emotion-dot-color); opacity: 1; transform: scale(1); filter: saturate(1); }
         }
         @keyframes mpEmotionChartLatestPulse {
           0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); transform: scale(1); }
@@ -2248,6 +2284,7 @@ function EmotionChartPanel({
           animation: mpEmotionChartGridSweep 680ms cubic-bezier(.2,.85,.25,1) both;
         }
         .mp-emotion-chart-dot-in {
+          background-color: transparent;
           opacity: 0;
           animation: mpEmotionChartDotIn 520ms cubic-bezier(.2,.85,.25,1) both;
         }
@@ -2263,6 +2300,7 @@ function EmotionChartPanel({
           .mp-emotion-chart-dot-in,
           .mp-emotion-chart-dot-latest {
             animation: none !important;
+            background-color: var(--mp-emotion-dot-color) !important;
             opacity: 1 !important;
             transform: none !important;
           }
@@ -2287,7 +2325,7 @@ function EmotionChartPanel({
         </p>
       ) : null}
 
-      <div className="-mx-5 overflow-x-auto px-5 pb-2 [scrollbar-width:none]">
+      <div ref={heatmapScrollRef} className="-mx-5 overflow-x-auto px-5 pb-2 [scrollbar-width:none]">
         <div className="min-w-max rounded-[1.35rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-3">
           <div
             className="mb-3 grid"
@@ -2325,8 +2363,8 @@ function EmotionChartPanel({
                       key={cell.date}
                       style={{
                         '--mp-emotion-dot-delay': `${delayMs}ms`,
+                        '--mp-emotion-dot-color': emotion?.color ?? 'rgba(120,116,128,0.55)',
                         animationDelay: isLatestEmotion ? `${delayMs}ms, ${Math.max(delayMs + 460, 1180)}ms` : `${delayMs}ms`,
-                        backgroundColor: emotion?.color ?? 'rgba(120,116,128,0.55)',
                       } as CSSProperties}
                       title={label}
                       type="button"
