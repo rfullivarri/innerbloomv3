@@ -1,8 +1,9 @@
-import { type ReactNode, useEffect, useId, useRef, useState } from 'react';
+import { forwardRef, type ReactNode, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { decideTaskHabitAchievement, getRewardsHistory, getTaskInsights, getUserXpByTrait, toggleTaskHabitAchievementMaintained, type HabitAchievementPillarGroup, type HabitAchievementShelfItem, type MonthlyWrappedRecord, type RewardsGrowthCalibrationRow, type RewardsHistorySummary, type TaskInsightsResponse, type TraitXpEntry, type WeeklyWrappedRecord } from '../../../../lib/api';
 import { useRequest } from '../../../../hooks/useRequest';
 import { HabitAchievementSeal } from '../../../../components/dashboard-v3/HabitAchievementSeal';
+import { resolveHabitAchievementSealCandidates } from '../../../../lib/habitAchievementSeals';
 import { InnerbloomBrand, TraitIcon } from '../MobilePremiumPrimitives';
 import { habitDevelopmentStatusLabel, HabitStatusChip, PremiumScoreRing } from '../PremiumHabitDevelopment';
 import { emitHabitAchievementUpdated } from '../../../../lib/habitAchievementEvents';
@@ -253,6 +254,7 @@ export function PremiumRewardsSection({
   const [actionError, setActionError] = useState<string | null>(null);
   const [activeWeeklyWrapped, setActiveWeeklyWrapped] = useState<WeeklyWrappedRecord | null>(null);
   const [activeMonthlyWrapped, setActiveMonthlyWrapped] = useState<MonthlyWrappedRecord | null>(null);
+  const [selectedAchievementForShare, setSelectedAchievementForShare] = useState<HabitAchievementShelfItem | null>(null);
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const scrollFrameRef = useRef<number | null>(null);
   const { data, reload } = useRequest(
@@ -478,6 +480,7 @@ export function PremiumRewardsSection({
                     }
                     setFlippedHabitId((current) => (current === habit.id ? null : habit.id));
                   }}
+                  onShareAchievement={(achievement) => setSelectedAchievementForShare(achievement)}
                   onToggleMaintained={handleToggleMaintained}
                 />
               ))}
@@ -558,6 +561,13 @@ export function PremiumRewardsSection({
             />,
           )
         : null}
+      {selectedAchievementForShare ? (
+        <AchievementShareSheet
+          backendUserId={backendUserId}
+          habit={selectedAchievementForShare}
+          onClose={() => setSelectedAchievementForShare(null)}
+        />
+      ) : null}
     </section>
   );
 }
@@ -592,6 +602,7 @@ function AchievementCarouselCard({
   isFlipped,
   maintainPending,
   onClick,
+  onShareAchievement,
   onToggleMaintained,
 }: {
   backendUserId: string | null;
@@ -600,6 +611,7 @@ function AchievementCarouselCard({
   isFlipped: boolean;
   maintainPending: boolean;
   onClick: () => void;
+  onShareAchievement: (habit: HabitAchievementShelfItem) => void;
   onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>;
 }) {
   const achieved = isHabitAchieved(habit);
@@ -632,7 +644,7 @@ function AchievementCarouselCard({
         className={`relative h-full min-h-[21rem] rounded-[1.55rem] transition-transform duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
       >
         <div className={`absolute inset-0 rounded-[1.55rem] border p-4 text-center [backface-visibility:hidden] ${borderClass} ${achieved ? '' : 'opacity-70 grayscale'}`}>
-          <AchievementFrontFace habit={habit} isActive={isActive} />
+          <AchievementFrontFace habit={habit} isActive={isActive} onShareAchievement={onShareAchievement} />
         </div>
         <div className={`absolute inset-0 rounded-[1.55rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-4 [backface-visibility:hidden] [transform:rotateY(180deg)] ${achieved ? '' : 'border-amber-300/55'}`}>
           {achieved ? (
@@ -650,7 +662,14 @@ function AchievementCarouselCard({
   );
 }
 
-function AchievementFrontFace({ habit }: { habit: HabitAchievementShelfItem; isActive: boolean }) {
+function AchievementFrontFace({
+  habit,
+  onShareAchievement,
+}: {
+  habit: HabitAchievementShelfItem;
+  isActive: boolean;
+  onShareAchievement: (habit: HabitAchievementShelfItem) => void;
+}) {
   const achieved = isHabitAchieved(habit);
 
   return (
@@ -693,7 +712,7 @@ function AchievementFrontFace({ habit }: { habit: HabitAchievementShelfItem; isA
           className="mt-auto inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-[color:var(--mp-violet-strong)]"
           onClick={(event) => {
             event.stopPropagation();
-            shareAchievement(habit);
+            onShareAchievement(habit);
           }}
           type="button"
         >
@@ -970,6 +989,248 @@ function PendingAchievementReviewSheet({
         </div>
       </div>
     </div>
+  );
+}
+
+function AchievementShareSheet({
+  backendUserId,
+  habit,
+  onClose,
+}: {
+  backendUserId: string | null;
+  habit: HabitAchievementShelfItem;
+  onClose: () => void;
+}) {
+  const previewRef = useRef<HTMLDivElement | null>(null);
+  const [mode, setMode] = useState<WeeklyStoryVisualMode>('dark');
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
+  const { data: insights } = useRequest(
+    () => getTaskInsights(habit.taskId, { range: 'month' }),
+    [habit.taskId, backendUserId],
+    { enabled: Boolean(backendUserId && habit.taskId) },
+  );
+  const development = insights ? buildHabitDevelopmentFromInsights(insights) : null;
+  const months = development ? resolveHabitDevelopmentMonths(development.months).slice(-3) : [];
+
+  useEffect(() => {
+    const themeNode = document.querySelector('[data-mp-theme]');
+    const theme = themeNode?.getAttribute('data-mp-theme');
+    setMode(theme === 'light' ? 'light' : 'dark');
+  }, []);
+
+  const handleShare = async () => {
+    if (!previewRef.current) return;
+    setIsSharing(true);
+    setShareError(null);
+    try {
+      await waitForSharePreviewImages(previewRef.current);
+      const { toPng } = await import('html-to-image');
+      const dataUrl = await toPng(previewRef.current, {
+        pixelRatio: 3,
+        cacheBust: true,
+        backgroundColor: mode === 'light' ? '#FFF8EF' : '#05050A',
+      });
+      const blob = await dataUrlToBlob(dataUrl);
+      const slug = slugifyShareFilename(habit.taskName || 'habito-logrado');
+      const file = new File([blob], `innerbloom-habito-logrado-${slug}.png`, { type: 'image/png' });
+      const browserNavigator = typeof navigator === 'undefined' ? null : navigator as Navigator & {
+        canShare?: (data: { files?: File[] }) => boolean;
+        share?: (data: { files?: File[]; title?: string; text?: string }) => Promise<void>;
+      };
+
+      if (browserNavigator?.share && browserNavigator.canShare?.({ files: [file] })) {
+        await browserNavigator.share({
+          files: [file],
+          title: 'Hábito logrado en Innerbloom',
+          text: `${habit.taskName} · 3 meses de constancia`,
+        });
+      } else {
+        downloadShareImage(dataUrl, file.name);
+      }
+    } catch (error) {
+      console.error('Failed to generate achievement share image', error);
+      setShareError('No pudimos generar la imagen. Intentá otra vez.');
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[90] flex items-end justify-center bg-black/60 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] backdrop-blur-md"
+      onClick={onClose}
+      onTouchMove={(event) => event.stopPropagation()}
+      onWheel={(event) => event.stopPropagation()}
+    >
+      <div
+        className="flex max-h-[min(92dvh,47rem)] w-full max-w-[25rem] flex-col overflow-hidden rounded-[1.75rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-4 shadow-[0_-24px_70px_rgba(0,0,0,0.5)]"
+        onClick={(event) => event.stopPropagation()}
+        onTouchMove={(event) => event.stopPropagation()}
+        onWheel={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[color:var(--mp-violet)]">Compartir logro</p>
+            <h3 className="mt-1 text-xl font-semibold text-[color:var(--mp-text)]">Vista previa de tu historia</h3>
+          </div>
+          <button
+            aria-label="Cerrar compartir logro"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[color:var(--mp-border)] bg-white/[0.04] text-2xl text-[color:var(--mp-text-secondary)]"
+            onClick={onClose}
+            type="button"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2 rounded-full bg-black/10 p-1">
+          {(['dark', 'light'] as WeeklyStoryVisualMode[]).map((item) => (
+            <button
+              className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${mode === item ? 'bg-[color:var(--mp-violet)] text-white' : 'text-[color:var(--mp-text-secondary)]'}`}
+              key={item}
+              onClick={() => setMode(item)}
+              type="button"
+            >
+              {item === 'dark' ? 'Dark' : 'Light'}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="mx-auto w-full max-w-[min(72vw,19.5rem)]">
+            <AchievementSharePreview
+              habit={habit}
+              mode={mode}
+              months={months}
+              ref={previewRef}
+            />
+          </div>
+        </div>
+
+        {shareError ? <p className="mt-3 text-sm text-[color:var(--mp-red)]">{shareError}</p> : null}
+        <button
+          className="mt-4 w-full shrink-0 rounded-full bg-[color:var(--mp-violet)] px-5 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(139,92,246,0.28)] disabled:opacity-60"
+          disabled={isSharing}
+          onClick={() => void handleShare()}
+          type="button"
+        >
+          {isSharing ? 'Generando...' : 'Compartir'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+type AchievementShareMonth = {
+  month: string;
+  percent: number;
+  projected?: boolean;
+  periodKey?: string | null;
+};
+
+const AchievementSharePreview = forwardRef<HTMLDivElement, {
+  habit: HabitAchievementShelfItem;
+  mode: WeeklyStoryVisualMode;
+  months: AchievementShareMonth[];
+}>(({ habit, mode, months }, ref) => {
+  const isLight = mode === 'light';
+  const text = isLight ? '#151224' : '#FFF8EF';
+  const muted = isLight ? '#6B6575' : 'rgba(255,248,239,.68)';
+  const softMuted = isLight ? 'rgba(21,18,36,.52)' : 'rgba(255,248,239,.48)';
+  const line = isLight ? 'rgba(139,92,246,.2)' : 'rgba(167,139,250,.22)';
+  const bg = isLight
+    ? 'radial-gradient(circle at 92% 4%, rgba(186,126,255,.24), transparent 34%), radial-gradient(circle at 0% 100%, rgba(255,184,121,.22), transparent 38%), #FFF8EF'
+    : 'radial-gradient(circle at 88% 0%, rgba(128,92,255,.26), transparent 42%), radial-gradient(circle at 8% 100%, rgba(236,111,193,.16), transparent 40%), #05050A';
+  const traitLabel = habit.trait?.name ?? null;
+  const achievedLabel = formatAchievementShareDate(habit.achievedAt);
+
+  return (
+    <div
+      className="relative aspect-[9/16] w-full overflow-hidden rounded-[1.25rem] border p-6 shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
+      ref={ref}
+      style={{ background: bg, borderColor: line, color: text }}
+    >
+      <svg aria-hidden="true" className="absolute -right-16 -top-14 h-72 w-52 opacity-70" fill="none" viewBox="0 0 120 180">
+        <path d="M96 -8C54 52 72 93 122 132" stroke={isLight ? 'rgba(139,92,246,.2)' : 'rgba(167,139,250,.6)'} strokeWidth="1.2" />
+      </svg>
+      <div className="relative flex items-center justify-between gap-3">
+        <InnerbloomBrand
+          markClassName="h-6 w-6"
+          textClassName="text-[10px] font-semibold uppercase tracking-[0.28em]"
+          style={{ color: isLight ? '#6D4FC2' : '#C4B5FD' }}
+        />
+      </div>
+
+      <div className="relative mt-9 text-center">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.3em]" style={{ color: isLight ? '#7C3AED' : '#A78BFA' }}>Hábito logrado</p>
+        <p className="mt-3 text-[2rem] font-semibold leading-[1.02]">3 meses de constancia</p>
+      </div>
+
+      <div className="relative mx-auto mt-8 grid h-40 w-40 place-items-center rounded-full border border-white/10 bg-white/[0.035] shadow-[0_0_42px_rgba(167,139,250,0.18)]">
+        <AchievementShareSeal habit={habit} />
+      </div>
+
+      <div className="relative mt-8 text-center">
+        <h4 className="mx-auto max-w-[16rem] text-[1.9rem] font-semibold leading-[1.05]">{habit.taskName}</h4>
+        {traitLabel ? <p className="mt-2 text-lg" style={{ color: muted }}>{traitLabel}</p> : null}
+        {achievedLabel ? <p className="mt-5 text-sm font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
+      </div>
+
+      <div className="relative mt-8 border-t pt-5" style={{ borderColor: line }}>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.26em]" style={{ color: muted }}>Progreso mensual</p>
+        {months.length ? (
+          <div className="mt-4 grid gap-3" style={{ gridTemplateColumns: `repeat(${months.length}, minmax(0, 1fr))` }}>
+            {months.map((month) => (
+              <div className="min-w-0" key={`${month.periodKey ?? month.month}-${month.percent}`}>
+                <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                  <span
+                    className="block h-full rounded-full"
+                    style={{
+                      background: isLight ? '#8B5CF6' : '#A78BFA',
+                      width: `${Math.max(5, Math.min(100, month.percent))}%`,
+                    }}
+                  />
+                </div>
+                <div className="mt-2 flex items-baseline justify-between gap-1">
+                  <span className="truncate text-xs font-medium" style={{ color: muted }}>{month.month}</span>
+                  <span className="text-sm font-semibold">{month.percent}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-4 text-sm" style={{ color: muted }}>Ventana activa completada</p>
+        )}
+      </div>
+
+      <p className="absolute bottom-6 left-6 right-6 text-center text-[11px] font-semibold tracking-[0.18em]" style={{ color: softMuted }}>
+        innerbloomjourney.org
+      </p>
+    </div>
+  );
+});
+AchievementSharePreview.displayName = 'AchievementSharePreview';
+
+function AchievementShareSeal({ habit }: { habit: HabitAchievementShelfItem }) {
+  const [sealSrc, setSealSrc] = useState<string | null>(() => resolveHabitAchievementSealSrc(habit));
+
+  useEffect(() => {
+    setSealSrc(resolveHabitAchievementSealSrc(habit));
+  }, [habit]);
+
+  if (!sealSrc) {
+    return <TraitIcon size={118} trait={habit.trait?.name} />;
+  }
+
+  return (
+    <img
+      alt={`${habit.taskName} seal`}
+      className="h-[8.5rem] w-[8.5rem] object-contain"
+      loading="eager"
+      onError={() => setSealSrc(null)}
+      src={sealSrc}
+    />
   );
 }
 
@@ -4809,17 +5070,61 @@ function buildFallbackCalibrationRow(
   };
 }
 
-function shareAchievement(habit: HabitAchievementShelfItem) {
-  const text = `Innerbloom logro desbloqueado: ${habit.taskName}`;
-  const browserNavigator = typeof navigator === 'undefined' ? null : navigator as Navigator & {
-    share?: (data: { title?: string; text?: string }) => Promise<void>;
-    clipboard?: { writeText: (value: string) => Promise<void> };
-  };
-  if (browserNavigator?.share) {
-    void browserNavigator.share({ title: 'Innerbloom', text }).catch(() => undefined);
-    return;
-  }
-  if (browserNavigator?.clipboard) {
-    void browserNavigator.clipboard.writeText(text).catch(() => undefined);
-  }
+function resolveHabitAchievementSealSrc(habit: HabitAchievementShelfItem) {
+  return resolveHabitAchievementSealCandidates({
+    pillar: habit.pillar,
+    traitCode: habit.trait?.code,
+    traitName: habit.trait?.name,
+  })[0] ?? null;
+}
+
+function formatAchievementShareDate(value: string | null) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const formatted = new Intl.DateTimeFormat('es', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date).replace('.', '');
+  return `Logrado el ${formatted}`;
+}
+
+async function waitForSharePreviewImages(node: HTMLElement) {
+  const images = Array.from(node.querySelectorAll('img'));
+  await Promise.all(images.map(async (image) => {
+    if (image.complete && image.naturalWidth > 0) return;
+    if (typeof image.decode === 'function') {
+      await image.decode().catch(() => undefined);
+      return;
+    }
+    await new Promise<void>((resolve) => {
+      image.addEventListener('load', () => resolve(), { once: true });
+      image.addEventListener('error', () => resolve(), { once: true });
+    });
+  }));
+}
+
+async function dataUrlToBlob(dataUrl: string) {
+  const response = await fetch(dataUrl);
+  return response.blob();
+}
+
+function downloadShareImage(dataUrl: string, filename: string) {
+  const link = document.createElement('a');
+  link.href = dataUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+function slugifyShareFilename(value: string) {
+  const normalized = value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return normalized || 'habito-logrado';
 }
