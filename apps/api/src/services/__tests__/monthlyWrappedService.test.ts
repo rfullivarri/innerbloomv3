@@ -31,7 +31,8 @@ describe('monthlyWrappedService', () => {
   it('builds and persists payload with close message when not eligible', async () => {
     mockQuery
       .mockResolvedValueOnce({ rows: [{ tasks_completed: 11, xp_gained: 480 }] })
-      .mockResolvedValueOnce({ rows: [{ dominant_pillar: 'MIND', tasks_completed: 6 }] });
+      .mockResolvedValueOnce({ rows: [{ dominant_pillar: 'MIND', tasks_completed: 6 }] })
+      .mockResolvedValueOnce({ rows: [{ difficulty_code: 'easy', tasks_completed: 7 }, { difficulty_code: 'medium', tasks_completed: 4 }] });
 
     mockInsertMonthlyWrapped.mockImplementation(async ({ userId, periodKey, payload }) => ({
       id: 'id-1',
@@ -63,13 +64,19 @@ describe('monthlyWrappedService', () => {
       missingTasksToUpgrade: 1,
     });
     expect(result.payload.monthly_kpis.tasksCompleted).toBe(11);
+    expect(result.payload.difficulty).toEqual({ easy: 7, medium: 4, hard: 0 });
     expect(mockTrimMonthlyWrappedHistory).toHaveBeenCalledWith('11111111-2222-3333-4444-555555555555', 2);
   });
 
   it('returns rewards history monthly wrapups limited to 2 items', async () => {
-    mockListRecentMonthlyWrapped.mockResolvedValue([{ id: '1' }, { id: '2' }]);
+    mockListRecentMonthlyWrapped.mockResolvedValue([
+      { id: 'current', periodKey: new Date().toISOString().slice(0, 7) },
+      { id: '1', periodKey: '2026-02' },
+      { id: '2', periodKey: '2026-01' },
+      { id: '3', periodKey: '2025-12' },
+    ]);
     const result = await getRewardsHistoryMonthlyWrapups('user-id');
-    expect(result).toEqual([{ id: '1' }, { id: '2' }]);
-    expect(mockListRecentMonthlyWrapped).toHaveBeenCalledWith('user-id', 2);
+    expect(result).toEqual([{ id: '1', periodKey: '2026-02' }, { id: '2', periodKey: '2026-01' }]);
+    expect(mockListRecentMonthlyWrapped).toHaveBeenCalledWith('user-id', 6);
   });
 });

@@ -32,6 +32,18 @@ type GrowthCalibrationDbRow = {
   evaluation_month_label: string;
 };
 
+type MonthlyDifficultyRow = {
+  difficulty_code: string | null;
+  completions: number | string | null;
+};
+
+type MonthlyModeContextRow = {
+  current_mode: string | null;
+  current_weekly_target: number | string | null;
+  next_mode: string | null;
+  next_weekly_target: number | string | null;
+};
+
 async function listCompletionDays(userId: string, range: DateRange): Promise<string[]> {
   const result = await pool.query<{ day_key: string }>(
     `SELECT DISTINCT date::text AS day_key
@@ -44,6 +56,62 @@ async function listCompletionDays(userId: string, range: DateRange): Promise<str
     [userId, range.start, range.end],
   );
   return result.rows.map((row) => row.day_key);
+}
+
+async function getMonthlyDifficultyBreakdown(userId: string, range: DateRange): Promise<{ easy: number; medium: number; hard: number }> {
+  const result = await pool.query<MonthlyDifficultyRow>(
+    `SELECT LOWER(cd.code) AS difficulty_code,
+            COALESCE(SUM(dl.quantity), 0)::int AS completions
+       FROM daily_log dl
+       JOIN tasks t ON t.task_id = dl.task_id
+  LEFT JOIN cat_difficulty cd ON cd.difficulty_id = t.difficulty_id
+      WHERE dl.user_id = $1::uuid
+        AND dl.date >= $2::date
+        AND dl.date <= $3::date
+        AND COALESCE(dl.quantity, 0) > 0
+   GROUP BY LOWER(cd.code)`,
+    [userId, range.start, range.end],
+  );
+
+  return result.rows.reduce(
+    (acc, row) => {
+      const code = row.difficulty_code ?? '';
+      const completions = Number(row.completions ?? 0);
+      if (code === 'easy') acc.easy += completions;
+      if (code === 'medium') acc.medium += completions;
+      if (code === 'hard') acc.hard += completions;
+      return acc;
+    },
+    { easy: 0, medium: 0, hard: 0 },
+  );
+}
+
+async function getMonthlyModeContext(userId: string): Promise<MonthlyModeContextRow | null> {
+  const result = await pool.query<MonthlyModeContextRow>(
+    `WITH current_mode AS (
+       SELECT gm.code AS current_mode,
+              gm.weekly_target AS current_weekly_target
+         FROM users u
+    LEFT JOIN cat_game_mode gm ON gm.game_mode_id = u.game_mode_id
+        WHERE u.user_id = $1::uuid
+        LIMIT 1
+     )
+     SELECT cm.current_mode,
+            cm.current_weekly_target,
+            next_mode.code AS next_mode,
+            next_mode.weekly_target AS next_weekly_target
+       FROM current_mode cm
+  LEFT JOIN LATERAL (
+       SELECT gm.code, gm.weekly_target
+         FROM cat_game_mode gm
+        WHERE gm.weekly_target > cm.current_weekly_target
+     ORDER BY gm.weekly_target ASC, gm.game_mode_id ASC
+        LIMIT 1
+     ) next_mode ON true`,
+    [userId],
+  );
+
+  return result.rows[0] ?? null;
 }
 
 function resolveMonthRange(periodKey: string): DateRange | null {
@@ -59,6 +127,19 @@ function resolveMonthRange(periodKey: string): DateRange | null {
     start: monthStart.toISOString().slice(0, 10),
     end: monthEnd.toISOString().slice(0, 10),
   };
+}
+
+function resolveMonthlyWeekStates(completionDays: string[]): ('done' | 'partial' | 'empty')[] {
+  return Array.from({ length: 5 }, (_, index) => {
+    const weekNumber = index + 1;
+    const count = completionDays.filter((day) => {
+      const dayNumber = Number(day.slice(8, 10));
+      return Math.ceil(dayNumber / 7) === weekNumber;
+    }).length;
+    if (count >= 7) return 'done';
+    if (count >= 5) return 'partial';
+    return 'empty';
+  });
 }
 
 function getDaysUntilNextMonthWrapup(referenceDate = new Date()): number {
@@ -132,6 +213,16 @@ export const getUserRewardsHistory: AsyncHandler = async (req, res) => {
       }),
     ),
   );
+  const monthlyDifficultyById = new Map(
+    await Promise.all(
+      monthlyWrapups.map(async (entry) => {
+        const range = resolveMonthRange(entry.periodKey);
+        const difficulty = range ? await getMonthlyDifficultyBreakdown(id, range) : { easy: 0, medium: 0, hard: 0 };
+        return [entry.id, difficulty] as const;
+      }),
+    ),
+  );
+  const modeContext = await getMonthlyModeContext(id);
   const growthSummary = growthCalibrationRows.reduce(
     (acc, row) => {
       if (row.action === 'up') acc.up += 1;
@@ -150,10 +241,23 @@ export const getUserRewardsHistory: AsyncHandler = async (req, res) => {
       completionDays: weeklyCompletionDaysById.get(entry.id) ?? [],
     })),
     weekly_unseen_count: unseenCount,
-    monthly_wrapups: monthlyWrapups.map((entry) => ({
-      ...entry,
-      completionDays: monthlyCompletionDaysById.get(entry.id) ?? [],
-    })),
+    monthly_wrapups: monthlyWrapups.map((entry) => {
+      const completionDays = monthlyCompletionDaysById.get(entry.id) ?? [];
+      const difficulty = monthlyDifficultyById.get(entry.id) ?? { easy: 0, medium: 0, hard: 0 };
+      return {
+        ...entry,
+        completionDays,
+        payload: {
+          ...entry.payload,
+          difficulty,
+          live_mode_context: modeContext,
+        },
+        summary: {
+          ...(entry.summary ?? {}),
+          weeks: resolveMonthlyWeekStates(completionDays),
+        },
+      };
+    }),
     habit_achievements: {
       pending_count: pendingCount,
       achieved_by_pillar: achievedByPillar,

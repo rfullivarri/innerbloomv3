@@ -21,6 +21,11 @@ export type MonthlyWrappedPayload = {
   eligible_for_upgrade: boolean;
   suggested_next_mode: string | null;
   monthly_kpis: MonthlyWrappedKpis;
+  difficulty: {
+    easy: number;
+    medium: number;
+    hard: number;
+  };
   slide_2: MonthlyWrappedSlide2;
 };
 

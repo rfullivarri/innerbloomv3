@@ -2556,6 +2556,49 @@ type MonthlyStoryData = {
   trackedDays: number;
 };
 
+type MonthlyWrappedPayloadView = {
+  completedTasks?: number;
+  completions?: number;
+  difficulty?: { easy?: number; hard?: number; medium?: number };
+  effortBalance?: { easy?: number; hard?: number; medium?: number };
+  eligible_for_upgrade?: boolean;
+  gpTotal?: number;
+  live_mode_context?: {
+    current_mode?: string | null;
+    current_weekly_target?: number | string | null;
+    next_mode?: string | null;
+    next_weekly_target?: number | string | null;
+  } | null;
+  mode_weekly_target?: number;
+  monthly_kpis?: {
+    dominantPillar?: string | null;
+    dominantPillarTasksCompleted?: number;
+    tasksCompleted?: number;
+    xpGained?: number;
+  };
+  summary?: {
+    completedTasks?: number;
+    completions?: number;
+    effortBalance?: { easy?: number; hard?: number; medium?: number };
+    gpTotal?: number;
+    totalXp?: number;
+  };
+  suggested_next_mode?: string | null;
+  task_pass_rate?: number;
+  tasks_meeting_goal?: number;
+  tasks_total_evaluated?: number;
+  totalXp?: number;
+  xpTotal?: number;
+};
+
+type MonthlyWrappedSummaryView = {
+  eligible_for_upgrade?: boolean;
+  suggested_next_mode?: string | null;
+  tasks_completed?: number;
+  xp_gained?: number;
+  weeks?: unknown;
+};
+
 function MonthlyCalendarStrip({ active, days }: { active: boolean; days: MonthlyCalendarDay[] }) {
   return (
     <div className="grid grid-cols-[repeat(16,minmax(0,1fr))] gap-1.5">
@@ -2643,7 +2686,7 @@ function MonthlyNearHabitsStory({
         Score mensual de la ventana activa. Verde marca meses dentro del objetivo.
       </p>
       <div className="space-y-[clamp(.85rem,2.4dvh,1.25rem)]">
-        {habits.map((habit, index) => (
+        {habits.length ? habits.map((habit, index) => (
           <div className="mp-weekly-fragment border-t border-[color:var(--weekly-line)] pt-4" key={`monthly-near-habit-${habit.title}`} style={{ transitionDelay: `${220 + index * 130}ms` }}>
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -2654,7 +2697,7 @@ function MonthlyNearHabitsStory({
                 {getMonthlyScoreTone(habit.percent).label}
               </p>
             </div>
-            <div className="mt-4 grid grid-cols-3 gap-3">
+            <div className="mt-4 grid gap-3" style={{ gridTemplateColumns: `repeat(${Math.max(1, habit.months.length)}, minmax(0, 1fr))` }}>
               {habit.months.map((month, monthIndex) => {
                 const tone = getMonthlyScoreTone(month.percent);
                 return (
@@ -2680,7 +2723,12 @@ function MonthlyNearHabitsStory({
               })}
             </div>
           </div>
-        ))}
+        )) : (
+          <div className="mp-weekly-fragment border-t border-[color:var(--weekly-line)] pt-6" style={{ transitionDelay: '220ms' }}>
+            <p className="text-xl font-semibold leading-tight text-[color:var(--weekly-title)]">Sin hábitos evaluados</p>
+            <p className="mt-2 text-sm leading-relaxed text-[color:var(--weekly-muted)]">No hubo recalibración mensual con score disponible para este periodo.</p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -4162,12 +4210,12 @@ function buildMonthlyStoryData(monthly: MonthlyWrappedRecord, rewards: RewardsHi
   }));
   const trackedDays = Math.max(0, completedDayNumbers.size);
   const gpTotal = resolveMonthlyGp(monthly);
-  const completedTasks = resolveMonthlyCompletedTasks(monthly, trackedDays);
-  const difficulty = resolveMonthlyDifficulty(monthly, completedTasks);
+  const completedTasks = resolveMonthlyCompletedTasks(monthly);
+  const difficulty = resolveMonthlyDifficulty(monthly);
   const calibration = resolveMonthlyCalibrationStory(rewards.growthCalibration);
   const nearHabits = resolveMonthlyNearHabits(rewards);
   const emotion = resolveMonthlyEmotionStory(monthly);
-  const rhythm = resolveMonthlyRhythmStory(completedTasks);
+  const rhythm = resolveMonthlyRhythmStory(monthly);
 
   return {
     calendarDays,
@@ -4207,27 +4255,25 @@ function formatMonthFromPeriod(periodKey: string | null | undefined) {
   return new Intl.DateTimeFormat('es', { month: 'short' }).format(date).replace('.', '');
 }
 
-function resolveMonthlyCompletedTasks(monthly: MonthlyWrappedRecord, trackedDays: number) {
-  const payload = monthly.payload as {
-    completedTasks?: number;
-    completions?: number;
-    summary?: { completedTasks?: number; completions?: number };
-  } | null;
-  const value = payload?.completedTasks ?? payload?.completions ?? payload?.summary?.completedTasks ?? payload?.summary?.completions;
+function resolveMonthlyCompletedTasks(monthly: MonthlyWrappedRecord) {
+  const payload = monthly.payload as MonthlyWrappedPayloadView | null;
+  const summary = monthly.summary as MonthlyWrappedSummaryView | null;
+  const value = payload?.monthly_kpis?.tasksCompleted
+    ?? summary?.tasks_completed
+    ?? payload?.completedTasks
+    ?? payload?.completions
+    ?? payload?.summary?.completedTasks
+    ?? payload?.summary?.completions;
   if (typeof value === 'number' && Number.isFinite(value)) return Math.round(value);
-  return Math.max(14, Math.round(trackedDays * 2.6));
+  return 0;
 }
 
-function resolveMonthlyDifficulty(monthly: MonthlyWrappedRecord, completedTasks: number) {
-  const payload = monthly.payload as {
-    difficulty?: { easy?: number; hard?: number; medium?: number };
-    effortBalance?: { easy?: number; hard?: number; medium?: number };
-    summary?: { effortBalance?: { easy?: number; hard?: number; medium?: number } };
-  } | null;
+function resolveMonthlyDifficulty(monthly: MonthlyWrappedRecord) {
+  const payload = monthly.payload as MonthlyWrappedPayloadView | null;
   const source = payload?.difficulty ?? payload?.effortBalance ?? payload?.summary?.effortBalance;
-  const easy = typeof source?.easy === 'number' ? source.easy : Math.max(0, Math.round(completedTasks * 0.5));
-  const medium = typeof source?.medium === 'number' ? source.medium : Math.max(0, Math.round(completedTasks * 0.36));
-  const hard = typeof source?.hard === 'number' ? source.hard : Math.max(0, completedTasks - easy - medium);
+  const easy = typeof source?.easy === 'number' ? source.easy : 0;
+  const medium = typeof source?.medium === 'number' ? source.medium : 0;
+  const hard = typeof source?.hard === 'number' ? source.hard : 0;
   const total = Math.max(1, easy + medium + hard);
   const easyPct = Math.round((easy / total) * 100);
   const mediumPct = Math.round((medium / total) * 100);
@@ -4248,45 +4294,63 @@ function resolveMonthlyCalibrationStory(growth: RewardsHistorySummary['growthCal
 }
 
 function resolveMonthlyNearHabits(rewards: RewardsHistorySummary): MonthlyStoryData['nearHabits'] {
-  const items = rewards.habitAchievements.achievedByPillar
-    .flatMap((group) => group.habits)
-    .filter((habit) => habit.status !== 'stored')
-    .slice(0, 6);
-  const fallback = [
-    { label: 'Hidratación', percent: 94, title: '2L de agua' },
-    { label: 'Sueño', percent: 88, title: 'Dormir 8hs' },
-    { label: 'Enfoque', percent: 81, title: 'Planificar el día' },
-  ];
-  const source = items.length >= 3
-    ? items.map((habit, index) => ({
-        label: habit.trait?.name ?? resolveRewardsPillarLabel(normalizePillarCode(habit.pillar) ?? 'BODY'),
-        percent: [94, 88, 81, 74, 68, 63][index] ?? 72,
-        title: habit.taskName,
-      }))
-    : fallback;
-
-  return source.slice(0, 3).map((habit, index) => ({
-    ...habit,
-    months: [
-      { label: 'Mar', percent: clampMonthlyScore(habit.percent - 18 - index * 3) },
-      { label: 'Abr', percent: clampMonthlyScore(habit.percent - 8 - index * 2) },
-      { label: 'May', percent: clampMonthlyScore(habit.percent) },
-    ],
-  }));
+  return resolveCalibrationResults(rewards.growthCalibration)
+    .filter((row) => Number.isFinite(row.completionRatePct))
+    .sort((a, b) => b.completionRatePct - a.completionRatePct)
+    .slice(0, 3)
+    .map((row) => {
+      const percent = clampMonthlyScore(row.completionRatePct);
+      return {
+        label: row.pillar ?? 'Tarea',
+        months: [
+          {
+            label: formatMonthFromPeriod(row.evaluationMonthLabel) ?? formatMonthFromPeriod(rewards.growthCalibration.latestPeriodLabel) ?? 'Mes',
+            percent,
+          },
+        ],
+        percent,
+        title: row.taskTitle,
+      };
+    });
 }
 
-function resolveMonthlyRhythmStory(completedTasks: number) {
-  const totalTasks = 12;
-  const strongTasks = Math.min(totalTasks, Math.max(6, Math.round(completedTasks / 8)));
-  const readiness = Math.min(100, Math.round((strongTasks / totalTasks) * 100));
+function resolveMonthlyRhythmStory(monthly: MonthlyWrappedRecord) {
+  const payload = monthly.payload as MonthlyWrappedPayloadView | null;
+  const liveMode = payload?.live_mode_context;
+  const currentMode = normalizeMonthlyMode(liveMode?.current_mode ?? (payload as { current_mode?: string | null } | null)?.current_mode);
+  const nextMode = normalizeMonthlyMode(liveMode?.next_mode ?? payload?.suggested_next_mode) ?? resolveNextMonthlyMode(currentMode);
+  const totalTasks = resolveFiniteNumber(payload?.tasks_total_evaluated, 0);
+  const strongTasks = resolveFiniteNumber(payload?.tasks_meeting_goal, 0);
+  const rate = typeof payload?.task_pass_rate === 'number'
+    ? payload.task_pass_rate
+    : totalTasks > 0
+      ? strongTasks / totalTasks
+      : 0;
+  const readiness = Math.max(0, Math.min(100, Math.round(rate * 100)));
   return {
-    currentMode: 'CHILL',
+    currentMode: currentMode ?? 'ACTUAL',
     readiness,
-    nextMode: 'FLOW',
+    nextMode: nextMode ?? 'SIGUIENTE',
     strongTasks,
     threshold: 80,
     totalTasks,
   };
+}
+
+function resolveFiniteNumber(value: unknown, fallback: number) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function normalizeMonthlyMode(value: string | null | undefined) {
+  const normalized = value?.trim().toUpperCase();
+  return normalized && normalized.length > 0 ? normalized : null;
+}
+
+function resolveNextMonthlyMode(currentMode: string | null) {
+  const order = ['LOW', 'CHILL', 'FLOW', 'EVOLVE'];
+  const index = currentMode ? order.indexOf(currentMode) : -1;
+  return index >= 0 && index < order.length - 1 ? order[index + 1] : null;
 }
 
 function clampMonthlyScore(value: number) {
@@ -4340,7 +4404,7 @@ function buildMonthlyEmotionPath(points: MonthlyStoryData['emotion']['journey'])
 }
 
 function resolveMonthlyWeekStates(monthly: MonthlyWrappedRecord): Array<'done' | 'partial' | 'empty'> {
-  const summaryWeeks = (monthly.summary as { weeks?: unknown } | null)?.weeks;
+  const summaryWeeks = (monthly.summary as MonthlyWrappedSummaryView | null)?.weeks;
   if (Array.isArray(summaryWeeks)) {
     return Array.from({ length: 5 }, (_, index) => {
       const value = summaryWeeks[index];
@@ -4355,8 +4419,8 @@ function resolveMonthlyWeekStates(monthly: MonthlyWrappedRecord): Array<'done' |
       const dayNumber = Number(day.slice(8, 10));
       return Math.ceil(dayNumber / 7) === weekNumber;
     }).length;
-    if (count >= 5) return 'done';
-    if (count > 0) return 'partial';
+    if (count >= 7) return 'done';
+    if (count >= 5) return 'partial';
     return 'empty';
   });
 }
@@ -4377,13 +4441,16 @@ function resolveMonthlyEmotion(monthly: MonthlyWrappedRecord) {
 }
 
 function resolveMonthlyGp(monthly: MonthlyWrappedRecord) {
-  const payload = monthly.payload as {
-    gpTotal?: number;
-    totalXp?: number;
-    xpTotal?: number;
-    summary?: { gpTotal?: number; totalXp?: number };
-  } | null;
-  const value = payload?.gpTotal ?? payload?.totalXp ?? payload?.xpTotal ?? payload?.summary?.gpTotal ?? payload?.summary?.totalXp ?? 624;
+  const payload = monthly.payload as MonthlyWrappedPayloadView | null;
+  const summary = monthly.summary as MonthlyWrappedSummaryView | null;
+  const value = payload?.monthly_kpis?.xpGained
+    ?? summary?.xp_gained
+    ?? payload?.gpTotal
+    ?? payload?.totalXp
+    ?? payload?.xpTotal
+    ?? payload?.summary?.gpTotal
+    ?? payload?.summary?.totalXp
+    ?? 0;
   return Math.round(Number(value) || 0);
 }
 
