@@ -1080,8 +1080,8 @@ function AchievementShareSheet({
           ))}
         </div>
 
-        <div className="mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="mx-auto w-full max-w-[min(72vw,19.5rem)]">
+        <div className="mt-4 flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+          <div className="mx-auto aspect-[9/16] h-[min(58dvh,34rem)] max-w-full">
             <AchievementSharePreview
               habit={habit}
               mode={mode}
@@ -1119,18 +1119,21 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
 }>(({ habit, mode, months }, ref) => {
   const isLight = mode === 'light';
   const text = isLight ? '#151224' : '#FFF8EF';
-  const muted = isLight ? '#6B6575' : 'rgba(255,248,239,.68)';
-  const softMuted = isLight ? 'rgba(21,18,36,.52)' : 'rgba(255,248,239,.48)';
+  const muted = isLight ? '#655F70' : 'rgba(255,248,239,.7)';
+  const softMuted = isLight ? 'rgba(21,18,36,.56)' : 'rgba(255,248,239,.52)';
+  const accent = isLight ? '#7C3AED' : '#A78BFA';
   const line = isLight ? 'rgba(139,92,246,.2)' : 'rgba(167,139,250,.22)';
   const bg = isLight
-    ? 'radial-gradient(circle at 92% 4%, rgba(186,126,255,.24), transparent 34%), radial-gradient(circle at 0% 100%, rgba(255,184,121,.22), transparent 38%), #FFF8EF'
-    : 'radial-gradient(circle at 88% 0%, rgba(128,92,255,.26), transparent 42%), radial-gradient(circle at 8% 100%, rgba(236,111,193,.16), transparent 40%), #05050A';
+    ? 'radial-gradient(circle at 92% 4%, rgba(186,126,255,.2), transparent 34%), radial-gradient(circle at 0% 100%, rgba(255,184,121,.18), transparent 38%), #FFF8EF'
+    : 'radial-gradient(circle at 88% 0%, rgba(128,92,255,.22), transparent 42%), radial-gradient(circle at 8% 100%, rgba(236,111,193,.12), transparent 40%), #05050A';
   const traitLabel = habit.trait?.name ?? null;
   const achievedLabel = formatAchievementShareDate(habit.achievedAt);
+  const visibleMonths = months.slice(-3);
 
   return (
     <div
-      className="relative aspect-[9/16] w-full overflow-hidden rounded-[1.25rem] border p-6 shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
+      className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.25rem] border p-6 shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
+      data-achievement-share-preview="true"
       ref={ref}
       style={{ background: bg, borderColor: line, color: text }}
     >
@@ -1145,49 +1148,51 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
         />
       </div>
 
-      <div className="relative mt-9 text-center">
-        <p className="text-[12px] font-semibold uppercase tracking-[0.3em]" style={{ color: isLight ? '#7C3AED' : '#A78BFA' }}>Hábito logrado</p>
-        <p className="mt-3 text-[2rem] font-semibold leading-[1.02]">3 meses de constancia</p>
+      <div className="relative mt-6 text-center">
+        <p className="text-[0.95rem] font-semibold uppercase tracking-[0.22em]" style={{ color: accent }}>Hábito logrado</p>
+        <p className="mt-2 text-[0.95rem] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
       </div>
 
-      <div className="relative mx-auto mt-8 grid h-40 w-40 place-items-center rounded-full border border-white/10 bg-white/[0.035] shadow-[0_0_42px_rgba(167,139,250,0.18)]">
+      <div className="relative mx-auto mt-5 grid h-[9.75rem] shrink-0 place-items-center">
         <AchievementShareSeal habit={habit} />
       </div>
 
-      <div className="relative mt-8 text-center">
-        <h4 className="mx-auto max-w-[16rem] text-[1.9rem] font-semibold leading-[1.05]">{habit.taskName}</h4>
-        {traitLabel ? <p className="mt-2 text-lg" style={{ color: muted }}>{traitLabel}</p> : null}
-        {achievedLabel ? <p className="mt-5 text-sm font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
+      <div className="relative mt-5 text-center">
+        <h4 className="mx-auto line-clamp-2 max-w-[16rem] text-[clamp(1.65rem,7vw,2.25rem)] font-semibold leading-[1.05]">{habit.taskName}</h4>
+        {traitLabel ? <p className="mt-2 text-base font-medium" style={{ color: muted }}>{traitLabel}</p> : null}
+        {achievedLabel ? <p className="mt-3 text-[0.82rem] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
       </div>
 
-      <div className="relative mt-8 border-t pt-5" style={{ borderColor: line }}>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.26em]" style={{ color: muted }}>Progreso mensual</p>
-        {months.length ? (
-          <div className="mt-4 grid gap-3" style={{ gridTemplateColumns: `repeat(${months.length}, minmax(0, 1fr))` }}>
-            {months.map((month) => (
-              <div className="min-w-0" key={`${month.periodKey ?? month.month}-${month.percent}`}>
-                <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-                  <span
-                    className="block h-full rounded-full"
-                    style={{
-                      background: isLight ? '#8B5CF6' : '#A78BFA',
-                      width: `${Math.max(5, Math.min(100, month.percent))}%`,
-                    }}
-                  />
+      <div className="relative mt-auto border-t pt-4" style={{ borderColor: line }}>
+        {visibleMonths.length ? (
+          <>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em]" style={{ color: muted }}>Progreso mensual</p>
+            <div className="mt-3 grid gap-3" style={{ gridTemplateColumns: `repeat(${visibleMonths.length}, minmax(0, 1fr))` }}>
+              {visibleMonths.map((month) => (
+                <div className="min-w-0" key={`${month.periodKey ?? month.month}-${month.percent}`}>
+                  <div className="h-1 overflow-hidden rounded-full" style={{ backgroundColor: isLight ? 'rgba(21,18,36,.1)' : 'rgba(255,255,255,.12)' }}>
+                    <span
+                      className="block h-full rounded-full"
+                      style={{
+                        background: accent,
+                        width: `${Math.max(5, Math.min(100, month.percent))}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="mt-1.5 flex items-baseline justify-between gap-1">
+                    <span className="truncate text-[0.68rem] font-medium" style={{ color: muted }}>{month.month}</span>
+                    <span className="text-xs font-semibold">{month.percent}%</span>
+                  </div>
                 </div>
-                <div className="mt-2 flex items-baseline justify-between gap-1">
-                  <span className="truncate text-xs font-medium" style={{ color: muted }}>{month.month}</span>
-                  <span className="text-sm font-semibold">{month.percent}%</span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         ) : (
-          <p className="mt-4 text-sm" style={{ color: muted }}>Ventana activa completada</p>
+          <p className="text-center text-xs font-medium" style={{ color: softMuted }}>Ventana activa completada</p>
         )}
       </div>
 
-      <p className="absolute bottom-6 left-6 right-6 text-center text-[11px] font-semibold tracking-[0.18em]" style={{ color: softMuted }}>
+      <p className="relative mt-4 shrink-0 text-center text-[11px] font-semibold tracking-[0.18em]" style={{ color: softMuted }}>
         innerbloomjourney.org
       </p>
     </div>
@@ -1209,7 +1214,7 @@ function AchievementShareSeal({ habit }: { habit: HabitAchievementShelfItem }) {
   return (
     <img
       alt={`${habit.taskName} seal`}
-      className="h-[8.5rem] w-[8.5rem] object-contain"
+      className="h-[9.5rem] w-[9.5rem] object-contain"
       loading="eager"
       onError={() => setSealSrc(null)}
       src={sealSrc}
