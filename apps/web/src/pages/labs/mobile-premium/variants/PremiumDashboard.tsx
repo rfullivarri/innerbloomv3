@@ -567,6 +567,12 @@ function DashboardMotionStyles() {
       .mp-energy-line-reveal {
         animation: mpEnergyLineReveal 980ms cubic-bezier(.2,.85,.25,1) both;
       }
+      .mp-energy-line-group:focus {
+        outline: none;
+      }
+      .mp-energy-line-selected {
+        filter: drop-shadow(0 0 7px currentColor) drop-shadow(0 0 14px currentColor);
+      }
       @media (prefers-reduced-motion: reduce) {
         .mp-level-progress-load,
         .mp-dashboard-card-in,
@@ -593,7 +599,17 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
     : null;
 
   return (
-    <section ref={chartRef} className="pb-3 pt-2">
+    <section
+      ref={chartRef}
+      className="pb-3 pt-2"
+      onPointerDownCapture={(event) => {
+        if (!activeMetricLabel) return;
+        const target = event.target as Element;
+        if (!target.closest('[data-energy-interactive="true"]')) {
+          setActiveMetricLabel(null);
+        }
+      }}
+    >
       <div className="flex items-baseline justify-between gap-4">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-medium text-[color:var(--mp-text)]">Energía diaria</h2>
@@ -601,6 +617,7 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
             aria-expanded={infoOpen}
             aria-label="Ver explicación de Daily Energy"
             className="grid h-6 w-6 place-items-center rounded-full border border-[color:var(--mp-border)] text-xs font-semibold text-[color:var(--mp-text-secondary)] transition hover:text-[color:var(--mp-text)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--mp-violet)]/70"
+            data-energy-interactive="true"
             onClick={() => {
               setInfoOpen((open) => !open);
               setActiveMetricLabel(null);
@@ -625,6 +642,7 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
       {activeMetric && !infoOpen ? (
         <div
           className="mt-3 inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold"
+          data-energy-interactive="true"
           style={{ borderColor: activeMetric.color, color: activeMetric.color }}
         >
           {activeMetric.label} · {activeMetric.pillar}
@@ -657,10 +675,17 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
         <text fill="var(--mp-text-muted)" fontSize="10" letterSpacing="1.2" x="4" y="184">HACE 7 DÍAS</text>
         <text fill="var(--mp-text-muted)" fontSize="10" letterSpacing="1.2" textAnchor="end" x="282" y="184">HOY</text>
         <path d={chart.riskArea} fill="url(#energy-risk-fade)" />
-        {chart.lines.map((line, index) => (
+        {chart.lines.map((line, index) => {
+          const isSelected = activeMetricLabel === line.metric.label;
+          const hasSelection = Boolean(activeMetricLabel);
+          const isDimmed = hasSelection && !isSelected;
+          const baseOpacity = line.metric === lowest ? 1 : 0.68;
+          return (
           <g
             aria-label={`${line.metric.label} · ${line.metric.pillar}`}
-            className="cursor-pointer"
+            aria-pressed={isSelected}
+            className="mp-energy-line-group cursor-pointer"
+            data-energy-interactive="true"
             key={line.metric.label}
             onClick={() => {
               setActiveMetricLabel((label) => label === line.metric.label ? null : line.metric.label);
@@ -677,21 +702,31 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
             tabIndex={0}
           >
             <path
-              className={`mp-energy-line ${chartVisible ? 'mp-energy-line-reveal' : ''}`}
               d={line.path}
               fill="none"
-              opacity={line.metric === lowest ? 1 : 0.68}
+              opacity="0"
+              pointerEvents="stroke"
+              stroke="transparent"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="18"
+            />
+            <path
+              className={`mp-energy-line ${chartVisible ? 'mp-energy-line-reveal' : ''} ${isSelected ? 'mp-energy-line-selected' : ''}`}
+              d={line.path}
+              fill="none"
+              opacity={isDimmed ? 0.28 : isSelected ? 1 : baseOpacity}
               pathLength={1}
               stroke={line.metric.color}
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={line.metric === lowest ? 2.8 : 1.8}
+              strokeWidth={isSelected ? 4 : line.metric === lowest ? 2.8 : 1.8}
               style={{ animationDelay: `${index * 110}ms` }}
             />
             <line
-              opacity="0.48"
+              opacity={isDimmed ? 0.22 : isSelected ? 0.78 : 0.48}
               stroke={line.metric.color}
-              strokeWidth="1"
+              strokeWidth={isSelected ? 1.5 : 1}
               x1="282"
               x2="294"
               y1={line.endY}
@@ -701,14 +736,23 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
               cx="282"
               cy={line.endY}
               fill={line.metric.color}
-              r={line.metric === lowest ? 4.5 : 3.5}
+              opacity={isDimmed ? 0.42 : 1}
+              r={isSelected ? 5.4 : line.metric === lowest ? 4.5 : 3.5}
             />
-            <text fill={line.metric.color} fontSize="12" fontWeight={line.metric === lowest ? 600 : 400} x="300" y={line.labelY + 4}>
+            <text
+              fill={line.metric.color}
+              fontSize="12"
+              fontWeight={isSelected || line.metric === lowest ? 600 : 400}
+              opacity={isDimmed ? 0.5 : 1}
+              x="300"
+              y={line.labelY + 4}
+            >
               {line.metric.label}
               <tspan dx="5" fill="var(--mp-data-value)" fontWeight="600">{line.metric.percent}%</tspan>
             </text>
           </g>
-        ))}
+          );
+        })}
       </svg>
     </section>
   );
