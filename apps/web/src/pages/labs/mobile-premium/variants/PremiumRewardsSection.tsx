@@ -1006,7 +1006,8 @@ function AchievementShareSheet({
   const [isSharing, setIsSharing] = useState(false);
   const [shareError, setShareError] = useState<string | null>(null);
   const [sealDataUrl, setSealDataUrl] = useState<string | null>(null);
-  const [sealDataUrlResolved, setSealDataUrlResolved] = useState(false);
+  const [sealLoading, setSealLoading] = useState(false);
+  const [sealFailed, setSealFailed] = useState(false);
   const { data: insights, status: insightsStatus } = useRequest(
     () => getTaskInsights(habit.taskId, { range: 'month' }),
     [habit.taskId, backendUserId],
@@ -1023,12 +1024,24 @@ function AchievementShareSheet({
 
   useEffect(() => {
     let cancelled = false;
+    setSealLoading(true);
+    setSealFailed(false);
     setSealDataUrl(null);
-    setSealDataUrlResolved(false);
     void resolveHabitAchievementSealDataUrl(habit).then((dataUrl) => {
       if (cancelled) return;
       setSealDataUrl(dataUrl);
-      setSealDataUrlResolved(true);
+      setSealFailed(!dataUrl);
+      if (!dataUrl && import.meta.env.DEV) {
+        console.warn('Achievement share seal fell back to TraitIcon', {
+          taskId: habit.taskId,
+          traitCode: habit.trait?.code,
+          traitName: habit.trait?.name,
+          pillar: habit.pillar,
+        });
+      }
+    }).finally(() => {
+      if (cancelled) return;
+      setSealLoading(false);
     });
     return () => {
       cancelled = true;
@@ -1037,15 +1050,12 @@ function AchievementShareSheet({
 
   const handleShare = async () => {
     if (!previewRef.current) return;
+    if (sealLoading) return;
     setIsSharing(true);
     setShareError(null);
     try {
-      if (!sealDataUrlResolved) {
-        const dataUrl = await resolveHabitAchievementSealDataUrl(habit);
-        setSealDataUrl(dataUrl);
-        setSealDataUrlResolved(true);
-        await waitForNextFrame();
-      }
+      await waitForNextFrame();
+      await waitForNextFrame();
       await waitForSharePreviewImages(previewRef.current);
       const { toPng } = await import('html-to-image');
       const dataUrl = await toPng(previewRef.current, {
@@ -1127,6 +1137,7 @@ function AchievementShareSheet({
               months={months}
               ref={previewRef}
               sealDataUrl={sealDataUrl}
+              sealFailed={sealFailed}
             />
           </div>
         </div>
@@ -1134,11 +1145,11 @@ function AchievementShareSheet({
         {shareError ? <p className="mt-3 text-sm text-[color:var(--mp-red)]">{shareError}</p> : null}
         <button
           className="mt-4 w-full shrink-0 rounded-full bg-[color:var(--mp-violet)] px-5 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(139,92,246,0.28)] disabled:opacity-60"
-          disabled={isSharing || !sealDataUrlResolved || !insightsResolved}
+          disabled={isSharing || sealLoading || !insightsResolved}
           onClick={() => void handleShare()}
           type="button"
         >
-          {isSharing ? 'Generando...' : sealDataUrlResolved && insightsResolved ? 'Compartir' : 'Preparando...'}
+          {isSharing ? 'Generando...' : sealLoading ? 'Preparando sello...' : insightsResolved ? 'Compartir' : 'Preparando...'}
         </button>
       </div>
     </div>
@@ -1157,7 +1168,8 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
   mode: WeeklyStoryVisualMode;
   months: AchievementShareMonth[];
   sealDataUrl: string | null;
-}>(({ habit, mode, months, sealDataUrl }, ref) => {
+  sealFailed: boolean;
+}>(({ habit, mode, months, sealDataUrl, sealFailed }, ref) => {
   const isLight = mode === 'light';
   const text = isLight ? '#151224' : '#FFF8EF';
   const muted = isLight ? '#655F70' : 'rgba(255,248,239,.7)';
@@ -1195,7 +1207,7 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
       </div>
 
       <div className="relative mx-auto mt-3 grid h-[8.6rem] shrink-0 place-items-center">
-        <AchievementShareSeal habit={habit} sealDataUrl={sealDataUrl} />
+        <AchievementShareSeal habit={habit} sealDataUrl={sealDataUrl} sealFailed={sealFailed} />
       </div>
 
       <div className="relative mt-3 text-center">
@@ -1204,7 +1216,7 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
         {achievedLabel ? <p className="mt-2 text-[0.72rem] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
       </div>
 
-      <div className="relative mt-auto border-t pt-3" style={{ borderColor: line }}>
+      <div className="relative mt-3 border-t pt-3" style={{ borderColor: line }}>
         {visibleMonths.length ? (
           <>
             <p className="text-[9px] font-semibold uppercase tracking-[0.22em]" style={{ color: muted }}>Progreso mensual</p>
@@ -1234,7 +1246,7 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
         )}
       </div>
 
-      <p className="relative mt-3 shrink-0 text-center text-[10px] font-semibold tracking-[0.18em]" style={{ color: softMuted }}>
+      <p className="relative mt-auto shrink-0 pt-3 text-center text-[10px] font-semibold tracking-[0.18em]" style={{ color: softMuted }}>
         innerbloomjourney.org
       </p>
     </div>
@@ -1245,18 +1257,28 @@ AchievementSharePreview.displayName = 'AchievementSharePreview';
 function AchievementShareSeal({
   habit,
   sealDataUrl,
+  sealFailed,
 }: {
   habit: HabitAchievementShelfItem;
   sealDataUrl: string | null;
+  sealFailed: boolean;
 }) {
   if (!sealDataUrl) {
-    return <TraitIcon size={118} trait={habit.trait?.name} />;
+    return (
+      <div
+        aria-label={sealFailed ? `${habit.taskName} fallback seal` : `${habit.taskName} seal loading`}
+        className="grid h-[8.25rem] w-[8.25rem] place-items-center text-[color:var(--mp-violet)]"
+      >
+        <TraitIcon size={118} trait={habit.trait?.name} />
+      </div>
+    );
   }
 
   return (
     <img
       alt={`${habit.taskName} seal`}
       className="h-[8.25rem] w-[8.25rem] object-contain"
+      decoding="sync"
       loading="eager"
       src={sealDataUrl}
     />
@@ -5132,27 +5154,85 @@ function buildFallbackCalibrationRow(
   };
 }
 
-function resolveHabitAchievementSealSrc(habit: HabitAchievementShelfItem) {
+function resolveHabitAchievementSealSrcCandidates(habit: HabitAchievementShelfItem) {
   return resolveHabitAchievementSealCandidates({
     pillar: habit.pillar,
     traitCode: habit.trait?.code,
     traitName: habit.trait?.name,
-  })[0] ?? null;
+  });
 }
 
 async function resolveHabitAchievementSealDataUrl(habit: HabitAchievementShelfItem) {
+  const candidates = resolveHabitAchievementSealSrcCandidates(habit);
+  for (const src of candidates) {
+    const dataUrl = await assetUrlToDataUrl(src);
+    if (dataUrl) return dataUrl;
+    if (import.meta.env.DEV) {
+      console.warn('Achievement share seal candidate failed', {
+        src,
+        taskId: habit.taskId,
+        traitCode: habit.trait?.code,
+        traitName: habit.trait?.name,
+        pillar: habit.pillar,
+      });
+    }
+  }
+  return null;
+}
+
+async function assetUrlToDataUrl(src: string) {
   if (typeof window === 'undefined') return null;
-  const src = resolveHabitAchievementSealSrc(habit);
-  if (!src) return null;
+  const absoluteUrl = new URL(src, window.location.origin).href;
+  const fetched = await fetchAssetAsDataUrl(absoluteUrl);
+  if (fetched) return fetched;
+  return imageAssetToCanvasDataUrl(absoluteUrl);
+}
+
+async function fetchAssetAsDataUrl(absoluteUrl: string) {
   try {
-    const absoluteUrl = new URL(src, window.location.origin).href;
-    const response = await fetch(absoluteUrl, { cache: 'force-cache' });
+    const response = await fetch(absoluteUrl, {
+      cache: 'force-cache',
+      credentials: 'same-origin',
+    });
     if (!response.ok) return null;
     const blob = await response.blob();
+    if (blob.type && !blob.type.startsWith('image/')) return null;
     return await blobToDataUrl(blob);
   } catch {
     return null;
   }
+}
+
+function imageAssetToCanvasDataUrl(absoluteUrl: string) {
+  return new Promise<string | null>((resolve) => {
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.decoding = 'async';
+    image.onload = () => {
+      try {
+        const width = image.naturalWidth || image.width;
+        const height = image.naturalHeight || image.height;
+        if (!width || !height) {
+          resolve(null);
+          return;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext('2d');
+        if (!context) {
+          resolve(null);
+          return;
+        }
+        context.drawImage(image, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      } catch {
+        resolve(null);
+      }
+    };
+    image.onerror = () => resolve(null);
+    image.src = absoluteUrl;
+  });
 }
 
 function blobToDataUrl(blob: Blob) {
@@ -5184,11 +5264,16 @@ async function waitForSharePreviewImages(node: HTMLElement) {
     if (image.complete && image.naturalWidth > 0) return;
     if (typeof image.decode === 'function') {
       await image.decode().catch(() => undefined);
-      return;
+      if (image.naturalWidth > 0) return;
     }
     await new Promise<void>((resolve) => {
-      image.addEventListener('load', () => resolve(), { once: true });
-      image.addEventListener('error', () => resolve(), { once: true });
+      const timeout = window.setTimeout(() => resolve(), 2500);
+      const finish = () => {
+        window.clearTimeout(timeout);
+        resolve();
+      };
+      image.addEventListener('load', finish, { once: true });
+      image.addEventListener('error', finish, { once: true });
     });
   }));
 }
