@@ -30,6 +30,11 @@ type DominantPillarRow = {
   tasks_completed: number | string | null;
 };
 
+type DifficultyRow = {
+  difficulty_code: string | null;
+  tasks_completed: number | string | null;
+};
+
 function buildSlide2(input: BuildMonthlyWrappedInput): MonthlyWrappedPayload['slide_2'] {
   const threshold = Math.ceil(input.tasksTotalEvaluated * 0.8);
   const missingTasks = Math.max(0, threshold - input.tasksMeetingGoal);
@@ -54,6 +59,11 @@ async function getMonthlyKpis(userId: string, periodStart: string, nextPeriodSta
   xpGained: number;
   dominantPillar: string | null;
   dominantPillarTasksCompleted: number;
+  difficulty: {
+    easy: number;
+    medium: number;
+    hard: number;
+  };
 }> {
   const totals = await pool.query<MonthlyKpiRow>(
     `SELECT COALESCE(SUM(dl.quantity), 0)::int AS tasks_completed,
@@ -84,12 +94,37 @@ async function getMonthlyKpis(userId: string, periodStart: string, nextPeriodSta
 
   const totalRow = totals.rows[0];
   const pillarRow = dominantPillarResult.rows[0];
+  const difficultyResult = await pool.query<DifficultyRow>(
+    `SELECT LOWER(cd.code) AS difficulty_code,
+            COALESCE(SUM(dl.quantity), 0)::int AS tasks_completed
+       FROM daily_log dl
+       JOIN tasks t ON t.task_id = dl.task_id
+  LEFT JOIN cat_difficulty cd ON cd.difficulty_id = t.difficulty_id
+      WHERE dl.user_id = $1::uuid
+        AND dl.date >= $2::date
+        AND dl.date < $3::date
+        AND COALESCE(dl.quantity, 0) > 0
+   GROUP BY LOWER(cd.code)`,
+    [userId, periodStart, nextPeriodStart],
+  );
+  const difficulty = difficultyResult.rows.reduce(
+    (acc, row) => {
+      const code = row.difficulty_code ?? '';
+      const completions = Number(row.tasks_completed ?? 0);
+      if (code === 'easy') acc.easy += completions;
+      if (code === 'medium') acc.medium += completions;
+      if (code === 'hard') acc.hard += completions;
+      return acc;
+    },
+    { easy: 0, medium: 0, hard: 0 },
+  );
 
   return {
     tasksCompleted: Number(totalRow?.tasks_completed ?? 0),
     xpGained: Number(totalRow?.xp_gained ?? 0),
     dominantPillar: pillarRow?.dominant_pillar ?? null,
     dominantPillarTasksCompleted: Number(pillarRow?.tasks_completed ?? 0),
+    difficulty,
   };
 }
 
@@ -107,6 +142,7 @@ export async function buildAndPersistMonthlyWrapped(input: BuildMonthlyWrappedIn
     eligible_for_upgrade: input.eligibleForUpgrade,
     suggested_next_mode: input.suggestedNextMode,
     monthly_kpis: kpis,
+    difficulty: kpis.difficulty,
     slide_2: slide2,
   };
 
@@ -131,5 +167,9 @@ export async function buildAndPersistMonthlyWrapped(input: BuildMonthlyWrappedIn
 }
 
 export async function getRewardsHistoryMonthlyWrapups(userId: string): Promise<MonthlyWrappedEntry[]> {
-  return listRecentMonthlyWrapped(userId, 2);
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const entries = await listRecentMonthlyWrapped(userId, 6);
+  return entries
+    .filter((entry) => /^\d{4}-\d{2}$/.test(entry.periodKey) && entry.periodKey < currentMonth)
+    .slice(0, 2);
 }
