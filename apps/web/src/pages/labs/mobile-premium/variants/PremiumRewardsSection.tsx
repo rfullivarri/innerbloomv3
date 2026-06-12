@@ -2368,7 +2368,11 @@ function PremiumMonthlyWrappedStory({
             registerSlide={(el) => (storySlideRefs.current[3] = el)}
             title="Más cerca de lograrlo"
           >
-            <MonthlyNearHabitsStory active={activeStorySlide === 3} habits={monthlyData.nearHabits} />
+            <MonthlyNearHabitsStory
+              active={activeStorySlide === 3}
+              habits={monthlyData.nearHabits}
+              unlockedHabits={monthlyData.unlockedHabits}
+            />
           </WeeklyStorySlide>
 
           <WeeklyStorySlide
@@ -2627,9 +2631,15 @@ type MonthlyStoryData = {
     label: string;
   };
   gpTotal: number;
+  unlockedHabits: Array<{
+    label: string;
+    monthLabel: string;
+    percent: number;
+    title: string;
+  }>;
   nearHabits: Array<{
     label: string;
-    months: Array<{ label: string; percent: number }>;
+    months: Array<{ label: string; percent: number | null }>;
     percent: number;
     title: string;
   }>;
@@ -2766,21 +2776,39 @@ function MonthlyCalibrationStory({
 function MonthlyNearHabitsStory({
   active,
   habits,
+  unlockedHabits,
 }: {
   active: boolean;
   habits: MonthlyStoryData['nearHabits'];
+  unlockedHabits: MonthlyStoryData['unlockedHabits'];
 }) {
   return (
     <div className="flex flex-1 flex-col justify-between gap-[clamp(1rem,3dvh,1.6rem)]">
       <p className="mp-weekly-fragment text-sm leading-relaxed text-[color:var(--weekly-muted)]" style={{ transitionDelay: '120ms' }}>
-        Score mensual de la ventana activa. Verde marca meses dentro del objetivo.
+        Nuevos logros del mes y hábitos que quedaron cerca de desbloquearse.
       </p>
-      <div className="space-y-[clamp(.85rem,2.4dvh,1.25rem)]">
+      <div className="space-y-[clamp(.75rem,2.1dvh,1.05rem)]">
+        {unlockedHabits.length ? (
+          <div className="mp-weekly-fragment rounded-[1.15rem] border border-[#5BE282]/35 bg-[#5BE282]/[0.07] px-4 py-3" style={{ transitionDelay: '200ms' }}>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#5BE282]">Nuevo logro desbloqueado</p>
+            <div className="mt-3 space-y-2.5">
+              {unlockedHabits.map((habit) => (
+                <div className="flex items-start justify-between gap-3" key={`monthly-unlocked-habit-${habit.title}`}>
+                  <div className="min-w-0">
+                    <p className="truncate text-base font-semibold leading-tight text-[color:var(--weekly-title)]">{habit.title}</p>
+                    <p className="mt-0.5 text-xs text-[color:var(--weekly-muted)]">{habit.label} · {habit.monthLabel}</p>
+                  </div>
+                  <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#5BE282]">OK</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
         {habits.length ? habits.map((habit, index) => (
-          <div className="mp-weekly-fragment border-t border-[color:var(--weekly-line)] pt-4" key={`monthly-near-habit-${habit.title}`} style={{ transitionDelay: `${220 + index * 130}ms` }}>
+          <div className="mp-weekly-fragment border-t border-[color:var(--weekly-line)] pt-3.5" key={`monthly-near-habit-${habit.title}`} style={{ transitionDelay: `${260 + index * 130}ms` }}>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xl font-semibold leading-tight text-[color:var(--weekly-title)]">{habit.title}</p>
+                <p className="text-lg font-semibold leading-tight text-[color:var(--weekly-title)]">{habit.title}</p>
                 <p className="mt-1 text-sm text-[color:var(--weekly-muted)]">{habit.label}</p>
               </div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: getMonthlyScoreTone(habit.percent).color }}>
@@ -2789,13 +2817,13 @@ function MonthlyNearHabitsStory({
             </div>
             <div className="mt-4 grid gap-3" style={{ gridTemplateColumns: `repeat(${Math.max(1, habit.months.length)}, minmax(0, 1fr))` }}>
               {habit.months.map((month, monthIndex) => {
-                const tone = getMonthlyScoreTone(month.percent);
+                const tone = getMonthlyScoreTone(month.percent ?? 0);
                 return (
                   <div className="min-w-0" key={`monthly-near-habit-${habit.title}-${month.label}`}>
                     <span className="mb-2 flex items-baseline justify-between gap-2">
                       <span className="text-[10px] uppercase tracking-[0.22em] text-[color:var(--weekly-subtle)]">{month.label}</span>
-                      <span className="text-lg font-semibold leading-none" style={{ color: tone.color }}>
-                        <AnimatedWeeklyNumber active={active} duration={760 + monthIndex * 90} value={month.percent} />%
+                      <span className="text-base font-semibold leading-none" style={{ color: month.percent === null ? 'var(--weekly-subtle)' : tone.color }}>
+                        {month.percent === null ? 's/d' : <><AnimatedWeeklyNumber active={active} duration={760 + monthIndex * 90} value={month.percent} />%</>}
                       </span>
                     </span>
                   <span className="block h-2 overflow-hidden rounded-full bg-[color:var(--weekly-line)]">
@@ -2804,7 +2832,8 @@ function MonthlyNearHabitsStory({
                       style={{
                         backgroundColor: tone.color,
                         transitionDelay: `${620 + monthIndex * 120}ms`,
-                        width: active ? `${month.percent}%` : '0%',
+                        opacity: month.percent === null ? 0 : 1,
+                        width: active ? `${month.percent ?? 0}%` : '0%',
                       }}
                     />
                   </span>
@@ -2815,8 +2844,8 @@ function MonthlyNearHabitsStory({
           </div>
         )) : (
           <div className="mp-weekly-fragment border-t border-[color:var(--weekly-line)] pt-6" style={{ transitionDelay: '220ms' }}>
-            <p className="text-xl font-semibold leading-tight text-[color:var(--weekly-title)]">Sin hábitos evaluados</p>
-            <p className="mt-2 text-sm leading-relaxed text-[color:var(--weekly-muted)]">No hubo recalibración mensual con score disponible para este periodo.</p>
+            <p className="text-xl font-semibold leading-tight text-[color:var(--weekly-title)]">Sin hábitos cerca</p>
+            <p className="mt-2 text-sm leading-relaxed text-[color:var(--weekly-muted)]">No quedaron hábitos entre 50% y 99% para este periodo.</p>
           </div>
         )}
       </div>
@@ -3048,6 +3077,9 @@ function MiniWeeklyEnergyChart({
   energy: WeeklyWrappedRecord['payload']['summary']['energyHighlight'] | undefined;
 }) {
   const metrics = buildWeeklyEnergyRaceMetrics(energy);
+  if (!metrics.length) {
+    return <div className="h-24 rounded-[0.75rem] border border-[color:var(--weekly-line)] bg-white/[0.035]" />;
+  }
   const lines = buildWeeklyEnergyRaceLines(metrics);
 
   return (
@@ -3089,16 +3121,30 @@ function WeeklyEnergyRaceChart({
   energy: WeeklyWrappedRecord['payload']['summary']['energyHighlight'] | undefined;
 }) {
   const metrics = buildWeeklyEnergyRaceMetrics(energy);
+  if (!metrics.length) {
+    return (
+      <div className="mp-weekly-fragment flex min-h-0 flex-1 flex-col justify-center gap-5" style={{ transitionDelay: '180ms' }}>
+        <div className="rounded-[1.3rem] border border-[color:var(--weekly-line)] bg-white/[0.045] px-5 py-6">
+          <p className="text-xs uppercase tracking-[0.28em] text-[#56DDF5]">Datos reales</p>
+          <p className="mt-4 text-2xl font-semibold leading-tight text-[color:var(--weekly-text)]">Este Weekly todavía no tiene serie real guardada.</p>
+          <p className="mt-3 text-sm leading-6 text-[color:var(--weekly-muted)]">
+            Los próximos Wrapped van a usar HP, Mood y Focus reales de Daily Energy para mostrar la variación semanal.
+          </p>
+        </div>
+      </div>
+    );
+  }
   const lines = buildWeeklyEnergyRaceLines(metrics);
   const leader = resolveWeeklyEnergyLeader(metrics);
+  const variationLeader = resolveWeeklyEnergyVariationLeader(metrics);
 
   return (
-    <div className="mp-weekly-fragment grid min-h-0 flex-1 place-items-center" style={{ transitionDelay: '180ms' }}>
+    <div className="mp-weekly-fragment flex min-h-0 flex-1 flex-col justify-center gap-[clamp(1rem,3dvh,1.35rem)]" style={{ transitionDelay: '180ms' }}>
       <svg
-        aria-label={`Energía diaria semanal: ${metrics.map((metric) => `${metric.pillar} ${metric.percent}%`).join(', ')}`}
+        aria-label={`Energía diaria semanal: ${metrics.map((metric) => `${metric.label} ${metric.percent}%`).join(', ')}`}
         className="block max-h-[44dvh] w-full overflow-visible"
         role="img"
-        viewBox="0 0 360 270"
+        viewBox="0 0 360 250"
       >
         <defs>
           <linearGradient id="weekly-energy-area" x1="0" x2="0" y1="0" y2="1">
@@ -3128,30 +3174,63 @@ function WeeklyEnergyRaceChart({
               stroke={line.metric.color}
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={line.metric.key === 'body' ? 3.5 : 2.7}
+              strokeWidth={line.metric.key === variationLeader.key ? 4.2 : 2.5}
+              style={{
+                filter: line.metric.key === variationLeader.key ? `drop-shadow(0 0 10px ${line.metric.color}66)` : undefined,
+                transitionDelay: `${index * 95}ms`,
+              }}
+            />
+            <path
+              d={line.path}
+              fill="none"
+              opacity={line.metric.key === variationLeader.key ? 0.18 : 0}
+              stroke={line.metric.color}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="12"
               style={{ transitionDelay: `${index * 95}ms` }}
             />
             <g className="mp-weekly-race-late" style={{ transitionDelay: `${1110 + index * 70}ms` }}>
               <line opacity="0.46" stroke={line.metric.color} strokeWidth="1.2" x1="260" x2="278" y1={line.endY} y2={line.labelY} />
               <circle cx="260" cy={line.endY} fill={line.metric.color} r="4.4" />
               <text fill={line.metric.color} fontSize="13" fontWeight="600" x="286" y={line.labelY + 4}>
-                {line.metric.pillar}
+                {line.metric.label}
                 <tspan dx="6" fill="var(--weekly-text)" fontWeight="500">{line.metric.percent}%</tspan>
               </text>
             </g>
           </g>
         ))}
-        <text fill="var(--weekly-subtle)" fontSize="10" letterSpacing="1.4" x="8" y="225">HACE 7 DÍAS</text>
-        <text fill="var(--weekly-subtle)" fontSize="10" letterSpacing="1.4" textAnchor="end" x="260" y="225">HOY</text>
+        <text fill="var(--weekly-subtle)" fontSize="10" letterSpacing="1.4" x="8" y="222">HACE 7 DÍAS</text>
+        <text fill="var(--weekly-subtle)" fontSize="10" letterSpacing="1.4" textAnchor="end" x="260" y="222">HOY</text>
         <g className="mp-weekly-race-late" style={{ transitionDelay: '2520ms' }}>
-          <text fill="var(--weekly-muted)" fontSize="13" x="8" y="254">
-            <tspan fill={leader.color} fontWeight="700">{leader.pillar}</tspan>
+          <text fill="var(--weekly-muted)" fontSize="13" x="8" y="246">
+            <tspan fill={leader.color} fontWeight="700">{leader.label}</tspan>
             <tspan> lideró </tspan>
             <tspan fill="var(--weekly-text)" fontWeight="700">{leader.days}/7</tspan>
             <tspan> días</tspan>
           </text>
         </g>
       </svg>
+      <div className="mp-weekly-race-late space-y-3" style={{ transitionDelay: '2620ms' }}>
+        <div className="rounded-[1.1rem] border border-[color:var(--weekly-line)] bg-white/[0.045] px-4 py-3">
+          <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--weekly-subtle)]">Mayor variación</p>
+          <div className="mt-2 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-2xl font-semibold leading-none" style={{ color: variationLeader.color }}>{variationLeader.label}</p>
+              <p className="mt-1 text-xs text-[color:var(--weekly-muted)]">{variationLeader.pillar}</p>
+            </div>
+            <p className="text-3xl font-semibold leading-none" style={{ color: variationLeader.color }}>{formatSignedPct(variationLeader.deltaPct ?? 0)}</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {metrics.map((metric) => (
+            <div className="rounded-[0.85rem] border border-[color:var(--weekly-line)] bg-white/[0.035] px-3 py-2" key={`weekly-energy-delta-${metric.key}`}>
+              <p className="text-sm font-semibold" style={{ color: metric.color }}>{metric.label}</p>
+              <p className="mt-1 text-xs text-[color:var(--weekly-muted)]">{formatSignedPct(metric.deltaPct ?? 0)}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -3802,7 +3881,13 @@ function MonthlySharePreview({
         <div className={`relative ${full ? 'mt-10' : 'mt-3'}`}>
           <p className={`${full ? 'text-[12px]' : 'text-[5px]'} font-semibold uppercase tracking-[0.28em]`} style={{ color: violet }}>Hábitos</p>
           <p className={`${full ? 'mt-4 text-[2.45rem]' : 'mt-1 text-[13px]'} font-semibold leading-[0.95]`}>Más cerca de lograrlo</p>
-          <div className={`${full ? 'mt-10 space-y-8' : 'mt-3 space-y-2.5'}`}>
+          {data.unlockedHabits[0] ? (
+            <div className={`${full ? 'mt-8 rounded-3xl p-4' : 'mt-2 rounded-lg p-1.5'} border border-[#5BE282]/30 bg-[#5BE282]/10`}>
+              <p className={`${full ? 'text-[10px]' : 'text-[4px]'} uppercase tracking-[0.22em] text-[#5BE282]`}>Nuevo logro desbloqueado</p>
+              <p className={`${full ? 'mt-2 text-xl' : 'mt-1 text-[7px]'} truncate font-semibold`}>{data.unlockedHabits[0].title}</p>
+            </div>
+          ) : null}
+          <div className={`${full ? 'mt-8 space-y-7' : 'mt-2.5 space-y-2'}`}>
             {data.nearHabits.map((habit) => (
               <div key={`monthly-share-habit-${habit.title}`}>
                 <div className="flex items-start justify-between gap-2">
@@ -3815,7 +3900,7 @@ function MonthlySharePreview({
                 <div className={`${full ? 'mt-4 gap-3' : 'mt-1.5 gap-1'} grid grid-cols-3`}>
                   {habit.months.map((month) => (
                     <span className={`${full ? 'h-2' : 'h-1'} rounded-full bg-black/10`} key={`monthly-share-habit-${habit.title}-${month.label}`}>
-                      <span className="block h-full rounded-full" style={{ backgroundColor: getMonthlyScoreTone(month.percent).color, width: `${month.percent}%` }} />
+                      <span className="block h-full rounded-full" style={{ backgroundColor: getMonthlyScoreTone(month.percent ?? 0).color, opacity: month.percent === null ? 0 : 1, width: `${month.percent ?? 0}%` }} />
                     </span>
                   ))}
                 </div>
@@ -3999,35 +4084,56 @@ function getWeeklyPillarColor(pillar: RewardsPillarCode) {
   return '#56DDF5';
 }
 
-function buildWeeklyEnergyRaceMetrics(energy: WeeklyWrappedRecord['payload']['summary']['energyHighlight'] | undefined) {
-  const highlightedValue = Math.round(Math.max(0, Math.min(100, energy?.value ?? 74)));
-  const metricKey = (energy?.metric ?? 'HP').toUpperCase();
-  return [
-    {
-      key: 'body',
-      pillar: 'Cuerpo',
-      color: '#56DDF5',
-      percent: metricKey === 'HP' ? highlightedValue : 74,
-      points: [70, 66, 73, 68, 75, 76, metricKey === 'HP' ? highlightedValue : 74],
-    },
-    {
-      key: 'soul',
-      pillar: 'Alma',
-      color: '#F7C86A',
-      percent: metricKey === 'MOOD' ? highlightedValue : 56,
-      points: [48, 54, 52, 58, 57, 66, metricKey === 'MOOD' ? highlightedValue : 56],
-    },
-    {
-      key: 'mind',
-      pillar: 'Mente',
-      color: '#A78BFA',
-      percent: metricKey === 'FOCUS' ? highlightedValue : 42,
-      points: [58, 55, 61, 57, 52, 45, metricKey === 'FOCUS' ? highlightedValue : 42],
-    },
-  ];
+type WeeklyEnergyHighlight = WeeklyWrappedRecord['payload']['summary']['energyHighlight'];
+type WeeklyEnergyRaceMetric = {
+  key: 'body' | 'soul' | 'mind';
+  label: 'HP' | 'Mood' | 'Focus';
+  pillar: 'Cuerpo' | 'Alma' | 'Mente';
+  color: string;
+  percent: number;
+  deltaPct: number | null;
+  points: number[];
+};
+
+function buildWeeklyEnergyRaceMetrics(energy: WeeklyEnergyHighlight | undefined): WeeklyEnergyRaceMetric[] {
+  const realMetrics = energy?.metrics;
+  if (realMetrics?.length) {
+    const sourceByMetric = new Map(realMetrics.map((metric) => [metric.metric, metric]));
+    return [
+      {
+        key: 'body',
+        label: 'HP',
+        pillar: 'Cuerpo',
+        color: '#56DDF5',
+        percent: clampWeeklyEnergyPercent(sourceByMetric.get('HP')?.value ?? energy?.value ?? 0),
+        deltaPct: normalizeWeeklyDelta(sourceByMetric.get('HP')?.deltaPct),
+        points: normalizeWeeklyEnergyPoints(sourceByMetric.get('HP')?.points, sourceByMetric.get('HP')?.value ?? energy?.value ?? 0),
+      },
+      {
+        key: 'soul',
+        label: 'Mood',
+        pillar: 'Alma',
+        color: '#F7C86A',
+        percent: clampWeeklyEnergyPercent(sourceByMetric.get('MOOD')?.value ?? 0),
+        deltaPct: normalizeWeeklyDelta(sourceByMetric.get('MOOD')?.deltaPct),
+        points: normalizeWeeklyEnergyPoints(sourceByMetric.get('MOOD')?.points, sourceByMetric.get('MOOD')?.value ?? 0),
+      },
+      {
+        key: 'mind',
+        label: 'Focus',
+        pillar: 'Mente',
+        color: '#A78BFA',
+        percent: clampWeeklyEnergyPercent(sourceByMetric.get('FOCUS')?.value ?? 0),
+        deltaPct: normalizeWeeklyDelta(sourceByMetric.get('FOCUS')?.deltaPct),
+        points: normalizeWeeklyEnergyPoints(sourceByMetric.get('FOCUS')?.points, sourceByMetric.get('FOCUS')?.value ?? 0),
+      },
+    ];
+  }
+
+  return [];
 }
 
-function buildWeeklyEnergyRaceLines(metrics: ReturnType<typeof buildWeeklyEnergyRaceMetrics>) {
+function buildWeeklyEnergyRaceLines(metrics: WeeklyEnergyRaceMetric[]) {
   const lines = metrics.map((metric) => ({
     metric,
     path: buildWeeklyEnergyPath(metric.points),
@@ -4048,7 +4154,7 @@ function buildWeeklyEnergyRaceLines(metrics: ReturnType<typeof buildWeeklyEnergy
   return lines;
 }
 
-function resolveWeeklyEnergyLeader(metrics: ReturnType<typeof buildWeeklyEnergyRaceMetrics>) {
+function resolveWeeklyEnergyLeader(metrics: WeeklyEnergyRaceMetric[]) {
   const days = Math.max(...metrics.map((metric) => metric.points.length), 0);
   const leaderCounts = new Map<string, number>();
 
@@ -4063,8 +4169,45 @@ function resolveWeeklyEnergyLeader(metrics: ReturnType<typeof buildWeeklyEnergyR
 
   return metrics.reduce((best, metric) => {
     const count = leaderCounts.get(metric.key) ?? 0;
-    return count > best.days ? { pillar: metric.pillar, color: metric.color, days: count } : best;
-  }, { pillar: metrics[0]?.pillar ?? 'Cuerpo', color: metrics[0]?.color ?? '#56DDF5', days: 0 });
+    return count > best.days ? { label: metric.label, pillar: metric.pillar, color: metric.color, days: count } : best;
+  }, { label: metrics[0]?.label ?? 'HP', pillar: metrics[0]?.pillar ?? 'Cuerpo', color: metrics[0]?.color ?? '#56DDF5', days: 0 });
+}
+
+function resolveWeeklyEnergyVariationLeader(metrics: WeeklyEnergyRaceMetric[]) {
+  return metrics.reduce((best, metric) => {
+    const metricDelta = Math.abs(metric.deltaPct ?? 0);
+    const bestDelta = Math.abs(best.deltaPct ?? 0);
+    return metricDelta > bestDelta ? metric : best;
+  }, metrics[0] ?? {
+    key: 'body',
+    label: 'HP',
+    pillar: 'Cuerpo',
+    color: '#56DDF5',
+    percent: 0,
+    deltaPct: 0,
+    points: [0, 0],
+  });
+}
+
+function clampWeeklyEnergyPercent(value: number | null | undefined) {
+  const numeric = Number(value ?? 0);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.max(0, Math.min(100, Math.round(numeric)));
+}
+
+function normalizeWeeklyDelta(value: number | null | undefined) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return null;
+  return Math.round(numeric * 10) / 10;
+}
+
+function normalizeWeeklyEnergyPoints(points: number[] | null | undefined, fallback: number | null | undefined) {
+  const normalized = (points ?? [])
+    .map((point) => clampWeeklyEnergyPercent(point))
+    .filter((point) => Number.isFinite(point));
+  if (normalized.length > 0) return normalized.slice(-7);
+  const fallbackValue = clampWeeklyEnergyPercent(fallback);
+  return [fallbackValue, fallbackValue];
 }
 
 function buildWeeklyEnergyPath(points: number[]) {
@@ -4301,7 +4444,7 @@ function buildMonthlyStoryData(monthly: MonthlyWrappedRecord, rewards: RewardsHi
   const completedTasks = resolveMonthlyCompletedTasks(monthly);
   const difficulty = resolveMonthlyDifficulty(monthly);
   const calibration = resolveMonthlyCalibrationStory(rewards.growthCalibration);
-  const nearHabits = resolveMonthlyNearHabits(rewards);
+  const habitProgress = resolveMonthlyHabitProgress(rewards, monthly.periodKey);
   const emotion = resolveMonthlyEmotionStory(monthly);
   const rhythm = resolveMonthlyRhythmStory(monthly);
 
@@ -4312,11 +4455,12 @@ function buildMonthlyStoryData(monthly: MonthlyWrappedRecord, rewards: RewardsHi
     difficulty,
     emotion,
     gpTotal,
-    nearHabits,
+    nearHabits: habitProgress.nearHabits,
     periodLabel: formatMonthlyPeriodLabel(monthly.periodKey),
     rhythm,
     totalDays,
     trackedDays,
+    unlockedHabits: habitProgress.unlockedHabits,
   };
 }
 
@@ -4381,25 +4525,60 @@ function resolveMonthlyCalibrationStory(growth: RewardsHistorySummary['growthCal
   };
 }
 
-function resolveMonthlyNearHabits(rewards: RewardsHistorySummary): MonthlyStoryData['nearHabits'] {
-  return resolveCalibrationResults(rewards.growthCalibration)
+function resolveMonthlyHabitProgress(
+  rewards: RewardsHistorySummary,
+  periodKey: string,
+): Pick<MonthlyStoryData, 'nearHabits' | 'unlockedHabits'> {
+  const currentPeriod = periodKey.slice(0, 7);
+  const rows = resolveCalibrationResults(rewards.growthCalibration)
     .filter((row) => Number.isFinite(row.completionRatePct))
+    .filter((row) => {
+      const rowPeriod = row.evaluationMonthLabel?.slice(0, 7);
+      return !rowPeriod || rowPeriod === currentPeriod || rowPeriod === rewards.growthCalibration.latestPeriodLabel?.slice(0, 7);
+    });
+  const periodWindow = buildMonthlyPeriodWindow(currentPeriod);
+  const unlockedHabits = rows
+    .filter((row) => clampMonthlyScore(row.completionRatePct) >= 100)
+    .sort((a, b) => a.taskTitle.localeCompare(b.taskTitle, 'es', { sensitivity: 'base' }))
+    .slice(0, 2)
+    .map((row) => ({
+      label: row.pillar ?? 'Tarea',
+      monthLabel: formatMonthFromPeriod(row.evaluationMonthLabel) ?? formatMonthFromPeriod(currentPeriod) ?? 'Mes',
+      percent: 100,
+      title: row.taskTitle,
+    }));
+  const nearHabits = rows
+    .filter((row) => {
+      const percent = clampMonthlyScore(row.completionRatePct);
+      return percent >= 50 && percent < 100;
+    })
     .sort((a, b) => b.completionRatePct - a.completionRatePct)
     .slice(0, 3)
     .map((row) => {
       const percent = clampMonthlyScore(row.completionRatePct);
+      const rowPeriod = row.evaluationMonthLabel?.slice(0, 7) || currentPeriod;
       return {
         label: row.pillar ?? 'Tarea',
-        months: [
-          {
-            label: formatMonthFromPeriod(row.evaluationMonthLabel) ?? formatMonthFromPeriod(rewards.growthCalibration.latestPeriodLabel) ?? 'Mes',
-            percent,
-          },
-        ],
+        months: periodWindow.map((period) => ({
+          label: formatMonthFromPeriod(period) ?? 'Mes',
+          percent: period === rowPeriod ? percent : null,
+        })),
         percent,
         title: row.taskTitle,
       };
     });
+  return { nearHabits, unlockedHabits };
+}
+
+function buildMonthlyPeriodWindow(periodKey: string) {
+  const [yearRaw, monthRaw] = periodKey.split('-');
+  const year = Number(yearRaw);
+  const month = Number(monthRaw);
+  if (!Number.isFinite(year) || !Number.isFinite(month)) return [periodKey];
+  return Array.from({ length: 3 }, (_, index) => {
+    const date = new Date(year, month - 1 - (2 - index), 1);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  });
 }
 
 function resolveMonthlyRhythmStory(monthly: MonthlyWrappedRecord) {
@@ -4446,7 +4625,8 @@ function clampMonthlyScore(value: number) {
 }
 
 function getMonthlyScoreTone(percent: number) {
-  if (percent >= 80) return { color: '#5BE282', label: 'OK' };
+  if (percent >= 100) return { color: '#5BE282', label: 'OK' };
+  if (percent >= 80) return { color: '#5BE282', label: 'Cerca' };
   if (percent >= 50) return { color: '#F7C86A', label: 'En progreso' };
   return { color: '#FF6B6B', label: 'Frágil' };
 }
