@@ -2432,7 +2432,7 @@ function VisionPanel({
   weeklyTarget: number | null;
 }) {
   const weeklyGoal = Math.max(1, Math.round(weeklyTarget ?? 3));
-  const { data } = useRequest(
+  const { data, status } = useRequest(
     async () => {
       if (!backendUserId) return null;
       const groups = await Promise.all(
@@ -2469,6 +2469,7 @@ function VisionPanel({
     ),
     [backendUserId, data, localSnapshot, weeklyGoal],
   );
+  const isLoading = Boolean(backendUserId && status === 'loading' && !data);
   const localHistoryDays = new Set(localSnapshot?.dquestHistory.map((record) => record.date) ?? []).size;
   const hasEnoughHistory = localSnapshot
     ? localHistoryDays >= 7
@@ -2488,23 +2489,29 @@ function VisionPanel({
     <section className="space-y-8">
       <LabBackHeader />
 
-      <VisionListSection empty="No hay tareas en racha." title="En racha">
-        {streakRows.map((row) => (
-          <VisionStreakRow key={`streak-${row.id}`} row={row} />
-        ))}
-      </VisionListSection>
+      {isLoading ? (
+        <VisionLoadingState />
+      ) : (
+        <>
+          <VisionListSection empty="No hay tareas en racha." title="En racha">
+            {streakRows.map((row) => (
+              <VisionStreakRow key={`streak-${row.id}`} row={row} />
+            ))}
+          </VisionListSection>
 
-      <VisionListSection empty={hasEnoughHistory ? 'No hay tareas que necesiten atención todavía.' : 'A partir de la primera semana podremos revisar qué tareas necesitan más atención.'} title="Necesitan atención">
-        {attentionRows.slice(0, 3).map((row) => (
-          <VisionAttentionRow key={`attention-${row.id}`} row={row} />
-        ))}
-      </VisionListSection>
+          <VisionListSection empty={hasEnoughHistory ? 'No hay tareas que necesiten atención todavía.' : 'A partir de la primera semana podremos revisar qué tareas necesitan más atención.'} title="Necesitan atención">
+            {attentionRows.map((row) => (
+              <VisionAttentionRow key={`attention-${row.id}`} row={row} />
+            ))}
+          </VisionListSection>
 
-      <VisionListSection empty="No hay tareas cerca del hábito." title="Cerca del hábito">
-        {nearHabitRows.map((row) => (
-          <VisionNearHabitRow key={`near-${row.id}`} row={row} />
-        ))}
-      </VisionListSection>
+          <VisionListSection empty="No hay tareas cerca del hábito." title="Cerca del hábito">
+            {nearHabitRows.map((row) => (
+              <VisionNearHabitRow key={`near-${row.id}`} row={row} />
+            ))}
+          </VisionListSection>
+        </>
+      )}
     </section>
   );
 }
@@ -2805,14 +2812,40 @@ function formatGp(value: number) {
   return new Intl.NumberFormat('es', { maximumFractionDigits: 0 }).format(value);
 }
 
+function VisionLoadingState() {
+  return (
+    <section className="grid min-h-[18rem] place-items-center border-b border-[color:var(--mp-border)] py-12">
+      <div className="grid justify-items-center gap-4 text-[color:var(--mp-text-secondary)]">
+        <span className="h-10 w-10 animate-spin rounded-full border-2 border-[color:var(--mp-border)] border-t-[color:var(--mp-violet)]" />
+        <p className="text-sm font-medium">Cargando visión general...</p>
+      </div>
+    </section>
+  );
+}
+
 function VisionListSection({ title, empty, children }: { title: string; empty: string; children: ReactNode }) {
-  const count = Children.count(children);
+  const [expanded, setExpanded] = useState(false);
+  const items = Children.toArray(children);
+  const count = items.length;
+  const visibleItems = expanded ? items : items.slice(0, 3);
+  const hiddenCount = Math.max(0, count - 3);
   return (
     <section className="space-y-3">
       <h2 className="text-xl font-semibold text-[color:var(--mp-text)]">{title}</h2>
       <div>
         {count > 0 ? (
-          children
+          <>
+            {visibleItems}
+            {hiddenCount > 0 ? (
+              <button
+                className="mt-3 min-h-10 rounded-full border border-[color:var(--mp-border)] px-4 text-sm font-semibold text-[color:var(--mp-violet)] transition hover:bg-violet-400/10"
+                onClick={() => setExpanded((current) => !current)}
+                type="button"
+              >
+                {expanded ? 'Ver menos' : `Ver ${hiddenCount} más`}
+              </button>
+            ) : null}
+          </>
         ) : (
           <p className="border-b border-[color:var(--mp-border)] py-4 text-sm text-[color:var(--mp-text-secondary)]">{empty}</p>
         )}
@@ -2916,9 +2949,22 @@ function isValidHabitSlot(slot: unknown) {
 }
 
 function isNearHabit(row: VisionTaskRow) {
-  if (row.lifecycleStatus === 'achieved' || row.lifecycleStatus === 'maintained') return false;
+  if (isTaskAchievedHabit(row)) return false;
   const slots = row.insights?.previewAchievement?.windowProximity?.slots ?? [];
   return slots.filter(isValidHabitSlot).length >= 2 && slots.length === 3;
+}
+
+function isTaskAchievedHabit(row: Pick<PremiumTaskRow, 'achievementSealVisible' | 'lifecycleStatus'>) {
+  const status = (row.lifecycleStatus ?? '').trim().toLowerCase();
+  return Boolean(
+    row.achievementSealVisible ||
+    status === 'achieved' ||
+    status === 'maintained' ||
+    status === 'stored' ||
+    status === 'achievement_pending' ||
+    status === 'achievement_maintained' ||
+    status === 'achievement_stored',
+  );
 }
 
 function resolveHabitWindowScore(row: VisionTaskRow) {
