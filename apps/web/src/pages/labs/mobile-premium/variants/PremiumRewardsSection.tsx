@@ -1742,12 +1742,15 @@ function PremiumWeeklyWrappedStory({
             opacity: 1;
             transform: translateY(0);
           }
-          .mp-weekly-radar-final {
+          .mp-weekly-radar-final,
+          .mp-weekly-radar-label {
             opacity: 0;
             transform: translateY(14px);
             transition: opacity 700ms 4200ms ease, transform 700ms 4200ms cubic-bezier(.2,.8,.2,1);
           }
-          .mp-weekly-slide-active .mp-weekly-radar-final {
+
+          .mp-weekly-slide-active .mp-weekly-radar-final,
+          .mp-weekly-slide-active .mp-weekly-radar-label {
             opacity: 1;
             transform: translateY(0);
           }
@@ -1821,7 +1824,7 @@ function PremiumWeeklyWrappedStory({
           .mp-weekly-emotion-active { animation: mpWeeklyEmotionPulse 2.8s ease-in-out infinite; color: inherit; }
           @media (prefers-reduced-motion: reduce) {
             .mp-weekly-story-in, .mp-weekly-story-glow, .mp-weekly-emotion-active, .mp-weekly-check-in, .mp-weekly-radar-polygon, .mp-weekly-arc-svg { animation: none !important; }
-            .mp-weekly-fragment, .mp-weekly-race-late, .mp-weekly-radar-reveal, .mp-weekly-radar-stage, .mp-weekly-radar-final, .mp-weekly-radar-dominant-fill, .mp-weekly-radar-glow, .mp-weekly-late-text, .mp-weekly-radar-percent, .mp-weekly-emotion-orb { opacity: 1 !important; transform: none !important; transition: none !important; }
+            .mp-weekly-fragment, .mp-weekly-race-late, .mp-weekly-radar-reveal, .mp-weekly-radar-stage, .mp-weekly-radar-final, .mp-weekly-radar-label, .mp-weekly-radar-dominant-fill, .mp-weekly-radar-glow, .mp-weekly-late-text, .mp-weekly-radar-percent, .mp-weekly-emotion-orb { opacity: 1 !important;  transform: none !important;  transition: none !important;}
             .mp-weekly-bar, .mp-weekly-race-line, .mp-weekly-radar-polygon, .mp-weekly-arc-path { transition: none !important; stroke-dashoffset: 0 !important; }
           }
         `}
@@ -2043,6 +2046,7 @@ function PremiumWeeklyWrappedStory({
             index={emotionSlideIndex}
             registerSlide={(el) => (storySlideRefs.current[emotionSlideIndex] = el)}
             title={emotion?.label ?? 'Pulso semanal'}
+            titleDelay="2800ms"
           >
             <div className="flex flex-1 flex-col justify-between gap-8">
               <div className="mp-weekly-fragment relative grid flex-1 place-items-center py-[clamp(1rem,4dvh,2.5rem)]" style={{ transitionDelay: '120ms' }}>
@@ -2816,6 +2820,7 @@ function WeeklyStorySlide({
   index,
   registerSlide,
   title,
+  titleDelay = '95ms',
 }: {
   accent: string;
   active: boolean;
@@ -2824,6 +2829,7 @@ function WeeklyStorySlide({
   index: number;
   registerSlide: (el: HTMLElement | null) => void;
   title: string;
+  titleDelay?: string;
 }) {
   return (
     <section
@@ -2852,7 +2858,7 @@ function WeeklyStorySlide({
             style={{ color: 'var(--weekly-brand)', transitionDelay: '0ms' }}
           />
           <p className="mp-weekly-fragment mt-[clamp(.9rem,2.4dvh,1.25rem)] text-xs font-semibold uppercase tracking-[0.34em]" style={{ color: accent, transitionDelay: '40ms' }}>{eyebrow}</p>
-          <h2 className="mp-weekly-fragment mt-3 text-[clamp(2.45rem,10.5vw,3.35rem)] font-semibold leading-[0.96] tracking-[-0.035em] text-[color:var(--weekly-title)]" style={{ transitionDelay: '95ms' }}>{title}</h2>
+          <h2 className="mp-weekly-fragment mt-3 text-[clamp(2.45rem,10.5vw,3.35rem)] font-semibold leading-[0.96] tracking-[-0.035em] text-[color:var(--weekly-title)]" style={{ transitionDelay: titleDelay }}>{title}</h2>
         </div>
         <div className="flex min-h-0 flex-1 flex-col">{children}</div>
       </div>
