@@ -148,7 +148,7 @@ export function PremiumDashboard({
     { enabled: Boolean(backendUserId) },
   );
   const energyEndDate = energyData?.trend?.currentDate ?? formatDateKey(new Date());
-  const energyStartDate = shiftDateKey(energyEndDate, -7);
+  const energyStartDate = shiftDateKey(energyEndDate, -6);
   const { data: energySeriesData } = useRequest(
     () => getUserStateTimeseries(backendUserId ?? '', { from: energyStartDate, to: energyEndDate }),
     [backendUserId, energyStartDate, energyEndDate],
@@ -887,9 +887,15 @@ function buildEnergySummary(
   allowFallback = true,
 ) {
   const hasRealData = Boolean(data);
-  const hasHistory = hasRealData ? Boolean(data?.trend?.hasHistory) : allowFallback;
+  const normalizedSeries = normalizeEnergySeries(series);
+  const hasMatureSeries = normalizedSeries.length >= 7;
+  const hasHistory = hasRealData ? hasMatureSeries : allowFallback;
   const trend = data?.trend?.pillars;
-  const points = hasRealData ? series?.slice(-8) ?? [] : allowFallback ? FALLBACK_ENERGY_SERIES : [];
+  const points = hasRealData ? normalizedSeries : allowFallback ? FALLBACK_ENERGY_SERIES.slice(-7) : [];
+  const latestSeriesPoint = points.at(-1) ?? null;
+  const bodyPercent = latestSeriesPoint ? latestSeriesPoint.Body : hasRealData ? data?.hp_pct : allowFallback ? 74 : 0;
+  const soulPercent = latestSeriesPoint ? latestSeriesPoint.Soul : hasRealData ? data?.mood_pct : allowFallback ? 56 : 0;
+  const mindPercent = latestSeriesPoint ? latestSeriesPoint.Mind : hasRealData ? data?.focus_pct : allowFallback ? 42 : 0;
 
   return {
     hasHistory,
@@ -897,47 +903,50 @@ function buildEnergySummary(
       {
         label: 'HP',
         pillar: 'Cuerpo',
-        percent: clampEnergyLevel(hasRealData ? data?.hp_pct : allowFallback ? 74 : 0),
+        percent: clampEnergyLevel(bodyPercent),
         deltaPct: hasHistory ? (hasRealData ? trend?.Body.deltaPct ?? null : -2.8) : null,
-        points: buildEnergyPoints(points, 'Body', hasRealData ? data?.hp_pct : allowFallback ? 74 : 0, trend?.Body.previous),
+        points: buildEnergyPoints(points, 'Body', bodyPercent),
         color: 'var(--mp-body)',
       },
       {
         label: 'Mood',
         pillar: 'Alma',
-        percent: clampEnergyLevel(hasRealData ? data?.mood_pct : allowFallback ? 56 : 0),
+        percent: clampEnergyLevel(soulPercent),
         deltaPct: hasHistory ? (hasRealData ? trend?.Soul.deltaPct ?? null : 53.7) : null,
-        points: buildEnergyPoints(points, 'Soul', hasRealData ? data?.mood_pct : allowFallback ? 56 : 0, trend?.Soul.previous),
+        points: buildEnergyPoints(points, 'Soul', soulPercent),
         color: '#f5c56b',
       },
       {
         label: 'Focus',
         pillar: 'Mente',
-        percent: clampEnergyLevel(hasRealData ? data?.focus_pct : allowFallback ? 42 : 0),
+        percent: clampEnergyLevel(mindPercent),
         deltaPct: hasHistory ? (hasRealData ? trend?.Mind.deltaPct ?? null : -18.2) : null,
-        points: buildEnergyPoints(points, 'Mind', hasRealData ? data?.focus_pct : allowFallback ? 42 : 0, trend?.Mind.previous),
+        points: buildEnergyPoints(points, 'Mind', mindPercent),
         color: '#a78bfa',
       },
     ],
   };
 }
 
+function normalizeEnergySeries(series: EnergyTimeseriesPoint[] | null | undefined) {
+  return (series ?? [])
+    .filter((point) => point?.date)
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-7);
+}
+
 function buildEnergyPoints(
   series: EnergyTimeseriesPoint[],
   pillar: 'Body' | 'Mind' | 'Soul',
   current: number | null | undefined,
-  previous: number | null | undefined,
 ) {
   const currentValue = clampEnergyLevel(current);
   if (series.length > 0) {
-    const values = series.map((point) => clampEnergyLevel(point[pillar]));
-    values[values.length - 1] = currentValue;
-    return values;
+    return series.map((point) => clampEnergyLevel(point[pillar]));
   }
 
-  return typeof previous === 'number'
-    ? [clampEnergyLevel(previous), currentValue]
-    : [currentValue, currentValue];
+  return [currentValue, currentValue];
 }
 
 function buildEnergyChart(metrics: ReturnType<typeof buildEnergySummary>['metrics']) {
