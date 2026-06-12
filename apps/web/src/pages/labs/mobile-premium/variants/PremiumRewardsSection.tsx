@@ -1063,7 +1063,10 @@ function AchievementShareSheet({
         cacheBust: true,
         backgroundColor: mode === 'light' ? '#FFF8EF' : '#05050A',
       });
-      const blob = await dataUrlToBlob(dataUrl);
+      const finalDataUrl = sealDataUrl
+        ? await paintSealOverExportedShareImage(dataUrl, previewRef.current, sealDataUrl)
+        : dataUrl;
+      const blob = await dataUrlToBlob(finalDataUrl);
       const slug = slugifyShareFilename(habit.taskName || 'habito-logrado');
       const file = new File([blob], `innerbloom-habito-logrado-${slug}.png`, { type: 'image/png' });
       const browserNavigator = typeof navigator === 'undefined' ? null : navigator as Navigator & {
@@ -1078,7 +1081,7 @@ function AchievementShareSheet({
           text: `${habit.taskName} · 3 meses de constancia`,
         });
       } else {
-        downloadShareImage(dataUrl, file.name);
+        downloadShareImage(finalDataUrl, file.name);
       }
     } catch (error) {
       console.error('Failed to generate achievement share image', error);
@@ -1268,6 +1271,7 @@ function AchievementShareSeal({
       <div
         aria-label={sealFailed ? `${habit.taskName} fallback seal` : `${habit.taskName} seal loading`}
         className="grid h-[8.25rem] w-[8.25rem] place-items-center text-[color:var(--mp-violet)]"
+        data-achievement-share-seal="true"
       >
         <TraitIcon size={118} trait={habit.trait?.name} />
       </div>
@@ -1278,6 +1282,7 @@ function AchievementShareSeal({
     <img
       alt={`${habit.taskName} seal`}
       className="h-[8.25rem] w-[8.25rem] object-contain"
+      data-achievement-share-seal="true"
       decoding="sync"
       loading="eager"
       src={sealDataUrl}
@@ -5232,6 +5237,53 @@ function imageAssetToCanvasDataUrl(absoluteUrl: string) {
     };
     image.onerror = () => resolve(null);
     image.src = absoluteUrl;
+  });
+}
+
+async function paintSealOverExportedShareImage(
+  shareDataUrl: string,
+  previewNode: HTMLElement,
+  sealDataUrl: string,
+) {
+  const sealNode = previewNode.querySelector('[data-achievement-share-seal="true"]') as HTMLElement | null;
+  if (!sealNode) return shareDataUrl;
+  try {
+    const [shareImage, sealImage] = await Promise.all([
+      loadImageElement(shareDataUrl),
+      loadImageElement(sealDataUrl),
+    ]);
+    const previewRect = previewNode.getBoundingClientRect();
+    const sealRect = sealNode.getBoundingClientRect();
+    if (!previewRect.width || !previewRect.height || !sealRect.width || !sealRect.height) return shareDataUrl;
+
+    const scaleX = shareImage.naturalWidth / previewRect.width;
+    const scaleY = shareImage.naturalHeight / previewRect.height;
+    const canvas = document.createElement('canvas');
+    canvas.width = shareImage.naturalWidth;
+    canvas.height = shareImage.naturalHeight;
+    const context = canvas.getContext('2d');
+    if (!context) return shareDataUrl;
+
+    context.drawImage(shareImage, 0, 0);
+    context.drawImage(
+      sealImage,
+      (sealRect.left - previewRect.left) * scaleX,
+      (sealRect.top - previewRect.top) * scaleY,
+      sealRect.width * scaleX,
+      sealRect.height * scaleY,
+    );
+    return canvas.toDataURL('image/png');
+  } catch {
+    return shareDataUrl;
+  }
+}
+
+function loadImageElement(src: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('Image failed to load'));
+    image.src = src;
   });
 }
 
