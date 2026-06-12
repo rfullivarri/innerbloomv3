@@ -89,6 +89,34 @@ export async function getXpBaseByPillar(userId: string): Promise<XpBaseByPillar>
   return base;
 }
 
+export async function getDailyEnergyXpBaseByPillar(userId: string): Promise<XpBaseByPillar> {
+  const result = await pool.query<{
+    pillar_id: number;
+    xp_base: string | number;
+  }>(
+    `SELECT t.pillar_id, SUM(t.xp_base) AS xp_base
+      FROM tasks t
+      WHERE t.user_id = $1
+        AND t.active = true
+   GROUP BY t.pillar_id`,
+    [userId],
+  );
+
+  const base: XpBaseByPillar = { Body: 0, Mind: 0, Soul: 0 };
+
+  for (const row of result.rows) {
+    const pillarName = PILLAR_ID_TO_NAME[row.pillar_id];
+
+    if (!pillarName) {
+      continue;
+    }
+
+    base[pillarName] = Number(row.xp_base ?? 0);
+  }
+
+  return base;
+}
+
 export async function getDailyXpSeriesByPillar(
   userId: string,
   from: string,
@@ -147,6 +175,7 @@ export async function getUserLogStats(userId: string): Promise<LogStats> {
 
 export {
   addDays,
+  computeDailyEnergyWeeklyTarget,
   computeDailyTargets,
   computeDecayRates,
   computeGainFactors,

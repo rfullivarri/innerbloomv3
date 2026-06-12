@@ -3,14 +3,15 @@ import { pool } from '../../db.js';
 import type { AsyncHandler } from '../../lib/async-handler.js';
 import {
   addDays,
+  computeDailyEnergyWeeklyTarget,
   computeDailyTargets,
   computeHalfLife,
   enumerateDates,
+  getDailyEnergyXpBaseByPillar,
   formatDateInTimezone,
   getDailyXpSeriesByPillar,
   getUserLogStats,
   getUserProfile,
-  getXpBaseByPillar,
   propagateEnergy,
   type Pillar,
   type PropagatedSeriesRow,
@@ -97,31 +98,25 @@ async function computeEnergyTrend(userId: string): Promise<EnergyTrend | null> {
   const previousDate = addDays(today, -7);
 
   const logStats = await getUserLogStats(userId);
-  const xpBaseByPillar = await getXpBaseByPillar(userId);
+  const xpBaseByPillar = await getDailyEnergyXpBaseByPillar(userId);
   const halfLifeByPillar = computeHalfLife(profile.modeCode);
-  const dailyTargets = computeDailyTargets(xpBaseByPillar, profile.weeklyTarget);
-  const graceApplied = logStats.uniqueDays < 7;
+  const dailyTargets = computeDailyTargets(xpBaseByPillar, computeDailyEnergyWeeklyTarget(profile.modeCode));
   const graceUntilDate = logStats.firstDate ? addDays(logStats.firstDate, 6) : null;
-  const propagationStart = logStats.firstDate
-    ? logStats.firstDate < previousDate
-      ? logStats.firstDate
-      : previousDate
-    : previousDate;
-  const propagationDates = enumerateDates(propagationStart, today);
+  const propagationDates = enumerateDates(previousDate, today);
 
   if (propagationDates.length === 0) {
     return null;
   }
 
   const xpSeries =
-    propagationDates.length > 0 ? await getDailyXpSeriesByPillar(userId, propagationStart, today) : new Map();
+    propagationDates.length > 0 ? await getDailyXpSeriesByPillar(userId, previousDate, today) : new Map();
 
   const { series } = propagateEnergy({
     dates: propagationDates,
     xpByDate: xpSeries,
     halfLifeByPillar,
     dailyTargets,
-    forceFullGrace: graceApplied,
+    forceFullGrace: false,
     graceUntilDate,
   });
 
