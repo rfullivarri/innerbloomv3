@@ -988,13 +988,15 @@ function AchievementShareSheet({
   const [mode, setMode] = useState<WeeklyStoryVisualMode>('dark');
   const [isSharing, setIsSharing] = useState(false);
   const [shareError, setShareError] = useState<string | null>(null);
-  const { data: insights } = useRequest(
+  const [sealDataUrl, setSealDataUrl] = useState<string | null>(null);
+  const [sealDataUrlResolved, setSealDataUrlResolved] = useState(false);
+  const { data: insights, status: insightsStatus } = useRequest(
     () => getTaskInsights(habit.taskId, { range: 'month' }),
     [habit.taskId, backendUserId],
     { enabled: Boolean(backendUserId && habit.taskId) },
   );
-  const development = insights ? buildHabitDevelopmentFromInsights(insights) : null;
-  const months = development ? resolveHabitDevelopmentMonths(development.months).slice(-3) : [];
+  const months = insights ? buildAchievementShareMonthsFromInsights(insights) : [];
+  const insightsResolved = !backendUserId || !habit.taskId || insightsStatus !== 'loading';
 
   useEffect(() => {
     const themeNode = document.querySelector('[data-mp-theme]');
@@ -1002,11 +1004,31 @@ function AchievementShareSheet({
     setMode(theme === 'light' ? 'light' : 'dark');
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    setSealDataUrl(null);
+    setSealDataUrlResolved(false);
+    void resolveHabitAchievementSealDataUrl(habit).then((dataUrl) => {
+      if (cancelled) return;
+      setSealDataUrl(dataUrl);
+      setSealDataUrlResolved(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [habit]);
+
   const handleShare = async () => {
     if (!previewRef.current) return;
     setIsSharing(true);
     setShareError(null);
     try {
+      if (!sealDataUrlResolved) {
+        const dataUrl = await resolveHabitAchievementSealDataUrl(habit);
+        setSealDataUrl(dataUrl);
+        setSealDataUrlResolved(true);
+        await waitForNextFrame();
+      }
       await waitForSharePreviewImages(previewRef.current);
       const { toPng } = await import('html-to-image');
       const dataUrl = await toPng(previewRef.current, {
@@ -1080,13 +1102,14 @@ function AchievementShareSheet({
           ))}
         </div>
 
-        <div className="mt-4 flex min-h-0 flex-1 items-center justify-center overflow-hidden">
-          <div className="mx-auto aspect-[9/16] h-[min(58dvh,34rem)] max-w-full">
+        <div className="mt-3 flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+          <div className="mx-auto aspect-[9/16] h-[min(54dvh,31rem)] max-w-full">
             <AchievementSharePreview
               habit={habit}
               mode={mode}
               months={months}
               ref={previewRef}
+              sealDataUrl={sealDataUrl}
             />
           </div>
         </div>
@@ -1094,11 +1117,11 @@ function AchievementShareSheet({
         {shareError ? <p className="mt-3 text-sm text-[color:var(--mp-red)]">{shareError}</p> : null}
         <button
           className="mt-4 w-full shrink-0 rounded-full bg-[color:var(--mp-violet)] px-5 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(139,92,246,0.28)] disabled:opacity-60"
-          disabled={isSharing}
+          disabled={isSharing || !sealDataUrlResolved || !insightsResolved}
           onClick={() => void handleShare()}
           type="button"
         >
-          {isSharing ? 'Generando...' : 'Compartir'}
+          {isSharing ? 'Generando...' : sealDataUrlResolved && insightsResolved ? 'Compartir' : 'Preparando...'}
         </button>
       </div>
     </div>
@@ -1116,7 +1139,8 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
   habit: HabitAchievementShelfItem;
   mode: WeeklyStoryVisualMode;
   months: AchievementShareMonth[];
-}>(({ habit, mode, months }, ref) => {
+  sealDataUrl: string | null;
+}>(({ habit, mode, months, sealDataUrl }, ref) => {
   const isLight = mode === 'light';
   const text = isLight ? '#151224' : '#FFF8EF';
   const muted = isLight ? '#655F70' : 'rgba(255,248,239,.7)';
@@ -1132,12 +1156,12 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
 
   return (
     <div
-      className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.25rem] border p-6 shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
+      className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.25rem] border p-5 shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
       data-achievement-share-preview="true"
       ref={ref}
       style={{ background: bg, borderColor: line, color: text }}
     >
-      <svg aria-hidden="true" className="absolute -right-16 -top-14 h-72 w-52 opacity-70" fill="none" viewBox="0 0 120 180">
+      <svg aria-hidden="true" className="absolute -right-16 -top-14 h-64 w-48 opacity-60" fill="none" viewBox="0 0 120 180">
         <path d="M96 -8C54 52 72 93 122 132" stroke={isLight ? 'rgba(139,92,246,.2)' : 'rgba(167,139,250,.6)'} strokeWidth="1.2" />
       </svg>
       <div className="relative flex items-center justify-between gap-3">
@@ -1148,29 +1172,33 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
         />
       </div>
 
-      <div className="relative mt-6 text-center">
-        <p className="text-[0.95rem] font-semibold uppercase tracking-[0.22em]" style={{ color: accent }}>Hábito logrado</p>
-        <p className="mt-2 text-[0.95rem] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
+      <div className="relative mt-4 text-center">
+        <p className="text-[0.88rem] font-semibold uppercase tracking-[0.22em]" style={{ color: accent }}>Hábito logrado</p>
+        <p className="mt-1.5 text-[0.86rem] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
       </div>
 
-      <div className="relative mx-auto mt-5 grid h-[9.75rem] shrink-0 place-items-center">
-        <AchievementShareSeal habit={habit} />
+      <div className="relative mx-auto mt-3 grid h-[8.6rem] shrink-0 place-items-center">
+        <AchievementShareSeal habit={habit} sealDataUrl={sealDataUrl} />
       </div>
 
-      <div className="relative mt-5 text-center">
-        <h4 className="mx-auto line-clamp-2 max-w-[16rem] text-[clamp(1.65rem,7vw,2.25rem)] font-semibold leading-[1.05]">{habit.taskName}</h4>
-        {traitLabel ? <p className="mt-2 text-base font-medium" style={{ color: muted }}>{traitLabel}</p> : null}
-        {achievedLabel ? <p className="mt-3 text-[0.82rem] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
+      <div className="relative mt-3 text-center">
+        <h4 className="mx-auto line-clamp-2 max-w-[15rem] text-[clamp(1.35rem,5.4vw,1.85rem)] font-semibold leading-[1.04]">{habit.taskName}</h4>
+        {traitLabel ? <p className="mt-1.5 text-sm font-medium" style={{ color: muted }}>{traitLabel}</p> : null}
+        {achievedLabel ? <p className="mt-2 text-[0.72rem] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
       </div>
 
-      <div className="relative mt-auto border-t pt-4" style={{ borderColor: line }}>
+      <div className="relative mt-auto border-t pt-3" style={{ borderColor: line }}>
         {visibleMonths.length ? (
           <>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em]" style={{ color: muted }}>Progreso mensual</p>
-            <div className="mt-3 grid gap-3" style={{ gridTemplateColumns: `repeat(${visibleMonths.length}, minmax(0, 1fr))` }}>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.22em]" style={{ color: muted }}>Progreso mensual</p>
+            <div className="mt-2 grid gap-2.5" style={{ gridTemplateColumns: `repeat(${visibleMonths.length}, minmax(0, 1fr))` }}>
               {visibleMonths.map((month) => (
                 <div className="min-w-0" key={`${month.periodKey ?? month.month}-${month.percent}`}>
-                  <div className="h-1 overflow-hidden rounded-full" style={{ backgroundColor: isLight ? 'rgba(21,18,36,.1)' : 'rgba(255,255,255,.12)' }}>
+                  <div className="flex items-baseline justify-between gap-1">
+                    <span className="truncate text-[0.62rem] font-medium" style={{ color: muted }}>{month.month}</span>
+                    <span className="text-[0.72rem] font-semibold">{month.percent}%</span>
+                  </div>
+                  <div className="mt-1.5 h-1 overflow-hidden rounded-full" style={{ backgroundColor: isLight ? 'rgba(21,18,36,.1)' : 'rgba(255,255,255,.12)' }}>
                     <span
                       className="block h-full rounded-full"
                       style={{
@@ -1179,20 +1207,17 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
                       }}
                     />
                   </div>
-                  <div className="mt-1.5 flex items-baseline justify-between gap-1">
-                    <span className="truncate text-[0.68rem] font-medium" style={{ color: muted }}>{month.month}</span>
-                    <span className="text-xs font-semibold">{month.percent}%</span>
-                  </div>
+                  {month.projected ? <p className="mt-1 text-[0.5rem] font-medium" style={{ color: softMuted }}>proy.</p> : null}
                 </div>
               ))}
             </div>
           </>
         ) : (
-          <p className="text-center text-xs font-medium" style={{ color: softMuted }}>Ventana activa completada</p>
+          <p className="text-center text-[0.68rem] font-medium" style={{ color: softMuted }}>Ventana activa completada</p>
         )}
       </div>
 
-      <p className="relative mt-4 shrink-0 text-center text-[11px] font-semibold tracking-[0.18em]" style={{ color: softMuted }}>
+      <p className="relative mt-3 shrink-0 text-center text-[10px] font-semibold tracking-[0.18em]" style={{ color: softMuted }}>
         innerbloomjourney.org
       </p>
     </div>
@@ -1200,24 +1225,23 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
 });
 AchievementSharePreview.displayName = 'AchievementSharePreview';
 
-function AchievementShareSeal({ habit }: { habit: HabitAchievementShelfItem }) {
-  const [sealSrc, setSealSrc] = useState<string | null>(() => resolveHabitAchievementSealSrc(habit));
-
-  useEffect(() => {
-    setSealSrc(resolveHabitAchievementSealSrc(habit));
-  }, [habit]);
-
-  if (!sealSrc) {
+function AchievementShareSeal({
+  habit,
+  sealDataUrl,
+}: {
+  habit: HabitAchievementShelfItem;
+  sealDataUrl: string | null;
+}) {
+  if (!sealDataUrl) {
     return <TraitIcon size={118} trait={habit.trait?.name} />;
   }
 
   return (
     <img
       alt={`${habit.taskName} seal`}
-      className="h-[9.5rem] w-[9.5rem] object-contain"
+      className="h-[8.25rem] w-[8.25rem] object-contain"
       loading="eager"
-      onError={() => setSealSrc(null)}
-      src={sealSrc}
+      src={sealDataUrl}
     />
   );
 }
@@ -1361,6 +1385,39 @@ function buildHabitDevelopmentFromInsights(insights: TaskInsightsResponse) {
     previousMonths: [],
     months: resolveHabitDevelopmentMonths(months),
   };
+}
+
+function buildAchievementShareMonthsFromInsights(insights: TaskInsightsResponse): AchievementShareMonth[] {
+  const preview = insights.previewAchievement;
+  if (!preview) return [];
+  const recentMonths = preview.recentMonths ?? [];
+  const months = recentMonths.reduce<AchievementShareMonth[]>((items, entry) => {
+    const raw = entry.projectedCompletionRate ?? entry.completionRate ?? entry.value;
+    if (raw == null) return items;
+    const normalized = normalizeCompletionPercent(raw);
+    items.push({
+      month: entry.month ?? formatMonthFromPeriod(entry.periodKey) ?? 'Mes',
+      percent: Math.max(0, Math.round(normalized)),
+      periodKey: entry.periodKey ?? null,
+      projected: entry.closed === false || entry.projectedCompletionRate != null,
+    });
+    return items;
+  }, []);
+
+  if (months.length > 0) {
+    return resolveHabitDevelopmentMonths(months).slice(-3);
+  }
+
+  const currentMonth = preview.currentMonth;
+  const currentRaw = currentMonth?.projectedMonthEndRate ?? currentMonth?.completionRateSoFar;
+  if (currentRaw == null) return [];
+  const periodKey = currentMonth?.periodKey ?? new Date().toISOString().slice(0, 7);
+  return [{
+    month: formatMonthFromPeriod(periodKey) ?? 'Mes',
+    percent: Math.max(0, Math.round(normalizeCompletionPercent(currentRaw))),
+    periodKey,
+    projected: currentMonth?.projectedMonthEndRate != null,
+  }];
 }
 
 function normalizeCompletionPercent(rawValue: number) {
@@ -5060,6 +5117,32 @@ function resolveHabitAchievementSealSrc(habit: HabitAchievementShelfItem) {
   })[0] ?? null;
 }
 
+async function resolveHabitAchievementSealDataUrl(habit: HabitAchievementShelfItem) {
+  if (typeof window === 'undefined') return null;
+  const src = resolveHabitAchievementSealSrc(habit);
+  if (!src) return null;
+  try {
+    const absoluteUrl = new URL(src, window.location.origin).href;
+    const response = await fetch(absoluteUrl, { cache: 'force-cache' });
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    return await blobToDataUrl(blob);
+  } catch {
+    return null;
+  }
+}
+
+function blobToDataUrl(blob: Blob) {
+  return new Promise<string | null>((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve(typeof reader.result === 'string' ? reader.result : null);
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(blob);
+  });
+}
+
 function formatAchievementShareDate(value: string | null) {
   if (!value) return null;
   const date = new Date(value);
@@ -5085,6 +5168,14 @@ async function waitForSharePreviewImages(node: HTMLElement) {
       image.addEventListener('error', () => resolve(), { once: true });
     });
   }));
+}
+
+function waitForNextFrame() {
+  return new Promise<void>((resolve) => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => resolve());
+    });
+  });
 }
 
 async function dataUrlToBlob(dataUrl: string) {
