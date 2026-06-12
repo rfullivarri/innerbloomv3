@@ -10,6 +10,7 @@ import type { LocalOnboardingSnapshot } from '../localOnboardingBridge';
 
 type RewardsPillarCode = 'BODY' | 'MIND' | 'SOUL';
 type WeeklyStoryVisualMode = 'dark' | 'light';
+type CalibrationFilter = RewardsGrowthCalibrationRow['finalAction'];
 
 const WEEKLY_PILLAR_ORDER: RewardsPillarCode[] = ['BODY', 'MIND', 'SOUL'];
 const STORY_MODAL_LAYER_CLASS = 'fixed bottom-0 left-0 right-0 top-0 isolate z-[9999] h-screen h-[100dvh] w-screen overflow-hidden bg-black';
@@ -1165,10 +1166,47 @@ function GrowthCalibrationDetailView({
   growth: RewardsHistorySummary['growthCalibration'];
   onClose: () => void;
 }) {
+  const [activeFilter, setActiveFilter] = useState<CalibrationFilter | null>(null);
   const results = resolveCalibrationResults(growth);
+  const visibleResults = activeFilter ? results.filter((row) => row.finalAction === activeFilter) : results;
+  const activeFilterEmptyLabel = activeFilter === 'up' ? 'subido dificultad' : activeFilter === 'down' ? 'bajado dificultad' : 'se hayan mantenido';
+
   return (
-    <section className="space-y-6">
-      <header className="flex items-start justify-between gap-4">
+    <section className="space-y-6" onClick={() => setActiveFilter(null)}>
+      <style>{`
+        @keyframes mpCalibrationRowIn {
+          from { opacity: 0; transform: translateY(-.75rem); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes mpCalibrationIconIn {
+          from { opacity: 0; transform: scale(.58); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes mpCalibrationBarLoad {
+          from { transform: scaleX(0); }
+          to { transform: scaleX(1); }
+        }
+        .mp-calibration-row-in {
+          animation: mpCalibrationRowIn 520ms cubic-bezier(.2,.85,.25,1) both;
+        }
+        .mp-calibration-icon-in {
+          animation: mpCalibrationIconIn 480ms cubic-bezier(.2,.85,.25,1) both;
+        }
+        .mp-calibration-bar-load {
+          transform-origin: left center;
+          animation: mpCalibrationBarLoad 780ms cubic-bezier(.2,.85,.25,1) both;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .mp-calibration-row-in,
+          .mp-calibration-icon-in,
+          .mp-calibration-bar-load {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+          }
+        }
+      `}</style>
+      <header className="flex items-start justify-between gap-4" onClick={(event) => event.stopPropagation()}>
         <div>
           <button
             className="mb-5 grid h-11 w-11 place-items-center rounded-full border border-[color:var(--mp-border)] text-2xl text-[color:var(--mp-text)]"
@@ -1182,20 +1220,29 @@ function GrowthCalibrationDetailView({
         </div>
       </header>
 
-      <div className="grid grid-cols-3 border-y border-[color:var(--mp-border)] py-4">
-        <CalibrationStat icon="↑" label="Subió dificultad" tone="red" value={growth.summary.up} />
-        <CalibrationStat icon="•" label="Se mantuvo" tone="amber" value={growth.summary.keep} />
-        <CalibrationStat icon="↓" label="Bajó dificultad" tone="green" value={growth.summary.down} />
+      <div className="grid grid-cols-3 border-y border-[color:var(--mp-border)] py-4" onClick={(event) => event.stopPropagation()}>
+        <CalibrationStat active={activeFilter === 'up'} icon="↑" label="Subió dificultad" onSelect={() => setActiveFilter('up')} tone="red" value={growth.summary.up} />
+        <CalibrationStat active={activeFilter === 'keep'} icon="•" label="Se mantuvo" onSelect={() => setActiveFilter('keep')} tone="amber" value={growth.summary.keep} />
+        <CalibrationStat active={activeFilter === 'down'} icon="↓" label="Bajó dificultad" onSelect={() => setActiveFilter('down')} tone="green" value={growth.summary.down} />
       </div>
 
       {results.length ? (
-        <div className="space-y-0 border-y border-[color:var(--mp-border)]">
-          {results.map((row) => (
-            <CalibrationResultRow key={`${row.taskId}-${row.evaluatedAt}`} row={row} />
-          ))}
+        <div className="space-y-0 border-y border-[color:var(--mp-border)]" onClick={(event) => event.stopPropagation()}>
+          {visibleResults.length ? (
+            visibleResults.map((row, index) => (
+              <CalibrationResultRow animationIndex={index} key={`${activeFilter ?? 'all'}-${row.taskId}-${row.evaluatedAt}`} row={row} />
+            ))
+          ) : (
+            <div className="py-8 text-center">
+              <p className="text-base font-semibold text-[color:var(--mp-text)]">No hay tareas que hayan {activeFilterEmptyLabel}.</p>
+              <p className="mx-auto mt-2 max-w-[18rem] text-sm leading-6 text-[color:var(--mp-text-secondary)]">
+                Tocá fuera del listado para volver a ver todos los resultados.
+              </p>
+            </div>
+          )}
         </div>
       ) : (
-        <div className="border-y border-[color:var(--mp-border)] py-8 text-center">
+        <div className="border-y border-[color:var(--mp-border)] py-8 text-center" onClick={(event) => event.stopPropagation()}>
           <p className="text-base font-semibold text-[color:var(--mp-text)]">Todavía no hay calibraciones reales.</p>
           <p className="mx-auto mt-2 max-w-[18rem] text-sm leading-6 text-[color:var(--mp-text-secondary)]">
             Cuando cierre el período mensual, acá van a aparecer los ajustes reales de dificultad.
@@ -1206,11 +1253,15 @@ function GrowthCalibrationDetailView({
   );
 }
 
-function CalibrationResultRow({ row }: { row: RewardsGrowthCalibrationRow }) {
+function CalibrationResultRow({ row, animationIndex }: { row: RewardsGrowthCalibrationRow; animationIndex: number }) {
   const tone = getCalibrationTone(row.finalAction);
   const progressPercent = Math.min(100, Math.max(0, row.completionRatePct));
+  const delayMs = 90 + animationIndex * 95;
   return (
-    <article className="border-b border-[color:var(--mp-border)] py-4 last:border-b-0">
+    <article
+      className="mp-calibration-row-in border-b border-[color:var(--mp-border)] py-4 last:border-b-0"
+      style={{ animationDelay: `${delayMs}ms` }}
+    >
       <div className="grid grid-cols-[1fr_auto] gap-3">
         <div className="min-w-0">
           <h4 className="truncate text-sm font-semibold text-[color:var(--mp-text)]">{row.taskTitle}</h4>
@@ -1218,7 +1269,7 @@ function CalibrationResultRow({ row }: { row: RewardsGrowthCalibrationRow }) {
             {row.difficultyBefore ?? '—'} → {row.difficultyAfter ?? '—'}
           </p>
         </div>
-        <span className="grid h-10 w-10 place-items-center rounded-full border text-xl" style={{ borderColor: tone.color, color: tone.color }}>
+        <span className="mp-calibration-icon-in grid h-10 w-10 place-items-center rounded-full border text-xl" style={{ animationDelay: `${delayMs + 120}ms`, borderColor: tone.color, color: tone.color }}>
           {tone.icon}
         </span>
       </div>
@@ -1226,7 +1277,7 @@ function CalibrationResultRow({ row }: { row: RewardsGrowthCalibrationRow }) {
       <div className="mt-3 grid grid-cols-[1fr_auto_auto] items-end gap-3">
         <div>
           <div className="h-2 overflow-hidden rounded-full bg-[color:var(--mp-border)]">
-            <div className="h-full rounded-full" style={{ width: `${progressPercent}%`, backgroundColor: tone.color }} />
+            <div className="mp-calibration-bar-load h-full rounded-full" style={{ animationDelay: `${delayMs + 230}ms`, width: `${progressPercent}%`, backgroundColor: tone.color }} />
           </div>
           <p className="mt-1 text-[11px] text-[color:var(--mp-text-muted)]">{cleanCalibrationReason(row)}</p>
         </div>
@@ -1235,7 +1286,9 @@ function CalibrationResultRow({ row }: { row: RewardsGrowthCalibrationRow }) {
           <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--mp-text-muted)]">progreso</p>
         </div>
         <div className="text-right">
-          <p className="text-sm font-semibold" style={{ color: tone.color }}>{Math.round(row.completionRatePct)}%</p>
+          <p className="text-sm font-semibold" style={{ color: tone.color }}>
+            <CountUpNumber delayMs={delayMs + 260} suffix="%" value={Math.round(row.completionRatePct)} />
+          </p>
           <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--mp-text-muted)]">tasa</p>
         </div>
       </div>
@@ -1244,18 +1297,22 @@ function CalibrationResultRow({ row }: { row: RewardsGrowthCalibrationRow }) {
 }
 
 function CalibrationStat({
+  active = false,
   icon,
   value,
   label,
+  onSelect,
   tone,
 }: {
+  active?: boolean;
   icon: string;
   value: number;
   label: string;
+  onSelect?: () => void;
   tone: 'red' | 'amber' | 'green';
 }) {
-  return (
-    <div className="flex items-center gap-3 border-r border-[color:var(--mp-border)] px-3 last:border-r-0">
+  const content = (
+    <>
       <span
         className={`grid h-10 w-10 shrink-0 place-items-center rounded-full border text-2xl leading-none text-[color:var(--mp-${tone})]`}
         style={{ borderColor: `var(--mp-${tone})` }}
@@ -1266,8 +1323,55 @@ function CalibrationStat({
         <span className="block text-2xl font-semibold leading-none text-[color:var(--mp-text)]">{value}</span>
         <span className="mt-1 block text-xs leading-tight text-[color:var(--mp-text-secondary)]">{label}</span>
       </span>
+    </>
+  );
+
+  if (onSelect) {
+    return (
+      <button
+        className={`flex items-center gap-3 border-r border-[color:var(--mp-border)] px-3 text-left transition last:border-r-0 ${active ? 'bg-white/[0.045]' : 'hover:bg-white/[0.025]'}`}
+        onClick={onSelect}
+        type="button"
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-3 border-r border-[color:var(--mp-border)] px-3 last:border-r-0">
+      {content}
     </div>
   );
+}
+
+function CountUpNumber({ value, suffix = '', delayMs = 0 }: { value: number; suffix?: string; delayMs?: number }) {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    let frame = 0;
+    let start: number | null = null;
+    const timeout = window.setTimeout(() => {
+      const duration = 720;
+      const tick = (timestamp: number) => {
+        start ??= timestamp;
+        const progress = Math.min(1, (timestamp - start) / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setDisplayValue(Math.round(value * eased));
+        if (progress < 1) {
+          frame = window.requestAnimationFrame(tick);
+        }
+      };
+      frame = window.requestAnimationFrame(tick);
+    }, delayMs);
+
+    return () => {
+      window.clearTimeout(timeout);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [delayMs, value]);
+
+  return <>{displayValue}{suffix}</>;
 }
 
 function getCalibrationTone(action: RewardsGrowthCalibrationRow['finalAction']) {

@@ -559,9 +559,12 @@ function DashboardMotionStyles() {
         from { stroke-dashoffset: 1; opacity: .15; }
         to { stroke-dashoffset: 0; opacity: 1; }
       }
-      .mp-energy-line-reveal {
+      .mp-energy-line {
         stroke-dasharray: 1;
         stroke-dashoffset: 1;
+        opacity: .15;
+      }
+      .mp-energy-line-reveal {
         animation: mpEnergyLineReveal 980ms cubic-bezier(.2,.85,.25,1) both;
       }
       @media (prefers-reduced-motion: reduce) {
@@ -571,6 +574,7 @@ function DashboardMotionStyles() {
         .mp-emotion-dot-in,
         .mp-balance-track-active::after,
         .mp-balance-track-active .mp-balance-segment,
+        .mp-energy-line,
         .mp-energy-line-reveal { animation: none !important; transform: none !important; opacity: inherit !important; stroke-dashoffset: 0 !important; }
       }
     `}</style>
@@ -578,11 +582,13 @@ function DashboardMotionStyles() {
 }
 
 function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergySummary> }) {
+  const chartRef = useRef<HTMLElement | null>(null);
+  const chartVisible = useInViewOnce(chartRef);
   const lowest = energy.metrics.reduce((current, metric) => metric.percent < current.percent ? metric : current);
   const chart = buildEnergyChart(energy.metrics);
 
   return (
-    <section className="pb-3 pt-2">
+    <section ref={chartRef} className="pb-3 pt-2">
       <div className="flex items-baseline justify-between gap-4">
         <h2 className="text-lg font-medium text-[color:var(--mp-text)]">Energía diaria</h2>
         <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--mp-text-muted)]">7 días</p>
@@ -617,7 +623,7 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
         {chart.lines.map((line, index) => (
           <g key={line.metric.label}>
             <path
-              className="mp-energy-line-reveal"
+              className={`mp-energy-line ${chartVisible ? 'mp-energy-line-reveal' : ''}`}
               d={line.path}
               fill="none"
               opacity={line.metric === lowest ? 1 : 0.68}

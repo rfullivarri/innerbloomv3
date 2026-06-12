@@ -6,9 +6,10 @@ import { getUserStateTimeseries } from './get-user-state-timeseries.js';
 const {
   mockGetUserProfile,
   mockGetUserLogStats,
-  mockGetXpBaseByPillar,
+  mockGetDailyEnergyXpBaseByPillar,
   mockComputeHalfLife,
   mockComputeDailyTargets,
+  mockComputeDailyEnergyWeeklyTarget,
   mockPropagateEnergy,
   mockEnumerateDates,
   mockGetDailyXpSeriesByPillar,
@@ -16,9 +17,10 @@ const {
 } = vi.hoisted(() => ({
   mockGetUserProfile: vi.fn(),
   mockGetUserLogStats: vi.fn(),
-  mockGetXpBaseByPillar: vi.fn(),
+  mockGetDailyEnergyXpBaseByPillar: vi.fn(),
   mockComputeHalfLife: vi.fn(),
   mockComputeDailyTargets: vi.fn(),
+  mockComputeDailyEnergyWeeklyTarget: vi.fn(),
   mockPropagateEnergy: vi.fn(),
   mockEnumerateDates: vi.fn(),
   mockGetDailyXpSeriesByPillar: vi.fn(),
@@ -28,9 +30,10 @@ const {
 vi.mock('./user-state-service.js', () => ({
   getUserProfile: mockGetUserProfile,
   getUserLogStats: mockGetUserLogStats,
-  getXpBaseByPillar: mockGetXpBaseByPillar,
+  getDailyEnergyXpBaseByPillar: mockGetDailyEnergyXpBaseByPillar,
   computeHalfLife: mockComputeHalfLife,
   computeDailyTargets: mockComputeDailyTargets,
+  computeDailyEnergyWeeklyTarget: mockComputeDailyEnergyWeeklyTarget,
   propagateEnergy: mockPropagateEnergy,
   enumerateDates: mockEnumerateDates,
   getDailyXpSeriesByPillar: mockGetDailyXpSeriesByPillar,
@@ -51,9 +54,10 @@ describe('getUserStateTimeseries', () => {
   beforeEach(() => {
     mockGetUserProfile.mockReset();
     mockGetUserLogStats.mockReset();
-    mockGetXpBaseByPillar.mockReset();
+    mockGetDailyEnergyXpBaseByPillar.mockReset();
     mockComputeHalfLife.mockReset();
     mockComputeDailyTargets.mockReset();
+    mockComputeDailyEnergyWeeklyTarget.mockReset();
     mockPropagateEnergy.mockReset();
     mockEnumerateDates.mockReset();
     mockGetDailyXpSeriesByPillar.mockReset();
@@ -83,21 +87,13 @@ describe('getUserStateTimeseries', () => {
       timezone: 'UTC',
     });
     mockGetUserLogStats.mockResolvedValue({ uniqueDays: 10, firstDate: '2023-12-15' });
-    mockGetXpBaseByPillar.mockResolvedValue({ Body: 10, Mind: 20, Soul: 30 });
+    mockGetDailyEnergyXpBaseByPillar.mockResolvedValue({ Body: 10, Mind: 20, Soul: 30 });
     mockComputeHalfLife.mockReturnValue({ Body: 2, Mind: 3, Soul: 4 });
+    mockComputeDailyEnergyWeeklyTarget.mockReturnValue(2.5);
     mockComputeDailyTargets.mockReturnValue({ Body: 1, Mind: 2, Soul: 3 });
     mockAddDays.mockReturnValue('2023-12-21');
 
-    const enumeratedDates = [
-      '2023-12-15',
-      '2023-12-16',
-      '2023-12-17',
-      '2023-12-18',
-      '2023-12-19',
-      '2023-12-20',
-      '2023-12-21',
-      '2023-12-22',
-    ];
+    const enumeratedDates = ['2023-12-20', '2023-12-21', '2023-12-22'];
     mockEnumerateDates.mockReturnValue(enumeratedDates);
 
     const xpSeries = new Map<string, Partial<Record<'Body' | 'Mind' | 'Soul', number>>>([
@@ -118,7 +114,14 @@ describe('getUserStateTimeseries', () => {
 
     await getUserStateTimeseries(req, res, vi.fn());
 
-    expect(mockEnumerateDates).toHaveBeenCalledWith('2023-12-15', '2023-12-22');
+    expect(mockComputeDailyEnergyWeeklyTarget).toHaveBeenCalledWith('FLOW');
+    expect(mockComputeDailyTargets).toHaveBeenCalledWith({ Body: 10, Mind: 20, Soul: 30 }, 2.5);
+    expect(mockEnumerateDates).toHaveBeenCalledWith('2023-12-20', '2023-12-22');
+    expect(mockGetDailyXpSeriesByPillar).toHaveBeenCalledWith(
+      '4a6f8b1e-12f0-4a22-8e8a-7cbf8250a49d',
+      '2023-12-20',
+      '2023-12-22',
+    );
     expect(mockPropagateEnergy).toHaveBeenCalledWith(
       expect.objectContaining({
         dates: enumeratedDates,

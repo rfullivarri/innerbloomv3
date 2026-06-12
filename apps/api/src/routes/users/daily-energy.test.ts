@@ -15,11 +15,13 @@ const stateServiceMocks = vi.hoisted(() => {
 
   return {
     addDays,
+    computeDailyEnergyWeeklyTarget: vi.fn().mockReturnValue(2.5),
     computeDailyTargets: vi.fn().mockReturnValue({ Body: 10, Mind: 10, Soul: 10 }),
     computeHalfLife: vi.fn().mockReturnValue({ Body: 5, Mind: 5, Soul: 5 }),
     enumerateDates: vi.fn().mockReturnValue(['2024-05-01', '2024-05-08']),
     formatDateInTimezone: vi.fn().mockReturnValue('2024-05-08'),
     getDailyXpSeriesByPillar: vi.fn().mockResolvedValue(new Map()),
+    getDailyEnergyXpBaseByPillar: vi.fn().mockResolvedValue({ Body: 10, Mind: 10, Soul: 10 }),
     getUserLogStats: vi.fn().mockResolvedValue({ uniqueDays: 8, firstDate: '2024-05-01' }),
     getUserProfile: vi.fn().mockResolvedValue({
       userId: 'dedb5d95-244c-47b7-922c-c256d8930723',
@@ -28,7 +30,6 @@ const stateServiceMocks = vi.hoisted(() => {
       weeklyTarget: 70,
       timezone: 'UTC',
     }),
-    getXpBaseByPillar: vi.fn().mockResolvedValue({ Body: 10, Mind: 10, Soul: 10 }),
     propagateEnergy: vi.fn().mockReturnValue({
       lastEnergy: { Body: 80, Mind: 60, Soul: 90 },
       series: [

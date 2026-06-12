@@ -11,6 +11,13 @@ const HALF_LIFE_BY_MODE: Record<string, Record<Pillar, number>> = {
 
 const DEFAULT_HALF_LIFE = HALF_LIFE_BY_MODE.CHILL;
 
+const DAILY_ENERGY_WEEKLY_TARGET_BY_MODE: Record<string, number> = {
+  LOW: 1,
+  CHILL: 2,
+  FLOW: 2.5,
+  EVOLVE: 3,
+};
+
 export type XpByDate = Map<string, Partial<Record<Pillar, number>>>;
 
 export type HalfLifeByPillar = Record<Pillar, number>;
@@ -56,6 +63,10 @@ export function computeDailyTargets(
     acc[pillar] = base > 0 && weeklyTarget > 0 ? (base * weeklyTarget) / 7 : 0;
     return acc;
   }, {} as DailyTargetByPillar);
+}
+
+export function computeDailyEnergyWeeklyTarget(modeCode: string): number {
+  return DAILY_ENERGY_WEEKLY_TARGET_BY_MODE[modeCode.toUpperCase()] ?? DAILY_ENERGY_WEEKLY_TARGET_BY_MODE.CHILL;
 }
 
 export function computeGainFactors(

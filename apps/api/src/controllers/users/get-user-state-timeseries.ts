@@ -5,13 +5,14 @@ import { SimpleTtlCache } from '../../lib/simple-cache.js';
 import { parseWithValidation, uuidSchema } from '../../lib/validation.js';
 import {
   addDays,
+  computeDailyEnergyWeeklyTarget,
   computeDailyTargets,
   computeHalfLife,
   enumerateDates,
   getDailyXpSeriesByPillar,
+  getDailyEnergyXpBaseByPillar,
   getUserLogStats,
   getUserProfile,
-  getXpBaseByPillar,
   propagateEnergy,
 } from './user-state-service.js';
 
@@ -68,22 +69,16 @@ export const getUserStateTimeseries: AsyncHandler = async (req, res) => {
 
   const profile = await getUserProfile(id);
   const logStats = await getUserLogStats(id);
-  const xpBaseByPillar = await getXpBaseByPillar(id);
+  const xpBaseByPillar = await getDailyEnergyXpBaseByPillar(id);
   const halfLifeByPillar = computeHalfLife(profile.modeCode);
-  const dailyTargets = computeDailyTargets(xpBaseByPillar, profile.weeklyTarget);
-  const graceApplied = logStats.uniqueDays < 7;
+  const dailyTargets = computeDailyTargets(xpBaseByPillar, computeDailyEnergyWeeklyTarget(profile.modeCode));
   const graceUntilDate = logStats.firstDate ? addDays(logStats.firstDate, 6) : null;
-
-  const propagationStart = logStats.firstDate
-    ? (logStats.firstDate < fromDate ? logStats.firstDate : fromDate)
-    : fromDate;
-
-  const propagationDates = enumerateDates(propagationStart, toDate);
+  const propagationDates = enumerateDates(fromDate, toDate);
 
   let xpSeries = new Map<string, Partial<Record<'Body' | 'Mind' | 'Soul', number>>>();
 
   if (propagationDates.length > 0) {
-    xpSeries = await getDailyXpSeriesByPillar(id, propagationStart, toDate);
+    xpSeries = await getDailyXpSeriesByPillar(id, fromDate, toDate);
   }
 
   const { series } = propagateEnergy({
@@ -91,7 +86,7 @@ export const getUserStateTimeseries: AsyncHandler = async (req, res) => {
     xpByDate: xpSeries,
     halfLifeByPillar,
     dailyTargets,
-    forceFullGrace: graceApplied,
+    forceFullGrace: false,
     graceUntilDate,
   });
 

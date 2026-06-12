@@ -2221,9 +2221,53 @@ function EmotionChartPanel({
   const frequent = useMemo(() => resolveMostFrequentEmotion(snapshots.slice(-15)), [snapshots]);
   const periodStart = heatmap.periodStart;
   const periodEnd = heatmap.periodEnd;
+  const latestEmotionDate = useMemo(() => {
+    for (let index = snapshots.length - 1; index >= 0; index -= 1) {
+      if (snapshots[index]?.mood) return snapshots[index].date;
+    }
+    return null;
+  }, [snapshots]);
 
   return (
     <section className="space-y-5">
+      <style>{`
+        @keyframes mpEmotionChartGridSweep {
+          from { opacity: 0; transform: translateX(-1.4rem); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes mpEmotionChartDotIn {
+          0% { opacity: 0; transform: scale(.45); filter: saturate(.65); }
+          62% { opacity: 1; transform: scale(1.16); filter: saturate(1.25); }
+          100% { opacity: 1; transform: scale(1); filter: saturate(1); }
+        }
+        @keyframes mpEmotionChartLatestPulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); transform: scale(1); }
+          45% { box-shadow: 0 0 0 .36rem rgba(255,255,255,.16); transform: scale(1.18); }
+        }
+        .mp-emotion-chart-grid-in {
+          animation: mpEmotionChartGridSweep 680ms cubic-bezier(.2,.85,.25,1) both;
+        }
+        .mp-emotion-chart-dot-in {
+          opacity: 0;
+          animation: mpEmotionChartDotIn 520ms cubic-bezier(.2,.85,.25,1) both;
+        }
+        .mp-emotion-chart-dot-latest {
+          animation:
+            mpEmotionChartDotIn 520ms cubic-bezier(.2,.85,.25,1) both,
+            mpEmotionChartLatestPulse 720ms cubic-bezier(.2,.85,.25,1) 1180ms 1;
+          outline: 1px solid rgba(255,255,255,.42);
+          outline-offset: 2px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .mp-emotion-chart-grid-in,
+          .mp-emotion-chart-dot-in,
+          .mp-emotion-chart-dot-latest {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+          }
+        }
+      `}</style>
       <LabBackHeader />
       <p className="text-base text-[color:var(--mp-text-secondary)]">Seis meses desde tu primer registro disponible.</p>
 
@@ -2260,24 +2304,30 @@ function EmotionChartPanel({
             ))}
           </div>
           <div
-            className="grid"
+            className="mp-emotion-chart-grid-in grid"
             style={{ columnGap: '0.5rem', gridTemplateColumns: `repeat(${heatmap.columns.length}, 1rem)` }}
           >
-            {heatmap.columns.map((column) => (
+            {heatmap.columns.map((column, columnIndex) => (
               <div className="grid grid-rows-7 gap-1.5" key={column.key}>
-                {column.cells.map((cell) => {
+                {column.cells.map((cell, rowIndex) => {
                   if (!cell.inPeriod) {
                     return <span aria-hidden="true" className="h-4 w-4 opacity-0" key={cell.date} />;
                   }
                   const emotion = cell.mood ? resolveEmotionVisual(cell.mood) : null;
                   const label = emotion ? `${emotion.label} · ${formatDateShort(cell.date)}` : `${formatDateShort(cell.date)} · sin registro`;
+                  const isLatestEmotion = Boolean(emotion && latestEmotionDate === cell.date);
+                  const delayMs = 120 + columnIndex * 26 + ((columnIndex * 17 + rowIndex * 29) % 150);
                   return (
                     <button
                       aria-label={label}
-                      className="h-4 w-4 rounded-full"
+                      className={`h-4 w-4 rounded-full ${isLatestEmotion ? 'mp-emotion-chart-dot-latest' : 'mp-emotion-chart-dot-in'}`}
                       onClick={() => setActiveEmotionCell({ date: cell.date, label, color: emotion?.color })}
                       key={cell.date}
-                      style={{ backgroundColor: emotion?.color ?? 'rgba(120,116,128,0.55)' }}
+                      style={{
+                        '--mp-emotion-dot-delay': `${delayMs}ms`,
+                        animationDelay: isLatestEmotion ? `${delayMs}ms, ${Math.max(delayMs + 460, 1180)}ms` : `${delayMs}ms`,
+                        backgroundColor: emotion?.color ?? 'rgba(120,116,128,0.55)',
+                      } as CSSProperties}
                       title={label}
                       type="button"
                     />
