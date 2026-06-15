@@ -16,6 +16,7 @@ import {
   getRewardsHistory,
   getTaskInsights,
   getUserStreakPanel,
+  getUserXpByTrait,
   acceptGameModeUpgradeSuggestion,
   dismissGameModeUpgradeSuggestion,
   submitDailyQuest,
@@ -528,6 +529,11 @@ function MobilePremiumLabPageInner() {
     enabled: Boolean(effectiveBackendUserId),
   });
   const weeklyWrapped = useWeeklyWrapped(effectiveBackendUserId);
+  const weeklyWrappedRadarRequest = useRequest(
+    () => getUserXpByTrait(effectiveBackendUserId ?? ''),
+    [effectiveBackendUserId],
+    { enabled: Boolean(effectiveBackendUserId) },
+  );
 
   useEffect(() => {
     const selector = 'meta[name="robots"][data-innerbloom-labs="mobile-premium"]';
@@ -1085,6 +1091,7 @@ function MobilePremiumLabPageInner() {
       {weeklyWrapped.isModalOpen && weeklyWrapped.activeRecord && !activeOverlay ? (
         <PremiumWeeklyWrappedStory
           onClose={handleWeeklyWrappedClose}
+          radarTraits={weeklyWrappedRadarRequest.data?.traits ?? []}
           weekly={weeklyWrapped.activeRecord}
         />
       ) : null}

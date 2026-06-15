@@ -298,7 +298,12 @@ describe('GET /api/users/:id/weekly-wrapped/pending and POST /seen', () => {
 
   it('returns unseen weekly wrapup as pending with unseen count', async () => {
     mockVerifyToken.mockResolvedValue({ id: userId, clerkId: 'user_123', email: 'test@example.com', isNew: false });
-    mockQuery.mockResolvedValue({ rows: [{ user_id: userId }] });
+    mockQuery.mockImplementation((sql: string) => {
+      if (sql.includes('FROM daily_log')) {
+        return Promise.resolve({ rows: [{ day_key: '2024-10-07' }, { day_key: '2024-10-09' }] });
+      }
+      return Promise.resolve({ rows: [{ user_id: userId }] });
+    });
     mockGetRecentWrapped.mockResolvedValue([{ id: 'wrap-pending', userId, weekStart: '2024-10-07', weekEnd: '2024-10-13', payload: { mode: 'final' } }]);
     mockFindPendingWeeklyWrappedId.mockResolvedValue('wrap-pending');
     mockCountUnseenWeeklyWrapped.mockResolvedValue(2);
@@ -310,6 +315,7 @@ describe('GET /api/users/:id/weekly-wrapped/pending and POST /seen', () => {
     expect(response.status).toBe(200);
     expect(response.body.item?.id).toBe('wrap-pending');
     expect(response.body.item?.seen).toBe(false);
+    expect(response.body.item?.completionDays).toEqual(['2024-10-07', '2024-10-09']);
     expect(response.body.unseen_count).toBe(2);
   });
 
