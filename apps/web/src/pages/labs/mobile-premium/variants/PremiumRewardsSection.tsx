@@ -1162,6 +1162,7 @@ function AchievementShareSheet({
 type AchievementShareMonth = {
   month: string;
   percent: number;
+  closed?: boolean;
   projected?: boolean;
   periodKey?: string | null;
 };
@@ -1455,6 +1456,7 @@ function buildAchievementShareMonthsFromInsights(
     items.push({
       month: entry.month ?? formatMonthFromPeriod(entry.periodKey) ?? 'Mes',
       percent: Math.max(0, Math.round(normalized)),
+      closed: entry.closed !== false,
       periodKey: entry.periodKey ?? null,
       projected: entry.closed === false || entry.projectedCompletionRate != null,
     });
@@ -1462,13 +1464,16 @@ function buildAchievementShareMonthsFromInsights(
   }, []);
 
   if (months.length > 0) {
+    const closedAchievementWindow = selectLatestClosedConsecutiveAchievementShareMonths(months);
+    if (closedAchievementWindow.length === 3) return closedAchievementWindow;
+
     const achievedPeriod = resolveAchievementShareAchievedPeriod(habit.achievedAt);
     if (achievedPeriod) {
       const byPeriod = new Map(months.flatMap((month) => (month.periodKey ? [[month.periodKey.slice(0, 7), month] as const] : [])));
       const achievedWindow = buildAchievementShareTrailingPeriodKeys(achievedPeriod, 3)
         .map((periodKey) => byPeriod.get(periodKey))
         .filter((month): month is AchievementShareMonth => Boolean(month));
-      if (achievedWindow.length > 0) return achievedWindow;
+      if (achievedWindow.length === 3) return achievedWindow;
     }
 
     return selectLatestContinuousAchievementShareMonths(months);
@@ -1518,6 +1523,23 @@ function selectLatestContinuousAchievementShareMonths(months: AchievementShareMo
     if (windowMonths.length >= 2) return windowMonths;
   }
   return sorted.slice(-3);
+}
+
+function selectLatestClosedConsecutiveAchievementShareMonths(months: AchievementShareMonth[]) {
+  const closedMonths = resolveHabitDevelopmentMonths(
+    months.filter((month) => month.closed !== false && !month.projected && month.periodKey),
+  );
+  for (let endIndex = closedMonths.length - 1; endIndex >= 0; endIndex -= 1) {
+    const end = closedMonths[endIndex];
+    if (!end.periodKey) continue;
+    const windowKeys = buildAchievementShareTrailingPeriodKeys(end.periodKey.slice(0, 7), 3);
+    const byPeriod = new Map(closedMonths.flatMap((month) => (month.periodKey ? [[month.periodKey.slice(0, 7), month] as const] : [])));
+    const windowMonths = windowKeys
+      .map((periodKey) => byPeriod.get(periodKey))
+      .filter((month): month is AchievementShareMonth => Boolean(month));
+    if (windowMonths.length === 3) return windowMonths;
+  }
+  return [];
 }
 
 function normalizeCompletionPercent(rawValue: number) {
