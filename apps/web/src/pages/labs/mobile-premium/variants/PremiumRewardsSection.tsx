@@ -1194,7 +1194,7 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
       data-achievement-share-preview="true"
       ref={ref}
       style={{
-        '--achievement-share-seal-size': 'clamp(6.7rem, 23cqh, 8.25rem)',
+        '--achievement-share-seal-size': 'clamp(6.95rem, 24cqh, 8.55rem)',
         background: bg,
         borderColor: line,
         color: text,
@@ -1209,12 +1209,12 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
         <p className="mt-[0.55cqh] text-[clamp(0.42rem,1.55cqh,0.52rem)] font-semibold uppercase tracking-[0.32em]" style={{ color: isLight ? '#222A55' : '#C4B5FD' }}>Innerbloom</p>
       </div>
 
-      <div className="relative mx-auto mt-[1.4cqh] grid h-[calc(var(--achievement-share-seal-size)+0.35rem)] shrink-0 place-items-center">
+      <div className="relative mx-auto mt-[1.25cqh] grid h-[calc(var(--achievement-share-seal-size)+0.35rem)] shrink-0 place-items-center">
         <AchievementShareSeal habit={habit} sealDataUrl={sealDataUrl} sealFailed={sealFailed} />
       </div>
 
-      <div className="relative mt-[1.05cqh] text-center">
-        <h4 className="mx-auto line-clamp-2 max-w-[82cqw] text-[clamp(0.9rem,3.45cqh,1.18rem)] font-semibold leading-[1.04]">{habit.taskName}</h4>
+      <div className="relative mt-auto text-center">
+        <h4 className="mx-auto line-clamp-2 max-w-[84cqw] text-[clamp(1rem,3.85cqh,1.34rem)] font-semibold leading-[1.04]">{habit.taskName}</h4>
         {traitLabel ? (
           <div className="mx-auto mt-[0.75cqh] grid max-w-[64cqw] grid-cols-[1fr_auto_1fr] items-center gap-[2.8cqw]">
             <span className="h-px" style={{ backgroundColor: line }} />
@@ -1224,13 +1224,13 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
         ) : null}
       </div>
 
-      <div className="relative mt-[1.55cqh] text-center">
+      <div className="relative mt-[1.35cqh] text-center">
         <p className="text-[clamp(0.48rem,1.7cqh,0.58rem)] font-semibold uppercase tracking-[0.24em]" style={{ color: accent }}>Hábito logrado</p>
         <p className="mt-[0.35cqh] text-[clamp(0.44rem,1.55cqh,0.54rem)] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
         {achievedLabel ? <p className="mt-[0.35cqh] text-[clamp(0.4rem,1.35cqh,0.48rem)] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
       </div>
 
-      <div className="relative mt-auto shrink-0 border-t pt-[1.35cqh]" style={{ borderColor: line }}>
+      <div className="relative mt-[3.2cqh] shrink-0 border-t pt-[1.35cqh]" style={{ borderColor: line }}>
         {visibleMonths.length ? (
           <>
             <div className="flex items-center justify-between gap-3">
