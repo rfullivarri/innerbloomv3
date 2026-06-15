@@ -1133,7 +1133,7 @@ function AchievementShareSheet({
         </div>
 
         <div className="mt-3 flex min-h-0 flex-1 items-center justify-center overflow-hidden">
-          <div className="mx-auto aspect-[9/16] h-[min(52dvh,30rem)] max-h-full max-w-full">
+          <div className="mx-auto aspect-[9/16] h-[min(58dvh,32rem)] max-h-full max-w-full">
             <AchievementSharePreview
               habit={habit}
               mode={mode}
@@ -1190,56 +1190,61 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
 
   return (
     <div
-      className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.25rem] border px-[1rem] pb-[0.78rem] pt-[0.95rem] shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
+      className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.25rem] border px-[4.4cqw] pb-[2.2cqh] pt-[2.7cqh] [container-type:size] shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
       data-achievement-share-preview="true"
       ref={ref}
-      style={{ background: bg, borderColor: line, color: text }}
+      style={{
+        '--achievement-share-seal-size': 'clamp(6.7rem, 23cqh, 8.25rem)',
+        background: bg,
+        borderColor: line,
+        color: text,
+      } as CSSProperties}
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-[0.28rem] rounded-[1.05rem] border" style={{ borderColor: line }} />
       <svg aria-hidden="true" className="absolute -right-16 -top-16 h-60 w-44 opacity-50" fill="none" viewBox="0 0 120 180">
         <path d="M96 -8C54 52 72 93 122 132" stroke={isLight ? 'rgba(139,92,246,.2)' : 'rgba(167,139,250,.6)'} strokeWidth="1.2" />
       </svg>
       <div className="relative flex flex-col items-center">
-        <InnerbloomFlowerMark className="h-5 w-5" />
-        <p className="mt-1 text-[0.52rem] font-semibold uppercase tracking-[0.32em]" style={{ color: isLight ? '#222A55' : '#C4B5FD' }}>Innerbloom</p>
+        <InnerbloomFlowerMark className="h-[3.2cqh] w-[3.2cqh] max-h-5 max-w-5" />
+        <p className="mt-[0.55cqh] text-[clamp(0.42rem,1.55cqh,0.52rem)] font-semibold uppercase tracking-[0.32em]" style={{ color: isLight ? '#222A55' : '#C4B5FD' }}>Innerbloom</p>
       </div>
 
-      <div className="relative mx-auto mt-2.5 grid h-[8.8rem] shrink-0 place-items-center">
+      <div className="relative mx-auto mt-[1.4cqh] grid h-[calc(var(--achievement-share-seal-size)+0.35rem)] shrink-0 place-items-center">
         <AchievementShareSeal habit={habit} sealDataUrl={sealDataUrl} sealFailed={sealFailed} />
       </div>
 
-      <div className="relative mt-1.5 text-center">
-        <h4 className="mx-auto line-clamp-2 max-w-[13.25rem] text-[clamp(1.02rem,4.2vw,1.32rem)] font-semibold leading-[1.04]">{habit.taskName}</h4>
+      <div className="relative mt-[1.05cqh] text-center">
+        <h4 className="mx-auto line-clamp-2 max-w-[82cqw] text-[clamp(0.9rem,3.45cqh,1.18rem)] font-semibold leading-[1.04]">{habit.taskName}</h4>
         {traitLabel ? (
-          <div className="mx-auto mt-1 grid max-w-[9.75rem] grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <div className="mx-auto mt-[0.75cqh] grid max-w-[64cqw] grid-cols-[1fr_auto_1fr] items-center gap-[2.8cqw]">
             <span className="h-px" style={{ backgroundColor: line }} />
-            <p className="text-[0.62rem] font-medium leading-none" style={{ color: muted }}>{traitLabel}</p>
+            <p className="text-[clamp(0.48rem,1.75cqh,0.62rem)] font-medium leading-none" style={{ color: muted }}>{traitLabel}</p>
             <span className="h-px" style={{ backgroundColor: line }} />
           </div>
         ) : null}
       </div>
 
-      <div className="relative mt-2 text-center">
-        <p className="text-[0.58rem] font-semibold uppercase tracking-[0.24em]" style={{ color: accent }}>Hábito logrado</p>
-        <p className="mt-0.5 text-[0.54rem] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
-        {achievedLabel ? <p className="mt-0.5 text-[0.48rem] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
+      <div className="relative mt-[1.55cqh] text-center">
+        <p className="text-[clamp(0.48rem,1.7cqh,0.58rem)] font-semibold uppercase tracking-[0.24em]" style={{ color: accent }}>Hábito logrado</p>
+        <p className="mt-[0.35cqh] text-[clamp(0.44rem,1.55cqh,0.54rem)] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
+        {achievedLabel ? <p className="mt-[0.35cqh] text-[clamp(0.4rem,1.35cqh,0.48rem)] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
       </div>
 
-      <div className="relative mt-auto border-t pt-2" style={{ borderColor: line }}>
+      <div className="relative mt-auto shrink-0 border-t pt-[1.35cqh]" style={{ borderColor: line }}>
         {visibleMonths.length ? (
           <>
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[7px] font-semibold uppercase tracking-[0.18em]" style={{ color: green }}>Progreso mensual</p>
-              <p className="text-[0.46rem] font-medium" style={{ color: softMuted }}>últimos 3 meses</p>
+              <p className="text-[clamp(0.34rem,1.15cqh,0.44rem)] font-semibold uppercase tracking-[0.18em]" style={{ color: green }}>Progreso mensual</p>
+              <p className="text-[clamp(0.34rem,1.12cqh,0.46rem)] font-medium" style={{ color: softMuted }}>últimos 3 meses</p>
             </div>
-            <div className="mt-1.5 grid gap-2" style={{ gridTemplateColumns: `repeat(${visibleMonths.length}, minmax(0, 1fr))` }}>
+            <div className="mt-[1.05cqh] grid gap-[3cqw]" style={{ gridTemplateColumns: `repeat(${visibleMonths.length}, minmax(0, 1fr))` }}>
               {visibleMonths.map((month) => (
                 <div className="min-w-0" key={`${month.periodKey ?? month.month}-${month.percent}`}>
                   <div className="text-center">
-                    <p className="truncate text-[0.5rem] font-medium" style={{ color: muted }}>{month.month}</p>
-                    <p className="mt-0.5 text-[0.68rem] font-semibold leading-none" style={{ color: green }}>{month.percent}%</p>
+                    <p className="truncate text-[clamp(0.42rem,1.4cqh,0.5rem)] font-medium" style={{ color: muted }}>{month.month}</p>
+                    <p className="mt-[0.35cqh] text-[clamp(0.54rem,2.05cqh,0.68rem)] font-semibold leading-none" style={{ color: green }}>{month.percent}%</p>
                   </div>
-                  <div className="mt-1 h-0.5 overflow-hidden rounded-full" style={{ backgroundColor: isLight ? 'rgba(21,18,36,.1)' : 'rgba(255,255,255,.12)' }}>
+                  <div className="mt-[0.75cqh] h-[0.34cqh] min-h-px overflow-hidden rounded-full" style={{ backgroundColor: isLight ? 'rgba(21,18,36,.1)' : 'rgba(255,255,255,.12)' }}>
                     <span
                       className="block h-full rounded-full"
                       style={{
@@ -1248,19 +1253,19 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
                       }}
                     />
                   </div>
-                  {month.projected ? <p className="mt-0.5 text-center text-[0.42rem] font-medium" style={{ color: softMuted }}>proy.</p> : null}
+                  {month.projected ? <p className="mt-[0.3cqh] text-center text-[clamp(0.32rem,1.05cqh,0.42rem)] font-medium" style={{ color: softMuted }}>proy.</p> : null}
                 </div>
               ))}
             </div>
           </>
         ) : (
-          <p className="text-center text-[0.52rem] font-medium" style={{ color: softMuted }}>Ventana activa completada</p>
+          <p className="text-center text-[clamp(0.42rem,1.5cqh,0.52rem)] font-medium" style={{ color: softMuted }}>Ventana activa completada</p>
         )}
       </div>
 
-      <div className="relative mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+      <div className="relative mt-[1.35cqh] grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-[2.8cqw]">
         <span className="h-px" style={{ backgroundColor: line }} />
-        <p className="text-center text-[7px] font-semibold tracking-[0.16em]" style={{ color: softMuted }}>innerbloomjourney.org</p>
+        <p className="text-center text-[clamp(0.34rem,1.15cqh,0.44rem)] font-semibold tracking-[0.16em]" style={{ color: softMuted }}>innerbloomjourney.org</p>
         <span className="h-px" style={{ backgroundColor: line }} />
       </div>
     </div>
@@ -1281,7 +1286,7 @@ function AchievementShareSeal({
     return (
       <div
         aria-label={sealFailed ? `${habit.taskName} fallback seal` : `${habit.taskName} seal loading`}
-        className="grid h-[8.25rem] w-[8.25rem] place-items-center text-[color:var(--mp-violet)]"
+        className="grid h-[var(--achievement-share-seal-size,8.25rem)] w-[var(--achievement-share-seal-size,8.25rem)] place-items-center text-[color:var(--mp-violet)]"
         data-achievement-share-seal="true"
       >
         <TraitIcon size={118} trait={habit.trait?.name} />
@@ -1292,7 +1297,7 @@ function AchievementShareSeal({
   return (
     <img
       alt={`${habit.taskName} seal`}
-      className="h-[8.25rem] w-[8.25rem] object-contain"
+      className="h-[var(--achievement-share-seal-size,8.25rem)] w-[var(--achievement-share-seal-size,8.25rem)] object-contain"
       data-achievement-share-seal="true"
       decoding="sync"
       loading="eager"
