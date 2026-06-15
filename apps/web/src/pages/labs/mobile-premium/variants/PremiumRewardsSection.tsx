@@ -4,7 +4,7 @@ import { decideTaskHabitAchievement, getRewardsHistory, getTaskInsights, getUser
 import { useRequest } from '../../../../hooks/useRequest';
 import { HabitAchievementSeal } from '../../../../components/dashboard-v3/HabitAchievementSeal';
 import { resolveHabitAchievementSealCandidates } from '../../../../lib/habitAchievementSeals';
-import { InnerbloomBrand, TraitIcon } from '../MobilePremiumPrimitives';
+import { InnerbloomBrand, InnerbloomFlowerMark, TraitIcon } from '../MobilePremiumPrimitives';
 import { habitDevelopmentStatusLabel, HabitStatusChip, PremiumScoreRing } from '../PremiumHabitDevelopment';
 import { emitHabitAchievementUpdated } from '../../../../lib/habitAchievementEvents';
 import type { LocalOnboardingSnapshot } from '../localOnboardingBridge';
@@ -996,7 +996,7 @@ function AchievementShareSheet({
     [habit.taskId, backendUserId],
     { enabled: Boolean(backendUserId && habit.taskId) },
   );
-  const months = insights ? buildAchievementShareMonthsFromInsights(insights) : [];
+  const months = insights ? buildAchievementShareMonthsFromInsights(insights, habit) : [];
   const insightsResolved = !backendUserId || !habit.taskId || insightsStatus !== 'loading';
 
   useEffect(() => {
@@ -1161,52 +1161,57 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
   const muted = isLight ? '#655F70' : 'rgba(255,248,239,.7)';
   const softMuted = isLight ? 'rgba(21,18,36,.56)' : 'rgba(255,248,239,.52)';
   const accent = isLight ? '#7C3AED' : '#A78BFA';
-  const line = isLight ? 'rgba(139,92,246,.2)' : 'rgba(167,139,250,.22)';
+  const green = isLight ? '#24A148' : '#64E86E';
+  const line = isLight ? 'rgba(167,139,250,.34)' : 'rgba(167,139,250,.32)';
   const bg = isLight
-    ? 'radial-gradient(circle at 92% 4%, rgba(186,126,255,.2), transparent 34%), radial-gradient(circle at 0% 100%, rgba(255,184,121,.18), transparent 38%), #FFF8EF'
-    : 'radial-gradient(circle at 88% 0%, rgba(128,92,255,.22), transparent 42%), radial-gradient(circle at 8% 100%, rgba(236,111,193,.12), transparent 40%), #05050A';
+    ? 'radial-gradient(circle at 50% 18%, rgba(194,132,252,.16), transparent 34%), radial-gradient(circle at 100% 4%, rgba(186,126,255,.16), transparent 30%), #FFF8EF'
+    : 'radial-gradient(circle at 50% 18%, rgba(167,139,250,.16), transparent 34%), radial-gradient(circle at 100% 0%, rgba(128,92,255,.2), transparent 34%), radial-gradient(circle at 8% 100%, rgba(236,111,193,.1), transparent 38%), #05050A';
   const traitLabel = habit.trait?.name ?? null;
   const achievedLabel = formatAchievementShareDate(habit.achievedAt);
   const visibleMonths = months.slice(-3);
 
   return (
     <div
-      className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.25rem] border px-[1.05rem] pb-[6.4rem] pt-[1.05rem] shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
+      className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.25rem] border px-[1.05rem] pb-[6.9rem] pt-[1.15rem] shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
       data-achievement-share-preview="true"
       ref={ref}
       style={{ background: bg, borderColor: line, color: text }}
     >
+      <div aria-hidden="true" className="pointer-events-none absolute inset-[0.28rem] rounded-[1.05rem] border" style={{ borderColor: line }} />
       <svg aria-hidden="true" className="absolute -right-16 -top-16 h-60 w-44 opacity-50" fill="none" viewBox="0 0 120 180">
         <path d="M96 -8C54 52 72 93 122 132" stroke={isLight ? 'rgba(139,92,246,.2)' : 'rgba(167,139,250,.6)'} strokeWidth="1.2" />
       </svg>
-      <div className="relative flex items-center justify-between gap-3">
-        <InnerbloomBrand
-          markClassName="h-4 w-4"
-          textClassName="text-[8px] font-semibold uppercase tracking-[0.24em]"
-          style={{ color: isLight ? '#6D4FC2' : '#C4B5FD' }}
-        />
+      <div className="relative flex flex-col items-center">
+        <InnerbloomFlowerMark className="h-5 w-5" />
+        <p className="mt-1 text-[0.58rem] font-semibold uppercase tracking-[0.34em]" style={{ color: isLight ? '#222A55' : '#C4B5FD' }}>Innerbloom</p>
       </div>
 
-      <div className="relative mt-2 text-center">
-        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em]" style={{ color: accent }}>Hábito logrado</p>
-        <p className="mt-0.5 text-[0.64rem] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
-      </div>
-
-      <div className="relative mx-auto mt-2 grid h-[8.45rem] shrink-0 place-items-center">
+      <div className="relative mx-auto mt-2.5 grid h-[8.8rem] shrink-0 place-items-center">
         <AchievementShareSeal habit={habit} sealDataUrl={sealDataUrl} sealFailed={sealFailed} />
       </div>
 
       <div className="relative mt-2 text-center">
-        <h4 className="mx-auto line-clamp-2 max-w-[14rem] text-[clamp(0.92rem,4.1vw,1.18rem)] font-semibold leading-[1.02]">{habit.taskName}</h4>
-        {traitLabel ? <p className="mt-0.5 text-[0.66rem] font-medium" style={{ color: muted }}>{traitLabel}</p> : null}
+        <h4 className="mx-auto line-clamp-2 max-w-[14.5rem] text-[clamp(1.25rem,5.4vw,1.75rem)] font-semibold leading-[1.02]">{habit.taskName}</h4>
+        {traitLabel ? (
+          <div className="mx-auto mt-1 grid max-w-[10.5rem] grid-cols-[1fr_auto_1fr] items-center gap-2">
+            <span className="h-px" style={{ backgroundColor: line }} />
+            <p className="text-[0.78rem] font-medium leading-none" style={{ color: muted }}>{traitLabel}</p>
+            <span className="h-px" style={{ backgroundColor: line }} />
+          </div>
+        ) : null}
+      </div>
+
+      <div className="relative mt-2.5 text-center">
+        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.28em]" style={{ color: accent }}>Hábito logrado</p>
+        <p className="mt-1 text-[0.68rem] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
         {achievedLabel ? <p className="mt-1 text-[0.56rem] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
       </div>
 
-      <div className="absolute bottom-[2rem] left-[1.05rem] right-[1.05rem] border-t pt-2.5" style={{ borderColor: line }}>
+      <div className="absolute bottom-[2.05rem] left-[1.05rem] right-[1.05rem] border-t pt-[0.625rem]" style={{ borderColor: line }}>
         {visibleMonths.length ? (
           <>
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[8px] font-semibold uppercase tracking-[0.2em]" style={{ color: muted }}>Progreso mensual</p>
+              <p className="text-[8px] font-semibold uppercase tracking-[0.2em]" style={{ color: green }}>Progreso mensual</p>
               <p className="text-[0.54rem] font-medium" style={{ color: softMuted }}>últimos 3 meses</p>
             </div>
             <div className="mt-2 grid gap-2" style={{ gridTemplateColumns: `repeat(${visibleMonths.length}, minmax(0, 1fr))` }}>
@@ -1214,13 +1219,13 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
                 <div className="min-w-0" key={`${month.periodKey ?? month.month}-${month.percent}`}>
                   <div className="text-center">
                     <p className="truncate text-[0.58rem] font-medium" style={{ color: muted }}>{month.month}</p>
-                    <p className="mt-0.5 text-[0.78rem] font-semibold leading-none">{month.percent}%</p>
+                    <p className="mt-0.5 text-[0.82rem] font-semibold leading-none" style={{ color: green }}>{month.percent}%</p>
                   </div>
                   <div className="mt-1.5 h-1 overflow-hidden rounded-full" style={{ backgroundColor: isLight ? 'rgba(21,18,36,.1)' : 'rgba(255,255,255,.12)' }}>
                     <span
                       className="block h-full rounded-full"
                       style={{
-                        background: accent,
+                        background: green,
                         width: `${Math.max(5, Math.min(100, month.percent))}%`,
                       }}
                     />
@@ -1235,9 +1240,11 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
         )}
       </div>
 
-      <p className="absolute bottom-[0.8rem] left-[1.05rem] right-[1.05rem] text-center text-[9px] font-semibold tracking-[0.16em]" style={{ color: softMuted }}>
-        innerbloomjourney.org
-      </p>
+      <div className="absolute bottom-[0.72rem] left-[1.05rem] right-[1.05rem] grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <span className="h-px" style={{ backgroundColor: line }} />
+        <p className="text-center text-[9px] font-semibold tracking-[0.18em]" style={{ color: softMuted }}>innerbloomjourney.org</p>
+        <span className="h-px" style={{ backgroundColor: line }} />
+      </div>
     </div>
   );
 });
@@ -1417,7 +1424,10 @@ function buildHabitDevelopmentFromInsights(insights: TaskInsightsResponse) {
   };
 }
 
-function buildAchievementShareMonthsFromInsights(insights: TaskInsightsResponse): AchievementShareMonth[] {
+function buildAchievementShareMonthsFromInsights(
+  insights: TaskInsightsResponse,
+  habit: HabitAchievementShelfItem,
+): AchievementShareMonth[] {
   const preview = insights.previewAchievement;
   if (!preview) return [];
   const recentMonths = preview.recentMonths ?? [];
@@ -1435,7 +1445,16 @@ function buildAchievementShareMonthsFromInsights(insights: TaskInsightsResponse)
   }, []);
 
   if (months.length > 0) {
-    return resolveHabitDevelopmentMonths(months).slice(-3);
+    const achievedPeriod = resolveAchievementShareAchievedPeriod(habit.achievedAt);
+    if (achievedPeriod) {
+      const byPeriod = new Map(months.flatMap((month) => (month.periodKey ? [[month.periodKey.slice(0, 7), month] as const] : [])));
+      const achievedWindow = buildAchievementShareTrailingPeriodKeys(achievedPeriod, 3)
+        .map((periodKey) => byPeriod.get(periodKey))
+        .filter((month): month is AchievementShareMonth => Boolean(month));
+      if (achievedWindow.length > 0) return achievedWindow;
+    }
+
+    return selectLatestContinuousAchievementShareMonths(months);
   }
 
   const currentMonth = preview.currentMonth;
@@ -1448,6 +1467,40 @@ function buildAchievementShareMonthsFromInsights(insights: TaskInsightsResponse)
     periodKey,
     projected: currentMonth?.projectedMonthEndRate != null,
   }];
+}
+
+function resolveAchievementShareAchievedPeriod(value: string | null) {
+  if (!value) return null;
+  if (/^\d{4}-\d{2}/.test(value)) return value.slice(0, 7);
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function buildAchievementShareTrailingPeriodKeys(currentPeriodKey: string, count: number) {
+  const [yearValue, monthValue] = currentPeriodKey.split('-').map(Number);
+  const current = Number.isFinite(yearValue) && Number.isFinite(monthValue)
+    ? new Date(yearValue, monthValue - 1, 1)
+    : new Date();
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date(current.getFullYear(), current.getMonth() - (count - 1 - index), 1);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  });
+}
+
+function selectLatestContinuousAchievementShareMonths(months: AchievementShareMonth[]) {
+  const sorted = resolveHabitDevelopmentMonths(months);
+  for (let endIndex = sorted.length - 1; endIndex >= 0; endIndex -= 1) {
+    const end = sorted[endIndex];
+    if (!end.periodKey) continue;
+    const windowKeys = buildAchievementShareTrailingPeriodKeys(end.periodKey.slice(0, 7), 3);
+    const byPeriod = new Map(sorted.flatMap((month) => (month.periodKey ? [[month.periodKey.slice(0, 7), month] as const] : [])));
+    const windowMonths = windowKeys
+      .map((periodKey) => byPeriod.get(periodKey))
+      .filter((month): month is AchievementShareMonth => Boolean(month));
+    if (windowMonths.length >= 2) return windowMonths;
+  }
+  return sorted.slice(-3);
 }
 
 function normalizeCompletionPercent(rawValue: number) {
@@ -1907,7 +1960,7 @@ function WeeklyWrappedRow({ onOpen, weekly }: { onOpen: () => void; weekly: Week
   );
 }
 
-function PremiumWeeklyWrappedStory({
+export function PremiumWeeklyWrappedStory({
   onClose,
   radarTraits,
   weekly,
