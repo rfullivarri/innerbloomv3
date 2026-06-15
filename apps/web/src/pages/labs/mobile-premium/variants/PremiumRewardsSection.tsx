@@ -1571,7 +1571,7 @@ function WeeklyWrappedRow({ onOpen, weekly }: { onOpen: () => void; weekly: Week
   );
 }
 
-function PremiumWeeklyWrappedStory({
+export function PremiumWeeklyWrappedStory({
   onClose,
   radarTraits,
   weekly,
