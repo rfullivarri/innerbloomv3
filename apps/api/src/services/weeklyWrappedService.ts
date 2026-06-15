@@ -1,9 +1,11 @@
 import {
   addDays,
+  computeDailyEnergyWeeklyTarget,
   computeDailyTargets,
   computeHalfLife,
   enumerateDates,
   formatDateInTimezone,
+  getDailyEnergyXpBaseByPillar,
   getDailyXpSeriesByPillar,
   getUserLogStats,
   getUserProfile,
@@ -62,6 +64,8 @@ type DailyEnergySnapshot = {
   focus_norm: number;
   trend: EnergyTrend | null;
 };
+
+type DailyEnergySeriesPoint = PropagatedSeriesRow;
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
 const MS_IN_DAY = 24 * 60 * 60 * 1000;
@@ -292,7 +296,7 @@ export async function maybeGenerateWeeklyWrappedForDate(
 ): Promise<WeeklyWrappedEntry | null> {
   const { start, end } = resolveWeekRange(referenceDate);
   const existing = await findWeeklyWrappedByRange(userId, start, end);
-  if (existing) {
+  if (existing && hasDailyEnergyMetrics(existing as WeeklyWrappedEntry)) {
     return existing as WeeklyWrappedEntry;
   }
 
@@ -327,7 +331,7 @@ export async function runWeeklyWrappedJob(now: Date): Promise<{
   for (const userId of candidates) {
     try {
       const existing = await findWeeklyWrappedByRange(userId, start, end);
-      if (existing) {
+      if (existing && hasDailyEnergyMetrics(existing as WeeklyWrappedEntry)) {
         skipped += 1;
         continue;
       }
@@ -344,6 +348,10 @@ export async function runWeeklyWrappedJob(now: Date): Promise<{
   return { attempted: candidates.length, created, skipped, errors };
 }
 
+function hasDailyEnergyMetrics(entry: WeeklyWrappedEntry): boolean {
+  return (entry.payload.summary.energyHighlight?.metrics?.length ?? 0) > 0;
+}
+
 async function buildWeeklyWrappedPayload(
   userId: string,
   range: { start: string; end: string },
@@ -355,7 +363,7 @@ async function buildWeeklyWrappedPayload(
     return toDateKey(start);
   })();
 
-  const [insights, logsResult, longTermLogsResult, levelSummary, emotionSnapshots, dailyEnergy] = await Promise.all([
+  const [insights, logsResult, longTermLogsResult, levelSummary, emotionSnapshots, dailyEnergy, dailyEnergySeries] = await Promise.all([
     getUserInsights(userId, {} as InsightQuery),
     getUserLogs(userId, {
       from: range.start,
@@ -376,6 +384,10 @@ async function buildWeeklyWrappedPayload(
     loadDailyEnergySnapshot(userId).catch((error) => {
       console.warn('[weekly-wrapped] failed to load daily energy', { userId, error });
       return null;
+    }),
+    loadDailyEnergySeries(userId, range.start, range.end).catch((error) => {
+      console.warn('[weekly-wrapped] failed to load daily energy series', { userId, range, error });
+      return [] as DailyEnergySeriesPoint[];
     }),
   ]);
   const emotions = emotionSnapshots;
@@ -435,7 +447,7 @@ async function buildWeeklyWrappedPayload(
   });
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
   const highlight = effortBalance.topTask?.title ?? topHabits[0]?.title ?? null;
-  const energyHighlight = computeEnergyHighlight(insights, pillarDominant, dailyEnergy);
+  const energyHighlight = computeEnergyHighlight(insights, pillarDominant, dailyEnergy, dailyEnergySeries);
   const emotionHighlight = buildEmotionHighlight(emotions);
   const weeklyEmotionMessage =
     emotionHighlight.weekly?.weeklyMessage ??
@@ -942,10 +954,11 @@ function computePillarDominantStats(
     );
 }
 
-function computeEnergyHighlight(
+export function computeEnergyHighlight(
   insights: Awaited<ReturnType<typeof getUserInsights>>,
   pillarDominant: string | null,
   dailyEnergy: DailyEnergySnapshot | null,
+  dailyEnergySeries: DailyEnergySeriesPoint[] = [],
 ): WeeklyWrappedPayload['summary']['energyHighlight'] {
   const energyTrend = dailyEnergy?.trend ?? null;
   const metric =
@@ -958,6 +971,38 @@ function computeEnergyHighlight(
     FOCUS: dailyEnergy?.focus_pct ?? null,
     MOOD: dailyEnergy?.mood_pct ?? null,
   };
+  const normalizedSeries = normalizeDailyEnergySeries(dailyEnergySeries);
+  const metricSeries = (['Body', 'Soul', 'Mind'] as const).map((pillar) => {
+    const metricMeta = ENERGY_METRIC_BY_PILLAR[pillar];
+    const snapshotValue = snapshotValueByMetric[metricMeta.label];
+    const currentFromTrend = energyTrend?.pillars[pillar]?.current ?? null;
+    const previousFromTrend = energyTrend?.pillars[pillar]?.previous ?? null;
+    const points = buildDailyEnergyPoints(
+      normalizedSeries,
+      pillar,
+      snapshotValue ?? currentFromTrend ?? 0,
+      previousFromTrend,
+    );
+    const value = Math.max(0, Math.min(100, Math.round(snapshotValue ?? points.at(-1) ?? currentFromTrend ?? 0)));
+    const deltaPct =
+      typeof energyTrend?.pillars[pillar]?.deltaPct === 'number'
+        ? Math.round((energyTrend.pillars[pillar].deltaPct ?? 0) * 10) / 10
+        : computeWeeklyPointDelta(points);
+
+    return {
+      metric: metricMeta.label,
+      pillar,
+      label: metricMeta.label,
+      value,
+      deltaPct,
+      points,
+    };
+  });
+
+  const mostVariable =
+    metricSeries
+      .filter((entry) => typeof entry.deltaPct === 'number')
+      .sort((a, b) => Math.abs(b.deltaPct ?? 0) - Math.abs(a.deltaPct ?? 0))[0] ?? null;
 
   const topGrowth = energyTrend?.hasHistory
     ? (['Body', 'Mind', 'Soul'] as const)
@@ -971,6 +1016,16 @@ function computeEnergyHighlight(
         .sort((a, b) => (b.delta ?? 0) - (a.delta ?? 0))[0]
     : null;
 
+  if (mostVariable) {
+    return {
+      metric: mostVariable.metric,
+      value: mostVariable.value,
+      deltaPct: mostVariable.deltaPct,
+      hasHistory: true,
+      metrics: metricSeries,
+    };
+  }
+
   if (topGrowth) {
     const snapshotValue = snapshotValueByMetric[topGrowth.metric];
     const rawValue = snapshotValue ?? topGrowth.current ?? 0;
@@ -980,6 +1035,7 @@ function computeEnergyHighlight(
       value: current,
       deltaPct: Math.round((topGrowth.delta ?? 0) * 10) / 10,
       hasHistory: true,
+      metrics: metricSeries,
     };
   }
 
@@ -999,7 +1055,42 @@ function computeEnergyHighlight(
     metric: metric.label,
     value,
     hasHistory: energyTrend?.hasHistory ?? false,
+    metrics: metricSeries,
   };
+}
+
+function normalizeDailyEnergySeries(series: DailyEnergySeriesPoint[]) {
+  return (series ?? [])
+    .filter((point) => point?.date)
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-7);
+}
+
+function buildDailyEnergyPoints(
+  series: DailyEnergySeriesPoint[],
+  pillar: Pillar,
+  current: number | null | undefined,
+  previous: number | null | undefined,
+) {
+  const currentValue = Math.max(0, Math.min(100, Math.round(Number(current ?? 0))));
+  if (series.length > 0) {
+    return series.map((point) => Math.max(0, Math.min(100, Math.round(Number(point[pillar] ?? currentValue)))));
+  }
+
+  if (typeof previous === 'number' && Number.isFinite(previous)) {
+    return [Math.max(0, Math.min(100, Math.round(previous))), currentValue];
+  }
+
+  return [currentValue, currentValue];
+}
+
+function computeWeeklyPointDelta(points: number[]) {
+  if (points.length < 2) return null;
+  const first = points[0];
+  const last = points[points.length - 1];
+  if (!Number.isFinite(first) || !Number.isFinite(last) || first <= 0) return null;
+  return Math.round(((last - first) / first) * 1000) / 10;
 }
 
 function buildEmotionHighlight(entries: EmotionSnapshot[]): EmotionHighlight {
@@ -1207,6 +1298,34 @@ async function loadDailyEnergySnapshot(userId: string): Promise<DailyEnergySnaps
     focus_norm: toNumber(row.focus_norm),
     trend,
   };
+}
+
+async function loadDailyEnergySeries(userId: string, from: string, to: string): Promise<DailyEnergySeriesPoint[]> {
+  const dates = enumerateDates(from, to);
+  if (dates.length === 0) {
+    return [];
+  }
+
+  const [profile, logStats, xpBaseByPillar, xpSeries] = await Promise.all([
+    getUserProfile(userId),
+    getUserLogStats(userId),
+    getDailyEnergyXpBaseByPillar(userId),
+    getDailyXpSeriesByPillar(userId, from, to),
+  ]);
+  const halfLifeByPillar = computeHalfLife(profile.modeCode);
+  const dailyTargets = computeDailyTargets(xpBaseByPillar, computeDailyEnergyWeeklyTarget(profile.modeCode));
+  const graceUntilDate = logStats.firstDate ? addDays(logStats.firstDate, 6) : null;
+
+  const { series } = propagateEnergy({
+    dates,
+    xpByDate: xpSeries,
+    halfLifeByPillar,
+    dailyTargets,
+    forceFullGrace: false,
+    graceUntilDate,
+  });
+
+  return series;
 }
 
 async function loadEmotionSnapshots(userId: string, endDate: string, days: number): Promise<EmotionSnapshot[]> {

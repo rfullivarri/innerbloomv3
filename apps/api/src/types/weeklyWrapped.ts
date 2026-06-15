@@ -38,6 +38,14 @@ export type WeeklyWrappedPayload = {
       value: number;
       deltaPct?: number | null;
       hasHistory?: boolean;
+      metrics?: {
+        metric: 'HP' | 'FOCUS' | 'MOOD';
+        pillar: 'Body' | 'Mind' | 'Soul';
+        label: 'HP' | 'FOCUS' | 'MOOD';
+        value: number;
+        deltaPct: number | null;
+        points: number[];
+      }[];
     };
     effortBalance?: {
       easy: number;
