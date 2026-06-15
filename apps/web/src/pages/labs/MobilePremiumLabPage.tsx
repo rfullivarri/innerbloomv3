@@ -1,9 +1,10 @@
-import { Children, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { Children, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useBackendUser } from '../../hooks/useBackendUser';
 import { useOnboardingProgress } from '../../hooks/useOnboardingProgress';
 import { useRequest } from '../../hooks/useRequest';
 import { useUserTasks } from '../../hooks/useUserTasks';
+import { useWeeklyWrapped } from '../../hooks/useWeeklyWrapped';
 import { useClerk, useUser } from '../../auth/runtimeAuth';
 import {
   getDailyQuestDefinition,
@@ -57,7 +58,7 @@ import { PremiumDashboard } from './mobile-premium/variants/PremiumDashboard';
 import { PremiumBalanceCard } from './mobile-premium/variants/PremiumBalanceCard';
 import { PremiumInteractionOverlays, type PremiumOverlayKind } from './mobile-premium/variants/PremiumInteractionOverlays';
 import { buildActiveOnboardingBanners, PremiumOnboardingBannersLab } from './mobile-premium/variants/PremiumOnboardingBannersLab';
-import { PremiumRewardsSection } from './mobile-premium/variants/PremiumRewardsSection';
+import { PremiumRewardsSection, PremiumWeeklyWrappedStory } from './mobile-premium/variants/PremiumRewardsSection';
 import {
   LAB_FALLBACK_UPGRADE_SUGGESTION,
   hasActivePremiumRhythmSuggestion,
@@ -324,6 +325,7 @@ function buildFallbackDailyCompleteSummary(): PremiumDailyCompleteSummary {
         },
       ],
     },
+    selectedTaskIds: ['dq-premium-sleep', 'dq-premium-run'],
     selectedTasks: 2,
     totalTasks: 3,
   };
@@ -505,6 +507,8 @@ function MobilePremiumLabPageInner() {
   const [activeOverlay, setActiveOverlay] = useState<PremiumOverlayKind>(null);
   const [dailyCompleteSummary, setDailyCompleteSummary] = useState<PremiumDailyCompleteSummary | null>(null);
   const [activeFeedbackEvent, setActiveFeedbackEvent] = useState<SubmitDailyQuestFeedbackEvent | null>(null);
+  const [feedbackEventQueue, setFeedbackEventQueue] = useState<SubmitDailyQuestFeedbackEvent[]>([]);
+  const [activeFeedbackIndex, setActiveFeedbackIndex] = useState(0);
   const [premiumModerationState, setPremiumModerationState] = useState<ModerationStateResponse>(
     onboardingPreview
       ? { dayKey: new Date().toISOString().slice(0, 10), dailyQuestCompleted: false, trackers: [] }
@@ -523,6 +527,7 @@ function MobilePremiumLabPageInner() {
   const rhythmSuggestionRequest = useRequest(() => getGameModeUpgradeSuggestion(), [effectiveBackendUserId], {
     enabled: Boolean(effectiveBackendUserId),
   });
+  const weeklyWrapped = useWeeklyWrapped(effectiveBackendUserId);
 
   useEffect(() => {
     const selector = 'meta[name="robots"][data-innerbloom-labs="mobile-premium"]';
@@ -682,6 +687,50 @@ function MobilePremiumLabPageInner() {
     setActiveOverlay(null);
     navigate(`${labBase}/dashboard`);
   };
+  const openFeedbackEvent = useCallback((event: SubmitDailyQuestFeedbackEvent, index: number) => {
+    setActiveFeedbackIndex(index);
+    setActiveFeedbackEvent(event);
+    setActiveOverlay(event.type === 'level_up' ? 'level-feedback' : 'streak-feedback');
+  }, []);
+  const handleReviewDailyProgress = useCallback(() => {
+    const events = feedbackEventQueue.length
+      ? feedbackEventQueue
+      : dailyCompleteSummary?.response.feedback_events ?? [];
+    const firstEvent = events[0] ?? null;
+
+    if (!firstEvent) {
+      setActiveFeedbackEvent(null);
+      setActiveOverlay('dquest-completed');
+      return;
+    }
+
+    setFeedbackEventQueue(events);
+    openFeedbackEvent(firstEvent, 0);
+  }, [dailyCompleteSummary?.response.feedback_events, feedbackEventQueue, openFeedbackEvent]);
+  const handleShowFeedbackEvent = useCallback((event: SubmitDailyQuestFeedbackEvent) => {
+    const eventIndex = feedbackEventQueue.findIndex((candidate) => candidate === event);
+    openFeedbackEvent(event, eventIndex >= 0 ? eventIndex : 0);
+  }, [feedbackEventQueue, openFeedbackEvent]);
+  const handleCloseActiveOverlay = useCallback(() => {
+    if (activeOverlay === 'level-feedback' || activeOverlay === 'streak-feedback') {
+      const nextIndex = activeFeedbackIndex + 1;
+      const nextEvent = feedbackEventQueue[nextIndex] ?? null;
+
+      if (nextEvent) {
+        openFeedbackEvent(nextEvent, nextIndex);
+        return;
+      }
+
+      setActiveFeedbackEvent(null);
+      setFeedbackEventQueue([]);
+      setActiveFeedbackIndex(0);
+    }
+
+    setActiveOverlay(null);
+  }, [activeFeedbackIndex, activeOverlay, feedbackEventQueue, openFeedbackEvent]);
+  const handleWeeklyWrappedClose = useCallback(() => {
+    void weeklyWrapped.completeModal();
+  }, [weeklyWrapped.completeModal]);
   const handleRhythmSuggestionDismiss = async () => {
     if (!rhythmSuggestion || rhythmSuggestionSubmitting) return;
 
@@ -931,6 +980,7 @@ function MobilePremiumLabPageInner() {
             onConfirmFeedback={(summary) => {
               if (effectiveBackendUserId) {
                 void onboardingProgressRequest.reload();
+                weeklyWrapped.reload();
               } else {
                 recordLocalDailyQuest({
                   emotionColor: summary.emotionColor,
@@ -940,8 +990,11 @@ function MobilePremiumLabPageInner() {
                 });
                 setLocalOnboardingSnapshot(markLocalOnboardingStep('first_daily_quest_completed'));
               }
+              const feedbackEvents = summary.response.feedback_events ?? [];
               setDailyCompleteSummary(summary);
-              setActiveFeedbackEvent(summary.response.feedback_events?.[0] ?? null);
+              setFeedbackEventQueue(feedbackEvents);
+              setActiveFeedbackIndex(0);
+              setActiveFeedbackEvent(feedbackEvents[0] ?? null);
               setActiveOverlay('daily-complete');
             }}
             onCycleModeration={handleModerationCycle}
@@ -1006,9 +1059,7 @@ function MobilePremiumLabPageInner() {
         onToggleModerationEnabled={handleModerationEnabled}
         onToggleModerationPause={handleModerationPause}
         onManualRhythmChange={handleManualRhythmChange}
-        onClose={() => {
-          setActiveOverlay(null);
-        }}
+        onClose={handleCloseActiveOverlay}
         onGoDashboard={goToDashboard}
         onOpen={(overlay) => setActiveOverlay(overlay)}
         onOpenUserProfile={() => clerk.openUserProfile()}
@@ -1020,15 +1071,8 @@ function MobilePremiumLabPageInner() {
           }
           navigate(`${labBase}/dashboard`, { replace: true });
         }}
-        onReviewProgress={() => {
-          const firstEvent = dailyCompleteSummary?.response.feedback_events?.[0] ?? null;
-          setActiveFeedbackEvent(firstEvent);
-          setActiveOverlay(firstEvent?.type === 'level_up' ? 'level-feedback' : firstEvent?.type === 'streak_milestone' ? 'streak-feedback' : 'dquest-completed');
-        }}
-        onShowFeedbackEvent={(event) => {
-          setActiveFeedbackEvent(event);
-          setActiveOverlay(event.type === 'level_up' ? 'level-feedback' : 'streak-feedback');
-        }}
+        onReviewProgress={handleReviewDailyProgress}
+        onShowFeedbackEvent={handleShowFeedbackEvent}
         onThemeToggle={toggleTheme}
         onUpgradeRhythmConfirm={handleRhythmSuggestionConfirm}
         rhythmSuggestion={overlayRhythmSuggestion}
@@ -1038,6 +1082,12 @@ function MobilePremiumLabPageInner() {
         userImageUrl={runtimeUser.user?.imageUrl ?? null}
         userName={userName}
       />
+      {weeklyWrapped.isModalOpen && weeklyWrapped.activeRecord && !activeOverlay ? (
+        <PremiumWeeklyWrappedStory
+          onClose={handleWeeklyWrappedClose}
+          weekly={weeklyWrapped.activeRecord}
+        />
+      ) : null}
     </MobilePremiumShell>
   );
 }
