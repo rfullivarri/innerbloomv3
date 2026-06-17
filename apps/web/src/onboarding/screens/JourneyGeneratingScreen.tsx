@@ -123,7 +123,7 @@ export function JourneyGeneratingScreen({ gameMode, language, onGoToDashboard, o
       <section className="onboarding-premium-card relative z-10 w-full max-w-3xl rounded-3xl p-6 sm:p-10">
         <div className={`mb-6 flex items-center justify-center gap-2 text-center text-xs font-semibold uppercase tracking-[0.42em] sm:text-sm ${isLight ? 'text-slate-500' : 'text-white/65'}`}>
           <span>Innerbloom</span>
-          <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.9em] w-auto" />
+          <img src="/IB-COLOR-LOGO-v2.png" alt="Innerbloom logo" className="h-[1.9em] w-auto" />
         </div>
 
         <h1 className={`text-balance text-3xl font-semibold sm:text-4xl ${isLight ? 'text-slate-900' : 'text-white'}`}>{copy.title}</h1>

@@ -1368,7 +1368,7 @@ function UncontrolledIntegratedQuickStartFlow({
           <section className="quickstart-premium-card relative mx-auto mt-5 w-full max-w-3xl rounded-3xl p-5 sm:p-8">
             <div className={`mb-5 flex items-center justify-center gap-2 text-center text-[0.68rem] font-semibold uppercase tracking-[0.36em] sm:text-xs ${isLight ? 'text-slate-500' : 'text-white/65'}`}>
               <span>Innerbloom</span>
-              <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.8em] w-auto" />
+              <img src="/IB-COLOR-LOGO-v2.png" alt="Innerbloom logo" className="h-[1.8em] w-auto" />
             </div>
             <h1 className={`text-balance text-2xl font-semibold sm:text-3xl ${isLight ? 'text-slate-900' : 'text-white'}`}>{copy.setupTitle}</h1>
             <p className={`mt-2 text-sm ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>{copy.setupSubtitle}</p>

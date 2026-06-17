@@ -341,7 +341,7 @@ function LoopSplashScene({ variant = "default" }: { variant?: HeroPhoneShowcaseV
             ))}
           </p>
           <img
-            src="/IB-COLOR-LOGO.png"
+            src="/IB-COLOR-LOGO-v2.png"
             alt=""
             className={styles.loopSplashFlower}
             loading="eager"
