@@ -27,7 +27,7 @@ export function Admin2Shell() {
           <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">
             <span>Innerbloom</span>
             <img
-              src="/IB-COLOR-LOGO.png"
+              src="/IB-COLOR-LOGO-v2.png"
               alt="Innerbloom flower"
               className="h-4 w-4 object-contain"
               loading="lazy"
@@ -68,7 +68,7 @@ export function Admin2Shell() {
               <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">
                 <span>Innerbloom</span>
                 <img
-                  src="/IB-COLOR-LOGO.png"
+                  src="/IB-COLOR-LOGO-v2.png"
                   alt="Innerbloom flower"
                   className="h-4 w-4 object-contain"
                   loading="lazy"

@@ -1275,7 +1275,7 @@ export default function LandingPage({
         >
           <span className="brand-text">Innerbloom</span>
           <img
-            src="/IB-COLOR-LOGO.png"
+            src="/IB-COLOR-LOGO-v2.png"
             alt="Innerbloom"
             className="logo-mark"
             width={50}

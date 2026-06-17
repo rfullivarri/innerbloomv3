@@ -32,7 +32,7 @@ export function JourneyReadyModal({
       >
         <div className="mb-5 flex items-center justify-center gap-2 text-center text-xs font-semibold uppercase tracking-[0.32em] text-[color:var(--color-text-subtle)] sm:text-sm">
           <span>Innerbloom</span>
-          <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.45em] w-auto" />
+          <img src="/IB-COLOR-LOGO-v2.png" alt="Innerbloom logo" className="h-[1.45em] w-auto" />
         </div>
 
         <h2 className="font-display text-2xl font-semibold text-[color:var(--color-text)]">{t('dashboard.journeyReady.title')}</h2>

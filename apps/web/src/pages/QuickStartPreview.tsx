@@ -1334,7 +1334,7 @@ export default function QuickStartPreviewPage() {
           <section className="relative mx-auto mt-5 w-full max-w-3xl rounded-3xl border border-white/10 bg-[#0a133d]/85 p-5 shadow-[0_0_45px_rgba(79,70,229,0.22)] backdrop-blur-xl sm:p-8">
             <div className="mb-5 flex items-center justify-center gap-2 text-center text-[0.68rem] font-semibold uppercase tracking-[0.36em] text-white/65 sm:text-xs">
               <span>Innerbloom</span>
-              <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.8em] w-auto" />
+              <img src="/IB-COLOR-LOGO-v2.png" alt="Innerbloom logo" className="h-[1.8em] w-auto" />
             </div>
             <h1 className="text-balance text-2xl font-semibold text-white sm:text-3xl">{copy.setupTitle}</h1>
             <p className="mt-2 text-sm text-slate-300">{copy.setupSubtitle}</p>

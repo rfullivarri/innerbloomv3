@@ -17,7 +17,7 @@ export function BrandWordmark({ className, textClassName, iconClassName, ...prop
     >
       <span className={cn('uppercase', textClassName)}>Innerbloom</span>
       <img
-        src="/IB-COLOR-LOGO.png"
+        src="/IB-COLOR-LOGO-v2.png"
         alt="Innerbloom logo"
         className={cn('h-[1.9em] w-auto', iconClassName)}
       />
