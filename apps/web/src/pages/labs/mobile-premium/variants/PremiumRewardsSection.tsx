@@ -1190,11 +1190,11 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
 
   return (
     <div
-      className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.25rem] border px-[4.4cqw] pb-[2.2cqh] pt-[2.7cqh] [container-type:size] shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
+      className="relative flex h-full w-full flex-col justify-evenly overflow-hidden rounded-[1.25rem] border px-[4.4cqw] pb-[2.2cqh] pt-[2.7cqh] [container-type:size] shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
       data-achievement-share-preview="true"
       ref={ref}
       style={{
-        '--achievement-share-seal-size': 'clamp(7.15rem, 24.8cqh, 8.8rem)',
+        '--achievement-share-seal-size': 'clamp(7.3rem, 26cqh, 9.1rem)',
         background: bg,
         borderColor: line,
         color: text,
@@ -1209,28 +1209,27 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
         <p className="mt-[0.55cqh] text-[clamp(0.42rem,1.55cqh,0.52rem)] font-semibold uppercase tracking-[0.32em]" style={{ color: isLight ? '#222A55' : '#C4B5FD' }}>Innerbloom</p>
       </div>
 
-      <div className="relative mx-auto mt-[1cqh] grid h-[calc(var(--achievement-share-seal-size)+0.25rem)] shrink-0 place-items-center">
+      <div className="relative mx-auto grid h-[calc(var(--achievement-share-seal-size)+0.2rem)] shrink-0 place-items-center">
         <AchievementShareSeal habit={habit} sealDataUrl={sealDataUrl} sealFailed={sealFailed} />
       </div>
 
-      <div className="relative mt-auto text-center">
+      <div className="relative text-center">
         <h4 className="mx-auto line-clamp-2 max-w-[84cqw] text-[clamp(1.02rem,3.95cqh,1.38rem)] font-semibold leading-[1.04]">{habit.taskName}</h4>
         {traitLabel ? (
-          <div className="mx-auto mt-[0.75cqh] grid max-w-[64cqw] grid-cols-[1fr_auto_1fr] items-center gap-[2.8cqw]">
+          <div className="mx-auto mt-[0.7cqh] grid max-w-[64cqw] grid-cols-[1fr_auto_1fr] items-center gap-[2.8cqw]">
             <span className="h-px" style={{ backgroundColor: line }} />
             <p className="text-[clamp(0.48rem,1.75cqh,0.62rem)] font-medium leading-none" style={{ color: muted }}>{traitLabel}</p>
             <span className="h-px" style={{ backgroundColor: line }} />
           </div>
         ) : null}
+        <div className="mt-[1.25cqh]">
+          <p className="text-[clamp(0.48rem,1.7cqh,0.58rem)] font-semibold uppercase tracking-[0.24em]" style={{ color: accent }}>Hábito logrado</p>
+          <p className="mt-[0.35cqh] text-[clamp(0.44rem,1.55cqh,0.54rem)] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
+          {achievedLabel ? <p className="mt-[0.35cqh] text-[clamp(0.4rem,1.35cqh,0.48rem)] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
+        </div>
       </div>
 
-      <div className="relative mt-[1.25cqh] text-center">
-        <p className="text-[clamp(0.48rem,1.7cqh,0.58rem)] font-semibold uppercase tracking-[0.24em]" style={{ color: accent }}>Hábito logrado</p>
-        <p className="mt-[0.35cqh] text-[clamp(0.44rem,1.55cqh,0.54rem)] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
-        {achievedLabel ? <p className="mt-[0.35cqh] text-[clamp(0.4rem,1.35cqh,0.48rem)] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
-      </div>
-
-      <div className="relative mt-[2.25cqh] shrink-0 border-t pt-[1.35cqh]" style={{ borderColor: line }}>
+      <div className="relative shrink-0 border-t pt-[1.35cqh]" style={{ borderColor: line }}>
         {visibleMonths.length ? (
           <>
             <div className="flex items-center justify-between gap-3">
@@ -1263,7 +1262,7 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
         )}
       </div>
 
-      <div className="relative mt-[1.35cqh] grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-[2.8cqw]">
+      <div className="relative grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-[2.8cqw]">
         <span className="h-px" style={{ backgroundColor: line }} />
         <p className="text-center text-[clamp(0.34rem,1.15cqh,0.44rem)] font-semibold tracking-[0.16em]" style={{ color: softMuted }}>innerbloomjourney.org</p>
         <span className="h-px" style={{ backgroundColor: line }} />
