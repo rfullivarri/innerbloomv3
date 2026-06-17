@@ -84,7 +84,7 @@ export function HUD({ language = 'es', mode, stepIndex, totalSteps, xp, highligh
                 onClick={handleBrand}
                 className="onboarding-hud-brand inline-flex min-w-0 items-center gap-2 text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-white/60 transition hover:text-white/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
               >
-                <img src="/IB-COLOR-LOGO.png" alt="" className="h-5 w-auto shrink-0" />
+                <img src="/IB-COLOR-LOGO-v2.png" alt="" className="h-5 w-auto shrink-0" />
                 <span className="truncate">Innerbloom</span>
               </button>
             ) : (

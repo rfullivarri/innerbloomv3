@@ -227,7 +227,7 @@ export function EditorGuideWheel({
       >
         <div className="flex h-full items-center justify-center">
           <img
-            src="/IB-COLOR-LOGO.png"
+            src="/IB-COLOR-LOGO-v2.png"
             alt="Innerbloom logo"
             className="h-12 w-12 object-contain drop-shadow-[0_0_18px_rgba(196,181,253,0.5)]"
           />

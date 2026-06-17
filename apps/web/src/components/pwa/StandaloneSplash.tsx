@@ -136,7 +136,7 @@ export function StandaloneSplash({ onDone }: StandaloneSplashProps) {
               INNERBLOOM
             </motion.span>
             <motion.img
-              src="/IB-COLOR-LOGO.png"
+              src="/IB-COLOR-LOGO-v2.png"
               alt=""
               className="h-12 w-12 sm:h-14 sm:w-14"
               initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.98 }}

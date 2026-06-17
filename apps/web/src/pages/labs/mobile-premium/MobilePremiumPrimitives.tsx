@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom';
-import { useId, type CSSProperties, type ReactNode } from 'react';
+import { type CSSProperties, type ReactNode } from 'react';
 import { mobilePremiumThemeVars, type MobilePremiumTheme } from './mobilePremiumTokens';
 import { TraitIcon } from './traitIconRegistry';
 
@@ -18,47 +18,14 @@ const toneClass: Record<Tone, string> = {
 };
 
 export function InnerbloomFlowerMark({ className = 'h-7 w-7' }: { className?: string }) {
-  const gradientId = useId();
   return (
-    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 64 48">
-      <defs>
-        <linearGradient id={gradientId} x1="10" x2="54" y1="42" y2="6" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#8B5CF6" />
-          <stop offset="0.52" stopColor="#A78BFA" />
-          <stop offset="1" stopColor="#C4B5FD" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M31.9 42.2c-6.9-6-10.1-13-9.3-20.9.6-6.2 3.8-12.2 9.3-18 5.5 5.8 8.7 11.8 9.3 18 .8 7.9-2.4 14.9-9.3 20.9Z"
-        fill={`url(#${gradientId})`}
-      />
-      <path
-        d="M29.3 43.6c-8 .4-14.5-1.8-19.3-6.7C6.4 33.2 4.2 28.2 3.5 22c7.5.3 13.7 2.7 18.4 7.2 3.9 3.8 6.4 8.6 7.4 14.4Z"
-        fill={`url(#${gradientId})`}
-        opacity="0.9"
-      />
-      <path
-        d="M34.7 43.6c8 .4 14.5-1.8 19.3-6.7 3.6-3.7 5.8-8.7 6.5-14.9-7.5.3-13.7 2.7-18.4 7.2-3.9 3.8-6.4 8.6-7.4 14.4Z"
-        fill={`url(#${gradientId})`}
-        opacity="0.9"
-      />
-      <path
-        d="M23.4 44.2c-7.2-.4-12.9-2.8-17.1-7.1C3.2 33.9 1.3 29.8.5 24.9c5.3.8 9.9 2.7 13.8 5.9 4 3.3 7 7.7 9.1 13.4Z"
-        fill={`url(#${gradientId})`}
-        opacity="0.72"
-      />
-      <path
-        d="M40.6 44.2c7.2-.4 12.9-2.8 17.1-7.1 3.1-3.2 5-7.3 5.8-12.2-5.3.8-9.9 2.7-13.8 5.9-4 3.3-7 7.7-9.1 13.4Z"
-        fill={`url(#${gradientId})`}
-        opacity="0.72"
-      />
-    </svg>
+    <img aria-hidden="true" alt="" className={className} src="/IB-COLOR-LOGO-v2.png" />
   );
 }
 
 export function InnerbloomBrand({
   className,
-  markClassName = 'h-7 w-7',
+  markClassName = 'h-8 w-8',
   style,
   textClassName,
 }: {
