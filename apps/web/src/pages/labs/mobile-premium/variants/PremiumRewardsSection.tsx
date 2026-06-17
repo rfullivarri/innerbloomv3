@@ -1,4 +1,4 @@
-import { forwardRef, type MutableRefObject, type ReactNode, useEffect, useId, useRef, useState } from 'react';
+import { forwardRef, type CSSProperties, type MutableRefObject, type ReactNode, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { decideTaskHabitAchievement, getRewardsHistory, getTaskInsights, getUserXpByTrait, toggleTaskHabitAchievementMaintained, type HabitAchievementPillarGroup, type HabitAchievementShelfItem, type MonthlyWrappedRecord, type RewardsGrowthCalibrationRow, type RewardsHistorySummary, type TaskInsightsResponse, type TraitXpEntry, type WeeklyWrappedRecord } from '../../../../lib/api';
 import { useRequest } from '../../../../hooks/useRequest';
@@ -15,9 +15,10 @@ type CalibrationFilter = RewardsGrowthCalibrationRow['finalAction'];
 type WeeklyShareOption = 'tasks' | 'balance' | 'habits' | 'emotion';
 type MonthlyShareOption = 'month' | 'tasks' | 'habits' | 'emotion';
 type WrappedShareTarget<T extends string> = { key: T; label: string; slideIndex: number };
+type WrappedShareImageCache = Map<string, string>;
 
 const WEEKLY_PILLAR_ORDER: RewardsPillarCode[] = ['BODY', 'MIND', 'SOUL'];
-const STORY_MODAL_LAYER_CLASS = 'fixed bottom-0 left-0 right-0 top-0 isolate z-[9999] h-screen h-[100dvh] w-screen overflow-hidden bg-black';
+const STORY_MODAL_LAYER_CLASS = 'fixed bottom-0 left-0 right-0 top-0 isolate z-[9999] h-[100svh] min-h-[100svh] w-screen overflow-hidden bg-black';
 
 const FALLBACK_REWARDS_HISTORY: RewardsHistorySummary = {
   weeklyWrapups: [
@@ -2045,6 +2046,7 @@ export function PremiumWeeklyWrappedStory({
     : [{ title: payload.summary?.highlight ?? 'Daily Quest', body: `${completedCount}/7 días activos`, pillar: dominantLabel, daysActive: completedCount }];
   const storyScrollRef = useRef<HTMLDivElement | null>(null);
   const storySlideRefs = useRef<(HTMLElement | null)[]>([]);
+  const shareImageCacheRef = useRef<WrappedShareImageCache>(new Map());
   const [activeStorySlide, setActiveStorySlide] = useState(0);
   const [showSharePicker, setShowSharePicker] = useState(false);
   const [storyVisualMode, setStoryVisualMode] = useState<WeeklyStoryVisualMode>('dark');
@@ -2382,7 +2384,7 @@ export function PremiumWeeklyWrappedStory({
         `}
       </style>
       <div
-        className="mp-weekly-story-root relative h-screen h-[100dvh] min-h-screen min-h-[100svh] w-screen overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)]"
+        className="mp-weekly-story-root relative h-[100svh] min-h-[100svh] w-screen overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)] [--weekly-share-safe-bottom:max(env(safe-area-inset-bottom),clamp(4.75rem,9dvh,6rem))]"
         data-weekly-mode={storyVisualMode}
       >
         <button
@@ -2644,7 +2646,7 @@ export function PremiumWeeklyWrappedStory({
                 </p>
                 <div className="mp-weekly-fragment h-1.5 w-24 rounded-full bg-gradient-to-r from-[#F7C86A] to-[color:var(--mp-violet)] shadow-[0_0_28px_rgba(247,200,106,0.28)]" style={{ transitionDelay: '260ms' }} />
               </div>
-              <div className="space-y-7 pb-[max(env(safe-area-inset-bottom),0px)]">
+              <div className="space-y-7 pb-[var(--weekly-share-safe-bottom)]">
                 <button
                   className="mp-weekly-fragment w-full rounded-full bg-[color:var(--weekly-brand)] px-6 py-4 text-base font-semibold text-white shadow-[0_0_32px_rgba(167,139,250,0.22)]"
                   onClick={() => setShowSharePicker(true)}
@@ -2662,6 +2664,7 @@ export function PremiumWeeklyWrappedStory({
             mode={storyVisualMode}
             onClose={() => setShowSharePicker(false)}
             onModeChange={setStoryVisualMode}
+            shareImageCacheRef={shareImageCacheRef}
             slideRefs={storySlideRefs}
             targets={weeklyShareTargets}
           />
@@ -2683,6 +2686,7 @@ function PremiumMonthlyWrappedStory({
   const monthlyData = buildMonthlyStoryData(monthly, rewards);
   const storyScrollRef = useRef<HTMLDivElement | null>(null);
   const storySlideRefs = useRef<(HTMLElement | null)[]>([]);
+  const shareImageCacheRef = useRef<WrappedShareImageCache>(new Map());
   const [activeStorySlide, setActiveStorySlide] = useState(0);
   const [showSharePicker, setShowSharePicker] = useState(false);
   const [storyVisualMode, setStoryVisualMode] = useState<WeeklyStoryVisualMode>('dark');
@@ -2733,7 +2737,7 @@ function PremiumMonthlyWrappedStory({
     >
       <MonthlyStoryStyles />
       <div
-        className="mp-weekly-story-root relative h-screen h-[100dvh] min-h-screen min-h-[100svh] w-screen overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)]"
+        className="mp-weekly-story-root relative h-[100svh] min-h-[100svh] w-screen overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)] [--weekly-share-safe-bottom:max(env(safe-area-inset-bottom),clamp(4.75rem,9dvh,6rem))]"
         data-weekly-mode={storyVisualMode}
       >
         <button
@@ -2889,14 +2893,16 @@ function PremiumMonthlyWrappedStory({
                   Tareas, hábitos, ritmo y emoción. Un mes a la vez.
                 </p>
               </div>
-              <button
-                className="mp-weekly-fragment w-full rounded-full bg-[color:var(--weekly-brand)] px-6 py-4 text-lg font-semibold text-white shadow-[0_18px_70px_rgba(167,139,250,0.34)]"
-                onClick={() => setShowSharePicker(true)}
-                style={{ transitionDelay: '520ms' }}
-                type="button"
-              >
-                Compartir
-              </button>
+              <div className="pb-[var(--weekly-share-safe-bottom)]">
+                <button
+                  className="mp-weekly-fragment w-full rounded-full bg-[color:var(--weekly-brand)] px-6 py-4 text-lg font-semibold text-white shadow-[0_18px_70px_rgba(167,139,250,0.34)]"
+                  onClick={() => setShowSharePicker(true)}
+                  style={{ transitionDelay: '520ms' }}
+                  type="button"
+                >
+                  Compartir
+                </button>
+              </div>
             </div>
           </WeeklyStorySlide>
         </div>
@@ -2906,6 +2912,7 @@ function PremiumMonthlyWrappedStory({
             mode={storyVisualMode}
             onClose={() => setShowSharePicker(false)}
             onModeChange={setStoryVisualMode}
+            shareImageCacheRef={shareImageCacheRef}
             slideRefs={storySlideRefs}
             targets={monthlyShareTargets}
           />
@@ -3470,7 +3477,7 @@ function WeeklyStorySlide({
 }) {
   return (
     <section
-      className={`mp-weekly-slide-shell relative flex min-h-[100dvh] snap-start justify-center overflow-hidden px-7 ${active ? 'mp-weekly-slide-active' : ''}`}
+      className={`mp-weekly-slide-shell relative flex h-[100svh] min-h-[100svh] snap-start justify-center overflow-hidden px-7 ${active ? 'mp-weekly-slide-active' : ''}`}
       data-weekly-slide={index}
       ref={registerSlide}
       style={{
@@ -3940,12 +3947,14 @@ function WeeklySharePicker({
   mode,
   onClose,
   onModeChange,
+  shareImageCacheRef,
   slideRefs,
   targets,
 }: {
   mode: WeeklyStoryVisualMode;
   onClose: () => void;
   onModeChange: (mode: WeeklyStoryVisualMode) => void;
+  shareImageCacheRef: MutableRefObject<WrappedShareImageCache>;
   slideRefs: MutableRefObject<(HTMLElement | null)[]>;
   targets: Array<WrappedShareTarget<WeeklyShareOption>>;
 }) {
@@ -3956,6 +3965,7 @@ function WeeklySharePicker({
       mode={mode}
       onClose={onClose}
       onModeChange={onModeChange}
+      shareImageCacheRef={shareImageCacheRef}
       shareText="Mi Weekly Wrapped en Innerbloom"
       shareTitle="Weekly Wrapped en Innerbloom"
       slideRefs={slideRefs}
@@ -3971,6 +3981,7 @@ function WrappedStorySharePicker<T extends string>({
   mode,
   onClose,
   onModeChange,
+  shareImageCacheRef,
   shareText,
   shareTitle,
   slideRefs,
@@ -3982,6 +3993,7 @@ function WrappedStorySharePicker<T extends string>({
   mode: WeeklyStoryVisualMode;
   onClose: () => void;
   onModeChange: (mode: WeeklyStoryVisualMode) => void;
+  shareImageCacheRef: MutableRefObject<WrappedShareImageCache>;
   shareText: string;
   shareTitle: string;
   slideRefs: MutableRefObject<(HTMLElement | null)[]>;
@@ -3996,6 +4008,7 @@ function WrappedStorySharePicker<T extends string>({
   const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
   const selectedTarget = targets.find((target) => target.key === selected) ?? targets[0];
   const targetSignature = targets.map((target) => `${target.key}:${target.slideIndex}`).join('|');
+  const getCacheKey = (purpose: 'thumb' | 'preview' | 'full', target: WrappedShareTarget<T>) => `${filePrefix}:${mode}:${purpose}:${target.key}:${target.slideIndex}`;
 
   useEffect(() => {
     if (targets[0] && !targets.some((target) => target.key === selected)) {
@@ -4005,19 +4018,36 @@ function WrappedStorySharePicker<T extends string>({
 
   useEffect(() => {
     let cancelled = false;
-    setThumbnails({});
+    const cachedThumbnails: Record<string, string> = {};
+    const missingTargets: Array<WrappedShareTarget<T>> = [];
+    for (const target of targets) {
+      const cached = shareImageCacheRef.current.get(getCacheKey('thumb', target));
+      if (cached) {
+        cachedThumbnails[target.key] = cached;
+      } else {
+        missingTargets.push(target);
+      }
+    }
+    setThumbnails(cachedThumbnails);
+    if (!missingTargets.length) {
+      return () => {
+        cancelled = true;
+      };
+    }
     void (async () => {
       await waitForNextFrame();
       await waitForNextFrame();
-      const next: Record<string, string> = {};
-      for (const target of targets) {
+      const next: Record<string, string> = { ...cachedThumbnails };
+      for (const target of missingTargets) {
         const slide = slideRefs.current[target.slideIndex];
         if (!slide) continue;
         try {
-          next[target.key] = await exportWrappedStorySlideToPng(slide, {
+          const dataUrl = await exportWrappedStorySlideToPng(slide, {
             mode,
             pixelRatio: 0.38,
           });
+          shareImageCacheRef.current.set(getCacheKey('thumb', target), dataUrl);
+          next[target.key] = dataUrl;
           if (!cancelled) setThumbnails({ ...next });
         } catch (error) {
           if (import.meta.env.DEV) {
@@ -4029,14 +4059,27 @@ function WrappedStorySharePicker<T extends string>({
     return () => {
       cancelled = true;
     };
-  }, [mode, slideRefs, targetSignature]);
+  }, [mode, shareImageCacheRef, slideRefs, targetSignature]);
 
   useEffect(() => {
     let cancelled = false;
-    setPreviewDataUrl(null);
+    if (!selectedTarget) {
+      setPreviewDataUrl(null);
+      return () => {
+        cancelled = true;
+      };
+    }
+    const cacheKey = getCacheKey('preview', selectedTarget);
+    const cached = shareImageCacheRef.current.get(cacheKey);
+    setPreviewDataUrl(cached ?? null);
     if (!previewing || !selectedTarget) return () => {
       cancelled = true;
     };
+    if (cached) {
+      return () => {
+        cancelled = true;
+      };
+    }
     void (async () => {
       const slide = slideRefs.current[selectedTarget.slideIndex];
       if (!slide) return;
@@ -4045,6 +4088,7 @@ function WrappedStorySharePicker<T extends string>({
           mode,
           pixelRatio: 0.9,
         });
+        shareImageCacheRef.current.set(cacheKey, dataUrl);
         if (!cancelled) setPreviewDataUrl(dataUrl);
       } catch (error) {
         if (import.meta.env.DEV) {
@@ -4055,7 +4099,7 @@ function WrappedStorySharePicker<T extends string>({
     return () => {
       cancelled = true;
     };
-  }, [mode, previewing, selectedTarget?.key, selectedTarget?.slideIndex, slideRefs]);
+  }, [mode, previewing, selectedTarget?.key, selectedTarget?.slideIndex, shareImageCacheRef, slideRefs]);
 
   const handleShare = async () => {
     if (!selectedTarget) return;
@@ -4064,10 +4108,15 @@ function WrappedStorySharePicker<T extends string>({
     setIsSharing(true);
     setShareError(null);
     try {
-      const dataUrl = await exportWrappedStorySlideToPng(slide, {
-        mode,
-        pixelRatio: 3,
-      });
+      const cacheKey = getCacheKey('full', selectedTarget);
+      let dataUrl = shareImageCacheRef.current.get(cacheKey);
+      if (!dataUrl) {
+        dataUrl = await exportWrappedStorySlideToPng(slide, {
+          mode,
+          pixelRatio: 3,
+        });
+        shareImageCacheRef.current.set(cacheKey, dataUrl);
+      }
       const filename = `${filePrefix}-${slugifyShareFilename(selectedTarget.label)}.png`;
       const blob = await dataUrlToBlob(dataUrl);
       const file = new File([blob], filename, { type: 'image/png' });
@@ -4095,7 +4144,7 @@ function WrappedStorySharePicker<T extends string>({
 
   return (
     <div
-      className="absolute inset-0 z-30 flex items-end bg-black/46 px-4 pb-[calc(var(--weekly-safe-bottom)+0.75rem)] backdrop-blur-md"
+      className="absolute inset-0 z-30 flex items-end bg-black/46 px-4 pb-[calc(var(--weekly-share-safe-bottom)+0.75rem)] backdrop-blur-md"
       data-wrapped-share-picker="true"
       onClick={onClose}
       onTouchMove={(event) => event.stopPropagation()}
@@ -4318,12 +4367,14 @@ function MonthlySharePicker({
   mode,
   onClose,
   onModeChange,
+  shareImageCacheRef,
   slideRefs,
   targets,
 }: {
   mode: WeeklyStoryVisualMode;
   onClose: () => void;
   onModeChange: (mode: WeeklyStoryVisualMode) => void;
+  shareImageCacheRef: MutableRefObject<WrappedShareImageCache>;
   slideRefs: MutableRefObject<(HTMLElement | null)[]>;
   targets: Array<WrappedShareTarget<MonthlyShareOption>>;
 }) {
@@ -4334,6 +4385,7 @@ function MonthlySharePicker({
       mode={mode}
       onClose={onClose}
       onModeChange={onModeChange}
+      shareImageCacheRef={shareImageCacheRef}
       shareText="Mi Monthly Wrapped en Innerbloom"
       shareTitle="Monthly Wrapped en Innerbloom"
       slideRefs={slideRefs}
