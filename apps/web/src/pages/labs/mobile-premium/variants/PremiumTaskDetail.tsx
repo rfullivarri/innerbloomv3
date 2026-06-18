@@ -650,6 +650,7 @@ function TaskEditSheet({
   onSave: (draft: TaskEditDraft) => void;
   task: PremiumTaskSummary;
 }) {
+  const { language, t } = usePostLoginLanguage();
   const initialPillar = task.pillar;
   const initialTraits = TRAITS_BY_PILLAR[initialPillar];
   const pillarsCatalog = usePillars({ enabled: Boolean(backendUserId) });
@@ -740,7 +741,7 @@ function TaskEditSheet({
       onSave(payload);
     } catch (error) {
       console.error('[mobile-premium] update task failed', error);
-      setSaveError('No se pudieron guardar los cambios. Probá de nuevo.');
+      setSaveError(t('mobilePremium.taskEdit.saveError'));
     } finally {
       setSavePending(false);
     }
@@ -756,7 +757,7 @@ function TaskEditSheet({
       onClose();
     } catch (error) {
       console.error('[mobile-premium] delete task failed', error);
-      setDeleteError('No se pudo eliminar la tarea. Probá de nuevo.');
+      setDeleteError(t('mobilePremium.taskEdit.deleteError'));
     } finally {
       setDeletePending(false);
     }
@@ -767,11 +768,11 @@ function TaskEditSheet({
       <section className="max-h-[88vh] w-full overflow-y-auto rounded-[1.8rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-bg-elevated)] p-5 text-[color:var(--mp-text)] shadow-[0_24px_72px_rgba(0,0,0,0.42)]">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-[color:var(--mp-text-muted)]">Editar tarea</p>
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-[color:var(--mp-text-muted)]">{t('editor.modal.edit.badge')}</p>
             <h2 className="mt-1 text-2xl font-semibold leading-tight text-[color:var(--mp-text)]">{task.name}</h2>
           </div>
           <button
-            aria-label="Cerrar"
+            aria-label={t('mobilePremium.taskEdit.close')}
             className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-2xl text-[color:var(--mp-text-secondary)]"
             onClick={onClose}
             type="button"
@@ -782,7 +783,7 @@ function TaskEditSheet({
 
         <div className="mt-6 space-y-5">
           <label className="block">
-            <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">Tarea</span>
+            <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.tasks.task')}</span>
             <input
               className="mt-3 h-12 w-full rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] px-5 text-base text-[color:var(--mp-text)] outline-none"
               onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
@@ -791,7 +792,7 @@ function TaskEditSheet({
           </label>
 
           <div>
-            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">Pilar</p>
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('editor.field.pillar')}</p>
             <div className="mt-3 grid grid-cols-3 rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-1 text-sm font-semibold">
               {STREAK_PILLARS.map((pillar) => (
                 <button
@@ -800,18 +801,18 @@ function TaskEditSheet({
                   onClick={() => selectPillar(pillar)}
                   type="button"
                 >
-                  {PILLAR_LABELS[pillar]}
+                  {translateTaskPillarLabel(pillar, t)}
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">Rasgo</p>
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('editor.field.trait')}</p>
             <div className="mt-3 rounded-[1.35rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-3">
               <div className="grid grid-cols-[40px_minmax(0,1fr)_40px] items-center gap-3">
                 <button
-                  aria-label="Rasgo anterior"
+                  aria-label={t('mobilePremium.taskEdit.previousTrait')}
                   className="grid h-10 w-10 place-items-center rounded-full border border-[color:var(--mp-border)] text-xl text-[color:var(--mp-text-secondary)]"
                   disabled={!availableTraits.length}
                   onClick={() => moveTrait(-1)}
@@ -820,13 +821,13 @@ function TaskEditSheet({
                   ‹
                 </button>
                 <div className="min-w-0 text-center">
-                  <p className="truncate text-xl font-semibold text-[color:var(--mp-text)]">{(selectedTrait?.name ?? draft.stat) || 'Cargando catálogo...'}</p>
+                  <p className="truncate text-xl font-semibold text-[color:var(--mp-text)]">{translateTaskDetailText((selectedTrait?.name ?? draft.stat) || t('mobilePremium.taskEdit.loadingCatalog'), language)}</p>
                   <p className="mt-1 text-xs font-medium text-[color:var(--mp-text-muted)]">
-                    {PILLAR_LABELS[draft.pillar]} · {availableTraits.length ? selectedTraitIndex + 1 : 0}/{availableTraits.length}
+                    {translateTaskPillarLabel(draft.pillar, t)} · {availableTraits.length ? selectedTraitIndex + 1 : 0}/{availableTraits.length}
                   </p>
                 </div>
                 <button
-                  aria-label="Rasgo siguiente"
+                  aria-label={t('mobilePremium.taskEdit.nextTrait')}
                   className="grid h-10 w-10 place-items-center rounded-full border border-[color:var(--mp-border)] text-xl text-[color:var(--mp-text-secondary)]"
                   disabled={!availableTraits.length}
                   onClick={() => moveTrait(1)}
@@ -838,7 +839,7 @@ function TaskEditSheet({
               <div className="mt-3 flex justify-center gap-1.5">
                 {availableTraits.map((trait) => (
                   <button
-                    aria-label={`Seleccionar ${trait.name}`}
+                    aria-label={t('mobilePremium.taskEdit.selectTrait', { trait: translateTaskDetailText(trait.name, language) })}
                     className={`h-1.5 rounded-full transition-all ${(trait.id != null && draft.traitId === trait.id) || normalizeTraitKey(draft.stat) === normalizeTraitKey(trait.name) ? 'w-5 bg-[color:var(--mp-violet)]' : 'w-1.5 bg-[color:var(--mp-border-strong)]'}`}
                     key={trait.id ?? trait.name}
                     onClick={() => setDraft((current) => ({ ...current, stat: trait.name, traitId: trait.id }))}
@@ -850,7 +851,7 @@ function TaskEditSheet({
           </div>
 
           <div>
-            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">Dificultad</p>
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('editor.field.difficulty')}</p>
             <div className="mt-3 flex gap-2">
               {(['Fácil', 'Media', 'Difícil'] as const).map((difficulty) => (
                 <button
@@ -867,7 +868,7 @@ function TaskEditSheet({
                   }))}
                   type="button"
                 >
-                  {difficulty}
+                  {translateDifficultyLabel(difficulty, t)}
                 </button>
               ))}
             </div>
@@ -875,10 +876,10 @@ function TaskEditSheet({
 
           <div className="grid grid-cols-[0.9fr_1.1fr] gap-3 pt-1">
             <button className="min-h-11 rounded-full border border-[color:var(--mp-border)] px-5 text-sm font-semibold text-[color:var(--mp-text-secondary)]" onClick={onClose} type="button">
-              Cancelar
+              {t('editor.button.cancel')}
             </button>
             <button className="min-h-11 rounded-full bg-violet-500 px-5 text-sm font-semibold text-white disabled:opacity-50" disabled={savePending} onClick={handleSave} type="button">
-              {savePending ? 'Guardando...' : 'Guardar cambios'}
+              {savePending ? t('editor.button.saving') : t('editor.button.saveChanges')}
             </button>
           </div>
           {saveError ? <p className="text-xs text-[color:var(--mp-red)]">{saveError}</p> : null}
@@ -887,9 +888,9 @@ function TaskEditSheet({
             <div className="border-t border-[color:var(--mp-border)] pt-4">
               {deleteConfirmOpen ? (
                 <div className="rounded-[1.1rem] border border-red-300/25 bg-red-400/8 p-4">
-                  <p className="text-sm font-semibold text-[color:var(--mp-text)]">Eliminar esta tarea</p>
+                  <p className="text-sm font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.taskEdit.deleteThis')}</p>
                   <p className="mt-1 text-xs leading-5 text-[color:var(--mp-text-secondary)]">
-                    Se archivará con el flujo existente y dejará de aparecer en tareas activas.
+                    {t('mobilePremium.taskEdit.deleteBody')}
                   </p>
                   {deleteError ? <p className="mt-3 text-xs text-[color:var(--mp-red)]">{deleteError}</p> : null}
                   <div className="mt-4 grid grid-cols-2 gap-2">
@@ -899,7 +900,7 @@ function TaskEditSheet({
                       onClick={() => setDeleteConfirmOpen(false)}
                       type="button"
                     >
-                      Cancelar
+                      {t('editor.button.cancel')}
                     </button>
                     <button
                       className="min-h-10 rounded-full bg-red-400/90 px-4 text-sm font-semibold text-black disabled:opacity-50"
@@ -907,7 +908,7 @@ function TaskEditSheet({
                       onClick={handleDelete}
                       type="button"
                     >
-                      {deletePending ? 'Eliminando...' : 'Eliminar'}
+                      {deletePending ? t('editor.modal.delete.loading') : t('editor.modal.delete.confirm')}
                     </button>
                   </div>
                 </div>
@@ -917,7 +918,7 @@ function TaskEditSheet({
                   onClick={() => setDeleteConfirmOpen(true)}
                   type="button"
                 >
-                  Eliminar tarea
+                  {t('editor.modal.delete.title')}
                 </button>
               )}
             </div>
@@ -1499,6 +1500,22 @@ function translateDifficultyLabel(value: string, t: (key: string, params?: Recor
   if (normalized.includes('difícil') || normalized.includes('dificil') || normalized.includes('hard')) return t('mobilePremium.difficulty.hard');
   if (normalized.includes('media') || normalized.includes('medium')) return t('mobilePremium.difficulty.medium');
   return value;
+}
+
+function translateTaskPillarLabel(
+  value: StreakPanelPillar,
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
+  switch (value) {
+    case 'Body':
+      return t('mobilePremium.pillar.body');
+    case 'Mind':
+      return t('mobilePremium.pillar.mind');
+    case 'Soul':
+      return t('mobilePremium.pillar.soul');
+    default:
+      return PILLAR_LABELS[value];
+  }
 }
 
 function translateTaskDetailText(value: string, language: 'es' | 'en') {

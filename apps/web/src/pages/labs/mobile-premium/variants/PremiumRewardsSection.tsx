@@ -1771,9 +1771,9 @@ function CalibrationStat({
       >
         {icon}
       </span>
-      <span className="min-w-0">
+      <span className="min-w-0 text-center">
         <span className="block text-2xl font-semibold leading-none text-[color:var(--mp-text)]">{value}</span>
-        <span className="mt-1 block text-xs leading-tight text-[color:var(--mp-text-secondary)]">{label}</span>
+        <span className="mx-auto mt-1 block max-w-[4.6rem] text-[11px] leading-tight text-[color:var(--mp-text-secondary)]">{label}</span>
       </span>
     </>
   );
@@ -1781,7 +1781,7 @@ function CalibrationStat({
   if (onSelect) {
     return (
       <button
-        className={`flex items-center gap-3 border-r border-[color:var(--mp-border)] px-3 text-left transition last:border-r-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--mp-violet)]/60 ${active ? 'bg-white/[0.045]' : 'hover:bg-white/[0.025]'}`}
+        className={`flex min-w-0 flex-col items-center justify-center gap-2 border-r border-[color:var(--mp-border)] px-2 py-4 text-center transition last:border-r-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--mp-violet)]/60 ${active ? 'bg-white/[0.045]' : 'hover:bg-white/[0.025]'}`}
         onClick={(event) => {
           event.currentTarget.blur();
           onSelect();
@@ -1794,7 +1794,7 @@ function CalibrationStat({
   }
 
   return (
-    <div className="flex items-center gap-3 border-r border-[color:var(--mp-border)] px-3 last:border-r-0">
+    <div className="flex min-w-0 flex-col items-center justify-center gap-2 border-r border-[color:var(--mp-border)] px-2 py-4 text-center last:border-r-0">
       {content}
     </div>
   );
@@ -2461,14 +2461,14 @@ export function PremiumWeeklyWrappedStory({
           <WeeklyStorySlide
             accent="#A78BFA"
             active={showSharePicker || activeStorySlide === 1}
-            eyebrow={sectionsByKey.get('achievements')?.accent ?? 'RESUMEN 7 DÍAS'}
+            eyebrow={t('mobilePremium.rewards.realData').toUpperCase()}
             index={1}
             registerSlide={(el) => (storySlideRefs.current[1] = el)}
             title={t('mobilePremium.rewards.tasksDone')}
           >
             <div className="flex flex-1 flex-col justify-between gap-[clamp(1.4rem,4dvh,2.4rem)]">
               <p className="mp-weekly-fragment text-xl leading-relaxed text-[color:var(--weekly-muted)]" style={{ transitionDelay: '100ms' }}>
-                Completaste <span className="font-semibold text-[#EC6FC1]">{completions}</span> tareas en los últimos <span className="font-semibold text-[#FFB879]">7</span> días.
+                {t('mobilePremium.rewards.weeklyTasksPrefix')} <span className="font-semibold text-[#EC6FC1]">{completions}</span> {t('mobilePremium.rewards.weeklyTasksMiddle')} <span className="font-semibold text-[#FFB879]">7</span> {t('mobilePremium.rewards.weeklyTasksSuffix')}
               </p>
               <div className="space-y-[clamp(1.6rem,4dvh,2.2rem)]">
                 <div className="mp-weekly-fragment text-center" style={{ transitionDelay: '210ms' }}>
@@ -2506,11 +2506,11 @@ export function PremiumWeeklyWrappedStory({
               eyebrow="LEVEL UP"
               index={2}
               registerSlide={(el) => (storySlideRefs.current[2] = el)}
-              title={`Llegaste al nivel ${payload.levelUp.currentLevel ?? 'nuevo'}`}
+              title={t('mobilePremium.rewards.levelReached', { level: payload.levelUp.currentLevel ?? t('mobilePremium.rewards.levelReachedFallback') })}
             >
               <div className="flex flex-1 flex-col justify-center gap-8">
                 <p className="mp-weekly-fragment text-xl leading-relaxed text-[color:var(--weekly-muted)]" style={{ transitionDelay: '90ms' }}>
-                  {sectionsByKey.get('level-up')?.body ?? 'Tu progreso de la semana empujó un nuevo nivel.'}
+                  {language === 'en' ? t('mobilePremium.rewards.levelUpBody') : sectionsByKey.get('level-up')?.body ?? t('mobilePremium.rewards.levelUpBody')}
                 </p>
                 <div className="mp-weekly-fragment relative" style={{ transitionDelay: '210ms' }}>
                   <span className="mp-weekly-story-glow absolute inset-0 rounded-full bg-amber-300/30 blur-3xl" />
@@ -2526,14 +2526,14 @@ export function PremiumWeeklyWrappedStory({
           <WeeklyStorySlide
             accent={dominantColor}
             active={showSharePicker || activeStorySlide === habitsSlideIndex}
-            eyebrow="HÁBITOS"
+            eyebrow={t('mobilePremium.rewards.habitsEyebrow').toUpperCase()}
             index={habitsSlideIndex}
             registerSlide={(el) => (storySlideRefs.current[habitsSlideIndex] = el)}
-            title={sectionsByKey.get('habits')?.title ?? 'Ritmo que se sostiene'}
+            title={language === 'en' ? t('mobilePremium.rewards.habitsRhythmTitle') : sectionsByKey.get('habits')?.title ?? t('mobilePremium.rewards.habitsRhythmTitle')}
           >
             <div className="flex flex-1 flex-col justify-between gap-8">
               <p className="mp-weekly-fragment text-base leading-7 text-[color:var(--weekly-muted)]" style={{ transitionDelay: '80ms' }}>
-                {sectionsByKey.get('habits')?.body ?? 'Estos hábitos aparecieron de forma consistente y mantuvieron tus últimos 7 días en movimiento.'}
+                {language === 'en' ? t('mobilePremium.rewards.habitsRhythmBody') : sectionsByKey.get('habits')?.body ?? t('mobilePremium.rewards.habitsRhythmBody')}
               </p>
               <div className="space-y-6">
                 {storyHabits.map((habit, index) => {
@@ -2542,8 +2542,8 @@ export function PremiumWeeklyWrappedStory({
                   <div className="mp-weekly-fragment space-y-3 border-b border-[color:var(--weekly-line)] pb-5 last:border-b-0" key={`weekly-story-habit-${habit.title}-${index}`} style={{ transitionDelay: `${260 + index * 260}ms` }}>
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-2xl font-semibold leading-tight text-[color:var(--weekly-text)]">{habit.title}</p>
-                        <p className="mt-1 text-sm text-[color:var(--weekly-muted)]">{habit.body}</p>
+                        <p className="text-2xl font-semibold leading-tight text-[color:var(--weekly-text)]">{translateRewardText(habit.title, t)}</p>
+                        <p className="mt-1 text-sm text-[color:var(--weekly-muted)]">{translateWeeklyHabitBody(habit.body, language)}</p>
                       </div>
                       <span className="text-lg font-semibold text-[color:var(--weekly-brand)]">{formatHabitDays(habit)}</span>
                     </div>
@@ -2572,7 +2572,7 @@ export function PremiumWeeklyWrappedStory({
           <WeeklyStorySlide
             accent={dominantColor}
             active={showSharePicker || activeStorySlide === pillarSlideIndex}
-            eyebrow="PILAR DOMINANTE"
+            eyebrow={t('mobilePremium.rewards.dominantPillar').toUpperCase()}
             index={pillarSlideIndex}
             registerSlide={(el) => (storySlideRefs.current[pillarSlideIndex] = el)}
             title={t('mobilePremium.rewards.weeklyBalance')}
@@ -2582,7 +2582,7 @@ export function PremiumWeeklyWrappedStory({
                 active={showSharePicker || activeStorySlide === pillarSlideIndex}
                 dominant={dominantPillar}
                 dominantPct={dominantPct}
-                message={sectionsByKey.get('pillar')?.body ?? `${dominantLabel} lideró tu energía estos días.`}
+                message={language === 'en' ? t('mobilePremium.rewards.pillarLedMessage', { pillar: dominantLabel }) : sectionsByKey.get('pillar')?.body ?? t('mobilePremium.rewards.pillarLedMessage', { pillar: dominantLabel })}
                 radarTraits={radarTraits}
                 xp={payload.summary?.pillarDominantStats?.xp ?? 0}
                 completions={payload.summary?.pillarDominantStats?.completions ?? 0}
@@ -2639,10 +2639,10 @@ export function PremiumWeeklyWrappedStory({
               </div>
               <div className="space-y-4">
                 <p className="mp-weekly-late-text text-xl font-semibold leading-relaxed text-[color:var(--weekly-text)]">
-                  {emotion?.weeklyMessage ?? sectionsByKey.get('highlight')?.body ?? 'Tu semana tuvo un pulso emocional claro.'}
+                  {language === 'en' ? t('mobilePremium.rewards.emotionPulseFallback') : emotion?.weeklyMessage ?? sectionsByKey.get('highlight')?.body ?? t('mobilePremium.rewards.emotionPulseFallback')}
                 </p>
                 <p className="mp-weekly-late-text text-sm leading-relaxed text-[color:var(--weekly-muted)]" style={{ transitionDelay: '3000ms' }}>
-                  {biweeklyEmotion?.biweeklyContext ?? 'El contexto de 15 días ayuda a leer si esta emoción fue aislada o tendencia.'}
+                  {language === 'en' ? t('mobilePremium.rewards.biweeklyContextFallback') : biweeklyEmotion?.biweeklyContext ?? t('mobilePremium.rewards.biweeklyContextFallback')}
                 </p>
               </div>
             </div>
@@ -2800,14 +2800,14 @@ function PremiumMonthlyWrappedStory({
           <WeeklyStorySlide
             accent="#A78BFA"
             active={showSharePicker || activeStorySlide === 1}
-            eyebrow="DATOS REALES"
+            eyebrow={t('mobilePremium.rewards.realData').toUpperCase()}
             index={1}
             registerSlide={(el) => (storySlideRefs.current[1] = el)}
             title={t('mobilePremium.rewards.tasksDone')}
           >
             <div className="flex flex-1 flex-col justify-between gap-[clamp(1.5rem,4dvh,2.5rem)]">
               <p className="mp-weekly-fragment text-xl leading-relaxed text-[color:var(--weekly-muted)]" style={{ transitionDelay: '100ms' }}>
-                Completaste <span className="font-semibold text-[#EC6FC1]">{monthlyData.completedTasks}</span> tareas durante el mes.
+                {t('mobilePremium.rewards.monthlyTasksPrefix')} <span className="font-semibold text-[#EC6FC1]">{monthlyData.completedTasks}</span> {t('mobilePremium.rewards.monthlyTasksSuffix')}
               </p>
               <div className="space-y-[clamp(1.8rem,4.5dvh,2.8rem)]">
                 <div className="mp-weekly-fragment text-center" style={{ transitionDelay: '210ms' }}>
@@ -3619,15 +3619,16 @@ function WeeklyEnergyRaceChart({
   active: boolean;
   energy: WeeklyWrappedRecord['payload']['summary']['energyHighlight'] | undefined;
 }) {
+  const { t } = usePostLoginLanguage();
   const metrics = buildWeeklyEnergyRaceMetrics(energy);
   if (!metrics.length) {
     return (
       <div className="mp-weekly-fragment flex min-h-0 flex-1 flex-col justify-center gap-5" style={{ transitionDelay: '180ms' }}>
         <div className="rounded-[1.3rem] border border-[color:var(--weekly-line)] bg-white/[0.045] px-5 py-6">
-          <p className="text-xs uppercase tracking-[0.28em] text-[#56DDF5]">Datos reales</p>
-          <p className="mt-4 text-2xl font-semibold leading-tight text-[color:var(--weekly-text)]">Este Weekly todavía no tiene serie real guardada.</p>
+          <p className="text-xs uppercase tracking-[0.28em] text-[#56DDF5]">{t('mobilePremium.rewards.realData')}</p>
+          <p className="mt-4 text-2xl font-semibold leading-tight text-[color:var(--weekly-text)]">{t('mobilePremium.rewards.noEnergyTitle')}</p>
           <p className="mt-3 text-sm leading-6 text-[color:var(--weekly-muted)]">
-            Los próximos Wrapped van a usar HP, Mood y Focus reales de Daily Energy para mostrar la variación semanal.
+            {t('mobilePremium.rewards.noEnergyBody')}
           </p>
         </div>
       </div>
@@ -3704,15 +3705,15 @@ function WeeklyEnergyRaceChart({
         <g className="mp-weekly-race-late" style={{ transitionDelay: '2520ms' }}>
           <text fill="var(--weekly-muted)" fontSize="13" x="8" y="246">
             <tspan fill={leader.color} fontWeight="700">{leader.label}</tspan>
-            <tspan> lideró </tspan>
+            <tspan> {t('mobilePremium.rewards.energyLeader')} </tspan>
             <tspan fill="var(--weekly-text)" fontWeight="700">{leader.days}/7</tspan>
-            <tspan> días</tspan>
+            <tspan> {t('mobilePremium.rewards.activeDays')}</tspan>
           </text>
         </g>
       </svg>
       <div className="mp-weekly-race-late space-y-3" style={{ transitionDelay: '2620ms' }}>
         <div className="rounded-[1.1rem] border border-[color:var(--weekly-line)] bg-white/[0.045] px-4 py-3">
-          <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--weekly-subtle)]">Mayor variación</p>
+          <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--weekly-subtle)]">{t('mobilePremium.rewards.majorVariation')}</p>
           <div className="mt-2 flex items-end justify-between gap-4">
             <div>
               <p className="text-2xl font-semibold leading-none" style={{ color: variationLeader.color }}>{variationLeader.label}</p>
@@ -3753,16 +3754,17 @@ function WeeklyDifficultyConstellation({
   mediumPct: number;
   total: number;
 }) {
+  const { t } = usePostLoginLanguage();
   const segments = [
-    { key: 'easy', label: 'Fácil', count: easyCount, percent: easyPct, color: '#5BE282' },
-    { key: 'medium', label: 'Media', count: mediumCount, percent: mediumPct, color: '#F7C86A' },
-    { key: 'hard', label: 'Difícil', count: hardCount, percent: hardPct, color: '#FF6B6B' },
+    { key: 'easy', label: t('mobilePremium.difficulty.easy'), count: easyCount, percent: easyPct, color: '#5BE282' },
+    { key: 'medium', label: t('mobilePremium.difficulty.medium'), count: mediumCount, percent: mediumPct, color: '#F7C86A' },
+    { key: 'hard', label: t('mobilePremium.difficulty.hard'), count: hardCount, percent: hardPct, color: '#FF6B6B' },
   ];
   const safeTotal = Math.max(1, total);
 
   return (
     <div className="mp-weekly-fragment space-y-6" style={{ transitionDelay: '520ms' }}>
-      <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--weekly-muted)]">Dificultad de las tareas</p>
+      <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--weekly-muted)]">{t('mobilePremium.rewards.taskDifficulty')}</p>
       <div className="flex h-3 overflow-hidden rounded-full bg-[color:var(--weekly-line)]">
         {segments.map((segment, index) => {
           const width = Math.max(segment.count > 0 ? 7 : 0, Math.round((segment.count / safeTotal) * 100));
@@ -3817,6 +3819,7 @@ function WeeklyRadarAnalysisChart({
   radarTraits?: TraitXpEntry[];
   xp: number;
 }) {
+  const { t } = usePostLoginLanguage();
   const uniqueId = useId().replace(/:/g, '_');
   const size = 340;
   const center = size / 2;
@@ -3829,8 +3832,8 @@ function WeeklyRadarAnalysisChart({
   const effectiveDominantIndex = WEEKLY_PILLAR_ORDER.indexOf(effectiveDominant);
   const hasRealRadarTraits = (radarTraits ?? []).some((trait) => normalizePillarCode(trait.pillar) && Number.isFinite(trait.xp) && trait.xp > 0);
   const effectiveMessage = hasRealRadarTraits
-    ? `${resolveRewardsPillarLabel(effectiveDominant)} lideró tu energía estos días. Seguí apoyándote en ese foco.`
-    : message || `${resolveRewardsPillarLabel(effectiveDominant)} lideró tu energía estos días. Seguí apoyándote en ese foco.`;
+    ? t('mobilePremium.rewards.pillarLedMessage', { pillar: resolveRewardsPillarLabel(effectiveDominant, t) })
+    : message || t('mobilePremium.rewards.pillarLedMessage', { pillar: resolveRewardsPillarLabel(effectiveDominant, t) });
   const points = axes.map((axis, index) => {
     const distance = radius * (axis.value / maxValue);
     const point = weeklyPolarPoint(center, center, distance, weeklyRadarAngle(index, axes.length));
@@ -3933,7 +3936,7 @@ function WeeklyRadarAnalysisChart({
               textAnchor="middle"
             >
               <textPath href={`#${uniqueId}-weekly-radar-label-path-${pillar}`} startOffset="50%" textAnchor="middle">
-                {resolveRewardsPillarLabel(pillar).toUpperCase()} {pillarPercentages[pillar]}%
+                {resolveRewardsPillarLabel(pillar, t).toUpperCase()} {pillarPercentages[pillar]}%
               </textPath>
             </text>
           ))}
@@ -3954,7 +3957,7 @@ function WeeklyRadarAnalysisChart({
               <p className={`${selected ? 'text-[clamp(2.9rem,11vw,3.35rem)]' : 'text-[clamp(1.85rem,7.2vw,2.15rem)]'} font-semibold leading-none tracking-[-0.04em]`}>
                 <AnimatedWeeklyNumber active={active} delay={3900} duration={selected ? 1450 : 820} value={percent} />%
               </p>
-              <p className="mt-2 text-[10px] uppercase tracking-[0.24em] text-[color:var(--weekly-muted)]">{resolveRewardsPillarLabel(pillar)}</p>
+              <p className="mt-2 text-[10px] uppercase tracking-[0.24em] text-[color:var(--weekly-muted)]">{resolveRewardsPillarLabel(pillar, t)}</p>
             </div>
           );
         })}
@@ -4525,10 +4528,11 @@ function MonthlyShareDifficulty({
   difficulty: MonthlyStoryData['difficulty'];
   full: boolean;
 }) {
+  const { t } = usePostLoginLanguage();
   const segments = [
-    { key: 'easy', label: 'Fácil', count: difficulty.easy, pct: difficulty.easyPct, color: '#5BE282' },
-    { key: 'medium', label: 'Media', count: difficulty.medium, pct: difficulty.mediumPct, color: '#F7C86A' },
-    { key: 'hard', label: 'Difícil', count: difficulty.hard, pct: difficulty.hardPct, color: '#FF6B6B' },
+    { key: 'easy', label: t('mobilePremium.difficulty.easy'), count: difficulty.easy, pct: difficulty.easyPct, color: '#5BE282' },
+    { key: 'medium', label: t('mobilePremium.difficulty.medium'), count: difficulty.medium, pct: difficulty.mediumPct, color: '#F7C86A' },
+    { key: 'hard', label: t('mobilePremium.difficulty.hard'), count: difficulty.hard, pct: difficulty.hardPct, color: '#FF6B6B' },
   ];
   return (
     <div className={full ? 'mt-14' : 'mt-5'}>
@@ -4700,6 +4704,18 @@ function translateRewardText(value: string, t: (key: string, params?: Record<str
     hard: t('mobilePremium.difficulty.hard'),
   };
   return labels[normalized] ?? value;
+}
+
+function translateWeeklyHabitBody(value: string | undefined, language: 'es' | 'en') {
+  if (!value || language !== 'en') return value ?? '';
+  const normalized = value.toLowerCase();
+  const dayMatch = value.match(/(\d+)\/7/);
+  const prefix = dayMatch ? `${dayMatch[1]}/7 days. ` : '';
+  if (normalized.includes('sostuviste el compromiso')) return `${prefix}You kept the commitment.`;
+  if (normalized.includes('ordenó el foco')) return `${prefix}It organized the week's focus.`;
+  if (normalized.includes('aprendizaje activo')) return `${prefix}Active learning.`;
+  if (normalized.includes('regulación emocional')) return `${prefix}Emotional regulation.`;
+  return value;
 }
 
 function translateCalibrationReason(value: string, t: (key: string, params?: Record<string, string | number>) => string) {

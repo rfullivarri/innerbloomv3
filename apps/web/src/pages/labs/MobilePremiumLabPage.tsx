@@ -1968,10 +1968,10 @@ function formatCompactDate(value: string | null) {
   return value.slice(0, 10);
 }
 
-function formatDateShort(value: string) {
+function formatDateShort(value: string, language: 'es' | 'en' = 'es') {
   const date = new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short' }).format(date).replace('.', '');
+  return new Intl.DateTimeFormat(language, { day: 'numeric', month: 'short' }).format(date).replace('.', '');
 }
 
 function enumerateDateRange(start: string, end: string) {
@@ -2289,6 +2289,7 @@ function EmotionChartPanel({
   backendUserId: string | null;
   localSnapshot?: LocalOnboardingSnapshot | null;
 }) {
+  const { language, t } = usePostLoginLanguage();
   const [activeEmotionCell, setActiveEmotionCell] = useState<{ date: string; label: string; color?: string } | null>(null);
   const heatmapScrollRef = useRef<HTMLDivElement | null>(null);
   const { data } = useRequest(
@@ -2400,13 +2401,13 @@ function EmotionChartPanel({
         }
       `}</style>
       <LabBackHeader />
-      <p className="text-base text-[color:var(--mp-text-secondary)]">Seis meses desde tu primer registro disponible.</p>
+      <p className="text-base text-[color:var(--mp-text-secondary)]">{t('mobilePremium.emotionChart.description')}</p>
 
       <div className="flex flex-wrap gap-x-6 gap-y-4">
         {EMOTION_LEGEND.map((emotion) => (
           <span className="inline-flex items-center gap-2 text-sm text-[color:var(--mp-text-secondary)]" key={emotion.key}>
             <span className="h-3.5 w-3.5 rounded-full" style={{ backgroundColor: emotion.color }} />
-            {emotion.label}
+            {translateEmotionLegendLabel(emotion.key, t)}
           </span>
         ))}
       </div>
@@ -2414,7 +2415,7 @@ function EmotionChartPanel({
       {periodStart && periodEnd ? (
         <p className="flex items-center gap-2 text-sm text-[color:var(--mp-text-secondary)]">
           <span className="text-[color:var(--mp-text-muted)]">▣</span>
-          Período analizado: {formatDateShort(periodStart)} – {formatDateShort(periodEnd)}
+          {t('mobilePremium.emotionChart.period')}: {formatDateShort(periodStart, language)} – {formatDateShort(periodEnd, language)}
         </p>
       ) : null}
 
@@ -2430,7 +2431,7 @@ function EmotionChartPanel({
                 key={segment.key}
                 style={{ gridColumn: `${segment.startIndex + 1} / span ${segment.span}` }}
               >
-                {segment.label}
+                {formatEmotionMonthLabel(segment.monthKey, language)}
               </span>
             ))}
           </div>
@@ -2445,7 +2446,9 @@ function EmotionChartPanel({
                     return <span aria-hidden="true" className="h-4 w-4 opacity-0" key={cell.date} />;
                   }
                   const emotion = cell.mood ? resolveEmotionVisual(cell.mood) : null;
-                  const label = emotion ? `${emotion.label} · ${formatDateShort(cell.date)}` : `${formatDateShort(cell.date)} · sin registro`;
+                  const label = emotion
+                    ? `${translateEmotionLegendLabel(emotion.key, t)} · ${formatDateShort(cell.date, language)}`
+                    : `${formatDateShort(cell.date, language)} · ${t('mobilePremium.emotionChart.noRecord')}`;
                   const isLatestEmotion = Boolean(emotion && latestEmotionDate === cell.date);
                   const delayMs = 120 + columnIndex * 26 + ((columnIndex * 17 + rowIndex * 29) % 150);
                   return (
@@ -2485,8 +2488,8 @@ function EmotionChartPanel({
           style={{ backgroundColor: frequent.color }}
         />
         <div>
-          <p className="text-2xl font-light text-[color:var(--mp-text)]">{frequent.label}</p>
-          <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">emoción más frecuente</p>
+          <p className="text-2xl font-light text-[color:var(--mp-text)]">{translateEmotionLegendLabel(frequent.key, t)}</p>
+          <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">{t('mobilePremium.emotionChart.mostFrequent')}</p>
         </div>
       </div>
     </section>
@@ -2642,7 +2645,7 @@ function buildLabsEmotionFallback(): EmotionSnapshot[] {
 
 function resolveEmotionVisual(mood: string | null | undefined) {
   const normalized = normalizeTextKey(mood);
-  if (normalized.includes('felic') || normalized.includes('happy')) return EMOTION_LEGEND[1];
+  if (normalized.includes('felic') || normalized.includes('happy') || normalized.includes('happiness')) return EMOTION_LEGEND[1];
   if (normalized.includes('motiv')) return EMOTION_LEGEND[2];
   if (normalized.includes('trist') || normalized.includes('sad')) return EMOTION_LEGEND[3];
   if (normalized.includes('ansiedad') || normalized.includes('anxiety')) return EMOTION_LEGEND[4];
@@ -2716,7 +2719,7 @@ function buildEmotionMonthSegments(columns: Array<{ cells: Array<{ date: string;
     assignments[columnIndex] = activeMonthKey;
   });
 
-  const segments: Array<{ key: string; label: string; startIndex: number; span: number }> = [];
+  const segments: Array<{ key: string; monthKey: string; startIndex: number; span: number }> = [];
   let currentKey = assignments[0] ?? '';
   let segmentStart = 0;
 
@@ -2728,10 +2731,7 @@ function buildEmotionMonthSegments(columns: Array<{ cells: Array<{ date: string;
         const [year, month] = currentKey.split('-').map(Number);
         segments.push({
           key: `${currentKey}-${segmentStart}`,
-          label: new Intl.DateTimeFormat('es', { month: 'short' })
-            .format(new Date(year, month - 1, 1))
-            .replace('.', '')
-            .toUpperCase(),
+          monthKey: `${year}-${String(month).padStart(2, '0')}`,
           startIndex: segmentStart,
           span,
         });
@@ -2742,6 +2742,36 @@ function buildEmotionMonthSegments(columns: Array<{ cells: Array<{ date: string;
   }
 
   return segments;
+}
+
+function translateEmotionLegendLabel(
+  key: (typeof EMOTION_LEGEND)[number]['key'],
+  t: (translationKey: string, params?: Record<string, string | number>) => string,
+) {
+  switch (key) {
+    case 'happy':
+      return t('mobilePremium.dquest.happy');
+    case 'motivation':
+      return t('mobilePremium.dquest.motivation');
+    case 'sad':
+      return t('mobilePremium.dquest.sad');
+    case 'anxiety':
+      return t('mobilePremium.dquest.anxiety');
+    case 'frustration':
+      return t('mobilePremium.dquest.frustration');
+    case 'tired':
+      return t('mobilePremium.dquest.tired');
+    case 'calm':
+    default:
+      return t('mobilePremium.dquest.calm');
+  }
+}
+
+function formatEmotionMonthLabel(monthKey: string, language: 'es' | 'en') {
+  const [year, month] = monthKey.split('-').map(Number);
+  const date = new Date(year, month - 1, 1);
+  if (Number.isNaN(date.getTime())) return monthKey.toUpperCase();
+  return new Intl.DateTimeFormat(language, { month: 'short' }).format(date).replace('.', '').toUpperCase();
 }
 
 function startOfLocalDay(date: Date) {
