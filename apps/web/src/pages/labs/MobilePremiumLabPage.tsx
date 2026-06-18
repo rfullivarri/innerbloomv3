@@ -5,7 +5,8 @@ import { useOnboardingProgress } from '../../hooks/useOnboardingProgress';
 import { useRequest } from '../../hooks/useRequest';
 import { useUserTasks } from '../../hooks/useUserTasks';
 import { useWeeklyWrapped } from '../../hooks/useWeeklyWrapped';
-import { useClerk, useUser } from '../../auth/runtimeAuth';
+import { useAuth, useClerk, useUser } from '../../auth/runtimeAuth';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import {
   getDailyQuestDefinition,
   getDailyQuestStatus,
@@ -488,8 +489,10 @@ export default function MobilePremiumLabPage({ basePath }: { basePath?: string }
 function MobilePremiumLabPageInner() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = usePostLoginLanguage();
   const labBase = useMobilePremiumBasePath();
   const backendUser = useBackendUser();
+  const { signOut } = useAuth();
   const clerk = useClerk();
   const runtimeUser = useUser();
   const [onboardingPreview] = useState(() => {
@@ -683,7 +686,7 @@ function MobilePremiumLabPageInner() {
   const navItems = buildNavItems(route, {
     dquest: shouldGuideDailyQuest,
     tareas: shouldGuideTaskEdit,
-  }, labBase);
+  }, labBase, t);
   const toggleTheme = () => setTheme((current) => (current === 'dark' ? 'light' : 'dark'));
   const selectedModerationTracker =
     premiumModerationState.trackers.find((tracker) => tracker.type === selectedModerationType) ??
@@ -911,7 +914,7 @@ function MobilePremiumLabPageInner() {
       onMenuOpen={() => setActiveOverlay('menu')}
       onThemeToggle={toggleTheme}
       theme={theme}
-      title={ROUTE_LABELS[route]}
+      title={resolveRouteLabel(route, t)}
     >
       <section className="space-y-7">
         {shouldShowOnboardingGuide && effectiveOnboardingProgress && ['dashboard', 'tareas', 'logros'].includes(route) ? (
@@ -1069,6 +1072,9 @@ function MobilePremiumLabPageInner() {
         onGoDashboard={goToDashboard}
         onOpen={(overlay) => setActiveOverlay(overlay)}
         onOpenUserProfile={() => clerk.openUserProfile()}
+        onSignOut={() => {
+          void signOut({ redirectUrl: '/login2' });
+        }}
         onReminderSaved={async () => {
           if (effectiveBackendUserId) {
             await onboardingProgressRequest.reload();
@@ -1109,7 +1115,37 @@ function resolveLabRoute(pathname: string, basePath = LAB_BASE): LabRoute | null
   return LAB_ROUTES.some((item) => item.path === segment) ? (segment as LabRoute) : null;
 }
 
-function buildNavItems(activeRoute: LabRoute, onboardingCues: { dquest: boolean; tareas: boolean }, basePath = LAB_BASE): PremiumNavItem[] {
+function resolveRouteLabel(route: LabRoute, t: (key: string) => string): string {
+  switch (route) {
+    case 'dashboard':
+      return t('mobilePremium.route.dashboard');
+    case 'tareas':
+      return t('mobilePremium.route.tasks');
+    case 'dquest':
+      return t('mobilePremium.route.dquest');
+    case 'logros':
+      return t('mobilePremium.route.rewards');
+    case 'task-detail':
+      return t('mobilePremium.route.taskDetail');
+    case 'emotion-chart':
+      return t('mobilePremium.route.emotionChart');
+    case 'balance':
+      return t('mobilePremium.route.balance');
+    case 'vision-general':
+      return t('mobilePremium.route.vision');
+    case 'onboarding-banners':
+      return t('mobilePremium.route.onboardingBanners');
+    default:
+      return ROUTE_LABELS[route];
+  }
+}
+
+function buildNavItems(
+  activeRoute: LabRoute,
+  onboardingCues: { dquest: boolean; tareas: boolean },
+  basePath = LAB_BASE,
+  t: (key: string) => string = (key) => key,
+): PremiumNavItem[] {
   const labBase = normalizeMobilePremiumBasePath(basePath);
   const dashboardActiveRoutes: LabRoute[] = ['dashboard', 'emotion-chart', 'balance', 'vision-general'];
   const tasksActiveRoutes: LabRoute[] = ['tareas', 'task-detail'];
@@ -1117,7 +1153,7 @@ function buildNavItems(activeRoute: LabRoute, onboardingCues: { dquest: boolean;
     const item = LAB_ROUTES.find((candidate) => candidate.path === route)!;
     return {
       to: `${labBase}/${item.path}`,
-      label: item.label,
+      label: resolveRouteLabel(route, t),
       icon: <PremiumNavIcon route={route} />,
       end: item.path === 'dashboard',
       onboardingCue: item.path === 'dquest' ? onboardingCues.dquest : item.path === 'tareas' ? onboardingCues.tareas : false,

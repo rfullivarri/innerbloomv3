@@ -21,6 +21,7 @@ import {
 import { PremiumModerationCards } from './PremiumModerationCards';
 import { buildPremiumRowsFromLocalOnboarding, type LocalOnboardingSnapshot } from '../localOnboardingBridge';
 import { useMobilePremiumBasePath } from '../mobilePremiumRouting';
+import { usePostLoginLanguage } from '../../../../i18n/postLoginLanguage';
 
 const STREAK_PILLARS: StreakPanelPillar[] = ['Body', 'Mind', 'Soul'];
 
@@ -113,6 +114,7 @@ export function PremiumDashboard({
   onModerationOpen?: () => void;
   onModerationDetail?: (tracker: ModerationTracker) => void;
 }) {
+  const { t } = usePostLoginLanguage();
   const labBase = useMobilePremiumBasePath();
   const weeklyGoal = Math.max(1, Math.round(weeklyTarget ?? 3));
   const { data: streakData } = useRequest(
@@ -215,15 +217,15 @@ export function PremiumDashboard({
       <section className="border-b border-[color:var(--mp-border)] pb-6">
         <div className="grid grid-cols-[minmax(0,1fr)_92px] items-center gap-4">
           <div>
-            <p className="text-[1.28rem] font-medium leading-tight text-[color:var(--mp-text)]">Retrospectiva de ayer</p>
+            <p className="text-[1.28rem] font-medium leading-tight text-[color:var(--mp-text)]">{t('mobilePremium.dashboard.dquestTitle')}</p>
             <p className="mt-2 max-w-[17rem] text-sm leading-5 text-[color:var(--mp-text-secondary)]">
-              Registrá tu emoción predominante y marcá las tareas que completaste.
+              {t('mobilePremium.dashboard.dquestBody')}
             </p>
             <Link
               className="mt-5 inline-flex h-10 items-center gap-3 rounded-full bg-violet-500 px-5 text-sm font-medium text-white shadow-[0_10px_22px_rgba(124,58,237,0.2)]"
               to={`${labBase}/dquest`}
             >
-              Comenzar
+              {t('mobilePremium.dashboard.start')}
               <span aria-hidden="true" className="text-base">›</span>
             </Link>
           </div>
@@ -235,8 +237,8 @@ export function PremiumDashboard({
         </div>
         <div className="mt-6 border-t border-[color:var(--mp-border)] pt-4">
           <div className="flex items-baseline justify-between gap-3 text-xs text-[color:var(--mp-text-secondary)]">
-            <p><span className="text-[color:var(--mp-text)]">Nivel {level.current_level}</span> · {formatNumber(level.xp_total)} GP</p>
-            <p>{level.xp_to_next ?? 0} GP restantes</p>
+            <p><span className="text-[color:var(--mp-text)]">{t('mobilePremium.dashboard.level', { level: level.current_level })}</span> · {formatNumber(level.xp_total)} GP</p>
+            <p>{t('mobilePremium.dashboard.gpRemaining', { gp: level.xp_to_next ?? 0 })}</p>
           </div>
           <div className="mt-3 h-px overflow-hidden bg-white/10">
             <div className="mp-level-progress-load h-full origin-left bg-[color:var(--mp-violet)] shadow-[0_0_14px_rgba(167,139,250,0.62)]" style={{ width: `${Math.max(4, Math.min(100, level.progress_percent))}%` }} />
@@ -263,7 +265,7 @@ export function PremiumDashboard({
           ref={emotionCardRef}
           to={`${labBase}/emotion-chart`}
         >
-          <MiniHeading heading="Emoción predominante" label="últimos 15 días" />
+          <MiniHeading heading={t('mobilePremium.dashboard.emotionHeading')} label={t('mobilePremium.dashboard.last15Days')} />
           <EmotionSummaryDots active={emotionVisible} summary={emotionSummary} />
         </Link>
         <Link
@@ -272,7 +274,7 @@ export function PremiumDashboard({
           to={`${labBase}/balance`}
         >
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-[color:var(--mp-text)]">Equilibrio</p>
+            <p className="text-sm font-medium text-[color:var(--mp-text)]">{t('mobilePremium.dashboard.balance')}</p>
             <span className="text-xl text-[color:var(--mp-text-muted)] transition-transform group-hover:translate-x-0.5">›</span>
           </div>
           <PremiumBalanceCompact active={balanceVisible} balance={balance} />
@@ -281,16 +283,16 @@ export function PremiumDashboard({
 
       <Link className="block" to={`${labBase}/vision-general`}>
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-medium text-[color:var(--mp-text)]">Visión general</h2>
+          <h2 className="text-lg font-medium text-[color:var(--mp-text)]">{t('mobilePremium.dashboard.overview')}</h2>
           <span className="text-xl text-[color:var(--mp-text-secondary)]">›</span>
         </div>
         <div className="mt-3">
-          {overview.streak ? <OverviewRow accent="green" icon="streak" label="Mejor racha actual" task={overview.streak} value={`${overview.streak.streakDays}d`} /> : null}
-          {overview.attention ? <OverviewRow accent="red" icon="attention" label="Necesita atención" task={overview.attention} value={`${overview.attention.monthlyCount}/${overview.attention.weeklyGoal * 4} mes`} /> : null}
-          {overview.close ? <OverviewRow accent="amber" icon="close" label="Cerca del hábito" task={overview.close} value={`${overview.close.weeklyDone}/${overview.close.weeklyGoal}`} withDots /> : null}
+          {overview.streak ? <OverviewRow accent="green" icon="streak" label={t('mobilePremium.dashboard.bestStreak')} task={overview.streak} value={`${overview.streak.streakDays}d`} /> : null}
+          {overview.attention ? <OverviewRow accent="red" icon="attention" label={t('mobilePremium.dashboard.needsAttention')} task={overview.attention} value={`${overview.attention.monthlyCount}/${overview.attention.weeklyGoal * 4} ${t('mobilePremium.dashboard.monthSuffix')}`} /> : null}
+          {overview.close ? <OverviewRow accent="amber" icon="close" label={t('mobilePremium.dashboard.closeToHabit')} task={overview.close} value={`${overview.close.weeklyDone}/${overview.close.weeklyGoal}`} withDots /> : null}
           {!overview.streak && !overview.attention && !overview.close ? (
             <p className="border-b border-[color:var(--mp-border)] py-5 text-sm leading-6 text-[color:var(--mp-text-secondary)]">
-              A partir de la primera semana podremos mostrar señales útiles sobre tus tareas.
+              {t('mobilePremium.dashboard.noSignals')}
             </p>
           ) : null}
         </div>
@@ -588,6 +590,7 @@ function DashboardMotionStyles() {
 }
 
 function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergySummary> }) {
+  const { t } = usePostLoginLanguage();
   const chartRef = useRef<HTMLElement | null>(null);
   const chartVisible = useInViewOnce(chartRef);
   const [activeMetricLabel, setActiveMetricLabel] = useState<string | null>(null);
@@ -612,10 +615,10 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
     >
       <div className="flex items-baseline justify-between gap-4">
         <div className="flex items-center gap-2">
-          <h2 className="text-lg font-medium text-[color:var(--mp-text)]">Energía diaria</h2>
+          <h2 className="text-lg font-medium text-[color:var(--mp-text)]">{t('mobilePremium.dashboard.dailyEnergy')}</h2>
           <button
             aria-expanded={infoOpen}
-            aria-label="Ver explicación de Daily Energy"
+            aria-label={t('mobilePremium.dashboard.dailyEnergyA11y')}
             className="grid h-6 w-6 place-items-center rounded-full border border-[color:var(--mp-border)] text-xs font-semibold text-[color:var(--mp-text-secondary)] transition hover:text-[color:var(--mp-text)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--mp-violet)]/70"
             data-energy-interactive="true"
             onClick={() => {
@@ -627,7 +630,7 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
             i
           </button>
         </div>
-        <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--mp-text-muted)]">7 días</p>
+        <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.dashboard.sevenDays')}</p>
       </div>
 
       {infoOpen ? (

@@ -13,6 +13,7 @@ import {
   type SubmitDailyQuestFeedbackEvent,
   type SubmitDailyQuestResponse,
 } from '../../../../lib/api';
+import { usePostLoginLanguage } from '../../../../i18n/postLoginLanguage';
 import { PremiumModerationCards } from './PremiumModerationCards';
 
 type DQuestPillarCode = 'BODY' | 'MIND' | 'SOUL';
@@ -97,6 +98,7 @@ export function PremiumDailyQuest({
   onboardingPreview?: boolean;
   previewAlreadyCompleted?: boolean;
 }) {
+  const { t } = usePostLoginLanguage();
   const [selectedEmotion, setSelectedEmotion] = useState<number | null>(null);
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [snoozed, setSnoozed] = useState(false);
@@ -152,7 +154,7 @@ export function PremiumDailyQuest({
       setSubmitState('submitted');
       onConfirmFeedback?.({
         emotionColor: selectedEmotionMeta.color,
-        emotionName: selectedEmotionOption?.name ?? 'Calma',
+        emotionName: selectedEmotionOption ? resolveDQuestEmotionLabel(selectedEmotionOption, t) : t('mobilePremium.dquest.calm'),
         gpTotal,
         response: buildFallbackSubmitResponse({
           date: definition.date,
@@ -179,7 +181,7 @@ export function PremiumDailyQuest({
       setSubmitState('submitted');
       onConfirmFeedback?.({
         emotionColor: selectedEmotionMeta.color,
-        emotionName: selectedEmotionOption?.name ?? 'Emoción',
+        emotionName: selectedEmotionOption ? resolveDQuestEmotionLabel(selectedEmotionOption, t) : t('mobilePremium.dquest.emotionFallback'),
         gpTotal,
         response,
         selectedTaskIds: selectedTasks,
@@ -204,9 +206,9 @@ export function PremiumDailyQuest({
       <section className="space-y-7 pb-28">
         <div className="rounded-[1.5rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-5">
           <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[color:var(--mp-violet)]">DQuest</p>
-          <h2 className="mt-3 text-2xl font-semibold text-[color:var(--mp-text)]">No pudimos cargar tu retrospectiva</h2>
+          <h2 className="mt-3 text-2xl font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.dquest.errorTitle')}</h2>
           <p className="mt-3 text-sm leading-6 text-[color:var(--mp-text-secondary)]">
-            No mostramos tareas de demostración cuando hay una sesión real. Reintentá para cargar tus datos.
+            {t('mobilePremium.dquest.errorBody')}
           </p>
           <button
             className="mt-5 min-h-11 rounded-full bg-violet-500 px-5 text-sm font-semibold text-white"
@@ -216,7 +218,7 @@ export function PremiumDailyQuest({
             }}
             type="button"
           >
-            Reintentar
+            {t('mobilePremium.dquest.retry')}
           </button>
         </div>
       </section>
@@ -238,16 +240,16 @@ export function PremiumDailyQuest({
       <section className="space-y-7 pb-28">
         <div className="rounded-[1.5rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-5">
           <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[color:var(--mp-violet)]">DQuest</p>
-          <h2 className="mt-3 text-2xl font-semibold text-[color:var(--mp-text)]">Ya completaste la retrospectiva</h2>
+          <h2 className="mt-3 text-2xl font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.dquest.completedTitle')}</h2>
           <p className="mt-3 text-sm leading-6 text-[color:var(--mp-text-secondary)]">
-            El registro de hoy ya quedó guardado.
+            {t('mobilePremium.dquest.completedBody')}
           </p>
           <button
             className="mt-5 min-h-11 rounded-full bg-violet-500 px-5 text-sm font-semibold text-white"
             onClick={onSnooze}
             type="button"
           >
-            Volver al dashboard
+            {t('mobilePremium.dquest.backDashboard')}
           </button>
         </div>
       </section>
@@ -257,13 +259,13 @@ export function PremiumDailyQuest({
   return (
     <section className="space-y-7 pb-28">
       <div className="space-y-3">
-        <p className="text-[1.42rem] leading-tight text-[color:var(--mp-text)]">Retrospectiva de ayer</p>
+        <p className="text-[1.42rem] leading-tight text-[color:var(--mp-text)]">{t('mobilePremium.dquest.title')}</p>
         <p className="max-w-[21rem] text-[0.98rem] leading-7 text-[color:var(--mp-text-secondary)]">
-          Elegí la emoción predominante y marcá las tareas que completaste.
+          {t('mobilePremium.dquest.subtitle')}
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label="Emoción predominante">
+      <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label={t('mobilePremium.dquest.emotionA11y')}>
         {definition.emotionOptions.map((option) => {
           const emotion = normalizeDQuestEmotion(option);
           const selected = selectedEmotion === option.emotion_id;
@@ -284,7 +286,7 @@ export function PremiumDailyQuest({
               type="button"
             >
               <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: emotion.color }} />
-              {option.name}
+              {resolveDQuestEmotionLabel(option, t)}
             </button>
           );
         })}
@@ -305,7 +307,7 @@ export function PremiumDailyQuest({
         {definition.pillars.map((pillar) => (
           <section className="space-y-2" key={pillar.pillar_code}>
             <h2 className="text-[1.28rem] font-semibold text-[color:var(--mp-text)]">
-              {resolveDQuestPillarLabel(pillar.pillar_code)}
+              {resolveDQuestPillarLabel(pillar.pillar_code, t)}
             </h2>
             <div>
               {pillar.tasks.map((task) => (
@@ -324,7 +326,7 @@ export function PremiumDailyQuest({
       <footer className="fixed inset-x-0 bottom-[calc(76px+env(safe-area-inset-bottom))] z-20 mx-auto w-full max-w-[430px] border-y border-[color:var(--mp-border)] bg-[color:var(--mp-bg)] px-5 py-3 shadow-[0_-18px_42px_rgba(0,0,0,0.16)]">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-[82px]">
-            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-[color:var(--mp-text-muted)]">GP total</p>
+            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.dquest.totalGp')}</p>
             <p className="mt-0.5 text-[1.05rem] font-semibold leading-none text-[color:var(--mp-violet)]">{gpTotal} GP</p>
           </div>
           <div className="flex min-w-0 items-center gap-2">
@@ -333,7 +335,7 @@ export function PremiumDailyQuest({
               onClick={handleSnooze}
               type="button"
             >
-              Más tarde
+              {t('mobilePremium.dquest.later')}
             </button>
             <button
               className="min-h-10 rounded-full bg-violet-500 px-5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(124,58,237,0.24)] disabled:opacity-45"
@@ -341,13 +343,13 @@ export function PremiumDailyQuest({
               onClick={handleConfirm}
               type="button"
             >
-              {submitState === 'submitting' ? 'Confirmando' : 'Confirmar'}
+              {submitState === 'submitting' ? t('mobilePremium.dquest.confirming') : t('mobilePremium.dquest.confirm')}
             </button>
           </div>
         </div>
-        {snoozed ? <p className="mt-2 text-xs text-[color:var(--mp-text-muted)]">Más tarde queda pendiente para esta retrospectiva.</p> : null}
-        {submitState === 'submitted' ? <p className="mt-2 text-xs text-[color:var(--mp-green)]">DQuest confirmada.</p> : null}
-        {submitState === 'error' ? <p className="mt-2 text-xs text-[color:var(--mp-red)]">No se pudo confirmar. Probá nuevamente.</p> : null}
+        {snoozed ? <p className="mt-2 text-xs text-[color:var(--mp-text-muted)]">{t('mobilePremium.dquest.snoozed')}</p> : null}
+        {submitState === 'submitted' ? <p className="mt-2 text-xs text-[color:var(--mp-green)]">{t('mobilePremium.dquest.submitted')}</p> : null}
+        {submitState === 'error' ? <p className="mt-2 text-xs text-[color:var(--mp-red)]">{t('mobilePremium.dquest.submitError')}</p> : null}
       </footer>
     </section>
   );
@@ -470,7 +472,8 @@ function PremiumDailyQuestTaskRow({
   selected: boolean;
   onToggle: () => void;
 }) {
-  const difficulty = resolveDQuestDifficulty(task.difficulty);
+  const { t } = usePostLoginLanguage();
+  const difficulty = resolveDQuestDifficulty(task.difficulty, t);
   return (
     <button
       className="grid w-full grid-cols-[36px_minmax(0,1fr)_auto_auto] items-center gap-3 border-b border-[color:var(--mp-border)] py-3.5 text-left last:border-b-0"
@@ -509,20 +512,41 @@ function normalizeDQuestEmotion(option: DailyQuestEmotionOption) {
   return { key: 'calm', color: '#64E86E', soft: 'rgba(100,232,110,0.12)' };
 }
 
-function resolveDQuestPillarLabel(value: string) {
+function resolveDQuestPillarLabel(value: string, t: (key: string) => string) {
   const normalized = value.toUpperCase() as DQuestPillarCode;
-  if (normalized === 'MIND') return 'Mente';
-  if (normalized === 'SOUL') return 'Alma';
-  return 'Cuerpo';
+  if (normalized === 'MIND') return t('mobilePremium.pillar.mind');
+  if (normalized === 'SOUL') return t('mobilePremium.pillar.soul');
+  return t('mobilePremium.pillar.body');
 }
 
-function resolveDQuestDifficulty(difficulty: string | null) {
+function resolveDQuestDifficulty(difficulty: string | null, t: (key: string) => string) {
   const normalized = (difficulty ?? '').toLowerCase();
   if (normalized.includes('easy') || normalized.includes('fácil') || normalized.includes('facil')) {
-    return { label: 'Fácil', className: 'bg-emerald-400/12 text-[color:var(--mp-green)]' };
+    return { label: t('mobilePremium.difficulty.easy'), className: 'bg-emerald-400/12 text-[color:var(--mp-green)]' };
   }
   if (normalized.includes('hard') || normalized.includes('dif')) {
-    return { label: 'Difícil', className: 'bg-red-400/12 text-[color:var(--mp-red)]' };
+    return { label: t('mobilePremium.difficulty.hard'), className: 'bg-red-400/12 text-[color:var(--mp-red)]' };
   }
-  return { label: 'Media', className: 'bg-amber-300/12 text-[color:var(--mp-amber)]' };
+  return { label: t('mobilePremium.difficulty.medium'), className: 'bg-amber-300/12 text-[color:var(--mp-amber)]' };
+}
+
+function resolveDQuestEmotionLabel(option: DailyQuestEmotionOption, t: (key: string) => string) {
+  const emotion = normalizeDQuestEmotion(option);
+  switch (emotion.key) {
+    case 'happy':
+      return t('mobilePremium.dquest.happy');
+    case 'motivation':
+      return t('mobilePremium.dquest.motivation');
+    case 'sad':
+      return t('mobilePremium.dquest.sad');
+    case 'anxiety':
+      return t('mobilePremium.dquest.anxiety');
+    case 'frustration':
+      return t('mobilePremium.dquest.frustration');
+    case 'tired':
+      return t('mobilePremium.dquest.tired');
+    case 'calm':
+    default:
+      return t('mobilePremium.dquest.calm');
+  }
 }

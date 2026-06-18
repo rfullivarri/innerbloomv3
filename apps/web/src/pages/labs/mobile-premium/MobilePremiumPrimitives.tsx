@@ -1,5 +1,6 @@
 import { Link, NavLink } from 'react-router-dom';
 import { type CSSProperties, type ReactNode } from 'react';
+import { usePostLoginLanguage } from '../../../i18n/postLoginLanguage';
 import { mobilePremiumThemeVars, type MobilePremiumTheme } from './mobilePremiumTokens';
 import { TraitIcon } from './traitIconRegistry';
 
@@ -171,6 +172,7 @@ export function MobileSectionHeader({
 }
 
 export function PremiumBottomNav({ items }: { items: PremiumNavItem[] }) {
+  const { t } = usePostLoginLanguage();
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-[430px] border-t border-[color:var(--mp-border)] bg-[color:var(--mp-nav-bg)] px-4 pb-[max(8px,env(safe-area-inset-bottom))] pt-1.5 shadow-[var(--mp-nav-shadow)] backdrop-blur-2xl">
       <style>{`
@@ -200,7 +202,7 @@ export function PremiumBottomNav({ items }: { items: PremiumNavItem[] }) {
               {item.icon}
               {item.onboardingCue ? (
                 <span
-                  aria-label="Siguiente paso del onboarding"
+                  aria-label={t('mobilePremium.a11y.nextOnboardingStep')}
                   className="mp-onboarding-nav-cue absolute -right-2.5 -top-2.5 h-2.5 w-2.5 rounded-full bg-[color:var(--mp-violet)]"
                 />
               ) : null}
@@ -265,6 +267,7 @@ export function MobilePremiumHeader({
   onThemeToggle: () => void;
   onMenuOpen?: () => void;
 }) {
+  const { t } = usePostLoginLanguage();
   return (
     <header className="space-y-4">
       <div className="flex items-center justify-between gap-4">
@@ -273,7 +276,7 @@ export function MobilePremiumHeader({
         </Link>
         <div className="flex shrink-0 items-center gap-2">
           <button
-            aria-label="Abrir menú"
+            aria-label={t('mobilePremium.a11y.openMenu')}
             className="grid h-10 w-10 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-[color:var(--mp-text)]"
             onClick={onMenuOpen}
             type="button"
