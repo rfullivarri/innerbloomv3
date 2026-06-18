@@ -1,4 +1,4 @@
-import { forwardRef, type CSSProperties, type MutableRefObject, type ReactNode, useEffect, useId, useRef, useState } from 'react';
+import { forwardRef, type ReactNode, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { decideTaskHabitAchievement, getRewardsHistory, getTaskInsights, getUserXpByTrait, toggleTaskHabitAchievementMaintained, type HabitAchievementPillarGroup, type HabitAchievementShelfItem, type MonthlyWrappedRecord, type RewardsGrowthCalibrationRow, type RewardsHistorySummary, type TaskInsightsResponse, type TraitXpEntry, type WeeklyWrappedRecord } from '../../../../lib/api';
 import { useRequest } from '../../../../hooks/useRequest';
@@ -12,13 +12,9 @@ import type { LocalOnboardingSnapshot } from '../localOnboardingBridge';
 type RewardsPillarCode = 'BODY' | 'MIND' | 'SOUL';
 type WeeklyStoryVisualMode = 'dark' | 'light';
 type CalibrationFilter = RewardsGrowthCalibrationRow['finalAction'];
-type WeeklyShareOption = 'tasks' | 'balance' | 'habits' | 'emotion';
-type MonthlyShareOption = 'month' | 'tasks' | 'habits' | 'emotion';
-type WrappedShareTarget<T extends string> = { key: T; label: string; slideIndex: number };
-type WrappedShareImageCache = Map<string, string>;
 
 const WEEKLY_PILLAR_ORDER: RewardsPillarCode[] = ['BODY', 'MIND', 'SOUL'];
-const STORY_MODAL_LAYER_CLASS = 'fixed bottom-0 left-0 right-0 top-0 isolate z-[9999] h-[100svh] min-h-[100svh] w-screen overflow-hidden bg-black';
+const STORY_MODAL_LAYER_CLASS = 'fixed bottom-0 left-0 right-0 top-0 isolate z-[9999] h-screen h-[100dvh] w-screen overflow-hidden bg-black';
 
 const FALLBACK_REWARDS_HISTORY: RewardsHistorySummary = {
   weeklyWrapups: [
@@ -675,62 +671,47 @@ function AchievementFrontFace({
   onShareAchievement: (habit: HabitAchievementShelfItem) => void;
 }) {
   const achieved = isHabitAchieved(habit);
-
   return (
-    <div className="relative flex h-full flex-col items-center text-center">
+    <div className="flex h-full flex-col items-center">
       <HabitAchievementSeal
         alt={`${habit.taskName} seal`}
         disabled={!achieved}
-        fallback={<TraitIcon size={140} trait={habit.trait?.name} />}
+        fallback={<TraitIcon size={120} trait={habit.trait?.name} />}
         imgClassName="h-full w-full object-contain"
-        className={`mx-auto grid h-40 w-40 shrink-0 place-items-center ${
-          achieved ? '' : 'opacity-50 grayscale'
-        }`}
+        className={`mx-auto grid h-32 w-32 shrink-0 place-items-center ${achieved ? '' : 'opacity-55 grayscale'}`}
         pillar={habit.pillar}
         traitCode={habit.trait?.code}
         traitName={habit.trait?.name}
       />
-
-      <h3 className="mt-3 line-clamp-3 text-[1.08rem] font-semibold leading-[1.12] text-[color:var(--mp-text)]">
+      <h3 className="mt-3 line-clamp-3 text-[1.25rem] font-semibold leading-[1.1] text-[color:var(--mp-text)]">
         {habit.taskName}
       </h3>
-
-      <p className="mt-2 flex max-w-full items-center justify-center gap-2 overflow-hidden text-sm leading-none">
-        <span className="min-w-0 truncate text-[color:var(--mp-text-secondary)]">
-          {habit.trait?.name ?? 'Rasgo'}
-        </span>
-        <span className="shrink-0 text-[color:var(--mp-text-muted)]">·</span>
-        <span
-          className={`shrink-0 font-semibold ${
-            achieved
-              ? 'text-[color:var(--mp-violet-strong)]'
-              : 'text-[color:var(--mp-text-muted)]'
-          }`}
-        >
-          {achieved ? 'Logrado' : 'Bloqueado'}
-        </span>
+      <p className="mt-1.5 text-base text-[color:var(--mp-text-secondary)]">{habit.trait?.name ?? 'Rasgo'}</p>
+      <p className={`mt-3 text-xs font-semibold uppercase tracking-[0.12em] ${achieved ? 'text-[color:var(--mp-violet)]' : 'text-[color:var(--mp-amber)]'}`}>
+        {achieved ? 'Hábito logrado' : 'Bloqueado'}
       </p>
-
+      <div className="mt-auto w-full">
+        <div className={`mx-auto inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.12em] ${
+          achieved
+            ? 'border-violet-300/20 bg-violet-400/8 text-[color:var(--mp-violet)]'
+            : 'border-amber-300/24 bg-amber-300/8 text-[color:var(--mp-amber)]'
+        }`}>
+          <span aria-hidden="true" className="text-sm leading-none">↻</span>
+          <span>{achieved ? 'Ver desarrollo' : 'Tocar para ver desarrollo'}</span>
+        </div>
+      </div>
       {achieved ? (
         <button
-          className="mt-auto inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-[color:var(--mp-violet-strong)]"
+          className="mt-3 rounded-full border border-[color:var(--mp-border)] px-4 py-1.5 text-xs font-semibold text-[color:var(--mp-text)]"
           onClick={(event) => {
             event.stopPropagation();
             onShareAchievement(habit);
           }}
           type="button"
         >
-          <span aria-hidden="true" className="text-sm leading-none">⇧</span>
           Compartir
         </button>
       ) : null}
-
-      <span
-        aria-hidden="true"
-        className="absolute bottom-2.5 right-2.5 text-base leading-none text-[color:var(--mp-text-muted)] opacity-45"
-      >
-        ↘
-      </span>
     </div>
   );
 }
@@ -761,9 +742,7 @@ function AchievementBackFace({
           />
         </div>
       </div>
-      <p className="mt-auto text-center text-[10px] text-[color:var(--mp-text-muted)] opacity-60">
-        Toca para volver
-      </p>
+      <p className="mt-auto text-xs text-[color:var(--mp-text-muted)]">Toca otra vez para volver al frente</p>
     </div>
   );
 }
@@ -1194,11 +1173,11 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
 
   return (
     <div
-      className="relative flex h-full w-full flex-col justify-evenly overflow-hidden rounded-[1.25rem] border px-[4.4cqw] pb-[2.2cqh] pt-[2.7cqh] [container-type:size] shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
+      className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.25rem] border px-[4.4cqw] pb-[2.2cqh] pt-[2.7cqh] [container-type:size] shadow-[0_22px_80px_rgba(0,0,0,0.28)]"
       data-achievement-share-preview="true"
       ref={ref}
       style={{
-        '--achievement-share-seal-size': 'clamp(7.3rem, 26cqh, 9.1rem)',
+        '--achievement-share-seal-size': 'clamp(6.7rem, 23cqh, 8.25rem)',
         background: bg,
         borderColor: line,
         color: text,
@@ -1213,27 +1192,28 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
         <p className="mt-[0.55cqh] text-[clamp(0.42rem,1.55cqh,0.52rem)] font-semibold uppercase tracking-[0.32em]" style={{ color: isLight ? '#222A55' : '#C4B5FD' }}>Innerbloom</p>
       </div>
 
-      <div className="relative mx-auto grid h-[calc(var(--achievement-share-seal-size)+0.2rem)] shrink-0 place-items-center">
+      <div className="relative mx-auto mt-[1.4cqh] grid h-[calc(var(--achievement-share-seal-size)+0.35rem)] shrink-0 place-items-center">
         <AchievementShareSeal habit={habit} sealDataUrl={sealDataUrl} sealFailed={sealFailed} />
       </div>
 
-      <div className="relative text-center">
-        <h4 className="mx-auto line-clamp-2 max-w-[84cqw] text-[clamp(1.02rem,3.95cqh,1.38rem)] font-semibold leading-[1.04]">{habit.taskName}</h4>
+      <div className="relative mt-[1.05cqh] text-center">
+        <h4 className="mx-auto line-clamp-2 max-w-[82cqw] text-[clamp(0.9rem,3.45cqh,1.18rem)] font-semibold leading-[1.04]">{habit.taskName}</h4>
         {traitLabel ? (
-          <div className="mx-auto mt-[0.7cqh] grid max-w-[64cqw] grid-cols-[1fr_auto_1fr] items-center gap-[2.8cqw]">
+          <div className="mx-auto mt-[0.75cqh] grid max-w-[64cqw] grid-cols-[1fr_auto_1fr] items-center gap-[2.8cqw]">
             <span className="h-px" style={{ backgroundColor: line }} />
             <p className="text-[clamp(0.48rem,1.75cqh,0.62rem)] font-medium leading-none" style={{ color: muted }}>{traitLabel}</p>
             <span className="h-px" style={{ backgroundColor: line }} />
           </div>
         ) : null}
-        <div className="mt-[1.25cqh]">
-          <p className="text-[clamp(0.48rem,1.7cqh,0.58rem)] font-semibold uppercase tracking-[0.24em]" style={{ color: accent }}>Hábito logrado</p>
-          <p className="mt-[0.35cqh] text-[clamp(0.44rem,1.55cqh,0.54rem)] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
-          {achievedLabel ? <p className="mt-[0.35cqh] text-[clamp(0.4rem,1.35cqh,0.48rem)] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
-        </div>
       </div>
 
-      <div className="relative shrink-0 border-t pt-[1.35cqh]" style={{ borderColor: line }}>
+      <div className="relative mt-[1.55cqh] text-center">
+        <p className="text-[clamp(0.48rem,1.7cqh,0.58rem)] font-semibold uppercase tracking-[0.24em]" style={{ color: accent }}>Hábito logrado</p>
+        <p className="mt-[0.35cqh] text-[clamp(0.44rem,1.55cqh,0.54rem)] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
+        {achievedLabel ? <p className="mt-[0.35cqh] text-[clamp(0.4rem,1.35cqh,0.48rem)] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
+      </div>
+
+      <div className="relative mt-auto shrink-0 border-t pt-[1.35cqh]" style={{ borderColor: line }}>
         {visibleMonths.length ? (
           <>
             <div className="flex items-center justify-between gap-3">
@@ -1266,7 +1246,7 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
         )}
       </div>
 
-      <div className="relative grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-[2.8cqw]">
+      <div className="relative mt-[1.35cqh] grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-[2.8cqw]">
         <span className="h-px" style={{ backgroundColor: line }} />
         <p className="text-center text-[clamp(0.34rem,1.15cqh,0.44rem)] font-semibold tracking-[0.16em]" style={{ color: softMuted }}>innerbloomjourney.org</p>
         <span className="h-px" style={{ backgroundColor: line }} />
@@ -2046,7 +2026,6 @@ export function PremiumWeeklyWrappedStory({
     : [{ title: payload.summary?.highlight ?? 'Daily Quest', body: `${completedCount}/7 días activos`, pillar: dominantLabel, daysActive: completedCount }];
   const storyScrollRef = useRef<HTMLDivElement | null>(null);
   const storySlideRefs = useRef<(HTMLElement | null)[]>([]);
-  const shareImageCacheRef = useRef<WrappedShareImageCache>(new Map());
   const [activeStorySlide, setActiveStorySlide] = useState(0);
   const [showSharePicker, setShowSharePicker] = useState(false);
   const [storyVisualMode, setStoryVisualMode] = useState<WeeklyStoryVisualMode>('dark');
@@ -2056,12 +2035,6 @@ export function PremiumWeeklyWrappedStory({
   const energySlideIndex = pillarSlideIndex + 1;
   const emotionSlideIndex = energySlideIndex + 1;
   const closingSlideIndex = emotionSlideIndex + 1;
-  const weeklyShareTargets: Array<WrappedShareTarget<WeeklyShareOption>> = [
-    { key: 'tasks', label: 'Tareas', slideIndex: 1 },
-    { key: 'balance', label: 'Balance', slideIndex: pillarSlideIndex },
-    { key: 'habits', label: 'Hábitos', slideIndex: habitsSlideIndex },
-    { key: 'emotion', label: emotion?.label ?? 'Emoción', slideIndex: emotionSlideIndex },
-  ];
 
   useBodyScrollLock();
 
@@ -2296,15 +2269,12 @@ export function PremiumWeeklyWrappedStory({
             opacity: 1;
             transform: translateY(0);
           }
-          .mp-weekly-radar-final,
-          .mp-weekly-radar-label {
+          .mp-weekly-radar-final {
             opacity: 0;
             transform: translateY(14px);
             transition: opacity 700ms 4200ms ease, transform 700ms 4200ms cubic-bezier(.2,.8,.2,1);
           }
-
-          .mp-weekly-slide-active .mp-weekly-radar-final,
-          .mp-weekly-slide-active .mp-weekly-radar-label {
+          .mp-weekly-slide-active .mp-weekly-radar-final {
             opacity: 1;
             transform: translateY(0);
           }
@@ -2378,13 +2348,13 @@ export function PremiumWeeklyWrappedStory({
           .mp-weekly-emotion-active { animation: mpWeeklyEmotionPulse 2.8s ease-in-out infinite; color: inherit; }
           @media (prefers-reduced-motion: reduce) {
             .mp-weekly-story-in, .mp-weekly-story-glow, .mp-weekly-emotion-active, .mp-weekly-check-in, .mp-weekly-radar-polygon, .mp-weekly-arc-svg { animation: none !important; }
-            .mp-weekly-fragment, .mp-weekly-race-late, .mp-weekly-radar-reveal, .mp-weekly-radar-stage, .mp-weekly-radar-final, .mp-weekly-radar-label, .mp-weekly-radar-dominant-fill, .mp-weekly-radar-glow, .mp-weekly-late-text, .mp-weekly-radar-percent, .mp-weekly-emotion-orb { opacity: 1 !important;  transform: none !important;  transition: none !important;}
+            .mp-weekly-fragment, .mp-weekly-race-late, .mp-weekly-radar-reveal, .mp-weekly-radar-stage, .mp-weekly-radar-final, .mp-weekly-radar-dominant-fill, .mp-weekly-radar-glow, .mp-weekly-late-text, .mp-weekly-radar-percent, .mp-weekly-emotion-orb { opacity: 1 !important; transform: none !important; transition: none !important; }
             .mp-weekly-bar, .mp-weekly-race-line, .mp-weekly-radar-polygon, .mp-weekly-arc-path { transition: none !important; stroke-dashoffset: 0 !important; }
           }
         `}
       </style>
       <div
-        className="mp-weekly-story-root relative h-[100svh] min-h-[100svh] w-screen overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)] [--weekly-share-safe-bottom:max(env(safe-area-inset-bottom),clamp(4.75rem,9dvh,6rem))]"
+        className="mp-weekly-story-root relative h-screen h-[100dvh] min-h-screen min-h-[100svh] w-screen overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)]"
         data-weekly-mode={storyVisualMode}
       >
         <button
@@ -2400,7 +2370,7 @@ export function PremiumWeeklyWrappedStory({
         <div className={`h-full snap-y snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${showSharePicker ? 'overflow-hidden' : 'overflow-y-auto'}`} ref={storyScrollRef}>
           <WeeklyStorySlide
             accent={dominantColor}
-            active={showSharePicker || activeStorySlide === 0}
+            active={activeStorySlide === 0}
             eyebrow="WEEKLY WRAPPED"
             index={0}
             registerSlide={(el) => (storySlideRefs.current[0] = el)}
@@ -2417,7 +2387,7 @@ export function PremiumWeeklyWrappedStory({
                 />
                 <div className="relative text-center">
                   <p className="mp-weekly-gradient-text text-[clamp(6.6rem,30vw,9.5rem)] font-semibold leading-none tracking-[-0.08em]">
-                    <AnimatedWeeklyNumber active={showSharePicker || activeStorySlide === 0} value={completedCount} />/7
+                    <AnimatedWeeklyNumber active={activeStorySlide === 0} value={completedCount} />/7
                   </p>
                   <p className="mt-4 text-sm uppercase tracking-[0.34em] text-[color:var(--weekly-muted)]">días activos</p>
                 </div>
@@ -2442,7 +2412,7 @@ export function PremiumWeeklyWrappedStory({
 
           <WeeklyStorySlide
             accent="#A78BFA"
-            active={showSharePicker || activeStorySlide === 1}
+            active={activeStorySlide === 1}
             eyebrow={sectionsByKey.get('achievements')?.accent ?? 'RESUMEN 7 DÍAS'}
             index={1}
             registerSlide={(el) => (storySlideRefs.current[1] = el)}
@@ -2455,12 +2425,12 @@ export function PremiumWeeklyWrappedStory({
               <div className="space-y-[clamp(1.6rem,4dvh,2.2rem)]">
                 <div className="mp-weekly-fragment text-center" style={{ transitionDelay: '210ms' }}>
                   <p className="mp-weekly-gradient-text text-[clamp(7rem,34vw,10rem)] font-semibold leading-none tracking-[-0.08em]">
-                    <AnimatedWeeklyNumber active={showSharePicker || activeStorySlide === 1} value={completions} />
+                    <AnimatedWeeklyNumber active={activeStorySlide === 1} value={completions} />
                   </p>
                   <p className="mt-2 text-sm uppercase tracking-[0.34em] text-[color:var(--weekly-muted)]">tareas completadas</p>
                 </div>
                 <WeeklyDifficultyConstellation
-                  active={showSharePicker || activeStorySlide === 1}
+                  active={activeStorySlide === 1}
                   easyCount={easyCount}
                   easyPct={easyPct}
                   hardCount={hardCount}
@@ -2472,7 +2442,7 @@ export function PremiumWeeklyWrappedStory({
                 <div className="mp-weekly-fragment flex items-center justify-center gap-2 pt-1 text-[color:var(--weekly-muted)]" style={{ transitionDelay: '860ms' }}>
                   <span className="h-px w-8 bg-[color:var(--weekly-line)]" />
                   <p className="text-xs uppercase tracking-[0.22em]">
-                    <AnimatedWeeklyNumber active={showSharePicker || activeStorySlide === 1} duration={900} value={xpTotal} />
+                    <AnimatedWeeklyNumber active={activeStorySlide === 1} duration={900} value={xpTotal} />
                     {' '}GP generados
                   </p>
                   <span className="h-px w-8 bg-[color:var(--weekly-line)]" />
@@ -2484,7 +2454,7 @@ export function PremiumWeeklyWrappedStory({
           {payload.levelUp?.happened ? (
             <WeeklyStorySlide
               accent="#F7C86A"
-              active={showSharePicker || activeStorySlide === 2}
+              active={activeStorySlide === 2}
               eyebrow="LEVEL UP"
               index={2}
               registerSlide={(el) => (storySlideRefs.current[2] = el)}
@@ -2497,7 +2467,7 @@ export function PremiumWeeklyWrappedStory({
                 <div className="mp-weekly-fragment relative" style={{ transitionDelay: '210ms' }}>
                   <span className="mp-weekly-story-glow absolute inset-0 rounded-full bg-amber-300/30 blur-3xl" />
                   <p className="relative text-[clamp(5.6rem,25vw,8rem)] font-semibold leading-none text-[color:var(--weekly-title)]">
-                    <AnimatedWeeklyNumber active={showSharePicker || activeStorySlide === 2} value={payload.levelUp.currentLevel ?? 0} />
+                    <AnimatedWeeklyNumber active={activeStorySlide === 2} value={payload.levelUp.currentLevel ?? 0} />
                   </p>
                   <p className="relative mt-3 text-sm uppercase tracking-[0.3em] text-[#F7C86A]">+{payload.levelUp.xpGained} GP</p>
                 </div>
@@ -2507,7 +2477,7 @@ export function PremiumWeeklyWrappedStory({
 
           <WeeklyStorySlide
             accent={dominantColor}
-            active={showSharePicker || activeStorySlide === habitsSlideIndex}
+            active={activeStorySlide === habitsSlideIndex}
             eyebrow="HÁBITOS"
             index={habitsSlideIndex}
             registerSlide={(el) => (storySlideRefs.current[habitsSlideIndex] = el)}
@@ -2553,7 +2523,7 @@ export function PremiumWeeklyWrappedStory({
 
           <WeeklyStorySlide
             accent={dominantColor}
-            active={showSharePicker || activeStorySlide === pillarSlideIndex}
+            active={activeStorySlide === pillarSlideIndex}
             eyebrow="PILAR DOMINANTE"
             index={pillarSlideIndex}
             registerSlide={(el) => (storySlideRefs.current[pillarSlideIndex] = el)}
@@ -2561,7 +2531,7 @@ export function PremiumWeeklyWrappedStory({
           >
             <div className="flex flex-1 flex-col justify-between gap-8">
               <WeeklyRadarAnalysisChart
-                active={showSharePicker || activeStorySlide === pillarSlideIndex}
+                active={activeStorySlide === pillarSlideIndex}
                 dominant={dominantPillar}
                 dominantPct={dominantPct}
                 message={sectionsByKey.get('pillar')?.body ?? `${dominantLabel} lideró tu energía estos días.`}
@@ -2574,7 +2544,7 @@ export function PremiumWeeklyWrappedStory({
 
           <WeeklyStorySlide
             accent="#56DDF5"
-            active={showSharePicker || activeStorySlide === energySlideIndex}
+            active={activeStorySlide === energySlideIndex}
             eyebrow="DAILY ENERGY"
             index={energySlideIndex}
             registerSlide={(el) => (storySlideRefs.current[energySlideIndex] = el)}
@@ -2587,7 +2557,7 @@ export function PremiumWeeklyWrappedStory({
                   : `${formatSignedPct(energy.deltaPct)} frente a la semana anterior.`}
               </p>
               <WeeklyEnergyRaceChart
-                active={showSharePicker || activeStorySlide === energySlideIndex}
+                active={activeStorySlide === energySlideIndex}
                 energy={energy}
               />
             </div>
@@ -2595,12 +2565,11 @@ export function PremiumWeeklyWrappedStory({
 
           <WeeklyStorySlide
             accent={emotion?.color ?? dominantColor}
-            active={showSharePicker || activeStorySlide === emotionSlideIndex}
+            active={activeStorySlide === emotionSlideIndex}
             eyebrow="EMOCIÓN"
             index={emotionSlideIndex}
             registerSlide={(el) => (storySlideRefs.current[emotionSlideIndex] = el)}
             title={emotion?.label ?? 'Pulso semanal'}
-            titleDelay="2800ms"
           >
             <div className="flex flex-1 flex-col justify-between gap-8">
               <div className="mp-weekly-fragment relative grid flex-1 place-items-center py-[clamp(1rem,4dvh,2.5rem)]" style={{ transitionDelay: '120ms' }}>
@@ -2632,23 +2601,22 @@ export function PremiumWeeklyWrappedStory({
 
           <WeeklyStorySlide
             accent="#F7C86A"
-            active={showSharePicker || activeStorySlide === closingSlideIndex}
+            active={activeStorySlide === closingSlideIndex}
             eyebrow="CIERRE"
             index={closingSlideIndex}
             registerSlide={(el) => (storySlideRefs.current[closingSlideIndex] = el)}
             title={sectionsByKey.get('closing')?.accent ?? 'Seguimos'}
-            titleClassName="text-[clamp(2.05rem,8.4vw,2.8rem)]"
           >
             <div className="flex flex-1 flex-col justify-between gap-[clamp(2rem,7dvh,2.5rem)]">
               <div className="space-y-[clamp(1.5rem,5dvh,2rem)]">
-                <p className="mp-weekly-fragment text-[clamp(1.65rem,6.8vw,2.35rem)] font-semibold leading-tight text-[color:var(--weekly-text)]" style={{ transitionDelay: '120ms' }}>
+                <p className="mp-weekly-fragment text-3xl font-semibold leading-tight text-[color:var(--weekly-text)]" style={{ transitionDelay: '120ms' }}>
                   {sectionsByKey.get('closing')?.body ?? 'Seguimos. Mañana vuelve el Daily Quest para sumar otro paso.'}
                 </p>
                 <div className="mp-weekly-fragment h-1.5 w-24 rounded-full bg-gradient-to-r from-[#F7C86A] to-[color:var(--mp-violet)] shadow-[0_0_28px_rgba(247,200,106,0.28)]" style={{ transitionDelay: '260ms' }} />
               </div>
-              <div className="space-y-7 pb-[var(--weekly-share-safe-bottom)]">
+              <div className="space-y-7 pb-[max(env(safe-area-inset-bottom),0px)]">
                 <button
-                  className="mp-weekly-fragment w-full rounded-full bg-[color:var(--weekly-brand)] px-6 py-4 text-base font-semibold text-white shadow-[0_0_32px_rgba(167,139,250,0.22)]"
+                  className="mp-weekly-fragment w-full rounded-full bg-[color:var(--mp-violet)] px-6 py-4 text-base font-semibold text-white shadow-[0_0_32px_rgba(167,139,250,0.22)]"
                   onClick={() => setShowSharePicker(true)}
                   style={{ transitionDelay: '420ms' }}
                   type="button"
@@ -2661,12 +2629,14 @@ export function PremiumWeeklyWrappedStory({
         </div>
         {showSharePicker ? (
           <WeeklySharePicker
+            dominantColor={dominantColor}
+            dominantLabel={dominantLabel}
+            energy={energy}
+            emotion={emotion}
             mode={storyVisualMode}
             onClose={() => setShowSharePicker(false)}
             onModeChange={setStoryVisualMode}
-            shareImageCacheRef={shareImageCacheRef}
-            slideRefs={storySlideRefs}
-            targets={weeklyShareTargets}
+            storyHabits={storyHabits}
           />
         ) : null}
       </div>
@@ -2686,16 +2656,9 @@ function PremiumMonthlyWrappedStory({
   const monthlyData = buildMonthlyStoryData(monthly, rewards);
   const storyScrollRef = useRef<HTMLDivElement | null>(null);
   const storySlideRefs = useRef<(HTMLElement | null)[]>([]);
-  const shareImageCacheRef = useRef<WrappedShareImageCache>(new Map());
   const [activeStorySlide, setActiveStorySlide] = useState(0);
   const [showSharePicker, setShowSharePicker] = useState(false);
   const [storyVisualMode, setStoryVisualMode] = useState<WeeklyStoryVisualMode>('dark');
-  const monthlyShareTargets: Array<WrappedShareTarget<MonthlyShareOption>> = [
-    { key: 'month', label: 'Mes', slideIndex: 0 },
-    { key: 'tasks', label: 'Tareas', slideIndex: 1 },
-    { key: 'habits', label: 'Hábitos', slideIndex: 3 },
-    { key: 'emotion', label: monthlyData.emotion.label, slideIndex: 5 },
-  ];
 
   useBodyScrollLock();
 
@@ -2737,7 +2700,7 @@ function PremiumMonthlyWrappedStory({
     >
       <MonthlyStoryStyles />
       <div
-        className="mp-weekly-story-root relative h-[100svh] min-h-[100svh] w-screen overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)] [--weekly-share-safe-bottom:max(env(safe-area-inset-bottom),clamp(4.75rem,9dvh,6rem))]"
+        className="mp-weekly-story-root relative h-screen h-[100dvh] min-h-screen min-h-[100svh] w-screen overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)]"
         data-weekly-mode={storyVisualMode}
       >
         <button
@@ -2753,7 +2716,7 @@ function PremiumMonthlyWrappedStory({
         <div className={`h-full snap-y snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${showSharePicker ? 'overflow-hidden' : 'overflow-y-auto'}`} ref={storyScrollRef}>
           <WeeklyStorySlide
             accent="#A78BFA"
-            active={showSharePicker || activeStorySlide === 0}
+            active={activeStorySlide === 0}
             eyebrow="MONTHLY WRAPPED"
             index={0}
             registerSlide={(el) => (storySlideRefs.current[0] = el)}
@@ -2767,20 +2730,20 @@ function PremiumMonthlyWrappedStory({
                 <span className="mp-weekly-story-glow absolute h-72 w-72 rounded-full bg-violet-400/20 blur-3xl" />
                 <div className="relative text-center">
                   <p className="mp-weekly-gradient-text text-[clamp(6.4rem,29vw,9rem)] font-semibold leading-none tracking-[-0.08em]">
-                    <AnimatedWeeklyNumber active={showSharePicker || activeStorySlide === 0} value={monthlyData.trackedDays} />/{monthlyData.totalDays}
+                    <AnimatedWeeklyNumber active={activeStorySlide === 0} value={monthlyData.trackedDays} />/{monthlyData.totalDays}
                   </p>
                   <p className="mt-4 text-sm uppercase tracking-[0.34em] text-[color:var(--weekly-muted)]">días trackeados</p>
                 </div>
               </div>
               <div className="pb-[clamp(.75rem,3dvh,1.6rem)]">
-                <MonthlyCalendarStrip active={showSharePicker || activeStorySlide === 0} days={monthlyData.calendarDays} />
+                <MonthlyCalendarStrip active={activeStorySlide === 0} days={monthlyData.calendarDays} />
               </div>
             </div>
           </WeeklyStorySlide>
 
           <WeeklyStorySlide
             accent="#A78BFA"
-            active={showSharePicker || activeStorySlide === 1}
+            active={activeStorySlide === 1}
             eyebrow="DATOS REALES"
             index={1}
             registerSlide={(el) => (storySlideRefs.current[1] = el)}
@@ -2793,12 +2756,12 @@ function PremiumMonthlyWrappedStory({
               <div className="space-y-[clamp(1.8rem,4.5dvh,2.8rem)]">
                 <div className="mp-weekly-fragment text-center" style={{ transitionDelay: '210ms' }}>
                   <p className="mp-weekly-gradient-text text-[clamp(7rem,34vw,10rem)] font-semibold leading-none tracking-[-0.08em]">
-                    <AnimatedWeeklyNumber active={showSharePicker || activeStorySlide === 1} value={monthlyData.completedTasks} />
+                    <AnimatedWeeklyNumber active={activeStorySlide === 1} value={monthlyData.completedTasks} />
                   </p>
                   <p className="mt-2 text-sm uppercase tracking-[0.34em] text-[color:var(--weekly-muted)]">tareas completadas</p>
                 </div>
                 <WeeklyDifficultyConstellation
-                  active={showSharePicker || activeStorySlide === 1}
+                  active={activeStorySlide === 1}
                   easyCount={monthlyData.difficulty.easy}
                   easyPct={monthlyData.difficulty.easyPct}
                   hardCount={monthlyData.difficulty.hard}
@@ -2808,7 +2771,7 @@ function PremiumMonthlyWrappedStory({
                   total={monthlyData.completedTasks}
                 />
                 <p className="mp-weekly-fragment text-center text-xs uppercase tracking-[0.24em] text-[color:var(--weekly-muted)]" style={{ transitionDelay: '900ms' }}>
-                  <AnimatedWeeklyNumber active={showSharePicker || activeStorySlide === 1} duration={900} value={monthlyData.gpTotal} /> GP generados
+                  <AnimatedWeeklyNumber active={activeStorySlide === 1} duration={900} value={monthlyData.gpTotal} /> GP generados
                 </p>
               </div>
             </div>
@@ -2816,14 +2779,14 @@ function PremiumMonthlyWrappedStory({
 
           <WeeklyStorySlide
             accent="#F7C86A"
-            active={showSharePicker || activeStorySlide === 2}
+            active={activeStorySlide === 2}
             eyebrow="CALIBRACIÓN"
             index={2}
             registerSlide={(el) => (storySlideRefs.current[2] = el)}
             title="Ajustes del mes"
           >
             <MonthlyCalibrationStory
-              active={showSharePicker || activeStorySlide === 2}
+              active={activeStorySlide === 2}
               downTasks={monthlyData.calibration.downTasks}
               keep={monthlyData.calibration.keep}
               upTasks={monthlyData.calibration.upTasks}
@@ -2832,14 +2795,14 @@ function PremiumMonthlyWrappedStory({
 
           <WeeklyStorySlide
             accent="#A78BFA"
-            active={showSharePicker || activeStorySlide === 3}
+            active={activeStorySlide === 3}
             eyebrow="HÁBITOS"
             index={3}
             registerSlide={(el) => (storySlideRefs.current[3] = el)}
             title="Más cerca de lograrlo"
           >
             <MonthlyNearHabitsStory
-              active={showSharePicker || activeStorySlide === 3}
+              active={activeStorySlide === 3}
               habits={monthlyData.nearHabits}
               unlockedHabits={monthlyData.unlockedHabits}
             />
@@ -2847,14 +2810,14 @@ function PremiumMonthlyWrappedStory({
 
           <WeeklyStorySlide
             accent="#5BE282"
-            active={showSharePicker || activeStorySlide === 4}
+            active={activeStorySlide === 4}
             eyebrow="RITMO"
             index={4}
             registerSlide={(el) => (storySlideRefs.current[4] = el)}
             title="Cerca del próximo ritmo"
           >
             <MonthlyRhythmReadinessStory
-              active={showSharePicker || activeStorySlide === 4}
+              active={activeStorySlide === 4}
               currentMode={monthlyData.rhythm.currentMode}
               nextMode={monthlyData.rhythm.nextMode}
               readiness={monthlyData.rhythm.readiness}
@@ -2866,55 +2829,50 @@ function PremiumMonthlyWrappedStory({
 
           <WeeklyStorySlide
             accent={monthlyData.emotion.color}
-            active={showSharePicker || activeStorySlide === 5}
+            active={activeStorySlide === 5}
             eyebrow="EMOCIÓN"
             index={5}
             registerSlide={(el) => (storySlideRefs.current[5] = el)}
             title={monthlyData.emotion.label}
           >
-            <MonthlyEmotionJourneyStory active={showSharePicker || activeStorySlide === 5} emotion={monthlyData.emotion} />
+            <MonthlyEmotionJourneyStory active={activeStorySlide === 5} emotion={monthlyData.emotion} />
           </WeeklyStorySlide>
 
           <WeeklyStorySlide
             accent="#A78BFA"
-            active={showSharePicker || activeStorySlide === 6}
+            active={activeStorySlide === 6}
             eyebrow="CIERRE"
             index={6}
             registerSlide={(el) => (storySlideRefs.current[6] = el)}
             title="Seguimos"
-            titleClassName="text-[clamp(2.05rem,8.4vw,2.8rem)]"
           >
             <div className="flex flex-1 flex-col justify-between gap-[clamp(2rem,7dvh,3rem)]">
               <div className="space-y-8">
-                <p className="mp-weekly-fragment text-[clamp(1.75rem,7.4vw,2.65rem)] font-semibold leading-tight text-[color:var(--weekly-title)]" style={{ transitionDelay: '140ms' }}>
+                <p className="mp-weekly-fragment text-[clamp(2.25rem,10vw,3.7rem)] font-semibold leading-tight text-[color:var(--weekly-title)]" style={{ transitionDelay: '140ms' }}>
                   Un mes de señales claras para ajustar tu Journey.
                 </p>
                 <p className="mp-weekly-fragment text-xl leading-relaxed text-[color:var(--weekly-muted)]" style={{ transitionDelay: '280ms' }}>
                   Tareas, hábitos, ritmo y emoción. Un mes a la vez.
                 </p>
               </div>
-              <div className="pb-[var(--weekly-share-safe-bottom)]">
-                <button
-                  className="mp-weekly-fragment w-full rounded-full bg-[color:var(--weekly-brand)] px-6 py-4 text-lg font-semibold text-white shadow-[0_18px_70px_rgba(167,139,250,0.34)]"
-                  onClick={() => setShowSharePicker(true)}
-                  style={{ transitionDelay: '520ms' }}
-                  type="button"
-                >
-                  Compartir
-                </button>
-              </div>
+              <button
+                className="mp-weekly-fragment w-full rounded-full bg-[color:var(--mp-violet)] px-6 py-4 text-lg font-semibold text-white shadow-[0_18px_70px_rgba(167,139,250,0.34)]"
+                onClick={() => setShowSharePicker(true)}
+                style={{ transitionDelay: '520ms' }}
+                type="button"
+              >
+                Compartir
+              </button>
             </div>
           </WeeklyStorySlide>
         </div>
 
         {showSharePicker ? (
           <MonthlySharePicker
+            data={monthlyData}
             mode={storyVisualMode}
             onClose={() => setShowSharePicker(false)}
             onModeChange={setStoryVisualMode}
-            shareImageCacheRef={shareImageCacheRef}
-            slideRefs={storySlideRefs}
-            targets={monthlyShareTargets}
           />
         ) : null}
       </div>
@@ -3462,8 +3420,6 @@ function WeeklyStorySlide({
   index,
   registerSlide,
   title,
-  titleClassName = 'text-[clamp(2.45rem,10.5vw,3.35rem)]',
-  titleDelay = '95ms',
 }: {
   accent: string;
   active: boolean;
@@ -3472,12 +3428,10 @@ function WeeklyStorySlide({
   index: number;
   registerSlide: (el: HTMLElement | null) => void;
   title: string;
-  titleClassName?: string;
-  titleDelay?: string;
 }) {
   return (
     <section
-      className={`mp-weekly-slide-shell relative flex h-[100svh] min-h-[100svh] snap-start justify-center overflow-hidden px-7 ${active ? 'mp-weekly-slide-active' : ''}`}
+      className={`mp-weekly-slide-shell relative flex min-h-[100dvh] snap-start justify-center overflow-hidden px-7 ${active ? 'mp-weekly-slide-active' : ''}`}
       data-weekly-slide={index}
       ref={registerSlide}
       style={{
@@ -3502,7 +3456,7 @@ function WeeklyStorySlide({
             style={{ color: 'var(--weekly-brand)', transitionDelay: '0ms' }}
           />
           <p className="mp-weekly-fragment mt-[clamp(.9rem,2.4dvh,1.25rem)] text-xs font-semibold uppercase tracking-[0.34em]" style={{ color: accent, transitionDelay: '40ms' }}>{eyebrow}</p>
-          <h2 className={`mp-weekly-fragment mt-3 ${titleClassName} font-semibold leading-[0.96] tracking-[-0.035em] text-[color:var(--weekly-title)]`} style={{ transitionDelay: titleDelay }}>{title}</h2>
+          <h2 className="mp-weekly-fragment mt-3 text-[clamp(2.45rem,10.5vw,3.35rem)] font-semibold leading-[0.96] tracking-[-0.035em] text-[color:var(--weekly-title)]" style={{ transitionDelay: '95ms' }}>{title}</h2>
         </div>
         <div className="flex min-h-0 flex-1 flex-col">{children}</div>
       </div>
@@ -3944,208 +3898,36 @@ function WeeklyRadarAnalysisChart({
 }
 
 function WeeklySharePicker({
+  dominantColor,
+  dominantLabel,
+  energy,
+  emotion,
   mode,
   onClose,
   onModeChange,
-  shareImageCacheRef,
-  slideRefs,
-  targets,
+  storyHabits,
 }: {
+  dominantColor: string;
+  dominantLabel: string;
+  energy: WeeklyWrappedRecord['payload']['summary']['energyHighlight'] | undefined;
+  emotion: WeeklyWrappedRecord['payload']['emotions']['weekly'] | WeeklyWrappedRecord['payload']['emotions']['biweekly'] | undefined;
   mode: WeeklyStoryVisualMode;
   onClose: () => void;
   onModeChange: (mode: WeeklyStoryVisualMode) => void;
-  shareImageCacheRef: MutableRefObject<WrappedShareImageCache>;
-  slideRefs: MutableRefObject<(HTMLElement | null)[]>;
-  targets: Array<WrappedShareTarget<WeeklyShareOption>>;
+  storyHabits: Array<{ title: string; body?: string; daysActive?: number; completionRate?: number | string | null }>;
 }) {
-  return (
-    <WrappedStorySharePicker
-      eyebrow="Compartir story"
-      filePrefix="innerbloom-weekly"
-      mode={mode}
-      onClose={onClose}
-      onModeChange={onModeChange}
-      shareImageCacheRef={shareImageCacheRef}
-      shareText="Mi Weekly Wrapped en Innerbloom"
-      shareTitle="Weekly Wrapped en Innerbloom"
-      slideRefs={slideRefs}
-      targets={targets}
-      title="Elegí una versión"
-    />
-  );
-}
-
-function WrappedStorySharePicker<T extends string>({
-  eyebrow,
-  filePrefix,
-  mode,
-  onClose,
-  onModeChange,
-  shareImageCacheRef,
-  shareText,
-  shareTitle,
-  slideRefs,
-  targets,
-  title,
-}: {
-  eyebrow: string;
-  filePrefix: string;
-  mode: WeeklyStoryVisualMode;
-  onClose: () => void;
-  onModeChange: (mode: WeeklyStoryVisualMode) => void;
-  shareImageCacheRef: MutableRefObject<WrappedShareImageCache>;
-  shareText: string;
-  shareTitle: string;
-  slideRefs: MutableRefObject<(HTMLElement | null)[]>;
-  targets: Array<WrappedShareTarget<T>>;
-  title: string;
-}) {
-  const [selected, setSelected] = useState<T>((targets[0]?.key ?? '') as T);
+  const [selected, setSelected] = useState<'tasks' | 'balance' | 'habits' | 'emotion'>('tasks');
   const [previewing, setPreviewing] = useState(false);
-  const [isSharing, setIsSharing] = useState(false);
-  const [shareError, setShareError] = useState<string | null>(null);
-  const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
-  const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
-  const selectedTarget = targets.find((target) => target.key === selected) ?? targets[0];
-  const targetSignature = targets.map((target) => `${target.key}:${target.slideIndex}`).join('|');
-  const getCacheKey = (purpose: 'thumb' | 'preview' | 'full', target: WrappedShareTarget<T>) => `${filePrefix}:${mode}:${purpose}:${target.key}:${target.slideIndex}`;
-
-  useEffect(() => {
-    if (targets[0] && !targets.some((target) => target.key === selected)) {
-      setSelected(targets[0].key);
-    }
-  }, [selected, targetSignature]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const cachedThumbnails: Record<string, string> = {};
-    const missingTargets: Array<WrappedShareTarget<T>> = [];
-    for (const target of targets) {
-      const cached = shareImageCacheRef.current.get(getCacheKey('thumb', target));
-      if (cached) {
-        cachedThumbnails[target.key] = cached;
-      } else {
-        missingTargets.push(target);
-      }
-    }
-    setThumbnails(cachedThumbnails);
-    if (!missingTargets.length) {
-      return () => {
-        cancelled = true;
-      };
-    }
-    void (async () => {
-      await waitForNextFrame();
-      await waitForNextFrame();
-      const next: Record<string, string> = { ...cachedThumbnails };
-      for (const target of missingTargets) {
-        const slide = slideRefs.current[target.slideIndex];
-        if (!slide) continue;
-        try {
-          const dataUrl = await exportWrappedStorySlideToPng(slide, {
-            mode,
-            pixelRatio: 0.38,
-          });
-          shareImageCacheRef.current.set(getCacheKey('thumb', target), dataUrl);
-          next[target.key] = dataUrl;
-          if (!cancelled) setThumbnails({ ...next });
-        } catch (error) {
-          if (import.meta.env.DEV) {
-            console.warn('Wrapped story thumbnail generation failed', { error, slideIndex: target.slideIndex });
-          }
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [mode, shareImageCacheRef, slideRefs, targetSignature]);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!selectedTarget) {
-      setPreviewDataUrl(null);
-      return () => {
-        cancelled = true;
-      };
-    }
-    const cacheKey = getCacheKey('preview', selectedTarget);
-    const cached = shareImageCacheRef.current.get(cacheKey);
-    setPreviewDataUrl(cached ?? null);
-    if (!previewing || !selectedTarget) return () => {
-      cancelled = true;
-    };
-    if (cached) {
-      return () => {
-        cancelled = true;
-      };
-    }
-    void (async () => {
-      const slide = slideRefs.current[selectedTarget.slideIndex];
-      if (!slide) return;
-      try {
-        const dataUrl = await exportWrappedStorySlideToPng(slide, {
-          mode,
-          pixelRatio: 0.9,
-        });
-        shareImageCacheRef.current.set(cacheKey, dataUrl);
-        if (!cancelled) setPreviewDataUrl(dataUrl);
-      } catch (error) {
-        if (import.meta.env.DEV) {
-          console.warn('Wrapped story preview generation failed', { error, slideIndex: selectedTarget.slideIndex });
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [mode, previewing, selectedTarget?.key, selectedTarget?.slideIndex, shareImageCacheRef, slideRefs]);
-
-  const handleShare = async () => {
-    if (!selectedTarget) return;
-    const slide = slideRefs.current[selectedTarget.slideIndex];
-    if (!slide) return;
-    setIsSharing(true);
-    setShareError(null);
-    try {
-      const cacheKey = getCacheKey('full', selectedTarget);
-      let dataUrl = shareImageCacheRef.current.get(cacheKey);
-      if (!dataUrl) {
-        dataUrl = await exportWrappedStorySlideToPng(slide, {
-          mode,
-          pixelRatio: 3,
-        });
-        shareImageCacheRef.current.set(cacheKey, dataUrl);
-      }
-      const filename = `${filePrefix}-${slugifyShareFilename(selectedTarget.label)}.png`;
-      const blob = await dataUrlToBlob(dataUrl);
-      const file = new File([blob], filename, { type: 'image/png' });
-      const browserNavigator = typeof navigator === 'undefined' ? null : navigator as Navigator & {
-        canShare?: (data: { files?: File[] }) => boolean;
-        share?: (data: { files?: File[]; title?: string; text?: string }) => Promise<void>;
-      };
-
-      if (browserNavigator?.share && browserNavigator.canShare?.({ files: [file] })) {
-        await browserNavigator.share({
-          files: [file],
-          title: shareTitle,
-          text: shareText,
-        });
-      } else {
-        downloadShareImage(dataUrl, filename);
-      }
-    } catch (error) {
-      console.error('Wrapped story share failed', error);
-      setShareError('No pudimos generar la imagen. Intentá otra vez.');
-    } finally {
-      setIsSharing(false);
-    }
-  };
+  const options: Array<{ key: typeof selected; label: string }> = [
+    { key: 'tasks', label: 'Tareas' },
+    { key: 'balance', label: 'Balance' },
+    { key: 'habits', label: 'Hábitos' },
+    { key: 'emotion', label: emotion?.label ?? 'Calma' },
+  ];
 
   return (
     <div
-      className="absolute inset-0 z-30 flex items-end bg-black/46 px-4 pb-[calc(var(--weekly-share-safe-bottom)+0.75rem)] backdrop-blur-md"
-      data-wrapped-share-picker="true"
+      className="absolute inset-0 z-30 flex items-end bg-black/46 px-4 pb-[calc(var(--weekly-safe-bottom)+0.75rem)] backdrop-blur-md"
       onClick={onClose}
       onTouchMove={(event) => event.stopPropagation()}
       onWheel={(event) => event.stopPropagation()}
@@ -4168,8 +3950,8 @@ function WrappedStorySharePicker<T extends string>({
             </button>
           ) : (
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[color:var(--weekly-brand)]">{eyebrow}</p>
-              <h3 className="mt-1 text-lg font-semibold text-[color:var(--weekly-title)]">{title}</h3>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[color:var(--weekly-brand)]">Compartir story</p>
+              <h3 className="mt-1 text-lg font-semibold text-[color:var(--weekly-title)]">Elegí una versión</h3>
             </div>
           )}
           <button
@@ -4196,45 +3978,49 @@ function WrappedStorySharePicker<T extends string>({
         {previewing ? (
           <div className="mt-3 flex min-h-0 flex-1 flex-col">
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div className="mx-auto aspect-[9/16] w-full max-w-[min(72vw,19.5rem)] overflow-hidden rounded-[1.25rem] border border-[color:var(--weekly-line)] bg-black/20">
-                {previewDataUrl ? (
-                  <img alt={`${selectedTarget?.label ?? 'Story'} preview`} className="h-full w-full object-cover" src={previewDataUrl} />
-                ) : (
-                  <div className="grid h-full place-items-center text-sm font-semibold text-[color:var(--weekly-muted)]">Preparando preview...</div>
-                )}
+              <div className="mx-auto w-full max-w-[min(72vw,19.5rem)]">
+                <WeeklySharePreview
+                  dominantColor={dominantColor}
+                  dominantLabel={dominantLabel}
+                  energy={energy}
+                  emotion={emotion}
+                  full
+                  mode={mode}
+                  storyHabits={storyHabits}
+                  type={selected}
+                />
               </div>
             </div>
-            {shareError ? <p className="mt-2 text-sm text-[color:var(--mp-red)]">{shareError}</p> : null}
             <button
-              className="mt-3 w-full shrink-0 rounded-full bg-[color:var(--weekly-brand)] px-5 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(139,92,246,0.28)] disabled:opacity-60"
-              disabled={isSharing}
-              onClick={() => void handleShare()}
+              className="mt-3 w-full shrink-0 rounded-full bg-[color:var(--mp-violet)] px-5 py-3 text-base font-semibold text-white"
               type="button"
             >
-              {isSharing ? 'Generando...' : 'Compartir'}
+              Compartir
             </button>
           </div>
         ) : (
           <div className="mt-3 grid min-h-0 flex-1 grid-cols-2 gap-2 overflow-y-auto overscroll-contain pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {targets.map((target) => (
+            {options.map((option) => (
               <button
-                aria-pressed={selected === target.key}
-                className={`group overflow-hidden rounded-[0.85rem] border p-1.5 text-left transition ${selected === target.key ? 'border-[color:var(--weekly-brand)] bg-white/[0.08] shadow-[0_0_22px_rgba(167,139,250,0.18)]' : 'border-[color:var(--weekly-line)] bg-white/[0.035]'}`}
-                key={target.key}
+                aria-pressed={selected === option.key}
+                className={`group overflow-hidden rounded-[0.85rem] border p-1.5 text-left transition ${selected === option.key ? 'border-[color:var(--weekly-brand)] bg-white/[0.08] shadow-[0_0_22px_rgba(167,139,250,0.18)]' : 'border-[color:var(--weekly-line)] bg-white/[0.035]'}`}
+                key={option.key}
                 onClick={() => {
-                  setSelected(target.key);
+                  setSelected(option.key);
                   setPreviewing(true);
                 }}
                 type="button"
               >
-                <div className="aspect-[9/16] overflow-hidden rounded-[0.75rem] bg-black/20">
-                  {thumbnails[target.key] ? (
-                    <img alt={`${target.label} preview`} className="h-full w-full object-cover" src={thumbnails[target.key]} />
-                  ) : (
-                    <div className="grid h-full place-items-center text-[9px] font-semibold text-[color:var(--weekly-muted)]">Preparando</div>
-                  )}
-                </div>
-                <span className="mt-1 block px-1 pb-0.5 text-[11px] font-semibold text-[color:var(--weekly-title)]">{target.label}</span>
+                <WeeklySharePreview
+                  dominantColor={dominantColor}
+                  dominantLabel={dominantLabel}
+                  energy={energy}
+                  emotion={emotion}
+                  mode={mode}
+                  storyHabits={storyHabits}
+                  type={option.key}
+                />
+                <span className="mt-1 block px-1 pb-0.5 text-[11px] font-semibold text-[color:var(--weekly-title)]">{option.label}</span>
               </button>
             ))}
           </div>
@@ -4363,35 +4149,110 @@ function WeeklySharePreview({
   );
 }
 
+type MonthlyShareOption = 'month' | 'tasks' | 'habits' | 'emotion';
+
 function MonthlySharePicker({
+  data,
   mode,
   onClose,
   onModeChange,
-  shareImageCacheRef,
-  slideRefs,
-  targets,
 }: {
+  data: MonthlyStoryData;
   mode: WeeklyStoryVisualMode;
   onClose: () => void;
   onModeChange: (mode: WeeklyStoryVisualMode) => void;
-  shareImageCacheRef: MutableRefObject<WrappedShareImageCache>;
-  slideRefs: MutableRefObject<(HTMLElement | null)[]>;
-  targets: Array<WrappedShareTarget<MonthlyShareOption>>;
 }) {
+  const [selected, setSelected] = useState<MonthlyShareOption>('month');
+  const [previewing, setPreviewing] = useState(false);
+  const options: Array<{ key: MonthlyShareOption; label: string }> = [
+    { key: 'month', label: 'Mes' },
+    { key: 'tasks', label: 'Tareas' },
+    { key: 'habits', label: 'Hábitos' },
+    { key: 'emotion', label: data.emotion.label },
+  ];
+
   return (
-    <WrappedStorySharePicker
-      eyebrow="Compartir mes"
-      filePrefix="innerbloom-monthly"
-      mode={mode}
-      onClose={onClose}
-      onModeChange={onModeChange}
-      shareImageCacheRef={shareImageCacheRef}
-      shareText="Mi Monthly Wrapped en Innerbloom"
-      shareTitle="Monthly Wrapped en Innerbloom"
-      slideRefs={slideRefs}
-      targets={targets}
-      title="Elegí una story"
-    />
+    <div
+      className="absolute inset-0 z-30 flex items-end bg-black/46 px-4 pb-[calc(var(--weekly-safe-bottom)+0.75rem)] backdrop-blur-md"
+      onClick={onClose}
+      onTouchMove={(event) => event.stopPropagation()}
+      onWheel={(event) => event.stopPropagation()}
+    >
+      <div
+        className="mp-weekly-panel flex max-h-[min(90dvh,45rem)] w-full flex-col overflow-hidden rounded-[1.65rem] p-3.5"
+        onClick={(event) => event.stopPropagation()}
+        onTouchMove={(event) => event.stopPropagation()}
+        onWheel={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4">
+          {previewing ? (
+            <button
+              className="-ml-1 inline-flex items-center gap-2 rounded-full px-2 py-1 text-sm font-semibold text-[color:var(--weekly-title)]"
+              onClick={() => setPreviewing(false)}
+              type="button"
+            >
+              <span className="text-xl leading-none">‹</span>
+              Cambiar story
+            </button>
+          ) : (
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[color:var(--weekly-brand)]">Compartir mes</p>
+              <h3 className="mt-1 text-lg font-semibold text-[color:var(--weekly-title)]">Elegí una story</h3>
+            </div>
+          )}
+          <button
+            aria-label="Cerrar selector"
+            className="grid h-9 w-9 place-items-center rounded-full bg-black/10 text-xl text-[color:var(--weekly-muted)]"
+            onClick={onClose}
+            type="button"
+          >
+            ×
+          </button>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2 rounded-full bg-black/10 p-1">
+          {(['dark', 'light'] as WeeklyStoryVisualMode[]).map((item) => (
+            <button
+              className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${mode === item ? 'bg-[color:var(--weekly-brand)] text-white' : 'text-[color:var(--weekly-muted)]'}`}
+              key={item}
+              onClick={() => onModeChange(item)}
+              type="button"
+            >
+              {item === 'dark' ? 'Dark' : 'Light'}
+            </button>
+          ))}
+        </div>
+        {previewing ? (
+          <div className="mt-3 flex min-h-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="mx-auto w-full max-w-[min(72vw,19.5rem)]">
+                <MonthlySharePreview data={data} full mode={mode} type={selected} />
+              </div>
+            </div>
+            <button className="mt-3 w-full shrink-0 rounded-full bg-[color:var(--mp-violet)] px-5 py-3 text-base font-semibold text-white" type="button">
+              Compartir
+            </button>
+          </div>
+        ) : (
+          <div className="mt-3 grid min-h-0 flex-1 grid-cols-2 gap-2 overflow-y-auto overscroll-contain pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {options.map((option) => (
+              <button
+                aria-pressed={selected === option.key}
+                className={`group overflow-hidden rounded-[0.85rem] border p-1.5 text-left transition ${selected === option.key ? 'border-[color:var(--weekly-brand)] bg-white/[0.08] shadow-[0_0_22px_rgba(167,139,250,0.18)]' : 'border-[color:var(--weekly-line)] bg-white/[0.035]'}`}
+                key={option.key}
+                onClick={() => {
+                  setSelected(option.key);
+                  setPreviewing(true);
+                }}
+                type="button"
+              >
+                <MonthlySharePreview data={data} mode={mode} type={option.key} />
+                <span className="mt-1 block px-1 pb-0.5 text-[11px] font-semibold text-[color:var(--weekly-title)]">{option.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -4544,10 +4405,6 @@ function AnimatedWeeklyNumber({
   useEffect(() => {
     if (!active) {
       setDisplayValue(0);
-      return;
-    }
-    if (typeof document !== 'undefined' && document.querySelector('[data-wrapped-share-picker="true"]')) {
-      setDisplayValue(Math.max(0, value));
       return;
     }
 
@@ -5531,80 +5388,6 @@ async function waitForSharePreviewImages(node: HTMLElement) {
       image.addEventListener('error', finish, { once: true });
     });
   }));
-}
-
-async function exportWrappedStorySlideToPng(
-  slide: HTMLElement,
-  {
-    mode,
-    pixelRatio,
-  }: {
-    mode: WeeklyStoryVisualMode;
-    pixelRatio: number;
-  },
-) {
-  const restore = prepareWrappedStorySlideForExport(slide);
-  try {
-    await waitForNextFrame();
-    await waitForNextFrame();
-    await waitForSharePreviewImages(slide);
-    const { toPng } = await import('html-to-image');
-    return await toPng(slide, {
-      pixelRatio,
-      cacheBust: true,
-      backgroundColor: mode === 'light' ? '#FFF8EF' : '#05050A',
-    });
-  } finally {
-    restore();
-  }
-}
-
-function prepareWrappedStorySlideForExport(slide: HTMLElement) {
-  const hadActiveClass = slide.classList.contains('mp-weekly-slide-active');
-  slide.classList.add('mp-weekly-slide-active');
-  const style = document.createElement('style');
-  style.textContent = `
-    [data-wrapped-exporting="true"] .mp-weekly-fragment,
-    [data-wrapped-exporting="true"] .mp-weekly-race-late,
-    [data-wrapped-exporting="true"] .mp-weekly-radar-reveal,
-    [data-wrapped-exporting="true"] .mp-weekly-radar-stage,
-    [data-wrapped-exporting="true"] .mp-weekly-radar-final,
-    [data-wrapped-exporting="true"] .mp-weekly-radar-label,
-    [data-wrapped-exporting="true"] .mp-weekly-radar-dominant-fill,
-    [data-wrapped-exporting="true"] .mp-weekly-radar-glow,
-    [data-wrapped-exporting="true"] .mp-weekly-late-text,
-    [data-wrapped-exporting="true"] .mp-weekly-radar-percent,
-    [data-wrapped-exporting="true"] .mp-weekly-emotion-orb,
-    [data-wrapped-exporting="true"] .mp-weekly-arc-svg {
-      opacity: 1 !important;
-      transform: none !important;
-      transition: none !important;
-      animation: none !important;
-    }
-    [data-wrapped-exporting="true"] .mp-weekly-bar,
-    [data-wrapped-exporting="true"] .mp-weekly-race-line,
-    [data-wrapped-exporting="true"] .mp-weekly-radar-polygon,
-    [data-wrapped-exporting="true"] .mp-weekly-arc-path {
-      transition: none !important;
-      stroke-dashoffset: 0 !important;
-    }
-    [data-wrapped-exporting="true"] .mp-weekly-radar-area,
-    [data-wrapped-exporting="true"] .mp-weekly-radar-grid,
-    [data-wrapped-exporting="true"] .mp-weekly-radar-axis,
-    [data-wrapped-exporting="true"] .mp-weekly-radar-ring,
-    [data-wrapped-exporting="true"] .mp-weekly-radar-center {
-      opacity: 1 !important;
-      transition: none !important;
-      transform: none !important;
-    }
-  `;
-  slide.setAttribute('data-wrapped-exporting', 'true');
-  document.head.appendChild(style);
-  return () => {
-    if (!hadActiveClass) slide.classList.remove('mp-weekly-slide-active');
-    slide.removeAttribute('data-wrapped-exporting');
-    style.remove();
-  };
 }
 
 function waitForNextFrame() {
