@@ -27,8 +27,12 @@ import { AdaptiveText } from "../components/landing/AdaptiveText";
 import { CookieConsentBanner } from "../components/landing/CookieConsentBanner";
 import { useLandingAnalytics } from "../components/landing/useLandingAnalytics";
 import { HeroPhoneShowcase } from "../components/landing/HeroPhoneShowcase";
+import { AvatarCtaBanner } from "../components/landing/AvatarCtaBanner";
 import WeatherCycleOrb from "../components/landing/WeatherCycleOrb";
-import { GameModeStep } from "../onboarding/steps/GameModeStep";
+import { DEMO_USER_ID } from "../components/demo/DemoDashboardOverviewScene";
+import { StreaksPanel } from "../components/dashboard-v3/StreaksPanel";
+import type { StreakPanelResponse } from "../lib/api";
+import { EmotionChartCard } from "../components/dashboard-v3/EmotionChartCard";
 import { QuickStartTasksStep } from "../onboarding/steps/QuickStartTasksStep";
 import { QUICK_START_TASKS } from "../onboarding/quickStart";
 import { LabsWeeklyRhythmSystemSection } from "../components/labs/LabsWeeklyRhythmSystemSection";
@@ -525,6 +529,82 @@ function LandingNarrativeMethod({
   );
 }
 
+type LandingEmotionMockRow = {
+  date: string;
+  emotion: string;
+};
+
+const LANDING_V3_EMOTION_PATTERN = [
+  "Motivación",
+  "Cansancio",
+  "Calma",
+  "Felicidad",
+  "Motivación",
+  "Frustración",
+  "Calma",
+  "Tristeza",
+  "Ansiedad",
+  "Motivación",
+  "Calma",
+  "Cansancio",
+] as const;
+
+const LANDING_V3_EMOTION_MOCK_DATA: LandingEmotionMockRow[] = Array.from({ length: 138 }, (_, index) => {
+  const date = new Date(2026, 0, 1 + index);
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const pseudoRandomIndex = index * 17 + day * 11 + month * 23 + (index % 5) * 7 + Math.floor(index / 13) * 19;
+  const emotion = LANDING_V3_EMOTION_PATTERN[pseudoRandomIndex % LANDING_V3_EMOTION_PATTERN.length];
+
+  return {
+    date: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
+    emotion,
+  };
+});
+
+function publishLandingV3EmotionMockData(shouldDispatch = true) {
+  if (typeof window === "undefined") return;
+
+  window.data = {
+    ...(window.data ?? {}),
+    daily_emotion: LANDING_V3_EMOTION_MOCK_DATA,
+  };
+
+  if (!shouldDispatch) return;
+
+  window.dispatchEvent(
+    new CustomEvent("gj:data-ready", {
+      detail: {
+        data: {
+          daily_emotion: LANDING_V3_EMOTION_MOCK_DATA,
+        },
+      },
+    }),
+  );
+}
+
+function LandingV3EmotionChartVisual() {
+  publishLandingV3EmotionMockData(false);
+
+  useEffect(() => {
+    let frame = window.requestAnimationFrame(() => publishLandingV3EmotionMockData());
+    const interval = window.setInterval(() => {
+      frame = window.requestAnimationFrame(() => publishLandingV3EmotionMockData());
+    }, 9000);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  return (
+    <div className="v3-method-emotion-chart" data-demo-anchor="emotion-chart">
+      <EmotionChartCard userId={DEMO_USER_ID} />
+    </div>
+  );
+}
+
 export function LandingV3MethodVisual({
   index,
   language,
@@ -552,42 +632,47 @@ export function LandingV3MethodVisual({
   }, [index]);
 
   if (index === 0) {
-    const tasks = QUICK_START_TASKS[language].Body.slice(0, 4).map((task) => {
-      if (task.id === "ENERGIA") return { ...task, inputAfter: language === "es" ? "min" : "min" };
-      if (task.id === "NUTRICION") return { ...task, text: language === "es" ? "comidas equilibradas al día" : "balanced meals a day" };
-      return task;
-    });
+    const tasks = QUICK_START_TASKS[language].Body.slice(0, 4);
     return (
       <div className="v3-step-visual v3-method-product-visual v3-method-quickstart" aria-hidden>
         <div className="v3-method-quickstart__scene">
-          <div className="v3-rhythm-preview v3-rhythm-preview--native">
+          <p className="v3-quickstart-phase-title v3-quickstart-phase-title--tasks">
+            {language === "es" ? "Customizá tus tareas" : "Customize your tasks"}
+          </p>
+          <QuickStartTasksStep
+            language={language}
+            pillar="Body"
+            tasks={tasks}
+            selectedIds={tasks.slice(0, 3).map((task) => task.id)}
+            inputValues={{ "Body-ENERGIA": animatedMinutes, "Body-SUENO": "7" }}
+            minimum={1}
+            gameMode="LOW"
+            balancedBonusActive={false}
+            onToggleTask={() => undefined}
+            onInputChange={() => undefined}
+            onBack={() => undefined}
+            onConfirm={() => undefined}
+          />
+          <div className="v3-rhythm-preview">
             <p className="v3-quickstart-phase-title v3-quickstart-phase-title--rhythm">
               {language === "es" ? "Elegí tu ritmo" : "Choose your rhythm"}
             </p>
-            <GameModeStep
-              language={language}
-              selected="FLOW"
-              onSelect={() => undefined}
-            />
-          </div>
-          <div className="v3-quickstart-tasks-preview">
-            <p className="v3-quickstart-phase-title v3-quickstart-phase-title--tasks">
-              {language === "es" ? "Customizá tus tareas" : "Customize your tasks"}
-            </p>
-            <QuickStartTasksStep
-              language={language}
-              pillar="Body"
-              tasks={tasks}
-              selectedIds={tasks.slice(0, 3).map((task) => task.id)}
-              inputValues={{ "Body-ENERGIA": animatedMinutes, "Body-SUENO": "7" }}
-              minimum={1}
-              gameMode="FLOW"
-              balancedBonusActive={false}
-              onToggleTask={() => undefined}
-              onInputChange={() => undefined}
-              onBack={() => undefined}
-              onConfirm={() => undefined}
-            />
+            {[
+              { label: "Low", value: "1x/week", days: 1 },
+              { label: "Chill", value: "2x/week", days: 2 },
+              { label: "Flow", value: "3x/week", days: 3 },
+              { label: "Evolve", value: "4x/week", days: 4 },
+            ].map((rhythm) => (
+              <div className={`v3-rhythm-preview__row ${rhythm.label === "Chill" ? "is-selected" : ""}`} key={rhythm.label}>
+                <span>{rhythm.label}</span>
+                <div className="v3-rhythm-preview__week">
+                  {Array.from({ length: 7 }, (_, dayIndex) => (
+                    <i className={dayIndex < rhythm.days ? "is-active" : ""} key={dayIndex} />
+                  ))}
+                </div>
+                <b>{rhythm.value}</b>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -595,9 +680,68 @@ export function LandingV3MethodVisual({
   }
 
   if (index === 1) {
+    const previewData: StreakPanelResponse | undefined = nativePreview
+      ? {
+          topStreaks: [
+            { id: "body-steps", name: language === "es" ? "10.000 pasos / Correr" : "10,000 steps / Running", stat: language === "es" ? "Movilidad" : "Mobility", weekDone: 2, streakDays: 4 },
+            { id: "body-fasting", name: language === "es" ? "Ayuno hasta las 14hs" : "Fasting until 2 PM", stat: language === "es" ? "Nutrición" : "Nutrition", weekDone: 2, streakDays: 2 },
+          ],
+          tasks: [
+            {
+              id: "body-steps",
+              name: language === "es" ? "10.000 pasos / Correr" : "10,000 steps / Running",
+              stat: language === "es" ? "Movilidad" : "Mobility",
+              difficultyLabel: language === "es" ? "Fácil" : "Easy",
+              latestRecalibrationAction: "down",
+              weekDone: 2,
+              streakDays: 4,
+              metrics: {
+                week: { count: 2, xp: 96 },
+                month: { count: 8, xp: 312, weeks: [1, 2, 2, 3] },
+                qtr: { count: 23, xp: 940, weeks: [1, 2, 2, 3], weekTotals: [4, 4, 4, 4] },
+              },
+            },
+            {
+              id: "body-fasting",
+              name: language === "es" ? "Ayuno hasta las 14hs" : "Fasting until 2 PM",
+              stat: language === "es" ? "Nutrición" : "Nutrition",
+              difficultyLabel: language === "es" ? "Media" : "Medium",
+              latestRecalibrationAction: "keep",
+              weekDone: 2,
+              streakDays: 2,
+              metrics: {
+                week: { count: 2, xp: 82 },
+                month: { count: 7, xp: 252, weeks: [1, 2, 1, 3] },
+                qtr: { count: 21, xp: 810, weeks: [1, 2, 1, 3], weekTotals: [4, 4, 4, 4] },
+              },
+            },
+          ],
+        }
+      : undefined;
     return (
       <div className="v3-step-visual v3-method-product-visual v3-method-streaks" data-light-scope="dashboard-v3" aria-hidden>
-        <LandingV3MobileTasksVisual />
+        <div className="v3-method-signals-loop">
+          <div className="v3-method-signals-slide v3-method-signals-slide--streaks">
+            <p className="v3-method-signal-title">
+              {language === "es" ? "Visualizá tu progreso" : "Visualize your progress"}
+            </p>
+            <div className="v3-method-streaks__tilt">
+              <StreaksPanel
+                userId={DEMO_USER_ID}
+                gameMode="flow"
+                weeklyTarget={3}
+                avatarProfile={null}
+                previewData={previewData}
+              />
+            </div>
+          </div>
+          <div className="v3-method-signals-slide v3-method-signals-slide--emotions">
+            <p className="v3-method-signal-title">
+              {language === "es" ? "Registrá tus emociones" : "Log your emotions"}
+            </p>
+            <LandingV3EmotionChartVisual />
+          </div>
+        </div>
       </div>
     );
   }
@@ -612,63 +756,7 @@ export function LandingV3MethodVisual({
 
   return (
     <div className="v3-step-visual v3-method-product-visual v3-method-logros" data-light-scope="dashboard-v3" aria-hidden>
-      <LandingV3LogrosVisual language={language} logrosCycleMs={logrosCycleMs} />
-    </div>
-  );
-}
-
-const LANDING_V3_TASK_ROWS = [
-  { icon: "↻", title: "20` Sin pantallas ...", trait: "Recuperación", difficulty: "Difícil", difficultyClass: "is-hard", progress: "0/3", done: 0, streak: null, weeks: [0, 0, 0, 0, 0] },
-  { icon: "♢", title: "2L de agua", trait: "Hidratación", difficulty: "Fácil", difficultyClass: "is-easy", progress: "2/3", done: 2, streak: null, weeks: [1, 1, 2, 0, 0] },
-  { icon: "🔥", title: "Ayuno hasta las 14...", trait: "Nutrición", difficulty: "Fácil", difficultyClass: "is-easy", progress: "2/3", done: 2, streak: "2d", weeks: [1, 0, 2, 0, 0] },
-  { icon: "♧", title: "Cena antes de las ...", trait: "Nutrición", difficulty: "Fácil", difficultyClass: "is-easy", progress: "2/3", done: 2, streak: null, weeks: [1, 1, 2, 0, 0] },
-  { icon: "🔥", title: "Dormir 8hs", trait: "Sueño", difficulty: "Media", difficultyClass: "is-medium", progress: "3/3", done: 3, streak: "4d", weeks: [1, 1, 1, 0, 0] },
-  { icon: "⇄", title: "Hacer ejercicios d...", trait: "Movilidad", difficulty: "Fácil", difficultyClass: "is-easy", progress: "1/3", done: 1, streak: null, weeks: [1, 1, 2, 0, 0] },
-] as const;
-
-function LandingV3MobileTasksVisual() {
-  return (
-    <div className="ib20-showcase ib20-showcase--tasks">
-      <div className="ib20-showcase-glow" />
-      <div className="ib20-tasks-panel">
-        <div className="ib20-showcase-topline">
-          <span>Tareas</span>
-          <b>Cuerpo</b>
-        </div>
-        <div className="ib20-task-head">
-          <span>Tarea</span>
-          <span>Semanas</span>
-          <span>Progreso</span>
-        </div>
-        <div className="ib20-task-list">
-          {LANDING_V3_TASK_ROWS.slice(1, 5).map((task, index) => (
-            <article className="ib20-task-row" key={task.title} style={{ "--delay": `${index * 120}ms` } as CSSProperties}>
-              <div className={`ib20-task-icon ${task.streak ? "has-streak" : ""}`}>
-                <b>{task.icon}</b>
-                {task.streak ? <small>{task.streak}</small> : null}
-              </div>
-              <div className="ib20-task-copy">
-                <strong>{task.title}</strong>
-                <p>
-                  {task.trait}
-                  <i />
-                  <span className={task.difficultyClass}>{task.difficulty}</span>
-                  <em>✦</em>
-                </p>
-              </div>
-              <div className="ib20-task-weeks">
-                {task.weeks.map((state, weekIndex) => (
-                  <span className={state === 1 ? "is-green" : state === 2 ? "is-gold" : ""} key={`${task.title}-${weekIndex}`} />
-                ))}
-                <small>S1 S2 S3 S4 S5</small>
-              </div>
-              <div className="ib20-task-ring" style={{ "--progress": `${Math.min(100, (task.done / 3) * 100)}%` } as CSSProperties}>
-                <b>{task.progress}</b>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
+      <LandingV3LogrosVisual language={language} cycleMs={logrosCycleMs} />
     </div>
   );
 }
@@ -697,165 +785,80 @@ function LandingV3AdjustmentVisual({ language }: { language: Language }) {
   }, [hasEntered]);
 
   return (
-    <div className={`ib20-showcase ib20-showcase--detail ${hasEntered ? "is-visible" : ""}`} ref={demoRef}>
-      <div className="ib20-showcase-glow" />
-      <div className="ib20-detail-shell">
-        <div className="ib20-detail-nav">
-          <span aria-hidden>‹</span>
-          <p>{isSpanish ? "Detalle de tarea" : "Task detail"}</p>
-          <span aria-hidden />
+    <div className={`v3-adjustment-demo ${hasEntered ? "is-visible" : ""}`} ref={demoRef}>
+      <section className="v3-adjustment-task">
+        <p>{isSpanish ? "Detalle de tarea" : "Task detail"}</p>
+        <h4>{isSpanish ? "Revisar gastos del día" : "Review daily expenses"}</h4>
+        <div className="v3-adjustment-meta">
+          <span>{isSpanish ? "Autocontrol" : "Self-control"}</span>
+          <span>{isSpanish ? "Fácil" : "Easy"}</span>
+          <span className="v3-adjustment-down">
+            <i aria-hidden>→</i>
+            <b>{isSpanish ? "Bajó la dificultad" : "Difficulty lowered"}</b>
+          </span>
         </div>
+      </section>
 
-        <section className="ib20-detail-head">
-          <div className="ib20-detail-icon" aria-hidden>◌</div>
-          <div className="ib20-detail-copy">
-            <h4>{isSpanish ? "Revisar gastos del día" : "Review daily expenses"}</h4>
-            <div className="ib20-detail-chips">
-              <span className="ib20-detail-chip ib20-detail-chip--trait">
-                {isSpanish ? "Autocontrol" : "Self-control"}
-              </span>
-              <span className="ib20-detail-chip ib20-detail-chip--difficulty">{isSpanish ? "Fácil" : "Easy"}</span>
-              <span className="ib20-detail-chip ib20-detail-chip--down">
-                <i aria-hidden>→</i>
-                <b>{isSpanish ? "Bajó la dificultad" : "Difficulty lowered"}</b>
-              </span>
-            </div>
+      <section className="v3-adjustment-health">
+        <p>{isSpanish ? "Desarrollo del hábito" : "Habit development"}</p>
+        <span className="v3-adjustment-status">{isSpanish ? "Hábito fuerte" : "Strong habit"}</span>
+        <div className="v3-adjustment-health-grid">
+          <div className="v3-adjustment-score">
+            <svg viewBox="0 0 120 120" aria-hidden>
+              <circle cx="60" cy="60" r="44" />
+              <circle cx="60" cy="60" r="44" />
+            </svg>
+            <strong>89</strong>
+            <span>Score</span>
           </div>
-          <span className="ib20-detail-chevron" aria-hidden>›</span>
-        </section>
-
-        <section className="ib20-habit-dev">
-          <p>{isSpanish ? "Desarrollo del hábito" : "Habit development"}</p>
-          <div className="ib20-habit-body">
-            <div className="ib20-habit-ring" style={{ "--score-target": "226.8deg", "--score-color": "#f5c55a" } as CSSProperties}>
-              <strong>63</strong>
-              <span>Score</span>
-            </div>
-            <div className="ib20-habit-content">
-              <span className="ib20-habit-status">{isSpanish ? "Hábito en construcción" : "Habit in progress"}</span>
-              <p className="ib20-habit-insight">{isSpanish ? "Estás avanzando de forma constante." : "You're progressing steadily."}</p>
-              <div className="ib20-habit-divider" />
-              <div className="ib20-habit-ranges">
-                <span className="is-fragile">{isSpanish ? "Frágil <50" : "Fragile <50"}</span>
-                <i />
-                <span className="is-building">50-79</span>
-                <i />
-                <span className="is-strong">{isSpanish ? "Fuerte ≥80" : "Strong ≥80"}</span>
-              </div>
-              <div className="ib20-habit-window-title">
-                <i className="is-spacer" />
-                <span>{isSpanish ? "Ventana activa" : "Active window"}</span>
-                <i />
-              </div>
-              <div className="ib20-habit-months">
-                <span className="is-outside-window"><i className="is-building">53%</i><b>mar</b></span>
-                <span className="is-active-window"><i className="is-building">72%</i><b>abr</b></span>
-                <span><i className="is-fragile">38%</i><b>may</b></span>
-                <span className="is-projected"><i className="is-strong">96%</i><b>jun</b><small>{isSpanish ? "proyectado" : "projected"}</small></span>
-              </div>
-            </div>
+          <div className="v3-adjustment-scale">
+            <i />
+            <span>100</span>
+            <span>80</span>
+            <span>50</span>
+            <span>0</span>
           </div>
-        </section>
-      </div>
+        </div>
+        <div className="v3-adjustment-months">
+          <span><i className="is-fail">×</i>feb<br /><b>33%</b></span>
+          <span><i className="is-warn">•</i>mar<br /><b>68%</b></span>
+          <span><i className="is-ok">✓</i>abr<br /><b>108%</b></span>
+          <span><i className="is-now">↻</i>may<br /><b>88%</b></span>
+        </div>
+      </section>
     </div>
   );
 }
 
-function LandingV3MobileLogrosVisual() {
-  return (
-    <div className="ib20-showcase ib20-showcase--logros">
-      <div className="ib20-showcase-glow" />
-      <div className="ib20-logros-panel">
-        <div className="ib20-showcase-topline">
-          <span>Logros</span>
-          <b>Hábitos logrados</b>
-        </div>
-        <div className="ib20-logros-carousel">
-          <article className="ib20-logros-side ib20-logros-side--left" />
-          <article className="ib20-logros-card">
-            <div className="ib20-logros-card-inner">
-              <div className="ib20-logros-face ib20-logros-front">
-                <img src="/sellos/body/sello_body_hydration.png" alt="" />
-                <strong>2L de agua</strong>
-                <p>Hidratación <span>·</span> <b>Logrado</b></p>
-                <button type="button">↟ Compartir</button>
-              </div>
-              <div className="ib20-logros-face ib20-logros-back">
-                <p>LOGRO DESBLOQUEADO</p>
-                <strong>2L de agua</strong>
-                <span>Hidratación</span>
-                <dl>
-                  <div><dt>Logrado</dt><dd>2026-04-02</dd></div>
-                  <div><dt>GP antes</dt><dd>158 GP</dd></div>
-                  <div><dt>Mantener</dt><dd><i /></dd></div>
-                </dl>
-                <small>Toca para volver</small>
-              </div>
-            </div>
-          </article>
-          <article className="ib20-logros-side ib20-logros-side--right" />
-        </div>
-        <div className="ib20-logros-count">2 / 11</div>
-        <div className="ib20-logros-dots">
-          {Array.from({ length: 7 }, (_, index) => (
-            <span className={index === 1 ? "is-active" : ""} key={index} />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-type LandingV3LogrosCard = {
-  achievedAt?: string;
-  flip?: boolean;
-  gpBefore?: string;
-  development?: {
-    months: Array<{ month: string; percent: number; projected?: boolean }>;
-    score: number;
-    status: string;
-  };
-  locked?: boolean;
-  name: string;
-  src: string;
-  trait: string;
-};
-
-type LandingV3LogrosSet = {
-  cards: LandingV3LogrosCard[];
-  icon: string;
-  label: string;
-};
-
-const V3_LOGROS_SETS: Record<"BODY" | "MIND" | "SOUL", LandingV3LogrosSet> = {
+const V3_LOGROS_SETS = {
   BODY: {
     label: "Body",
-    icon: "",
+    icon: "🫀",
     cards: [
       { name: "2L de agua", trait: "Hidratación", src: "/sellos/body/sello_body_hydration.png", flip: true, achievedAt: "2026-03-18", gpBefore: "1.240 GP" },
-      { name: "10.000 pasos", trait: "Movilidad", src: "/sellos/body/sello_body_hydration.png", locked: true, development: { score: 63, status: "Hábito en construcción", months: [{ month: "mar", percent: 53 }, { month: "abr", percent: 72 }, { month: "may", percent: 38 }, { month: "jun", percent: 96, projected: true }] } },
+      { name: "10.000 pasos", trait: "Movilidad", src: "/sellos/body/sello_body_hydration.png", locked: true },
       { name: "Dormir 8hs", trait: "Sueño", src: "/sellos/body/sello_body_nutrition.png" },
-      { name: "Gym", trait: "Fuerza", src: "/sellos/body/sello_body_nutrition.png", locked: true, development: { score: 27, status: "Hábito frágil", months: [{ month: "mar", percent: 8 }, { month: "abr", percent: 9 }, { month: "may", percent: 8 }, { month: "jun", percent: 65, projected: true }] } },
+      { name: "Gym", trait: "Fuerza", src: "/sellos/body/sello_body_nutrition.png", locked: true },
     ],
   },
   MIND: {
     label: "Mind",
-    icon: "",
+    icon: "🧠",
     cards: [
       { name: "Inglés", trait: "Focus", src: "/sellos/mind/sello_mind_focus.png", flip: true, achievedAt: "2026-04-02", gpBefore: "980 GP" },
-      { name: "Leer 20m", trait: "Claridad", src: "/sellos/mind/sello_mind_focus.png", locked: true, development: { score: 27, status: "Hábito frágil", months: [{ month: "mar", percent: 8 }, { month: "abr", percent: 9 }, { month: "may", percent: 8 }, { month: "jun", percent: 65, projected: true }] } },
+      { name: "Leer 20m", trait: "Claridad", src: "/sellos/mind/sello_mind_focus.png", locked: true },
       { name: "Lectura 20m", trait: "Claridad", src: "/sellos/mind/sello_mind_focus.png" },
-      { name: "Journaling", trait: "Memoria", src: "/sellos/mind/sello_mind_focus.png", locked: true, development: { score: 63, status: "Hábito en construcción", months: [{ month: "mar", percent: 53 }, { month: "abr", percent: 72 }, { month: "may", percent: 38 }, { month: "jun", percent: 96, projected: true }] } },
+      { name: "Journaling", trait: "Memoria", src: "/sellos/mind/sello_mind_focus.png", locked: true },
     ],
   },
   SOUL: {
     label: "Soul",
-    icon: "",
+    icon: "🌼",
     cards: [
       { name: "Llamar familia", trait: "Conexión", src: "/sellos/soul/soul_connection_transparent.png", flip: true, achievedAt: "2026-04-16", gpBefore: "760 GP" },
-      { name: "Pausa diaria", trait: "Presencia", src: "/sellos/soul/soul_connection_transparent.png", locked: true, development: { score: 63, status: "Hábito en construcción", months: [{ month: "mar", percent: 53 }, { month: "abr", percent: 72 }, { month: "may", percent: 38 }, { month: "jun", percent: 96, projected: true }] } },
+      { name: "Pausa diaria", trait: "Presencia", src: "/sellos/soul/soul_connection_transparent.png", locked: true },
       { name: "Salir sin móvil", trait: "Calma", src: "/sellos/soul/soul_connection_transparent.png" },
-      { name: "Juego", trait: "Play", src: "/sellos/soul/soul_connection_transparent.png", locked: true, development: { score: 27, status: "Hábito frágil", months: [{ month: "mar", percent: 8 }, { month: "abr", percent: 9 }, { month: "may", percent: 8 }, { month: "jun", percent: 65, projected: true }] } },
+      { name: "Juego", trait: "Play", src: "/sellos/soul/soul_connection_transparent.png", locked: true },
     ],
   },
 } as const;
@@ -893,6 +896,7 @@ function LandingV3LogrosVisual({ language, cycleMs = 5200 }: { language: Languag
       <div className="v3-logros-tabs">
         {(Object.keys(V3_LOGROS_SETS) as Array<keyof typeof V3_LOGROS_SETS>).map((pillar) => (
           <span className={pillar === active.pillar ? "is-active" : ""} key={pillar}>
+            <i>{V3_LOGROS_SETS[pillar].icon}</i>
             {isSpanish
               ? pillar === "BODY"
                 ? "Cuerpo"
@@ -943,31 +947,6 @@ function LandingV3LogrosVisual({ language, cycleMs = 5200 }: { language: Languag
                         </dd>
                       </div>
                     </dl>
-                  </div>
-                ) : card.locked && card.development ? (
-                  <div className="v3-logros-card__face v3-logros-card__back v3-logros-card__back--development">
-                    <p>{isSpanish ? "Desarrollo del hábito" : "Habit development"}</p>
-                    <span className={`v3-logros-dev-status ${card.development.score < 50 ? "is-fragile" : "is-building"}`}>
-                      {card.development.status}
-                    </span>
-                    <div className="v3-logros-dev-ring" style={{ "--score-target": `${card.development.score * 3.6}deg`, "--score-color": card.development.score < 50 ? "#ff6670" : "#f5c55a" } as CSSProperties}>
-                      <strong>{card.development.score}</strong>
-                      <span>Score</span>
-                    </div>
-                    <div className="v3-logros-dev-ranges">
-                      <span>Frágil &lt;50</span><i /> <span>50-79</span><i /> <span>Fuerte ≥80</span>
-                    </div>
-                    <div className="v3-logros-dev-window">
-                      <b>{isSpanish ? "Ventana activa" : "Active window"}</b>
-                      <div>
-                        {card.development.months.map((month) => (
-                          <span className={month.projected ? "is-projected" : ""} key={`${card.name}-${month.month}`}>
-                            <i className={month.percent < 50 ? "is-fragile" : month.percent < 80 ? "is-building" : "is-strong"}>{month.percent}%</i>
-                            <em>{month.month}</em>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
                   </div>
                 ) : null}
               </div>
@@ -2055,6 +2034,17 @@ export default function LandingPage({
           </>
         )}
 
+        {isV3Conversion ? (
+          <section className="avatar-cta-section section-pad reveal-on-scroll" id="avatar-start">
+            <div className="container">
+              <AvatarCtaBanner
+                language={language}
+                startHref={buildOnboardingPath(language)}
+              />
+            </div>
+          </section>
+        ) : null}
+
         <section
           className="testimonials section-pad reveal-on-scroll"
           id="testimonials"
@@ -2082,7 +2072,7 @@ export default function LandingPage({
                 {copy.testimonials.items.map((testimonial, index) => (
                   <figure
                     className="testi"
-                    key={`${testimonial.author}-${index}`}
+                    key={testimonial.author}
                     role="group"
                     id={`slide-${index + 1}`}
                     aria-label={
@@ -2119,7 +2109,7 @@ export default function LandingPage({
               >
                 {copy.testimonials.items.map((testimonial, index) => (
                   <button
-                    key={`${testimonial.author}-${index}`}
+                    key={testimonial.author}
                     className="dot"
                     role="tab"
                     aria-selected={index === activeSlide}
