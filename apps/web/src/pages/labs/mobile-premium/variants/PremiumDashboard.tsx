@@ -1136,7 +1136,7 @@ function normalizeEmotionLabel(
 
 function resolveEmotionColor(label: string) {
   const normalized = label.toLowerCase();
-  if (normalized.includes('happy')) return EMOTION_COLORS.felicidad;
+  if (normalized.includes('happy') || normalized.includes('happiness') || normalized.includes('felic')) return EMOTION_COLORS.felicidad;
   if (normalized.includes('calm')) return EMOTION_COLORS.calma;
   if (normalized.includes('motivation')) return EMOTION_COLORS.motivación;
   if (normalized.includes('sad')) return EMOTION_COLORS.tristeza;
