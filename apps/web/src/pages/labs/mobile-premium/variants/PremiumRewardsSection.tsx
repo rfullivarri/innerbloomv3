@@ -19,7 +19,7 @@ type WrappedShareTarget<T extends string> = { key: T; label: string; slideIndex:
 type WrappedShareImageCache = Map<string, string>;
 
 const WEEKLY_PILLAR_ORDER: RewardsPillarCode[] = ['BODY', 'MIND', 'SOUL'];
-const STORY_MODAL_LAYER_CLASS = 'fixed bottom-0 left-0 right-0 top-0 isolate z-[9999] h-[100svh] min-h-[100svh] w-screen overflow-hidden bg-black';
+const STORY_MODAL_LAYER_CLASS = 'fixed bottom-0 left-0 right-0 top-0 isolate z-[9999] h-[100dvh] min-h-[100dvh] w-screen overflow-hidden bg-black';
 
 const FALLBACK_REWARDS_HISTORY: RewardsHistorySummary = {
   weeklyWrapups: [
@@ -1328,6 +1328,7 @@ function AchievementDetailRow({ label, value }: { label: string; value: string }
 }
 
 function MonthHealthDot({ active = true, month, percent, projected }: { active?: boolean; month: string; percent: number; projected?: boolean }) {
+  const { language, t } = usePostLoginLanguage();
   const tone = getScoreTone(percent);
   return (
     <div className={`text-center ${active ? '' : 'opacity-55'}`}>
@@ -1344,10 +1345,45 @@ function MonthHealthDot({ active = true, month, percent, projected }: { active?:
         ) : null}
         {percent}%
       </div>
-      <p className="mt-1 text-[11px] text-[color:var(--mp-text-secondary)]">{month}</p>
-      {projected ? <p className="-mt-0.5 text-[8px] text-[color:var(--mp-text-muted)]">proy.</p> : null}
+      <p className="mt-1 text-[11px] text-[color:var(--mp-text-secondary)]">{formatHabitMonthLabel(month, language)}</p>
+      {projected ? <p className="-mt-0.5 text-[8px] text-[color:var(--mp-text-muted)]">{t('mobilePremium.taskDetail.projectedShort')}</p> : null}
     </div>
   );
+}
+
+function formatHabitMonthLabel(month: string, language: 'es' | 'en') {
+  if (language === 'es') return month;
+  const normalized = month.trim().toLowerCase().replace('.', '');
+  const monthIndexByLabel: Record<string, number> = {
+    ene: 0,
+    enero: 0,
+    feb: 1,
+    febrero: 1,
+    mar: 2,
+    marzo: 2,
+    abr: 3,
+    abril: 3,
+    may: 4,
+    mayo: 4,
+    jun: 5,
+    junio: 5,
+    jul: 6,
+    julio: 6,
+    ago: 7,
+    agosto: 7,
+    sep: 8,
+    sept: 8,
+    septiembre: 8,
+    oct: 9,
+    octubre: 9,
+    nov: 10,
+    noviembre: 10,
+    dic: 11,
+    diciembre: 11,
+  };
+  const monthIndex = monthIndexByLabel[normalized];
+  if (monthIndex == null) return month;
+  return new Intl.DateTimeFormat('en', { month: 'short' }).format(new Date(2026, monthIndex, 1)).replace('.', '').toLowerCase();
 }
 
 function resolveHabitDevelopmentMonths(months: Array<{ month: string; percent: number; projected?: boolean; periodKey?: string | null }>) {
@@ -2402,7 +2438,7 @@ export function PremiumWeeklyWrappedStory({
         `}
       </style>
       <div
-        className="mp-weekly-story-root relative h-[100svh] min-h-[100svh] w-screen overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)] [--weekly-share-safe-bottom:max(env(safe-area-inset-bottom),clamp(4.75rem,9dvh,6rem))]"
+        className="mp-weekly-story-root relative h-[100dvh] min-h-[100dvh] w-screen overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)] [--weekly-share-safe-bottom:max(env(safe-area-inset-bottom),clamp(4.75rem,9dvh,6rem))]"
         data-weekly-mode={storyVisualMode}
       >
         <button
@@ -2415,7 +2451,7 @@ export function PremiumWeeklyWrappedStory({
           ×
         </button>
 
-        <div className={`h-full snap-y snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${showSharePicker ? 'overflow-hidden' : 'overflow-y-auto'}`} ref={storyScrollRef}>
+        <div className={`h-full snap-y snap-mandatory overscroll-contain [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [touch-action:pan-y] [&::-webkit-scrollbar]:hidden ${showSharePicker ? 'overflow-hidden' : 'overflow-y-scroll'}`} ref={storyScrollRef}>
           <WeeklyStorySlide
             accent={dominantColor}
             active={showSharePicker || activeStorySlide === 0}
@@ -2756,7 +2792,7 @@ function PremiumMonthlyWrappedStory({
     >
       <MonthlyStoryStyles />
       <div
-        className="mp-weekly-story-root relative h-[100svh] min-h-[100svh] w-screen overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)] [--weekly-share-safe-bottom:max(env(safe-area-inset-bottom),clamp(4.75rem,9dvh,6rem))]"
+        className="mp-weekly-story-root relative h-[100dvh] min-h-[100dvh] w-screen overflow-hidden [--weekly-safe-bottom:max(env(safe-area-inset-bottom),1rem)] [--weekly-safe-top:max(env(safe-area-inset-top),1rem)] [--weekly-share-safe-bottom:max(env(safe-area-inset-bottom),clamp(4.75rem,9dvh,6rem))]"
         data-weekly-mode={storyVisualMode}
       >
         <button
@@ -2769,7 +2805,7 @@ function PremiumMonthlyWrappedStory({
           ×
         </button>
 
-        <div className={`h-full snap-y snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${showSharePicker ? 'overflow-hidden' : 'overflow-y-auto'}`} ref={storyScrollRef}>
+        <div className={`h-full snap-y snap-mandatory overscroll-contain [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [touch-action:pan-y] [&::-webkit-scrollbar]:hidden ${showSharePicker ? 'overflow-hidden' : 'overflow-y-scroll'}`} ref={storyScrollRef}>
           <WeeklyStorySlide
             accent="#A78BFA"
             active={showSharePicker || activeStorySlide === 0}
@@ -3496,7 +3532,7 @@ function WeeklyStorySlide({
 }) {
   return (
     <section
-      className={`mp-weekly-slide-shell relative flex h-[100svh] min-h-[100svh] snap-start justify-center overflow-hidden px-7 ${active ? 'mp-weekly-slide-active' : ''}`}
+      className={`mp-weekly-slide-shell relative flex h-[100dvh] min-h-[100dvh] snap-start justify-center overflow-hidden px-7 ${active ? 'mp-weekly-slide-active' : ''}`}
       data-weekly-slide={index}
       ref={registerSlide}
       style={{

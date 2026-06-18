@@ -861,15 +861,17 @@ function ReminderSheet({
   return (
     <PremiumSheet eyebrow={t('mobilePremium.reminder.eyebrow')} onClose={onClose} title={t('mobilePremium.reminder.title')}>
       <div className="space-y-6">
-        <label className="block">
+        <label className="block min-w-0">
           <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.reminder.localTime')}</span>
-          <input
-            aria-label={t('mobilePremium.reminder.timeA11y')}
-            className="mp-time-input mt-3 h-12 w-full rounded-full border border-[color:var(--mp-violet)] bg-[color:var(--mp-surface-strong)] px-5 text-center text-base font-semibold text-[color:var(--mp-violet-strong)] outline-none"
-            onChange={(event) => setTime(event.target.value)}
-            type="time"
-            value={time}
-          />
+          <span className="mt-3 block max-w-full overflow-hidden rounded-full border border-[color:var(--mp-violet)] bg-[color:var(--mp-surface-strong)]">
+            <input
+              aria-label={t('mobilePremium.reminder.timeA11y')}
+              className="mp-time-input block h-12 w-full min-w-0 max-w-full appearance-none border-0 bg-transparent px-5 text-center text-base font-semibold text-[color:var(--mp-violet-strong)] outline-none"
+              onChange={(event) => setTime(event.target.value)}
+              type="time"
+              value={time}
+            />
+          </span>
         </label>
         <div className="flex items-center gap-3 rounded-[1rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-3">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-violet-400/12 text-[color:var(--mp-violet)]">

@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { usePostLoginLanguage } from '../../../i18n/postLoginLanguage';
 
 type HabitTone = 'fragile' | 'building' | 'strong';
 
@@ -24,8 +25,13 @@ export function habitDevelopmentTone(score: number) {
   return TONE_STYLES[resolveTone(score)];
 }
 
-export function habitDevelopmentStatusLabel(score: number) {
+export function habitDevelopmentStatusLabel(score: number, language: 'es' | 'en' = 'es') {
   const tone = resolveTone(clampScore(score));
+  if (language === 'en') {
+    if (tone === 'fragile') return 'Fragile habit';
+    if (tone === 'building') return 'Building habit';
+    return 'Strong habit';
+  }
   if (tone === 'fragile') return 'Hábito frágil';
   if (tone === 'building') return 'Hábito en construcción';
   return 'Hábito fuerte';
@@ -40,7 +46,9 @@ export function HabitStatusChip({
   score: number;
   compact?: boolean;
 }) {
+  const { language } = usePostLoginLanguage();
   const tone = habitDevelopmentTone(score);
+  const displayLabel = translateHabitStatusLabel(label, score, language);
 
   return (
     <span
@@ -49,9 +57,24 @@ export function HabitStatusChip({
       }`}
       style={{ backgroundColor: tone.soft, color: tone.color }}
     >
-      {label}
+      {displayLabel}
     </span>
   );
+}
+
+function translateHabitStatusLabel(label: string, score: number, language: 'es' | 'en') {
+  if (language === 'es') return label;
+  const normalized = label
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+  if (normalized === 'habito fragil') return 'Fragile habit';
+  if (normalized === 'habito en construccion') return 'Building habit';
+  if (normalized === 'habito fuerte') return 'Strong habit';
+  if (normalized === 'habito logrado') return 'Achieved habit';
+  if (normalized === 'habito guardado') return 'Saved habit';
+  return habitDevelopmentStatusLabel(score, language);
 }
 
 export function PremiumScoreRing({
