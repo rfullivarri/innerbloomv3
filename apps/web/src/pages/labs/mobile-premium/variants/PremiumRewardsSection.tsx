@@ -8,6 +8,7 @@ import { InnerbloomBrand, InnerbloomFlowerMark, TraitIcon } from '../MobilePremi
 import { habitDevelopmentStatusLabel, HabitStatusChip, PremiumScoreRing } from '../PremiumHabitDevelopment';
 import { emitHabitAchievementUpdated } from '../../../../lib/habitAchievementEvents';
 import type { LocalOnboardingSnapshot } from '../localOnboardingBridge';
+import { usePostLoginLanguage } from '../../../../i18n/postLoginLanguage';
 
 type RewardsPillarCode = 'BODY' | 'MIND' | 'SOUL';
 type WeeklyStoryVisualMode = 'dark' | 'light';
@@ -246,6 +247,7 @@ export function PremiumRewardsSection({
   localSnapshot?: LocalOnboardingSnapshot | null;
   onboardingPreview?: boolean;
 }) {
+  const { language, t } = usePostLoginLanguage();
   const [activePillar, setActivePillar] = useState<RewardsPillarCode>('BODY');
   const [activeIndex, setActiveIndex] = useState(1);
   const [flippedHabitId, setFlippedHabitId] = useState<string | null>(null);
@@ -453,18 +455,18 @@ export function PremiumRewardsSection({
               onClick={() => setActivePillar(code)}
               type="button"
             >
-              {resolveRewardsPillarLabel(code)}
+              {resolveRewardsPillarLabel(code, t)}
             </button>
           );
         })}
       </div>
 
       <section className="space-y-4">
-        <h2 className="text-[1.35rem] font-semibold text-[color:var(--mp-text)]">Hábitos logrados</h2>
+        <h2 className="text-[1.35rem] font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.rewards.habitsAchieved')}</h2>
         {habits.length ? (
           <div className="space-y-4">
             <div
-              aria-label="Carrusel de hábitos logrados"
+              aria-label={t('mobilePremium.rewards.achievedCarouselA11y')}
               className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden px-[12%] py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               onScroll={syncActiveCardFromScroll}
               ref={carouselRef}
@@ -493,7 +495,7 @@ export function PremiumRewardsSection({
           </div>
         ) : (
           <p className="rounded-[1.25rem] border border-[color:var(--mp-border)] p-6 text-center text-sm text-[color:var(--mp-text-secondary)]">
-            Todavía no hay hábitos para mostrar.
+            {t('mobilePremium.rewards.noHabits')}
           </p>
         )}
       </section>
@@ -511,7 +513,7 @@ export function PremiumRewardsSection({
         <span className="text-[color:var(--mp-violet)]">
           <TraitIcon size={22} trait="logros" />
         </span>
-        <span className="flex-1 text-base text-[color:var(--mp-text)]">Pendientes de revisar: {pendingReviewCount}</span>
+        <span className="flex-1 text-base text-[color:var(--mp-text)]">{t('mobilePremium.rewards.pendingReview', { count: pendingReviewCount })}</span>
         <span className="text-3xl font-light text-[color:var(--mp-text-secondary)]">›</span>
       </button>
       {actionError ? (
@@ -531,7 +533,7 @@ export function PremiumRewardsSection({
       ) : (
         <WrappedEmptySection
           countdownDays={getMonthlyCountdownDays()}
-          subtitle="Todavía no hay resumen mensual real"
+          subtitle={t('mobilePremium.rewards.monthlyEmptySubtitle')}
           title="Monthly Wrapped"
         />
       )}
@@ -674,6 +676,7 @@ function AchievementFrontFace({
   isActive: boolean;
   onShareAchievement: (habit: HabitAchievementShelfItem) => void;
 }) {
+  const { language, t } = usePostLoginLanguage();
   const achieved = isHabitAchieved(habit);
 
   return (
@@ -697,7 +700,7 @@ function AchievementFrontFace({
 
       <p className="mt-2 flex max-w-full items-center justify-center gap-2 overflow-hidden text-sm leading-none">
         <span className="min-w-0 truncate text-[color:var(--mp-text-secondary)]">
-          {habit.trait?.name ?? 'Rasgo'}
+          {translateRewardText(habit.trait?.name ?? t('mobilePremium.rewards.traitFallback'), t)}
         </span>
         <span className="shrink-0 text-[color:var(--mp-text-muted)]">·</span>
         <span
@@ -707,7 +710,7 @@ function AchievementFrontFace({
               : 'text-[color:var(--mp-text-muted)]'
           }`}
         >
-          {achieved ? 'Logrado' : 'Bloqueado'}
+          {achieved ? t('mobilePremium.rewards.achieved') : t('mobilePremium.rewards.locked')}
         </span>
       </p>
 
@@ -721,7 +724,7 @@ function AchievementFrontFace({
           type="button"
         >
           <span aria-hidden="true" className="text-sm leading-none">⇧</span>
-          Compartir
+          {t('mobilePremium.rewards.share')}
         </button>
       ) : null}
 
@@ -744,16 +747,17 @@ function AchievementBackFace({
   maintainPending: boolean;
   onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>;
 }) {
+  const { language, t } = usePostLoginLanguage();
   return (
     <div className="flex h-full flex-col justify-center text-left">
-      <p className="text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--mp-amber)]">Logro desbloqueado</p>
+      <p className="text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--mp-amber)]">{t('mobilePremium.rewards.unlocked')}</p>
       <h3 className="mt-6 text-center text-2xl font-semibold leading-tight text-[color:var(--mp-text)]">{habit.taskName}</h3>
-      <p className="mt-2 text-center text-lg text-[color:var(--mp-text-secondary)]">{habit.trait?.name ?? 'Rasgo'}</p>
+      <p className="mt-2 text-center text-lg text-[color:var(--mp-text-secondary)]">{translateRewardText(habit.trait?.name ?? t('mobilePremium.rewards.traitFallback'), t)}</p>
       <div className="mt-7 space-y-4 border-y border-[color:var(--mp-border)] py-5 text-base">
-        <AchievementDetailRow label="Logrado" value={formatCompactDate(habit.achievedAt)} />
-        <AchievementDetailRow label="GP antes" value={`${habit.gpBeforeAchievement} GP`} />
+        <AchievementDetailRow label={t('mobilePremium.rewards.achieved')} value={formatCompactDate(habit.achievedAt)} />
+        <AchievementDetailRow label={t('mobilePremium.rewards.gpBefore')} value={`${habit.gpBeforeAchievement} GP`} />
         <div className="flex items-center justify-between gap-4">
-          <span className="text-[color:var(--mp-text-secondary)]">Mantener</span>
+          <span className="text-[color:var(--mp-text-secondary)]">{t('mobilePremium.rewards.maintain')}</span>
           <MaintainAchievementToggle
             checked={habit.maintainEnabled}
             disabled={maintainPending}
@@ -762,7 +766,7 @@ function AchievementBackFace({
         </div>
       </div>
       <p className="mt-auto text-center text-[10px] text-[color:var(--mp-text-muted)] opacity-60">
-        Toca para volver
+        {t('mobilePremium.rewards.tapBack')}
       </p>
     </div>
   );
@@ -777,11 +781,12 @@ function MaintainAchievementToggle({
   disabled: boolean;
   onToggle: () => void;
 }) {
+  const { t } = usePostLoginLanguage();
   return (
     <div className="flex items-center">
       <button
         aria-checked={checked}
-        aria-label="Mantener activo"
+        aria-label={t('mobilePremium.rewards.maintain')}
         className={`relative h-7 w-[3.15rem] shrink-0 rounded-full border transition disabled:opacity-50 ${
           checked
             ? 'border-violet-300/75 bg-violet-500/70'
@@ -806,6 +811,7 @@ function MaintainAchievementToggle({
 }
 
 function LockedHabitBackFace({ backendUserId, habit, isFlipped }: { backendUserId: string | null; habit: HabitAchievementShelfItem; isFlipped: boolean }) {
+  const { t } = usePostLoginLanguage();
   const { data: insights } = useRequest(
     () => getTaskInsights(habit.taskId, { range: 'month' }),
     [habit.taskId, backendUserId],
@@ -821,15 +827,15 @@ function LockedHabitBackFace({ backendUserId, habit, isFlipped }: { backendUserI
     return (
       <div className="flex h-full flex-col justify-between text-center">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[color:var(--mp-violet)]">Desarrollo del hábito</p>
-          <p className="mt-5 inline-flex rounded-full border border-[color:var(--mp-border)] px-4 py-2 text-sm font-semibold text-[color:var(--mp-amber)]">Bloqueado</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[color:var(--mp-violet)]">{t('mobilePremium.taskDetail.habitDevelopment')}</p>
+          <p className="mt-5 inline-flex rounded-full border border-[color:var(--mp-border)] px-4 py-2 text-sm font-semibold text-[color:var(--mp-amber)]">{t('mobilePremium.rewards.locked')}</p>
         </div>
 
         <p className="mx-auto max-w-[13rem] text-sm leading-6 text-[color:var(--mp-text-secondary)]">
-          Todavía no hay suficiente evidencia real para mostrar el desarrollo de este hábito.
+          {t('mobilePremium.taskDetail.noData')}
         </p>
 
-        <p className="text-xs text-[color:var(--mp-text-muted)]">Se desbloquea con la revisión mensual.</p>
+        <p className="text-xs text-[color:var(--mp-text-muted)]">{t('mobilePremium.rewards.pendingReview', { count: 1 })}</p>
       </div>
     );
   }
@@ -838,7 +844,7 @@ function LockedHabitBackFace({ backendUserId, habit, isFlipped }: { backendUserI
   return (
     <div className="flex h-full flex-col justify-between text-center">
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[color:var(--mp-violet)]">Desarrollo del hábito</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[color:var(--mp-violet)]">{t('mobilePremium.taskDetail.habitDevelopment')}</p>
         <div className="mt-4">
           <HabitStatusChip compact label={development.status} score={development.score} />
         </div>
@@ -850,11 +856,11 @@ function LockedHabitBackFace({ backendUserId, habit, isFlipped }: { backendUserI
 
       <div>
         <div className="mb-2 flex items-center justify-center gap-1.5 text-[9px] font-medium text-[color:var(--mp-text-muted)]">
-          <span className="text-[color:var(--mp-red)]">Frágil &lt;50</span>
+          <span className="text-[color:var(--mp-red)]">{t('mobilePremium.taskDetail.fragile')}</span>
           <span>·</span>
           <span className="text-[color:var(--mp-amber)]">50-79</span>
           <span>·</span>
-          <span className="text-[color:var(--mp-green)]">Fuerte ≥80</span>
+          <span className="text-[color:var(--mp-green)]">{t('mobilePremium.taskDetail.strong')}</span>
         </div>
         <div
           className="grid items-start gap-1"
@@ -865,7 +871,7 @@ function LockedHabitBackFace({ backendUserId, habit, isFlipped }: { backendUserI
             style={{ gridColumn: `${activeWindowStartIndex + 1} / ${Math.max(visibleMonths.length, 3) + 1}` }}
           >
             <span className="h-px flex-1 bg-[color:var(--mp-border)]" />
-            <span>Ventana activa</span>
+            <span>{t('mobilePremium.taskDetail.activeWindow')}</span>
             <span className="h-px flex-1 bg-[color:var(--mp-border)]" />
           </div>
           <div
@@ -905,6 +911,7 @@ function PendingAchievementReviewSheet({
   onMaintain: () => void;
   onStore: () => void;
 }) {
+  const { t } = usePostLoginLanguage();
   return (
     <div
       className="fixed inset-0 z-[80] flex items-end justify-center bg-black/62 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] backdrop-blur-md"
@@ -917,7 +924,7 @@ function PendingAchievementReviewSheet({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--mp-text-muted)]">
-              Hábito logrado {currentIndex + 1}/{total}
+              {t('mobilePremium.rewards.achieved')} {currentIndex + 1}/{total}
             </p>
             <h3 className="mt-2 text-3xl font-semibold leading-tight text-[color:var(--mp-text)]">
               {habit.taskName}
@@ -947,14 +954,14 @@ function PendingAchievementReviewSheet({
           </div>
           <div className="min-w-0">
             <p className="text-base text-[color:var(--mp-text-secondary)]">
-              {habit.trait?.name ?? 'Rasgo'} · {resolvePillarShortLabel(habit.pillar)}
+              {translateRewardText(habit.trait?.name ?? t('mobilePremium.rewards.traitFallback'), t)} · {resolvePillarShortLabel(habit.pillar)}
             </p>
           </div>
         </div>
 
         <div className="mt-7 border-y border-[color:var(--mp-border)] py-5">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">Ventana activa</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.taskDetail.activeWindow')}</p>
             <span className="mp-achievement-check grid h-7 w-7 place-items-center rounded-full bg-[color:var(--mp-green)] text-sm font-black text-[#06120b]" style={{ animation: 'mpAchievementCheckIn 520ms cubic-bezier(0.22, 1, 0.36, 1) 880ms both' }}>✓</span>
           </div>
           <div className="mt-4 grid grid-cols-3 gap-3">
@@ -1005,6 +1012,7 @@ function AchievementShareSheet({
   habit: HabitAchievementShelfItem;
   onClose: () => void;
 }) {
+  const { t } = usePostLoginLanguage();
   const previewRef = useRef<HTMLDivElement | null>(null);
   const [mode, setMode] = useState<WeeklyStoryVisualMode>('dark');
   const [isSharing, setIsSharing] = useState(false);
@@ -1178,6 +1186,7 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
   sealDataUrl: string | null;
   sealFailed: boolean;
 }>(({ habit, mode, months, sealDataUrl, sealFailed }, ref) => {
+  const { language, t } = usePostLoginLanguage();
   const isLight = mode === 'light';
   const text = isLight ? '#151224' : '#FFF8EF';
   const muted = isLight ? '#655F70' : 'rgba(255,248,239,.7)';
@@ -1227,8 +1236,8 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
           </div>
         ) : null}
         <div className="mt-[1.25cqh]">
-          <p className="text-[clamp(0.48rem,1.7cqh,0.58rem)] font-semibold uppercase tracking-[0.24em]" style={{ color: accent }}>Hábito logrado</p>
-          <p className="mt-[0.35cqh] text-[clamp(0.44rem,1.55cqh,0.54rem)] font-medium leading-snug" style={{ color: muted }}>3 meses de constancia</p>
+          <p className="text-[clamp(0.48rem,1.7cqh,0.58rem)] font-semibold uppercase tracking-[0.24em]" style={{ color: accent }}>{t('mobilePremium.rewards.achieved')}</p>
+          <p className="mt-[0.35cqh] text-[clamp(0.44rem,1.55cqh,0.54rem)] font-medium leading-snug" style={{ color: muted }}>{language === 'es' ? '3 meses de constancia' : '3 months of consistency'}</p>
           {achievedLabel ? <p className="mt-[0.35cqh] text-[clamp(0.4rem,1.35cqh,0.48rem)] font-medium" style={{ color: softMuted }}>{achievedLabel}</p> : null}
         </div>
       </div>
@@ -1237,8 +1246,8 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
         {visibleMonths.length ? (
           <>
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[clamp(0.34rem,1.15cqh,0.44rem)] font-semibold uppercase tracking-[0.18em]" style={{ color: green }}>Progreso mensual</p>
-              <p className="text-[clamp(0.34rem,1.12cqh,0.46rem)] font-medium" style={{ color: softMuted }}>últimos 3 meses</p>
+              <p className="text-[clamp(0.34rem,1.15cqh,0.44rem)] font-semibold uppercase tracking-[0.18em]" style={{ color: green }}>{t('mobilePremium.tasks.progress')}</p>
+              <p className="text-[clamp(0.34rem,1.12cqh,0.46rem)] font-medium" style={{ color: softMuted }}>{language === 'es' ? 'últimos 3 meses' : 'last 3 months'}</p>
             </div>
             <div className="mt-[1.05cqh] grid gap-[3cqw]" style={{ gridTemplateColumns: `repeat(${visibleMonths.length}, minmax(0, 1fr))` }}>
               {visibleMonths.map((month) => (
@@ -1256,13 +1265,13 @@ const AchievementSharePreview = forwardRef<HTMLDivElement, {
                       }}
                     />
                   </div>
-                  {month.projected ? <p className="mt-[0.3cqh] text-center text-[clamp(0.32rem,1.05cqh,0.42rem)] font-medium" style={{ color: softMuted }}>proy.</p> : null}
+                  {month.projected ? <p className="mt-[0.3cqh] text-center text-[clamp(0.32rem,1.05cqh,0.42rem)] font-medium" style={{ color: softMuted }}>{t('mobilePremium.taskDetail.projectedShort')}</p> : null}
                 </div>
               ))}
             </div>
           </>
         ) : (
-          <p className="text-center text-[clamp(0.42rem,1.5cqh,0.52rem)] font-medium" style={{ color: softMuted }}>Ventana activa completada</p>
+          <p className="text-center text-[clamp(0.42rem,1.5cqh,0.52rem)] font-medium" style={{ color: softMuted }}>{t('mobilePremium.taskDetail.activeWindow')}</p>
         )}
       </div>
 
@@ -1569,6 +1578,7 @@ function GrowthCalibrationPremium({
   growth: RewardsHistorySummary['growthCalibration'];
   onOpen: () => void;
 }) {
+  const { t } = usePostLoginLanguage();
   return (
     <section className="space-y-3">
       <button
@@ -1578,17 +1588,17 @@ function GrowthCalibrationPremium({
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-[color:var(--mp-text)]">Resultados de calibración</h2>
-            <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">Últimos ajustes automáticos de dificultad</p>
+            <h2 className="text-xl font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.rewards.calibrationTitle')}</h2>
+            <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">{t('mobilePremium.rewards.calibrationSubtitle')}</p>
           </div>
           <p className="whitespace-nowrap text-sm text-[color:var(--mp-text-secondary)]">
-            Próxima: <span className="font-semibold text-[color:var(--mp-violet)]">{growth.countdownDays}d</span>
+            {t('mobilePremium.rewards.next')} <span className="font-semibold text-[color:var(--mp-violet)]">{growth.countdownDays}d</span>
           </p>
         </div>
         <div className="mt-3 grid grid-cols-3 rounded-[0.9rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] py-3">
-          <CalibrationStat icon="↑" label="Subió dificultad" tone="red" value={growth.summary.up} />
-          <CalibrationStat icon="•" label="Se mantuvo" tone="amber" value={growth.summary.keep} />
-          <CalibrationStat icon="↓" label="Bajó dificultad" tone="green" value={growth.summary.down} />
+          <CalibrationStat icon="↑" label={t('mobilePremium.rewards.upDifficulty')} tone="red" value={growth.summary.up} />
+          <CalibrationStat icon="•" label={t('mobilePremium.rewards.keepDifficulty')} tone="amber" value={growth.summary.keep} />
+          <CalibrationStat icon="↓" label={t('mobilePremium.rewards.downDifficulty')} tone="green" value={growth.summary.down} />
         </div>
       </button>
     </section>
@@ -1602,10 +1612,11 @@ function GrowthCalibrationDetailView({
   growth: RewardsHistorySummary['growthCalibration'];
   onClose: () => void;
 }) {
+  const { t } = usePostLoginLanguage();
   const [activeFilter, setActiveFilter] = useState<CalibrationFilter | null>(null);
   const results = resolveCalibrationResults(growth);
   const visibleResults = activeFilter ? results.filter((row) => row.finalAction === activeFilter) : results;
-  const activeFilterEmptyLabel = activeFilter === 'up' ? 'subido dificultad' : activeFilter === 'down' ? 'bajado dificultad' : 'se hayan mantenido';
+  const activeFilterEmptyLabel = activeFilter === 'up' ? t('mobilePremium.rewards.upDifficulty').toLowerCase() : activeFilter === 'down' ? t('mobilePremium.rewards.downDifficulty').toLowerCase() : t('mobilePremium.rewards.keepDifficulty').toLowerCase();
 
   useEffect(() => {
     window.scrollTo({ left: 0, top: 0, behavior: 'auto' });
@@ -1655,15 +1666,15 @@ function GrowthCalibrationDetailView({
           >
             ‹
           </button>
-          <h2 className="text-3xl font-semibold leading-tight text-[color:var(--mp-text)]">Detalle de calibración</h2>
-          <p className="mt-2 text-sm uppercase tracking-[0.18em] text-[color:var(--mp-text-muted)]">{growth.latestPeriodLabel ?? 'Último período'}</p>
+          <h2 className="text-3xl font-semibold leading-tight text-[color:var(--mp-text)]">{t('mobilePremium.rewards.calibrationDetail')}</h2>
+          <p className="mt-2 text-sm uppercase tracking-[0.18em] text-[color:var(--mp-text-muted)]">{growth.latestPeriodLabel ?? t('mobilePremium.rewards.latestPeriod')}</p>
         </div>
       </header>
 
       <div className="grid grid-cols-3 border-y border-[color:var(--mp-border)] py-4" onClick={(event) => event.stopPropagation()}>
-        <CalibrationStat active={activeFilter === 'up'} icon="↑" label="Subió dificultad" onSelect={() => setActiveFilter((filter) => filter === 'up' ? null : 'up')} tone="red" value={growth.summary.up} />
-        <CalibrationStat active={activeFilter === 'keep'} icon="•" label="Se mantuvo" onSelect={() => setActiveFilter((filter) => filter === 'keep' ? null : 'keep')} tone="amber" value={growth.summary.keep} />
-        <CalibrationStat active={activeFilter === 'down'} icon="↓" label="Bajó dificultad" onSelect={() => setActiveFilter((filter) => filter === 'down' ? null : 'down')} tone="green" value={growth.summary.down} />
+        <CalibrationStat active={activeFilter === 'up'} icon="↑" label={t('mobilePremium.rewards.upDifficulty')} onSelect={() => setActiveFilter((filter) => filter === 'up' ? null : 'up')} tone="red" value={growth.summary.up} />
+        <CalibrationStat active={activeFilter === 'keep'} icon="•" label={t('mobilePremium.rewards.keepDifficulty')} onSelect={() => setActiveFilter((filter) => filter === 'keep' ? null : 'keep')} tone="amber" value={growth.summary.keep} />
+        <CalibrationStat active={activeFilter === 'down'} icon="↓" label={t('mobilePremium.rewards.downDifficulty')} onSelect={() => setActiveFilter((filter) => filter === 'down' ? null : 'down')} tone="green" value={growth.summary.down} />
       </div>
 
       {results.length ? (
@@ -1694,6 +1705,7 @@ function GrowthCalibrationDetailView({
 }
 
 function CalibrationResultRow({ row, animationIndex }: { row: RewardsGrowthCalibrationRow; animationIndex: number }) {
+  const { t } = usePostLoginLanguage();
   const tone = getCalibrationTone(row.finalAction);
   const progressPercent = Math.min(100, Math.max(0, row.completionRatePct));
   const delayMs = 90 + animationIndex * 95;
@@ -1706,7 +1718,7 @@ function CalibrationResultRow({ row, animationIndex }: { row: RewardsGrowthCalib
         <div className="min-w-0">
           <h4 className="truncate text-sm font-semibold text-[color:var(--mp-text)]">{row.taskTitle}</h4>
           <p className="mt-1 text-xs text-[color:var(--mp-text-secondary)]">
-            {row.difficultyBefore ?? '—'} → {row.difficultyAfter ?? '—'}
+            {translateRewardText(row.difficultyBefore ?? '—', t)} → {translateRewardText(row.difficultyAfter ?? '—', t)}
           </p>
         </div>
         <span className="mp-calibration-icon-in grid h-10 w-10 place-items-center rounded-full border text-xl" style={{ animationDelay: `${delayMs + 120}ms`, borderColor: tone.color, color: tone.color }}>
@@ -1719,17 +1731,17 @@ function CalibrationResultRow({ row, animationIndex }: { row: RewardsGrowthCalib
           <div className="h-2 overflow-hidden rounded-full bg-[color:var(--mp-border)]">
             <div className="mp-calibration-bar-load h-full rounded-full" style={{ animationDelay: `${delayMs + 230}ms`, width: `${progressPercent}%`, backgroundColor: tone.color }} />
           </div>
-          <p className="mt-1 text-[11px] text-[color:var(--mp-text-muted)]">{cleanCalibrationReason(row)}</p>
+          <p className="mt-1 text-[11px] text-[color:var(--mp-text-muted)]">{translateCalibrationReason(cleanCalibrationReason(row), t)}</p>
         </div>
         <div className="text-right">
           <p className="text-sm font-semibold text-[color:var(--mp-text)]">{formatNumber(row.actualCompletions)} / {formatNumber(row.expectedTarget)}</p>
-          <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--mp-text-muted)]">progreso</p>
+          <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.rewards.progress')}</p>
         </div>
         <div className="text-right">
           <p className="text-sm font-semibold" style={{ color: tone.color }}>
             <CountUpNumber delayMs={delayMs + 260} suffix="%" value={Math.round(row.completionRatePct)} />
           </p>
-          <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--mp-text-muted)]">tasa</p>
+          <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.rewards.rate')}</p>
         </div>
       </div>
     </article>
@@ -1857,13 +1869,14 @@ function normalizePillarCode(value: unknown): RewardsPillarCode | null {
 }
 
 function PillarSymbol({ pillar }: { pillar: RewardsPillarCode }) {
+  const { t } = usePostLoginLanguage();
   if (pillar === 'MIND') {
-    return <span aria-label="Mente" className="text-lg leading-none">🧠</span>;
+    return <span aria-label={t('mobilePremium.pillar.mind')} className="text-lg leading-none">🧠</span>;
   }
   if (pillar === 'SOUL') {
-    return <span aria-label="Alma" className="text-lg leading-none">🌼</span>;
+    return <span aria-label={t('mobilePremium.pillar.soul')} className="text-lg leading-none">🌼</span>;
   }
-  return <span aria-label="Cuerpo" className="text-lg leading-none">🫀</span>;
+  return <span aria-label={t('mobilePremium.pillar.body')} className="text-lg leading-none">🫀</span>;
 }
 
 function WeeklyWrappedPremium({
@@ -1873,15 +1886,16 @@ function WeeklyWrappedPremium({
   onOpenWeekly: (weekly: WeeklyWrappedRecord) => void;
   weeklyItems: WeeklyWrappedRecord[];
 }) {
+  const { t } = usePostLoginLanguage();
   return (
     <section className="space-y-3">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold text-[color:var(--mp-text)]">Weekly Wrapped</h2>
-          <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">Resumen semanal más reciente</p>
+          <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">{t('mobilePremium.rewards.weeklySubtitle')}</p>
         </div>
         <p className="whitespace-nowrap text-sm text-[color:var(--mp-text-secondary)]">
-          Próximo en <span className="font-semibold text-[color:var(--mp-violet)]">{getWeeklyCountdownDays()}d</span>
+          {t('mobilePremium.rewards.nextIn')} <span className="font-semibold text-[color:var(--mp-violet)]">{getWeeklyCountdownDays()}d</span>
         </p>
       </div>
       <div className="space-y-3">
@@ -1906,6 +1920,7 @@ function WrappedEmptySection({
   subtitle: string;
   title: string;
 }) {
+  const { t } = usePostLoginLanguage();
   return (
     <section className="space-y-3">
       <div className="flex items-start justify-between gap-4">
@@ -1914,7 +1929,7 @@ function WrappedEmptySection({
           <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">{subtitle}</p>
         </div>
         <p className="whitespace-nowrap text-sm text-[color:var(--mp-text-secondary)]">
-          Próximo en <span className="font-semibold text-[color:var(--mp-violet)]">{countdownDays}d</span>
+          {t('mobilePremium.rewards.nextIn')} <span className="font-semibold text-[color:var(--mp-violet)]">{countdownDays}d</span>
         </p>
       </div>
     </section>
@@ -1928,6 +1943,7 @@ function MonthlyWrappedPremium({
   monthly: MonthlyWrappedRecord;
   onOpenMonthly: (monthly: MonthlyWrappedRecord) => void;
 }) {
+  const { t } = usePostLoginLanguage();
   const states = resolveMonthlyWeekStates(monthly);
   const emotion = resolveMonthlyEmotion(monthly);
   const insight = resolveMonthlyInsight(states);
@@ -1939,7 +1955,7 @@ function MonthlyWrappedPremium({
           <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">{monthly.periodKey}</p>
         </div>
         <p className="whitespace-nowrap text-sm text-[color:var(--mp-text-secondary)]">
-          Próximo en <span className="font-semibold text-[color:var(--mp-violet)]">{getMonthlyCountdownDays()}d</span>
+          {t('mobilePremium.rewards.nextIn')} <span className="font-semibold text-[color:var(--mp-violet)]">{getMonthlyCountdownDays()}d</span>
         </p>
       </div>
       <button
@@ -1952,7 +1968,7 @@ function MonthlyWrappedPremium({
             <p className="text-base font-semibold text-[color:var(--mp-text)]">{insight}</p>
             <p className="mt-3 inline-flex items-center gap-2 text-sm text-[color:var(--mp-text-secondary)]">
               <span className="h-4 w-4 rounded-full" style={{ backgroundColor: emotion.color }} />
-              {emotion.label}
+              {translateRewardText(emotion.label, t)}
             </p>
           </div>
           <div className="flex items-center justify-end gap-3">
@@ -1961,7 +1977,7 @@ function MonthlyWrappedPremium({
               <span className={`mx-auto mb-1 block h-4 w-4 rounded-full ${
                 state === 'done' ? 'bg-[color:var(--mp-green)]' : state === 'partial' ? 'bg-[color:var(--mp-amber)]' : 'bg-[color:var(--mp-border)]'
               }`} />
-              S{index + 1}
+              {t('mobilePremium.tasks.weekShort', { week: index + 1 })}
             </span>
           ))}
           </div>
@@ -1972,18 +1988,19 @@ function MonthlyWrappedPremium({
 }
 
 function WeeklyWrappedRow({ onOpen, weekly }: { onOpen: () => void; weekly: WeeklyWrappedRecord }) {
+  const { language, t } = usePostLoginLanguage();
   const days = enumerateDateRange(weekly.weekStart, weekly.weekEnd).slice(0, 7);
   const completed = new Set(weekly.completionDays ?? []);
   const emotion = weekly.payload.emotions?.weekly ?? weekly.payload.emotions?.biweekly;
   const dominantPillar = normalizePillarCode(weekly.payload.summary?.pillarDominant) ?? 'BODY';
-  const dayLabels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  const dayLabels = language === 'es' ? ['L', 'M', 'X', 'J', 'V', 'S', 'D'] : ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   return (
     <button
       className="w-full rounded-[0.9rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-4 text-left transition hover:border-[color:var(--mp-violet)]/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--mp-violet)]/70"
       onClick={onOpen}
       type="button"
     >
-      <p className="mb-3 text-sm text-[color:var(--mp-text-secondary)]">{formatDateShort(weekly.weekStart)} → {formatDateShort(weekly.weekEnd)}</p>
+      <p className="mb-3 text-sm text-[color:var(--mp-text-secondary)]">{formatDateShort(weekly.weekStart, language)} → {formatDateShort(weekly.weekEnd, language)}</p>
       <div className="grid grid-cols-[1fr_76px_76px] items-center gap-3">
         <div className="grid grid-cols-7 gap-1.5">
           {days.map((day, index) => (
@@ -1995,7 +2012,7 @@ function WeeklyWrappedRow({ onOpen, weekly }: { onOpen: () => void; weekly: Week
         </div>
         <div className="border-l border-[color:var(--mp-border)] pl-3 text-center text-xs text-[color:var(--mp-text-secondary)]">
           <span className="mx-auto mb-1 block h-9 w-9 rounded-full shadow-[0_0_24px_rgba(167,139,250,0.24)]" style={{ backgroundColor: emotion?.color ?? 'var(--mp-violet)' }} />
-          {emotion?.label ?? 'Calma'}
+          {translateRewardText(emotion?.label ?? 'Calma', t)}
         </div>
         <div className="border-l border-[color:var(--mp-border)] pl-3">
           <span className="mx-auto grid h-9 w-9 place-items-center rounded-full bg-violet-300/16 text-[color:var(--mp-violet)]">
@@ -2016,6 +2033,7 @@ export function PremiumWeeklyWrappedStory({
   radarTraits?: TraitXpEntry[];
   weekly: WeeklyWrappedRecord;
 }) {
+  const { language, t } = usePostLoginLanguage();
   const payload = weekly.payload;
   const sectionsByKey = new Map((payload.sections ?? []).map((section) => [section.key, section]));
   const days = enumerateDateRange(weekly.weekStart, weekly.weekEnd).slice(0, 7);
@@ -2024,7 +2042,7 @@ export function PremiumWeeklyWrappedStory({
   const emotion = payload.emotions?.weekly ?? payload.emotions?.biweekly;
   const biweeklyEmotion = payload.emotions?.biweekly ?? emotion;
   const dominantPillar = normalizePillarCode(payload.summary?.pillarDominant) ?? 'BODY';
-  const dominantLabel = resolveRewardsPillarLabel(dominantPillar);
+  const dominantLabel = resolveRewardsPillarLabel(dominantPillar, t);
   const dominantColor = getWeeklyPillarColor(dominantPillar);
   const habits = (sectionsByKey.get('habits')?.items ?? []).slice(0, 3);
   const energy = payload.summary?.energyHighlight;
@@ -2036,8 +2054,8 @@ export function PremiumWeeklyWrappedStory({
   const easyPct = effortTotal ? Math.round(((effort?.easy ?? 0) / effortTotal) * 100) : 0;
   const mediumPct = effortTotal ? Math.round(((effort?.medium ?? 0) / effortTotal) * 100) : 0;
   const hardPct = effortTotal ? Math.max(0, 100 - easyPct - mediumPct) : 0;
-  const weekRange = `${formatDateShort(weekly.weekStart)} → ${formatDateShort(weekly.weekEnd)}`;
-  const dayLabels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  const weekRange = `${formatDateShort(weekly.weekStart, language)} → ${formatDateShort(weekly.weekEnd, language)}`;
+  const dayLabels = language === 'es' ? ['L', 'M', 'X', 'J', 'V', 'S', 'D'] : ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   const completions = payload.summary?.completions ?? completedCount;
   const xpTotal = payload.summary?.xpTotal ?? 0;
   const dominantPct = resolvePillarDominancePct(payload.summary?.pillarDominantStats?.completions, payload.summary?.completions);
@@ -2057,10 +2075,10 @@ export function PremiumWeeklyWrappedStory({
   const emotionSlideIndex = energySlideIndex + 1;
   const closingSlideIndex = emotionSlideIndex + 1;
   const weeklyShareTargets: Array<WrappedShareTarget<WeeklyShareOption>> = [
-    { key: 'tasks', label: 'Tareas', slideIndex: 1 },
+    { key: 'tasks', label: t('mobilePremium.feedback.tasks'), slideIndex: 1 },
     { key: 'balance', label: 'Balance', slideIndex: pillarSlideIndex },
-    { key: 'habits', label: 'Hábitos', slideIndex: habitsSlideIndex },
-    { key: 'emotion', label: emotion?.label ?? 'Emoción', slideIndex: emotionSlideIndex },
+    { key: 'habits', label: t('mobilePremium.tasks.habit'), slideIndex: habitsSlideIndex },
+    { key: 'emotion', label: translateRewardText(emotion?.label ?? 'Emoción', t), slideIndex: emotionSlideIndex },
   ];
 
   useBodyScrollLock();
@@ -2388,7 +2406,7 @@ export function PremiumWeeklyWrappedStory({
         data-weekly-mode={storyVisualMode}
       >
         <button
-          aria-label="Cerrar Weekly Wrapped"
+          aria-label={t('mobilePremium.a11y.close')}
           className="absolute right-5 z-20 grid h-11 w-11 place-items-center rounded-full bg-black/10 text-2xl text-[color:var(--weekly-muted)] backdrop-blur-md"
           onClick={onClose}
           style={{ top: 'calc(var(--weekly-safe-top) + 0.25rem)' }}
@@ -2404,7 +2422,7 @@ export function PremiumWeeklyWrappedStory({
             eyebrow="WEEKLY WRAPPED"
             index={0}
             registerSlide={(el) => (storySlideRefs.current[0] = el)}
-            title="Tu semana en movimiento"
+            title={t('mobilePremium.rewards.weeklyTitle')}
           >
             <div className="flex min-h-0 flex-1 flex-col justify-between gap-[clamp(2rem,6dvh,3rem)]">
               <p className="mp-weekly-fragment text-sm uppercase tracking-[0.28em] text-[color:var(--weekly-muted)]" style={{ transitionDelay: '120ms' }}>
@@ -2419,7 +2437,7 @@ export function PremiumWeeklyWrappedStory({
                   <p className="mp-weekly-gradient-text text-[clamp(6.6rem,30vw,9.5rem)] font-semibold leading-none tracking-[-0.08em]">
                     <AnimatedWeeklyNumber active={showSharePicker || activeStorySlide === 0} value={completedCount} />/7
                   </p>
-                  <p className="mt-4 text-sm uppercase tracking-[0.34em] text-[color:var(--weekly-muted)]">días activos</p>
+                  <p className="mt-4 text-sm uppercase tracking-[0.34em] text-[color:var(--weekly-muted)]">{t('mobilePremium.rewards.activeDays')}</p>
                 </div>
               </div>
               <div className="grid grid-cols-7 gap-2 pb-[clamp(1.25rem,5dvh,2.6rem)]">
@@ -2446,7 +2464,7 @@ export function PremiumWeeklyWrappedStory({
             eyebrow={sectionsByKey.get('achievements')?.accent ?? 'RESUMEN 7 DÍAS'}
             index={1}
             registerSlide={(el) => (storySlideRefs.current[1] = el)}
-            title="Tareas realizadas"
+            title={t('mobilePremium.rewards.tasksDone')}
           >
             <div className="flex flex-1 flex-col justify-between gap-[clamp(1.4rem,4dvh,2.4rem)]">
               <p className="mp-weekly-fragment text-xl leading-relaxed text-[color:var(--weekly-muted)]" style={{ transitionDelay: '100ms' }}>
@@ -2457,7 +2475,7 @@ export function PremiumWeeklyWrappedStory({
                   <p className="mp-weekly-gradient-text text-[clamp(7rem,34vw,10rem)] font-semibold leading-none tracking-[-0.08em]">
                     <AnimatedWeeklyNumber active={showSharePicker || activeStorySlide === 1} value={completions} />
                   </p>
-                  <p className="mt-2 text-sm uppercase tracking-[0.34em] text-[color:var(--weekly-muted)]">tareas completadas</p>
+                  <p className="mt-2 text-sm uppercase tracking-[0.34em] text-[color:var(--weekly-muted)]">{t('mobilePremium.rewards.tasksCompleted')}</p>
                 </div>
                 <WeeklyDifficultyConstellation
                   active={showSharePicker || activeStorySlide === 1}
@@ -2473,7 +2491,7 @@ export function PremiumWeeklyWrappedStory({
                   <span className="h-px w-8 bg-[color:var(--weekly-line)]" />
                   <p className="text-xs uppercase tracking-[0.22em]">
                     <AnimatedWeeklyNumber active={showSharePicker || activeStorySlide === 1} duration={900} value={xpTotal} />
-                    {' '}GP generados
+                    {' '}{t('mobilePremium.rewards.generatedGp')}
                   </p>
                   <span className="h-px w-8 bg-[color:var(--weekly-line)]" />
                 </div>
@@ -2557,7 +2575,7 @@ export function PremiumWeeklyWrappedStory({
             eyebrow="PILAR DOMINANTE"
             index={pillarSlideIndex}
             registerSlide={(el) => (storySlideRefs.current[pillarSlideIndex] = el)}
-            title="Balance semanal"
+            title={t('mobilePremium.rewards.weeklyBalance')}
           >
             <div className="flex flex-1 flex-col justify-between gap-8">
               <WeeklyRadarAnalysisChart
@@ -2578,7 +2596,7 @@ export function PremiumWeeklyWrappedStory({
             eyebrow="DAILY ENERGY"
             index={energySlideIndex}
             registerSlide={(el) => (storySlideRefs.current[energySlideIndex] = el)}
-            title="Energía diaria"
+            title={t('mobilePremium.rewards.dailyEnergy')}
           >
             <div className="flex flex-1 flex-col justify-between gap-8">
               <p className="mp-weekly-late-text text-xl leading-relaxed text-[color:var(--weekly-muted)]">
@@ -2683,6 +2701,7 @@ function PremiumMonthlyWrappedStory({
   onClose: () => void;
   rewards: RewardsHistorySummary;
 }) {
+  const { language, t } = usePostLoginLanguage();
   const monthlyData = buildMonthlyStoryData(monthly, rewards);
   const storyScrollRef = useRef<HTMLDivElement | null>(null);
   const storySlideRefs = useRef<(HTMLElement | null)[]>([]);
@@ -2691,10 +2710,10 @@ function PremiumMonthlyWrappedStory({
   const [showSharePicker, setShowSharePicker] = useState(false);
   const [storyVisualMode, setStoryVisualMode] = useState<WeeklyStoryVisualMode>('dark');
   const monthlyShareTargets: Array<WrappedShareTarget<MonthlyShareOption>> = [
-    { key: 'month', label: 'Mes', slideIndex: 0 },
-    { key: 'tasks', label: 'Tareas', slideIndex: 1 },
-    { key: 'habits', label: 'Hábitos', slideIndex: 3 },
-    { key: 'emotion', label: monthlyData.emotion.label, slideIndex: 5 },
+    { key: 'month', label: language === 'es' ? 'Mes' : 'Month', slideIndex: 0 },
+    { key: 'tasks', label: t('mobilePremium.feedback.tasks'), slideIndex: 1 },
+    { key: 'habits', label: t('mobilePremium.tasks.habit'), slideIndex: 3 },
+    { key: 'emotion', label: translateRewardText(monthlyData.emotion.label, t), slideIndex: 5 },
   ];
 
   useBodyScrollLock();
@@ -2741,7 +2760,7 @@ function PremiumMonthlyWrappedStory({
         data-weekly-mode={storyVisualMode}
       >
         <button
-          aria-label="Cerrar Monthly Wrapped"
+          aria-label={t('mobilePremium.a11y.close')}
           className="absolute right-5 z-20 grid h-11 w-11 place-items-center rounded-full bg-black/10 text-2xl text-[color:var(--weekly-muted)] backdrop-blur-md"
           onClick={onClose}
           style={{ top: 'calc(var(--weekly-safe-top) + 0.25rem)' }}
@@ -2757,11 +2776,11 @@ function PremiumMonthlyWrappedStory({
             eyebrow="MONTHLY WRAPPED"
             index={0}
             registerSlide={(el) => (storySlideRefs.current[0] = el)}
-            title="Tu mes en movimiento"
+            title={t('mobilePremium.rewards.monthlyTitle')}
           >
             <div className="flex min-h-0 flex-1 flex-col gap-[clamp(1.2rem,4dvh,2.2rem)]">
               <p className="mp-weekly-fragment text-sm uppercase tracking-[0.28em] text-[color:var(--weekly-muted)]" style={{ transitionDelay: '120ms' }}>
-                {monthlyData.periodLabel}
+                {translateMonthlyPeriodLabel(monthlyData.periodLabel, language)}
               </p>
               <div className="mp-weekly-fragment relative grid flex-[0.85] place-items-center" style={{ transitionDelay: '220ms' }}>
                 <span className="mp-weekly-story-glow absolute h-72 w-72 rounded-full bg-violet-400/20 blur-3xl" />
@@ -2769,7 +2788,7 @@ function PremiumMonthlyWrappedStory({
                   <p className="mp-weekly-gradient-text text-[clamp(6.4rem,29vw,9rem)] font-semibold leading-none tracking-[-0.08em]">
                     <AnimatedWeeklyNumber active={showSharePicker || activeStorySlide === 0} value={monthlyData.trackedDays} />/{monthlyData.totalDays}
                   </p>
-                  <p className="mt-4 text-sm uppercase tracking-[0.34em] text-[color:var(--weekly-muted)]">días trackeados</p>
+                  <p className="mt-4 text-sm uppercase tracking-[0.34em] text-[color:var(--weekly-muted)]">{t('mobilePremium.rewards.trackedDays')}</p>
                 </div>
               </div>
               <div className="pb-[clamp(.75rem,3dvh,1.6rem)]">
@@ -2784,7 +2803,7 @@ function PremiumMonthlyWrappedStory({
             eyebrow="DATOS REALES"
             index={1}
             registerSlide={(el) => (storySlideRefs.current[1] = el)}
-            title="Tareas realizadas"
+            title={t('mobilePremium.rewards.tasksDone')}
           >
             <div className="flex flex-1 flex-col justify-between gap-[clamp(1.5rem,4dvh,2.5rem)]">
               <p className="mp-weekly-fragment text-xl leading-relaxed text-[color:var(--weekly-muted)]" style={{ transitionDelay: '100ms' }}>
@@ -2795,7 +2814,7 @@ function PremiumMonthlyWrappedStory({
                   <p className="mp-weekly-gradient-text text-[clamp(7rem,34vw,10rem)] font-semibold leading-none tracking-[-0.08em]">
                     <AnimatedWeeklyNumber active={showSharePicker || activeStorySlide === 1} value={monthlyData.completedTasks} />
                   </p>
-                  <p className="mt-2 text-sm uppercase tracking-[0.34em] text-[color:var(--weekly-muted)]">tareas completadas</p>
+                  <p className="mt-2 text-sm uppercase tracking-[0.34em] text-[color:var(--weekly-muted)]">{t('mobilePremium.rewards.tasksCompleted')}</p>
                 </div>
                 <WeeklyDifficultyConstellation
                   active={showSharePicker || activeStorySlide === 1}
@@ -2808,7 +2827,7 @@ function PremiumMonthlyWrappedStory({
                   total={monthlyData.completedTasks}
                 />
                 <p className="mp-weekly-fragment text-center text-xs uppercase tracking-[0.24em] text-[color:var(--weekly-muted)]" style={{ transitionDelay: '900ms' }}>
-                  <AnimatedWeeklyNumber active={showSharePicker || activeStorySlide === 1} duration={900} value={monthlyData.gpTotal} /> GP generados
+                  <AnimatedWeeklyNumber active={showSharePicker || activeStorySlide === 1} duration={900} value={monthlyData.gpTotal} /> {t('mobilePremium.rewards.generatedGp')}
                 </p>
               </div>
             </div>
@@ -3522,9 +3541,10 @@ function WeeklyTextMetric({ active, label, value }: { active: boolean; label: st
 }
 
 function WeeklyStoryHabitChip({ score }: { score: number }) {
+  const { t } = usePostLoginLanguage();
   const isStrong = score >= 80;
   const isBuilding = score >= 50 && score < 80;
-  const label = getWeeklyHabitStatusLabel(score);
+  const label = getWeeklyHabitStatusLabel(score, t);
   const styles = isStrong
     ? {
         background: 'color-mix(in srgb, #5BE282 22%, transparent)',
@@ -4263,6 +4283,7 @@ function WeeklySharePreview({
   storyHabits: Array<{ title: string; body?: string; daysActive?: number; completionRate?: number | string | null }>;
   type: 'tasks' | 'balance' | 'habits' | 'emotion';
 }) {
+  const { t } = usePostLoginLanguage();
   const isLight = mode === 'light';
   const text = isLight ? '#101332' : '#FFF8EF';
   const muted = isLight ? '#6E7078' : 'rgba(255,248,239,.66)';
@@ -4286,27 +4307,27 @@ function WeeklySharePreview({
 
       {type === 'tasks' ? (
         <div className={`relative ${full ? 'mt-12' : 'mt-4'}`}>
-          <p className={`${full ? 'text-[12px]' : 'text-[5px]'} font-semibold uppercase tracking-[0.28em] text-[#A78BFA]`}>Datos reales</p>
-          <p className={`${full ? 'mt-4 text-[2.9rem]' : 'mt-1 text-[14px]'} font-semibold leading-[0.95]`}>Tareas realizadas</p>
+          <p className={`${full ? 'text-[12px]' : 'text-[5px]'} font-semibold uppercase tracking-[0.28em] text-[#A78BFA]`}>{t('mobilePremium.rewards.weeklySubtitle')}</p>
+          <p className={`${full ? 'mt-4 text-[2.9rem]' : 'mt-1 text-[14px]'} font-semibold leading-[0.95]`}>{t('mobilePremium.rewards.tasksDone')}</p>
           <p className={`${full ? 'mt-14 text-[8rem]' : 'mt-2 text-[38px]'} font-semibold leading-none text-transparent [background:linear-gradient(110deg,#A78BFA,#EC6FC1,#FFB879)] [background-clip:text]`}>14</p>
-          <p className={`${full ? 'text-[14px]' : 'text-[5px]'} uppercase tracking-[0.26em]`} style={{ color: muted }}>Tareas completadas</p>
+          <p className={`${full ? 'text-[14px]' : 'text-[5px]'} uppercase tracking-[0.26em]`} style={{ color: muted }}>{t('mobilePremium.rewards.tasksCompleted')}</p>
           <div className={`${full ? 'mt-16 h-3' : 'mt-4 h-1.5'} flex overflow-hidden rounded-full bg-black/10`}>
             <span className="w-1/2 bg-[#5BE282]" />
             <span className="w-[36%] bg-[#F7C86A]" />
             <span className="w-[14%] bg-[#FF6B6B]" />
           </div>
           <div className={`${full ? 'mt-8 text-[2rem]' : 'mt-2.5 text-[7px]'} grid grid-cols-3 text-center font-semibold`}>
-            <span className="text-[#5BE282]">7{full ? <small className="ml-1 text-sm uppercase tracking-[0.22em]">Fácil</small> : null}</span>
-            <span className="text-[#F7C86A]">5{full ? <small className="ml-1 text-sm uppercase tracking-[0.22em]">Media</small> : null}</span>
-            <span className="text-[#FF6B6B]">2{full ? <small className="ml-1 text-sm uppercase tracking-[0.22em]">Difícil</small> : null}</span>
+            <span className="text-[#5BE282]">7{full ? <small className="ml-1 text-sm uppercase tracking-[0.22em]">{t('mobilePremium.difficulty.easy')}</small> : null}</span>
+            <span className="text-[#F7C86A]">5{full ? <small className="ml-1 text-sm uppercase tracking-[0.22em]">{t('mobilePremium.difficulty.medium')}</small> : null}</span>
+            <span className="text-[#FF6B6B]">2{full ? <small className="ml-1 text-sm uppercase tracking-[0.22em]">{t('mobilePremium.difficulty.hard')}</small> : null}</span>
           </div>
         </div>
       ) : null}
 
       {type === 'balance' ? (
         <div className={`relative ${full ? 'mt-12' : 'mt-3'}`}>
-          <p className={`${full ? 'text-[12px]' : 'text-[5px]'} font-semibold uppercase tracking-[0.28em]`} style={{ color: cyan }}>Pilar dominante</p>
-          <p className={`${full ? 'mt-4 text-[2.9rem]' : 'mt-1 text-[14px]'} font-semibold leading-[0.95]`}>Balance semanal</p>
+          <p className={`${full ? 'text-[12px]' : 'text-[5px]'} font-semibold uppercase tracking-[0.28em]`} style={{ color: cyan }}>{t('mobilePremium.dashboard.dominantPillar', { pillar: '' }).trim()}</p>
+          <p className={`${full ? 'mt-4 text-[2.9rem]' : 'mt-1 text-[14px]'} font-semibold leading-[0.95]`}>{t('mobilePremium.rewards.weeklyBalance')}</p>
           <svg aria-hidden="true" className={`mx-auto overflow-visible ${full ? 'mt-14 h-64 w-64' : 'mt-3 h-20 w-20'}`} viewBox="0 0 120 120">
             <circle cx="60" cy="60" fill="none" r="48" stroke={isLight ? 'rgba(16,19,50,.14)' : 'rgba(255,255,255,.16)'} />
             <path d="M60 12A48 48 0 0 1 106 75" fill="none" stroke={cyan} strokeLinecap="round" strokeWidth="5" />
@@ -4322,7 +4343,7 @@ function WeeklySharePreview({
 
       {type === 'habits' ? (
         <div className={`relative ${full ? 'mt-10' : 'mt-3'}`}>
-          <p className={`${full ? 'text-[12px]' : 'text-[5px]'} font-semibold uppercase tracking-[0.28em]`} style={{ color: violet }}>Hábitos</p>
+          <p className={`${full ? 'text-[12px]' : 'text-[5px]'} font-semibold uppercase tracking-[0.28em]`} style={{ color: violet }}>{t('mobilePremium.tasks.habit')}</p>
           <p className={`${full ? 'mt-4 text-[2.65rem]' : 'mt-1 text-[14px]'} font-semibold leading-[0.95]`}>Ritmo que se sostiene</p>
           <div className={`${full ? 'mt-10 space-y-7' : 'mt-2.5 space-y-1.5'}`}>
             {previewHabits.map((habit) => (
@@ -4340,7 +4361,7 @@ function WeeklySharePreview({
             ))}
           </div>
           <div className={`${full ? 'mt-12 rounded-3xl p-5' : 'mt-2.5 rounded-lg p-1.5'} border border-white/10 bg-white/[0.06]`}>
-            <p className={`${full ? 'text-[11px]' : 'text-[5px]'} uppercase tracking-[0.26em] text-[#A78BFA]`}>Energía diaria</p>
+            <p className={`${full ? 'text-[11px]' : 'text-[5px]'} uppercase tracking-[0.26em] text-[#A78BFA]`}>{t('mobilePremium.rewards.dailyEnergy')}</p>
             <div className="grid grid-cols-[.72fr_1fr] items-center gap-2">
               <p className={`${full ? 'text-4xl' : 'text-[14px]'} font-semibold`}>{formatSignedPct(energy?.deltaPct ?? 0)}</p>
               <MiniWeeklyEnergyChart energy={energy} />
@@ -4351,10 +4372,10 @@ function WeeklySharePreview({
 
       {type === 'emotion' ? (
         <div className={`relative ${full ? 'mt-14' : 'mt-4'}`}>
-          <p className={`${full ? 'text-[12px]' : 'text-[5px]'} font-semibold uppercase tracking-[0.28em]`} style={{ color: emotionColor }}>Emoción</p>
-          <p className={`${full ? 'mt-4 text-[4.4rem]' : 'mt-1 text-[23px]'} font-semibold leading-none`}>{emotion?.label ?? 'Calma'}</p>
+          <p className={`${full ? 'text-[12px]' : 'text-[5px]'} font-semibold uppercase tracking-[0.28em]`} style={{ color: emotionColor }}>{t('mobilePremium.feedback.emotion')}</p>
+          <p className={`${full ? 'mt-4 text-[4.4rem]' : 'mt-1 text-[23px]'} font-semibold leading-none`}>{translateRewardText(emotion?.label ?? 'Calma', t)}</p>
           <div className={`mx-auto rounded-full ${full ? 'mt-20 h-52 w-52' : 'mt-5 h-16 w-16'}`} style={{ backgroundColor: emotionColor, boxShadow: `0 0 ${full ? 90 : 38}px ${emotionColor}66` }} />
-          <p className={`${full ? 'mt-20 text-2xl' : 'mt-5 text-[8px]'} font-semibold leading-tight`}>La semana cerró con {emotion?.label?.toLowerCase() ?? 'calma'}.</p>
+          <p className={`${full ? 'mt-20 text-2xl' : 'mt-5 text-[8px]'} font-semibold leading-tight`}>{translateRewardText(emotion?.label ?? 'Calma', t)}</p>
         </div>
       ) : null}
 
@@ -4406,6 +4427,7 @@ function MonthlySharePreview({
   mode: WeeklyStoryVisualMode;
   type: MonthlyShareOption;
 }) {
+  const { language, t } = usePostLoginLanguage();
   const isLight = mode === 'light';
   const text = isLight ? '#101338' : '#FFF8EF';
   const muted = isLight ? '#6E7078' : 'rgba(255,248,239,.66)';
@@ -4427,10 +4449,10 @@ function MonthlySharePreview({
       {type === 'month' ? (
         <div className={`relative ${full ? 'mt-12' : 'mt-4'}`}>
           <p className={`${full ? 'text-[12px]' : 'text-[5px]'} font-semibold uppercase tracking-[0.28em]`} style={{ color: violet }}>Monthly Wrapped</p>
-          <p className={`${full ? 'mt-4 text-[2.8rem]' : 'mt-1 text-[14px]'} font-semibold leading-[0.95]`}>Tu mes en movimiento</p>
-          <p className={`${full ? 'mt-8 text-[13px]' : 'mt-2 text-[5px]'} uppercase tracking-[0.24em]`} style={{ color: muted }}>{data.periodLabel}</p>
+          <p className={`${full ? 'mt-4 text-[2.8rem]' : 'mt-1 text-[14px]'} font-semibold leading-[0.95]`}>{t('mobilePremium.rewards.monthlyTitle')}</p>
+          <p className={`${full ? 'mt-8 text-[13px]' : 'mt-2 text-[5px]'} uppercase tracking-[0.24em]`} style={{ color: muted }}>{translateMonthlyPeriodLabel(data.periodLabel, language)}</p>
           <p className={`${full ? 'mt-20 text-[7.4rem]' : 'mt-7 text-[38px]'} font-semibold leading-none text-transparent [background:linear-gradient(110deg,#A78BFA,#EC6FC1,#FFB879)] [background-clip:text]`}>{data.trackedDays}/{data.totalDays}</p>
-          <p className={`${full ? 'mt-3 text-[14px]' : 'mt-1 text-[5px]'} uppercase tracking-[0.28em]`} style={{ color: muted }}>días trackeados</p>
+          <p className={`${full ? 'mt-3 text-[14px]' : 'mt-1 text-[5px]'} uppercase tracking-[0.28em]`} style={{ color: muted }}>{t('mobilePremium.rewards.trackedDays')}</p>
           <div className={`${full ? 'mt-16 gap-2' : 'mt-5 gap-1'} grid grid-cols-7`}>
             {data.calendarDays.slice(0, 28).map((day) => (
               <span className={`${full ? 'h-3.5' : 'h-1.5'} rounded-full`} key={`monthly-share-day-${day.day}`} style={{ backgroundColor: day.active ? '#5BE282' : 'rgba(150,150,160,.24)' }} />
@@ -4441,10 +4463,10 @@ function MonthlySharePreview({
 
       {type === 'tasks' ? (
         <div className={`relative ${full ? 'mt-12' : 'mt-4'}`}>
-          <p className={`${full ? 'text-[12px]' : 'text-[5px]'} font-semibold uppercase tracking-[0.28em]`} style={{ color: violet }}>Datos reales</p>
-          <p className={`${full ? 'mt-4 text-[2.8rem]' : 'mt-1 text-[14px]'} font-semibold leading-[0.95]`}>Tareas realizadas</p>
+          <p className={`${full ? 'text-[12px]' : 'text-[5px]'} font-semibold uppercase tracking-[0.28em]`} style={{ color: violet }}>{t('mobilePremium.rewards.weeklySubtitle')}</p>
+          <p className={`${full ? 'mt-4 text-[2.8rem]' : 'mt-1 text-[14px]'} font-semibold leading-[0.95]`}>{t('mobilePremium.rewards.tasksDone')}</p>
           <p className={`${full ? 'mt-16 text-[8rem]' : 'mt-5 text-[42px]'} font-semibold leading-none text-transparent [background:linear-gradient(110deg,#A78BFA,#EC6FC1,#FFB879)] [background-clip:text]`}>{data.completedTasks}</p>
-          <p className={`${full ? 'text-[14px]' : 'text-[5px]'} uppercase tracking-[0.26em]`} style={{ color: muted }}>tareas completadas</p>
+          <p className={`${full ? 'text-[14px]' : 'text-[5px]'} uppercase tracking-[0.26em]`} style={{ color: muted }}>{t('mobilePremium.rewards.tasksCompleted')}</p>
           <MonthlyShareDifficulty difficulty={data.difficulty} full={full} />
         </div>
       ) : null}
@@ -4588,10 +4610,10 @@ function getWeeklyHabitScore(item: { body?: string; daysActive?: number; complet
   return Math.round((getWeeklyHabitDays(item) / 7) * 100);
 }
 
-function getWeeklyHabitStatusLabel(score: number) {
-  if (score < 50) return 'Hábito frágil';
-  if (score < 80) return 'Hábito en construcción';
-  return 'Hábito fuerte';
+function getWeeklyHabitStatusLabel(score: number, t: (key: string, params?: Record<string, string | number>) => string) {
+  if (score < 50) return t('mobilePremium.taskDetail.habitFragile');
+  if (score < 80) return t('mobilePremium.taskDetail.habitBuilding');
+  return t('mobilePremium.taskDetail.habitStrong');
 }
 
 function normalizeRewardGroups(groups: HabitAchievementPillarGroup[]): HabitAchievementPillarGroup[] {
@@ -4641,10 +4663,52 @@ function updateHabitInRewards(
   };
 }
 
-function resolveRewardsPillarLabel(code: RewardsPillarCode) {
-  if (code === 'MIND') return 'Mente';
-  if (code === 'SOUL') return 'Alma';
-  return 'Cuerpo';
+function resolveRewardsPillarLabel(code: RewardsPillarCode, t?: (key: string, params?: Record<string, string | number>) => string) {
+  if (code === 'MIND') return t ? t('mobilePremium.pillar.mind') : 'Mente';
+  if (code === 'SOUL') return t ? t('mobilePremium.pillar.soul') : 'Alma';
+  return t ? t('mobilePremium.pillar.body') : 'Cuerpo';
+}
+
+function translateRewardText(value: string, t: (key: string, params?: Record<string, string | number>) => string) {
+  const normalized = value.trim().toLowerCase();
+  const isEnglish = t('mobilePremium.pillar.body') === 'Body';
+  const labels: Record<string, string> = {
+    calma: t('mobilePremium.dquest.calm'),
+    felicidad: t('mobilePremium.dquest.happy'),
+    motivación: t('mobilePremium.dquest.motivation'),
+    motivacion: t('mobilePremium.dquest.motivation'),
+    tristeza: t('mobilePremium.dquest.sad'),
+    ansiedad: t('mobilePremium.dquest.anxiety'),
+    frustración: t('mobilePremium.dquest.frustration'),
+    frustracion: t('mobilePremium.dquest.frustration'),
+    cansancio: t('mobilePremium.dquest.tired'),
+    hidratación: isEnglish ? 'Hydration' : 'Hidratación',
+    hidratacion: isEnglish ? 'Hydration' : 'Hidratación',
+    recuperación: isEnglish ? 'Recovery' : 'Recuperación',
+    recuperacion: isEnglish ? 'Recovery' : 'Recuperación',
+    nutrición: isEnglish ? 'Nutrition' : 'Nutrición',
+    nutricion: isEnglish ? 'Nutrition' : 'Nutrición',
+    aprendizaje: isEnglish ? 'Learning' : 'Aprendizaje',
+    gratitud: isEnglish ? 'Gratitude' : 'Gratitud',
+    enfoque: isEnglish ? 'Focus' : 'Enfoque',
+    fácil: t('mobilePremium.difficulty.easy'),
+    facil: t('mobilePremium.difficulty.easy'),
+    media: t('mobilePremium.difficulty.medium'),
+    medium: t('mobilePremium.difficulty.medium'),
+    difícil: t('mobilePremium.difficulty.hard'),
+    dificil: t('mobilePremium.difficulty.hard'),
+    hard: t('mobilePremium.difficulty.hard'),
+  };
+  return labels[normalized] ?? value;
+}
+
+function translateCalibrationReason(value: string, t: (key: string, params?: Record<string, string | number>) => string) {
+  const normalized = value.trim().toLowerCase();
+  const isEnglish = t('mobilePremium.pillar.body') === 'Body';
+  if (normalized.includes('baja adherencia')) return isEnglish ? 'Low adherence: the system marked this task as harder.' : value;
+  if (normalized.includes('sin cambio')) return isEnglish ? 'No change: it was already at maximum difficulty.' : value;
+  if (normalized.includes('se mantuvo')) return t('mobilePremium.rewards.keepDifficulty');
+  return value;
 }
 
 function resolvePillarShortLabel(value: string | null) {
@@ -4973,14 +5037,14 @@ function isHabitAchieved(habit: HabitAchievementShelfItem) {
 }
 
 function formatCompactDate(value: string | null) {
-  if (!value) return 'Pendiente';
+  if (!value) return 'Pending';
   return value.slice(0, 10);
 }
 
-function formatDateShort(value: string) {
+function formatDateShort(value: string, language: 'es' | 'en' = 'es') {
   const date = new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short' }).format(date).replace('.', '');
+  return new Intl.DateTimeFormat(language, { day: 'numeric', month: 'short' }).format(date).replace('.', '');
 }
 
 function getWeeklyCountdownDays() {
@@ -5053,6 +5117,28 @@ function formatMonthlyPeriodLabel(periodKey: string) {
   const date = new Date(Number(yearRaw), Number(monthRaw) - 1, 1);
   if (Number.isNaN(date.getTime())) return periodKey;
   return new Intl.DateTimeFormat('es', { month: 'long', year: 'numeric' }).format(date);
+}
+
+function translateMonthlyPeriodLabel(value: string, language: 'es' | 'en') {
+  if (language === 'es') return value;
+  const normalized = value.toUpperCase();
+  const match = normalized.match(/(ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE)\s+DE?\s*(\d{4})/);
+  if (!match) return value;
+  const monthMap: Record<string, string> = {
+    ENERO: 'January',
+    FEBRERO: 'February',
+    MARZO: 'March',
+    ABRIL: 'April',
+    MAYO: 'May',
+    JUNIO: 'June',
+    JULIO: 'July',
+    AGOSTO: 'August',
+    SEPTIEMBRE: 'September',
+    OCTUBRE: 'October',
+    NOVIEMBRE: 'November',
+    DICIEMBRE: 'December',
+  };
+  return `${monthMap[match[1]] ?? match[1]} ${match[2]}`.toUpperCase();
 }
 
 function formatMonthFromPeriod(periodKey: string | null | undefined) {

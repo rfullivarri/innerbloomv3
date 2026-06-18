@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { ModerationTrackerIcon, moderationTrackerMeta } from '../../../../components/moderation/trackerMeta';
 import { useLongPress } from '../../../../hooks/useLongPress';
+import { usePostLoginLanguage } from '../../../../i18n/postLoginLanguage';
 import type { ModerationStatus, ModerationTracker, ModerationTrackerType } from '../../../../lib/api';
 
 const FLASH_VISIBLE_MS = 960;
@@ -28,16 +29,17 @@ export function PremiumModerationCards({
   pendingType?: ModerationTrackerType | null;
   compact?: boolean;
 }) {
+  const { t } = usePostLoginLanguage();
   const enabled = trackers.filter((tracker) => tracker.is_enabled);
   if (enabled.length === 0) return null;
 
   return (
     <section className={compact ? 'space-y-4' : 'space-y-3'}>
       <div className="flex items-center justify-between gap-3">
-        <h2 className={`${compact ? 'text-lg font-medium' : 'text-[1.28rem] font-semibold'} text-[color:var(--mp-text)]`}>Moderación</h2>
+        <h2 className={`${compact ? 'text-lg font-medium' : 'text-[1.28rem] font-semibold'} text-[color:var(--mp-text)]`}>{t('mobilePremium.moderation.title')}</h2>
         {onManage ? (
           <button className="shrink-0 text-xs font-semibold text-[color:var(--mp-violet)]" onClick={onManage} type="button">
-            Editar
+            {t('mobilePremium.moderation.edit')}
           </button>
         ) : null}
       </div>
@@ -70,7 +72,9 @@ function PremiumModerationCard({
   isPending: boolean;
   compact: boolean;
 }) {
+  const { language, t } = usePostLoginLanguage();
   const meta = moderationTrackerMeta[tracker.type];
+  const label = translateModerationTrackerLabel(meta.label, language);
   const previousStatus = useRef(tracker.statusToday);
   const longPressed = useRef(false);
   const longPressResetTimer = useRef<number | null>(null);
@@ -112,8 +116,8 @@ function PremiumModerationCard({
 
   return (
     <button
-      aria-label={`${meta.label}: ${tracker.current_streak_days} días de moderación. ${
-        tracker.is_paused ? 'Modo vacaciones activo. Tocá para ver detalle.' : 'Tocá para registrar hoy; mantené para ver detalle.'
+      aria-label={`${label}: ${tracker.current_streak_days} ${t('mobilePremium.moderation.days')} ${t('mobilePremium.moderation.title').toLowerCase()}. ${
+        tracker.is_paused ? t('mobilePremium.moderation.pausedA11y') : t('mobilePremium.moderation.actionA11y')
       }`}
       className={`relative overflow-hidden text-left transition ${
         compact
@@ -152,18 +156,27 @@ function PremiumModerationCard({
               : 'border-amber-300/32 bg-amber-300/12 text-[color:var(--mp-amber)]'
           } ${flashExiting ? '-translate-y-2 opacity-0' : 'translate-y-0 opacity-100'}`}
         >
-          {flash === 'on_track' ? 'Cumplido' : 'Interrumpido'}
+          {flash === 'on_track' ? t('mobilePremium.moderation.onTrack') : t('mobilePremium.moderation.offTrack')}
         </span>
       ) : null}
       <div className="flex items-start justify-between gap-2">
         <ModerationTrackerIcon className={`${compact ? 'h-5 w-5' : 'h-6 w-6'} text-[color:var(--mp-violet)]`} type={tracker.type} />
         <span className="leading-none text-[color:var(--mp-text)]">
           <span className={`${compact ? 'text-[1.65rem]' : 'text-3xl'} font-light`}>{tracker.current_streak_days}</span>
-          <span className="ml-1 align-top text-xs text-[color:var(--mp-text-secondary)]">d</span>
+          <span className="ml-1 align-top text-xs text-[color:var(--mp-text-secondary)]">{t('mobilePremium.moderation.daySuffix')}</span>
         </span>
       </div>
-      <p className={`${compact ? 'mt-2 text-xs' : 'mt-3 text-sm'} truncate font-medium text-[color:var(--mp-text)]`}>{meta.label}</p>
-      {tracker.is_paused ? <p className="mt-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--mp-violet)]">Vacaciones</p> : null}
+      <p className={`${compact ? 'mt-2 text-xs' : 'mt-3 text-sm'} truncate font-medium text-[color:var(--mp-text)]`}>{label}</p>
+      {tracker.is_paused ? <p className="mt-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--mp-violet)]">{t('mobilePremium.moderation.paused')}</p> : null}
     </button>
   );
+}
+
+function translateModerationTrackerLabel(label: string, language: 'es' | 'en') {
+  if (language === 'es') return label;
+  const normalized = label.trim().toLowerCase();
+  if (normalized.includes('azúcar') || normalized.includes('azucar')) return 'Sugar';
+  if (normalized.includes('alcohol')) return 'Alcohol';
+  if (normalized.includes('tabaco') || normalized.includes('tobacco')) return 'Tobacco';
+  return label;
 }

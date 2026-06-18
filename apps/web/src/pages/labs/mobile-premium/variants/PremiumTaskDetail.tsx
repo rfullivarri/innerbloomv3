@@ -13,8 +13,9 @@ import {
 } from '../../../../lib/api';
 import { normalizeGameModeValue, type GameMode } from '../../../../lib/gameMode';
 import { TraitIcon } from '../MobilePremiumPrimitives';
-import { habitDevelopmentStatusLabel, HabitStatusChip, PremiumScoreRing } from '../PremiumHabitDevelopment';
+import { HabitStatusChip, PremiumScoreRing } from '../PremiumHabitDevelopment';
 import { useMobilePremiumBasePath } from '../mobilePremiumRouting';
+import { usePostLoginLanguage } from '../../../../i18n/postLoginLanguage';
 
 const STREAK_PILLARS: StreakPanelPillar[] = ['Body', 'Mind', 'Soul'];
 const MODE_TIERS: Record<GameMode, number> = {
@@ -388,6 +389,7 @@ export function PremiumTaskDetail({
   }>;
   weeklyTarget: number | null;
 }) {
+  const { language, t } = usePostLoginLanguage();
   const labBase = useMobilePremiumBasePath();
   const [scope, setScope] = useState<ActivityScope>('M');
   const [editOpen, setEditOpen] = useState(false);
@@ -445,9 +447,9 @@ export function PremiumTaskDetail({
       ? buildEmptyPreviewInsights(taskSummary, weeklyGoal)
       : buildFallbackInsights(taskSummary)
   );
-  const detail = buildDetail(taskSummary, insights, weeklyGoal);
-  const activity = buildActivity(scope, insights, weeklyGoal);
-  const latestChip = resolveRecalibrationChip(detail.latestRecalibrationAction, detail.difficultyLabel);
+  const detail = buildDetail(taskSummary, insights, weeklyGoal, language, t);
+  const activity = buildActivity(scope, insights, weeklyGoal, language, t);
+  const latestChip = resolveRecalibrationChip(detail.latestRecalibrationAction, detail.difficultyLabel, t);
   const activeWindowMonths = detail.activeWindow.slice(-5);
   const activeWindowStartIndex = Math.max(0, activeWindowMonths.length - 3);
 
@@ -464,7 +466,7 @@ export function PremiumTaskDetail({
       <header className="space-y-3">
         <div className="grid grid-cols-[40px_1fr_auto] items-center gap-3">
           <Link
-            aria-label="Volver a tareas"
+            aria-label={t('mobilePremium.taskDetail.back')}
             className="grid h-10 w-10 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-xl text-[color:var(--mp-text)]"
             to={`${labBase}/tareas`}
           >
@@ -478,7 +480,7 @@ export function PremiumTaskDetail({
             onClick={() => setEditOpen(true)}
             type="button"
           >
-            Editar
+            {t('mobilePremium.taskDetail.edit')}
           </button>
         </div>
         <div className="grid grid-cols-[46px_minmax(0,1fr)] items-center gap-3">
@@ -494,7 +496,7 @@ export function PremiumTaskDetail({
               </span>
               {detail.difficultyLabel ? (
                 <span className="inline-flex min-h-[1.4rem] shrink-0 items-center rounded-full border border-[color:var(--mp-border)] px-2 text-[0.68rem] font-semibold text-[color:var(--mp-text-secondary)]">
-                  {detail.difficultyLabel}
+                  {detail.difficultyLabel ? translateDifficultyLabel(detail.difficultyLabel, t) : detail.difficultyLabel}
                 </span>
               ) : null}
               {detail.latestRecalibrationAction ? <RecalibrationPulseChip action={detail.latestRecalibrationAction} chip={latestChip} /> : null}
@@ -504,7 +506,7 @@ export function PremiumTaskDetail({
       </header>
 
       <section className="space-y-4">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--mp-violet)]">Desarrollo del hábito</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--mp-violet)]">{t('mobilePremium.taskDetail.habitDevelopment')}</p>
         <div className="rounded-[1.25rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-4">
           <div className="grid grid-cols-[92px_1fr] items-start gap-4">
             <PremiumScoreRing animateKey={`${detail.id}-${detail.score}`} score={detail.score} size="sm" />
@@ -515,11 +517,11 @@ export function PremiumTaskDetail({
               </div>
               <div className="mt-4 border-t border-[color:var(--mp-border)] pt-3">
                 <div className="mb-3 flex items-center justify-center gap-2 text-[10px] font-medium text-[color:var(--mp-text-muted)]">
-                  <span className="text-[color:var(--mp-red)]">Frágil &lt;50</span>
+                  <span className="text-[color:var(--mp-red)]">{t('mobilePremium.taskDetail.fragile')}</span>
                   <span>·</span>
                   <span className="text-[color:var(--mp-amber)]">50-79</span>
                   <span>·</span>
-                  <span className="text-[color:var(--mp-green)]">Fuerte ≥80</span>
+                  <span className="text-[color:var(--mp-green)]">{t('mobilePremium.taskDetail.strong')}</span>
                 </div>
                 <div className="space-y-2">
                   <div
@@ -531,7 +533,7 @@ export function PremiumTaskDetail({
                       style={{ gridColumn: `${activeWindowStartIndex + 1} / ${Math.max(activeWindowMonths.length, 3) + 1}` }}
                     >
                       <span className="h-px flex-1 bg-[color:var(--mp-border)]" />
-                      <span>Ventana activa</span>
+                      <span>{t('mobilePremium.taskDetail.activeWindow')}</span>
                       <span className="h-px flex-1 bg-[color:var(--mp-border)]" />
                     </div>
                     {activeWindowMonths.map((month, index) => (
@@ -555,8 +557,8 @@ export function PremiumTaskDetail({
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--mp-violet)]">Actividad</p>
-            <p className="mt-1 text-xs text-[color:var(--mp-text-muted)]">{normalizedMode} · {weeklyGoal}/semana</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--mp-violet)]">{t('mobilePremium.taskDetail.activity')}</p>
+            <p className="mt-1 text-xs text-[color:var(--mp-text-muted)]">{normalizedMode} · {t('mobilePremium.taskDetail.weeklyGoal', { goal: weeklyGoal })}</p>
           </div>
           <div className="grid grid-cols-3 rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-0.5">
             {(['W', 'M', '3M'] as ActivityScope[]).map((item) => (
@@ -572,26 +574,26 @@ export function PremiumTaskDetail({
           </div>
         </div>
         <div className="flex justify-end gap-5 text-sm text-[color:var(--mp-text-secondary)]">
-          <span className="inline-flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[color:var(--mp-green)]" />Logrado</span>
-          <span className="inline-flex items-center gap-2"><span className="h-0.5 w-4 rounded-full bg-[color:var(--mp-track-strong)]" />Objetivo</span>
+          <span className="inline-flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[color:var(--mp-green)]" />{t('mobilePremium.taskDetail.achieved')}</span>
+          <span className="inline-flex items-center gap-2"><span className="h-0.5 w-4 rounded-full bg-[color:var(--mp-track-strong)]" />{t('mobilePremium.taskDetail.target')}</span>
         </div>
         <ActivityBars activity={activity} />
       </section>
 
       {detail.streaks.current >= 2 || detail.streaks.best >= 2 ? (
         <section className="space-y-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--mp-violet)]">Rachas</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--mp-violet)]">{t('mobilePremium.taskDetail.streaks')}</p>
           <div className="grid grid-cols-2 gap-3">
             {detail.streaks.current >= 2 ? (
               <div className="rounded-[1rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-4">
-                <p className="text-xs text-[color:var(--mp-text-muted)]">Racha actual</p>
-                <p className="mt-2 text-2xl font-semibold text-[color:var(--mp-text)]">🔥 {detail.streaks.current} días</p>
+                <p className="text-xs text-[color:var(--mp-text-muted)]">{t('mobilePremium.taskDetail.currentStreak')}</p>
+                <p className="mt-2 text-2xl font-semibold text-[color:var(--mp-text)]">🔥 {t('mobilePremium.taskDetail.days', { count: detail.streaks.current })}</p>
               </div>
             ) : null}
             {detail.streaks.best >= 2 ? (
               <div className="rounded-[1rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-4">
-                <p className="text-xs text-[color:var(--mp-text-muted)]">Mejor racha</p>
-                <p className="mt-2 text-2xl font-semibold text-[color:var(--mp-text)]">{detail.streaks.best} días</p>
+                <p className="text-xs text-[color:var(--mp-text-muted)]">{t('mobilePremium.taskDetail.bestStreak')}</p>
+                <p className="mt-2 text-2xl font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.taskDetail.days', { count: detail.streaks.best })}</p>
               </div>
             ) : null}
           </div>
@@ -599,7 +601,7 @@ export function PremiumTaskDetail({
       ) : null}
 
       <section className="space-y-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--mp-violet)]">Ajustes de dificultad</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--mp-violet)]">{t('mobilePremium.taskDetail.difficultyAdjustments')}</p>
         <div className="rounded-[1rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)]">
           {detail.difficultyAdjustments.length ? (
             detail.difficultyAdjustments.map((adjustment, index) => (
@@ -607,7 +609,7 @@ export function PremiumTaskDetail({
             ))
           ) : (
             <p className="px-4 py-5 text-sm text-[color:var(--mp-text-secondary)]">
-              Todavía no hay ajustes de dificultad registrados.
+              {t('mobilePremium.taskDetail.noAdjustments')}
             </p>
           )}
         </div>
@@ -951,7 +953,13 @@ function normalizeTaskSummaries(
   return Array.from(byId.values());
 }
 
-function buildDetail(task: PremiumTaskSummary, insights: TaskInsightsResponse, weeklyGoal: number) {
+function buildDetail(
+  task: PremiumTaskSummary,
+  insights: TaskInsightsResponse,
+  weeklyGoal: number,
+  language: 'es' | 'en',
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
   const latest = insights.recalibration?.latest ?? insights.recalibration?.history?.[0] ?? null;
   const latestRecalibrationAction = normalizeRecalibrationAction(latest?.action) ?? task.latestRecalibrationAction;
   const difficultyLabel = insights.task.difficultyLabel ?? task.difficultyLabel;
@@ -962,19 +970,19 @@ function buildDetail(task: PremiumTaskSummary, insights: TaskInsightsResponse, w
   const bestStreak = rawBestStreak >= 2 ? rawBestStreak : 0;
   return {
     id: task.id,
-    name: insights.task.name ?? task.name,
-    stat: insights.task.stat ?? task.stat,
+    name: translateTaskDetailText(insights.task.name ?? task.name, language),
+    stat: translateTaskDetailText(insights.task.stat ?? task.stat, language),
     difficultyLabel,
     latestRecalibrationAction,
     score,
-    lifecycleLabel: formatLifecycleStatus(insights.task.lifecycleStatus ?? task.lifecycleStatus, insights.previewAchievement?.status, score),
-    insight: resolveInsight(score),
-    activeWindow: resolveActiveWindow(insights),
+    lifecycleLabel: formatLifecycleStatus(insights.task.lifecycleStatus ?? task.lifecycleStatus, insights.previewAchievement?.status, score, t),
+    insight: resolveInsight(score, t),
+    activeWindow: resolveActiveWindow(insights, language, t),
     streaks: {
       current: currentStreak,
       best: bestStreak,
     },
-    difficultyAdjustments: resolveDifficultyAdjustments(insights, difficultyLabel),
+    difficultyAdjustments: resolveDifficultyAdjustments(insights, difficultyLabel, language, t),
   };
 }
 
@@ -988,13 +996,17 @@ function resolveScore(insights: TaskInsightsResponse, task: PremiumTaskSummary, 
   return Math.round(Math.min(100, Math.max(0, (total / Math.max(weeks.length * weeklyGoal, 1)) * 100)));
 }
 
-function resolveActiveWindow(insights: TaskInsightsResponse): ActiveWindowMonth[] {
+function resolveActiveWindow(
+  insights: TaskInsightsResponse,
+  language: 'es' | 'en',
+  t: (key: string, params?: Record<string, string | number>) => string,
+): ActiveWindowMonth[] {
   const recent = insights.previewAchievement?.recentMonths ?? [];
   const months: ActiveWindowMonth[] = recent
     .map((entry): ActiveWindowMonth | null => {
       const raw = entry.projectedCompletionRate ?? entry.completionRate ?? entry.value ?? 0;
       const normalized = normalizeCompletionPercent(raw);
-      const month = entry.month ?? formatMonthFromPeriod(entry.periodKey);
+      const month = formatExistingMonthLabel(entry.month, language) ?? formatMonthFromPeriod(entry.periodKey, language);
       if (!month) return null;
       return {
         periodKey: entry.periodKey ?? null,
@@ -1011,14 +1023,20 @@ function resolveActiveWindow(insights: TaskInsightsResponse): ActiveWindowMonth[
       .slice(-4);
   }
   const currentPeriod = new Date().toISOString().slice(0, 7);
-  return [{ periodKey: currentPeriod, month: formatMonthFromPeriod(currentPeriod) ?? 'Mes', percent: 0, projected: true }];
+  return [{ periodKey: currentPeriod, month: formatMonthFromPeriod(currentPeriod, language) ?? t('mobilePremium.taskDetail.monthFallback'), percent: 0, projected: true }];
 }
 
-function buildActivity(scope: ActivityScope, insights: TaskInsightsResponse, weeklyGoal: number) {
+function buildActivity(
+  scope: ActivityScope,
+  insights: TaskInsightsResponse,
+  weeklyGoal: number,
+  language: 'es' | 'en',
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
   if (scope === 'W') {
     return {
       mode: 'day' as const,
-      bars: buildLastSevenDays(insights.month.days).map((day) => ({
+      bars: buildLastSevenDays(insights.month.days, language).map((day) => ({
         label: day.label,
         value: day.value,
         target: 1,
@@ -1027,13 +1045,13 @@ function buildActivity(scope: ActivityScope, insights: TaskInsightsResponse, wee
     };
   }
   if (scope === '3M') {
-    const months = buildThreeMonthActivity(insights, weeklyGoal);
+    const months = buildThreeMonthActivity(insights, weeklyGoal, language, t);
     return {
       mode: 'month' as const,
       bars: months,
     };
   }
-  const weeks = buildCurrentMonthWeeks(insights.month.days, weeklyGoal);
+  const weeks = buildCurrentMonthWeeks(insights.month.days, weeklyGoal, t);
   return {
     mode: 'week' as const,
     bars: weeks,
@@ -1078,6 +1096,7 @@ function MonthHealthDot({
   percent,
   projected,
 }: ActiveWindowMonth & { active?: boolean; compact?: boolean }) {
+  const { t } = usePostLoginLanguage();
   const tone = getScoreTone(percent);
   const sizeClass = compact ? 'h-10 w-10 text-[11px]' : 'h-12 w-12 text-xs';
   const projectedInset = compact ? '-inset-1' : '-inset-1.5';
@@ -1097,7 +1116,7 @@ function MonthHealthDot({
         {percent}%
       </div>
       <p className="mt-2 text-xs text-[color:var(--mp-text-secondary)]">{month}</p>
-      {projected ? <p className="-mt-0.5 text-[9px] text-[color:var(--mp-text-muted)]">proyectado</p> : null}
+      {projected ? <p className="-mt-0.5 text-[9px] text-[color:var(--mp-text-muted)]">{t('mobilePremium.taskDetail.projected')}</p> : null}
     </div>
   );
 }
@@ -1188,7 +1207,12 @@ function RecalibrationGlyph({ chip }: { chip: ReturnType<typeof resolveRecalibra
   );
 }
 
-function resolveDifficultyAdjustments(insights: TaskInsightsResponse, fallbackDifficulty: string | null) {
+function resolveDifficultyAdjustments(
+  insights: TaskInsightsResponse,
+  fallbackDifficulty: string | null,
+  language: 'es' | 'en',
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
   const history = insights.recalibration?.history ?? [];
   if (history.length === 0) {
     return [];
@@ -1198,21 +1222,21 @@ function resolveDifficultyAdjustments(insights: TaskInsightsResponse, fallbackDi
     const before = record.difficultyBefore ?? fallbackDifficulty;
     const after = record.difficultyAfter ?? fallbackDifficulty;
     return {
-      date: formatShortDate(record.recalibratedAt ?? record.periodEnd ?? record.periodStart),
+      date: formatShortDate(record.recalibratedAt ?? record.periodEnd ?? record.periodStart, language),
       action,
-      label: buildAdjustmentLabel(action, before, after),
+      label: buildAdjustmentLabel(action, before, after, t),
     };
   });
 }
 
-function buildLastSevenDays(days: Array<{ date: string; count: number }>) {
+function buildLastSevenDays(days: Array<{ date: string; count: number }>, language: 'es' | 'en') {
   const byDate = new Map(days.map((day) => [day.date, day.count]));
   const today = startOfLocalDate(new Date());
   const monday = new Date(today);
   const day = today.getDay();
   const diffToMonday = day === 0 ? -6 : 1 - day;
   monday.setDate(today.getDate() + diffToMonday);
-  const labels = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+  const labels = language === 'es' ? ['D', 'L', 'M', 'X', 'J', 'V', 'S'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   return Array.from({ length: 7 }, (_, index) => {
     const date = new Date(monday);
     date.setDate(monday.getDate() + index);
@@ -1224,7 +1248,11 @@ function buildLastSevenDays(days: Array<{ date: string; count: number }>) {
   });
 }
 
-function buildCurrentMonthWeeks(days: Array<{ date: string; count: number }>, weeklyGoal: number): ActivityBar[] {
+function buildCurrentMonthWeeks(
+  days: Array<{ date: string; count: number }>,
+  weeklyGoal: number,
+  t: (key: string, params?: Record<string, string | number>) => string,
+): ActivityBar[] {
   const today = startOfLocalDate(new Date());
   const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
   const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -1239,7 +1267,7 @@ function buildCurrentMonthWeeks(days: Array<{ date: string; count: number }>, we
       value += byDate.get(key) ?? 0;
     }
     return {
-      label: `sem ${index + 1}`,
+      label: t('mobilePremium.taskDetail.weekShort', { week: index + 1 }),
       value,
       target: weeklyGoal,
       complete: value >= weeklyGoal,
@@ -1264,7 +1292,12 @@ function resolveMonthSortKey(month: ActiveWindowMonth) {
   return Number.isNaN(parsed.getTime()) ? 0 : parsed.getFullYear() * 12 + parsed.getMonth() + 1;
 }
 
-function buildThreeMonthActivity(insights: TaskInsightsResponse, weeklyGoal: number): ActivityBar[] {
+function buildThreeMonthActivity(
+  insights: TaskInsightsResponse,
+  weeklyGoal: number,
+  language: 'es' | 'en',
+  t: (key: string, params?: Record<string, string | number>) => string,
+): ActivityBar[] {
   const recentMonths = insights.previewAchievement?.recentMonths ?? [];
   const currentPeriodKey = insights.previewAchievement?.currentMonth?.periodKey ?? new Date().toISOString().slice(0, 7);
   if (recentMonths.length > 0 || currentPeriodKey) {
@@ -1274,11 +1307,11 @@ function buildThreeMonthActivity(insights: TaskInsightsResponse, weeklyGoal: num
       const isCurrent = index === periods.length - 1;
       if (!entry) {
         return {
-          label: formatMonthFromPeriod(periodKey) ?? 'Mes',
+          label: formatMonthFromPeriod(periodKey, language) ?? t('mobilePremium.taskDetail.monthFallback'),
           value: 0,
           target: 5,
           complete: false,
-          caption: isCurrent ? 'Sin registro' : 'Sin datos',
+          caption: isCurrent ? t('mobilePremium.taskDetail.noRecord') : t('mobilePremium.taskDetail.noData'),
           empty: true,
           projected: isCurrent,
         };
@@ -1289,11 +1322,11 @@ function buildThreeMonthActivity(insights: TaskInsightsResponse, weeklyGoal: num
       const percent = Math.min(100, normalizeCompletionPercent(raw));
       const complete = percent >= 80;
       return {
-        label: entry.month ?? formatMonthFromPeriod(periodKey) ?? 'Mes',
+        label: formatExistingMonthLabel(entry.month, language) ?? formatMonthFromPeriod(periodKey, language) ?? t('mobilePremium.taskDetail.monthFallback'),
         value: Math.max(0, percent / 20),
         target: 5,
         complete,
-        caption: `${Math.round(percent)}%${isCurrent ? ' proy.' : ''}`,
+        caption: `${Math.round(percent)}%${isCurrent ? ` ${t('mobilePremium.taskDetail.projectedShort')}` : ''}`,
         projected: isCurrent,
       };
     });
@@ -1305,7 +1338,7 @@ function buildThreeMonthActivity(insights: TaskInsightsResponse, weeklyGoal: num
     const hitWeeks = chunk.filter((week) => week.count >= weeklyGoal || week.hit).length;
     const totalWeeks = Math.max(chunk.length, 1);
     return {
-      label: resolveFallbackMonthLabel(index),
+      label: resolveFallbackMonthLabel(index, language),
       value: hitWeeks,
       target: totalWeeks,
       complete: hitWeeks / totalWeeks >= 0.8,
@@ -1331,24 +1364,34 @@ function normalizeCompletionPercent(rawValue: number) {
   return raw <= 2 ? raw * 100 : raw;
 }
 
-function resolveFallbackMonthLabel(index: number) {
-  return ['Mar', 'Abr', 'May'][index] ?? `M${index + 1}`;
+function resolveFallbackMonthLabel(index: number, language: 'es' | 'en') {
+  return (language === 'es' ? ['Mar', 'Abr', 'May'] : ['Mar', 'Apr', 'May'])[index] ?? `M${index + 1}`;
 }
 
-function resolveRecalibrationChip(action: RecalibrationAction | null, difficultyLabel: string | null) {
-  if (action === 'up') return { label: 'Subió dificultad', collapsedLabel: '↑', color: 'var(--mp-red)', text: '#220707', marker: '#220707' };
-  if (action === 'down') return { label: 'Bajó dificultad', collapsedLabel: '↓', color: 'var(--mp-green)', text: '#04170b', marker: '#04170b' };
-  if (action === 'keep') return { label: 'Se mantuvo', collapsedLabel: '•', color: 'var(--mp-amber)', text: '#201303', marker: '#201303' };
+function resolveRecalibrationChip(
+  action: RecalibrationAction | null,
+  difficultyLabel: string | null,
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
+  if (action === 'up') return { label: t('mobilePremium.taskDetail.adjustmentUp'), collapsedLabel: '↑', color: 'var(--mp-red)', text: '#220707', marker: '#220707' };
+  if (action === 'down') return { label: t('mobilePremium.taskDetail.adjustmentDown'), collapsedLabel: '↓', color: 'var(--mp-green)', text: '#04170b', marker: '#04170b' };
+  if (action === 'keep') return { label: t('mobilePremium.taskDetail.adjustmentKeep'), collapsedLabel: '•', color: 'var(--mp-amber)', text: '#201303', marker: '#201303' };
   const tone = resolveDifficultyToneVars(difficultyLabel);
-  return { label: difficultyLabel ?? 'Media', collapsedLabel: difficultyLabel ?? 'Media', ...tone, text: 'var(--mp-text)', marker: 'var(--mp-text)' };
+  return { label: difficultyLabel ? translateDifficultyLabel(difficultyLabel, t) : t('mobilePremium.difficulty.medium'), collapsedLabel: difficultyLabel ? translateDifficultyLabel(difficultyLabel, t) : t('mobilePremium.difficulty.medium'), ...tone, text: 'var(--mp-text)', marker: 'var(--mp-text)' };
 }
 
-function buildAdjustmentLabel(action: RecalibrationAction, before: string | null | undefined, after: string | null | undefined) {
-  const beforeLabel = before ?? 'Media';
+function buildAdjustmentLabel(
+  action: RecalibrationAction,
+  before: string | null | undefined,
+  after: string | null | undefined,
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
+  const beforeLabel = before ? translateDifficultyLabel(before, t) : t('mobilePremium.difficulty.medium');
   const afterLabel = after ?? beforeLabel;
-  if (action === 'up') return `Subió de ${beforeLabel} a ${afterLabel}`;
-  if (action === 'down') return `Bajó de ${beforeLabel} a ${afterLabel}`;
-  return `Se mantuvo en ${afterLabel}`;
+  const translatedAfter = translateDifficultyLabel(afterLabel, t);
+  if (action === 'up') return t('mobilePremium.taskDetail.adjustmentUpFromTo', { before: beforeLabel, after: translatedAfter });
+  if (action === 'down') return t('mobilePremium.taskDetail.adjustmentDownFromTo', { before: beforeLabel, after: translatedAfter });
+  return t('mobilePremium.taskDetail.adjustmentKeptAt', { after: translatedAfter });
 }
 
 function resolveWeeklyGoal(gameMode: string | null, weeklyTarget: number | null) {
@@ -1369,17 +1412,24 @@ function normalizeRecalibrationAction(value: string | null | undefined): Recalib
   return null;
 }
 
-function formatLifecycleStatus(value: string | null | undefined, previewStatus: string | null | undefined, score: number) {
+function formatLifecycleStatus(
+  value: string | null | undefined,
+  previewStatus: string | null | undefined,
+  score: number,
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
   const source = (value ?? previewStatus ?? '').toLowerCase();
-  if (source === 'achieved' || source === 'maintained' || source === 'strong') return 'Hábito logrado';
-  if (source === 'stored') return 'Hábito guardado';
-  return habitDevelopmentStatusLabel(score);
+  if (source === 'achieved' || source === 'maintained' || source === 'strong') return t('mobilePremium.taskDetail.habitAchieved');
+  if (source === 'stored') return t('mobilePremium.taskDetail.habitStored');
+  if (score < 50) return t('mobilePremium.taskDetail.habitFragile');
+  if (score < 80) return t('mobilePremium.taskDetail.habitBuilding');
+  return t('mobilePremium.taskDetail.habitStrong');
 }
 
-function resolveInsight(score: number) {
-  if (score >= 80) return 'Estás sosteniendo este hábito con mucha consistencia.';
-  if (score >= 50) return 'Estás avanzando de forma constante.';
-  return 'Necesita más consistencia durante la ventana activa.';
+function resolveInsight(score: number, t: (key: string, params?: Record<string, string | number>) => string) {
+  if (score >= 80) return t('mobilePremium.taskDetail.insightStrong');
+  if (score >= 50) return t('mobilePremium.taskDetail.insightBuilding');
+  return t('mobilePremium.taskDetail.insightFragile');
 }
 
 function getScoreTone(score: number) {
@@ -1405,18 +1455,74 @@ function resolveDifficultyToneVars(difficulty: string | null) {
   return { color: 'var(--mp-amber)', bg: 'rgba(251,191,36,0.12)' };
 }
 
-function formatMonthFromPeriod(value: string | null | undefined) {
+function formatExistingMonthLabel(value: string | null | undefined, language: 'es' | 'en') {
+  if (!value) return null;
+  const normalized = value.trim().toLowerCase().replace('.', '');
+  const labels: Record<string, { es: string; en: string }> = {
+    ene: { es: 'ene', en: 'Jan' },
+    jan: { es: 'ene', en: 'Jan' },
+    feb: { es: 'feb', en: 'Feb' },
+    mar: { es: 'mar', en: 'Mar' },
+    abr: { es: 'abr', en: 'Apr' },
+    apr: { es: 'abr', en: 'Apr' },
+    may: { es: 'may', en: 'May' },
+    jun: { es: 'jun', en: 'Jun' },
+    jul: { es: 'jul', en: 'Jul' },
+    ago: { es: 'ago', en: 'Aug' },
+    aug: { es: 'ago', en: 'Aug' },
+    sep: { es: 'sep', en: 'Sep' },
+    oct: { es: 'oct', en: 'Oct' },
+    nov: { es: 'nov', en: 'Nov' },
+    dic: { es: 'dic', en: 'Dec' },
+    dec: { es: 'dic', en: 'Dec' },
+  };
+  return labels[normalized]?.[language] ?? value;
+}
+
+function formatMonthFromPeriod(value: string | null | undefined, language: 'es' | 'en' = 'es') {
   if (!value) return null;
   const parsed = new Date(`${value.slice(0, 7)}-01T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return null;
-  return new Intl.DateTimeFormat('es', { month: 'short' }).format(parsed).replace('.', '');
+  return new Intl.DateTimeFormat(language, { month: 'short' }).format(parsed).replace('.', '');
 }
 
-function formatShortDate(value: string | null | undefined) {
+function formatShortDate(value: string | null | undefined, language: 'es' | 'en' = 'es') {
   if (!value) return '—';
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value.slice(0, 6);
-  return new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short' }).format(parsed).replace('.', '');
+  return new Intl.DateTimeFormat(language, { day: 'numeric', month: 'short' }).format(parsed).replace('.', '');
+}
+
+function translateDifficultyLabel(value: string, t: (key: string, params?: Record<string, string | number>) => string) {
+  const normalized = value.trim().toLowerCase();
+  if (normalized.includes('fácil') || normalized.includes('facil') || normalized.includes('easy')) return t('mobilePremium.difficulty.easy');
+  if (normalized.includes('difícil') || normalized.includes('dificil') || normalized.includes('hard')) return t('mobilePremium.difficulty.hard');
+  if (normalized.includes('media') || normalized.includes('medium')) return t('mobilePremium.difficulty.medium');
+  return value;
+}
+
+function translateTaskDetailText(value: string, language: 'es' | 'en') {
+  if (language === 'es') return value;
+  const normalized = value.trim().toLowerCase();
+  const labels: Record<string, string> = {
+    '20` sin pantallas antes de dormir': 'No screens 20 min before bed',
+    '20’ sin pantallas antes de dormir': 'No screens 20 min before bed',
+    'sin pantallas antes de dormir': 'No screens before bed',
+    '2l de agua': '2L of water',
+    'disfrutar hacer algo juntos': 'Enjoy doing something together',
+    'cocinar una receta nueva': 'Cook a new recipe',
+    'leer 10 o + paginas de un libro de conocimi...': 'Read 10+ pages of a nonfiction book',
+    'recuperación': 'Recovery',
+    'hidratación': 'Hydration',
+    'nutrición': 'Nutrition',
+    'aprendizaje': 'Learning',
+    'enfoque': 'Focus',
+    'gratitud': 'Gratitude',
+  };
+  const direct = labels[normalized];
+  if (direct) return direct;
+  const partial = Object.entries(labels).find(([source]) => normalized.startsWith(source));
+  return partial?.[1] ?? value;
 }
 
 function matchesSleep(row: PremiumTaskSummary) {

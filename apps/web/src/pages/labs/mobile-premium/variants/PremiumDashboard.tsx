@@ -114,7 +114,7 @@ export function PremiumDashboard({
   onModerationOpen?: () => void;
   onModerationDetail?: (tracker: ModerationTracker) => void;
 }) {
-  const { t } = usePostLoginLanguage();
+  const { language, t } = usePostLoginLanguage();
   const labBase = useMobilePremiumBasePath();
   const weeklyGoal = Math.max(1, Math.round(weeklyTarget ?? 3));
   const { data: streakData } = useRequest(
@@ -174,20 +174,21 @@ export function PremiumDashboard({
   const localBalanceTraits = useMemo(() => buildLocalBalanceTraits(localSnapshot), [localSnapshot]);
   const localEnergy = useMemo(() => buildLocalEnergyData(localSnapshot), [localSnapshot]);
   const emotionSummary = useMemo(
-    () => buildEmotionSummary(onboardingPreview ? localEmotions : emotionData, !onboardingPreview),
-    [emotionData, localEmotions, onboardingPreview],
+    () => buildEmotionSummary(onboardingPreview ? localEmotions : emotionData, !onboardingPreview, language, t),
+    [emotionData, language, localEmotions, onboardingPreview, t],
   );
   const balance = useMemo(
-    () => buildBalanceSummary(onboardingPreview ? localBalanceTraits : balanceData?.traits, !onboardingPreview),
-    [balanceData?.traits, localBalanceTraits, onboardingPreview],
+    () => buildBalanceSummary(onboardingPreview ? localBalanceTraits : balanceData?.traits, !onboardingPreview, t),
+    [balanceData?.traits, localBalanceTraits, onboardingPreview, t],
   );
   const energy = useMemo(
     () => buildEnergySummary(
       onboardingPreview ? localEnergy.snapshot : energyData,
       onboardingPreview ? localEnergy.series : energySeriesData,
       !onboardingPreview,
+      t,
     ),
-    [energyData, energySeriesData, localEnergy, onboardingPreview],
+    [energyData, energySeriesData, localEnergy, onboardingPreview, t],
   );
   const level = levelData ?? (
     onboardingPreview
@@ -410,15 +411,16 @@ function EmotionDayDot({ active, day, index }: { active: boolean; day: ReturnTyp
 }
 
 function PremiumBalanceCompact({ active, balance }: { active: boolean; balance: ReturnType<typeof buildBalanceSummary> }) {
+  const { t } = usePostLoginLanguage();
   const bars = [balance.body, balance.mind, balance.soul];
-  const tone = balance.dominant.label === 'Cuerpo'
+  const tone = balance.dominant.code === 'body'
     ? 'var(--mp-body)'
-    : balance.dominant.label === 'Mente'
+    : balance.dominant.code === 'mind'
       ? 'var(--mp-violet)'
       : 'var(--mp-amber)';
-  const softTone = balance.dominant.label === 'Cuerpo'
+  const softTone = balance.dominant.code === 'body'
     ? 'var(--mp-body-soft)'
-    : balance.dominant.label === 'Mente'
+    : balance.dominant.code === 'mind'
       ? 'rgba(167,139,250,0.12)'
       : 'rgba(245,197,107,0.11)';
 
@@ -432,16 +434,16 @@ function PremiumBalanceCompact({ active, balance }: { active: boolean; balance: 
           backgroundColor: softTone,
         }}
       >
-        Predominio {balance.dominant.label}
+        {t('mobilePremium.dashboard.dominantPillar', { pillar: balance.dominant.label })}
       </p>
       <div className="mt-4 flex items-baseline gap-2">
         <p className="text-[1.8rem] font-light tracking-tight" style={{ color: tone }}>
           <AnimatedBalancePercent active={active} value={balance.dominant.percent} />
         </p>
-        <p className="text-sm text-[color:var(--mp-text)]">del GP</p>
+        <p className="text-sm text-[color:var(--mp-text)]">{t('mobilePremium.dashboard.gpOf')}</p>
       </div>
       <p className="text-xs text-[color:var(--mp-text-muted)]">
-        {balance.dominant.label} lidera la distribución
+        {t('mobilePremium.dashboard.pillarLeads', { pillar: balance.dominant.label })}
       </p>
       <div className={`mp-balance-track ${active ? 'mp-balance-track-active' : ''} mt-5 flex h-2.5 overflow-hidden rounded-full bg-[color:var(--mp-track)]`} aria-hidden="true">
         {bars.map((bar, index) => (
@@ -450,8 +452,8 @@ function PremiumBalanceCompact({ active, balance }: { active: boolean; balance: 
             key={bar.label}
             style={{
               animationDelay: `${index * 120}ms`,
-              backgroundColor: bar.label === 'Cuerpo' ? 'var(--mp-body)' : bar.label === 'Mente' ? 'var(--mp-violet)' : 'var(--mp-amber)',
-              opacity: bar.label === balance.dominant.label ? 1 : 0.56,
+              backgroundColor: bar.code === 'body' ? 'var(--mp-body)' : bar.code === 'mind' ? 'var(--mp-violet)' : 'var(--mp-amber)',
+              opacity: bar.code === balance.dominant.code ? 1 : 0.56,
               width: `${bar.percent}%`,
             }}
           />
@@ -459,7 +461,7 @@ function PremiumBalanceCompact({ active, balance }: { active: boolean; balance: 
       </div>
       <div className="mt-2 flex justify-between text-[10px] text-[color:var(--mp-text-secondary)]">
         {bars.map((bar) => (
-          <span key={bar.label} style={{ color: bar.label === balance.dominant.label ? tone : undefined }}>
+          <span key={bar.label} style={{ color: bar.code === balance.dominant.code ? tone : undefined }}>
             {bar.label.slice(0, 1)} {bar.percent}%
           </span>
         ))}
@@ -635,10 +637,10 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
 
       {infoOpen ? (
         <div className="mt-3 rounded-[0.9rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] px-4 py-3 text-xs leading-5 text-[color:var(--mp-text-secondary)]">
-          <p className="font-semibold text-[color:var(--mp-text)]">Daily Energy mide tres señales diarias:</p>
-          <p className="mt-2"><span className="font-semibold text-[color:var(--mp-body)]">HP · Cuerpo</span> mide tu energía física.</p>
-          <p><span className="font-semibold text-[#f5c56b]">Mood · Alma</span> mide tu estado emocional.</p>
-          <p><span className="font-semibold text-[#a78bfa]">Focus · Mente</span> mide tu claridad mental.</p>
+          <p className="font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.dashboard.energyInfoTitle')}</p>
+          <p className="mt-2"><span className="font-semibold text-[color:var(--mp-body)]">HP · {t('mobilePremium.pillar.body')}</span> {t('mobilePremium.dashboard.energyHp')}</p>
+          <p><span className="font-semibold text-[#f5c56b]">Mood · {t('mobilePremium.pillar.soul')}</span> {t('mobilePremium.dashboard.energyMood')}</p>
+          <p><span className="font-semibold text-[#a78bfa]">Focus · {t('mobilePremium.pillar.mind')}</span> {t('mobilePremium.dashboard.energyFocus')}</p>
         </div>
       ) : null}
 
@@ -675,8 +677,8 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
             y2={energyY(value)}
           />
         ))}
-        <text fill="var(--mp-text-muted)" fontSize="10" letterSpacing="1.2" x="4" y="184">HACE 7 DÍAS</text>
-        <text fill="var(--mp-text-muted)" fontSize="10" letterSpacing="1.2" textAnchor="end" x="282" y="184">HOY</text>
+        <text fill="var(--mp-text-muted)" fontSize="10" letterSpacing="1.2" x="4" y="184">{t('mobilePremium.dashboard.daysAgo')}</text>
+        <text fill="var(--mp-text-muted)" fontSize="10" letterSpacing="1.2" textAnchor="end" x="282" y="184">{t('mobilePremium.dashboard.today')}</text>
         <path d={chart.riskArea} fill="url(#energy-risk-fade)" />
         {chart.lines.map((line, index) => {
           const isSelected = activeMetricLabel === line.metric.label;
@@ -952,22 +954,32 @@ function buildOverview(tasks: DashboardTask[], localSnapshot?: LocalOnboardingSn
   return { streak, attention, close };
 }
 
-function buildEmotionSummary(data: EmotionSnapshot[] | null | undefined, allowFallback = true) {
+function buildEmotionSummary(
+  data: EmotionSnapshot[] | null | undefined,
+  allowFallback = true,
+  language: 'es' | 'en',
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
   const source = (data && data.length ? data : allowFallback ? FALLBACK_EMOTIONS : [])
     .slice()
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(-15);
   const days = source.map((item) => {
-    const label = normalizeEmotionLabel(item.mood);
+    const label = normalizeEmotionLabel(item.mood, language, t);
     return { date: item.date, label, color: resolveEmotionColor(label) };
   });
   const counts = new Map<string, number>();
   days.forEach((day) => counts.set(day.label, (counts.get(day.label) ?? 0) + 1));
-  const label = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'Sin registros';
-  return { label, color: label === 'Sin registros' ? 'var(--mp-track-strong)' : resolveEmotionColor(label), days };
+  const fallbackLabel = language === 'es' ? 'Sin registros' : 'No records';
+  const label = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? fallbackLabel;
+  return { label, color: label === fallbackLabel ? 'var(--mp-track-strong)' : resolveEmotionColor(label), days };
 }
 
-function buildBalanceSummary(traits: TraitXpEntry[] | null | undefined, allowFallback = true) {
+function buildBalanceSummary(
+  traits: TraitXpEntry[] | null | undefined,
+  allowFallback = true,
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
   const values = allowFallback ? { body: 1757, mind: 1102, soul: 1106 } : { body: 0, mind: 0, soul: 0 };
   if (traits?.length) {
     values.body = 0;
@@ -981,9 +993,9 @@ function buildBalanceSummary(traits: TraitXpEntry[] | null | undefined, allowFal
     });
   }
   const total = Math.max(values.body + values.mind + values.soul, 1);
-  const body = { label: 'Cuerpo', value: values.body, percent: Math.round((values.body / total) * 100) };
-  const mind = { label: 'Mente', value: values.mind, percent: Math.round((values.mind / total) * 100) };
-  const soul = { label: 'Alma', value: values.soul, percent: Math.max(0, 100 - body.percent - mind.percent) };
+  const body = { code: 'body' as const, label: t('mobilePremium.pillar.body'), value: values.body, percent: Math.round((values.body / total) * 100) };
+  const mind = { code: 'mind' as const, label: t('mobilePremium.pillar.mind'), value: values.mind, percent: Math.round((values.mind / total) * 100) };
+  const soul = { code: 'soul' as const, label: t('mobilePremium.pillar.soul'), value: values.soul, percent: Math.max(0, 100 - body.percent - mind.percent) };
   const dominant = [body, mind, soul].sort((a, b) => b.value - a.value)[0];
   return { body, mind, soul, dominant };
 }
@@ -992,6 +1004,7 @@ function buildEnergySummary(
   data: Awaited<ReturnType<typeof getUserDailyEnergy>> | null | undefined,
   series: EnergyTimeseriesPoint[] | null | undefined,
   allowFallback = true,
+  t: (key: string, params?: Record<string, string | number>) => string,
 ) {
   const hasRealData = Boolean(data);
   const normalizedSeries = normalizeEnergySeries(series);
@@ -1009,7 +1022,7 @@ function buildEnergySummary(
     metrics: [
       {
         label: 'HP',
-        pillar: 'Cuerpo',
+        pillar: t('mobilePremium.pillar.body'),
         percent: clampEnergyLevel(bodyPercent),
         deltaPct: hasHistory ? (hasRealData ? trend?.Body.deltaPct ?? null : -2.8) : null,
         points: buildEnergyPoints(points, 'Body', bodyPercent),
@@ -1017,7 +1030,7 @@ function buildEnergySummary(
       },
       {
         label: 'Mood',
-        pillar: 'Alma',
+        pillar: t('mobilePremium.pillar.soul'),
         percent: clampEnergyLevel(soulPercent),
         deltaPct: hasHistory ? (hasRealData ? trend?.Soul.deltaPct ?? null : 53.7) : null,
         points: buildEnergyPoints(points, 'Soul', soulPercent),
@@ -1025,7 +1038,7 @@ function buildEnergySummary(
       },
       {
         label: 'Focus',
-        pillar: 'Mente',
+        pillar: t('mobilePremium.pillar.mind'),
         percent: clampEnergyLevel(mindPercent),
         deltaPct: hasHistory ? (hasRealData ? trend?.Mind.deltaPct ?? null : -18.2) : null,
         points: buildEnergyPoints(points, 'Mind', mindPercent),
@@ -1105,20 +1118,32 @@ function energyY(value: number) {
   return 10 + ((100 - clampEnergyLevel(value)) / 100) * 150;
 }
 
-function normalizeEmotionLabel(value: string | null | undefined) {
+function normalizeEmotionLabel(
+  value: string | null | undefined,
+  language: 'es' | 'en',
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
   const raw = (value ?? 'Calma').trim();
   const lower = raw.toLowerCase();
-  if (lower.includes('happy') || lower.includes('felic')) return 'Felicidad';
-  if (lower.includes('motiv')) return 'Motivación';
-  if (lower.includes('sad') || lower.includes('triste')) return 'Tristeza';
-  if (lower.includes('anx') || lower.includes('ansiedad')) return 'Ansiedad';
-  if (lower.includes('frustr')) return 'Frustración';
-  if (lower.includes('tired') || lower.includes('cans')) return 'Cansancio';
-  return 'Calma';
+  if (lower.includes('happy') || lower.includes('felic')) return t('mobilePremium.dquest.happy');
+  if (lower.includes('motiv')) return t('mobilePremium.dquest.motivation');
+  if (lower.includes('sad') || lower.includes('triste')) return t('mobilePremium.dquest.sad');
+  if (lower.includes('anx') || lower.includes('ansiedad')) return t('mobilePremium.dquest.anxiety');
+  if (lower.includes('frustr')) return t('mobilePremium.dquest.frustration');
+  if (lower.includes('tired') || lower.includes('cans')) return t('mobilePremium.dquest.tired');
+  return language === 'es' ? 'Calma' : 'Calm';
 }
 
 function resolveEmotionColor(label: string) {
-  return EMOTION_COLORS[label.toLowerCase()] ?? '#5ee178';
+  const normalized = label.toLowerCase();
+  if (normalized.includes('happy')) return EMOTION_COLORS.felicidad;
+  if (normalized.includes('calm')) return EMOTION_COLORS.calma;
+  if (normalized.includes('motivation')) return EMOTION_COLORS.motivación;
+  if (normalized.includes('sad')) return EMOTION_COLORS.tristeza;
+  if (normalized.includes('anxiety')) return EMOTION_COLORS.ansiedad;
+  if (normalized.includes('frustration')) return EMOTION_COLORS.frustración;
+  if (normalized.includes('tired')) return EMOTION_COLORS.cansancio;
+  return EMOTION_COLORS[normalized] ?? '#5ee178';
 }
 
 function clampEnergyLevel(value: number | null | undefined) {
