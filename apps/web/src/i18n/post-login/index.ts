@@ -4,6 +4,7 @@ import { dashboardTranslations } from './dashboard';
 import { editorTranslations } from './editor';
 import { feedbackTranslations } from './feedback';
 import { missionsTranslations } from './missions';
+import { mobilePremiumTranslations } from './mobilePremium';
 import { pricingTranslations } from './pricing';
 import { subscriptionTranslations } from './subscription';
 import { dailyQuestTranslations } from './dailyQuest';
@@ -12,6 +13,7 @@ import type { PostLoginTranslations } from './types';
 const postLoginTranslations: PostLoginTranslations = {
   ...dashboardTranslations,
   ...missionsTranslations,
+  ...mobilePremiumTranslations,
   ...editorTranslations,
   ...pricingTranslations,
   ...subscriptionTranslations,

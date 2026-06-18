@@ -4,6 +4,7 @@ import { classifyUserTask, createUserTask, getDailyReminderSettings, updateDaily
 import { useDifficulties } from '../../../../hooks/useCatalogs';
 import { TimezoneCombobox } from '../../../../components/common/TimezoneCombobox';
 import { getTimezoneCatalog, resolveDefaultTimezone } from '../../../../lib/timezones';
+import { usePostLoginLanguage } from '../../../../i18n/postLoginLanguage';
 import { TraitIcon } from '../MobilePremiumPrimitives';
 import type { MobilePremiumTheme } from '../mobilePremiumTokens';
 import {
@@ -38,6 +39,7 @@ export function PremiumInteractionOverlays({
   onClose,
   onOpen,
   onOpenUserProfile,
+  onSignOut,
   onReminderSaved,
   onReviewProgress,
   onGoDashboard,
@@ -74,6 +76,7 @@ export function PremiumInteractionOverlays({
   onClose: () => void;
   onOpen: OverlayAction;
   onOpenUserProfile?: () => void;
+  onSignOut?: () => void;
   onReminderSaved?: () => void | Promise<void>;
   onReviewProgress?: () => void;
   onGoDashboard?: () => void;
@@ -105,6 +108,7 @@ export function PremiumInteractionOverlays({
           gameMode={gameMode}
           onClose={onClose}
           onOpen={onOpen}
+          onSignOut={onSignOut}
           onThemeToggle={onThemeToggle}
           rhythmSuggestion={rhythmSuggestion}
           theme={theme}
@@ -174,6 +178,7 @@ function PremiumSheet({
   onClose: () => void;
   className?: string;
 }) {
+  const { t } = usePostLoginLanguage();
   return (
     <section
       className={`max-h-[88vh] w-full overflow-y-auto rounded-[1.8rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-bg-elevated)] p-5 text-[color:var(--mp-text)] shadow-[0_24px_72px_rgba(0,0,0,0.42)] ${className}`}
@@ -184,7 +189,7 @@ function PremiumSheet({
           <h2 className="mt-1 text-2xl font-semibold leading-tight text-[color:var(--mp-text)]">{title}</h2>
         </div>
         <button
-          aria-label="Cerrar"
+          aria-label={t('mobilePremium.a11y.close')}
           className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-2xl text-[color:var(--mp-text-secondary)]"
           onClick={onClose}
           type="button"
@@ -201,6 +206,7 @@ function PremiumMenuSheet({
   gameMode,
   onClose,
   onOpen,
+  onSignOut,
   onThemeToggle,
   rhythmSuggestion,
   theme,
@@ -209,6 +215,7 @@ function PremiumMenuSheet({
 }: {
   onClose: () => void;
   onOpen: OverlayAction;
+  onSignOut?: () => void;
   onThemeToggle: () => void;
   theme: MobilePremiumTheme;
   userEmail: string | null;
@@ -216,15 +223,24 @@ function PremiumMenuSheet({
   gameMode: string | null;
   rhythmSuggestion?: GameModeUpgradeSuggestion | null;
 }) {
+  const { language, setManualLanguage, t } = usePostLoginLanguage();
   const mode = (gameMode ?? 'Flow').trim() || 'Flow';
   const hasUpgrade = hasActivePremiumRhythmSuggestion(rhythmSuggestion ?? null);
   const suggestedMode = formatPremiumRhythmLabel(rhythmSuggestion?.suggested_mode ?? null);
   return (
-    <PremiumSheet eyebrow="Menú" onClose={onClose} title="Tu espacio personal">
+    <PremiumSheet eyebrow={t('mobilePremium.menu.eyebrow')} onClose={onClose} title={t('mobilePremium.menu.title')}>
       <div className="flex items-center justify-between gap-4">
         <div className="inline-grid grid-cols-2 rounded-full bg-[color:var(--mp-surface)] p-1 text-sm font-semibold text-[color:var(--mp-text-secondary)]">
-          <span className="rounded-full bg-[color:var(--mp-toggle-active-bg)] px-5 py-2 text-[color:var(--mp-violet)]">ES</span>
-          <span className="px-5 py-2">EN</span>
+          {(['es', 'en'] as const).map((option) => (
+            <button
+              className={`rounded-full px-5 py-2 ${language === option ? 'bg-[color:var(--mp-toggle-active-bg)] text-[color:var(--mp-violet)]' : ''}`}
+              key={option}
+              onClick={() => setManualLanguage(option)}
+              type="button"
+            >
+              {option.toUpperCase()}
+            </button>
+          ))}
         </div>
         <button
           className="grid h-12 w-12 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-[color:var(--mp-violet)]"
@@ -236,7 +252,7 @@ function PremiumMenuSheet({
       </div>
 
       <button
-        aria-label="Abrir perfil"
+        aria-label={t('mobilePremium.a11y.openProfile')}
         className="mt-6 flex w-full items-center gap-4 rounded-[1.25rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-4 text-left transition hover:border-[color:var(--mp-violet)]/60"
         onClick={() => onOpen('profile')}
         type="button"
@@ -244,7 +260,7 @@ function PremiumMenuSheet({
         <ProfileAvatar name={userName} size="sm" />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-base font-semibold">{userName}</span>
-          <span className="block truncate text-sm text-[color:var(--mp-text-secondary)]">{userEmail ?? 'Sandbox Labs'}</span>
+          <span className="block truncate text-sm text-[color:var(--mp-text-secondary)]">{userEmail ?? t('mobilePremium.menu.sandbox')}</span>
         </span>
         <span className="text-2xl text-[color:var(--mp-text-muted)]">›</span>
       </button>
@@ -253,16 +269,16 @@ function PremiumMenuSheet({
         <MenuAction
           accent={hasUpgrade ? 'recommendation' : 'default'}
           icon={<TraitIcon size={21} trait="focus" />}
-          label={hasUpgrade ? 'Ritmo recomendado' : 'Cambiar ritmo'}
+          label={hasUpgrade ? t('mobilePremium.menu.recommendedRhythm') : t('mobilePremium.menu.changeRhythm')}
           meta={hasUpgrade ? suggestedMode : mode.toUpperCase()}
           onClick={() => onOpen('rhythm')}
         />
-        <MenuAction icon={<BellIcon />} label="Recordatorio" onClick={() => onOpen('reminders')} />
-        <MenuAction icon={<WidgetsIcon />} label="Widgets" onClick={() => onOpen('widgets')} />
+        <MenuAction icon={<BellIcon />} label={t('mobilePremium.menu.reminder')} onClick={() => onOpen('reminders')} />
+        <MenuAction icon={<WidgetsIcon />} label={t('mobilePremium.menu.widgets')} onClick={() => onOpen('widgets')} />
       </div>
 
-      <button className="mt-5 flex min-h-12 w-full items-center justify-center rounded-full border border-[color:var(--mp-border)] text-sm font-semibold text-[color:var(--mp-text-secondary)]" type="button">
-        Cerrar sesión
+      <button className="mt-5 flex min-h-12 w-full items-center justify-center rounded-full border border-[color:var(--mp-border)] text-sm font-semibold text-[color:var(--mp-text-secondary)]" onClick={onSignOut} type="button">
+        {t('mobilePremium.menu.signOut')}
       </button>
     </PremiumSheet>
   );
@@ -283,8 +299,9 @@ function ProfileSheet({
   userEmail: string | null;
   userName: string;
 }) {
+  const { t } = usePostLoginLanguage();
   return (
-    <PremiumSheet eyebrow="Perfil" onClose={onClose} title="Tu espacio personal">
+    <PremiumSheet eyebrow={t('mobilePremium.profile.eyebrow')} onClose={onClose} title={t('mobilePremium.menu.title')}>
       <div className="flex flex-col items-center text-center">
         <button className="group relative cursor-pointer" onClick={onOpenUserProfile} type="button">
           <ProfileAvatar imageUrl={imageUrl} name={userName} size="lg" />
@@ -293,8 +310,8 @@ function ProfileSheet({
           </span>
         </button>
         <p className="mt-4 max-w-full truncate text-xl font-semibold text-[color:var(--mp-text)]">{userName}</p>
-        <p className="mt-1 max-w-full truncate text-sm text-[color:var(--mp-text-secondary)]">{userEmail ?? 'Sandbox Labs'}</p>
-        <button className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--mp-violet)]" onClick={onOpenUserProfile} type="button">Cambiar foto de perfil</button>
+        <p className="mt-1 max-w-full truncate text-sm text-[color:var(--mp-text-secondary)]">{userEmail ?? t('mobilePremium.menu.sandbox')}</p>
+        <button className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--mp-violet)]" onClick={onOpenUserProfile} type="button">{t('mobilePremium.profile.changePhoto')}</button>
       </div>
 
       <div className="mt-7 divide-y divide-[color:var(--mp-border)] rounded-[1.25rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)]">
@@ -302,7 +319,7 @@ function ProfileSheet({
           <span className="grid h-8 w-8 shrink-0 place-items-center text-[color:var(--mp-violet)]">
             <ProfileIcon />
           </span>
-          <span className="min-w-0 flex-1 text-base font-semibold text-[color:var(--mp-text)]">Clerk Settings</span>
+          <span className="min-w-0 flex-1 text-base font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.profile.settings')}</span>
           <span className="text-2xl text-[color:var(--mp-text-muted)]">›</span>
         </button>
       </div>
@@ -313,7 +330,7 @@ function ProfileSheet({
         type="button"
       >
         <TrashIcon />
-        Eliminar cuenta
+        {t('mobilePremium.profile.deleteAccount')}
       </button>
     </PremiumSheet>
   );
@@ -326,6 +343,7 @@ function DeleteAccountSheet({
   onCancel: () => void;
   onClose: () => void;
 }) {
+  const { t } = usePostLoginLanguage();
   const [confirmation, setConfirmation] = useState('');
   const normalizedConfirmation = confirmation.trim().toUpperCase();
   const canDelete = normalizedConfirmation === 'ELIMINAR' || normalizedConfirmation === 'DELETE';
@@ -334,11 +352,11 @@ function DeleteAccountSheet({
     <section className="max-h-[88vh] w-full overflow-y-auto rounded-[1.45rem] border border-rose-300/40 bg-[color:var(--mp-bg-elevated)] p-5 text-[color:var(--mp-text)] shadow-[0_24px_72px_rgba(0,0,0,0.48)]">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-rose-200">Acción irreversible</p>
-          <h2 className="mt-2 text-2xl font-semibold leading-tight text-[color:var(--mp-text)]">Eliminar cuenta</h2>
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-rose-200">{t('mobilePremium.delete.eyebrow')}</p>
+          <h2 className="mt-2 text-2xl font-semibold leading-tight text-[color:var(--mp-text)]">{t('mobilePremium.delete.title')}</h2>
         </div>
         <button
-          aria-label="Cerrar"
+          aria-label={t('mobilePremium.a11y.close')}
           className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-2xl text-[color:var(--mp-text-secondary)]"
           onClick={onClose}
           type="button"
@@ -348,22 +366,22 @@ function DeleteAccountSheet({
       </div>
 
       <p className="mt-6 text-sm leading-6 text-[color:var(--mp-text-secondary)]">
-        Esto elimina tu cuenta de forma permanente. No vas a poder recuperar tu perfil ni tu progreso después de confirmar.
+        {t('mobilePremium.delete.body')}
       </p>
 
       <label className="mt-7 block">
-        <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">Escribí ELIMINAR para confirmar</span>
+        <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.delete.confirmLabel')}</span>
         <input
           className="mt-3 h-14 w-full rounded-[1rem] border border-rose-300/38 bg-rose-950/20 px-4 text-base font-semibold uppercase tracking-[0.12em] text-[color:var(--mp-text)] outline-none placeholder:text-rose-100/24 focus:border-rose-200"
           onChange={(event) => setConfirmation(event.target.value)}
-          placeholder="ELIMINAR"
+          placeholder={t('mobilePremium.delete.placeholder')}
           value={confirmation}
         />
       </label>
 
       <div className="mt-5 grid grid-cols-2 gap-3">
         <button className="min-h-12 rounded-full border border-[color:var(--mp-border)] text-sm font-semibold text-[color:var(--mp-text-secondary)]" onClick={onCancel} type="button">
-          Cancelar
+          {t('mobilePremium.delete.cancel')}
         </button>
         <button
           className={`min-h-12 rounded-full border px-4 text-sm font-semibold transition ${
@@ -375,7 +393,7 @@ function DeleteAccountSheet({
           onClick={onClose}
           type="button"
         >
-          Eliminar definitivamente
+          {t('mobilePremium.delete.confirm')}
         </button>
       </div>
     </section>
@@ -464,20 +482,21 @@ function WidgetsSheet({
   pendingType?: ModerationTrackerType | null;
   trackers: ModerationTracker[];
 }) {
+  const { t } = usePostLoginLanguage();
   const enabledTrackers = trackers.filter((tracker) => tracker.is_enabled);
 
   return (
-    <PremiumSheet eyebrow="Widgets" onClose={onClose} title="Tu dashboard">
-      <p className="text-sm leading-6 text-[color:var(--mp-text-secondary)]">Elegí las funciones que querés seguir de cerca.</p>
+    <PremiumSheet eyebrow={t('mobilePremium.widgets.eyebrow')} onClose={onClose} title={t('mobilePremium.widgets.title')}>
+      <p className="text-sm leading-6 text-[color:var(--mp-text-secondary)]">{t('mobilePremium.widgets.body')}</p>
 
       <div className="mt-7">
-        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">Activos</p>
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.widgets.active')}</p>
         {enabledTrackers.length ? (
           <div className="mt-3 border-y border-[color:var(--mp-border)] py-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-medium">Moderación</h3>
+              <h3 className="text-base font-medium">{t('mobilePremium.widgets.moderation')}</h3>
               <button className="text-xs font-semibold text-[color:var(--mp-violet)]" onClick={onEdit} type="button">
-                Editar
+                {t('mobilePremium.widgets.edit')}
               </button>
             </div>
             <div className={`mt-4 grid divide-x divide-[color:var(--mp-border)] ${enabledTrackers.length === 1 ? 'grid-cols-1' : enabledTrackers.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
@@ -495,26 +514,26 @@ function WidgetsSheet({
                   <span className="mt-2 block truncate text-xs text-[color:var(--mp-text-secondary)]">
                     {moderationTrackerMeta[tracker.type].label}
                   </span>
-                  {tracker.is_paused ? <span className="mt-1 block text-[0.65rem] font-semibold uppercase tracking-[0.13em] text-[color:var(--mp-violet)]">Vacaciones</span> : null}
+                  {tracker.is_paused ? <span className="mt-1 block text-[0.65rem] font-semibold uppercase tracking-[0.13em] text-[color:var(--mp-violet)]">{t('mobilePremium.widgets.vacation')}</span> : null}
                 </button>
               ))}
             </div>
           </div>
         ) : (
-          <p className="mt-3 border-y border-[color:var(--mp-border)] py-5 text-sm text-[color:var(--mp-text-secondary)]">No hay widgets activos.</p>
+          <p className="mt-3 border-y border-[color:var(--mp-border)] py-5 text-sm text-[color:var(--mp-text-secondary)]">{t('mobilePremium.widgets.empty')}</p>
         )}
       </div>
 
       <div className="mt-7">
-        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">Disponibles</p>
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.widgets.available')}</p>
         <div className="mt-3 border-y border-[color:var(--mp-border)] py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h3 className="text-base font-medium">Moderación</h3>
-              <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">Alcohol, tabaco y azúcar</p>
+              <h3 className="text-base font-medium">{t('mobilePremium.widgets.moderation')}</h3>
+              <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">{t('mobilePremium.widgets.moderationDescription')}</p>
             </div>
             <button className="rounded-full border border-[color:var(--mp-border)] px-3 py-1.5 text-xs font-semibold text-[color:var(--mp-text-secondary)]" onClick={onEdit} type="button">
-              Editar
+              {t('mobilePremium.widgets.edit')}
             </button>
           </div>
           <div className="mt-5 flex flex-wrap gap-2">
@@ -578,15 +597,16 @@ function DailyCompleteSheet({
     totalTasks: number;
   };
 }) {
+  const { t } = usePostLoginLanguage();
   const completionPercent = summary.totalTasks > 0 ? Math.round((summary.selectedTasks / summary.totalTasks) * 100) : 0;
   const feedbackEvents = summary.response.feedback_events ?? [];
   return (
-    <PremiumSheet eyebrow="DQuest" onClose={onClose} title="Hoy hiciste crecer tu base">
+    <PremiumSheet eyebrow="DQuest" onClose={onClose} title={t('mobilePremium.feedback.dailyTitle')}>
       <div className="mp-feedback-enter grid grid-cols-[1fr_auto] items-center gap-4 border-b border-[color:var(--mp-border)] pb-5">
         <div>
-          <p className="text-sm text-[color:var(--mp-text-secondary)]">Cierre de ayer</p>
+          <p className="text-sm text-[color:var(--mp-text-secondary)]">{t('mobilePremium.feedback.yesterdayClose')}</p>
           <p className="mt-1 text-[2rem] font-semibold leading-none text-[color:var(--mp-violet)]">{summary.gpTotal} GP</p>
-          <p className="mt-2 text-xs text-[color:var(--mp-text-muted)]">{summary.response.streaks.daily} días con energía registrada</p>
+          <p className="mt-2 text-xs text-[color:var(--mp-text-muted)]">{t('mobilePremium.feedback.energyDays', { days: summary.response.streaks.daily })}</p>
         </div>
         <div className="mp-feedback-orb grid h-20 w-20 place-items-center rounded-full border border-[color:var(--mp-violet)] bg-violet-400/12 text-3xl text-[color:var(--mp-violet)]">
           <svg className="mp-feedback-check h-10 w-10" fill="none" viewBox="0 0 44 44">
@@ -596,9 +616,9 @@ function DailyCompleteSheet({
       </div>
       <div className="mt-5 grid grid-cols-[1fr_auto] items-center gap-4 border-b border-[color:var(--mp-border)] pb-5">
         <div>
-          <p className="text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--mp-text-muted)]">Tareas</p>
+          <p className="text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.feedback.tasks')}</p>
           <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">
-            Completaste {summary.selectedTasks} de {summary.totalTasks}. Cada registro sostiene tu ritmo.
+            {t('mobilePremium.feedback.tasksBody', { selected: summary.selectedTasks, total: summary.totalTasks })}
           </p>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[color:var(--mp-surface-strong)]">
             <span className="mp-feedback-bar block h-full rounded-full bg-[color:var(--mp-violet)]" style={{ width: `${completionPercent}%` }} />
@@ -608,7 +628,7 @@ function DailyCompleteSheet({
       </div>
       <div className="mt-5 grid grid-cols-2 gap-3">
         <FeedbackMetric
-          label="Emoción"
+          label={t('mobilePremium.feedback.emotion')}
           value={
             <span className="inline-flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: summary.emotionColor }} />
@@ -616,7 +636,7 @@ function DailyCompleteSheet({
             </span>
           }
         />
-        <FeedbackMetric label="Semana" value={`${summary.response.streaks.weekly} sem`} />
+        <FeedbackMetric label={t('mobilePremium.feedback.week')} value={t('mobilePremium.feedback.weekValue', { weeks: summary.response.streaks.weekly })} />
       </div>
       {feedbackEvents.length ? (
         <div className="mt-5 flex flex-wrap gap-2">
@@ -627,7 +647,9 @@ function DailyCompleteSheet({
               onClick={() => onShowFeedbackEvent?.(event)}
               type="button"
             >
-              {event.type === 'level_up' ? `Nivel ${event.payload.level}` : `${event.payload.tasks.length} racha${event.payload.tasks.length === 1 ? '' : 's'}`}
+              {event.type === 'level_up'
+                ? t('mobilePremium.feedback.level', { level: event.payload.level })
+                : t(event.payload.tasks.length === 1 ? 'mobilePremium.feedback.streakSingular' : 'mobilePremium.feedback.streakPlural', { count: event.payload.tasks.length })}
             </button>
           ))}
         </div>
@@ -637,7 +659,7 @@ function DailyCompleteSheet({
         onClick={onReviewProgress ?? onClose}
         type="button"
       >
-        {feedbackEvents.length ? 'Ver feedback' : 'Continuar'}
+        {feedbackEvents.length ? t('mobilePremium.feedback.viewFeedback') : t('mobilePremium.feedback.continue')}
       </button>
       <PremiumFeedbackMotionStyles />
     </PremiumSheet>
@@ -651,24 +673,25 @@ function PremiumLevelFeedbackSheet({
   event?: SubmitDailyQuestFeedbackEvent | null;
   onClose: () => void;
 }) {
+  const { t } = usePostLoginLanguage();
   const payload = event?.type === 'level_up' ? event.payload : { level: 24, previousLevel: 23 };
   return (
-    <PremiumSheet eyebrow="Feedback" onClose={onClose} title="Subiste de nivel">
+    <PremiumSheet eyebrow="Feedback" onClose={onClose} title={t('mobilePremium.feedback.levelTitle')}>
       <div className="mp-feedback-enter space-y-5">
         <div className="grid grid-cols-[82px_1fr] items-center gap-5 border-b border-[color:var(--mp-border)] pb-5">
           <span className="mp-feedback-trophy grid h-20 w-20 place-items-center rounded-full border border-amber-300/30 bg-amber-300/10 text-4xl">🏆</span>
           <div>
-            <p className="text-sm text-[color:var(--mp-text-secondary)]">Nivel actual</p>
+            <p className="text-sm text-[color:var(--mp-text-secondary)]">{t('mobilePremium.feedback.currentLevel')}</p>
             <p className="mt-1 text-5xl font-semibold leading-none text-[color:var(--mp-amber)]">{payload.level}</p>
-            <p className="mt-2 text-xs text-[color:var(--mp-text-muted)]">Antes estabas en nivel {payload.previousLevel}</p>
+            <p className="mt-2 text-xs text-[color:var(--mp-text-muted)]">{t('mobilePremium.feedback.previousLevel', { level: payload.previousLevel })}</p>
           </div>
         </div>
         <div className="rounded-[1.25rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-4">
-          <p className="text-sm font-medium">Tu GP de ayer ya impactó en tu progreso.</p>
-          <p className="mt-1 text-xs text-[color:var(--mp-text-secondary)]">Revisá el dashboard para ver el nuevo estado de nivel y energía.</p>
+          <p className="text-sm font-medium">{t('mobilePremium.feedback.gpImpact')}</p>
+          <p className="mt-1 text-xs text-[color:var(--mp-text-secondary)]">{t('mobilePremium.feedback.reviewDashboard')}</p>
         </div>
         <button className="min-h-11 w-full rounded-full bg-violet-500 px-5 text-sm font-semibold text-white" onClick={onClose} type="button">
-          Volver al dashboard
+          {t('mobilePremium.dquest.backDashboard')}
         </button>
       </div>
       <PremiumFeedbackMotionStyles />
@@ -683,10 +706,13 @@ function PremiumStreakFeedbackSheet({
   event?: SubmitDailyQuestFeedbackEvent | null;
   onClose: () => void;
 }) {
+  const { t } = usePostLoginLanguage();
   const payload = event?.type === 'streak_milestone'
     ? event.payload
     : { threshold: 7, tasks: [{ id: 'fallback-streak', name: 'Dormir 8hs', streakDays: 12 }] };
-  const title = payload.tasks.length === 1 ? 'Racha activa' : `${payload.tasks.length} rachas activas`;
+  const title = payload.tasks.length === 1
+    ? t('mobilePremium.feedback.streakActive')
+    : t('mobilePremium.feedback.streaksActive', { count: payload.tasks.length });
 
   return (
     <PremiumSheet eyebrow="Feedback" onClose={onClose} title={title}>
@@ -694,7 +720,7 @@ function PremiumStreakFeedbackSheet({
         <div className="grid grid-cols-[64px_1fr_auto] items-center gap-4 border-b border-[color:var(--mp-border)] pb-5">
           <span className="mp-feedback-flame grid h-14 w-14 place-items-center rounded-full border border-orange-300/30 bg-orange-300/10 text-2xl">🔥</span>
           <span>
-            <span className="block text-sm text-[color:var(--mp-text-secondary)]">Umbral alcanzado</span>
+            <span className="block text-sm text-[color:var(--mp-text-secondary)]">{t('mobilePremium.feedback.threshold')}</span>
             <span className="mt-1 block text-lg font-medium">{payload.threshold} días</span>
           </span>
           <span className="text-3xl font-semibold text-[color:var(--mp-amber)]">{payload.tasks.length}</span>
@@ -709,7 +735,7 @@ function PremiumStreakFeedbackSheet({
           ))}
         </ul>
         <button className="min-h-11 w-full rounded-full bg-violet-500 px-5 text-sm font-semibold text-white" onClick={onClose} type="button">
-          Listo
+          {t('mobilePremium.feedback.done')}
         </button>
       </div>
       <PremiumFeedbackMotionStyles />
@@ -747,19 +773,20 @@ function DQuestCompletedSheet({
     totalTasks: number;
   };
 }) {
+  const { t } = usePostLoginLanguage();
   return (
-    <PremiumSheet eyebrow="DQuest" onClose={onClose} title="Ya completaste la retrospectiva">
+    <PremiumSheet eyebrow="DQuest" onClose={onClose} title={t('mobilePremium.dquest.completedTitle')}>
       <div className="space-y-5">
         <div className="grid grid-cols-[64px_1fr] items-center gap-4 border-b border-[color:var(--mp-border)] pb-5">
           <span className="grid h-14 w-14 place-items-center rounded-full border border-emerald-300/28 bg-emerald-400/10 text-2xl text-[color:var(--mp-green)]">✓</span>
           <p className="text-sm leading-6 text-[color:var(--mp-text-secondary)]">
             {summary
-              ? `Hoy sumaste ${summary.gpTotal} GP y completaste ${summary.selectedTasks} de ${summary.totalTasks} tareas.`
-              : 'El registro de hoy ya quedó guardado. Tu constancia sigue construyendo tu base.'}
+              ? t('mobilePremium.feedback.alreadyDoneSummary', { gp: summary.gpTotal, selected: summary.selectedTasks, total: summary.totalTasks })
+              : t('mobilePremium.feedback.alreadyDoneFallback')}
           </p>
         </div>
         <button className="min-h-11 w-full rounded-full bg-violet-500 px-5 text-sm font-semibold text-white" onClick={onGoDashboard} type="button">
-          Volver al dashboard
+          {t('mobilePremium.dquest.backDashboard')}
         </button>
       </div>
     </PremiumSheet>
@@ -775,6 +802,7 @@ function ReminderSheet({
   onClose: () => void;
   onSaved?: () => void | Promise<void>;
 }) {
+  const { t } = usePostLoginLanguage();
   const [time, setTime] = useState('18:00');
   const [channels, setChannels] = useState({ email: true, notification: true });
   const detectedTimezone = useMemo(() => resolveDefaultTimezone(), []);
@@ -824,19 +852,19 @@ function ReminderSheet({
       onClose();
     } catch (error) {
       console.error('[mobile-premium] failed to save reminder settings', error);
-      setSaveError('No se pudo guardar el recordatorio. Probá de nuevo.');
+      setSaveError(t('mobilePremium.reminder.error'));
     } finally {
       setSavePending(false);
     }
   }
 
   return (
-    <PremiumSheet eyebrow="Recordatorio" onClose={onClose} title="Elegí cuándo volver">
+    <PremiumSheet eyebrow={t('mobilePremium.reminder.eyebrow')} onClose={onClose} title={t('mobilePremium.reminder.title')}>
       <div className="space-y-6">
         <label className="block">
-          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">Hora local</span>
+          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.reminder.localTime')}</span>
           <input
-            aria-label="Hora del recordatorio"
+            aria-label={t('mobilePremium.reminder.timeA11y')}
             className="mp-time-input mt-3 h-12 w-full rounded-full border border-[color:var(--mp-violet)] bg-[color:var(--mp-surface-strong)] px-5 text-center text-base font-semibold text-[color:var(--mp-violet-strong)] outline-none"
             onChange={(event) => setTime(event.target.value)}
             type="time"
@@ -848,16 +876,16 @@ function ReminderSheet({
             <BellIcon />
           </span>
           <div>
-            <p className="text-sm font-semibold text-[color:var(--mp-text)]">Todos los días</p>
-            <p className="text-xs text-[color:var(--mp-text-secondary)]">Daily Quest llega diariamente a la hora elegida.</p>
+            <p className="text-sm font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.reminder.everyDay')}</p>
+            <p className="text-xs text-[color:var(--mp-text-secondary)]">{t('mobilePremium.reminder.everyDayBody')}</p>
           </div>
         </div>
         <div>
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">Canal</p>
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.reminder.channel')}</p>
           <div className="mt-3 grid grid-cols-2 gap-2">
             {[
-              { key: 'email' as const, label: 'Email', icon: <MailIcon /> },
-              { key: 'notification' as const, label: 'Notificación', icon: <BellIcon /> },
+              { key: 'email' as const, label: t('mobilePremium.reminder.email'), icon: <MailIcon /> },
+              { key: 'notification' as const, label: t('mobilePremium.reminder.notification'), icon: <BellIcon /> },
             ].map((channel) => (
             <button
               aria-pressed={channels[channel.key]}
@@ -877,26 +905,26 @@ function ReminderSheet({
           </div>
         </div>
         <div>
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">Zona horaria</p>
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.reminder.timezone')}</p>
           <div className="mt-3 grid grid-cols-2 rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-1 text-sm font-semibold">
             <button
               className={`min-h-10 rounded-full ${automaticTimezone ? 'bg-violet-400/16 text-[color:var(--mp-violet)]' : 'text-[color:var(--mp-text-secondary)]'}`}
               onClick={() => setAutomaticTimezone(true)}
               type="button"
             >
-              Automática
+              {t('mobilePremium.reminder.automatic')}
             </button>
             <button
               className={`min-h-10 rounded-full ${!automaticTimezone ? 'bg-violet-400/16 text-[color:var(--mp-violet)]' : 'text-[color:var(--mp-text-secondary)]'}`}
               onClick={() => setAutomaticTimezone(false)}
               type="button"
             >
-              Manual
+              {t('mobilePremium.reminder.manual')}
             </button>
           </div>
           {automaticTimezone ? (
             <p className="mt-3 min-h-12 rounded-full border border-[color:var(--mp-border)] px-5 py-3 text-sm text-[color:var(--mp-text-secondary)]">
-              {detectedTimezone} · Automática
+              {detectedTimezone} · {t('mobilePremium.reminder.automatic')}
             </p>
           ) : (
             <div className="mt-3 [&_input]:rounded-full [&_input]:border-[color:var(--mp-border)] [&_input]:bg-[color:var(--mp-surface)] [&_input]:text-[color:var(--mp-text)]">
@@ -904,7 +932,7 @@ function ReminderSheet({
                 id={timezoneFieldId}
                 onChange={setManualTimezone}
                 options={timezoneCatalog}
-                placeholder="Buscar ciudad o zona horaria"
+                placeholder={t('mobilePremium.reminder.searchTimezone')}
                 value={manualTimezone}
               />
             </div>
@@ -917,7 +945,7 @@ function ReminderSheet({
           onClick={() => void handleSave()}
           type="button"
         >
-          {savePending ? 'Guardando…' : 'Guardar recordatorio'}
+          {savePending ? t('mobilePremium.reminder.saving') : t('mobilePremium.reminder.save')}
         </button>
       </div>
     </PremiumSheet>
