@@ -10181,9 +10181,9 @@
   }
 
   .landing.landing--v3-conversion .ib20-detail-chip--down {
-    flex: 1 1 28px;
-    width: auto !important;
-    max-width: 184px;
+    flex: 0 0 auto;
+    width: 28px;
+    max-width: none;
     min-width: 0;
     animation: v3-adjustment-chip-open 3.4s ease-in-out infinite !important;
   }
@@ -10199,15 +10199,18 @@
     padding-right: 10px;
     font-size: 0.66rem;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .landing.landing--v3-conversion .ib20-habit-body {
     grid-template-columns: 96px minmax(0, 1fr) !important;
     gap: 12px;
     padding: 15px 12px;
+    overflow: hidden;
   }
 
   .landing.landing--v3-conversion .ib20-habit-ring {
+    position: relative;
     width: 92px;
   }
 
@@ -10230,6 +10233,23 @@
     white-space: nowrap;
   }
 
+  .landing.landing--v3-conversion .ib20-habit-insight {
+    margin-top: 10px;
+    font-size: clamp(0.82rem, 3.4vw, 0.95rem);
+    line-height: 1.28;
+  }
+
+  .landing.landing--v3-conversion .ib20-habit-divider {
+    margin: 12px 0 10px;
+  }
+
+  .landing.landing--v3-conversion .ib20-habit-ranges {
+    justify-content: flex-start;
+    gap: 5px;
+    font-size: clamp(0.5rem, 2.35vw, 0.58rem);
+    white-space: nowrap;
+  }
+
   .landing.landing--v3-conversion .v3-method-logros__scene {
     --logros-card-w: clamp(190px, 58vw, 230px);
     width: min(100%, 390px);
@@ -10249,6 +10269,7 @@
   }
 
   .landing.landing--v3-conversion .v3-logros-dev-ring {
+    position: relative;
     width: 92px;
   }
 
@@ -10272,10 +10293,11 @@
 
   .landing.landing--v3-conversion .ib20-habit-window-title {
     display: grid;
-    grid-template-columns: minmax(22px, 1fr) auto minmax(64px, 1.6fr);
-    margin-left: 108px;
-    width: calc(100% - 108px);
+    grid-template-columns: minmax(18px, 0.7fr) auto minmax(44px, 1fr);
+    width: 100%;
     gap: 7px;
+    margin: 14px 0 10px;
+    font-size: clamp(0.5rem, 2.3vw, 0.58rem);
   }
 
   .landing.landing--v3-conversion .ib20-habit-window-title span {
@@ -10286,6 +10308,25 @@
     width: 33px;
     height: 33px;
     font-size: 0.52rem;
+  }
+
+  .landing.landing--v3-conversion .ib20-habit-months {
+    width: 100%;
+    gap: 4px;
+  }
+
+  .landing.landing--v3-conversion .ib20-habit-months i {
+    width: 32px;
+    height: 32px;
+    font-size: 0.58rem;
+  }
+
+  .landing.landing--v3-conversion .ib20-habit-months b {
+    font-size: 0.62rem;
+  }
+
+  .landing.landing--v3-conversion .ib20-habit-months small {
+    font-size: 0.48rem;
   }
 
   .landing.landing--v3-conversion .next--v3-final .container > div {
