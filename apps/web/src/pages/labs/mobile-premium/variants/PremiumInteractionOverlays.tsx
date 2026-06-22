@@ -512,7 +512,7 @@ function WidgetsSheet({
                     <span className="text-xl font-light">{tracker.current_streak_days}<small className="ml-1 text-xs text-[color:var(--mp-text-secondary)]">d</small></span>
                   </span>
                   <span className="mt-2 block truncate text-xs text-[color:var(--mp-text-secondary)]">
-                    {moderationTrackerMeta[tracker.type].label}
+                    {translateModerationTrackerLabel(tracker.type, t)}
                   </span>
                   {tracker.is_paused ? <span className="mt-1 block text-[0.65rem] font-semibold uppercase tracking-[0.13em] text-[color:var(--mp-violet)]">{t('mobilePremium.widgets.vacation')}</span> : null}
                 </button>
@@ -553,7 +553,7 @@ function WidgetsSheet({
                   type="button"
                 >
                   <ModerationTrackerIcon className="h-4 w-4 text-[color:var(--mp-violet)]" type={tracker.type} />
-                  {active ? '✓' : '+'} {moderationTrackerMeta[tracker.type].label}
+                  {active ? '✓' : '+'} {translateModerationTrackerLabel(tracker.type, t)}
                 </button>
               );
             })}
@@ -721,7 +721,7 @@ function PremiumStreakFeedbackSheet({
           <span className="mp-feedback-flame grid h-14 w-14 place-items-center rounded-full border border-orange-300/30 bg-orange-300/10 text-2xl">🔥</span>
           <span>
             <span className="block text-sm text-[color:var(--mp-text-secondary)]">{t('mobilePremium.feedback.threshold')}</span>
-            <span className="mt-1 block text-lg font-medium">{payload.threshold} días</span>
+            <span className="mt-1 block text-lg font-medium">{t('mobilePremium.feedback.thresholdDays', { count: payload.threshold })}</span>
           </span>
           <span className="text-3xl font-semibold text-[color:var(--mp-amber)]">{payload.tasks.length}</span>
         </div>
@@ -861,15 +861,17 @@ function ReminderSheet({
   return (
     <PremiumSheet eyebrow={t('mobilePremium.reminder.eyebrow')} onClose={onClose} title={t('mobilePremium.reminder.title')}>
       <div className="space-y-6">
-        <label className="block">
+        <label className="block min-w-0">
           <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.reminder.localTime')}</span>
-          <input
-            aria-label={t('mobilePremium.reminder.timeA11y')}
-            className="mp-time-input mt-3 h-12 w-full rounded-full border border-[color:var(--mp-violet)] bg-[color:var(--mp-surface-strong)] px-5 text-center text-base font-semibold text-[color:var(--mp-violet-strong)] outline-none"
-            onChange={(event) => setTime(event.target.value)}
-            type="time"
-            value={time}
-          />
+          <span className="mt-3 block max-w-full overflow-hidden rounded-full border border-[color:var(--mp-violet)] bg-[color:var(--mp-surface-strong)]">
+            <input
+              aria-label={t('mobilePremium.reminder.timeA11y')}
+              className="mp-time-input block h-12 w-full min-w-0 max-w-full appearance-none border-0 bg-transparent px-5 text-center text-base font-semibold text-[color:var(--mp-violet-strong)] outline-none"
+              onChange={(event) => setTime(event.target.value)}
+              type="time"
+              value={time}
+            />
+          </span>
         </label>
         <div className="flex items-center gap-3 rounded-[1rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-3">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-violet-400/12 text-[color:var(--mp-violet)]">
@@ -953,6 +955,7 @@ function ReminderSheet({
 }
 
 function AiTaskSheet({ backendUserId, onClose }: { backendUserId: string | null; onClose: () => void }) {
+  const { language, t } = usePostLoginLanguage();
   const [difficulty, setDifficulty] = useState<'Fácil' | 'Media' | 'Difícil'>('Media');
   const [intention, setIntention] = useState('');
   const [phase, setPhase] = useState<'idle' | 'analyzing' | 'generated' | 'error'>('idle');
@@ -974,8 +977,8 @@ function AiTaskSheet({ backendUserId, onClose }: { backendUserId: string | null;
         setSuggestion({
           pillar: classification.pillarName ?? classification.pillarCode ?? 'Sin pilar',
           trait: classification.traitName ?? classification.traitCode ?? 'Sin rasgo',
-          reason: classification.rationale ?? 'Clasificación generada por el servicio real.',
-          weeklyGoal: 'Según tu ritmo actual',
+          reason: classification.rationale ?? t('mobilePremium.aiTask.classificationReason'),
+          weeklyGoal: t('mobilePremium.aiTask.currentRhythm'),
         });
       } else {
         setClassification(null);
@@ -984,7 +987,7 @@ function AiTaskSheet({ backendUserId, onClose }: { backendUserId: string | null;
       setPhase('generated');
     } catch (error) {
       console.error('[mobile-premium] task classification failed', error);
-      setAiError('No se pudo generar la categoría con el servicio real.');
+      setAiError(t('mobilePremium.aiTask.classificationError'));
       setPhase('error');
     }
   }
@@ -1005,7 +1008,7 @@ function AiTaskSheet({ backendUserId, onClose }: { backendUserId: string | null;
       onClose();
     } catch (error) {
       console.error('[mobile-premium] create task failed', error);
-      setAiError('No se pudo crear la tarea con el flujo real.');
+      setAiError(t('mobilePremium.aiTask.createError'));
       setPhase('error');
     } finally {
       setCreatePending(false);
@@ -1013,13 +1016,13 @@ function AiTaskSheet({ backendUserId, onClose }: { backendUserId: string | null;
   }
 
   return (
-    <PremiumSheet eyebrow="Nueva tarea" onClose={onClose} title="Nueva tarea guiada">
+    <PremiumSheet eyebrow={t('editor.modal.aiCreate.badge')} onClose={onClose} title={t('editor.modal.aiCreate.title')}>
       <div className="space-y-5">
         <p className="text-base leading-6 text-[color:var(--mp-text-secondary)]">
-          Escribí tu intención y dejá que la IA sugiera la mejor categoría.
+          {t('editor.modal.aiCreate.description')}
         </p>
         <label className="block">
-          <span className="text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-[color:var(--mp-text-muted)]">¿Qué tarea querés sumar?</span>
+          <span className="text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-[color:var(--mp-text-muted)]">{t('editor.modal.aiCreate.taskTitleLabel')}</span>
           <textarea
             className="mt-3 min-h-24 w-full resize-none rounded-[1.25rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-4 text-base outline-none"
             onChange={(event) => {
@@ -1028,12 +1031,12 @@ function AiTaskSheet({ backendUserId, onClose }: { backendUserId: string | null;
               setClassification(null);
               if (phase !== 'idle') setPhase('idle');
             }}
-            placeholder="Ej. Caminar 30 minutos"
+            placeholder={t('editor.modal.aiCreate.taskTitlePlaceholder')}
             value={intention}
           />
         </label>
         <div>
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-[color:var(--mp-text-muted)]">Dificultad</p>
+          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-[color:var(--mp-text-muted)]">{t('editor.field.difficulty')}</p>
           <div className="mt-3 flex justify-center gap-2">
             {(['Fácil', 'Media', 'Difícil'] as const).map((label) => (
               <button
@@ -1049,7 +1052,7 @@ function AiTaskSheet({ backendUserId, onClose }: { backendUserId: string | null;
                 }}
                 type="button"
               >
-                {label}
+                {translateDifficultyLabel(label, t)}
               </button>
             ))}
           </div>
@@ -1060,15 +1063,15 @@ function AiTaskSheet({ backendUserId, onClose }: { backendUserId: string | null;
           onClick={handleGenerate}
           type="button"
         >
-          {phase === 'analyzing' ? '✦ Analizando tarea...' : '✦ Generar categoría'}
+          {phase === 'analyzing' ? `✦ ${t('editor.modal.aiCreate.analyzing')}` : `✦ ${t('editor.modal.aiCreate.suggestButton')}`}
         </button>
         {phase === 'analyzing' ? (
           <div className="border-y border-[color:var(--mp-border)] py-4">
             <div className="h-1 w-28 overflow-hidden rounded-full bg-[color:var(--mp-surface-strong)]">
               <span className="block h-full w-2/3 rounded-full bg-gradient-to-r from-violet-400 to-amber-200" />
             </div>
-            <p className="mt-3 text-base font-semibold">Analizando tarea...</p>
-            <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">Revisando intención, contexto y patrón de hábito.</p>
+            <p className="mt-3 text-base font-semibold">{t('editor.modal.aiCreate.analyzing')}</p>
+            <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">{t('editor.modal.aiCreate.analyzingHint')}</p>
           </div>
         ) : null}
         {phase === 'error' ? (
@@ -1076,26 +1079,26 @@ function AiTaskSheet({ backendUserId, onClose }: { backendUserId: string | null;
         ) : null}
         {phase === 'generated' ? (
           <div className="border-y border-[color:var(--mp-border)] py-4 text-center">
-            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-violet)]">Categoría generada</p>
+            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-violet)]">{t('editor.modal.aiCreate.suggestedCategory')}</p>
             <div className="mt-4 flex items-center justify-center gap-3">
-              <span className="rounded-full border border-violet-300/35 bg-violet-400/10 px-4 py-2 text-base font-semibold">{suggestion.pillar}</span>
+              <span className="rounded-full border border-violet-300/35 bg-violet-400/10 px-4 py-2 text-base font-semibold">{translatePillarLabel(suggestion.pillar, t)}</span>
               <span className="text-[color:var(--mp-text-secondary)]">/</span>
-              <span className="rounded-full border border-violet-300/35 bg-violet-400/10 px-4 py-2 text-base font-semibold">{suggestion.trait}</span>
+              <span className="rounded-full border border-violet-300/35 bg-violet-400/10 px-4 py-2 text-base font-semibold">{translateTraitLabel(suggestion.trait, language)}</span>
             </div>
-            <p className="mt-4 text-sm leading-5 text-[color:var(--mp-text-secondary)]">{suggestion.reason}</p>
-            <p className="mt-3 text-xs font-semibold text-[color:var(--mp-text)]">Objetivo semanal: {suggestion.weeklyGoal}</p>
+            <p className="mt-4 text-sm leading-5 text-[color:var(--mp-text-secondary)]">{translateAiSuggestionReason(suggestion.reason, language)}</p>
+            <p className="mt-3 text-xs font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.aiTask.weeklyGoal', { goal: translateAiSuggestionGoal(suggestion.weeklyGoal, language) })}</p>
             <div className="mt-4 flex justify-center gap-5 text-xs font-semibold text-[color:var(--mp-text-secondary)] underline decoration-dotted underline-offset-4">
-              <button onClick={handleGenerate} type="button">Reintentar sugerencia</button>
-              <button type="button">Elegir manualmente</button>
+              <button onClick={handleGenerate} type="button">{t('editor.modal.aiCreate.retrySuggestion')}</button>
+              <button type="button">{t('editor.modal.aiCreate.manualCategory')}</button>
             </div>
           </div>
         ) : null}
         <p className="text-xs leading-5 text-[color:var(--mp-text-muted)]">
-          Para editar tareas existentes, abrí el detalle desde Tareas.
+          {t('mobilePremium.aiTask.editExistingHint')}
         </p>
         <div className="grid grid-cols-[0.9fr_1.1fr] gap-3">
           <button className="min-h-11 rounded-full border border-[color:var(--mp-border)] px-5 text-sm font-semibold text-[color:var(--mp-text-secondary)]" onClick={onClose} type="button">
-            Cancelar
+            {t('editor.button.cancel')}
           </button>
           <button
             className="min-h-11 rounded-full bg-violet-500 px-5 text-sm font-semibold text-white disabled:opacity-45"
@@ -1103,7 +1106,7 @@ function AiTaskSheet({ backendUserId, onClose }: { backendUserId: string | null;
             onClick={handleCreate}
             type="button"
           >
-            {createPending ? 'Creando...' : 'Confirmar tarea'}
+            {createPending ? t('editor.button.creating') : t('editor.modal.aiCreate.confirmButton')}
           </button>
         </div>
       </div>
@@ -1143,6 +1146,73 @@ function normalizeDifficultyLabel(value: string | null | undefined) {
   }
 }
 
+function translateDifficultyLabel(
+  value: string | null | undefined,
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
+  switch (normalizeDifficultyLabel(value)) {
+    case 'Fácil':
+      return t('mobilePremium.difficulty.easy');
+    case 'Media':
+      return t('mobilePremium.difficulty.medium');
+    case 'Difícil':
+      return t('mobilePremium.difficulty.hard');
+    default:
+      return value ?? '';
+  }
+}
+
+function translatePillarLabel(
+  value: string | null | undefined,
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
+  const normalized = (value ?? '').trim().toLowerCase();
+  if (normalized.includes('body') || normalized.includes('cuerpo')) return t('mobilePremium.pillar.body');
+  if (normalized.includes('mind') || normalized.includes('mente')) return t('mobilePremium.pillar.mind');
+  if (normalized.includes('soul') || normalized.includes('alma')) return t('mobilePremium.pillar.soul');
+  return value ?? '';
+}
+
+function translateTraitLabel(value: string | null | undefined, language: 'es' | 'en') {
+  if (language !== 'en') return value ?? '';
+  const normalized = (value ?? '').trim().toLowerCase();
+  const labels: Record<string, string> = {
+    aprendizaje: 'Learning',
+    hidratación: 'Hydration',
+    hidratacion: 'Hydration',
+    movilidad: 'Mobility',
+    sueño: 'Sleep',
+    sueno: 'Sleep',
+    nutrición: 'Nutrition',
+    nutricion: 'Nutrition',
+    recuperación: 'Recovery',
+    recuperacion: 'Recovery',
+  };
+  return labels[normalized] ?? value ?? '';
+}
+
+function translateAiSuggestionReason(value: string, language: 'es' | 'en') {
+  if (language !== 'en') return value;
+  const normalized = value.trim().toLowerCase();
+  if (normalized.includes('movimiento sostenido')) return 'Sustained movement fits under Body.';
+  if (normalized.includes('hidratación se clasifica') || normalized.includes('hidratacion se clasifica')) return 'Hydration is classified as body care.';
+  if (normalized.includes('leer fortalece')) return 'Reading strengthens learning and mental development.';
+  if (normalized.includes('intención se interpreta') || normalized.includes('intencion se interpreta')) return 'The intent is interpreted as a learning practice.';
+  return value;
+}
+
+function translateAiSuggestionGoal(value: string, language: 'es' | 'en') {
+  if (language !== 'en') return value;
+  return value.replace(/3 veces por semana/i, '3 times per week');
+}
+
+function translateModerationTrackerLabel(
+  type: ModerationTrackerType,
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
+  return t(`mobilePremium.widgets.tracker.${type}`);
+}
+
 function RhythmSheet({
   currentMode,
   onClose,
@@ -1152,6 +1222,7 @@ function RhythmSheet({
   onClose: () => void;
   onConfirmRhythm?: (mode: string) => void;
 }) {
+  const { t } = usePostLoginLanguage();
   const current = formatPremiumRhythmLabel(currentMode).toLowerCase();
   const [appliedRhythm, setAppliedRhythm] = useState(current);
   const [selectedRhythm, setSelectedRhythm] = useState(current);
@@ -1161,18 +1232,18 @@ function RhythmSheet({
     days: number;
   }>(null);
   const options = [
-    { key: 'low', label: 'LOW', days: 1, text: 'Base suave' },
-    { key: 'chill', label: 'CHILL', days: 2, text: 'Constancia simple' },
-    { key: 'flow', label: 'FLOW', days: 3, text: 'Ritmo sostenido' },
-    { key: 'evolve', label: 'EVOLVE', days: 4, text: 'Mayor intensidad' },
+    { key: 'low', label: 'LOW', days: 1, text: t('mobilePremium.rhythm.low') },
+    { key: 'chill', label: 'CHILL', days: 2, text: t('mobilePremium.rhythm.chill') },
+    { key: 'flow', label: 'FLOW', days: 3, text: t('mobilePremium.rhythm.flow') },
+    { key: 'evolve', label: 'EVOLVE', days: 4, text: t('mobilePremium.rhythm.evolve') },
   ];
   const selectedOption = options.find((option) => option.key === selectedRhythm) ?? options[0];
   const hasPendingSelection = selectedRhythm !== appliedRhythm;
 
   return (
-    <PremiumSheet eyebrow="Ritmo" onClose={onClose} title="Elegí tu ritmo">
+    <PremiumSheet eyebrow={t('mobilePremium.rhythm.eyebrow')} onClose={onClose} title={t('mobilePremium.rhythm.title')}>
       <div className="mb-5 rounded-[1.25rem] bg-[linear-gradient(90deg,rgba(167,139,250,0.12),rgba(104,211,145,0.08))] p-4">
-        <p className="text-sm leading-6 text-[color:var(--mp-text-secondary)]">Tu ritmo define cuántos días por semana se espera sostener cada hábito.</p>
+        <p className="text-sm leading-6 text-[color:var(--mp-text-secondary)]">{t('mobilePremium.rhythm.body')}</p>
       </div>
       <div className="space-y-2.5 pb-24">
         {options.map((option) => {
@@ -1198,7 +1269,7 @@ function RhythmSheet({
                 </span>
                 <span className="text-right">
                   <span className={`block text-3xl font-semibold leading-none ${isGreen ? 'text-[color:var(--mp-green)]' : 'text-[color:var(--mp-text)]'}`}>{option.days}</span>
-                  <span className="mt-1 block text-xs font-medium text-[color:var(--mp-text-muted)]">días/sem</span>
+                  <span className="mt-1 block text-xs font-medium text-[color:var(--mp-text-muted)]">{t('mobilePremium.rhythm.daysWeek')}</span>
                 </span>
               </span>
               <span className="mt-4 grid grid-cols-4 gap-1.5" aria-hidden="true">
@@ -1216,10 +1287,10 @@ function RhythmSheet({
                 ))}
               </span>
               <span className="mt-4 flex items-center justify-between gap-3">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--mp-text-muted)]">{option.days}x/semana</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.rhythm.timesWeek', { count: option.days })}</span>
                 <span className="flex items-center gap-2">
-                  {active ? <span className="rounded-full bg-emerald-300/12 px-3 py-1 text-xs font-semibold text-[color:var(--mp-green)]">Actual</span> : null}
-                  {selected && !active ? <span className="rounded-full bg-violet-300/12 px-3 py-1 text-xs font-semibold text-[color:var(--mp-violet)]">Seleccionado</span> : null}
+                  {active ? <span className="rounded-full bg-emerald-300/12 px-3 py-1 text-xs font-semibold text-[color:var(--mp-green)]">{t('mobilePremium.rhythm.current')}</span> : null}
+                  {selected && !active ? <span className="rounded-full bg-violet-300/12 px-3 py-1 text-xs font-semibold text-[color:var(--mp-violet)]">{t('mobilePremium.rhythm.selected')}</span> : null}
                 </span>
               </span>
             </button>
@@ -1229,8 +1300,8 @@ function RhythmSheet({
       <div className="sticky bottom-0 -mx-5 -mb-5 border-t border-[color:var(--mp-border)] bg-[color:var(--mp-bg-elevated)] px-5 pb-5 pt-4">
         <div className="grid grid-cols-[1fr_auto] items-center gap-3">
           <div>
-            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[color:var(--mp-text-muted)]">Seleccionado</p>
-            <p className="mt-1 text-base font-semibold text-[color:var(--mp-text)]">{selectedOption.label} · {selectedOption.days} días/sem</p>
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.rhythm.selectedLabel')}</p>
+            <p className="mt-1 text-base font-semibold text-[color:var(--mp-text)]">{selectedOption.label} · {selectedOption.days} {t('mobilePremium.rhythm.daysWeek')}</p>
           </div>
           <button
             className={`min-h-11 rounded-full px-5 text-sm font-semibold transition ${
@@ -1242,7 +1313,7 @@ function RhythmSheet({
             onClick={() => setConfirmRhythm(selectedOption)}
             type="button"
           >
-            Continuar
+            {t('mobilePremium.rhythm.continue')}
           </button>
         </div>
       </div>
@@ -1271,14 +1342,15 @@ function RhythmPickerConfirmDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const { t } = usePostLoginLanguage();
   return (
     <div className="fixed inset-0 z-[70] mx-auto flex w-full max-w-[430px] items-end bg-black/62 px-3 pb-[max(14px,env(safe-area-inset-bottom))] backdrop-blur-md">
       <section className="w-full rounded-[1.55rem] bg-[color:var(--mp-bg-elevated)] p-5 text-[color:var(--mp-text)] shadow-[0_24px_72px_rgba(0,0,0,0.5)]">
-        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-[color:var(--mp-violet)]">Confirmar ritmo</p>
-        <h3 className="mt-2 text-2xl font-semibold leading-tight">Cambiar a {rhythm.label}</h3>
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-[color:var(--mp-violet)]">{t('mobilePremium.rhythm.confirmEyebrow')}</p>
+        <h3 className="mt-2 text-2xl font-semibold leading-tight">{t('mobilePremium.rhythm.confirmTitle', { rhythm: rhythm.label })}</h3>
         <div className="mt-5 rounded-[1.25rem] bg-violet-300/10 px-5 py-5 text-center">
           <p className="text-[2.35rem] font-semibold leading-none text-[color:var(--mp-violet)]">{rhythm.days}</p>
-          <p className="mt-2 text-sm font-medium text-[color:var(--mp-text)]">días por semana</p>
+          <p className="mt-2 text-sm font-medium text-[color:var(--mp-text)]">{t('mobilePremium.rhythm.daysPerWeek')}</p>
         </div>
         <div className="mt-5 grid grid-cols-[0.85fr_1.15fr] gap-3">
           <button
@@ -1286,14 +1358,14 @@ function RhythmPickerConfirmDialog({
             onClick={onCancel}
             type="button"
           >
-            Cancelar
+            {t('editor.button.cancel')}
           </button>
           <button
             className="min-h-12 rounded-full bg-violet-500 px-5 text-sm font-semibold text-white"
             onClick={onConfirm}
             type="button"
           >
-            Confirmar {rhythm.label}
+            {t('mobilePremium.rhythm.confirm', { rhythm: rhythm.label })}
           </button>
         </div>
       </section>
@@ -1314,10 +1386,11 @@ function ModerationEditSheet({
   pendingType?: ModerationTrackerType | null;
   trackers: ModerationTracker[];
 }) {
+  const { t } = usePostLoginLanguage();
   const selectedTrackers = trackers.filter((tracker) => tracker.is_enabled);
 
   return (
-    <PremiumSheet eyebrow="Widget · Moderación" onClose={onClose} title="Configurar">
+    <PremiumSheet eyebrow={`${t('mobilePremium.widgets.eyebrow')} · ${t('mobilePremium.widgets.moderation')}`} onClose={onClose} title={t('mobilePremium.widgets.edit')}>
       {selectedTrackers.length ? (
         <div className="divide-y divide-[color:var(--mp-border)] border-y border-[color:var(--mp-border)]">
           {selectedTrackers.map((tracker) => {
@@ -1326,17 +1399,17 @@ function ModerationEditSheet({
               <section className={`py-5 ${pending ? 'opacity-55' : ''}`} key={tracker.type}>
                 <div className="flex items-center gap-3">
                   <ModerationTrackerIcon className="h-5 w-5 text-[color:var(--mp-violet)]" type={tracker.type} />
-                  <h3 className="flex-1 text-lg font-medium">{moderationTrackerMeta[tracker.type].label}</h3>
+                  <h3 className="flex-1 text-lg font-medium">{translateModerationTrackerLabel(tracker.type, t)}</h3>
                   {tracker.is_paused ? (
-                    <span className="rounded-full border border-violet-300/30 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--mp-violet)]">Pausado</span>
+                    <span className="rounded-full border border-violet-300/30 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--mp-violet)]">{t('mobilePremium.moderation.paused')}</span>
                   ) : null}
                 </div>
 
                 <div className="mt-5 flex items-center justify-between gap-3">
-                  <span className="text-sm text-[color:var(--mp-text-secondary)]">Modo vacaciones</span>
+                  <span className="text-sm text-[color:var(--mp-text-secondary)]">{t('mobilePremium.widgets.vacation')}</span>
                   <button
                     aria-checked={tracker.is_paused}
-                    aria-label={`Modo vacaciones para ${moderationTrackerMeta[tracker.type].label}`}
+                    aria-label={`${t('mobilePremium.widgets.vacation')} ${translateModerationTrackerLabel(tracker.type, t)}`}
                     className={`relative h-7 w-12 rounded-full border transition ${
                       tracker.is_paused ? 'border-[color:var(--mp-violet)] bg-violet-400/28' : 'border-[color:var(--mp-border-strong)] bg-[color:var(--mp-surface)]'
                     }`}
@@ -1351,11 +1424,11 @@ function ModerationEditSheet({
 
                 <label className="mt-5 block">
                   <span className="flex items-baseline justify-between gap-3 text-sm text-[color:var(--mp-text-secondary)]">
-                    <span>Tolerancia</span>
+                    <span>{t('mobilePremium.moderation.tolerance')}</span>
                     <strong className="text-lg font-medium text-[color:var(--mp-text)]">{tracker.not_logged_tolerance_days}d</strong>
                   </span>
                   <input
-                    aria-label={`Tolerancia de ${moderationTrackerMeta[tracker.type].label}`}
+                    aria-label={`${t('mobilePremium.moderation.tolerance')} ${translateModerationTrackerLabel(tracker.type, t)}`}
                     className="mt-3 h-1.5 w-full cursor-pointer accent-[color:var(--mp-violet)]"
                     disabled={pending}
                     max={7}
@@ -1365,7 +1438,7 @@ function ModerationEditSheet({
                     type="range"
                     value={tracker.not_logged_tolerance_days}
                   />
-                  <span className="mt-3 block text-xs text-[color:var(--mp-text-muted)]">Días sin registrar antes de cortar la racha.</span>
+                  <span className="mt-3 block text-xs text-[color:var(--mp-text-muted)]">{t('mobilePremium.moderation.toleranceHint')}</span>
                 </label>
               </section>
             );
@@ -1373,7 +1446,7 @@ function ModerationEditSheet({
         </div>
       ) : (
         <p className="border-y border-[color:var(--mp-border)] py-6 text-sm text-[color:var(--mp-text-secondary)]">
-          Activá al menos un seguimiento desde Widgets.
+          {t('mobilePremium.moderation.activateWidgetHint')}
         </p>
       )}
     </PremiumSheet>
@@ -1389,6 +1462,7 @@ function ModerationSheet({
   onTogglePause?: (tracker: ModerationTracker, shouldPause: boolean) => void;
   tracker: ModerationTracker | null;
 }) {
+  const { t } = usePostLoginLanguage();
   const selected: ModerationTracker = tracker ?? {
     type: 'sugar',
     is_enabled: true,
@@ -1397,7 +1471,7 @@ function ModerationSheet({
     not_logged_tolerance_days: 2,
     statusToday: 'not_logged',
   };
-  const label = moderationTrackerMeta[selected.type].label;
+  const label = translateModerationTrackerLabel(selected.type, t);
   const remainingGrace = (selected as ModerationTracker & { remaining_grace_days?: number }).remaining_grace_days ?? selected.not_logged_tolerance_days;
 
   return (

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useRequest } from '../../../../hooks/useRequest';
 import { useCreateTask } from '../../../../hooks/useUserTasks';
 import { QUICK_START_TASKS, type QuickStartTask } from '../../../../onboarding/quickStart';
+import { usePostLoginLanguage } from '../../../../i18n/postLoginLanguage';
 import {
   getUserStreakPanel,
   type StreakPanelPillar,
@@ -50,12 +51,6 @@ type TaskDraft = {
 type SuggestedTask = TaskDraft & {
   id: string;
   reason: string;
-};
-
-const PILLAR_LABELS: Record<StreakPanelPillar, string> = {
-  Body: 'Cuerpo',
-  Mind: 'Mente',
-  Soul: 'Alma',
 };
 
 const QUICK_START_SELECTED_MOCK = new Set([
@@ -184,6 +179,7 @@ export function PremiumTasksScreen({
   onboardingEditCue?: boolean;
   onboardingPreview?: boolean;
 }) {
+  const { language, t } = usePostLoginLanguage();
   const [listFilter, setListFilter] = useState<TaskListFilter>('all');
   const [pillarFilter, setPillarFilter] = useState<PillarFilter>(null);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
@@ -247,7 +243,7 @@ export function PremiumTasksScreen({
         );
         created = persisted.map(({ suggestion, task }) => buildTaskRowFromUserTask(task, suggestion, weeklyGoal));
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudieron crear las tareas.';
+        const message = error instanceof Error ? error.message : language === 'es' ? 'No se pudieron crear las tareas.' : 'Could not create the tasks.';
         setSuggestionsError(message);
         return;
       }
@@ -289,13 +285,13 @@ export function PremiumTasksScreen({
       </style>
       {onboardingEditCue ? (
         <div className="rounded-[1.25rem] border border-[color:var(--mp-violet)] bg-violet-400/10 px-4 py-3 shadow-[0_0_30px_rgba(167,139,250,0.14)]">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-[color:var(--mp-violet)]">Siguiente paso</p>
-          <p className="mt-1 text-sm font-semibold text-[color:var(--mp-text)]">Abrí una tarea y editá un detalle para confirmar tu base.</p>
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-[color:var(--mp-violet)]">{t('mobilePremium.tasks.nextStep')}</p>
+          <p className="mt-1 text-sm font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.tasks.nextStepBody')}</p>
         </div>
       ) : null}
       <div className="flex items-center justify-end gap-2">
         <button
-          aria-label="Ver sugerencias de tareas"
+          aria-label={t('mobilePremium.tasks.suggestionsA11y')}
           className="grid h-11 w-11 place-items-center rounded-full border border-[color:var(--mp-border)] bg-transparent text-lg text-[color:var(--mp-violet)]"
           onClick={() => setSuggestionsOpen(true)}
           type="button"
@@ -308,7 +304,7 @@ export function PremiumTasksScreen({
           type="button"
         >
           <span className="text-xl leading-none">+</span>
-          Nueva
+          {t('mobilePremium.tasks.new')}
         </button>
       </div>
 
@@ -316,7 +312,7 @@ export function PremiumTasksScreen({
         <div className="relative shrink-0">
           <button
             aria-expanded={filterMenuOpen}
-            aria-label="Filtrar tareas"
+            aria-label={t('mobilePremium.tasks.filterA11y')}
             className={`grid min-h-11 w-11 place-items-center rounded-full border transition ${
               listFilter !== 'all' || filterMenuOpen
                 ? 'border-[color:var(--mp-violet-strong)] bg-[color:var(--mp-toggle-active-bg)] text-[color:var(--mp-violet-strong)] shadow-[inset_0_0_0_1px_var(--mp-violet-strong)]'
@@ -338,11 +334,7 @@ export function PremiumTasksScreen({
           ) : null}
         </div>
         <div className="flex min-w-0 flex-1 gap-3 overflow-x-auto [scrollbar-width:none]">
-          {[
-            ['Body', 'Cuerpo'],
-            ['Mind', 'Mente'],
-            ['Soul', 'Alma'],
-          ].map(([value, label]) => (
+          {STREAK_PILLARS.map((value) => (
             <button
               className={`min-h-11 shrink-0 rounded-full border px-6 text-sm font-semibold transition ${
                 pillarFilter === value
@@ -353,16 +345,16 @@ export function PremiumTasksScreen({
               onClick={() => setPillarFilter((current) => current === value ? null : value as StreakPanelPillar)}
               type="button"
             >
-              {label}
+              {translatePillar(value, t)}
             </button>
           ))}
         </div>
       </div>
 
       <div className="grid grid-cols-[minmax(0,1fr)_64px_92px] gap-3 border-b border-[color:var(--mp-border)] pb-2 text-xs text-[color:var(--mp-text-muted)]">
-        <span>Tarea</span>
-        <span className="text-center">Semanas</span>
-        <span className="text-right">Progreso</span>
+        <span>{t('mobilePremium.tasks.task')}</span>
+        <span className="text-center">{t('mobilePremium.tasks.weeks')}</span>
+        <span className="text-right">{t('mobilePremium.tasks.progress')}</span>
       </div>
 
       <div>
@@ -403,10 +395,11 @@ function TaskListFilterMenu({
   activeFilter: TaskListFilter;
   onSelect: (filter: TaskListFilter) => void;
 }) {
+  const { t } = usePostLoginLanguage();
   const options: Array<{ label: string; value: TaskListFilter }> = [
-    { label: 'Todo', value: 'all' },
-    { label: 'Solo tareas en racha', value: 'streak' },
-    { label: 'Ocultar hábitos logrados', value: 'hide-achieved' },
+    { label: t('mobilePremium.tasks.filter.all'), value: 'all' },
+    { label: t('mobilePremium.tasks.filter.streak'), value: 'streak' },
+    { label: t('mobilePremium.tasks.filter.hideAchieved'), value: 'hide-achieved' },
   ];
 
   return (
@@ -470,6 +463,7 @@ function isAchievedHabit(task: PremiumTaskRow) {
 }
 
 function PremiumTaskProgressRow({ onboardingCue = false, task }: { onboardingCue?: boolean; task: PremiumTaskRow }) {
+  const { language, t } = usePostLoginLanguage();
   const labBase = useMobilePremiumBasePath();
   const difficultyTone = resolveDifficultyTone(task.difficultyLabel);
   const progress = `${task.weeklyDone}/${task.weeklyGoal}`;
@@ -486,23 +480,27 @@ function PremiumTaskProgressRow({ onboardingCue = false, task }: { onboardingCue
     >
       <TaskLeadingBadge hasStreak={hasStreak} stat={task.stat} streakDays={task.streakDays} />
       <div className="min-w-0 overflow-hidden pr-1">
-        <p className="truncate text-[1.1rem] leading-7 text-[color:var(--mp-text)]">{task.name}</p>
+        <p className="truncate text-[1.1rem] leading-7 text-[color:var(--mp-text)]">{translateTaskText(task.name, language)}</p>
         <div className="mt-1 flex min-w-0 max-w-full items-center gap-1.5 overflow-hidden text-xs text-[color:var(--mp-text-secondary)]">
-          <span className="min-w-0 max-w-[7rem] truncate">{task.stat}</span>
+          <span className="min-w-0 max-w-[7rem] truncate">{translateTaskText(task.stat, language)}</span>
           <span className="shrink-0 text-[color:var(--mp-text-muted)]">·</span>
           {task.difficultyLabel ? (
             <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${difficultyTone}`}>
-              {task.difficultyLabel}
+              {translateDifficulty(task.difficultyLabel, t)}
             </span>
           ) : null}
           {task.achievementSealVisible ? (
-            <span aria-label="Hábito logrado" className="ml-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border border-violet-300/20 bg-violet-400/10 text-[0.65rem] text-violet-200">
+            <span
+              aria-label={t('mobilePremium.tasks.achievedHabit')}
+              className="ml-0.5 shrink-0 text-[0.72rem] font-semibold text-[color:var(--mp-violet-strong)]"
+              title={t('mobilePremium.tasks.achievedHabit')}
+            >
               ✦
             </span>
           ) : null}
         </div>
         {shouldShowHabitLanguage ? (
-          <p className="mt-1 text-xs font-medium text-[color:var(--mp-text-muted)]">hábito</p>
+          <p className="mt-1 text-xs font-medium text-[color:var(--mp-text-muted)]">{t('mobilePremium.tasks.habit')}</p>
         ) : null}
       </div>
       <div className="grid grid-cols-[58px_42px_10px] items-center gap-2 justify-self-end">
@@ -527,6 +525,7 @@ function TaskSuggestionsSheet({
   onApply: (suggestions: SuggestedTask[]) => void | Promise<void>;
   onClose: () => void;
 }) {
+  const { language, t } = usePostLoginLanguage();
   const [selected, setSelected] = useState<string[]>([]);
   const [choosingDifficulty, setChoosingDifficulty] = useState<string | null>(null);
   const [confirmingTaskId, setConfirmingTaskId] = useState<string | null>(null);
@@ -543,14 +542,14 @@ function TaskSuggestionsSheet({
   })).filter((group) => group.tasks.length > 0);
 
   return (
-    <TaskSheetFrame eyebrow="Sugerencias" onClose={onClose} title="Tareas recomendadas">
+    <TaskSheetFrame eyebrow={t('mobilePremium.tasks.suggestionsEyebrow')} onClose={onClose} title={t('mobilePremium.tasks.suggestionsTitle')}>
       <p className="text-sm leading-6 text-[color:var(--mp-text-secondary)]">
-        Prácticas del quick start que no quedaron en tu base inicial. Elegí las que querés sumar.
+        {t('mobilePremium.tasks.suggestionsBody')}
       </p>
 
       {selectedSuggestions.length ? (
         <div className="mt-4 rounded-full border border-violet-300/25 bg-violet-400/10 px-4 py-2 text-center text-xs font-semibold text-[color:var(--mp-violet)]">
-          {selectedSuggestions.length} seleccionada{selectedSuggestions.length === 1 ? '' : 's'} para agregar
+          {t('mobilePremium.tasks.selectedCount', { count: selectedSuggestions.length, plural: selectedSuggestions.length === 1 ? '' : 's' })}
         </div>
       ) : null}
 
@@ -559,7 +558,7 @@ function TaskSuggestionsSheet({
           visibleByPillar.map((group) => (
             <section key={group.pillar}>
               <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">
-                {PILLAR_LABELS[group.pillar]}
+                {translatePillar(group.pillar, t)}
               </p>
               <div className="divide-y divide-[color:var(--mp-border)] border-y border-[color:var(--mp-border)]">
                 {group.tasks.map((suggestion) => {
@@ -568,9 +567,9 @@ function TaskSuggestionsSheet({
                   return (
                     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-3.5" key={suggestion.id}>
                       <div className="min-w-0">
-                        <p className="truncate text-base font-medium text-[color:var(--mp-text)]">{suggestion.name}</p>
+                        <p className="truncate text-base font-medium text-[color:var(--mp-text)]">{translateTaskText(suggestion.name, language)}</p>
                         <div className="mt-1.5 flex items-center gap-2 text-xs text-[color:var(--mp-text-secondary)]">
-                          <span className="font-semibold text-[color:var(--mp-violet)]">{suggestion.stat}</span>
+                          <span className="font-semibold text-[color:var(--mp-violet)]">{translateTaskText(suggestion.stat, language)}</span>
                         </div>
                       </div>
                       <div className="flex min-w-[9.5rem] justify-end">
@@ -591,7 +590,7 @@ function TaskSuggestionsSheet({
                                 }}
                                 type="button"
                               >
-                                {difficulty}
+                                {translateDifficulty(difficulty, t)}
                               </button>
                             ))}
                           </div>
@@ -601,7 +600,7 @@ function TaskSuggestionsSheet({
                           </span>
                         ) : (
                           <button
-                            aria-label={`Sumar ${suggestion.name}`}
+                            aria-label={t('mobilePremium.tasks.addSuggestionA11y', { name: translateTaskText(suggestion.name, language) })}
                             className="grid h-9 w-9 place-items-center rounded-full border border-[color:var(--mp-border)] text-lg font-semibold text-[color:var(--mp-violet)] transition"
                             onClick={() => setChoosingDifficulty((current) => current === suggestion.id ? null : suggestion.id)}
                             type="button"
@@ -618,7 +617,7 @@ function TaskSuggestionsSheet({
           ))
         ) : (
           <p className="border-y border-[color:var(--mp-border)] py-6 text-sm leading-6 text-[color:var(--mp-text-secondary)]">
-            Ya sumaste todas las sugerencias disponibles a Tareas.
+            {t('mobilePremium.tasks.emptySuggestions')}
           </p>
         )}
       </div>
@@ -629,7 +628,7 @@ function TaskSuggestionsSheet({
       ) : null}
       <div className="mt-5 grid grid-cols-[0.9fr_1.1fr] gap-3">
         <button className="min-h-11 rounded-full border border-[color:var(--mp-border)] px-5 text-sm font-semibold text-[color:var(--mp-text-secondary)] disabled:opacity-45" disabled={isApplying} onClick={onClose} type="button">
-          Cancelar
+          {t('mobilePremium.tasks.cancel')}
         </button>
         <button
           className="min-h-11 rounded-full bg-violet-500 px-5 text-sm font-semibold text-white disabled:opacity-45"
@@ -640,7 +639,7 @@ function TaskSuggestionsSheet({
           })))}
           type="button"
         >
-          {isApplying ? 'Guardando...' : `Agregar ${selectedSuggestions.length || ''} tarea${selectedSuggestions.length === 1 ? '' : 's'}`}
+          {isApplying ? t('mobilePremium.tasks.saving') : t('mobilePremium.tasks.addTasks', { count: selectedSuggestions.length || '', plural: selectedSuggestions.length === 1 ? '' : 's' })}
         </button>
       </div>
     </TaskSheetFrame>
@@ -658,6 +657,7 @@ function TaskSheetFrame({
   onClose: () => void;
   title: string;
 }) {
+  const { t } = usePostLoginLanguage();
   return (
     <div className="fixed inset-0 z-50 mx-auto flex w-full max-w-[430px] items-end justify-center bg-black/42 px-3 pb-[max(14px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] backdrop-blur-xl">
       <style>{`
@@ -686,7 +686,7 @@ function TaskSheetFrame({
             <h2 className="mt-1 text-2xl font-semibold leading-tight text-[color:var(--mp-text)]">{title}</h2>
           </div>
           <button
-            aria-label="Cerrar"
+            aria-label={t('mobilePremium.tasks.close')}
             className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-2xl text-[color:var(--mp-text-secondary)]"
             onClick={onClose}
             type="button"
@@ -702,6 +702,7 @@ function TaskSheetFrame({
 
 
 function CompactMonthWeeks({ weeks, weeklyGoal }: { weeks: number[]; weeklyGoal: number }) {
+  const { t } = usePostLoginLanguage();
   const normalized = Array.from({ length: 5 }, (_, index) => Number(weeks[index] ?? 0));
   const currentWeekIndex = normalized.reduce((latest, value, index) => (value > 0 ? index : latest), -1);
   return (
@@ -713,12 +714,12 @@ function CompactMonthWeeks({ weeks, weeklyGoal }: { weeks: number[]; weeklyGoal:
         return (
           <span className="grid justify-items-center gap-1" key={index}>
             <span
-              aria-label={`S${index + 1}: ${Math.round(value)}/${weeklyGoal}`}
+              aria-label={t('mobilePremium.tasks.weekA11y', { week: index + 1, progress: Math.round(value), goal: weeklyGoal })}
               className="mp-tasks-week-bar h-7 w-1.5 origin-bottom rounded-full"
               style={{ backgroundColor: tone, animation: `mpTasksWeekRise 420ms ease-out ${80 + index * 70}ms both` }}
-              title={`S${index + 1}: ${Math.round(value)}/${weeklyGoal}`}
+              title={t('mobilePremium.tasks.weekA11y', { week: index + 1, progress: Math.round(value), goal: weeklyGoal })}
             />
-            <span className="text-[8px] font-medium leading-none text-[color:var(--mp-text-muted)]">S{index + 1}</span>
+            <span className="text-[8px] font-medium leading-none text-[color:var(--mp-text-muted)]">{t('mobilePremium.tasks.weekShort', { week: index + 1 })}</span>
           </span>
         );
       })}
@@ -727,16 +728,17 @@ function CompactMonthWeeks({ weeks, weeklyGoal }: { weeks: number[]; weeklyGoal:
 }
 
 function TaskLeadingBadge({ hasStreak, stat, streakDays }: { hasStreak: boolean; stat: string; streakDays: number }) {
+  const { t } = usePostLoginLanguage();
   if (hasStreak) {
     return (
       <div
-        aria-label={`Racha de ${streakDays} días`}
-        className="grid h-11 w-11 place-items-center rounded-full border border-orange-300/30 bg-[radial-gradient(circle_at_35%_25%,rgba(251,146,60,0.24),rgba(17,17,19,0.94)_62%)] text-[color:var(--mp-amber)] shadow-[0_0_24px_rgba(251,146,60,0.12)]"
-        title={`${streakDays} días de racha`}
+        aria-label={t('mobilePremium.tasks.streakA11y', { days: streakDays })}
+        className="grid h-11 w-11 place-items-center rounded-full border border-orange-300/35 bg-orange-300/[0.06] text-[color:var(--mp-amber)]"
+        title={t('mobilePremium.tasks.streakTitle', { days: streakDays })}
       >
         <span className="flex flex-col items-center justify-center leading-none">
           <span className="text-[1rem]" aria-hidden="true">🔥</span>
-          <span className="mt-0.5 text-[0.62rem] font-semibold tracking-[-0.02em]">{streakDays}d</span>
+          <span className="mt-0.5 text-[0.62rem] font-semibold tracking-[-0.02em]">{streakDays}{t('mobilePremium.tasks.daySuffix')}</span>
         </span>
       </div>
     );
@@ -937,4 +939,99 @@ function resolveDifficultyTone(difficulty: string | null): string {
     return 'bg-red-400/12 text-[color:var(--mp-red)]';
   }
   return 'bg-amber-300/12 text-[color:var(--mp-amber)]';
+}
+
+function translatePillar(pillar: StreakPanelPillar, t: (key: string, params?: Record<string, string | number>) => string) {
+  if (pillar === 'Body') return t('mobilePremium.pillar.body');
+  if (pillar === 'Mind') return t('mobilePremium.pillar.mind');
+  return t('mobilePremium.pillar.soul');
+}
+
+function translateDifficulty(value: string, t: (key: string, params?: Record<string, string | number>) => string) {
+  const normalized = value.trim().toLowerCase();
+  if (normalized.includes('fácil') || normalized.includes('facil') || normalized.includes('easy')) return t('mobilePremium.difficulty.easy');
+  if (normalized.includes('difícil') || normalized.includes('dificil') || normalized.includes('hard')) return t('mobilePremium.difficulty.hard');
+  if (normalized.includes('media') || normalized.includes('medium')) return t('mobilePremium.difficulty.medium');
+  return value;
+}
+
+function translateTaskText(value: string, language: 'es' | 'en') {
+  if (language === 'es') return value;
+  const normalized = value.trim().toLowerCase();
+  const labels: Record<string, string> = {
+    '20` sin pantallas antes de dormir': 'No screens 20 min before bed',
+    '20’ sin pantallas antes de dormir': 'No screens 20 min before bed',
+    '20 min sin pantallas antes de dormir': 'No screens 20 min before bed',
+    'sin pantallas antes de dormir': 'No screens before bed',
+    '2l de agua': '2L of water',
+    'ayuno hasta las 14': 'Fast until 2 PM',
+    'cena antes de las': 'Dinner before the set time',
+    'dormir 8hs': 'Sleep 8 hours',
+    'no dulces': 'No sweets',
+    'tomar agua': 'Drink water',
+    '10.000 pasos / correr': '10,000 steps / run',
+    'leer 20 min': 'Read 20 min',
+    'planificar el día': 'Plan the day',
+    'escribir gratitud': 'Write gratitude',
+    'entrenar agilidad mental': 'Train mental agility',
+    'hacer un gesto de ayuda': 'Do a helpful gesture',
+    'leer o estudiar': 'Read or study',
+    'cuidar de mí': 'Care for myself',
+    'observar impulsos': 'Observe impulses',
+    'conectar con alguien': 'Connect with someone',
+    'crear o escribir': 'Create or write',
+    'caminar': 'Walk',
+    'foco profundo': 'Deep focus',
+    'meditar o conectar': 'Meditate or connect',
+    'revisar finanzas': 'Review finances',
+    'regularme': 'Regulate myself',
+    'disfrutar sin culpa': 'Enjoy without guilt',
+    'rutina de higiene': 'Hygiene routine',
+    'reflexionar cómo me siento': 'Reflect on how I feel',
+    'moderar consumos': 'Moderate consumption',
+    'movilidad o estiramientos': 'Mobility or stretching',
+    'conectar con naturaleza': 'Connect with nature',
+    'comida equilibrada': 'Balanced meal',
+    'ordenar espacio o mente': 'Tidy space or mind',
+    'cuidar postura': 'Care for posture',
+    'acción con propósito': 'Purposeful action',
+    'avanzar una meta': 'Move a goal forward',
+    'pausa de recuperación': 'Recovery pause',
+    'hacer algo desafiante': 'Do something challenging',
+    'decisión alineada': 'Aligned decision',
+    'rutina activadora': 'Activation routine',
+    'sueño': 'Sleep',
+    'nutrición': 'Nutrition',
+    'hidratación': 'Hydration',
+    'movilidad': 'Mobility',
+    'aprendizaje': 'Learning',
+    'enfoque': 'Focus',
+    'gratitud': 'Gratitude',
+    'recuperación': 'Recovery',
+    'moderación': 'Moderation',
+    'agilidad': 'Agility',
+    'altruismo': 'Altruism',
+    'autoestima': 'Self-esteem',
+    'autocontrol': 'Self-control',
+    'conexión': 'Connection',
+    'creatividad': 'Creativity',
+    'energía': 'Energy',
+    'espiritualidad': 'Spirituality',
+    'finanzas': 'Finances',
+    'gestión': 'Regulation',
+    'gozo': 'Joy',
+    'higiene': 'Hygiene',
+    'naturaleza': 'Nature',
+    'orden': 'Order',
+    'postura': 'Posture',
+    'propósito': 'Purpose',
+    'proyección': 'Projection',
+    'resiliencia': 'Resilience',
+    'valores': 'Values',
+    'vitalidad': 'Vitality',
+  };
+  const direct = labels[normalized];
+  if (direct) return direct;
+  const partial = Object.entries(labels).find(([source]) => normalized.startsWith(source));
+  return partial?.[1] ?? value;
 }

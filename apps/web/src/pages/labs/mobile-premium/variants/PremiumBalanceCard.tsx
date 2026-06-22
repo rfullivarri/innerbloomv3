@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 
 import { useRequest } from '../../../../hooks/useRequest';
+import { usePostLoginLanguage } from '../../../../i18n/postLoginLanguage';
 import { getUserXpByTrait, type TraitXpEntry } from '../../../../lib/api';
 
 const PILLAR_ORDER = ['Body', 'Mind', 'Soul'] as const;
@@ -37,6 +38,12 @@ const PILLAR_META: Record<Pillar, { color: string; label: string }> = {
   Mind: { color: '#a78bfa', label: 'Mente' },
   Soul: { color: '#f5c56b', label: 'Alma' },
 };
+
+function translatePillarLabel(pillar: Pillar, t: (key: string, params?: Record<string, string | number>) => string) {
+  if (pillar === 'Body') return t('mobilePremium.pillar.body');
+  if (pillar === 'Mind') return t('mobilePremium.pillar.mind');
+  return t('mobilePremium.pillar.soul');
+}
 
 const DEMO_TRAITS: TraitXpEntry[] = [
   { trait: 'sleep', name: 'Recuperación', xp: 517, pillar: 'Body', sortOrder: 1 },
@@ -110,7 +117,7 @@ function computePillarMetrics(dataset: RadarDataset): PillarMetric[] {
   }));
 }
 
-function resolveBalanceReading(metrics: PillarMetric[]): BalanceReading {
+function resolveBalanceReading(metrics: PillarMetric[], t: (key: string, params?: Record<string, string | number>) => string): BalanceReading {
   const ordered = [...metrics].sort((first, second) => second.percent - first.percent);
   const dominant = ordered[0];
   const spread = dominant.percent - ordered[ordered.length - 1].percent;
@@ -118,7 +125,7 @@ function resolveBalanceReading(metrics: PillarMetric[]): BalanceReading {
   return {
     dominant,
     isBalanced,
-    label: isBalanced ? 'En balance' : `Predominio ${dominant.label}`,
+    label: isBalanced ? t('mobilePremium.dashboard.balance') : t('mobilePremium.dashboard.dominantPillar', { pillar: dominant.label }),
   };
 }
 
@@ -129,14 +136,15 @@ export function PremiumBalanceCard({
   backendUserId: string | null;
   localTraits?: TraitXpEntry[] | null;
 }) {
+  const { t } = usePostLoginLanguage();
   const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null);
   const traitRequest = useRequest(() => getUserXpByTrait(backendUserId ?? ''), [backendUserId], {
     enabled: Boolean(backendUserId),
   });
   const traits = localTraits ?? (backendUserId ? traitRequest.data?.traits ?? [] : DEMO_TRAITS);
   const dataset = useMemo(() => computeRadarDataset(traits), [traits]);
-  const metrics = useMemo(() => computePillarMetrics(dataset), [dataset]);
-  const reading = useMemo(() => resolveBalanceReading(metrics), [metrics]);
+  const metrics = useMemo(() => computePillarMetrics(dataset).map((metric) => ({ ...metric, label: translatePillarLabel(metric.pillar, t) })), [dataset, t]);
+  const reading = useMemo(() => resolveBalanceReading(metrics, t), [metrics, t]);
   const isLoading = Boolean(backendUserId) && traitRequest.status === 'loading';
 
   return (
@@ -145,25 +153,25 @@ export function PremiumBalanceCard({
         {dataset.axes.length ? (
             <p className="mx-auto max-w-[18rem] text-[1.08rem] font-medium leading-7 text-[color:var(--mp-text)]">
               <span style={{ color: PILLAR_META[reading.dominant.pillar].color }}>{reading.dominant.label}</span>{' '}
-              concentra el {reading.dominant.percent}% del GP
+              {t('mobilePremium.dashboard.pillarLeads', { pillar: '' }).trim()} {reading.dominant.percent}% {t('mobilePremium.dashboard.gpOf')}
             </p>
         ) : null}
       </div>
 
       {isLoading ? (
         <div className="flex h-[21rem] items-center justify-center text-sm text-[color:var(--mp-text-secondary)]">
-          Cargando balance...
+          {t('mobilePremium.route.balance')}...
         </div>
       ) : dataset.axes.length ? (
         <>
           <PremiumRadar dataset={dataset} metrics={metrics} onSelectionChange={setSelectedPillar} />
           <p className="mt-1 text-center text-xs text-[color:var(--mp-text-muted)]">
-            {selectedPillar ? `${PILLAR_META[selectedPillar].label} · rasgos visibles` : 'Tocá un arco para ver sus rasgos'}
+            {selectedPillar ? `${translatePillarLabel(selectedPillar, t)} · ${t('mobilePremium.rewards.traitFallback')}` : t('mobilePremium.dashboard.overview')}
           </p>
         </>
       ) : (
         <div className="flex h-[21rem] items-center justify-center text-sm text-[color:var(--mp-text-secondary)]">
-          Aún no hay GP para mostrar.
+          {t('mobilePremium.dashboard.noSignals')}
         </div>
       )}
     </section>
