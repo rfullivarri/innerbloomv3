@@ -10080,3 +10080,169 @@
     padding-inline: 22px;
   }
 }
+/* Final mobile overrides must stay at the end of this file because the landing
+   has several repeated conversion blocks above. */
+@media (max-width: 768px) {
+  .landing,
+  .landing.landing--v3-conversion {
+    height: auto !important;
+    min-height: 100svh;
+    overflow-y: visible !important;
+    overscroll-behavior-y: auto;
+    scroll-snap-type: none !important;
+  }
+
+  .landing :is(section, .v3-method-snap-panel) {
+    scroll-snap-align: none !important;
+    scroll-snap-stop: normal !important;
+    scroll-margin-top: calc(92px + env(safe-area-inset-top, 0px));
+  }
+
+  .landing.landing--v3-conversion .hero {
+    padding-top: clamp(22px, 6vw, 38px);
+  }
+
+  .landing.landing--v3-conversion .v3-method-card-copy .v2-method-step-badge,
+  .landing.landing--v3-conversion .ib20-detail-nav,
+  .landing.landing--v3-conversion .ib20-detail-chip--difficulty {
+    display: none !important;
+  }
+
+  .landing.landing--v3-conversion .ib20-detail-chips {
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .landing.landing--v3-conversion .ib20-detail-chip--trait {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.78rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .landing.landing--v3-conversion .ib20-detail-chip--down {
+    width: 100% !important;
+    max-width: 176px;
+    min-width: 0;
+    animation: none !important;
+  }
+
+  .landing.landing--v3-conversion .ib20-detail-chip--down i,
+  .landing.landing--v3-conversion .ib20-detail-chip--down b {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .landing.landing--v3-conversion .ib20-detail-chip--down b {
+    overflow: hidden;
+    padding-right: 10px;
+    font-size: 0.66rem;
+    text-overflow: ellipsis;
+  }
+
+  .landing.landing--v3-conversion .ib20-habit-body {
+    grid-template-columns: 96px minmax(0, 1fr) !important;
+    gap: 12px;
+    padding: 15px 12px;
+  }
+
+  .landing.landing--v3-conversion .ib20-habit-ring {
+    width: 92px;
+  }
+
+  .landing.landing--v3-conversion .ib20-habit-ring span {
+    margin-top: 38px;
+    font-size: 0.62rem;
+  }
+
+  .landing.landing--v3-conversion .ib20-habit-status {
+    min-height: 30px;
+    padding: 0.28rem 0.58rem;
+    font-size: clamp(0.68rem, 3.35vw, 0.82rem);
+    white-space: nowrap;
+  }
+
+  .landing.landing--v3-conversion .v3-method-logros__scene {
+    --logros-card-w: clamp(190px, 58vw, 230px);
+    width: min(100%, 390px);
+  }
+
+  .landing.landing--v3-conversion .v3-logros-card,
+  .landing.landing--v3-conversion .v3-logros-card__inner {
+    min-height: 288px !important;
+  }
+
+  .landing.landing--v3-conversion .v3-logros-dev-status {
+    max-width: 100%;
+    padding: 0.34rem 0.54rem;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  .landing.landing--v3-conversion .v3-logros-dev-ring {
+    width: 92px;
+  }
+
+  .landing.landing--v3-conversion .v3-logros-dev-ranges {
+    gap: 4px;
+    font-size: 0.48rem;
+  }
+
+  .landing.landing--v3-conversion .v3-logros-dev-window i {
+    width: 33px;
+    height: 33px;
+    font-size: 0.52rem;
+  }
+
+  .landing.landing--v3-conversion .next--v3-final .container > div {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .landing.landing--v3-conversion .next--v3-final .ib-primary-button {
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 430px) {
+  .landing .nav {
+    grid-template-columns: auto auto 1fr;
+    padding-inline: 12px;
+  }
+
+  .landing .nav-links {
+    display: none;
+  }
+
+  .landing .landing-theme-toggle {
+    width: 42px;
+    height: 42px;
+  }
+
+  .landing .logo-mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .landing .nav-actions {
+    gap: 7px;
+  }
+
+  .landing .nav-actions .nav-auth-button {
+    padding: 0.62rem 0.9rem;
+    font-size: 0.72rem;
+  }
+
+  .landing.landing--v3-conversion .ib20-habit-body {
+    grid-template-columns: 86px minmax(0, 1fr) !important;
+    padding-inline: 10px;
+  }
+
+  .landing.landing--v3-conversion .ib20-habit-ring {
+    width: 82px;
+  }
+}
