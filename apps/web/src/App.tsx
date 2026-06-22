@@ -399,7 +399,7 @@ export default function App() {
               <LoginPage
                 authPath="/login2"
                 defaultRedirectPath={innerbloom2DashboardPath}
-                secondaryActionHref="/v2"
+                secondaryActionHref="/"
                 signUpPath="/sign-up2"
               />
             </RedirectIfSignedIn>
@@ -420,7 +420,7 @@ export default function App() {
               <SignUpPage
                 authPath="/sign-up2"
                 defaultRedirectPath="/onboarding2"
-                secondaryActionHref="/v2"
+                secondaryActionHref="/"
                 signInPath="/login2"
               />
             </RedirectIfSignedIn>

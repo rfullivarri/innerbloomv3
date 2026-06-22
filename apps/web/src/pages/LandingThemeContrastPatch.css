@@ -1130,3 +1130,388 @@
   -webkit-text-fill-color: initial !important;
   text-shadow: none !important;
 }
+
+/* ---------- V3 problem section final composition ---------- */
+
+.landing.landing--v3-conversion .truth-problem-adaptive-stage {
+  width: min(100%, 1360px);
+  grid-template-columns: minmax(230px, 0.78fr) minmax(560px, 1.55fr) minmax(230px, 0.78fr);
+  gap: clamp(18px, 2.4vw, 34px);
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic {
+  width: min(100%, 820px);
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-stage .truth-problem-block {
+  min-height: clamp(236px, 20vw, 306px);
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-content: start;
+  align-items: start;
+  justify-content: initial;
+  column-gap: clamp(16px, 1.5vw, 22px);
+  row-gap: 0;
+  padding: clamp(24px, 2.4vw, 36px);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 248, 236, 0.055), transparent 44%),
+    linear-gradient(180deg, rgba(13, 14, 23, 0.84), rgba(6, 7, 12, 0.76));
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-stage .truth-problem-block.truth-problem-block--left {
+  border-color: rgba(255, 92, 104, 0.42);
+  box-shadow:
+    0 24px 72px rgba(0, 0, 0, 0.34),
+    0 0 38px rgba(255, 92, 104, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-stage .truth-problem-block.truth-problem-block--right {
+  border-color: rgba(55, 240, 166, 0.36);
+  box-shadow:
+    0 24px 72px rgba(0, 0, 0, 0.34),
+    0 0 38px rgba(55, 240, 166, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-stage .truth-problem-icon {
+  display: inline-flex;
+  width: 54px;
+  height: 54px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 2.3rem;
+  line-height: 1;
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-stage .truth-problem-copy {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  gap: clamp(10px, 1vw, 14px);
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-stage .truth-problem-primary {
+  margin-top: -0.08em;
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-stage .truth-problem-icon--x {
+  color: #ff5c68;
+  border: 1px solid rgba(255, 92, 104, 0.34);
+  background: rgba(255, 92, 104, 0.11);
+  box-shadow: 0 0 24px rgba(255, 92, 104, 0.18);
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-stage .truth-problem-icon--check {
+  color: #38f0a5;
+  border: 1px solid rgba(56, 240, 165, 0.34);
+  background: rgba(56, 240, 165, 0.1);
+  box-shadow: 0 0 24px rgba(56, 240, 165, 0.18);
+}
+
+.landing.landing--v3-conversion[data-theme-mode="light"] .truth-problem-adaptive-stage .truth-problem-block {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(125, 86, 210, 0.06), transparent 44%),
+    linear-gradient(180deg, rgba(255, 252, 246, 0.9), rgba(247, 240, 252, 0.78));
+  box-shadow:
+    0 24px 72px rgba(54, 37, 84, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.landing.landing--v3-conversion[data-theme-mode="light"]
+  .truth-problem-adaptive-stage
+  .truth-problem-block.truth-problem-block--left {
+  border-color: rgba(220, 64, 82, 0.36);
+  box-shadow:
+    0 24px 72px rgba(54, 37, 84, 0.12),
+    0 0 34px rgba(220, 64, 82, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.landing.landing--v3-conversion[data-theme-mode="light"]
+  .truth-problem-adaptive-stage
+  .truth-problem-block.truth-problem-block--right {
+  border-color: rgba(22, 160, 112, 0.34);
+  box-shadow:
+    0 24px 72px rgba(54, 37, 84, 0.12),
+    0 0 34px rgba(22, 160, 112, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 1180px) {
+  .landing.landing--v3-conversion .truth-problem-adaptive-stage {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 820px;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-stage .truth-problem-block {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .landing.landing--v3-conversion .truth-problem-adaptive-stage {
+    width: 100%;
+    max-width: 480px;
+    gap: 18px;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic {
+    width: 100%;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-stage .truth-problem-block {
+    border-radius: 20px;
+    padding: 22px;
+  }
+}
+
+/* ---------- V3 method scroll-snap sequence ---------- */
+
+.landing.landing--v3-conversion {
+  height: 100svh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
+
+.landing.landing--v3-conversion.landing--free-scroll {
+  scroll-snap-type: none !important;
+}
+
+.landing.landing--v3-conversion .hero,
+.landing.landing--v3-conversion .truth-problem,
+.landing.landing--v3-conversion .v3-method-snap-panel,
+.landing.landing--v3-conversion .v3-onboarding-cta {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.landing.landing--v3-conversion .testimonials,
+.landing.landing--v3-conversion .faq,
+.landing.landing--v3-conversion .next,
+.landing.landing--v3-conversion .footer {
+  scroll-snap-align: none !important;
+  scroll-snap-stop: normal !important;
+}
+
+.landing.landing--v3-conversion .how {
+  padding: 0;
+  overflow: clip;
+}
+
+.landing.landing--v3-conversion .how > .container {
+  width: 100%;
+  max-width: none;
+  padding-inline: 0;
+}
+
+.landing.landing--v3-conversion .v3-method-shell {
+  width: 100%;
+  max-width: none;
+  gap: 0;
+}
+
+.landing.landing--v3-conversion .v3-method-snap-panel {
+  min-height: 100svh;
+  width: min(100%, 1360px);
+  margin-inline: auto;
+  padding: clamp(84px, 10vh, 136px) clamp(18px, 4vw, 44px) clamp(56px, 8vh, 104px);
+}
+
+.landing.landing--v3-conversion .v3-method-snap-panel--intro {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.landing.landing--v3-conversion .v3-method-snap-panel--intro h2 {
+  max-width: 980px;
+}
+
+.landing.landing--v3-conversion .v3-method-snap-panel--intro .v2-method-intro {
+  max-width: 760px;
+}
+
+.landing.landing--v3-conversion .v3-method-card-grid {
+  gap: 0;
+}
+
+.landing.landing--v3-conversion .v3-method-card {
+  min-height: 100svh;
+}
+
+.landing.landing--v3-conversion .v3-onboarding-cta {
+  min-height: 100svh;
+  display: grid;
+  align-items: center;
+  padding-top: clamp(84px, 10vh, 136px);
+  padding-bottom: clamp(56px, 8vh, 104px);
+}
+
+@media (max-width: 900px) {
+  .landing.landing--v3-conversion .v3-method-snap-panel {
+    min-height: 100svh;
+    padding: clamp(76px, 9vh, 112px) 18px clamp(44px, 7vh, 76px);
+  }
+
+  .landing.landing--v3-conversion .v3-method-card,
+  .landing.landing--v3-conversion .v3-method-card--visual-right {
+    grid-template-columns: 1fr;
+    align-content: center;
+    gap: clamp(18px, 4vh, 32px);
+  }
+
+  .landing.landing--v3-conversion .v3-method-card .v3-method-card-copy {
+    order: 1;
+  }
+
+  .landing.landing--v3-conversion .v3-method-card .v3-step-visual,
+  .landing.landing--v3-conversion .v3-method-card--visual-right .v3-step-visual {
+    order: 2;
+  }
+
+  .landing.landing--v3-conversion .v3-method-product-visual {
+    min-height: clamp(280px, 46vh, 430px);
+  }
+}
+
+@media (max-width: 520px) {
+  .landing.landing--v3-conversion .v3-method-snap-panel {
+    padding-inline: 16px;
+  }
+
+  .landing.landing--v3-conversion .v3-method-snap-panel--intro h2 {
+    font-size: clamp(2.35rem, 10vw, 3.35rem);
+  }
+
+  .landing.landing--v3-conversion .v3-method-card-copy .v2-method-step-title {
+    font-size: clamp(2rem, 8vw, 2.8rem);
+  }
+
+  .landing.landing--v3-conversion .v3-method-card-copy .v2-method-step-description {
+    max-width: 32ch;
+    font-size: 1rem;
+  }
+
+  .landing.landing--v3-conversion .v3-method-product-visual {
+    min-height: clamp(250px, 42vh, 360px);
+  }
+}
+
+/* Keep hero and problem on one continuous surface. */
+.landing.landing--v3-conversion[data-theme-mode="light"] .hero,
+.landing.landing--v3-conversion[data-theme-mode="light"] .truth-problem {
+  background: transparent !important;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+.landing.landing--v3-conversion[data-theme-mode="light"] .truth-problem {
+  margin-top: 0 !important;
+}
+
+/* ---------- V3 lower-page free scroll and simplified FAQ ---------- */
+
+.landing.landing--v3-conversion .testimonials,
+.landing.landing--v3-conversion .faq,
+.landing.landing--v3-conversion .next--v3-final,
+.landing.landing--v3-conversion .footer {
+  scroll-snap-align: none !important;
+  scroll-snap-stop: normal !important;
+}
+
+.landing.landing--v3-conversion .faq--v3-quiet {
+  padding-top: clamp(60px, 8vw, 104px) !important;
+  padding-bottom: clamp(34px, 5vw, 62px) !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.landing.landing--v3-conversion .faq--v3-quiet .container {
+  width: min(100% - clamp(40px, 8vw, 112px), 1040px) !important;
+  max-width: 1040px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.landing.landing--v3-conversion .faq--v3-quiet h2 {
+  margin: 0 0 clamp(26px, 4vw, 42px) !important;
+  text-align: center;
+}
+
+.landing.landing--v3-conversion .faq--v3-quiet details {
+  margin: 0 !important;
+  padding: clamp(20px, 2.4vw, 28px) 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(255, 248, 236, 0.13) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.landing.landing--v3-conversion .faq--v3-quiet details:first-of-type {
+  border-top: 1px solid rgba(255, 248, 236, 0.13) !important;
+}
+
+.landing.landing--v3-conversion .faq--v3-quiet details::before,
+.landing.landing--v3-conversion .faq--v3-quiet details::after {
+  content: none !important;
+}
+
+.landing.landing--v3-conversion .faq--v3-quiet summary {
+  padding: 0 !important;
+  color: rgba(247, 244, 255, 0.82) !important;
+}
+
+.landing.landing--v3-conversion .faq--v3-quiet summary::after {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: rgba(247, 244, 255, 0.62) !important;
+}
+
+.landing.landing--v3-conversion .faq--v3-quiet p {
+  max-width: 72ch;
+  margin: 12px 0 0 !important;
+  color: rgba(226, 229, 246, 0.72) !important;
+}
+
+.landing.landing--v3-conversion .next--v3-final {
+  border-top: 0 !important;
+  margin-top: 0 !important;
+  padding-top: clamp(58px, 7vw, 96px) !important;
+  background: transparent !important;
+}
+
+.landing.landing--v3-conversion[data-theme-mode="light"] .faq--v3-quiet details,
+.landing.landing--v3-conversion[data-theme-mode="light"] .faq--v3-quiet details:first-of-type {
+  border-color: rgba(42, 35, 55, 0.13) !important;
+}
+
+.landing.landing--v3-conversion[data-theme-mode="light"] .faq--v3-quiet summary {
+  color: rgba(18, 16, 31, 0.92) !important;
+}
+
+.landing.landing--v3-conversion[data-theme-mode="light"] .faq--v3-quiet summary::after {
+  color: rgba(91, 72, 128, 0.7) !important;
+}
+
+.landing.landing--v3-conversion[data-theme-mode="light"] .faq--v3-quiet p {
+  color: rgba(45, 39, 61, 0.68) !important;
+}

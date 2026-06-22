@@ -1,0 +1,472 @@
+.graphic {
+  width: min(100%, 760px);
+  margin-inline: auto;
+  color: rgba(255, 248, 236, 0.74);
+}
+
+.graphic svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.panel {
+  fill: rgba(12, 12, 18, 0.58);
+  stroke: rgba(255, 248, 236, 0.12);
+  stroke-width: 1.3;
+}
+
+.panelGlow {
+  fill: none;
+  stroke: rgba(167, 139, 250, 0.16);
+  stroke-width: 62;
+  stroke-linecap: round;
+  filter: blur(28px);
+}
+
+.divider,
+.guidePath {
+  fill: none;
+  stroke: rgba(255, 248, 236, 0.1);
+  stroke-width: 1.6;
+}
+
+.samePerson {
+  opacity: 0.56;
+}
+
+.samePerson circle,
+.samePerson path {
+  fill: none;
+  stroke: rgba(255, 248, 236, 0.36);
+  stroke-width: 2;
+}
+
+.samePerson text,
+.trackTitle text,
+.dropCue text,
+.rigidLabel text,
+.breakLabel text,
+.adaptiveLabel text,
+.recalibrateLabel text,
+.sustainLabel text,
+.interventionCallout text,
+.supportRetryLabel text,
+.impulseLabel text {
+  fill: currentColor;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 760;
+  letter-spacing: 0.11em;
+}
+
+.samePerson text {
+  fill: rgba(255, 248, 236, 0.42);
+  font-size: 11px;
+}
+
+.trackTitle {
+  color: rgba(255, 108, 116, 0.82);
+  opacity: 0.86;
+}
+
+.trackTitleAdaptive {
+  color: rgba(167, 139, 250, 0.9);
+}
+
+.dropCue {
+  color: #ff6571;
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+.dropCue path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-dasharray: 4 6;
+}
+
+.dropCueAdaptive {
+  color: #d3a2ff;
+}
+
+.graphic[data-phase="energyDrop"] .dropCue,
+.graphic[data-phase="intervention"] .dropCue,
+.graphic[data-phase="recovery"] .dropCue,
+.graphic[data-phase="outcome"] .dropCue {
+  opacity: 0.88;
+}
+
+.rigidTrack path,
+.adaptiveTrack path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fullTrace {
+  stroke-width: 6.4;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+
+.initialSegment,
+.dropSegment,
+.responseSegment,
+.recoverySegment,
+.outcomeSegment {
+  display: none;
+}
+
+.rigidTrack .initialSegment {
+  stroke: #ff6571;
+}
+
+.adaptiveTrack .initialSegment {
+  stroke: #ad72ff;
+}
+
+.rigidTrack .guidePath,
+.adaptiveTrack .guidePath {
+  stroke-width: 6;
+  opacity: 0.2;
+}
+
+.rigidTrack .guidePath {
+  stroke: rgba(255, 101, 113, 0.16);
+}
+
+.adaptiveTrack .guidePath {
+  stroke: rgba(142, 114, 255, 0.16);
+}
+
+.graphic:not([data-phase="idle"]) .fullTrace {
+  opacity: 1;
+  animation: drawFullTrace 6.1s cubic-bezier(0.42, 0, 0.18, 1) forwards;
+}
+
+.graphic[data-reduced-motion="true"] .fullTrace {
+  animation: none;
+  opacity: 1;
+  stroke-dashoffset: 0;
+}
+
+.startNode,
+.retryNode,
+.bloomIntervention,
+.rigidLabel,
+.breakLabel,
+.adaptiveLabel,
+.recalibrateLabel,
+.sustainLabel,
+.supportRetryLabel,
+.impulseLabel,
+.breakEnd,
+.adaptiveEnd,
+.fragments {
+  opacity: 0;
+  transition: opacity 420ms ease, transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bloomIntervention {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.interventionCallout {
+  opacity: 0;
+  transition: opacity 420ms ease, transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interventionCallout path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.58;
+}
+
+.interventionCallout text {
+  font-size: 10px;
+  font-weight: 840;
+  letter-spacing: 0.14em;
+}
+
+.brandCallout image {
+  filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.36));
+}
+
+.brandCallout path {
+  stroke-dasharray: 1 5;
+}
+
+.analyzeCallout {
+  color: rgba(218, 186, 255, 0.96);
+}
+
+.recalibrateCallout {
+  color: rgba(111, 189, 255, 0.94);
+}
+
+.supportCallout {
+  color: rgba(72, 230, 210, 0.94);
+}
+
+.startNode {
+  opacity: 1;
+}
+
+.startNode circle:first-child,
+.retryNode circle:first-child,
+.recalibrateLabel circle,
+.sustainLabel circle,
+.impulseLabel circle {
+  fill: rgba(5, 6, 9, 0.95);
+  stroke: rgba(255, 248, 236, 0.58);
+  stroke-width: 2;
+}
+
+.startNode circle:last-child,
+.retryNode circle:last-child {
+  fill: #fff8ec;
+}
+
+.rigidLabel,
+.breakLabel {
+  color: rgba(255, 114, 122, 0.86);
+}
+
+.rigidLabel path,
+.breakLabel path,
+.adaptiveLabel path,
+.recalibrateLabel path,
+.sustainLabel path,
+.supportRetryLabel path,
+.impulseLabel path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+
+.rigidLabel path,
+.adaptiveLabel path,
+.supportRetryLabel path {
+  opacity: 0.38;
+}
+
+.adaptiveLabel,
+.recalibrateLabel,
+.sustainLabel,
+.supportRetryLabel,
+.impulseLabel {
+  color: rgba(188, 166, 255, 0.92);
+}
+
+.analyzeLabel {
+  color: rgba(218, 186, 255, 0.96);
+}
+
+.supportRetryLabel {
+  color: rgba(92, 219, 234, 0.92);
+}
+
+.impulseLabel {
+  color: rgba(71, 241, 169, 0.94);
+}
+
+.graphic[data-phase="intervention"] .rigidLabel,
+.graphic[data-phase="recovery"] .rigidLabel,
+.graphic[data-phase="outcome"] .rigidLabel,
+.graphic[data-phase="recovery"] .retryNode,
+.graphic[data-phase="outcome"] .retryNode,
+.graphic[data-phase="outcome"] .breakLabel,
+.graphic[data-phase="outcome"] .breakEnd,
+.graphic[data-phase="outcome"] .fragments,
+.graphic[data-phase="intervention"] .bloomIntervention,
+.graphic[data-phase="recovery"] .bloomIntervention,
+.graphic[data-phase="outcome"] .bloomIntervention,
+.graphic[data-phase="intervention"] .adaptiveLabel,
+.graphic[data-phase="recovery"] .adaptiveLabel,
+.graphic[data-phase="outcome"] .adaptiveLabel,
+.graphic[data-phase="intervention"] .analyzeCallout,
+.graphic[data-phase="recovery"] .analyzeCallout,
+.graphic[data-phase="outcome"] .analyzeCallout,
+.graphic[data-phase="recovery"] .recalibrateLabel,
+.graphic[data-phase="outcome"] .recalibrateLabel,
+.graphic[data-phase="recovery"] .recalibrateCallout,
+.graphic[data-phase="outcome"] .recalibrateCallout,
+.graphic[data-phase="outcome"] .sustainLabel,
+.graphic[data-phase="outcome"] .supportRetryLabel,
+.graphic[data-phase="outcome"] .supportCallout,
+.graphic[data-phase="outcome"] .impulseLabel,
+.graphic[data-phase="outcome"] .adaptiveEnd,
+.graphic[data-reduced-motion="true"] .rigidLabel,
+.graphic[data-reduced-motion="true"] .retryNode,
+.graphic[data-reduced-motion="true"] .breakLabel,
+.graphic[data-reduced-motion="true"] .breakEnd,
+.graphic[data-reduced-motion="true"] .fragments,
+.graphic[data-reduced-motion="true"] .bloomIntervention,
+.graphic[data-reduced-motion="true"] .adaptiveLabel,
+.graphic[data-reduced-motion="true"] .interventionCallout,
+.graphic[data-reduced-motion="true"] .recalibrateLabel,
+.graphic[data-reduced-motion="true"] .sustainLabel,
+.graphic[data-reduced-motion="true"] .supportRetryLabel,
+.graphic[data-reduced-motion="true"] .impulseLabel,
+.graphic[data-reduced-motion="true"] .adaptiveEnd {
+  opacity: 1;
+}
+
+.bloomRing,
+.bloomWave {
+  fill: none;
+  stroke: rgba(167, 139, 250, 0.5);
+}
+
+.bloomRing {
+  stroke-width: 1.3;
+  stroke-dasharray: 3 7;
+}
+
+.bloomWave {
+  stroke-width: 1;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.bloomLogo {
+  filter: drop-shadow(0 0 14px rgba(167, 139, 250, 0.54));
+}
+
+.graphic[data-phase="intervention"] .bloomWave,
+.graphic[data-phase="recovery"] .bloomWave,
+.graphic[data-phase="outcome"] .bloomWave {
+  animation: bloomPulse 1.25s ease-out 120ms both;
+}
+
+.fragments path,
+.fragments circle {
+  fill: none;
+  stroke: #ff6571;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.breakEnd circle {
+  fill: rgba(8, 8, 13, 0.95);
+  stroke: rgba(255, 101, 113, 0.9);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 8px rgba(255, 83, 96, 0.34));
+}
+
+.breakEnd path {
+  fill: none;
+  stroke: rgba(255, 101, 113, 0.72);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 5 8;
+}
+
+.adaptiveEnd circle {
+  fill: rgba(8, 8, 13, 0.95);
+  stroke: rgba(62, 240, 163, 0.92);
+  stroke-width: 2.2;
+  filter: drop-shadow(0 0 10px rgba(62, 240, 163, 0.42));
+}
+
+.adaptiveEnd path {
+  fill: none;
+  stroke: rgba(62, 240, 163, 0.7);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.fragments circle {
+  fill: #ff6571;
+  stroke: none;
+}
+
+:global(.landing[data-theme-mode="light"]) .graphic {
+  color: rgba(43, 36, 64, 0.74);
+}
+
+:global(.landing[data-theme-mode="light"]) .panel {
+  fill: rgba(255, 252, 246, 0.72);
+  stroke: rgba(77, 61, 114, 0.16);
+}
+
+:global(.landing[data-theme-mode="light"]) .panelGlow {
+  stroke: rgba(167, 139, 250, 0.14);
+}
+
+:global(.landing[data-theme-mode="light"]) .divider,
+:global(.landing[data-theme-mode="light"]) .guidePath {
+  stroke: rgba(72, 56, 102, 0.12);
+}
+
+:global(.landing[data-theme-mode="light"]) .samePerson circle,
+:global(.landing[data-theme-mode="light"]) .samePerson path {
+  stroke: rgba(43, 36, 64, 0.34);
+}
+
+:global(.landing[data-theme-mode="light"]) .samePerson text {
+  fill: rgba(43, 36, 64, 0.48);
+}
+
+:global(.landing[data-theme-mode="light"]) .startNode circle:first-child,
+:global(.landing[data-theme-mode="light"]) .retryNode circle:first-child,
+:global(.landing[data-theme-mode="light"]) .recalibrateLabel circle,
+:global(.landing[data-theme-mode="light"]) .sustainLabel circle,
+:global(.landing[data-theme-mode="light"]) .impulseLabel circle,
+:global(.landing[data-theme-mode="light"]) .breakEnd circle,
+:global(.landing[data-theme-mode="light"]) .adaptiveEnd circle {
+  fill: rgba(255, 252, 246, 0.98);
+  stroke: rgba(43, 36, 64, 0.56);
+}
+
+:global(.landing[data-theme-mode="light"]) .startNode circle:last-child,
+:global(.landing[data-theme-mode="light"]) .retryNode circle:last-child {
+  fill: rgba(43, 36, 64, 0.84);
+}
+
+:global(.landing[data-theme-mode="light"]) .brandCallout image {
+  filter: drop-shadow(0 0 8px rgba(125, 86, 210, 0.28));
+}
+
+:global(.landing[data-theme-mode="light"]) .bloomLogo {
+  filter: drop-shadow(0 0 10px rgba(125, 86, 210, 0.32));
+}
+
+@keyframes bloomPulse {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.78);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.75);
+  }
+}
+
+@keyframes drawFullTrace {
+  0% {
+    stroke-dashoffset: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .graphic *,
+  .graphic *::before,
+  .graphic *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
