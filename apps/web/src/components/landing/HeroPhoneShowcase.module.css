@@ -1308,3 +1308,394 @@
     width: min(100%, 306px);
   }
 }
+
+.modernProductScene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 52% 18%, rgba(139, 92, 246, 0.28), transparent 38%),
+    radial-gradient(circle at 12% 88%, rgba(26, 67, 91, 0.3), transparent 48%),
+    linear-gradient(180deg, #08080d 0%, #0b0d18 54%, #050609 100%);
+}
+
+.modernProductScene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at 50% 45%, black, transparent 74%);
+  opacity: 0.28;
+}
+
+.modernSplash,
+.modernSceneLayer {
+  position: absolute;
+  inset: 0;
+}
+
+.modernSplash {
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 16px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(139, 92, 246, 0.2), transparent 44%),
+    rgba(4, 5, 10, 0.78);
+  animation: modernSplashCycle 15s ease-in-out infinite;
+}
+
+.modernSplashLogo {
+  width: 70px;
+  height: 58px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 18px rgba(167, 139, 250, 0.42));
+  animation: modernSplashLogoCycle 15s ease-in-out infinite;
+}
+
+.modernSplashWord {
+  color: rgba(247, 242, 236, 0.82);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.36em;
+}
+
+.modernSceneLayer {
+  z-index: 2;
+  padding: 66px 18px 20px;
+  opacity: 0;
+  transform: translateX(34px);
+}
+
+.modernSceneRhythm {
+  display: grid;
+  align-content: center;
+  gap: 15px;
+  animation: modernLayerRhythm 15s ease-in-out infinite;
+}
+
+.modernRhythmOption {
+  display: grid;
+  grid-template-columns: 52px 1fr 34px;
+  align-items: center;
+  gap: 12px;
+  min-height: 70px;
+  border-radius: 22px;
+  border: 1px solid rgba(247, 242, 236, 0.22);
+  background: rgba(255, 255, 255, 0.035);
+  padding: 0 15px;
+}
+
+.modernRhythmOption span,
+.modernRhythmOption b {
+  color: rgba(247, 242, 236, 0.86);
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+}
+
+.modernRhythmOption i {
+  height: 30px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 18% 50%, rgba(168, 85, 247, 0.95) 0 5px, transparent 6px),
+    linear-gradient(100deg, #8b5cf6 0 35%, rgba(96, 94, 124, 0.48) 35% 100%);
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.24);
+  mask-image: radial-gradient(70% 130% at 50% 50%, black 46%, transparent 48%);
+}
+
+.modernRhythmOptionActive {
+  border-color: rgba(167, 139, 250, 0.62);
+  background: rgba(139, 92, 246, 0.12);
+  box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.14);
+}
+
+.modernSceneTasks {
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  animation: modernLayerTasks 15s ease-in-out infinite;
+}
+
+.modernTaskHeader {
+  display: grid;
+  grid-template-columns: 1fr 0.64fr 0.42fr;
+  gap: 8px;
+  padding: 0 4px 6px;
+}
+
+.modernTaskHeader span {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(247, 242, 236, 0.18);
+}
+
+.modernTaskRow {
+  display: grid;
+  grid-template-columns: 38px 1fr 56px 44px;
+  align-items: center;
+  gap: 9px;
+  min-height: 78px;
+  border-radius: 22px;
+  border: 1px solid rgba(247, 242, 236, 0.12);
+  background: rgba(255, 255, 255, 0.045);
+  padding: 0 10px;
+}
+
+.modernTaskRow > i {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(167, 139, 250, 0.95) 0 3px, transparent 4px),
+    rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(167, 139, 250, 0.22);
+}
+
+.modernTaskRow div {
+  min-width: 0;
+}
+
+.modernTaskRow strong {
+  display: block;
+  color: rgba(247, 242, 236, 0.94);
+  font-size: 0.95rem;
+  line-height: 1.05;
+}
+
+.modernTaskRow div span {
+  display: block;
+  margin-top: 5px;
+  color: rgba(247, 242, 236, 0.48);
+  font-size: 0.66rem;
+}
+
+.modernTaskRow em {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  align-items: end;
+  height: 34px;
+  font-style: normal;
+}
+
+.modernTaskRow em span {
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(247, 242, 236, 0.2);
+}
+
+.modernTaskRow em .modernTaskBarOn {
+  background: #67e8a5;
+}
+
+.modernTaskRow b {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.7rem;
+  border: 5px solid rgba(167, 139, 250, 0.95);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.modernSceneDetail {
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  animation: modernLayerDetail 15s ease-in-out infinite;
+}
+
+.modernDetailTop {
+  display: grid;
+  grid-template-columns: 104px 1fr;
+  align-items: center;
+  gap: 18px;
+  border-radius: 24px;
+  border: 1px solid rgba(247, 242, 236, 0.14);
+  background: rgba(255, 255, 255, 0.045);
+  padding: 18px;
+}
+
+.modernDetailTop i {
+  width: 94px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: conic-gradient(#f6c553 0 226deg, rgba(247, 242, 236, 0.28) 226deg 360deg);
+  mask: radial-gradient(circle, transparent 0 48%, black 50%);
+}
+
+.modernDetailTop div {
+  display: grid;
+  justify-items: start;
+}
+
+.modernDetailTop strong {
+  color: #f6c553;
+  font-size: 3rem;
+  line-height: 0.9;
+}
+
+.modernDetailTop span {
+  color: rgba(247, 242, 236, 0.58);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.modernDetailCopy {
+  display: grid;
+  gap: 12px;
+  padding: 0 12px;
+}
+
+.modernDetailCopy b,
+.modernDetailCopy span {
+  display: block;
+  height: 16px;
+  border-radius: 999px;
+  background: rgba(246, 197, 83, 0.28);
+}
+
+.modernDetailCopy span {
+  width: 82%;
+  background: rgba(247, 242, 236, 0.16);
+}
+
+.modernDetailCopy span:last-child {
+  width: 62%;
+}
+
+.modernMonths {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.modernMonths i {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  color: #f6c553;
+  font-style: normal;
+  font-size: 0.76rem;
+  font-weight: 850;
+  border: 2px solid currentColor;
+}
+
+.modernMonths .modernMonthProjected {
+  color: #4ade80;
+  outline: 1px dashed rgba(74, 222, 128, 0.55);
+  outline-offset: 4px;
+}
+
+.modernSceneShelf {
+  display: grid;
+  align-content: center;
+  gap: 28px;
+  animation: modernLayerShelf 15s ease-in-out infinite;
+}
+
+.modernShelfTabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(247, 242, 236, 0.14);
+  padding: 5px;
+}
+
+.modernShelfTabs span {
+  height: 32px;
+  border-radius: 999px;
+}
+
+.modernShelfTabs span:nth-child(1) {
+  background: rgba(247, 242, 236, 0.92);
+}
+
+.modernShelfTrack {
+  display: grid;
+  grid-template-columns: 0.46fr 1fr 0.46fr;
+  gap: 14px;
+  align-items: center;
+}
+
+.modernShelfCard,
+.modernShelfSide {
+  min-height: 270px;
+  border-radius: 28px;
+  border: 1px solid rgba(167, 139, 250, 0.48);
+  background: #151516;
+}
+
+.modernShelfSide {
+  opacity: 0.35;
+  transform: scale(0.88);
+}
+
+.modernShelfCard {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  padding: 18px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+}
+
+.modernShelfCard img {
+  width: 116px;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+
+.modernShelfCard strong {
+  color: #f8fafc;
+  font-size: 1.4rem;
+}
+
+.modernShelfCard span {
+  width: 58%;
+  height: 9px;
+  border-radius: 999px;
+  background: #8b5cf6;
+}
+
+@keyframes modernSplashCycle {
+  0%, 14% { opacity: 1; transform: scale(1); }
+  20%, 88% { opacity: 0; transform: scale(1.04); pointer-events: none; }
+  94%, 100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes modernSplashLogoCycle {
+  0%, 100% { transform: scale(0.96); }
+  8% { transform: scale(1.04); }
+}
+
+@keyframes modernLayerRhythm {
+  0%, 16%, 39%, 100% { opacity: 0; transform: translateX(34px); }
+  21%, 34% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes modernLayerTasks {
+  0%, 34%, 57%, 100% { opacity: 0; transform: translateX(34px); }
+  39%, 52% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes modernLayerDetail {
+  0%, 52%, 75%, 100% { opacity: 0; transform: translateX(34px); }
+  57%, 70% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes modernLayerShelf {
+  0%, 70%, 93%, 100% { opacity: 0; transform: translateX(34px); }
+  75%, 88% { opacity: 1; transform: translateX(0); }
+}

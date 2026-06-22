@@ -341,7 +341,7 @@ function LoopSplashScene({ variant = "default" }: { variant?: HeroPhoneShowcaseV
             ))}
           </p>
           <img
-            src="/IB-COLOR-LOGO-v2.png"
+            src="/innerbloom-flower-logo.png"
             alt=""
             className={styles.loopSplashFlower}
             loading="eager"
@@ -353,11 +353,110 @@ function LoopSplashScene({ variant = "default" }: { variant?: HeroPhoneShowcaseV
   );
 }
 
+const heroTasks = [
+  { label: "2L", meta: "Hidratación", count: "2/3", bars: 3 },
+  { label: "14h", meta: "Nutrición", count: "2/3", bars: 2 },
+  { label: "8h", meta: "Sueño", count: "3/3", bars: 3 },
+];
+
+function ModernHeroProductScene() {
+  return (
+    <section className={styles.modernProductScene} aria-hidden>
+      <div className={styles.modernSplash}>
+        <img src="/innerbloom-flower-logo.png" alt="" className={styles.modernSplashLogo} />
+        <span className={styles.modernSplashWord}>INNERBLOOM</span>
+      </div>
+
+      <div className={`${styles.modernSceneLayer} ${styles.modernSceneRhythm}`}>
+        {["Low", "Chill", "Flow", "Evolve"].map((mode, index) => (
+          <div className={`${styles.modernRhythmOption} ${index === 2 ? styles.modernRhythmOptionActive : ""}`} key={mode}>
+            <span>{mode}</span>
+            <i />
+            <b>{index + 1}x</b>
+          </div>
+        ))}
+      </div>
+
+      <div className={`${styles.modernSceneLayer} ${styles.modernSceneTasks}`}>
+        <div className={styles.modernTaskHeader}>
+          <span />
+          <span />
+          <span />
+        </div>
+        {heroTasks.map((task, index) => (
+          <div className={styles.modernTaskRow} key={task.label}>
+            <i />
+            <div>
+              <strong>{task.label}</strong>
+              <span>{task.meta}</span>
+            </div>
+            <em>
+              {Array.from({ length: 5 }).map((_, barIndex) => (
+                <span className={barIndex < task.bars ? styles.modernTaskBarOn : ""} key={barIndex} />
+              ))}
+            </em>
+            <b>{task.count}</b>
+          </div>
+        ))}
+      </div>
+
+      <div className={`${styles.modernSceneLayer} ${styles.modernSceneDetail}`}>
+        <div className={styles.modernDetailTop}>
+          <i />
+          <div>
+            <strong>63</strong>
+            <span>Score</span>
+          </div>
+        </div>
+        <div className={styles.modernDetailCopy}>
+          <b />
+          <span />
+          <span />
+        </div>
+        <div className={styles.modernMonths}>
+          {[53, 72, 38, 96].map((month, index) => (
+            <i className={index === 3 ? styles.modernMonthProjected : ""} key={month}>{month}%</i>
+          ))}
+        </div>
+      </div>
+
+      <div className={`${styles.modernSceneLayer} ${styles.modernSceneShelf}`}>
+        <div className={styles.modernShelfTabs}>
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className={styles.modernShelfTrack}>
+          <article className={styles.modernShelfSide} />
+          <article className={styles.modernShelfCard}>
+            <img src="/sellos/body/sello_body_hydration.png" alt="" />
+            <strong>2L</strong>
+            <span />
+          </article>
+          <article className={styles.modernShelfSide} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function HeroPhoneShowcase({
   variant = "default",
 }: {
   variant?: HeroPhoneShowcaseVariant;
 }) {
+  if (variant === "v3Right") {
+    return (
+      <PhoneFrame variant={variant}>
+        <div
+          className={styles.phoneScreenBackground}
+          style={{ "--hero-purple-afternoon": purpleAfternoonSolid } as CSSProperties}
+        />
+        <ModernHeroProductScene />
+      </PhoneFrame>
+    );
+  }
+
   const [dashboardReady, setDashboardReady] = useState(false);
   const [demoDataReady, setDemoDataReady] = useState(false);
   const [isHeroActive, setIsHeroActive] = useState(true);

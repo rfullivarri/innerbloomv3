@@ -6,6 +6,7 @@ import {
   type LocalizationResource,
 } from '@clerk/clerk-react';
 import {
+  createElement,
   createContext,
   useContext,
   type PropsWithChildren,
@@ -58,9 +59,10 @@ function ClerkRuntimeBridge({ children }: PropsWithChildren) {
   const clerkUser = useClerkUser();
   const clerk = useClerkRuntime();
 
-  return (
-    <RuntimeAuthContext.Provider
-      value={{
+  return createElement(
+    RuntimeAuthContext.Provider,
+    {
+      value: {
         auth: {
           isLoaded: clerkAuth.isLoaded,
           isSignedIn: clerkAuth.isSignedIn,
@@ -75,10 +77,9 @@ function ClerkRuntimeBridge({ children }: PropsWithChildren) {
         clerk: {
           openUserProfile: clerk.openUserProfile,
         },
-      }}
-    >
-      {children}
-    </RuntimeAuthContext.Provider>
+      },
+    },
+    children,
   );
 }
 
@@ -102,13 +103,13 @@ export function RuntimeAuthProvider({
   ...clerkProps
 }: RuntimeAuthProviderProps) {
   if (!clerkEnabled) {
-    return <RuntimeAuthContext.Provider value={signedOutRuntimeValue}>{children}</RuntimeAuthContext.Provider>;
+    return createElement(RuntimeAuthContext.Provider, { value: signedOutRuntimeValue }, children);
   }
 
-  return (
-    <ClerkProvider {...clerkProps}>
-      <ClerkRuntimeBridge>{children}</ClerkRuntimeBridge>
-    </ClerkProvider>
+  return createElement(
+    ClerkProvider,
+    clerkProps,
+    createElement(ClerkRuntimeBridge, null, children),
   );
 }
 

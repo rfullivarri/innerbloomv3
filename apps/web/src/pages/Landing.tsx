@@ -27,8 +27,9 @@ import { AdaptiveText } from "../components/landing/AdaptiveText";
 import { CookieConsentBanner } from "../components/landing/CookieConsentBanner";
 import { useLandingAnalytics } from "../components/landing/useLandingAnalytics";
 import { HeroPhoneShowcase } from "../components/landing/HeroPhoneShowcase";
+import { HeroProductScene } from "../components/landing/hero/HeroProductScene";
+import { AdaptiveJourneyGraphic } from "../components/landing/problem/AdaptiveJourneyGraphic";
 import WeatherCycleOrb from "../components/landing/WeatherCycleOrb";
-import { GameModeStep } from "../onboarding/steps/GameModeStep";
 import { QuickStartTasksStep } from "../onboarding/steps/QuickStartTasksStep";
 import { QUICK_START_TASKS } from "../onboarding/quickStart";
 import { LabsWeeklyRhythmSystemSection } from "../components/labs/LabsWeeklyRhythmSystemSection";
@@ -197,12 +198,15 @@ function BackToTopButton({ language }: { language: Language }) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    const landingScrollContainer = document.querySelector<HTMLElement>(".landing");
     const handleScroll = () => {
-      setIsVisible(window.scrollY > 500);
+      setIsVisible((landingScrollContainer?.scrollTop ?? window.scrollY) > 500);
     };
+
     handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const scrollTarget: HTMLElement | Window = landingScrollContainer ?? window;
+    scrollTarget.addEventListener("scroll", handleScroll, { passive: true });
+    return () => scrollTarget.removeEventListener("scroll", handleScroll);
   }, []);
 
   if (!isVisible) return null;
@@ -212,7 +216,15 @@ function BackToTopButton({ language }: { language: Language }) {
       type="button"
       className="landing-back-to-top"
       aria-label={language === "es" ? "Volver arriba" : "Back to top"}
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      onClick={() => {
+        const landingScrollContainer = document.querySelector<HTMLElement>(".landing");
+        if (landingScrollContainer && landingScrollContainer.scrollHeight > landingScrollContainer.clientHeight) {
+          landingScrollContainer.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }}
     >
       <span aria-hidden="true">↑</span>
       <span>Top</span>
@@ -564,11 +576,7 @@ export function LandingV3MethodVisual({
             <p className="v3-quickstart-phase-title v3-quickstart-phase-title--rhythm">
               {language === "es" ? "Elegí tu ritmo" : "Choose your rhythm"}
             </p>
-            <GameModeStep
-              language={language}
-              selected="FLOW"
-              onSelect={() => undefined}
-            />
+            <LandingV3RhythmPickerPreview language={language} />
           </div>
           <div className="v3-quickstart-tasks-preview">
             <p className="v3-quickstart-phase-title v3-quickstart-phase-title--tasks">
@@ -612,7 +620,53 @@ export function LandingV3MethodVisual({
 
   return (
     <div className="v3-step-visual v3-method-product-visual v3-method-logros" data-light-scope="dashboard-v3" aria-hidden>
-      <LandingV3LogrosVisual language={language} logrosCycleMs={logrosCycleMs} />
+      <LandingV3LogrosVisual language={language} cycleMs={logrosCycleMs} />
+    </div>
+  );
+}
+
+const LANDING_V3_RHYTHMS = [
+  { key: "low", label: "LOW", days: 1 },
+  { key: "chill", label: "CHILL", days: 2 },
+  { key: "flow", label: "FLOW", days: 3 },
+  { key: "evolve", label: "EVOLVE", days: 4 },
+] as const;
+
+function LandingV3RhythmPickerPreview({ language }: { language: Language }) {
+  const rhythmCopy = {
+    low: language === "es" ? "Base suave" : "Soft base",
+    chill: language === "es" ? "Constancia simple" : "Simple consistency",
+    flow: language === "es" ? "Ritmo sostenido" : "Sustained rhythm",
+    evolve: language === "es" ? "Mayor intensidad" : "Higher intensity",
+    days: language === "es" ? "días/sem" : "days/week",
+  };
+
+  return (
+    <div className="v3-rhythm-sheet-preview" role="img" aria-label={language === "es" ? "Selector de ritmo con Flow seleccionado" : "Rhythm selector with Flow selected"}>
+      <div className="v3-rhythm-sheet-options">
+        {LANDING_V3_RHYTHMS.map((rhythm) => {
+          const isFlow = rhythm.key === "flow";
+          return (
+            <article className={`v3-rhythm-sheet-option ${isFlow ? "is-flow" : ""}`} key={rhythm.key}>
+              <div className="v3-rhythm-sheet-option__top">
+                <div>
+                  <strong>{rhythm.label}</strong>
+                  <span>{rhythmCopy[rhythm.key]}</span>
+                </div>
+                <div>
+                  <b>{rhythm.days}</b>
+                  <em>{rhythmCopy.days}</em>
+                </div>
+              </div>
+              <div className="v3-rhythm-segments" aria-hidden="true">
+                {Array.from({ length: 4 }, (_, index) => (
+                  <i className={index < rhythm.days ? "is-filled" : ""} key={index} />
+                ))}
+              </div>
+            </article>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -620,8 +674,8 @@ export function LandingV3MethodVisual({
 const LANDING_V3_TASK_ROWS = [
   { icon: "↻", title: "20` Sin pantallas ...", trait: "Recuperación", difficulty: "Difícil", difficultyClass: "is-hard", progress: "0/3", done: 0, streak: null, weeks: [0, 0, 0, 0, 0] },
   { icon: "♢", title: "2L de agua", trait: "Hidratación", difficulty: "Fácil", difficultyClass: "is-easy", progress: "2/3", done: 2, streak: null, weeks: [1, 1, 2, 0, 0] },
-  { icon: "🔥", title: "Ayuno hasta las 14...", trait: "Nutrición", difficulty: "Fácil", difficultyClass: "is-easy", progress: "2/3", done: 2, streak: "2d", weeks: [1, 0, 2, 0, 0] },
-  { icon: "♧", title: "Cena antes de las ...", trait: "Nutrición", difficulty: "Fácil", difficultyClass: "is-easy", progress: "2/3", done: 2, streak: null, weeks: [1, 1, 2, 0, 0] },
+  { icon: "🔥", title: "Ayuno hasta las 14hs", trait: "Nutrición", difficulty: "Fácil", difficultyClass: "is-easy", progress: "2/3", done: 2, streak: "2d", weeks: [1, 0, 2, 0, 0] },
+  { icon: "♧", title: "Cena antes de las 21hs", trait: "Nutrición", difficulty: "Fácil", difficultyClass: "is-easy", progress: "2/3", done: 2, streak: null, weeks: [1, 1, 2, 0, 0] },
   { icon: "🔥", title: "Dormir 8hs", trait: "Sueño", difficulty: "Media", difficultyClass: "is-medium", progress: "3/3", done: 3, streak: "4d", weeks: [1, 1, 1, 0, 0] },
   { icon: "⇄", title: "Hacer ejercicios d...", trait: "Movilidad", difficulty: "Fácil", difficultyClass: "is-easy", progress: "1/3", done: 1, streak: null, weeks: [1, 1, 2, 0, 0] },
 ] as const;
@@ -660,7 +714,9 @@ function LandingV3MobileTasksVisual() {
                 {task.weeks.map((state, weekIndex) => (
                   <span className={state === 1 ? "is-green" : state === 2 ? "is-gold" : ""} key={`${task.title}-${weekIndex}`} />
                 ))}
-                <small>S1 S2 S3 S4 S5</small>
+                {task.weeks.map((_, weekIndex) => (
+                  <i key={`${task.title}-label-${weekIndex}`}>S{weekIndex + 1}</i>
+                ))}
               </div>
               <div className="ib20-task-ring" style={{ "--progress": `${Math.min(100, (task.done / 3) * 100)}%` } as CSSProperties}>
                 <b>{task.progress}</b>
@@ -707,7 +763,12 @@ function LandingV3AdjustmentVisual({ language }: { language: Language }) {
         </div>
 
         <section className="ib20-detail-head">
-          <div className="ib20-detail-icon" aria-hidden>◌</div>
+          <div className="ib20-detail-icon" aria-hidden>
+            <svg viewBox="0 0 24 24" fill="none" focusable="false">
+              <path d="M12 3.4 18.8 6v5.2c0 4.2-2.6 7.4-6.8 8.8-4.2-1.4-6.8-4.6-6.8-8.8V6L12 3.4Z" />
+              <path d="m8.7 12 2.1 2.1 4.6-5" />
+            </svg>
+          </div>
           <div className="ib20-detail-copy">
             <h4>{isSpanish ? "Revisar gastos del día" : "Review daily expenses"}</h4>
             <div className="ib20-detail-chips">
@@ -716,7 +777,7 @@ function LandingV3AdjustmentVisual({ language }: { language: Language }) {
               </span>
               <span className="ib20-detail-chip ib20-detail-chip--difficulty">{isSpanish ? "Fácil" : "Easy"}</span>
               <span className="ib20-detail-chip ib20-detail-chip--down">
-                <i aria-hidden>→</i>
+                <i aria-hidden>↓</i>
                 <b>{isSpanish ? "Bajó la dificultad" : "Difficulty lowered"}</b>
               </span>
             </div>
@@ -907,18 +968,18 @@ function LandingV3LogrosVisual({ language, cycleMs = 5200 }: { language: Languag
       <div className="v3-logros-viewport">
         <div className="v3-logros-track" key={active.pillar}>
           {current.cards.map((card, index) => (
-            <article className={`v3-logros-card ${index === active.index ? "is-center" : ""} ${card.locked ? "is-locked" : ""} ${card.flip ? "is-flippable" : ""}`} key={`${active.pillar}-${card.name}`}>
+            <article className={`v3-logros-card ${index === active.index ? "is-center" : ""} ${card.locked ? "is-locked" : ""} ${card.flip || card.locked ? "is-flippable" : ""}`} key={`${active.pillar}-${card.name}`}>
               <div className="v3-logros-card__inner">
                 <div className="v3-logros-card__face v3-logros-card__front">
-                  {card.locked ? (
-                    <span className="v3-logros-lock">{isSpanish ? "Bloqueado" : "Locked"}</span>
-                  ) : null}
                   <img src={card.src} alt="" />
                   <strong>{card.name}</strong>
-                  <p>{card.trait}</p>
-                  {!card.locked ? (
-                    <span className="v3-logros-achieved">{isSpanish ? "Hábito logrado" : "Achieved habit"}</span>
-                  ) : null}
+                  <p>
+                    <span>{card.trait}</span>
+                    <i aria-hidden>·</i>
+                    <b>{card.locked ? (isSpanish ? "Bloqueado" : "Locked") : (isSpanish ? "Logrado" : "Achieved")}</b>
+                  </p>
+                  {!card.locked ? <span className="v3-logros-share">↟ {isSpanish ? "Compartir" : "Share"}</span> : null}
+                  <span className="v3-logros-corner" aria-hidden>↘</span>
                 </div>
                 {card.flip ? (
                   <div className="v3-logros-card__face v3-logros-card__back">
@@ -983,7 +1044,7 @@ function LandingV3LogrosVisual({ language, cycleMs = 5200 }: { language: Languag
 function LandingV3ConversionMethod({ how, language }: { how: LandingCopy["how"]; language: Language }) {
   return (
     <div className="v2-method-shell v3-method-shell">
-      <div className="v2-method-heading">
+      <div className="v2-method-heading v3-method-snap-panel v3-method-snap-panel--intro">
         <p className="how-kicker">{how.kicker}</p>
         <AdaptiveText as="h2">{how.title}</AdaptiveText>
         <AdaptiveText as="p" className="section-sub v2-method-intro">
@@ -995,7 +1056,7 @@ function LandingV3ConversionMethod({ how, language }: { how: LandingCopy["how"];
         {how.steps.map((step, index) => {
           return (
             <article
-              className={`v3-method-card v3-method-card--${index % 2 === 0 ? "visual-right" : "visual-left"}`}
+              className={`v3-method-card v3-method-snap-panel v3-method-card--${index % 2 === 0 ? "visual-right" : "visual-left"}`}
               key={step.badge}
               style={{ "--delay": `${index * 80}ms` } as CSSProperties}
             >
@@ -1014,6 +1075,43 @@ function LandingV3ConversionMethod({ how, language }: { how: LandingCopy["how"];
         })}
       </div>
     </div>
+  );
+}
+
+function LandingV3OnboardingCta({
+  copy,
+  dashboardHref,
+  href,
+  isSignedIn,
+}: {
+  copy: LandingCopy;
+  dashboardHref: string;
+  href: string;
+  isSignedIn: boolean;
+}) {
+  return (
+    <section className="v3-onboarding-cta section-pad reveal-on-scroll">
+      <div className="container narrow">
+        <div className="v3-onboarding-cta__shell">
+          <div className="v3-onboarding-cta__copy">
+            <AdaptiveText as="h2">{copy.next.title}</AdaptiveText>
+            <AdaptiveText as="p" className="section-sub">
+              {copy.next.intro}
+            </AdaptiveText>
+          </div>
+          <div className="v3-onboarding-cta__action">
+            <Link
+              className={buttonClasses()}
+              data-analytics-cta={isSignedIn ? "dashboard" : "start_journey"}
+              data-analytics-location="method"
+              to={isSignedIn ? dashboardHref : href}
+            >
+              {isSignedIn ? copy.auth.dashboard : copy.auth.startJourney}
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -1041,6 +1139,12 @@ export default function LandingPage({
   const visibleNavLinks = copy.navLinks.filter(
     (link) => !/^\/demo$/i.test(link.href) && !/^#?demo$/i.test(link.href),
   );
+  const onboardingHref = isV3Conversion
+    ? `/onboarding2?lang=${language}`
+    : buildOnboardingPath(language);
+  const loginHref = buildLocalizedAuthPath(isV3Conversion ? "/login2" : "/login", language);
+  const signUpHref = buildLocalizedAuthPath(isV3Conversion ? "/sign-up2" : "/sign-up", language);
+  const dashboardHref = isV3Conversion ? "/innerbloom2/dashboard" : "/dashboard";
   const landingStyle = {
     ...(OFFICIAL_LANDING_CSS_VARIABLES as CSSProperties),
     ...getLandingThemeStyle(themeMode),
@@ -1050,6 +1154,7 @@ export default function LandingPage({
   const [activeModeIndex, setActiveModeIndex] = useState(0);
   const [isModesInView, setIsModesInView] = useState(false);
   const [hasModeInteracted, setHasModeInteracted] = useState(false);
+  const [isV3FreeScroll, setIsV3FreeScroll] = useState(false);
   const initialCookieConsentStateRef = useRef(readCookieConsentState());
   const [analyticsConsent, setAnalyticsConsent] = useState(
     () => initialCookieConsentStateRef.current.analytics,
@@ -1058,6 +1163,7 @@ export default function LandingPage({
     () => initialCookieConsentStateRef.current.analytics === "unset",
   );
   const modesSectionRef = useRef<HTMLElement | null>(null);
+  const landingRootRef = useRef<HTMLDivElement | null>(null);
   const modeThumbTouchStartXRef = useRef<number | null>(null);
 
   const testimonialCount = copy.testimonials.items.length;
@@ -1136,6 +1242,43 @@ export default function LandingPage({
 
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (!isV3Conversion) {
+      setIsV3FreeScroll(false);
+      return;
+    }
+
+    const rootElement = landingRootRef.current;
+    const ctaElement = rootElement?.querySelector<HTMLElement>(
+      ".v3-onboarding-cta",
+    );
+
+    if (!rootElement || !ctaElement) {
+      return;
+    }
+
+    let frame = 0;
+    const updateFreeScrollState = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const releasePoint = ctaElement.offsetTop - 2;
+        setIsV3FreeScroll(rootElement.scrollTop > releasePoint);
+      });
+    };
+
+    updateFreeScrollState();
+    rootElement.addEventListener("scroll", updateFreeScrollState, {
+      passive: true,
+    });
+    window.addEventListener("resize", updateFreeScrollState);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      rootElement.removeEventListener("scroll", updateFreeScrollState);
+      window.removeEventListener("resize", updateFreeScrollState);
+    };
+  }, [isV3Conversion]);
 
   useEffect(() => {
     const sectionElement = modesSectionRef.current;
@@ -1277,10 +1420,12 @@ export default function LandingPage({
 
   return (
     <div
+      ref={landingRootRef}
       className={[
         "landing",
         isNarrativeVariant ? "landing--v2-narrative" : "",
         isV3Conversion ? "landing--v3-conversion" : "",
+        isV3FreeScroll ? "landing--free-scroll" : "",
       ].filter(Boolean).join(" ")}
       style={landingStyle}
       data-theme-mode={themeMode}
@@ -1294,14 +1439,14 @@ export default function LandingPage({
             language === "es" ? "Innerbloom — inicio" : "Innerbloom — home"
           }
         >
-          <span className="brand-text">Innerbloom</span>
           <img
-            src="/IB-COLOR-LOGO-v2.png"
-            alt="Innerbloom"
+            src="/innerbloom-flower-logo.png"
+            alt=""
             className="logo-mark"
             width={50}
             height={50}
           />
+          <span className="brand-text">Innerbloom</span>
         </Link>
         {visibleNavLinks.length > 0 ? (
           <nav className="nav-links">
@@ -1354,7 +1499,7 @@ export default function LandingPage({
           </button>
           <LanguageDropdown value={language} onChange={handleLanguageChange} />
           {isSignedIn ? (
-            <Link className={buttonClasses()} to="/dashboard">
+            <Link className={buttonClasses()} to={dashboardHref}>
               {copy.auth.dashboard}
             </Link>
           ) : (
@@ -1363,7 +1508,7 @@ export default function LandingPage({
                 className={`${buttonClasses("ghost")} nav-auth-button`}
                 data-analytics-cta="login"
                 data-analytics-location="nav"
-                to={buildLocalizedAuthPath("/login", language)}
+                to={loginHref}
               >
                 {copy.auth.login}
               </Link>
@@ -1371,7 +1516,7 @@ export default function LandingPage({
                 className={`${buttonClasses()} nav-auth-button`}
                 data-analytics-cta="create_account"
                 data-analytics-location="nav"
-                to={buildLocalizedAuthPath("/sign-up", language)}
+                to={signUpHref}
               >
                 {copy.auth.signup}
               </Link>
@@ -1399,7 +1544,7 @@ export default function LandingPage({
                 }`}
               >
                 {isSignedIn ? (
-                  <Link className={buttonClasses()} to="/dashboard">
+                  <Link className={buttonClasses()} to={dashboardHref}>
                     {copy.auth.dashboard}
                   </Link>
                 ) : (
@@ -1408,28 +1553,34 @@ export default function LandingPage({
                       className={buttonClasses()}
                       data-analytics-cta="start_journey"
                       data-analytics-location="hero"
-                      to={buildOnboardingPath(language)}
+                      to={onboardingHref}
                     >
                       {copy.auth.startJourney}
                     </Link>
-                    <Link
-                      className="hero-demo-cta"
-                      data-analytics-cta="guided_demo"
-                      data-analytics-location="hero"
-                      to={buildDemoModeSelectUrl({
-                        language,
-                        source: "landing",
-                      })}
-                    >
-                      <span>{copy.auth.guidedDemo}</span>
-                    </Link>
+                    {!isV3Conversion ? (
+                      <Link
+                        className="hero-demo-cta"
+                        data-analytics-cta="guided_demo"
+                        data-analytics-location="hero"
+                        to={buildDemoModeSelectUrl({
+                          language,
+                          source: "landing",
+                        })}
+                      >
+                        <span>{copy.auth.guidedDemo}</span>
+                      </Link>
+                    ) : null}
                   </>
                 )}
               </div>
               <p className="tiny hero-cta-note">{copy.hero.note}</p>
             </div>
             <div className="hero-media" aria-label={copy.hero.alt}>
-              <HeroPhoneShowcase variant={isV3Conversion ? "v3Right" : "default"} />
+              {isV3Conversion ? (
+                <HeroProductScene language={language} />
+              ) : (
+                <HeroPhoneShowcase variant="default" />
+              )}
             </div>
           </div>
         </section>
@@ -1453,7 +1604,7 @@ export default function LandingPage({
                   {copy.problem.title}
                 </AdaptiveText>
 
-                <div className="truth-problem-v2-stage">
+                <div className={isV3Conversion ? "truth-problem-v2-stage truth-problem-adaptive-stage" : "truth-problem-v2-stage"}>
                   <div className="truth-problem-block truth-problem-block--left">
                     <span className="truth-problem-icon truth-problem-icon--x" aria-hidden>
                       ×
@@ -1467,7 +1618,13 @@ export default function LandingPage({
                       </AdaptiveText>
                     </div>
                   </div>
-                  <WeatherCycleOrb />
+                  {isV3Conversion ? (
+                    <div className="truth-problem-adaptive-graphic">
+                      <AdaptiveJourneyGraphic language={language} />
+                    </div>
+                  ) : (
+                    <WeatherCycleOrb />
+                  )}
                   <div className="truth-problem-block truth-problem-block--right">
                     <span className="truth-problem-icon truth-problem-icon--check" aria-hidden>
                       ✓
@@ -1559,10 +1716,18 @@ export default function LandingPage({
           </div>
         </section>
 
-        <section
-          className="feature-showcase section-pad reveal-on-scroll"
-          id="demo"
-        >
+        {isV3Conversion ? (
+          <LandingV3OnboardingCta
+            copy={copy}
+            dashboardHref={dashboardHref}
+            href={onboardingHref}
+            isSignedIn={isSignedIn}
+          />
+        ) : (
+          <section
+            className="feature-showcase section-pad reveal-on-scroll"
+            id="demo"
+          >
           <div className="container narrow">
             <div
               className={`visible-progress-top ${isNarrativeVariant || isOfficialDefault ? "visible-progress-top--v2-text-only" : ""}`}
@@ -1900,7 +2065,8 @@ export default function LandingPage({
               </div>
             </div>
           </div>
-        </section>
+          </section>
+        )}
 
         {isV3Conversion ? null : (
           <>
@@ -2056,7 +2222,7 @@ export default function LandingPage({
         )}
 
         <section
-          className="testimonials section-pad reveal-on-scroll"
+          className={`testimonials section-pad reveal-on-scroll ${isV3Conversion ? "testimonials--v3-quiet" : ""}`}
           id="testimonials"
         >
           <div className="container">
@@ -2064,77 +2230,151 @@ export default function LandingPage({
             <AdaptiveText as="p" className="section-sub">
               {copy.testimonials.intro}
             </AdaptiveText>
-            <div
-              className="slider"
-              id="testi-slider"
-              aria-roledescription="carousel"
-              tabIndex={0}
-              onKeyDown={handleKeyDown}
-              onMouseEnter={() => setPaused(true)}
-              onMouseLeave={() => setPaused(false)}
-              onFocus={() => setPaused(true)}
-              onBlur={() => setPaused(false)}
-            >
+            {isV3Conversion ? (
               <div
-                className="slider-track"
-                style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+                className="v3-review-carousel"
+                aria-roledescription="carousel"
+                tabIndex={0}
+                onKeyDown={handleKeyDown}
+                onMouseEnter={() => setPaused(true)}
+                onMouseLeave={() => setPaused(false)}
+                onFocus={() => setPaused(true)}
+                onBlur={() => setPaused(false)}
               >
-                {copy.testimonials.items.map((testimonial, index) => (
-                  <figure
-                    className="testi"
-                    key={`${testimonial.author}-${index}`}
-                    role="group"
-                    id={`slide-${index + 1}`}
-                    aria-label={
-                      language === "es"
-                        ? `${index + 1} de ${testimonialCount}`
-                        : `${index + 1} of ${testimonialCount}`
-                    }
-                  >
-                    <blockquote>{testimonial.quote}</blockquote>
-                    <figcaption>{testimonial.author}</figcaption>
-                  </figure>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="slider-btn prev"
-                aria-label={copy.testimonials.prev}
-                onClick={() => goToSlide(activeSlide - 1)}
-              >
-                ‹
-              </button>
-              <button
-                type="button"
-                className="slider-btn next"
-                aria-label={copy.testimonials.next}
-                onClick={() => goToSlide(activeSlide + 1)}
-              >
-                ›
-              </button>
-              <div
-                className="slider-dots"
-                role="tablist"
-                aria-label={copy.testimonials.groupLabel}
-              >
-                {copy.testimonials.items.map((testimonial, index) => (
+                <div
+                  className="v3-review-track"
+                  style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+                >
+                  {copy.testimonials.items.map((testimonial, index) => (
+                    <figure
+                      className="v3-review-card"
+                      key={`${testimonial.author}-${index}`}
+                      role="group"
+                      id={`slide-${index + 1}`}
+                      aria-label={
+                        language === "es"
+                          ? `${index + 1} de ${testimonialCount}`
+                          : `${index + 1} of ${testimonialCount}`
+                      }
+                    >
+                      <div className="v3-review-stars" aria-label="5 stars">
+                        <span>★★★★★</span>
+                      </div>
+                      <blockquote>{testimonial.quote}</blockquote>
+                      <figcaption>{testimonial.author}</figcaption>
+                    </figure>
+                  ))}
+                </div>
+                <div className="v3-review-controls">
                   <button
-                    key={`${testimonial.author}-${index}`}
-                    className="dot"
-                    role="tab"
-                    aria-selected={index === activeSlide}
-                    aria-controls={`slide-${index + 1}`}
-                    onClick={() => goToSlide(index)}
+                    type="button"
+                    className="v3-review-arrow"
+                    aria-label={copy.testimonials.prev}
+                    onClick={() => goToSlide(activeSlide - 1)}
                   >
-                    <span className="visually-hidden">{index + 1}</span>
+                    ‹
                   </button>
-                ))}
+                  <div
+                    className="v3-review-dots"
+                    role="tablist"
+                    aria-label={copy.testimonials.groupLabel}
+                  >
+                    {copy.testimonials.items.map((testimonial, index) => (
+                      <button
+                        key={`${testimonial.author}-${index}`}
+                        className="v3-review-dot"
+                        role="tab"
+                        aria-selected={index === activeSlide}
+                        aria-controls={`slide-${index + 1}`}
+                        onClick={() => goToSlide(index)}
+                      >
+                        <span className="visually-hidden">{index + 1}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    className="v3-review-arrow"
+                    aria-label={copy.testimonials.next}
+                    onClick={() => goToSlide(activeSlide + 1)}
+                  >
+                    ›
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div
+                className="slider"
+                id="testi-slider"
+                aria-roledescription="carousel"
+                tabIndex={0}
+                onKeyDown={handleKeyDown}
+                onMouseEnter={() => setPaused(true)}
+                onMouseLeave={() => setPaused(false)}
+                onFocus={() => setPaused(true)}
+                onBlur={() => setPaused(false)}
+              >
+                <div
+                  className="slider-track"
+                  style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+                >
+                  {copy.testimonials.items.map((testimonial, index) => (
+                    <figure
+                      className="testi"
+                      key={`${testimonial.author}-${index}`}
+                      role="group"
+                      id={`slide-${index + 1}`}
+                      aria-label={
+                        language === "es"
+                          ? `${index + 1} de ${testimonialCount}`
+                          : `${index + 1} of ${testimonialCount}`
+                      }
+                    >
+                      <blockquote>{testimonial.quote}</blockquote>
+                      <figcaption>{testimonial.author}</figcaption>
+                    </figure>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="slider-btn prev"
+                  aria-label={copy.testimonials.prev}
+                  onClick={() => goToSlide(activeSlide - 1)}
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  className="slider-btn next"
+                  aria-label={copy.testimonials.next}
+                  onClick={() => goToSlide(activeSlide + 1)}
+                >
+                  ›
+                </button>
+                <div
+                  className="slider-dots"
+                  role="tablist"
+                  aria-label={copy.testimonials.groupLabel}
+                >
+                  {copy.testimonials.items.map((testimonial, index) => (
+                    <button
+                      key={`${testimonial.author}-${index}`}
+                      className="dot"
+                      role="tab"
+                      aria-selected={index === activeSlide}
+                      aria-controls={`slide-${index + 1}`}
+                      onClick={() => goToSlide(index)}
+                    >
+                      <span className="visually-hidden">{index + 1}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </section>
 
-        <section className="faq section-pad reveal-on-scroll" id="faq">
+        <section className={`faq section-pad reveal-on-scroll ${isV3Conversion ? "faq--v3-quiet" : ""}`} id="faq">
           <div className="container narrow">
             <AdaptiveText as="h2">{copy.faq.title}</AdaptiveText>
             {copy.faq.items.map((faq) => (
@@ -2180,7 +2420,7 @@ export default function LandingPage({
           </section>
         ) : null}
 
-        <section className="next section-pad reveal-on-scroll">
+        <section className={`next section-pad reveal-on-scroll ${isV3Conversion ? "next--v3-final" : ""}`}>
           <div className="container narrow center">
             <AdaptiveText as="h2">{copy.next.title}</AdaptiveText>
             <AdaptiveText as="p" className="section-sub">
@@ -2188,7 +2428,7 @@ export default function LandingPage({
             </AdaptiveText>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               {isSignedIn ? (
-                <Link className={buttonClasses()} to="/dashboard">
+                <Link className={buttonClasses()} to={dashboardHref}>
                   {copy.auth.dashboard}
                 </Link>
               ) : (
@@ -2197,7 +2437,7 @@ export default function LandingPage({
                     className={buttonClasses()}
                     data-analytics-cta="start_journey"
                     data-analytics-location="footer"
-                    to={buildOnboardingPath(language)}
+                    to={onboardingHref}
                   >
                     {copy.auth.startJourney}
                   </Link>
@@ -2218,20 +2458,20 @@ export default function LandingPage({
         <span>{copy.footer.copyright}</span>
         <nav className="footer-links">
           {isSignedIn ? (
-            <Link to="/dashboard">Dashboard</Link>
+            <Link to={dashboardHref}>Dashboard</Link>
           ) : (
             <>
               <Link
                 data-analytics-cta="login"
                 data-analytics-location="footer"
-                to={buildLocalizedAuthPath("/login", language)}
+                to={loginHref}
               >
                 {copy.auth.login}
               </Link>
               <Link
                 data-analytics-cta="create_account"
                 data-analytics-location="footer"
-                to={buildLocalizedAuthPath("/sign-up", language)}
+                to={signUpHref}
               >
                 {copy.auth.signup}
               </Link>

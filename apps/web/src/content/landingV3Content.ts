@@ -68,6 +68,25 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
     testimonials: {
       ...LANDING_V2_CONTENT.es.testimonials,
       title: 'Primeras experiencias',
+      intro:
+        'Personas probando Innerbloom cuentan cómo cambió la forma de sostener sus hábitos.',
+      items: [
+        {
+          quote:
+            'Por primera vez una app no me castigó por tener una mala semana. Me bajó la intensidad y pude volver sin culpa.',
+          author: 'Sofía, beta tester',
+        },
+        {
+          quote:
+            'Sentí que Innerbloom entendía mi energía real. No me pidió perfección, me ayudó a sostener algo posible.',
+          author: 'Mateo, usuario temprano',
+        },
+        {
+          quote:
+            'La diferencia fue ver progreso incluso en días pequeños. Eso me hizo seguir cuando antes abandonaba.',
+          author: 'Valentina, comunidad Innerbloom',
+        },
+      ],
     },
   },
   en: {
@@ -136,6 +155,25 @@ export const LANDING_V3_CONTENT: Record<Language, LandingCopy> = {
     testimonials: {
       ...LANDING_V2_CONTENT.en.testimonials,
       title: 'Early experience',
+      intro:
+        'People trying Innerbloom describe how it changed the way they sustain habits.',
+      items: [
+        {
+          quote:
+            'For the first time, a habit app did not punish me for a bad week. It lowered the intensity and helped me come back without guilt.',
+          author: 'Sofia, beta tester',
+        },
+        {
+          quote:
+            'Innerbloom felt like it understood my real energy. It did not ask for perfection, it helped me sustain something possible.',
+          author: 'Mateo, early user',
+        },
+        {
+          quote:
+            'The difference was seeing progress even on small days. That made me keep going when I used to quit.',
+          author: 'Valentina, Innerbloom community',
+        },
+      ],
     },
   },
 };
