@@ -1154,7 +1154,6 @@ export default function LandingPage({
   const [activeModeIndex, setActiveModeIndex] = useState(0);
   const [isModesInView, setIsModesInView] = useState(false);
   const [hasModeInteracted, setHasModeInteracted] = useState(false);
-  const [isV3FreeScroll, setIsV3FreeScroll] = useState(false);
   const initialCookieConsentStateRef = useRef(readCookieConsentState());
   const [analyticsConsent, setAnalyticsConsent] = useState(
     () => initialCookieConsentStateRef.current.analytics,
@@ -1242,43 +1241,6 @@ export default function LandingPage({
 
     return () => observer.disconnect();
   }, []);
-
-  useEffect(() => {
-    if (!isV3Conversion) {
-      setIsV3FreeScroll(false);
-      return;
-    }
-
-    const rootElement = landingRootRef.current;
-    const ctaElement = rootElement?.querySelector<HTMLElement>(
-      ".v3-onboarding-cta",
-    );
-
-    if (!rootElement || !ctaElement) {
-      return;
-    }
-
-    let frame = 0;
-    const updateFreeScrollState = () => {
-      window.cancelAnimationFrame(frame);
-      frame = window.requestAnimationFrame(() => {
-        const releasePoint = ctaElement.offsetTop - 2;
-        setIsV3FreeScroll(rootElement.scrollTop > releasePoint);
-      });
-    };
-
-    updateFreeScrollState();
-    rootElement.addEventListener("scroll", updateFreeScrollState, {
-      passive: true,
-    });
-    window.addEventListener("resize", updateFreeScrollState);
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-      rootElement.removeEventListener("scroll", updateFreeScrollState);
-      window.removeEventListener("resize", updateFreeScrollState);
-    };
-  }, [isV3Conversion]);
 
   useEffect(() => {
     const sectionElement = modesSectionRef.current;
@@ -1425,7 +1387,6 @@ export default function LandingPage({
         "landing",
         isNarrativeVariant ? "landing--v2-narrative" : "",
         isV3Conversion ? "landing--v3-conversion" : "",
-        isV3FreeScroll ? "landing--free-scroll" : "",
       ].filter(Boolean).join(" ")}
       style={landingStyle}
       data-theme-mode={themeMode}
