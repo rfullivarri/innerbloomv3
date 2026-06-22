@@ -40,6 +40,11 @@ export const mobilePremiumTranslations = {
   'mobilePremium.delete.placeholder': { es: 'ELIMINAR', en: 'DELETE' },
   'mobilePremium.delete.cancel': { es: 'Cancelar', en: 'Cancel' },
   'mobilePremium.delete.confirm': { es: 'Eliminar definitivamente', en: 'Delete permanently' },
+  'mobilePremium.delete.deleting': { es: 'Eliminando...', en: 'Deleting...' },
+  'mobilePremium.delete.error': {
+    es: 'No se pudo eliminar la cuenta. Revisá tu conexión e intentá otra vez.',
+    en: 'Could not delete the account. Check your connection and try again.',
+  },
 
   'mobilePremium.widgets.eyebrow': { es: 'Widgets', en: 'Widgets' },
   'mobilePremium.widgets.title': { es: 'Tu dashboard', en: 'Your dashboard' },
