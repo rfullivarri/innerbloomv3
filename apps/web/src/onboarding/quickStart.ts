@@ -254,7 +254,7 @@ export function buildQuickStartManualCandidates(args: {
       return [{
         task: task.text,
         pillar_code: pillar.toUpperCase(),
-        trait_code: task.trait.toUpperCase(),
+        trait_code: task.id.toUpperCase(),
         input_value: inputValue || undefined,
         metadata: {
           task_id: task.id,
