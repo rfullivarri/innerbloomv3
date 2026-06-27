@@ -1,0 +1,118 @@
+{
+  "title": "Innerbloom 2.0 Marketing MVP - English Test",
+  "goal": "Validate the full acquisition loop with two simple posts before planning a monthly 20-post system.",
+  "campaignCode": "ib20_mvp",
+  "primaryUrl": "https://innerbloomjourney.org/",
+  "publicAssetBaseUrl": "https://raw.githubusercontent.com/rfullivarri/innerbloomv3/main/Docs/marketing/campaigns/2026-06-mvp/assets",
+  "source": "instagram",
+  "medium": "social",
+  "brand": {
+    "flower": "apps/web/public/brand/innerbloom-2/flower-transparent.png"
+  },
+  "posts": [
+    {
+      "id": "post_001",
+      "number": "001",
+      "platform": "instagram",
+      "format": "carousel",
+      "status": "ready",
+      "scheduledDate": "2026-06-30",
+      "scheduledTime": "19:30:00",
+      "notes": "Upload as carousel",
+      "hypothesis": "People who have failed with streak-based apps will respond to \"adaptive rhythm\" and \"real weeks\".",
+      "metric": "`page_view -> landing_cta_clicked -> auth_started -> auth_completed -> dashboard_view`",
+      "caption": [
+        "Your habits should adapt to your real life.",
+        "",
+        "Most habit apps assume every day is the same.",
+        "",
+        "Then a busy week hits, your streak breaks, and the whole plan starts feeling useless.",
+        "",
+        "Innerbloom is built around adaptive rhythm:",
+        "",
+        "- lower the intensity when life gets heavy",
+        "- keep visible progress",
+        "- recalibrate instead of starting over",
+        "- build a Journey that can survive real weeks",
+        "",
+        "Early version is live.",
+        "",
+        "Try it here:",
+        "{{trackingUrl}}",
+        "",
+        "#habits #habitbuilding #selfimprovement #productivity #personalgrowth #wellbeing #buildinpublic"
+      ],
+      "assets": [
+        {
+          "file": "assets/post-001-carousel-01.png",
+          "type": "image",
+          "title": "Your habits should adapt to your real life.",
+          "eyebrow": "INNERBLOOM 2.0",
+          "body": "Adaptive habits for real weeks, not perfect calendars.",
+          "sourceImage": "apps/web/public/landing-v2/method/step-01-real-life-board.jpg"
+        },
+        {
+          "file": "assets/post-001-carousel-02.png",
+          "type": "split",
+          "title": "Most habit apps assume every day is the same.",
+          "body": "Life does not. Stress, sleep, travel, work, and energy change constantly.",
+          "sourceImage": "apps/web/public/landing-v2/method/step-03-progress-phone.jpg"
+        },
+        {
+          "file": "assets/post-001-carousel-03.png",
+          "type": "image",
+          "title": "Lower the intensity. Keep the direction.",
+          "eyebrow": "ADAPTIVE RHYTHM",
+          "body": "Innerbloom helps you recalibrate instead of restarting from zero.",
+          "sourceImage": "apps/web/public/landing-v2/method/step-04-recalibration-dashboard.jpg"
+        },
+        {
+          "file": "assets/post-001-carousel-04.png",
+          "type": "brand",
+          "title": "Build a Journey that can survive real weeks.",
+          "body": "Start small. Recalibrate. Keep moving.",
+          "cta": "Try the early version"
+        }
+      ]
+    },
+    {
+      "id": "post_002",
+      "number": "002",
+      "platform": "instagram",
+      "format": "static",
+      "status": "ready",
+      "scheduledDate": "2026-07-03",
+      "scheduledTime": "19:30:00",
+      "notes": "Upload as single image",
+      "hypothesis": "A direct anti-perfect-days message will perform better for people tired of rigid productivity systems.",
+      "metric": "`page_view`, scroll depth, `landing_cta_clicked`, and `dashboard_view`.",
+      "caption": [
+        "If your plan only works on perfect days, it is not a plan.",
+        "",
+        "Most people do not fail habits because they are lazy.",
+        "",
+        "They fail because the system expects the same output from them every day, even when their energy, stress, sleep, and schedule change.",
+        "",
+        "Innerbloom is an adaptive habit app.",
+        "",
+        "It helps you keep direction without forcing the same rhythm all the time.",
+        "",
+        "Start small. Recalibrate. Keep moving.",
+        "",
+        "Try it here:",
+        "{{trackingUrl}}",
+        "",
+        "#habits #selfimprovement #wellbeing #productivity #mentalclarity #habittracker #buildinpublic"
+      ],
+      "assets": [
+        {
+          "file": "assets/post-002-static-pain-proposal.png",
+          "type": "static",
+          "title": "If your plan only works on perfect days, it is not a plan.",
+          "body": "Innerbloom adapts habit intensity to real life, so progress does not collapse when the week gets messy.",
+          "sourceImage": "apps/web/public/landing-v2/method/step-02-rhythm-control.jpg"
+        }
+      ]
+    }
+  ]
+}
