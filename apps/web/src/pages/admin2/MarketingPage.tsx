@@ -22,85 +22,111 @@ function statusClass(status: MarketingPostStatus) {
 
 function PostCard({
   post,
+  expanded,
+  onToggleExpanded,
   onStatusChange,
 }: {
   post: MarketingPostSeed;
+  expanded: boolean;
+  onToggleExpanded: (postId: string) => void;
   onStatusChange: (postId: string, status: MarketingPostStatus) => void;
 }) {
   return (
     <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">
-            {post.platform} / {post.format} / {post.id}
-          </p>
-          <h3 className="mt-1 text-lg font-semibold tracking-tight">{post.assets[0]?.title ?? post.id}</h3>
-        </div>
-        <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass(post.status)}`}>
-          {STATUS_LABELS[post.status]}
-        </span>
-      </div>
-
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-        {post.assets.map((asset) => (
-          <img
-            key={asset.file}
-            src={asset.url}
-            alt={asset.title}
-            className="h-32 w-32 shrink-0 rounded-xl border border-[color:var(--admin-border)] object-cover"
-            loading="lazy"
-          />
-        ))}
-      </div>
-
-      <div className="mt-4 grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Caption</p>
-          <pre className="mt-2 max-h-56 overflow-auto whitespace-pre-wrap rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-xs leading-relaxed text-[color:var(--admin-text)]">
-            {post.caption}
-          </pre>
-        </div>
-        <div className="space-y-3 text-sm">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Schedule</p>
-            <p className="mt-1 font-medium">{post.scheduledDate} / {post.scheduledTime}</p>
+      <button
+        type="button"
+        className="flex w-full flex-wrap items-center justify-between gap-3 text-left"
+        aria-expanded={expanded}
+        onClick={() => onToggleExpanded(post.id)}
+      >
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">
+            <span>{post.scheduledDate}</span>
+            <span>/</span>
+            <span>{post.scheduledTime.slice(0, 5)}</span>
+            <span>/</span>
+            <span>{post.platform}</span>
+            <span>/</span>
+            <span>{post.format}</span>
           </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Hypothesis</p>
-            <p className="mt-1 text-[color:var(--admin-muted)]">{post.hypothesis}</p>
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Metric</p>
-            <p className="mt-1 text-[color:var(--admin-muted)]">{post.metric}</p>
-          </div>
-          <a
-            href={post.trackingUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="block break-all text-xs font-semibold text-[color:var(--admin-accent)]"
-          >
-            {post.trackingUrl}
-          </a>
+          <h3 className="mt-1 truncate text-base font-semibold tracking-tight md:text-lg">
+            {post.assets[0]?.title ?? post.id}
+          </h3>
         </div>
-      </div>
+        <div className="flex shrink-0 items-center gap-3">
+          <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass(post.status)}`}>
+            {STATUS_LABELS[post.status]}
+          </span>
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] text-sm font-semibold text-[color:var(--admin-muted)]">
+            {expanded ? '-' : '+'}
+          </span>
+        </div>
+      </button>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button type="button" className="admin2-btn admin2-btn--success" onClick={() => onStatusChange(post.id, 'approved')}>
-          Approve
-        </button>
-        <button type="button" className="admin2-btn admin2-btn--secondary" onClick={() => onStatusChange(post.id, 'needs_review')}>
-          Needs review
-        </button>
-        <button type="button" className="admin2-btn admin2-btn--ghost" onClick={() => onStatusChange(post.id, 'draft')}>
-          Draft
-        </button>
-        <button type="button" className="admin2-btn admin2-btn--ghost" disabled title="Next step: wire generation service">
-          Regenerate copy
-        </button>
-        <button type="button" className="admin2-btn admin2-btn--ghost" disabled title="Next step: wire image generation">
-          Regenerate image
-        </button>
-      </div>
+      {!expanded ? null : (
+        <>
+          <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+            {post.assets.map((asset) => (
+              <img
+                key={asset.file}
+                src={asset.url}
+                alt={asset.title}
+                className="h-32 w-32 shrink-0 rounded-xl border border-[color:var(--admin-border)] object-cover"
+                loading="lazy"
+              />
+            ))}
+          </div>
+
+          <div className="mt-4 grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Caption</p>
+              <pre className="mt-2 max-h-56 overflow-auto whitespace-pre-wrap rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-xs leading-relaxed text-[color:var(--admin-text)]">
+                {post.caption}
+              </pre>
+            </div>
+            <div className="space-y-3 text-sm">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Schedule</p>
+                <p className="mt-1 font-medium">{post.scheduledDate} / {post.scheduledTime}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Hypothesis</p>
+                <p className="mt-1 text-[color:var(--admin-muted)]">{post.hypothesis}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Metric</p>
+                <p className="mt-1 text-[color:var(--admin-muted)]">{post.metric}</p>
+              </div>
+              <a
+                href={post.trackingUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="block break-all text-xs font-semibold text-[color:var(--admin-accent)]"
+              >
+                {post.trackingUrl}
+              </a>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button type="button" className="admin2-btn admin2-btn--success" onClick={() => onStatusChange(post.id, 'approved')}>
+              Approve
+            </button>
+            <button type="button" className="admin2-btn admin2-btn--secondary" onClick={() => onStatusChange(post.id, 'needs_review')}>
+              Needs review
+            </button>
+            <button type="button" className="admin2-btn admin2-btn--ghost" onClick={() => onStatusChange(post.id, 'draft')}>
+              Draft
+            </button>
+            <button type="button" className="admin2-btn admin2-btn--ghost" disabled title="Next step: wire generation service">
+              Regenerate copy
+            </button>
+            <button type="button" className="admin2-btn admin2-btn--ghost" disabled title="Next step: wire image generation">
+              Regenerate image
+            </button>
+          </div>
+        </>
+      )}
     </article>
   );
 }
@@ -108,6 +134,7 @@ function PostCard({
 export function MarketingPage() {
   const [postCount, setPostCount] = useState(marketingCampaignSeed.postCount);
   const [posts, setPosts] = useState(marketingCampaignSeed.posts);
+  const [expandedPostIds, setExpandedPostIds] = useState<Set<string>>(() => new Set());
   const approvedPosts = useMemo(() => posts.filter((post) => post.status === 'approved'), [posts]);
   const needsReviewCount = posts.filter((post) => post.status === 'needs_review').length;
 
@@ -119,6 +146,18 @@ export function MarketingPage() {
 
   function downloadApprovedCsv() {
     downloadMetricoolCalendarCsv(approvedPosts);
+  }
+
+  function toggleExpanded(postId: string) {
+    setExpandedPostIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+      if (nextIds.has(postId)) {
+        nextIds.delete(postId);
+      } else {
+        nextIds.add(postId);
+      }
+      return nextIds;
+    });
   }
 
   return (
@@ -209,7 +248,13 @@ export function MarketingPage() {
 
       <section className="flex flex-col gap-4">
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} onStatusChange={updateStatus} />
+          <PostCard
+            key={post.id}
+            post={post}
+            expanded={expandedPostIds.has(post.id)}
+            onToggleExpanded={toggleExpanded}
+            onStatusChange={updateStatus}
+          />
         ))}
       </section>
     </div>
