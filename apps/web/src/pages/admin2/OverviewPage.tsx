@@ -17,6 +17,11 @@ const SECTIONS = [
     to: '/admin/notifications',
   },
   {
+    title: 'Marketing',
+    description: 'Aprobación mensual de posts, estrategia, fuentes de datos y export CSV para Metricool.',
+    to: '/admin/marketing',
+  },
+  {
     title: 'AI TaskGen',
     description: 'Monitorea jobs, KPIs y reintentos desde un único panel operativo.',
     to: '/admin/ai-taskgen',

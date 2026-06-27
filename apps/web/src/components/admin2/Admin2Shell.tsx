@@ -3,6 +3,7 @@ import { OverviewPage } from '../../pages/admin2/OverviewPage';
 import { CoreEnginePage } from '../../pages/admin2/CoreEnginePage';
 import { UserOpsPage } from '../../pages/admin2/UserOpsPage';
 import { NotificationsPage } from '../../pages/admin2/NotificationsPage';
+import { MarketingPage } from '../../pages/admin2/MarketingPage';
 import { AiTaskgenPage } from '../../pages/admin2/AiTaskgenPage';
 import { AdvancedPage } from '../../pages/admin2/AdvancedPage';
 import { TaskgenUserPage } from '../../pages/admin/TaskgenUserPage';
@@ -13,6 +14,7 @@ const NAV_ITEMS = [
   { to: '/admin/core-engine', label: 'Core Engine' },
   { to: '/admin/user-ops', label: 'User Ops' },
   { to: '/admin/notifications', label: 'Notifications' },
+  { to: '/admin/marketing', label: 'Marketing' },
   { to: '/admin/ai-taskgen', label: 'AI TaskGen' },
   { to: '/admin/advanced', label: 'Advanced' },
 ];
@@ -108,6 +110,7 @@ export function Admin2Shell() {
             <Route path="core-engine" element={<CoreEnginePage />} />
             <Route path="user-ops" element={<UserOpsPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="marketing" element={<MarketingPage />} />
             <Route path="ai-taskgen" element={<AiTaskgenPage />} />
             <Route path="advanced" element={<AdvancedPage />} />
             <Route
