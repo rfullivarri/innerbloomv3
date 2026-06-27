@@ -26,6 +26,7 @@ import PremiumTimeline from "../components/PremiumTimeline";
 import { AdaptiveText } from "../components/landing/AdaptiveText";
 import { CookieConsentBanner } from "../components/landing/CookieConsentBanner";
 import { debugLandingGa4, useLandingAnalytics } from "../components/landing/useLandingAnalytics";
+import { useMetricoolTracking } from "../components/landing/useMetricoolTracking";
 import { HeroPhoneShowcase } from "../components/landing/HeroPhoneShowcase";
 import { HeroProductScene } from "../components/landing/hero/HeroProductScene";
 import { AdaptiveJourneyGraphic } from "../components/landing/problem/AdaptiveJourneyGraphic";
@@ -1188,6 +1189,11 @@ export default function LandingPage({
     consent: analyticsConsent,
     pathname: location.pathname,
     search: location.search,
+  });
+
+  useMetricoolTracking({
+    consent: analyticsConsent,
+    pathname: location.pathname,
   });
 
   const handleLanguageChange = (nextLanguage: Language) => {
