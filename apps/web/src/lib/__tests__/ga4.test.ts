@@ -25,6 +25,9 @@ describe('ga4 bootstrap', () => {
     expect(window.dataLayer).toContainEqual(expect.objectContaining({
       0: 'config',
       1: 'G-TEST1234',
+      2: expect.objectContaining({
+        send_page_view: false,
+      }),
     }));
     expect(window.dataLayer).toContainEqual(expect.objectContaining({
       0: 'event',
