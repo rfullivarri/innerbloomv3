@@ -86,7 +86,8 @@ export default function OnboardingIntroPage({
       language === 'en'
         ? 'Official preview of the Innerbloom onboarding'
         : 'Preview oficial del onboarding de Innerbloom',
-    url: ONBOARDING_CANONICAL_URL
+    url: ONBOARDING_CANONICAL_URL,
+    robots: 'noindex,nofollow',
   });
 
   const handleFinish = useCallback(

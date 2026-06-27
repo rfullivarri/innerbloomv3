@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { useEffect, useState, type ReactElement } from 'react';
+import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useAuth } from './auth/runtimeAuth';
 import DashboardV3Page from './pages/DashboardV3';
 import TaskEditorPage from './pages/editor';
@@ -305,7 +305,11 @@ export default function App() {
   );
   const innerbloom2BasePath = '/innerbloom2';
   const innerbloom2DashboardPath = `${innerbloom2BasePath}/dashboard`;
-  useGa4FunnelTracking({ dashboardBasePath: trimmedDashboardPath });
+  const analyticsDashboardBasePaths = useMemo(
+    () => [trimmedDashboardPath, innerbloom2DashboardPath],
+    [innerbloom2DashboardPath, trimmedDashboardPath],
+  );
+  useGa4FunnelTracking({ dashboardBasePaths: analyticsDashboardBasePaths });
 
   return (
     <div className="min-h-screen bg-transparent">

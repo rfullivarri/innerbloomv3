@@ -2,10 +2,13 @@ User-agent: *
 Allow: /
 
 Disallow: /login
+Disallow: /login2
 Disallow: /sign-up
+Disallow: /sign-up2
 Disallow: /signup
 Disallow: /dashboard
 Disallow: /dashboard-v3
+Disallow: /innerbloom2/
 Disallow: /admin
 Disallow: /api/
 Disallow: /_debug/
