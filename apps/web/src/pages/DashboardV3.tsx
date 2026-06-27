@@ -48,7 +48,6 @@ import {
   getModerationState,
   getRewardsHistory,
   getUserState,
-  getUserTasks,
   markJourneyReadyModalSeen,
   updateModerationStatus,
   type ModerationStatus,
@@ -97,6 +96,7 @@ import { StandaloneSplash } from "../components/pwa/StandaloneSplash";
 import { useOnboardingEditorNudge } from "../hooks/useOnboardingEditorNudge";
 import { useOnboardingProgress } from '../hooks/useOnboardingProgress';
 import { useModerationWidget } from "../hooks/useModerationWidget";
+import { useUserTasks } from "../hooks/useUserTasks";
 import type { ModerationTrackerType } from "../lib/api";
 import { ModerationWidget as ModerationStatusWidget } from "../components/moderation/ModerationWidget";
 import { ModerationEditSheet } from "../components/dashboard-v3/ModerationEditSheet";
@@ -197,7 +197,11 @@ export default function DashboardV3Page() {
   const { data: userState } = useRequest(
     () => getUserState(backendUserId!),
     [backendUserId],
-    { enabled: shouldFetchUserState },
+    {
+      enabled: shouldFetchUserState,
+      cacheKey: shouldFetchUserState ? `user-state:${backendUserId}` : null,
+      staleMs: 2 * 60 * 1000,
+    },
   );
 
   const rawGameMode =
@@ -427,19 +431,23 @@ export default function DashboardV3Page() {
   const { data: subscription } = useRequest(
     () => getCurrentUserSubscription(),
     [backendUserId],
-    { enabled: SHOW_BILLING_UI && Boolean(backendUserId) },
+    {
+      enabled: SHOW_BILLING_UI && Boolean(backendUserId),
+      cacheKey: SHOW_BILLING_UI && backendUserId ? `current-user-subscription:${backendUserId}` : null,
+      staleMs: 60 * 1000,
+    },
   );
-  const { data: generatedTasks } = useRequest(
-    () => getUserTasks(backendUserId!),
-    [backendUserId, isJourneyGenerating],
-    { enabled: Boolean(backendUserId) },
-  );
+  const { tasks: generatedTasks } = useUserTasks(backendUserId);
   const [journeyReadyOpen, setJourneyReadyOpen] = useState(false);
   const [pendingHabitDecisionCount, setPendingHabitDecisionCount] = useState(0);
   const rewardsHistoryRequest = useRequest(
     () => getRewardsHistory(backendUserId ?? ""),
     [backendUserId],
-    { enabled: Boolean(backendUserId) },
+    {
+      enabled: Boolean(backendUserId),
+      cacheKey: backendUserId ? `rewards-history:${backendUserId}` : null,
+      staleMs: 2 * 60 * 1000,
+    },
   );
   const [showOnboardingCompletionBanner, setShowOnboardingCompletionBanner] = useState(false);
   const generationKeyRef = useRef<string | null>(null);
@@ -1220,6 +1228,8 @@ export function DashboardOverview({
 
   const moderationRequest = useRequest(() => getModerationState(), [userId], {
     enabled: Boolean(userId),
+    cacheKey: userId ? `moderation-state:${userId}` : null,
+    staleMs: 2 * 60 * 1000,
   });
   const [moderationState, setModerationState] = useState(
     moderationRequest.data,
@@ -1227,7 +1237,11 @@ export function DashboardOverview({
   const modeUpgradeSuggestionRequest = useRequest(
     () => getGameModeUpgradeSuggestion(),
     [userId],
-    { enabled: Boolean(userId) },
+    {
+      enabled: Boolean(userId),
+      cacheKey: userId ? `game-mode-upgrade-suggestion:${userId}` : null,
+      staleMs: 5 * 60 * 1000,
+    },
   );
   const [modeUpgradeSuggestion, setModeUpgradeSuggestion] = useState(
     modeUpgradeSuggestionRequest.data,

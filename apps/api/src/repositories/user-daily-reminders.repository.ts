@@ -74,6 +74,11 @@ export type PendingEmailReminderRow = UserDailyReminderRow & {
   effective_timezone: string;
 };
 
+export type PendingEmailReminderLookup = {
+  reminders: PendingEmailReminderRow[];
+  nextCheckAt: Date | null;
+};
+
 export type CreateUserDailyReminderInput = {
   userId: string;
   channel?: string;
@@ -222,9 +227,12 @@ export async function updateUserDailyReminder(
   return mapRow(result.rows[0]);
 }
 
-export async function findPendingEmailReminders(now: Date): Promise<PendingEmailReminderRow[]> {
+export async function findPendingEmailReminderLookup(now: Date): Promise<PendingEmailReminderLookup> {
   await ensureTableExists();
-  const result = await pool.query<PendingEmailReminderRow>(
+  const result = await pool.query<{
+    reminders: PendingEmailReminderRow[] | string | null;
+    next_check_at: Date | string | null;
+  }>(
     `
       WITH reminder_context AS (
         SELECT
@@ -234,32 +242,81 @@ export async function findPendingEmailReminders(now: Date): Promise<PendingEmail
         FROM ${TABLE_NAME} r
         JOIN users u ON u.user_id = r.user_id
         WHERE r.channel = 'email' AND r.status = 'active'
+      ),
+      evaluated AS (
+        SELECT
+          rc.*,
+          COALESCE(rc.reminder_tz, rc.user_tz, 'UTC') AS effective_timezone,
+          timezone(COALESCE(rc.reminder_tz, rc.user_tz, 'UTC'), $1::timestamptz) AS local_now,
+          CASE
+            WHEN rc.last_sent_at IS NULL THEN NULL
+            ELSE timezone(COALESCE(rc.reminder_tz, rc.user_tz, 'UTC'), rc.last_sent_at)::date
+          END AS last_sent_local_date
+        FROM reminder_context rc
+      ),
+      scheduled AS (
+        SELECT
+          e.*,
+          (
+            (e.last_sent_at IS NULL OR e.local_now::date > e.last_sent_local_date)
+            AND e.local_now::time >= e.local_time
+          ) AS is_due,
+          (
+            CASE
+              WHEN
+                (e.last_sent_at IS NULL OR e.local_now::date > e.last_sent_local_date)
+                AND e.local_now::time < e.local_time
+                THEN (e.local_now::date + e.local_time)
+              ELSE ((e.local_now::date + INTERVAL '1 day')::date + e.local_time)
+            END
+          ) AT TIME ZONE e.effective_timezone AS next_check_at
+        FROM evaluated e
       )
       SELECT
-        rc.user_daily_reminder_id,
-        rc.user_id,
-        rc.channel,
-        rc.status,
-        COALESCE(rc.reminder_tz, rc.user_tz, 'UTC') AS timezone,
-        rc.local_time,
-        rc.last_sent_at,
-        rc.created_at,
-        rc.updated_at,
-        rc.email_primary,
-        rc.email,
-        rc.first_name,
-        rc.full_name,
-        COALESCE(rc.reminder_tz, rc.user_tz, 'UTC') AS effective_timezone
-      FROM reminder_context rc
-      WHERE
-        (rc.last_sent_at IS NULL OR timezone(COALESCE(rc.reminder_tz, rc.user_tz, 'UTC'), $1::timestamptz)::date
-          > timezone(COALESCE(rc.reminder_tz, rc.user_tz, 'UTC'), rc.last_sent_at)::date)
-        AND timezone(COALESCE(rc.reminder_tz, rc.user_tz, 'UTC'), $1::timestamptz)::time >= rc.local_time;
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'user_daily_reminder_id', s.user_daily_reminder_id,
+              'user_id', s.user_id,
+              'channel', s.channel,
+              'status', s.status,
+              'timezone', s.effective_timezone,
+              'local_time', s.local_time,
+              'last_sent_at', s.last_sent_at,
+              'created_at', s.created_at,
+              'updated_at', s.updated_at,
+              'email_primary', s.email_primary,
+              'email', s.email,
+              'first_name', s.first_name,
+              'full_name', s.full_name,
+              'effective_timezone', s.effective_timezone
+            )
+          ) FILTER (WHERE s.is_due),
+          '[]'::json
+        ) AS reminders,
+        MIN(s.next_check_at) AS next_check_at
+      FROM scheduled s;
     `,
     [now],
   );
 
-  return result.rows;
+  const row = result.rows[0];
+  const rawReminders = row?.reminders ?? [];
+  const reminders =
+    typeof rawReminders === 'string'
+      ? JSON.parse(rawReminders) as PendingEmailReminderRow[]
+      : rawReminders;
+  const rawNextCheckAt = row?.next_check_at ?? null;
+
+  return {
+    reminders,
+    nextCheckAt: rawNextCheckAt ? new Date(rawNextCheckAt) : null,
+  };
+}
+
+export async function findPendingEmailReminders(now: Date): Promise<PendingEmailReminderRow[]> {
+  const result = await findPendingEmailReminderLookup(now);
+  return result.reminders;
 }
 
 export async function findReminderContextForUser(

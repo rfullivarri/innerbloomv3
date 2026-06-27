@@ -397,7 +397,10 @@ function buildGrid(data: unknown): GridComputation {
 }
 
 export function EmotionTimeline({ userId }: EmotionTimelineProps) {
-  const { data, status } = useRequest(() => getEmotions(userId, { days: HEATMAP_LOOKBACK_DAYS }), [userId]);
+  const { data, status } = useRequest(() => getEmotions(userId, { days: HEATMAP_LOOKBACK_DAYS }), [userId], {
+    cacheKey: `emotions-timeline:${userId}:${HEATMAP_LOOKBACK_DAYS}`,
+    staleMs: 2 * 60 * 1000,
+  });
 
   const grid = useMemo(() => buildGrid(data), [data]);
   const periodLabel = useMemo(() => formatPeriod(grid.period.from, grid.period.to), [grid.period.from, grid.period.to]);

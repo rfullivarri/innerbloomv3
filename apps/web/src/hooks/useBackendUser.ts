@@ -51,7 +51,11 @@ export function useBackendUser(): BackendUserState {
   const { data, status, error, reload } = useRequest(
     requestFactory,
     [requestFactory],
-    { enabled },
+    {
+      enabled,
+      cacheKey: effectiveClerkUserId ? `current-user-profile:${effectiveClerkUserId}` : null,
+      staleMs: 5 * 60 * 1000,
+    },
   );
 
   const normalizedStatus: AsyncStatus = enabled ? status : 'loading';
