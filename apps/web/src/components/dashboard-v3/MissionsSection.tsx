@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { useRequest } from '../../hooks/useRequest';
-import { getUserTasks, type UserTask } from '../../lib/api';
+import { useUserTasks } from '../../hooks/useUserTasks';
+import type { UserTask } from '../../lib/api';
 import { asArray } from '../../lib/safe';
 import { Card } from '../ui/Card';
 
@@ -9,7 +9,7 @@ interface MissionsSectionProps {
 }
 
 export function MissionsSection({ userId }: MissionsSectionProps) {
-  const { data, status } = useRequest(() => getUserTasks(userId), [userId]);
+  const { tasks: data, status } = useUserTasks(userId);
   const tasks = useMemo(() => {
     console.info('[DASH] dataset', { keyNames: Object.keys(data ?? {}), isArray: Array.isArray(data) });
     return asArray<UserTask>(data, 'tasks');

@@ -141,6 +141,8 @@ export function RewardsSection({
     [userId],
     {
       enabled: !resolvedDisableRemote && Boolean(userId),
+      cacheKey: !resolvedDisableRemote && userId ? `rewards-history:${userId}` : null,
+      staleMs: 2 * 60 * 1000,
     },
   );
   const effectiveData = data ?? initialData;
@@ -1828,7 +1830,11 @@ function LockedAchievementHabitDevelopment({
   const { data, status, error } = useRequest(
     () => getTaskInsights(taskId),
     [taskId],
-    { enabled: loadOnVisible && !disableRemote && !mockPreviewAchievement },
+    {
+      enabled: loadOnVisible && !disableRemote && !mockPreviewAchievement,
+      cacheKey: loadOnVisible && !disableRemote && !mockPreviewAchievement ? `task-insights:${taskId}` : null,
+      staleMs: 5 * 60 * 1000,
+    },
   );
   const previewAchievement =
     mockPreviewAchievement ?? data?.previewAchievement ?? null;
@@ -1913,7 +1919,11 @@ function NotAchievedPreviewOverlay({
   const { data, status, error } = useRequest(
     () => getTaskInsights(taskId ?? ""),
     [taskId],
-    { enabled: Boolean(taskId) && !disableRemote && !mockPreviewAchievement },
+    {
+      enabled: Boolean(taskId) && !disableRemote && !mockPreviewAchievement,
+      cacheKey: taskId && !disableRemote && !mockPreviewAchievement ? `task-insights:${taskId}` : null,
+      staleMs: 5 * 60 * 1000,
+    },
   );
 
   useEffect(() => {
