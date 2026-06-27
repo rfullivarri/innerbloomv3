@@ -6,10 +6,6 @@ Disallow: /login2
 Disallow: /sign-up
 Disallow: /sign-up2
 Disallow: /signup
-Disallow: /onboarding
-Disallow: /onboarding2
-Disallow: /intro-journey
-Disallow: /intro-journey2
 Disallow: /dashboard
 Disallow: /dashboard-v3
 Disallow: /innerbloom2/

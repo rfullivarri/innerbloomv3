@@ -13,6 +13,7 @@ type MetaInput = {
   twitterImage?: string;
   twitterImageAlt?: string;
   url?: string;
+  robots?: string;
   type?: 'website' | 'article';
   siteName?: string;
 };
@@ -76,6 +77,7 @@ export const usePageMeta = ({
   ogImageWidth,
   ogImageHeight,
   url,
+  robots,
   type = 'website',
   siteName = 'Innerbloom'
 }: MetaInput) => {
@@ -117,6 +119,11 @@ export const usePageMeta = ({
     if (twitterImageAlt) {
       upsertMetaTag('twitter:image:alt', twitterImageAlt, 'name');
     }
+    if (robots) {
+      upsertMetaTag('robots', robots, 'name');
+    } else {
+      removeMetaTags('robots', 'name');
+    }
     upsertCanonical(resolvedUrl);
   }, [
     description,
@@ -130,6 +137,7 @@ export const usePageMeta = ({
     title,
     twitterImage,
     twitterImageAlt,
+    robots,
     type,
     url
   ]);
