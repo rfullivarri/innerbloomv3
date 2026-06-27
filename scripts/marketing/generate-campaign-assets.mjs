@@ -390,12 +390,20 @@ function renderContentPlan(campaign) {
   lines.push(
     "## Publishing Checklist",
     "",
+    "Preferred path:",
+    "",
+    "1. Merge this PR so the image URLs in `metricool-calendar-import.csv` point to public `main` branch files.",
+    "2. In Metricool Planner, use the CSV import option and upload `metricool-calendar-import.csv`.",
+    "3. Review the imported Instagram posts, dates, captions, and carousel/static assets before confirming.",
+    "4. After publishing, open GA4 Realtime and confirm page activity.",
+    "5. After 24 hours, check GA4 acquisition reports by session source/medium/campaign.",
+    "",
+    "Fallback path:",
+    "",
     "1. Upload Post 001 as a carousel to Instagram.",
     "2. Put the Post 001 tracking link in the caption or bio/link target available through the account.",
     "3. Upload Post 002 as a static post.",
     "4. Put the Post 002 tracking link in the caption or bio/link target available through the account.",
-    "5. After publishing, open GA4 Realtime and confirm page activity.",
-    "6. After 24 hours, check GA4 acquisition reports by session source/medium/campaign.",
     "",
     "## Decision Rule",
     "",
@@ -437,6 +445,69 @@ function renderMetricoolCsv(campaign) {
   return `${rows.map((row) => row.map(csvEscape).join(",")).join("\n")}\n`;
 }
 
+function assetPublicUrl(campaign, asset) {
+  if (!campaign.publicAssetBaseUrl) {
+    return "";
+  }
+
+  return `${campaign.publicAssetBaseUrl.replace(/\/$/, "")}/${encodeURIComponent(path.basename(asset.file))}`;
+}
+
+function renderMetricoolCalendarImportCsv(campaign) {
+  const pictureColumns = Array.from({ length: 10 }, (_, index) => `Picture Url ${index + 1}`);
+  const altTextColumns = Array.from({ length: 10 }, (_, index) => `Alt text picture ${index + 1}`);
+  const columns = [
+    "Text",
+    "Date",
+    "Time",
+    "Draft",
+    "Facebook",
+    "Twitter/X",
+    "LinkedIn",
+    "GBP",
+    "Instagram",
+    "Pinterest",
+    "TikTok",
+    "YouTube",
+    "Threads",
+    "Bluesky",
+    ...pictureColumns,
+    ...altTextColumns,
+    "Shortener",
+    "Instagram Post Type",
+    "Brand name"
+  ];
+
+  const rows = campaign.posts.map((post) => {
+    const row = Object.fromEntries(columns.map((column) => [column, ""]));
+    row.Text = captionText(campaign, post);
+    row.Date = post.scheduledDate;
+    row.Time = post.scheduledTime;
+    row.Draft = "FALSE";
+    row.Facebook = "FALSE";
+    row["Twitter/X"] = "FALSE";
+    row.LinkedIn = "FALSE";
+    row.GBP = "FALSE";
+    row.Instagram = "TRUE";
+    row.Pinterest = "FALSE";
+    row.TikTok = "FALSE";
+    row.YouTube = "FALSE";
+    row.Threads = "FALSE";
+    row.Bluesky = "FALSE";
+    row.Shortener = "FALSE";
+    row["Instagram Post Type"] = "POST";
+
+    post.assets.slice(0, 10).forEach((asset, index) => {
+      row[`Picture Url ${index + 1}`] = assetPublicUrl(campaign, asset);
+      row[`Alt text picture ${index + 1}`] = asset.title;
+    });
+
+    return columns.map((column) => row[column]);
+  });
+
+  return `${[columns, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n")}\n`;
+}
+
 function renderManifest(campaign) {
   return `${JSON.stringify(
     campaign.posts.flatMap((post) =>
@@ -475,6 +546,10 @@ async function main() {
   await renderAssets(campaign);
   await fs.writeFile(path.join(campaignDir, "content-plan.md"), renderContentPlan(campaign));
   await fs.writeFile(path.join(campaignDir, "metricool-upload.csv"), renderMetricoolCsv(campaign));
+  await fs.writeFile(
+    path.join(campaignDir, "metricool-calendar-import.csv"),
+    renderMetricoolCalendarImportCsv(campaign)
+  );
   await fs.writeFile(path.join(assetsDir, "asset-manifest.json"), renderManifest(campaign));
 
   console.log(`Generated campaign assets in ${path.relative(repoRoot, campaignDir)}`);

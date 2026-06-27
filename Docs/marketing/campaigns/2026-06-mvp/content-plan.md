@@ -93,12 +93,20 @@ Metric to watch:
 
 ## Publishing Checklist
 
+Preferred path:
+
+1. Merge this PR so the image URLs in `metricool-calendar-import.csv` point to public `main` branch files.
+2. In Metricool Planner, use the CSV import option and upload `metricool-calendar-import.csv`.
+3. Review the imported Instagram posts, dates, captions, and carousel/static assets before confirming.
+4. After publishing, open GA4 Realtime and confirm page activity.
+5. After 24 hours, check GA4 acquisition reports by session source/medium/campaign.
+
+Fallback path:
+
 1. Upload Post 001 as a carousel to Instagram.
 2. Put the Post 001 tracking link in the caption or bio/link target available through the account.
 3. Upload Post 002 as a static post.
 4. Put the Post 002 tracking link in the caption or bio/link target available through the account.
-5. After publishing, open GA4 Realtime and confirm page activity.
-6. After 24 hours, check GA4 acquisition reports by session source/medium/campaign.
 
 ## Decision Rule
 
