@@ -631,6 +631,10 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
   const { data, status } = useRequest(
     () => getEmotions(userId, range),
     [userId, range.from, range.to],
+    {
+      cacheKey: `emotions-chart:${userId}:${range.from}:${range.to}`,
+      staleMs: 2 * 60 * 1000,
+    },
   );
 
   const normalizedFromApi = useMemo(() => {

@@ -1,13 +1,19 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useDailyQuestReadiness } from '../useDailyQuestReadiness';
+import { __resetUserTasksStore } from '../useUserTasks';
+import { invalidateRequestCache } from '../useRequest';
 
 const mockGetUserTasks = vi.fn();
 const mockGetUserJourney = vi.fn();
+const mockGetJourneyGenerationStatus = vi.fn();
+const mockGetOnboardingProgress = vi.fn();
 
 vi.mock('../../lib/api', () => ({
   getUserTasks: (...args: unknown[]) => mockGetUserTasks(...args),
   getUserJourney: (...args: unknown[]) => mockGetUserJourney(...args),
+  getJourneyGenerationStatus: (...args: unknown[]) => mockGetJourneyGenerationStatus(...args),
+  getOnboardingProgress: (...args: unknown[]) => mockGetOnboardingProgress(...args),
 }));
 
 vi.mock('../../lib/journeyGeneration', () => ({
@@ -17,8 +23,14 @@ vi.mock('../../lib/journeyGeneration', () => ({
 
 describe('useDailyQuestReadiness', () => {
   beforeEach(() => {
+    invalidateRequestCache();
+    __resetUserTasksStore();
     mockGetUserTasks.mockReset();
     mockGetUserJourney.mockReset();
+    mockGetJourneyGenerationStatus.mockReset();
+    mockGetOnboardingProgress.mockReset();
+    mockGetJourneyGenerationStatus.mockResolvedValue({ ok: true, state: null });
+    mockGetOnboardingProgress.mockResolvedValue({ progress: null });
   });
 
   it('shows onboarding guidance when user has no tasks', async () => {

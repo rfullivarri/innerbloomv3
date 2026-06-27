@@ -278,7 +278,10 @@ function computeBalanceStatus(metrics: PillarMetrics): BalanceStatus {
 
 export function RadarChartCard({ userId }: RadarChartCardProps) {
   const { t } = usePostLoginLanguage();
-  const { data, status } = useRequest(() => getUserXpByTrait(userId), [userId]);
+  const { data, status } = useRequest(() => getUserXpByTrait(userId), [userId], {
+    cacheKey: `user-xp-by-trait:${userId}`,
+    staleMs: 5 * 60 * 1000,
+  });
   const dataset = useMemo(() => computeRadarDataset(data?.traits ?? []), [data?.traits]);
   const pillarMetrics = useMemo(() => computePillarMetrics(dataset.axes), [dataset.axes]);
   const balanceStatus = useMemo(() => computeBalanceStatus(pillarMetrics), [pillarMetrics]);

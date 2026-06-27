@@ -83,7 +83,10 @@ function formatDelta(delta: number | null): string {
 }
 
 export function EnergyCard({ userId }: EnergyCardProps) {
-  const { data, status } = useRequest(() => getUserDailyEnergy(userId), [userId]);
+  const { data, status } = useRequest(() => getUserDailyEnergy(userId), [userId], {
+    cacheKey: `daily-energy:${userId}`,
+    staleMs: 2 * 60 * 1000,
+  });
   const normalized = useMemo(() => normalize(data), [data]);
   const hasData = Boolean(data);
   const chartRef = useRef<HTMLDivElement | null>(null);

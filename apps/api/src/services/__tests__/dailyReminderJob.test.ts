@@ -8,7 +8,7 @@ const { mockFindPendingReminders, mockMarkAsSent, mockSendEmail, mockFindFeedbac
 }));
 
 vi.mock('../../repositories/user-daily-reminders.repository.js', () => ({
-  findPendingEmailReminders: (...args: unknown[]) => mockFindPendingReminders(...args),
+  findPendingEmailReminderLookup: (...args: unknown[]) => mockFindPendingReminders(...args),
   markRemindersAsSent: (...args: unknown[]) => mockMarkAsSent(...args),
 }));
 
@@ -39,15 +39,18 @@ vi.mock('../../repositories/feedback-definitions.repository.js', () => ({
 
 describe('runDailyReminderJob', () => {
   beforeEach(() => {
+    vi.resetModules();
     mockFindPendingReminders.mockReset();
     mockMarkAsSent.mockReset();
     mockSendEmail.mockReset();
     mockFindFeedbackDefinition.mockReset();
     mockFindFeedbackDefinition.mockResolvedValue(null);
+    process.env.DAILY_REMINDER_IDLE_RECHECK_MS = '900000';
+    process.env.DAILY_REMINDER_DUE_LOOKAHEAD_MS = '30000';
   });
 
   it('returns early when there are no reminders', async () => {
-    mockFindPendingReminders.mockResolvedValueOnce([]);
+    mockFindPendingReminders.mockResolvedValueOnce({ reminders: [], nextCheckAt: null });
     const { runDailyReminderJob } = await import('../dailyReminderJob.js');
 
     const result = await runDailyReminderJob(new Date('2024-01-01T00:00:00Z'));
@@ -57,9 +60,24 @@ describe('runDailyReminderJob', () => {
     expect(mockMarkAsSent).not.toHaveBeenCalled();
   });
 
+  it('skips the database while the next reminder check is still in the future', async () => {
+    mockFindPendingReminders.mockResolvedValueOnce({
+      reminders: [],
+      nextCheckAt: new Date('2024-01-01T12:00:00Z'),
+    });
+    const { clearDailyReminderJobSchedule, runDailyReminderJob } = await import('../dailyReminderJob.js');
+
+    clearDailyReminderJobSchedule();
+    await runDailyReminderJob(new Date('2024-01-01T10:00:00Z'));
+    const result = await runDailyReminderJob(new Date('2024-01-01T10:01:00Z'));
+
+    expect(result).toEqual({ attempted: 0, sent: 0, skipped: 0, errors: [] });
+    expect(mockFindPendingReminders).toHaveBeenCalledTimes(1);
+  });
+
   it('sends reminder emails and marks them as sent', async () => {
     const now = new Date('2024-01-01T12:00:00Z');
-    mockFindPendingReminders.mockResolvedValueOnce([
+    mockFindPendingReminders.mockResolvedValueOnce({ reminders: [
       {
         user_daily_reminder_id: 'r1',
         user_id: 'u1',
@@ -76,7 +94,7 @@ describe('runDailyReminderJob', () => {
         full_name: 'Jane Doe',
         effective_timezone: 'UTC',
       },
-    ]);
+    ], nextCheckAt: new Date('2024-01-02T08:00:00Z') });
 
     const { runDailyReminderJob } = await import('../dailyReminderJob.js');
 
@@ -90,7 +108,7 @@ describe('runDailyReminderJob', () => {
 
   it('skips entries without an email address', async () => {
     const now = new Date('2024-01-01T12:00:00Z');
-    mockFindPendingReminders.mockResolvedValueOnce([
+    mockFindPendingReminders.mockResolvedValueOnce({ reminders: [
       {
         user_daily_reminder_id: 'r2',
         user_id: 'u2',
@@ -107,7 +125,7 @@ describe('runDailyReminderJob', () => {
         full_name: 'No Email',
         effective_timezone: 'UTC',
       },
-    ]);
+    ], nextCheckAt: new Date('2024-01-02T08:00:00Z') });
 
     const { runDailyReminderJob } = await import('../dailyReminderJob.js');
 
@@ -121,7 +139,7 @@ describe('runDailyReminderJob', () => {
 
   it('records failures when the provider rejects a message', async () => {
     const now = new Date('2024-01-01T12:00:00Z');
-    mockFindPendingReminders.mockResolvedValueOnce([
+    mockFindPendingReminders.mockResolvedValueOnce({ reminders: [
       {
         user_daily_reminder_id: 'r3',
         user_id: 'u3',
@@ -138,7 +156,7 @@ describe('runDailyReminderJob', () => {
         full_name: 'Broken Mail',
         effective_timezone: 'UTC',
       },
-    ]);
+    ], nextCheckAt: new Date('2024-01-02T08:00:00Z') });
     mockSendEmail.mockRejectedValueOnce(new Error('SMTP down'));
 
     const { runDailyReminderJob } = await import('../dailyReminderJob.js');
@@ -169,7 +187,10 @@ describe('runDailyReminderJob', () => {
       effective_timezone: 'America/Argentina/Buenos_Aires',
     } as const;
 
-    mockFindPendingReminders.mockResolvedValueOnce([reminder]);
+    mockFindPendingReminders.mockResolvedValueOnce({
+      reminders: [reminder],
+      nextCheckAt: new Date('2024-03-16T09:30:00Z'),
+    });
 
     const { runDailyReminderJob } = await import('../dailyReminderJob.js');
 
@@ -195,7 +216,7 @@ describe('runDailyReminderJob', () => {
       cta_label: 'Reabrir Innerbloom',
       cta_href: 'https://example.com/custom',
     } as never);
-    mockFindPendingReminders.mockResolvedValueOnce([
+    mockFindPendingReminders.mockResolvedValueOnce({ reminders: [
       {
         user_daily_reminder_id: 'templated',
         user_id: 'u-temp',
@@ -212,7 +233,7 @@ describe('runDailyReminderJob', () => {
         full_name: 'Mate Test',
         effective_timezone: 'UTC',
       },
-    ]);
+    ], nextCheckAt: new Date('2024-06-11T08:00:00Z') });
 
     const { runDailyReminderJob } = await import('../dailyReminderJob.js');
 
@@ -233,7 +254,7 @@ describe('runDailyReminderJob', () => {
       cta_label: 'Abrir Daily Quest',
       cta_href: 'https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open',
     } as never);
-    mockFindPendingReminders.mockResolvedValueOnce([
+    mockFindPendingReminders.mockResolvedValueOnce({ reminders: [
       {
         user_daily_reminder_id: 'legacy-pre',
         user_id: 'u-pre',
@@ -250,7 +271,7 @@ describe('runDailyReminderJob', () => {
         full_name: 'Legacy User',
         effective_timezone: 'UTC',
       },
-    ]);
+    ], nextCheckAt: new Date('2024-06-11T08:00:00Z') });
 
     const { runDailyReminderJob } = await import('../dailyReminderJob.js');
 
@@ -264,7 +285,7 @@ describe('runDailyReminderJob', () => {
 
   it('only updates last_sent_at for reminders that were actually delivered', async () => {
     const now = new Date('2024-02-01T09:00:00Z');
-    mockFindPendingReminders.mockResolvedValueOnce([
+    mockFindPendingReminders.mockResolvedValueOnce({ reminders: [
       {
         user_daily_reminder_id: 'delivered',
         user_id: 'user-good',
@@ -297,7 +318,7 @@ describe('runDailyReminderJob', () => {
         full_name: 'Broken User',
         effective_timezone: 'UTC',
       },
-    ]);
+    ], nextCheckAt: new Date('2024-02-02T06:00:00Z') });
 
     mockSendEmail.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error('provider_error'));
 

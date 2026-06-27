@@ -16,9 +16,11 @@ const getWeeklyWrappedPrevious = vi.mocked(api.getWeeklyWrappedPrevious);
 const getWeeklyWrappedPending = vi.mocked(api.getWeeklyWrappedPending);
 const markWeeklyWrappedSeen = vi.mocked(api.markWeeklyWrappedSeen);
 const { useWeeklyWrapped } = await import('../useWeeklyWrapped');
+const { invalidateRequestCache } = await import('../useRequest');
 
 describe('useWeeklyWrapped', () => {
   beforeEach(() => {
+    invalidateRequestCache();
     getWeeklyWrappedLatest.mockReset();
     getWeeklyWrappedPrevious.mockReset();
     getWeeklyWrappedPending.mockReset();

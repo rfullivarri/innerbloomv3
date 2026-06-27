@@ -1,8 +1,9 @@
 import { useEffect, useMemo } from 'react';
 import { useRequest, type AsyncStatus } from './useRequest';
-import { getJourneyGenerationStatus, getUserJourney, getUserTasks, type UserJourneySummary } from '../lib/api';
+import { getJourneyGenerationStatus, getUserJourney, type UserJourneySummary } from '../lib/api';
 import { clearJourneyGenerationPending, isJourneyGenerationPending } from '../lib/journeyGeneration';
 import { useOnboardingProgress } from './useOnboardingProgress';
+import { useUserTasks } from './useUserTasks';
 
 type UseDailyQuestReadinessOptions = {
   enabled?: boolean;
@@ -33,12 +34,12 @@ export function useDailyQuestReadiness(
   const { enabled = true, isJourneyGenerating = false } = options;
   const onboardingProgress = useOnboardingProgress();
   const TASKGEN_WAIT_WINDOW_MS = 8 * 60 * 1000;
-  const { data: tasks, status: tasksStatus, reload: reloadTasks } = useRequest(() => getUserTasks(userId), [userId], {
-    enabled,
-  });
+  const { tasks, status: tasksStatus, reload: reloadTasks } = useUserTasks(enabled ? userId : null);
   const hasTasks = useMemo(() => (tasks?.length ?? 0) > 0, [tasks]);
   const { data: generationState } = useRequest(() => getJourneyGenerationStatus(), [userId], {
     enabled,
+    cacheKey: enabled ? `journey-generation-status:${userId}` : null,
+    staleMs: 30 * 1000,
   });
 
   const pendingJourneyGeneration = useMemo(() => {
@@ -92,7 +93,11 @@ export function useDailyQuestReadiness(
     data: journey,
     status: journeyStatus,
     reload: reloadJourney,
-  } = useRequest(() => getUserJourney(userId), [userId], { enabled: shouldLoadJourney });
+  } = useRequest(() => getUserJourney(userId), [userId], {
+    enabled: shouldLoadJourney,
+    cacheKey: shouldLoadJourney ? `user-journey:${userId}` : null,
+    staleMs: 2 * 60 * 1000,
+  });
 
   const firstTasksConfirmed = Boolean(journey?.first_tasks_confirmed || onboardingProgress.progress?.first_task_edited_at);
   const completedFirstDailyQuest = Boolean(journey?.completed_first_daily_quest || onboardingProgress.progress?.first_daily_quest_completed_at);
@@ -101,8 +106,8 @@ export function useDailyQuestReadiness(
   const canAutoOpenDailyQuestPopup = canOpenDailyQuest && completedFirstDailyQuest;
   const showOnboardingGuidance = !hasTasks || !firstTasksConfirmed;
   const reload = () => {
-    reloadTasks();
-    reloadJourney();
+    void reloadTasks();
+    void reloadJourney();
   };
 
   return {

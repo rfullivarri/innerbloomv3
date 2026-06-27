@@ -63,7 +63,10 @@ function groupByMonth(series: NormalizedDailyXpPoint[], language: 'es' | 'en'): 
 export function DailyCultivationSection({ userId }: DailyCultivationSectionProps) {
   const { language, t } = usePostLoginLanguage();
   const range = useMemo(() => createRange(120), []);
-  const { data, status } = useRequest(() => getUserDailyXp(userId, range), [userId, range.from, range.to]);
+  const { data, status } = useRequest(() => getUserDailyXp(userId, range), [userId, range.from, range.to], {
+    cacheKey: `user-daily-xp:${userId}:${range.from}:${range.to}`,
+    staleMs: 2 * 60 * 1000,
+  });
   const series = useMemo<NormalizedDailyXpPoint[]>(() => {
     const rawSeries = (data as any)?.series ?? data;
     console.info('[DASH] dataset', { keyNames: Object.keys(rawSeries ?? {}), isArray: Array.isArray(rawSeries) });

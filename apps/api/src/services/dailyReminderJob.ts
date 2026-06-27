@@ -1,7 +1,7 @@
 import { getEmailProvider } from './email/index.js';
 import type { EmailMessage } from './email/index.js';
 import {
-  findPendingEmailReminders,
+  findPendingEmailReminderLookup,
   markRemindersAsSent,
   type PendingEmailReminderRow,
 } from '../repositories/user-daily-reminders.repository.js';
@@ -17,6 +17,10 @@ const LEGACY_PRE_HOSTS = new Set(['web-dev-dfa2.up.railway.app']);
 const REMINDER_NOTIFICATION_KEY = DEFAULT_FEEDBACK_DEFINITION.notificationKey;
 const REMINDER_LOGO_URL =
   process.env.EMAIL_LOGO_URL?.trim() || 'https://innerbloomjourney.org/IB-COLOR-LOGO.png';
+const DEFAULT_IDLE_RECHECK_MS = 15 * 60 * 1000;
+const DEFAULT_DUE_LOOKAHEAD_MS = 30 * 1000;
+
+let nextReminderDbCheckAtMs = 0;
 
 type ReminderTemplate = {
   copy: string;
@@ -36,6 +40,36 @@ export type DailyReminderJobResult = {
   skipped: number;
   errors: { reminderId: string; reason: string }[];
 };
+
+function parsePositiveInteger(value: string | undefined, fallback: number): number {
+  const parsed = Number.parseInt(value ?? '', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function getIdleRecheckMs(): number {
+  return parsePositiveInteger(process.env.DAILY_REMINDER_IDLE_RECHECK_MS, DEFAULT_IDLE_RECHECK_MS);
+}
+
+function getDueLookaheadMs(): number {
+  return parsePositiveInteger(process.env.DAILY_REMINDER_DUE_LOOKAHEAD_MS, DEFAULT_DUE_LOOKAHEAD_MS);
+}
+
+function scheduleNextDbCheck(now: Date, nextCheckAt: Date | null): void {
+  const nowMs = now.getTime();
+  const maxIdleMs = getIdleRecheckMs();
+
+  if (!nextCheckAt || Number.isNaN(nextCheckAt.getTime())) {
+    nextReminderDbCheckAtMs = nowMs + maxIdleMs;
+    return;
+  }
+
+  const nextDueWindowMs = nextCheckAt.getTime() - getDueLookaheadMs();
+  nextReminderDbCheckAtMs = Math.max(nowMs, Math.min(nextDueWindowMs, nowMs + maxIdleMs));
+}
+
+export function clearDailyReminderJobSchedule(): void {
+  nextReminderDbCheckAtMs = 0;
+}
 
 export function resolveRecipient(row: PendingEmailReminderRow): string | null {
   const primary = row.email_primary?.trim();
@@ -237,9 +271,15 @@ export function buildReminderEmail(
 }
 
 export async function runDailyReminderJob(now: Date = new Date()): Promise<DailyReminderJobResult> {
-  const reminders = await findPendingEmailReminders(now);
+  if (nextReminderDbCheckAtMs > now.getTime()) {
+    return { attempted: 0, sent: 0, skipped: 0, errors: [] };
+  }
+
+  const lookup = await findPendingEmailReminderLookup(now);
+  const reminders = lookup.reminders;
 
   if (reminders.length === 0) {
+    scheduleNextDbCheck(now, lookup.nextCheckAt);
     return { attempted: 0, sent: 0, skipped: 0, errors: [] };
   }
 
@@ -248,6 +288,7 @@ export async function runDailyReminderJob(now: Date = new Date()): Promise<Daily
   const sent: string[] = [];
   const errors: { reminderId: string; reason: string }[] = [];
   let skipped = 0;
+  let providerFailures = 0;
 
   for (const reminder of reminders) {
     const recipient = resolveRecipient(reminder);
@@ -264,11 +305,18 @@ export async function runDailyReminderJob(now: Date = new Date()): Promise<Daily
     } catch (error) {
       console.error({ error, reminderId: reminder.user_daily_reminder_id }, 'Failed to send reminder email');
       errors.push({ reminderId: reminder.user_daily_reminder_id, reason: (error as Error).message });
+      providerFailures += 1;
     }
   }
 
   if (sent.length > 0) {
     await markRemindersAsSent(sent, now);
+  }
+
+  if (providerFailures === 0) {
+    scheduleNextDbCheck(now, lookup.nextCheckAt);
+  } else {
+    clearDailyReminderJobSchedule();
   }
 
   return { attempted: reminders.length, sent: sent.length, skipped, errors };

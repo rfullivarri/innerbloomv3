@@ -26,7 +26,11 @@ export function useWeeklyWrapped(userId: string | null | undefined) {
       pending: pendingResponse.item,
       unseenCount: pendingResponse.unseenCount,
     };
-  }, [userId], { enabled: Boolean(userId) });
+  }, [userId], {
+    enabled: Boolean(userId),
+    cacheKey: userId ? `weekly-wrapped:${userId}` : null,
+    staleMs: 15 * 60 * 1000,
+  });
 
   const [isModalOpen, setModalOpen] = useState(false);
   const [activeRecord, setActiveRecord] = useState<WeeklyWrappedRecord | null>(null);

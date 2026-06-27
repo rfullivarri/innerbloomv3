@@ -10,6 +10,7 @@ import {
   updateUserDailyReminder,
   type UserDailyReminderRow,
 } from '../../repositories/user-daily-reminders.repository.js';
+import { clearDailyReminderJobSchedule } from '../../services/dailyReminderJob.js';
 import { markOnboardingProgressStep } from '../../services/onboardingProgressService.js';
 
 const DEFAULT_LOCAL_TIME = '09:00:00';
@@ -108,6 +109,10 @@ export const updateCurrentUserDailyReminderSettings: AsyncHandler = async (req, 
 
   if (!reminder) {
     throw new HttpError(500, 'reminder_persist_failed', 'Failed to persist reminder settings');
+  }
+
+  if (channel === 'email') {
+    clearDailyReminderJobSchedule();
   }
 
   if (body.status === 'active') {
