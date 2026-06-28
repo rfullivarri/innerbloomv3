@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { marketingCampaignSeeds, type MarketingCampaignSeed, type MarketingPostSeed, type MarketingPostStatus } from '../../content/marketingAdminSeed';
+import {
+  marketingCampaignSeeds,
+  type MarketingAsset,
+  type MarketingCampaignSeed,
+  type MarketingPostSeed,
+  type MarketingPostStatus,
+} from '../../content/marketingAdminSeed';
 import { downloadMetricoolCalendarCsv } from '../../lib/marketingMetricoolCsv';
 import {
   buildMarketingAssetKey,
@@ -13,6 +19,8 @@ const STATUS_LABELS: Record<MarketingPostStatus, string> = {
   needs_review: 'Needs review',
   approved: 'Approved',
 };
+
+const STORAGE_PREFIX = 'innerbloom:admin-marketing:posts:';
 
 function statusClass(status: MarketingPostStatus) {
   if (status === 'approved') {
@@ -29,22 +37,67 @@ function statusClass(status: MarketingPostStatus) {
 function PostCard({
   post,
   expanded,
+  editing,
   onToggle,
+  onEditToggle,
+  onPostChange,
   onStatusChange,
 }: {
   post: MarketingPostSeed;
   expanded: boolean;
+  editing: boolean;
   onToggle: (postId: string) => void;
+  onEditToggle: (postId: string) => void;
+  onPostChange: (postId: string, updater: (post: MarketingPostSeed) => MarketingPostSeed) => void;
   onStatusChange: (postId: string, status: MarketingPostStatus) => void;
 }) {
+  const updateField = <Key extends keyof MarketingPostSeed>(key: Key, value: MarketingPostSeed[Key]) => {
+    onPostChange(post.id, (currentPost) => ({ ...currentPost, [key]: value }));
+  };
+
+  const updateAsset = (assetIndex: number, updater: (asset: MarketingAsset) => MarketingAsset) => {
+    onPostChange(post.id, (currentPost) => ({
+      ...currentPost,
+      assets: currentPost.assets.map((asset, index) => (index === assetIndex ? updater(asset) : asset)),
+    }));
+  };
+
+  const removeAsset = (assetIndex: number) => {
+    onPostChange(post.id, (currentPost) => ({
+      ...currentPost,
+      assets: currentPost.assets.filter((_, index) => index !== assetIndex),
+    }));
+  };
+
+  const moveAsset = (assetIndex: number, direction: -1 | 1) => {
+    onPostChange(post.id, (currentPost) => {
+      const nextIndex = assetIndex + direction;
+      if (nextIndex < 0 || nextIndex >= currentPost.assets.length) {
+        return currentPost;
+      }
+
+      const nextAssets = [...currentPost.assets];
+      const [asset] = nextAssets.splice(assetIndex, 1);
+      nextAssets.splice(nextIndex, 0, asset);
+      return { ...currentPost, assets: nextAssets };
+    });
+  };
+
+  const addAssets = async (files: FileList | null) => {
+    if (!files?.length) {
+      return;
+    }
+
+    const assets = await Promise.all(Array.from(files).map(fileToMarketingAsset));
+    onPostChange(post.id, (currentPost) => ({
+      ...currentPost,
+      assets: [...currentPost.assets, ...assets],
+    }));
+  };
+
   return (
     <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)]">
-      <button
-        type="button"
-        className="flex w-full flex-wrap items-center justify-between gap-3 p-4 text-left"
-        aria-expanded={expanded}
-        onClick={() => onToggle(post.id)}
-      >
+      <div className="flex w-full flex-wrap items-center justify-between gap-3 p-4">
         <div className="grid gap-1 sm:grid-cols-[9rem_10rem_1fr] sm:items-center">
           <p className="text-sm font-semibold text-[color:var(--admin-text)]">
             {post.scheduledDate} {post.scheduledTime.slice(0, 5)}
@@ -60,54 +113,200 @@ function PostCard({
           <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass(post.status)}`}>
             {STATUS_LABELS[post.status]}
           </span>
-          <span className="rounded-full border border-[color:var(--admin-border)] px-3 py-1 text-xs font-semibold text-[color:var(--admin-muted)]">
+          <button type="button" className="admin2-btn admin2-btn--primary" onClick={() => onEditToggle(post.id)}>
+            {editing ? 'Close edit' : 'Edit'}
+          </button>
+          <button
+            type="button"
+            className="admin2-btn admin2-btn--ghost"
+            aria-expanded={expanded}
+            onClick={() => onToggle(post.id)}
+          >
             {expanded ? 'Collapse' : 'Expand'}
-          </span>
+          </button>
         </div>
-      </button>
+      </div>
 
       {expanded ? (
         <div className="border-t border-[color:var(--admin-border)] p-4">
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {post.assets.map((asset) => (
-              <img
-                key={asset.file}
-                src={asset.url}
-                alt={asset.title}
-                className="h-32 w-32 shrink-0 rounded-xl border border-[color:var(--admin-border)] object-cover"
-                loading="lazy"
-              />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Assets</p>
+            {editing ? (
+              <label className="admin2-btn admin2-btn--secondary cursor-pointer">
+                Add image
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="sr-only"
+                  onChange={(event) => {
+                    void addAssets(event.currentTarget.files);
+                    event.currentTarget.value = '';
+                  }}
+                />
+              </label>
+            ) : null}
+          </div>
+
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {post.assets.map((asset, index) => (
+              <figure
+                key={`${asset.file}-${index}`}
+                className="overflow-hidden rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)]"
+              >
+                <div className="aspect-square bg-[color:var(--admin-bg)]">
+                  <img
+                    src={asset.url}
+                    alt={asset.title}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <figcaption className="space-y-2 p-3">
+                  <input
+                    value={asset.title}
+                    disabled={!editing}
+                    onChange={(event) => updateAsset(index, (currentAsset) => ({ ...currentAsset, title: event.target.value }))}
+                    className="w-full rounded-lg border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-2 py-1 text-sm font-semibold text-[color:var(--admin-text)] disabled:border-transparent disabled:bg-transparent disabled:p-0"
+                  />
+                  <p className="truncate font-mono text-xs text-[color:var(--admin-muted)]">{asset.file}</p>
+                  {editing ? (
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className="admin2-btn admin2-btn--ghost"
+                        disabled={index === 0}
+                        onClick={() => moveAsset(index, -1)}
+                      >
+                        Up
+                      </button>
+                      <button
+                        type="button"
+                        className="admin2-btn admin2-btn--ghost"
+                        disabled={index === post.assets.length - 1}
+                        onClick={() => moveAsset(index, 1)}
+                      >
+                        Down
+                      </button>
+                      <button type="button" className="admin2-btn admin2-btn--danger" onClick={() => removeAsset(index)}>
+                        Delete
+                      </button>
+                    </div>
+                  ) : null}
+                </figcaption>
+              </figure>
             ))}
           </div>
 
           <div className="mt-4 grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Caption</p>
-              <pre className="mt-2 max-h-56 overflow-auto whitespace-pre-wrap rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-xs leading-relaxed text-[color:var(--admin-text)]">
-                {post.caption}
-              </pre>
+              {editing ? (
+                <textarea
+                  value={post.caption}
+                  rows={16}
+                  onChange={(event) => updateField('caption', event.target.value)}
+                  className="mt-2 min-h-72 w-full resize-y rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 font-mono text-xs leading-relaxed text-[color:var(--admin-text)]"
+                />
+              ) : (
+                <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-xs leading-relaxed text-[color:var(--admin-text)]">
+                  {post.caption}
+                </pre>
+              )}
             </div>
             <div className="space-y-3 text-sm">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Schedule</p>
-                <p className="mt-1 font-medium">{post.scheduledDate} / {post.scheduledTime}</p>
+                {editing ? (
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    <input
+                      type="date"
+                      value={post.scheduledDate}
+                      onChange={(event) => updateField('scheduledDate', event.target.value)}
+                      className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-[color:var(--admin-text)]"
+                    />
+                    <input
+                      type="time"
+                      value={post.scheduledTime.slice(0, 5)}
+                      onChange={(event) => updateField('scheduledTime', `${event.target.value}:00`)}
+                      className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-[color:var(--admin-text)]"
+                    />
+                  </div>
+                ) : (
+                  <p className="mt-1 font-medium">{post.scheduledDate} / {post.scheduledTime}</p>
+                )}
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Post type</p>
+                {editing ? (
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    <select
+                      value={post.platform}
+                      onChange={(event) => updateField('platform', event.target.value as MarketingPostSeed['platform'])}
+                      className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-[color:var(--admin-text)]"
+                    >
+                      <option value="instagram">Instagram</option>
+                    </select>
+                    <select
+                      value={post.format}
+                      onChange={(event) => updateField('format', event.target.value as MarketingPostSeed['format'])}
+                      className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-[color:var(--admin-text)]"
+                    >
+                      <option value="carousel">Carousel</option>
+                      <option value="static">Static</option>
+                    </select>
+                  </div>
+                ) : (
+                  <p className="mt-1 font-medium">{post.platform} / {post.format}</p>
+                )}
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Hypothesis</p>
-                <p className="mt-1 text-[color:var(--admin-muted)]">{post.hypothesis}</p>
+                {editing ? (
+                  <textarea
+                    value={post.hypothesis}
+                    rows={3}
+                    onChange={(event) => updateField('hypothesis', event.target.value)}
+                    className="mt-2 w-full resize-y rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-[color:var(--admin-text)]"
+                  />
+                ) : (
+                  <p className="mt-1 text-[color:var(--admin-muted)]">{post.hypothesis}</p>
+                )}
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Metric</p>
-                <p className="mt-1 text-[color:var(--admin-muted)]">{post.metric}</p>
+                {editing ? (
+                  <textarea
+                    value={post.metric}
+                    rows={3}
+                    onChange={(event) => updateField('metric', event.target.value)}
+                    className="mt-2 w-full resize-y rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-[color:var(--admin-text)]"
+                  />
+                ) : (
+                  <p className="mt-1 text-[color:var(--admin-muted)]">{post.metric}</p>
+                )}
               </div>
-              <a
-                href={post.trackingUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="block break-all text-xs font-semibold text-[color:var(--admin-accent)]"
-              >
-                {post.trackingUrl}
-              </a>
+              {editing ? (
+                <label className="block">
+                  <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">
+                    Tracking URL
+                  </span>
+                  <input
+                    value={post.trackingUrl}
+                    onChange={(event) => updateField('trackingUrl', event.target.value)}
+                    className="mt-2 w-full rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-xs text-[color:var(--admin-text)]"
+                  />
+                </label>
+              ) : (
+                <a
+                  href={post.trackingUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block break-all text-xs font-semibold text-[color:var(--admin-accent)]"
+                >
+                  {post.trackingUrl}
+                </a>
+              )}
             </div>
           </div>
 
@@ -141,8 +340,9 @@ export function MarketingPage() {
     [selectedCampaignCode],
   );
   const [postCount, setPostCount] = useState(selectedCampaign.postCount);
-  const [posts, setPosts] = useState(() => cloneCampaignPosts(selectedCampaign));
+  const [posts, setPosts] = useState(() => readStoredCampaignPosts(selectedCampaign));
   const [expandedPostIds, setExpandedPostIds] = useState<Set<string>>(() => new Set());
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [r2Status, setR2Status] = useState<MarketingR2Status | null>(null);
   const [r2StatusError, setR2StatusError] = useState<string | null>(null);
   const [isUploadingAssets, setIsUploadingAssets] = useState(false);
@@ -157,8 +357,9 @@ export function MarketingPage() {
 
   useEffect(() => {
     setPostCount(selectedCampaign.postCount);
-    setPosts(cloneCampaignPosts(selectedCampaign));
+    setPosts(readStoredCampaignPosts(selectedCampaign));
     setExpandedPostIds(new Set());
+    setEditingPostId(null);
     setUploadMessage(null);
   }, [selectedCampaign]);
 
@@ -185,9 +386,15 @@ export function MarketingPage() {
   }, []);
 
   function updateStatus(postId: string, status: MarketingPostStatus) {
-    setPosts((currentPosts) =>
-      currentPosts.map((post) => (post.id === postId ? { ...post, status } : post)),
-    );
+    updatePost(postId, (post) => ({ ...post, status }));
+  }
+
+  function updatePost(postId: string, updater: (post: MarketingPostSeed) => MarketingPostSeed) {
+    setPosts((currentPosts) => {
+      const nextPosts = currentPosts.map((post) => (post.id === postId ? updater(post) : post));
+      persistCampaignPosts(selectedCampaign.campaignCode, nextPosts);
+      return nextPosts;
+    });
   }
 
   function togglePost(postId: string) {
@@ -200,6 +407,19 @@ export function MarketingPage() {
       }
       return next;
     });
+  }
+
+  function togglePostEdit(postId: string) {
+    setEditingPostId((currentPostId) => (currentPostId === postId ? null : postId));
+    setExpandedPostIds((current) => new Set(current).add(postId));
+  }
+
+  function resetCampaignEdits() {
+    const nextPosts = cloneCampaignPosts(selectedCampaign);
+    setPosts(nextPosts);
+    setEditingPostId(null);
+    setExpandedPostIds(new Set());
+    window.localStorage.removeItem(storageKeyForCampaign(selectedCampaign.campaignCode));
   }
 
   function downloadApprovedCsv() {
@@ -226,8 +446,8 @@ export function MarketingPage() {
       const result = await uploadMarketingAssetsToR2(uploadInputs);
       const uploadedByKey = new Map(result.assets.map((asset) => [asset.key, asset]));
 
-      setPosts((currentPosts) =>
-        currentPosts.map((post) => ({
+      setPosts((currentPosts) => {
+        const nextPosts = currentPosts.map((post) => ({
           ...post,
           assets: post.assets.map((asset) => {
             const key = buildMarketingAssetKey({
@@ -239,8 +459,11 @@ export function MarketingPage() {
 
             return uploaded ? { ...asset, url: uploaded.url } : asset;
           }),
-        })),
-      );
+        }));
+
+        persistCampaignPosts(selectedCampaign.campaignCode, nextPosts);
+        return nextPosts;
+      });
 
       setUploadMessage(`Uploaded ${result.assets.length} approved asset${result.assets.length === 1 ? '' : 's'} to R2.`);
     } catch (error) {
@@ -268,6 +491,13 @@ export function MarketingPage() {
             disabled={approvedPosts.length === 0}
           >
             Download Metricool CSV
+          </button>
+          <button
+            type="button"
+            className="admin2-btn admin2-btn--ghost"
+            onClick={resetCampaignEdits}
+          >
+            Reset edits
           </button>
         </div>
       </header>
@@ -399,7 +629,10 @@ export function MarketingPage() {
             key={post.id}
             post={post}
             expanded={expandedPostIds.has(post.id)}
+            editing={editingPostId === post.id}
             onToggle={togglePost}
+            onEditToggle={togglePostEdit}
+            onPostChange={updatePost}
             onStatusChange={updateStatus}
           />
         ))}
@@ -413,4 +646,58 @@ function cloneCampaignPosts(campaign: MarketingCampaignSeed) {
     ...post,
     assets: post.assets.map((asset) => ({ ...asset })),
   }));
+}
+
+function storageKeyForCampaign(campaignCode: string) {
+  return `${STORAGE_PREFIX}${campaignCode}`;
+}
+
+function readStoredCampaignPosts(campaign: MarketingCampaignSeed) {
+  if (typeof window === 'undefined') {
+    return cloneCampaignPosts(campaign);
+  }
+
+  const raw = window.localStorage.getItem(storageKeyForCampaign(campaign.campaignCode));
+  if (!raw) {
+    return cloneCampaignPosts(campaign);
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as { posts?: MarketingPostSeed[] };
+    if (!Array.isArray(parsed.posts)) {
+      return cloneCampaignPosts(campaign);
+    }
+
+    return parsed.posts.map((post) => ({
+      ...post,
+      assets: Array.isArray(post.assets) ? post.assets.map((asset) => ({ ...asset })) : [],
+    }));
+  } catch {
+    return cloneCampaignPosts(campaign);
+  }
+}
+
+function persistCampaignPosts(campaignCode: string, posts: MarketingPostSeed[]) {
+  window.localStorage.setItem(
+    storageKeyForCampaign(campaignCode),
+    JSON.stringify({
+      updatedAt: new Date().toISOString(),
+      posts,
+    }),
+  );
+}
+
+function fileToMarketingAsset(file: File) {
+  return new Promise<MarketingAsset>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve({
+        file: file.name,
+        title: file.name.replace(/\.[^.]+$/, ''),
+        url: String(reader.result),
+      });
+    };
+    reader.onerror = () => reject(reader.error ?? new Error('Failed to read image file.'));
+    reader.readAsDataURL(file);
+  });
 }
