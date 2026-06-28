@@ -89,6 +89,15 @@ export async function uploadMarketingAssetsToR2(inputs: UploadAssetInput[]) {
   return response.json() as Promise<UploadMarketingAssetsResponse>;
 }
 
+export function isMarketingAssetStoredOnR2(assetUrl: string, publicBaseUrl: string | null | undefined) {
+  const normalizedBaseUrl = String(publicBaseUrl ?? '').trim().replace(/\/+$/, '');
+  if (!normalizedBaseUrl) {
+    return false;
+  }
+
+  return assetUrl.trim().startsWith(`${normalizedBaseUrl}/`);
+}
+
 async function fetchAssetAsBase64(url: string) {
   const response = await fetch(url);
   if (!response.ok) {
