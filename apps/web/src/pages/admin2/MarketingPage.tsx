@@ -60,8 +60,11 @@ function PostCard({
           <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass(post.status)}`}>
             {STATUS_LABELS[post.status]}
           </span>
-          <span className="rounded-full border border-[color:var(--admin-border)] px-3 py-1 text-xs font-semibold text-[color:var(--admin-muted)]">
-            {expanded ? 'Collapse' : 'Expand'}
+          <span
+            aria-hidden="true"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[color:var(--admin-border)] text-sm font-semibold text-[color:var(--admin-muted)]"
+          >
+            {expanded ? '↑' : '↓'}
           </span>
         </div>
       </button>
