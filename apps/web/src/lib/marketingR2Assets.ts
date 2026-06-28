@@ -43,7 +43,7 @@ export function buildMarketingAssetKey({
 }
 
 export async function fetchMarketingR2Status() {
-  const response = await apiAuthorizedFetch(`${getR2RoutePrefix()}/status`, {
+  const response = await apiAuthorizedFetch('/admin/marketing/r2/status', {
     headers: {
       Accept: 'application/json',
     },
@@ -72,7 +72,7 @@ export async function uploadMarketingAssetsToR2(inputs: UploadAssetInput[]) {
     }),
   );
 
-  const response = await apiAuthorizedFetch(`${getR2RoutePrefix()}/assets`, {
+  const response = await apiAuthorizedFetch('/admin/marketing/r2/assets', {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -120,12 +120,4 @@ function toSafeSegment(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9_-]+/g, '-')
     .replace(/^-+|-+$/g, '') || 'default';
-}
-
-function getR2RoutePrefix() {
-  const origin = typeof window !== 'undefined' && window.location?.origin
-    ? window.location.origin
-    : '';
-
-  return `${origin}/api/admin/marketing/r2`;
 }

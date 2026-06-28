@@ -33,6 +33,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: 3.1075.0
+        version: 3.1075.0
       '@fastify/express':
         specifier: ^4.0.2
         version: 4.0.2
@@ -167,9 +170,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@aws-sdk/client-s3':
-        specifier: ^3.1075.0
-        version: 3.1075.0
       '@clerk/clerk-react':
         specifier: ^5.8.1
         version: 5.59.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
