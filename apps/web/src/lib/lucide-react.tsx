@@ -103,3 +103,98 @@ export const WandSparkles = createIcon(
   ],
   'WandSparkles',
 );
+
+export const Check = createIcon(
+  [
+    ['path', { d: 'M20 6 9 17l-5-5' }],
+  ],
+  'Check',
+);
+
+export const ChevronDown = createIcon(
+  [
+    ['path', { d: 'm6 9 6 6 6-6' }],
+  ],
+  'ChevronDown',
+);
+
+export const ChevronUp = createIcon(
+  [
+    ['path', { d: 'm18 15-6-6-6 6' }],
+  ],
+  'ChevronUp',
+);
+
+export const Clock3 = createIcon(
+  [
+    ['circle', { cx: '12', cy: '12', r: '10' }],
+    ['path', { d: 'M12 6v6l4 2' }],
+  ],
+  'Clock3',
+);
+
+export const FileDown = createIcon(
+  [
+    ['path', { d: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z' }],
+    ['path', { d: 'M14 2v6h6' }],
+    ['path', { d: 'M12 18v-6' }],
+    ['path', { d: 'm9 15 3 3 3-3' }],
+  ],
+  'FileDown',
+);
+
+export const ImagePlus = createIcon(
+  [
+    ['path', { d: 'M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7' }],
+    ['circle', { cx: '9', cy: '9', r: '2' }],
+    ['path', { d: 'm21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21' }],
+    ['path', { d: 'M16 5h6' }],
+    ['path', { d: 'M19 2v6' }],
+  ],
+  'ImagePlus',
+);
+
+export const Pencil = createIcon(
+  [
+    ['path', { d: 'M21.2 6.8 17.2 2.8a2 2 0 0 0-2.8 0L3 14.2V21h6.8L21.2 9.6a2 2 0 0 0 0-2.8z' }],
+    ['path', { d: 'm14 5 5 5' }],
+  ],
+  'Pencil',
+);
+
+export const RotateCcw = createIcon(
+  [
+    ['path', { d: 'M3 12a9 9 0 1 0 3-6.7L3 8' }],
+    ['path', { d: 'M3 3v5h5' }],
+  ],
+  'RotateCcw',
+);
+
+export const Trash2 = createIcon(
+  [
+    ['path', { d: 'M3 6h18' }],
+    ['path', { d: 'M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' }],
+    ['path', { d: 'M19 6 18 20a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6' }],
+    ['path', { d: 'M10 11v6' }],
+    ['path', { d: 'M14 11v6' }],
+  ],
+  'Trash2',
+);
+
+export const UploadCloud = createIcon(
+  [
+    ['path', { d: 'M16 16l-4-4-4 4' }],
+    ['path', { d: 'M12 12v9' }],
+    ['path', { d: 'M20.4 18.9A5 5 0 0 0 18 9h-1.3A8 8 0 1 0 4 16.3' }],
+  ],
+  'UploadCloud',
+);
+
+export const XCircle = createIcon(
+  [
+    ['circle', { cx: '12', cy: '12', r: '10' }],
+    ['path', { d: 'm15 9-6 6' }],
+    ['path', { d: 'm9 9 6 6' }],
+  ],
+  'XCircle',
+);
