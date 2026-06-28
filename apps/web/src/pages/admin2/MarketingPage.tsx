@@ -1,4 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Clock3,
+  FileDown,
+  ImagePlus,
+  Pencil,
+  RotateCcw,
+  Trash2,
+  UploadCloud,
+  WandSparkles,
+  XCircle,
+} from '../../lib/lucide-react';
 import {
   marketingCampaignSeeds,
   type MarketingAsset,
@@ -22,6 +36,19 @@ const STATUS_LABELS: Record<MarketingPostStatus, string> = {
 
 const STORAGE_PREFIX = 'innerbloom:admin-marketing:posts:';
 
+const iconButtonBase =
+  'inline-flex h-9 w-9 items-center justify-center rounded-lg border text-[color:var(--admin-text)] transition hover:border-[color:var(--admin-accent)] hover:bg-[color:var(--admin-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--admin-accent)] disabled:cursor-not-allowed disabled:opacity-35';
+
+const iconButtonVariants = {
+  ghost: 'border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)]',
+  primary: 'border-[color:var(--admin-btn-primary-border)] bg-[color:var(--admin-btn-primary-bg)] text-[color:var(--admin-btn-primary-text)] hover:bg-[color:var(--admin-btn-primary-bg)]',
+  success: 'border-[color:var(--admin-btn-success-border)] bg-[color:var(--admin-btn-success-bg)] text-[color:var(--admin-btn-success-text)]',
+  danger: 'border-[color:var(--admin-btn-danger-border)] bg-[color:var(--admin-btn-danger-bg)] text-[color:var(--admin-btn-danger-text)]',
+  warning: 'border-amber-500/50 bg-amber-500/15 text-amber-200',
+} as const;
+
+type IconButtonVariant = keyof typeof iconButtonVariants;
+
 function statusClass(status: MarketingPostStatus) {
   if (status === 'approved') {
     return 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200';
@@ -32,6 +59,53 @@ function statusClass(status: MarketingPostStatus) {
   }
 
   return 'border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] text-[color:var(--admin-muted)]';
+}
+
+function IconButton({
+  label,
+  variant = 'ghost',
+  disabled,
+  onClick,
+  children,
+}: {
+  label: string;
+  variant?: IconButtonVariant;
+  disabled?: boolean;
+  onClick?: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      disabled={disabled}
+      onClick={onClick}
+      className={`${iconButtonBase} ${iconButtonVariants[variant]}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function IconLabel({
+  label,
+  variant = 'ghost',
+  children,
+}: {
+  label: string;
+  variant?: IconButtonVariant;
+  children: ReactNode;
+}) {
+  return (
+    <label
+      aria-label={label}
+      title={label}
+      className={`${iconButtonBase} ${iconButtonVariants[variant]} cursor-pointer`}
+    >
+      {children}
+    </label>
+  );
 }
 
 function PostCard({
@@ -97,15 +171,15 @@ function PostCard({
 
   return (
     <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)]">
-      <div className="flex w-full flex-wrap items-center justify-between gap-3 p-4">
-        <div className="grid gap-1 sm:grid-cols-[9rem_10rem_1fr] sm:items-center">
+      <div className="flex w-full flex-wrap items-center justify-between gap-3 border-b border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-4">
+        <div className="grid min-w-0 flex-1 gap-1 sm:grid-cols-[9rem_10rem_minmax(0,1fr)] sm:items-center">
           <p className="text-sm font-semibold text-[color:var(--admin-text)]">
             {post.scheduledDate} {post.scheduledTime.slice(0, 5)}
           </p>
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">
             {post.platform} / {post.format}
           </p>
-          <h3 className="text-sm font-semibold tracking-tight text-[color:var(--admin-text)]">
+          <h3 className="min-w-0 truncate text-sm font-semibold tracking-tight text-[color:var(--admin-text)]">
             {post.assets[0]?.title ?? post.id}
           </h3>
         </div>
@@ -113,27 +187,22 @@ function PostCard({
           <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass(post.status)}`}>
             {STATUS_LABELS[post.status]}
           </span>
-          <button type="button" className="admin2-btn admin2-btn--primary" onClick={() => onEditToggle(post.id)}>
-            {editing ? 'Close edit' : 'Edit'}
-          </button>
-          <button
-            type="button"
-            className="admin2-btn admin2-btn--ghost"
-            aria-expanded={expanded}
-            onClick={() => onToggle(post.id)}
-          >
-            {expanded ? 'Collapse' : 'Expand'}
-          </button>
+          <IconButton label={editing ? 'Close edit' : 'Edit post'} variant={editing ? 'primary' : 'ghost'} onClick={() => onEditToggle(post.id)}>
+            <Pencil size={17} />
+          </IconButton>
+          <IconButton label={expanded ? 'Collapse post' : 'Expand post'} onClick={() => onToggle(post.id)}>
+            {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </IconButton>
         </div>
       </div>
 
       {expanded ? (
-        <div className="border-t border-[color:var(--admin-border)] p-4">
+        <div className="p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Assets</p>
             {editing ? (
-              <label className="admin2-btn admin2-btn--secondary cursor-pointer">
-                Add image
+              <IconLabel label="Add image" variant="primary">
+                <ImagePlus size={18} />
                 <input
                   type="file"
                   accept="image/*"
@@ -144,23 +213,44 @@ function PostCard({
                     event.currentTarget.value = '';
                   }}
                 />
-              </label>
+              </IconLabel>
             ) : null}
           </div>
 
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {post.assets.map((asset, index) => (
               <figure
                 key={`${asset.file}-${index}`}
-                className="overflow-hidden rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)]"
+                className="group overflow-hidden rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)]"
               >
-                <div className="aspect-square bg-[color:var(--admin-bg)]">
+                <div className="relative aspect-square bg-[color:var(--admin-bg)]">
                   <img
                     src={asset.url}
                     alt={asset.title}
                     className="h-full w-full object-cover"
                     loading="lazy"
                   />
+                  {editing ? (
+                    <div className="absolute right-2 top-2 flex items-center gap-1 rounded-xl border border-white/15 bg-slate-950/70 p-1 shadow-lg backdrop-blur">
+                      <IconButton
+                        label="Move image left"
+                        disabled={index === 0}
+                        onClick={() => moveAsset(index, -1)}
+                      >
+                        <ChevronUp size={16} className="-rotate-90" />
+                      </IconButton>
+                      <IconButton
+                        label="Move image right"
+                        disabled={index === post.assets.length - 1}
+                        onClick={() => moveAsset(index, 1)}
+                      >
+                        <ChevronDown size={16} className="-rotate-90" />
+                      </IconButton>
+                      <IconButton label="Delete image" variant="danger" onClick={() => removeAsset(index)}>
+                        <Trash2 size={16} />
+                      </IconButton>
+                    </div>
+                  ) : null}
                 </div>
                 <figcaption className="space-y-2 p-3">
                   <input
@@ -170,29 +260,6 @@ function PostCard({
                     className="w-full rounded-lg border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-2 py-1 text-sm font-semibold text-[color:var(--admin-text)] disabled:border-transparent disabled:bg-transparent disabled:p-0"
                   />
                   <p className="truncate font-mono text-xs text-[color:var(--admin-muted)]">{asset.file}</p>
-                  {editing ? (
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        className="admin2-btn admin2-btn--ghost"
-                        disabled={index === 0}
-                        onClick={() => moveAsset(index, -1)}
-                      >
-                        Up
-                      </button>
-                      <button
-                        type="button"
-                        className="admin2-btn admin2-btn--ghost"
-                        disabled={index === post.assets.length - 1}
-                        onClick={() => moveAsset(index, 1)}
-                      >
-                        Down
-                      </button>
-                      <button type="button" className="admin2-btn admin2-btn--danger" onClick={() => removeAsset(index)}>
-                        Delete
-                      </button>
-                    </div>
-                  ) : null}
                 </figcaption>
               </figure>
             ))}
@@ -310,22 +377,30 @@ function PostCard({
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button type="button" className="admin2-btn admin2-btn--success" onClick={() => onStatusChange(post.id, 'approved')}>
-              Approve
-            </button>
-            <button type="button" className="admin2-btn admin2-btn--secondary" onClick={() => onStatusChange(post.id, 'needs_review')}>
-              Needs review
-            </button>
-            <button type="button" className="admin2-btn admin2-btn--ghost" onClick={() => onStatusChange(post.id, 'draft')}>
-              Draft
-            </button>
-            <button type="button" className="admin2-btn admin2-btn--ghost" disabled title="Next step: wire generation service">
-              Regenerate copy
-            </button>
-            <button type="button" className="admin2-btn admin2-btn--ghost" disabled title="Next step: wire image generation">
-              Regenerate image
-            </button>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--admin-border)] pt-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Status</span>
+              <div className="flex items-center gap-1 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-1">
+                <IconButton label="Approve post" variant="success" onClick={() => onStatusChange(post.id, 'approved')}>
+                  <Check size={16} />
+                </IconButton>
+                <IconButton label="Mark needs review" variant="warning" onClick={() => onStatusChange(post.id, 'needs_review')}>
+                  <Clock3 size={16} />
+                </IconButton>
+                <IconButton label="Move to draft" onClick={() => onStatusChange(post.id, 'draft')}>
+                  <XCircle size={16} />
+                </IconButton>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-1">
+              <IconButton label="Regenerate copy" disabled>
+                <WandSparkles size={16} />
+              </IconButton>
+              <IconButton label="Regenerate image" disabled>
+                <ImagePlus size={16} />
+              </IconButton>
+            </div>
           </div>
         </div>
       ) : null}
@@ -484,21 +559,20 @@ export function MarketingPage() {
               Review generated posts, approve the ones that are ready, and export a Metricool CSV for the approved queue.
             </p>
           </div>
-          <button
-            type="button"
-            className="admin2-btn admin2-btn--primary"
-            onClick={downloadApprovedCsv}
-            disabled={approvedPosts.length === 0}
-          >
-            Download Metricool CSV
-          </button>
-          <button
-            type="button"
-            className="admin2-btn admin2-btn--ghost"
-            onClick={resetCampaignEdits}
-          >
-            Reset edits
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="admin2-btn admin2-btn--primary inline-flex items-center gap-2"
+              onClick={downloadApprovedCsv}
+              disabled={approvedPosts.length === 0}
+            >
+              <FileDown size={16} />
+              <span>CSV</span>
+            </button>
+            <IconButton label="Reset edits" onClick={resetCampaignEdits}>
+              <RotateCcw size={16} />
+            </IconButton>
+          </div>
         </div>
       </header>
 
@@ -598,11 +672,12 @@ export function MarketingPage() {
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                className="admin2-btn admin2-btn--secondary"
+                className="admin2-btn admin2-btn--secondary inline-flex items-center gap-2"
                 onClick={uploadApprovedAssets}
                 disabled={!r2Status?.configured || approvedPosts.length === 0 || isUploadingAssets}
               >
-                {isUploadingAssets ? 'Uploading assets...' : 'Upload approved assets to R2'}
+                <UploadCloud size={16} />
+                <span>{isUploadingAssets ? 'Uploading' : 'Upload R2'}</span>
               </button>
               {uploadMessage ? (
                 <p className="text-xs text-[color:var(--admin-muted)]">{uploadMessage}</p>
