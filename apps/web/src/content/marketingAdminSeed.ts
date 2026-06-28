@@ -37,7 +37,7 @@ export type MarketingCampaignSeed = {
 const assetBaseUrl =
   'https://raw.githubusercontent.com/rfullivarri/innerbloomv3/main/Docs/marketing/campaigns/2026-06-mvp/assets';
 
-export const marketingCampaignSeed: MarketingCampaignSeed = {
+export const marketingCampaignSeeds: MarketingCampaignSeed[] = [{
   title: 'Innerbloom 2.0 Marketing MVP - English Test',
   campaignCode: 'ib20_mvp',
   primaryUrl: 'https://innerbloomjourney.org/',
@@ -145,4 +145,6 @@ export const marketingCampaignSeed: MarketingCampaignSeed = {
       ],
     },
   ],
-};
+}];
+
+export const marketingCampaignSeed = marketingCampaignSeeds[0];
