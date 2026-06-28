@@ -193,6 +193,18 @@ export const adminSubscriptionUpdateBodySchema = z.object({
   status: subscriptionStatusSchema.optional().default('active'),
 });
 
+export const marketingR2AssetUploadBodySchema = z.object({
+  assets: z
+    .array(
+      z.object({
+        key: z.string().trim().min(1).max(240),
+        contentBase64: z.string().trim().min(1),
+        contentType: z.string().trim().min(1).max(100).optional(),
+      }),
+    )
+    .min(1)
+    .max(10),
+});
 
 export const subscriptionNotificationsTriggerBodySchema = z.object({
   runAt: z.string().datetime().optional(),
