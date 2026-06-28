@@ -97,7 +97,7 @@ app.use('/api', stripeWebhookRouter);
 if (apiLoggingEnabled) {
   console.info('[boot] registering express.json() after Clerk webhook router');
 }
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '25mb' }));
 
 app.get('/_debug/db', (_req, res, next) => {
   if (process.env.NODE_ENV === 'production') {
