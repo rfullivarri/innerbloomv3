@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { marketingCampaignSeed, type MarketingPostSeed, type MarketingPostStatus } from '../../content/marketingAdminSeed';
+import { marketingCampaignSeeds, type MarketingCampaignSeed, type MarketingPostSeed, type MarketingPostStatus } from '../../content/marketingAdminSeed';
 import { downloadMetricoolCalendarCsv } from '../../lib/marketingMetricoolCsv';
 import {
   buildMarketingAssetKey,
@@ -28,92 +28,121 @@ function statusClass(status: MarketingPostStatus) {
 
 function PostCard({
   post,
+  expanded,
+  onToggle,
   onStatusChange,
 }: {
   post: MarketingPostSeed;
+  expanded: boolean;
+  onToggle: (postId: string) => void;
   onStatusChange: (postId: string, status: MarketingPostStatus) => void;
 }) {
   return (
-    <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">
-            {post.platform} / {post.format} / {post.id}
+    <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)]">
+      <button
+        type="button"
+        className="flex w-full flex-wrap items-center justify-between gap-3 p-4 text-left"
+        aria-expanded={expanded}
+        onClick={() => onToggle(post.id)}
+      >
+        <div className="grid gap-1 sm:grid-cols-[9rem_10rem_1fr] sm:items-center">
+          <p className="text-sm font-semibold text-[color:var(--admin-text)]">
+            {post.scheduledDate} {post.scheduledTime.slice(0, 5)}
           </p>
-          <h3 className="mt-1 text-lg font-semibold tracking-tight">{post.assets[0]?.title ?? post.id}</h3>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">
+            {post.platform} / {post.format}
+          </p>
+          <h3 className="text-sm font-semibold tracking-tight text-[color:var(--admin-text)]">
+            {post.assets[0]?.title ?? post.id}
+          </h3>
         </div>
-        <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass(post.status)}`}>
-          {STATUS_LABELS[post.status]}
-        </span>
-      </div>
-
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-        {post.assets.map((asset) => (
-          <img
-            key={asset.file}
-            src={asset.url}
-            alt={asset.title}
-            className="h-32 w-32 shrink-0 rounded-xl border border-[color:var(--admin-border)] object-cover"
-            loading="lazy"
-          />
-        ))}
-      </div>
-
-      <div className="mt-4 grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Caption</p>
-          <pre className="mt-2 max-h-56 overflow-auto whitespace-pre-wrap rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-xs leading-relaxed text-[color:var(--admin-text)]">
-            {post.caption}
-          </pre>
+        <div className="flex items-center gap-2">
+          <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass(post.status)}`}>
+            {STATUS_LABELS[post.status]}
+          </span>
+          <span className="rounded-full border border-[color:var(--admin-border)] px-3 py-1 text-xs font-semibold text-[color:var(--admin-muted)]">
+            {expanded ? 'Collapse' : 'Expand'}
+          </span>
         </div>
-        <div className="space-y-3 text-sm">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Schedule</p>
-            <p className="mt-1 font-medium">{post.scheduledDate} / {post.scheduledTime}</p>
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Hypothesis</p>
-            <p className="mt-1 text-[color:var(--admin-muted)]">{post.hypothesis}</p>
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Metric</p>
-            <p className="mt-1 text-[color:var(--admin-muted)]">{post.metric}</p>
-          </div>
-          <a
-            href={post.trackingUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="block break-all text-xs font-semibold text-[color:var(--admin-accent)]"
-          >
-            {post.trackingUrl}
-          </a>
-        </div>
-      </div>
+      </button>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button type="button" className="admin2-btn admin2-btn--success" onClick={() => onStatusChange(post.id, 'approved')}>
-          Approve
-        </button>
-        <button type="button" className="admin2-btn admin2-btn--secondary" onClick={() => onStatusChange(post.id, 'needs_review')}>
-          Needs review
-        </button>
-        <button type="button" className="admin2-btn admin2-btn--ghost" onClick={() => onStatusChange(post.id, 'draft')}>
-          Draft
-        </button>
-        <button type="button" className="admin2-btn admin2-btn--ghost" disabled title="Next step: wire generation service">
-          Regenerate copy
-        </button>
-        <button type="button" className="admin2-btn admin2-btn--ghost" disabled title="Next step: wire image generation">
-          Regenerate image
-        </button>
-      </div>
+      {expanded ? (
+        <div className="border-t border-[color:var(--admin-border)] p-4">
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {post.assets.map((asset) => (
+              <img
+                key={asset.file}
+                src={asset.url}
+                alt={asset.title}
+                className="h-32 w-32 shrink-0 rounded-xl border border-[color:var(--admin-border)] object-cover"
+                loading="lazy"
+              />
+            ))}
+          </div>
+
+          <div className="mt-4 grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Caption</p>
+              <pre className="mt-2 max-h-56 overflow-auto whitespace-pre-wrap rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-xs leading-relaxed text-[color:var(--admin-text)]">
+                {post.caption}
+              </pre>
+            </div>
+            <div className="space-y-3 text-sm">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Schedule</p>
+                <p className="mt-1 font-medium">{post.scheduledDate} / {post.scheduledTime}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Hypothesis</p>
+                <p className="mt-1 text-[color:var(--admin-muted)]">{post.hypothesis}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Metric</p>
+                <p className="mt-1 text-[color:var(--admin-muted)]">{post.metric}</p>
+              </div>
+              <a
+                href={post.trackingUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="block break-all text-xs font-semibold text-[color:var(--admin-accent)]"
+              >
+                {post.trackingUrl}
+              </a>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button type="button" className="admin2-btn admin2-btn--success" onClick={() => onStatusChange(post.id, 'approved')}>
+              Approve
+            </button>
+            <button type="button" className="admin2-btn admin2-btn--secondary" onClick={() => onStatusChange(post.id, 'needs_review')}>
+              Needs review
+            </button>
+            <button type="button" className="admin2-btn admin2-btn--ghost" onClick={() => onStatusChange(post.id, 'draft')}>
+              Draft
+            </button>
+            <button type="button" className="admin2-btn admin2-btn--ghost" disabled title="Next step: wire generation service">
+              Regenerate copy
+            </button>
+            <button type="button" className="admin2-btn admin2-btn--ghost" disabled title="Next step: wire image generation">
+              Regenerate image
+            </button>
+          </div>
+        </div>
+      ) : null}
     </article>
   );
 }
 
 export function MarketingPage() {
-  const [postCount, setPostCount] = useState(marketingCampaignSeed.postCount);
-  const [posts, setPosts] = useState(marketingCampaignSeed.posts);
+  const [selectedCampaignCode, setSelectedCampaignCode] = useState(marketingCampaignSeeds[0].campaignCode);
+  const selectedCampaign = useMemo(
+    () => marketingCampaignSeeds.find((campaign) => campaign.campaignCode === selectedCampaignCode) ?? marketingCampaignSeeds[0],
+    [selectedCampaignCode],
+  );
+  const [postCount, setPostCount] = useState(selectedCampaign.postCount);
+  const [posts, setPosts] = useState(() => cloneCampaignPosts(selectedCampaign));
+  const [expandedPostIds, setExpandedPostIds] = useState<Set<string>>(() => new Set());
   const [r2Status, setR2Status] = useState<MarketingR2Status | null>(null);
   const [r2StatusError, setR2StatusError] = useState<string | null>(null);
   const [isUploadingAssets, setIsUploadingAssets] = useState(false);
@@ -125,6 +154,13 @@ export function MarketingPage() {
     (total, post) => total + post.assets.filter((asset) => r2Status?.publicBaseUrl && asset.url.startsWith(r2Status.publicBaseUrl)).length,
     0,
   );
+
+  useEffect(() => {
+    setPostCount(selectedCampaign.postCount);
+    setPosts(cloneCampaignPosts(selectedCampaign));
+    setExpandedPostIds(new Set());
+    setUploadMessage(null);
+  }, [selectedCampaign]);
 
   useEffect(() => {
     let cancelled = false;
@@ -154,6 +190,18 @@ export function MarketingPage() {
     );
   }
 
+  function togglePost(postId: string) {
+    setExpandedPostIds((current) => {
+      const next = new Set(current);
+      if (next.has(postId)) {
+        next.delete(postId);
+      } else {
+        next.add(postId);
+      }
+      return next;
+    });
+  }
+
   function downloadApprovedCsv() {
     downloadMetricoolCalendarCsv(approvedPosts);
   }
@@ -170,7 +218,7 @@ export function MarketingPage() {
       const uploadInputs = approvedPosts.flatMap((post) =>
         post.assets.map((asset) => ({
           asset,
-          campaignCode: marketingCampaignSeed.campaignCode,
+          campaignCode: selectedCampaign.campaignCode,
           postId: post.id,
         })),
       );
@@ -183,7 +231,7 @@ export function MarketingPage() {
           ...post,
           assets: post.assets.map((asset) => {
             const key = buildMarketingAssetKey({
-              campaignCode: marketingCampaignSeed.campaignCode,
+              campaignCode: selectedCampaign.campaignCode,
               postId: post.id,
               file: asset.file,
             });
@@ -249,8 +297,21 @@ export function MarketingPage() {
         </div>
         <div className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Campaign</p>
-          <p className="mt-3 text-lg font-semibold">{marketingCampaignSeed.campaignCode}</p>
-          <p className="mt-1 text-xs text-[color:var(--admin-muted)]">{marketingCampaignSeed.language}</p>
+          <label className="mt-3 block">
+            <span className="sr-only">Marketing campaign</span>
+            <select
+              value={selectedCampaign.campaignCode}
+              onChange={(event) => setSelectedCampaignCode(event.target.value)}
+              className="w-full rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-sm font-semibold text-[color:var(--admin-text)]"
+            >
+              {marketingCampaignSeeds.map((campaign) => (
+                <option key={campaign.campaignCode} value={campaign.campaignCode}>
+                  {campaign.campaignCode}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p className="mt-2 text-xs text-[color:var(--admin-muted)]">{selectedCampaign.language}</p>
         </div>
         <div className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Metricool assets</p>
@@ -266,16 +327,16 @@ export function MarketingPage() {
             This is prepared for GA4, Search Console and manual Metricool exports. Live integrations are intentionally not wired yet.
           </p>
           <div className="mt-4 grid gap-3 text-sm">
-            <a className="font-semibold text-[color:var(--admin-accent)]" href={marketingCampaignSeed.driveRootUrl} target="_blank" rel="noreferrer">
+            <a className="font-semibold text-[color:var(--admin-accent)]" href={selectedCampaign.driveRootUrl} target="_blank" rel="noreferrer">
               Google Drive marketing root
             </a>
-            <a className="font-semibold text-[color:var(--admin-accent)]" href={marketingCampaignSeed.strategyMemoryUrl} target="_blank" rel="noreferrer">
+            <a className="font-semibold text-[color:var(--admin-accent)]" href={selectedCampaign.strategyMemoryUrl} target="_blank" rel="noreferrer">
               Strategy memory file
             </a>
-            <a className="font-semibold text-[color:var(--admin-accent)]" href={marketingCampaignSeed.assetsFolderUrl} target="_blank" rel="noreferrer">
+            <a className="font-semibold text-[color:var(--admin-accent)]" href={selectedCampaign.assetsFolderUrl} target="_blank" rel="noreferrer">
               Assets folder
             </a>
-            <a className="font-semibold text-[color:var(--admin-accent)]" href={marketingCampaignSeed.campaignsFolderUrl} target="_blank" rel="noreferrer">
+            <a className="font-semibold text-[color:var(--admin-accent)]" href={selectedCampaign.campaignsFolderUrl} target="_blank" rel="noreferrer">
               Campaigns folder
             </a>
           </div>
@@ -334,9 +395,22 @@ export function MarketingPage() {
 
       <section className="flex flex-col gap-4">
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} onStatusChange={updateStatus} />
+          <PostCard
+            key={post.id}
+            post={post}
+            expanded={expandedPostIds.has(post.id)}
+            onToggle={togglePost}
+            onStatusChange={updateStatus}
+          />
         ))}
       </section>
     </div>
   );
+}
+
+function cloneCampaignPosts(campaign: MarketingCampaignSeed) {
+  return campaign.posts.map((post) => ({
+    ...post,
+    assets: post.assets.map((asset) => ({ ...asset })),
+  }));
 }
