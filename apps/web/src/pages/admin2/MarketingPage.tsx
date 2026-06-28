@@ -10,6 +10,7 @@ import { downloadMetricoolCalendarCsv } from '../../lib/marketingMetricoolCsv';
 import {
   buildMarketingAssetKey,
   fetchMarketingR2Status,
+  isMarketingAssetStoredOnR2,
   uploadMarketingAssetsToR2,
   type MarketingR2Status,
 } from '../../lib/marketingR2Assets';
@@ -351,7 +352,8 @@ export function MarketingPage() {
   const needsReviewCount = posts.filter((post) => post.status === 'needs_review').length;
   const approvedAssetCount = approvedPosts.reduce((total, post) => total + post.assets.length, 0);
   const r2ReadyAssetCount = approvedPosts.reduce(
-    (total, post) => total + post.assets.filter((asset) => r2Status?.publicBaseUrl && asset.url.startsWith(r2Status.publicBaseUrl)).length,
+    (total, post) =>
+      total + post.assets.filter((asset) => isMarketingAssetStoredOnR2(asset.url, r2Status?.publicBaseUrl)).length,
     0,
   );
 
@@ -431,17 +433,25 @@ export function MarketingPage() {
       return;
     }
 
-    setIsUploadingAssets(true);
     setUploadMessage(null);
 
     try {
       const uploadInputs = approvedPosts.flatMap((post) =>
-        post.assets.map((asset) => ({
-          asset,
-          campaignCode: selectedCampaign.campaignCode,
-          postId: post.id,
-        })),
+        post.assets
+          .filter((asset) => !isMarketingAssetStoredOnR2(asset.url, r2Status?.publicBaseUrl))
+          .map((asset) => ({
+            asset,
+            campaignCode: selectedCampaign.campaignCode,
+            postId: post.id,
+          })),
       );
+
+      if (uploadInputs.length === 0) {
+        setUploadMessage('All approved assets are already on R2.');
+        return;
+      }
+
+      setIsUploadingAssets(true);
 
       const result = await uploadMarketingAssetsToR2(uploadInputs);
       const uploadedByKey = new Map(result.assets.map((asset) => [asset.key, asset]));
