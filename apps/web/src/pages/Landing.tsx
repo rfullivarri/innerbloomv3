@@ -182,7 +182,7 @@ function splitPillarCopy(copy: string, language: Language) {
   return { definition, examples };
 }
 
-const DISCORD_URL = "https://discord.gg/wds35ykK";
+const DISCORD_URL = "https://discord.gg/Y4ZaqDZCZ3";
 
 const DISCORD_CTA_COPY: Record<Language, { lead: string; link: string }> = {
   en: {
