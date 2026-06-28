@@ -1,6 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { marketingCampaignSeed, type MarketingPostSeed, type MarketingPostStatus } from '../../content/marketingAdminSeed';
 import { downloadMetricoolCalendarCsv } from '../../lib/marketingMetricoolCsv';
+import {
+  buildMarketingAssetKey,
+  fetchMarketingR2Status,
+  uploadMarketingAssetsToR2,
+  type MarketingR2Status,
+} from '../../lib/marketingR2Assets';
 
 const STATUS_LABELS: Record<MarketingPostStatus, string> = {
   draft: 'Draft',
@@ -108,8 +114,39 @@ function PostCard({
 export function MarketingPage() {
   const [postCount, setPostCount] = useState(marketingCampaignSeed.postCount);
   const [posts, setPosts] = useState(marketingCampaignSeed.posts);
+  const [r2Status, setR2Status] = useState<MarketingR2Status | null>(null);
+  const [r2StatusError, setR2StatusError] = useState<string | null>(null);
+  const [isUploadingAssets, setIsUploadingAssets] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const approvedPosts = useMemo(() => posts.filter((post) => post.status === 'approved'), [posts]);
   const needsReviewCount = posts.filter((post) => post.status === 'needs_review').length;
+  const approvedAssetCount = approvedPosts.reduce((total, post) => total + post.assets.length, 0);
+  const r2ReadyAssetCount = approvedPosts.reduce(
+    (total, post) => total + post.assets.filter((asset) => r2Status?.publicBaseUrl && asset.url.startsWith(r2Status.publicBaseUrl)).length,
+    0,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchMarketingR2Status()
+      .then((status) => {
+        if (!cancelled) {
+          setR2Status(status);
+          setR2StatusError(null);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setR2Status(null);
+          setR2StatusError(error instanceof Error ? error.message : 'Unable to load R2 status.');
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function updateStatus(postId: string, status: MarketingPostStatus) {
     setPosts((currentPosts) =>
@@ -119,6 +156,50 @@ export function MarketingPage() {
 
   function downloadApprovedCsv() {
     downloadMetricoolCalendarCsv(approvedPosts);
+  }
+
+  async function uploadApprovedAssets() {
+    if (approvedPosts.length === 0) {
+      return;
+    }
+
+    setIsUploadingAssets(true);
+    setUploadMessage(null);
+
+    try {
+      const uploadInputs = approvedPosts.flatMap((post) =>
+        post.assets.map((asset) => ({
+          asset,
+          campaignCode: marketingCampaignSeed.campaignCode,
+          postId: post.id,
+        })),
+      );
+
+      const result = await uploadMarketingAssetsToR2(uploadInputs);
+      const uploadedByKey = new Map(result.assets.map((asset) => [asset.key, asset]));
+
+      setPosts((currentPosts) =>
+        currentPosts.map((post) => ({
+          ...post,
+          assets: post.assets.map((asset) => {
+            const key = buildMarketingAssetKey({
+              campaignCode: marketingCampaignSeed.campaignCode,
+              postId: post.id,
+              file: asset.file,
+            });
+            const uploaded = uploadedByKey.get(key);
+
+            return uploaded ? { ...asset, url: uploaded.url } : asset;
+          }),
+        })),
+      );
+
+      setUploadMessage(`Uploaded ${result.assets.length} approved asset${result.assets.length === 1 ? '' : 's'} to R2.`);
+    } catch (error) {
+      setUploadMessage(error instanceof Error ? error.message : 'R2 upload failed.');
+    } finally {
+      setIsUploadingAssets(false);
+    }
   }
 
   return (
@@ -143,7 +224,7 @@ export function MarketingPage() {
         </div>
       </header>
 
-      <section className="grid gap-4 md:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-5">
         <div className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Configured posts</p>
           <label className="mt-3 block">
@@ -171,6 +252,11 @@ export function MarketingPage() {
           <p className="mt-3 text-lg font-semibold">{marketingCampaignSeed.campaignCode}</p>
           <p className="mt-1 text-xs text-[color:var(--admin-muted)]">{marketingCampaignSeed.language}</p>
         </div>
+        <div className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Metricool assets</p>
+          <p className="mt-3 text-3xl font-semibold">{r2ReadyAssetCount}/{approvedAssetCount}</p>
+          <p className="mt-1 text-xs text-[color:var(--admin-muted)]">Approved assets on R2</p>
+        </div>
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
@@ -192,6 +278,45 @@ export function MarketingPage() {
             <a className="font-semibold text-[color:var(--admin-accent)]" href={marketingCampaignSeed.campaignsFolderUrl} target="_blank" rel="noreferrer">
               Campaigns folder
             </a>
+          </div>
+          <div className="mt-5 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-sm">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="font-semibold">Cloudflare R2</p>
+                <p className="mt-1 text-xs text-[color:var(--admin-muted)]">
+                  {r2StatusError
+                    ? r2StatusError
+                    : r2Status?.configured
+                      ? `${r2Status.bucket} -> ${r2Status.publicBaseUrl}`
+                      : 'Checking R2 configuration...'}
+                </p>
+              </div>
+              <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${
+                r2Status?.configured
+                  ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200'
+                  : 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-200'
+              }`}>
+                {r2Status?.configured ? 'Ready' : 'Pending'}
+              </span>
+            </div>
+            {r2Status && !r2Status.configured ? (
+              <p className="mt-2 text-xs text-[color:var(--admin-muted)]">
+                Missing: {r2Status.missing.join(', ')}
+              </p>
+            ) : null}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                className="admin2-btn admin2-btn--secondary"
+                onClick={uploadApprovedAssets}
+                disabled={!r2Status?.configured || approvedPosts.length === 0 || isUploadingAssets}
+              >
+                {isUploadingAssets ? 'Uploading assets...' : 'Upload approved assets to R2'}
+              </button>
+              {uploadMessage ? (
+                <p className="text-xs text-[color:var(--admin-muted)]">{uploadMessage}</p>
+              ) : null}
+            </div>
           </div>
         </div>
 
