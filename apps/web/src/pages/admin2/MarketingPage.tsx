@@ -8,6 +8,7 @@ import {
   ImagePlus,
   Pencil,
   RotateCcw,
+  RefreshCcwDot,
   Trash2,
   UploadCloud,
   WandSparkles,
@@ -28,6 +29,11 @@ import {
   uploadMarketingAssetsToR2,
   type MarketingR2Status,
 } from '../../lib/marketingR2Assets';
+import {
+  fetchMarketingAnalyticsInsights,
+  syncMarketingAnalytics,
+  type MarketingAnalyticsInsights,
+} from '../../lib/marketingAnalytics';
 
 const STATUS_LABELS: Record<MarketingPostStatus, string> = {
   draft: 'Draft',
@@ -423,8 +429,13 @@ export function MarketingPage() {
   const [r2StatusError, setR2StatusError] = useState<string | null>(null);
   const [isUploadingAssets, setIsUploadingAssets] = useState(false);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+  const [analyticsInsights, setAnalyticsInsights] = useState<MarketingAnalyticsInsights | null>(null);
+  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
+  const [analyticsMessage, setAnalyticsMessage] = useState<string | null>(null);
+  const [isSyncingAnalytics, setIsSyncingAnalytics] = useState(false);
   const approvedPosts = useMemo(() => posts.filter((post) => post.status === 'approved'), [posts]);
   const needsReviewCount = posts.filter((post) => post.status === 'needs_review').length;
+  const analyticsTotals = getAnalyticsTotals(analyticsInsights);
   const approvedAssetCount = approvedPosts.reduce((total, post) => total + post.assets.length, 0);
   const r2ReadyAssetCount = approvedPosts.reduce(
     (total, post) =>
@@ -461,6 +472,21 @@ export function MarketingPage() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    void loadAnalyticsInsights();
+  }, []);
+
+  async function loadAnalyticsInsights() {
+    try {
+      const nextInsights = await fetchMarketingAnalyticsInsights();
+      setAnalyticsInsights(nextInsights);
+      setAnalyticsError(null);
+    } catch (error) {
+      setAnalyticsInsights(null);
+      setAnalyticsError(error instanceof Error ? error.message : 'Unable to load marketing analytics.');
+    }
+  }
 
   function updateStatus(postId: string, status: MarketingPostStatus) {
     updatePost(postId, (post) => ({ ...post, status }));
@@ -558,6 +584,21 @@ export function MarketingPage() {
     }
   }
 
+  async function runAnalyticsSync() {
+    setIsSyncingAnalytics(true);
+    setAnalyticsMessage(null);
+
+    try {
+      const result = await syncMarketingAnalytics();
+      setAnalyticsMessage(`Synced ${result.periodStart} to ${result.periodEnd}.`);
+      await loadAnalyticsInsights();
+    } catch (error) {
+      setAnalyticsMessage(error instanceof Error ? error.message : 'Marketing analytics sync failed.');
+    } finally {
+      setIsSyncingAnalytics(false);
+    }
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
       <header className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-6">
@@ -638,7 +679,7 @@ export function MarketingPage() {
         <div className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5">
           <h3 className="text-lg font-semibold tracking-tight">Data & storage</h3>
           <p className="mt-2 text-sm text-[color:var(--admin-muted)]">
-            This is prepared for GA4, Search Console and manual Metricool exports. Live integrations are intentionally not wired yet.
+            GA4 and Search Console snapshots are stored in Neon. Metricool stays manual through approved CSV exports.
           </p>
           <div className="mt-4 grid gap-3 text-sm">
             <a className="font-semibold text-[color:var(--admin-accent)]" href={selectedCampaign.driveRootUrl} target="_blank" rel="noreferrer">
@@ -653,6 +694,51 @@ export function MarketingPage() {
             <a className="font-semibold text-[color:var(--admin-accent)]" href={selectedCampaign.campaignsFolderUrl} target="_blank" rel="noreferrer">
               Campaigns folder
             </a>
+          </div>
+          <div className="mt-5 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-sm">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="font-semibold">GA4 + Search Console</p>
+                <p className="mt-1 text-xs text-[color:var(--admin-muted)]">
+                  {analyticsError
+                    ? analyticsError
+                    : analyticsInsights?.latestRun
+                      ? `Last sync ${analyticsInsights.latestRun.periodStart} -> ${analyticsInsights.latestRun.periodEnd}`
+                      : 'No Neon analytics snapshot yet.'}
+                </p>
+              </div>
+              <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${
+                analyticsInsights?.configured
+                  ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200'
+                  : 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-200'
+              }`}>
+                {analyticsInsights?.configured ? 'Ready' : 'Pending'}
+              </span>
+            </div>
+            {analyticsInsights && !analyticsInsights.configured ? (
+              <p className="mt-2 text-xs text-[color:var(--admin-muted)]">
+                Missing: {analyticsInsights.missing.join(', ')}
+              </p>
+            ) : null}
+            {analyticsInsights?.latestRun?.errorMessage ? (
+              <p className="mt-2 text-xs text-amber-700 dark:text-amber-200">
+                {analyticsInsights.latestRun.errorMessage}
+              </p>
+            ) : null}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                className="admin2-btn admin2-btn--secondary inline-flex items-center gap-2"
+                onClick={runAnalyticsSync}
+                disabled={!analyticsInsights?.configured || isSyncingAnalytics}
+              >
+                <RefreshCcwDot size={16} />
+                <span>{isSyncingAnalytics ? 'Syncing' : 'Sync data'}</span>
+              </button>
+              {analyticsMessage ? (
+                <p className="text-xs text-[color:var(--admin-muted)]">{analyticsMessage}</p>
+              ) : null}
+            </div>
           </div>
           <div className="mt-5 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -708,6 +794,82 @@ export function MarketingPage() {
         </div>
       </section>
 
+      <section className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-semibold tracking-tight">Marketing insights</h3>
+            <p className="mt-2 text-sm text-[color:var(--admin-muted)]">
+              Latest GA4 and Search Console snapshot saved in Neon.
+            </p>
+          </div>
+          {analyticsInsights?.latestRun ? (
+            <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${
+              analyticsInsights.latestRun.status === 'completed'
+                ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200'
+                : analyticsInsights.latestRun.status === 'failed'
+                  ? 'border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-200'
+                  : 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-200'
+            }`}>
+              {analyticsInsights.latestRun.status}
+            </span>
+          ) : null}
+        </div>
+
+        {analyticsInsights?.summary ? (
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+            <InsightStat label="Users" value={formatNumber(analyticsTotals.activeUsers)} />
+            <InsightStat label="Sessions" value={formatNumber(analyticsTotals.sessions)} />
+            <InsightStat label="Views" value={formatNumber(analyticsTotals.pageViews)} />
+            <InsightStat label="Events" value={formatNumber(analyticsTotals.events)} />
+            <InsightStat label="Clicks" value={formatNumber(analyticsTotals.searchClicks)} />
+            <InsightStat label="Impressions" value={formatNumber(analyticsTotals.searchImpressions)} />
+          </div>
+        ) : (
+          <p className="mt-5 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-4 text-sm text-[color:var(--admin-muted)]">
+            Run the first sync to populate this dashboard.
+          </p>
+        )}
+
+        {analyticsInsights?.summary?.highlights.length ? (
+          <div className="mt-5 grid gap-2">
+            {analyticsInsights.summary.highlights.map((highlight) => (
+              <p key={highlight} className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-sm text-[color:var(--admin-text)]">
+                {highlight}
+              </p>
+            ))}
+          </div>
+        ) : null}
+
+        {analyticsInsights?.summary ? (
+          <div className="mt-5 grid gap-4 lg:grid-cols-3">
+            <InsightTable
+              title="Top pages"
+              rows={analyticsInsights.topPages.slice(0, 5).map((row) => ({
+                label: row.page_path || '/',
+                detail: row.page_title,
+                value: formatNumber(row.screen_page_views),
+              }))}
+            />
+            <InsightTable
+              title="Top sources"
+              rows={analyticsInsights.topSources.slice(0, 5).map((row) => ({
+                label: [row.source || '(direct)', row.medium || '(none)'].join(' / '),
+                detail: row.campaign || 'No campaign',
+                value: formatNumber(row.sessions),
+              }))}
+            />
+            <InsightTable
+              title="Search queries"
+              rows={analyticsInsights.topQueries.slice(0, 5).map((row) => ({
+                label: row.query || '(not provided)',
+                detail: row.page,
+                value: `${formatNumber(row.impressions)} imp. / ${formatNumber(row.clicks)} clicks`,
+              }))}
+            />
+          </div>
+        ) : null}
+      </section>
+
       <section className="flex flex-col gap-4">
         {posts.map((post) => (
           <PostCard
@@ -731,6 +893,64 @@ function cloneCampaignPosts(campaign: MarketingCampaignSeed) {
     ...post,
     assets: post.assets.map((asset) => ({ ...asset })),
   }));
+}
+
+function InsightStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3">
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">{label}</p>
+      <p className="mt-2 text-2xl font-semibold text-[color:var(--admin-text)]">{value}</p>
+    </div>
+  );
+}
+
+function InsightTable({
+  title,
+  rows,
+}: {
+  title: string;
+  rows: Array<{ label: string; detail?: string; value: string }>;
+}) {
+  return (
+    <div className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3">
+      <p className="text-sm font-semibold text-[color:var(--admin-text)]">{title}</p>
+      <div className="mt-3 divide-y divide-[color:var(--admin-border)]">
+        {rows.length ? rows.map((row) => (
+          <div key={`${row.label}-${row.value}`} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 py-2 text-sm">
+            <div className="min-w-0">
+              <p className="truncate font-medium text-[color:var(--admin-text)]">{row.label}</p>
+              {row.detail ? (
+                <p className="mt-1 truncate text-xs text-[color:var(--admin-muted)]">{row.detail}</p>
+              ) : null}
+            </div>
+            <p className="whitespace-nowrap font-semibold text-[color:var(--admin-text)]">{row.value}</p>
+          </div>
+        )) : (
+          <p className="py-2 text-sm text-[color:var(--admin-muted)]">No data yet.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function getAnalyticsTotals(insights: MarketingAnalyticsInsights | null) {
+  return insights?.summary?.totals ?? {
+    activeUsers: 0,
+    sessions: 0,
+    pageViews: 0,
+    events: 0,
+    searchClicks: 0,
+    searchImpressions: 0,
+  };
+}
+
+function formatNumber(value: number | string | null | undefined) {
+  const numberValue = Number(value ?? 0);
+  if (!Number.isFinite(numberValue)) {
+    return '0';
+  }
+
+  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(numberValue);
 }
 
 function storageKeyForCampaign(campaignCode: string) {

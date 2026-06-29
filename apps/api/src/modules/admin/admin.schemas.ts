@@ -206,6 +206,20 @@ export const marketingR2AssetUploadBodySchema = z.object({
     .max(10),
 });
 
+export const marketingAnalyticsSyncBodySchema = z.object({
+  startDate: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'startDate must be YYYY-MM-DD' })
+    .optional(),
+  endDate: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'endDate must be YYYY-MM-DD' })
+    .optional(),
+  force: z.coerce.boolean().default(false),
+});
+
 export const subscriptionNotificationsTriggerBodySchema = z.object({
   runAt: z.string().datetime().optional(),
 });

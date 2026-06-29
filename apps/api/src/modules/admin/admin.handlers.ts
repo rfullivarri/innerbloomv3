@@ -19,6 +19,7 @@ import {
   feedbackUserNotificationUpdateSchema,
   subscriptionNotificationsTriggerBodySchema,
   adminSubscriptionUpdateBodySchema,
+  marketingAnalyticsSyncBodySchema,
   marketingR2AssetUploadBodySchema,
   taskDifficultyCalibrationRunBodySchema,
   modeUpgradeAggregationRunBodySchema,
@@ -71,6 +72,11 @@ import { runUserMonthlyModeUpgradeAggregation } from '../../services/modeUpgrade
 import { runRetroactiveHabitAchievementDetection } from '../../services/habitAchievementService.js';
 import { getMonthlyPipelineStatus, runMonthlyPipelineForPeriod } from '../../services/monthlyPipelineService.js';
 import { getMarketingR2Status, uploadMarketingR2Assets } from '../../services/marketingR2AssetService.js';
+import {
+  getMarketingAnalyticsInsights,
+  getMarketingAnalyticsStatus,
+  runMarketingAnalyticsSync,
+} from '../../services/marketingAnalyticsService.js';
 import { pool } from '../../db.js';
 
 const taskgenForceRunRequestSchema = z
@@ -139,6 +145,22 @@ export const postAdminMarketingR2Assets = asyncHandler(async (req: Request, res:
     ok: true,
     assets,
   });
+});
+
+export const getAdminMarketingAnalyticsStatus = asyncHandler(async (_req: Request, res: Response) => {
+  const status = await getMarketingAnalyticsStatus();
+  res.json({ ok: true, ...status });
+});
+
+export const getAdminMarketingAnalyticsInsights = asyncHandler(async (_req: Request, res: Response) => {
+  const insights = await getMarketingAnalyticsInsights();
+  res.json({ ok: true, ...insights });
+});
+
+export const postAdminMarketingAnalyticsSync = asyncHandler(async (req: Request, res: Response) => {
+  const body = marketingAnalyticsSyncBodySchema.parse(req.body ?? {});
+  const result = await runMarketingAnalyticsSync(body);
+  res.json(result);
 });
 
 export const getAdminUserInsights = asyncHandler(async (req: Request, res: Response) => {
