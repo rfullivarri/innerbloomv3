@@ -20,6 +20,7 @@ import {
   subscriptionNotificationsTriggerBodySchema,
   adminSubscriptionUpdateBodySchema,
   marketingAnalyticsSyncBodySchema,
+  marketingAnalyticsSettingsBodySchema,
   marketingR2AssetUploadBodySchema,
   taskDifficultyCalibrationRunBodySchema,
   modeUpgradeAggregationRunBodySchema,
@@ -76,6 +77,7 @@ import {
   getMarketingAnalyticsInsights,
   getMarketingAnalyticsStatus,
   runMarketingAnalyticsSync,
+  updateMarketingAnalyticsSettings,
 } from '../../services/marketingAnalyticsService.js';
 import { pool } from '../../db.js';
 
@@ -161,6 +163,12 @@ export const postAdminMarketingAnalyticsSync = asyncHandler(async (req: Request,
   const body = marketingAnalyticsSyncBodySchema.parse(req.body ?? {});
   const result = await runMarketingAnalyticsSync(body);
   res.json(result);
+});
+
+export const putAdminMarketingAnalyticsSettings = asyncHandler(async (req: Request, res: Response) => {
+  const body = marketingAnalyticsSettingsBodySchema.parse(req.body ?? {});
+  const settings = await updateMarketingAnalyticsSettings(body);
+  res.json({ ok: true, settings });
 });
 
 export const getAdminUserInsights = asyncHandler(async (req: Request, res: Response) => {

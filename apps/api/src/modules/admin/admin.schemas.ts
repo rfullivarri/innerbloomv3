@@ -220,6 +220,19 @@ export const marketingAnalyticsSyncBodySchema = z.object({
   force: z.coerce.boolean().default(false),
 });
 
+const marketingAnalyticsStringListSchema = z
+  .array(z.string().trim().min(1).max(240))
+  .max(100);
+
+export const marketingAnalyticsSettingsBodySchema = z.object({
+  excludedSources: marketingAnalyticsStringListSchema.optional(),
+  excludedPagePrefixes: marketingAnalyticsStringListSchema.optional(),
+  productPagePrefixes: marketingAnalyticsStringListSchema.optional(),
+  marketingPagePaths: marketingAnalyticsStringListSchema.optional(),
+  internalUserEmails: marketingAnalyticsStringListSchema.optional(),
+  internalUserIds: z.array(z.string().uuid()).max(50).optional(),
+});
+
 export const subscriptionNotificationsTriggerBodySchema = z.object({
   runAt: z.string().datetime().optional(),
 });
