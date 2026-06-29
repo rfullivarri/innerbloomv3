@@ -32,7 +32,9 @@ import {
 import {
   fetchMarketingAnalyticsInsights,
   syncMarketingAnalytics,
+  updateMarketingAnalyticsSettings,
   type MarketingAnalyticsInsights,
+  type MarketingAnalyticsSettings,
 } from '../../lib/marketingAnalytics';
 
 const STATUS_LABELS: Record<MarketingPostStatus, string> = {
@@ -55,6 +57,13 @@ const iconButtonVariants = {
 } as const;
 
 type IconButtonVariant = keyof typeof iconButtonVariants;
+
+const DEFAULT_PAGE_TOTALS = {
+  activeUsers: 0,
+  sessions: 0,
+  pageViews: 0,
+  events: 0,
+};
 
 function statusClass(status: MarketingPostStatus) {
   if (status === 'approved') {
@@ -433,9 +442,14 @@ export function MarketingPage() {
   const [analyticsError, setAnalyticsError] = useState<string | null>(null);
   const [analyticsMessage, setAnalyticsMessage] = useState<string | null>(null);
   const [isSyncingAnalytics, setIsSyncingAnalytics] = useState(false);
+  const [settingsDraft, setSettingsDraft] = useState<MarketingAnalyticsSettings | null>(null);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
   const approvedPosts = useMemo(() => posts.filter((post) => post.status === 'approved'), [posts]);
   const needsReviewCount = posts.filter((post) => post.status === 'needs_review').length;
   const analyticsTotals = getAnalyticsTotals(analyticsInsights);
+  const analyticsMarketingTotals = analyticsInsights?.summary?.marketingTotals ?? DEFAULT_PAGE_TOTALS;
+  const analyticsProductTotals = analyticsInsights?.summary?.productTotals ?? DEFAULT_PAGE_TOTALS;
+  const registeredUsers = analyticsInsights?.registeredUsers ?? analyticsInsights?.summary?.registeredUsers ?? null;
   const approvedAssetCount = approvedPosts.reduce((total, post) => total + post.assets.length, 0);
   const r2ReadyAssetCount = approvedPosts.reduce(
     (total, post) =>
@@ -481,6 +495,7 @@ export function MarketingPage() {
     try {
       const nextInsights = await fetchMarketingAnalyticsInsights();
       setAnalyticsInsights(nextInsights);
+      setSettingsDraft(nextInsights.settings);
       setAnalyticsError(null);
     } catch (error) {
       setAnalyticsInsights(null);
@@ -596,6 +611,25 @@ export function MarketingPage() {
       setAnalyticsMessage(error instanceof Error ? error.message : 'Marketing analytics sync failed.');
     } finally {
       setIsSyncingAnalytics(false);
+    }
+  }
+
+  async function saveAnalyticsSettings() {
+    if (!settingsDraft) {
+      return;
+    }
+
+    setIsSavingSettings(true);
+    setAnalyticsMessage(null);
+
+    try {
+      await updateMarketingAnalyticsSettings(settingsDraft);
+      setAnalyticsMessage('Saved analytics filters.');
+      await loadAnalyticsInsights();
+    } catch (error) {
+      setAnalyticsMessage(error instanceof Error ? error.message : 'Analytics filter save failed.');
+    } finally {
+      setIsSavingSettings(false);
     }
   }
 
@@ -740,6 +774,49 @@ export function MarketingPage() {
               ) : null}
             </div>
           </div>
+          {settingsDraft ? (
+            <div className="mt-5 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-sm">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold">Analytics hygiene filters</p>
+                  <p className="mt-1 text-xs text-[color:var(--admin-muted)]">
+                    Exclude internal users and auth noise before generating marketing insights.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="admin2-btn admin2-btn--secondary inline-flex items-center gap-2"
+                  onClick={saveAnalyticsSettings}
+                  disabled={isSavingSettings}
+                >
+                  <Check size={16} />
+                  <span>{isSavingSettings ? 'Saving' : 'Save'}</span>
+                </button>
+              </div>
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                <SettingsListField
+                  label="Internal user emails"
+                  value={settingsDraft.internalUserEmails}
+                  onChange={(internalUserEmails) => setSettingsDraft((current) => current ? { ...current, internalUserEmails } : current)}
+                />
+                <SettingsListField
+                  label="Excluded sources"
+                  value={settingsDraft.excludedSources}
+                  onChange={(excludedSources) => setSettingsDraft((current) => current ? { ...current, excludedSources } : current)}
+                />
+                <SettingsListField
+                  label="Marketing landing paths"
+                  value={settingsDraft.marketingPagePaths}
+                  onChange={(marketingPagePaths) => setSettingsDraft((current) => current ? { ...current, marketingPagePaths } : current)}
+                />
+                <SettingsListField
+                  label="Product page prefixes"
+                  value={settingsDraft.productPagePrefixes}
+                  onChange={(productPagePrefixes) => setSettingsDraft((current) => current ? { ...current, productPagePrefixes } : current)}
+                />
+              </div>
+            </div>
+          ) : null}
           <div className="mt-5 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -817,12 +894,12 @@ export function MarketingPage() {
 
         {analyticsInsights?.summary ? (
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-            <InsightStat label="Users" value={formatNumber(analyticsTotals.activeUsers)} />
-            <InsightStat label="Sessions" value={formatNumber(analyticsTotals.sessions)} />
-            <InsightStat label="Views" value={formatNumber(analyticsTotals.pageViews)} />
-            <InsightStat label="Events" value={formatNumber(analyticsTotals.events)} />
-            <InsightStat label="Clicks" value={formatNumber(analyticsTotals.searchClicks)} />
-            <InsightStat label="Impressions" value={formatNumber(analyticsTotals.searchImpressions)} />
+            <InsightStat label="GA active users" value={formatNumber(analyticsTotals.activeUsers)} />
+            <InsightStat label="Registered users" value={formatNumber(registeredUsers?.total)} />
+            <InsightStat label="Landing views" value={formatNumber(analyticsMarketingTotals.pageViews)} />
+            <InsightStat label="Product views" value={formatNumber(analyticsProductTotals.pageViews)} />
+            <InsightStat label="Search clicks" value={formatNumber(analyticsTotals.searchClicks)} />
+            <InsightStat label="Search impressions" value={formatNumber(analyticsTotals.searchImpressions)} />
           </div>
         ) : (
           <p className="mt-5 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-4 text-sm text-[color:var(--admin-muted)]">
@@ -841,18 +918,26 @@ export function MarketingPage() {
         ) : null}
 
         {analyticsInsights?.summary ? (
-          <div className="mt-5 grid gap-4 lg:grid-cols-3">
+          <div className="mt-5 grid gap-4 lg:grid-cols-4">
             <InsightTable
-              title="Top pages"
-              rows={analyticsInsights.topPages.slice(0, 5).map((row) => ({
+              title="Landing pages"
+              rows={analyticsInsights.marketingPages.slice(0, 5).map((row) => ({
                 label: row.page_path || '/',
                 detail: row.page_title,
                 value: formatNumber(row.screen_page_views),
               }))}
             />
             <InsightTable
-              title="Top sources"
-              rows={analyticsInsights.topSources.slice(0, 5).map((row) => ({
+              title="Product pages"
+              rows={analyticsInsights.productPages.slice(0, 5).map((row) => ({
+                label: row.page_path || '/',
+                detail: row.page_title,
+                value: formatNumber(row.screen_page_views),
+              }))}
+            />
+            <InsightTable
+              title="Acquisition sources"
+              rows={analyticsInsights.cleanSources.slice(0, 5).map((row) => ({
                 label: [row.source || '(direct)', row.medium || '(none)'].join(' / '),
                 detail: row.campaign || 'No campaign',
                 value: formatNumber(row.sessions),
@@ -866,6 +951,16 @@ export function MarketingPage() {
                 value: `${formatNumber(row.impressions)} imp. / ${formatNumber(row.clicks)} clicks`,
               }))}
             />
+          </div>
+        ) : null}
+
+        {analyticsInsights?.summary?.notes?.length ? (
+          <div className="mt-5 grid gap-2">
+            {analyticsInsights.summary.notes.map((note) => (
+              <p key={note} className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-xs text-[color:var(--admin-muted)]">
+                {note}
+              </p>
+            ))}
           </div>
         ) : null}
       </section>
@@ -931,6 +1026,45 @@ function InsightTable({
       </div>
     </div>
   );
+}
+
+function SettingsListField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string[];
+  onChange: (value: string[]) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">{label}</span>
+      <textarea
+        value={value.join('\n')}
+        rows={4}
+        onChange={(event) => onChange(parseSettingsList(event.target.value))}
+        className="mt-2 w-full resize-y rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-3 py-2 font-mono text-xs leading-relaxed text-[color:var(--admin-text)]"
+      />
+    </label>
+  );
+}
+
+function parseSettingsList(value: string) {
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const item of value.split(/[\n,]/)) {
+    const text = item.trim();
+    const key = text.toLowerCase();
+    if (!text || seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    result.push(text);
+  }
+
+  return result;
 }
 
 function getAnalyticsTotals(insights: MarketingAnalyticsInsights | null) {

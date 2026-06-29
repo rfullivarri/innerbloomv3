@@ -46,6 +46,7 @@ import {
   postAdminMonthlyPipelineRun,
   postAdminMarketingAnalyticsSync,
   postAdminMarketingR2Assets,
+  putAdminMarketingAnalyticsSettings,
 } from './admin.handlers.js';
 import { requireAdmin } from './admin.middleware.js';
 
@@ -57,6 +58,7 @@ adminRouter.get('/users', getAdminUsers);
 adminRouter.get('/marketing/analytics/status', getAdminMarketingAnalyticsStatus);
 adminRouter.get('/marketing/analytics/insights', getAdminMarketingAnalyticsInsights);
 adminRouter.post('/marketing/analytics/sync', postAdminMarketingAnalyticsSync);
+adminRouter.put('/marketing/analytics/settings', putAdminMarketingAnalyticsSettings);
 adminRouter.get('/marketing/r2/status', getAdminMarketingR2Status);
 adminRouter.post('/marketing/r2/assets', postAdminMarketingR2Assets);
 adminRouter.get('/taskgen/jobs', getTaskgenJobs);

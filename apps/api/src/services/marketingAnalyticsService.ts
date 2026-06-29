@@ -64,6 +64,66 @@ type GscApiResponse = {
   rows?: GscApiRow[];
 };
 
+export type MarketingAnalyticsSettings = {
+  excludedSources: string[];
+  excludedPagePrefixes: string[];
+  productPagePrefixes: string[];
+  marketingPagePaths: string[];
+  internalUserEmails: string[];
+  internalUserIds: string[];
+};
+
+type MarketingAnalyticsSettingsRow = {
+  excluded_sources: string[] | null;
+  excluded_page_prefixes: string[] | null;
+  product_page_prefixes: string[] | null;
+  marketing_page_paths: string[] | null;
+  internal_user_emails: string[] | null;
+  internal_user_ids: string[] | null;
+};
+
+type PageMetricRecord = {
+  page_path: string;
+  page_title: string;
+  active_users: number;
+  sessions: number;
+  screen_page_views: number;
+  event_count: number;
+};
+
+type SourceMetricRecord = {
+  source: string;
+  medium: string;
+  campaign: string;
+  active_users: number;
+  sessions: number;
+  screen_page_views: number;
+};
+
+type QueryMetricRecord = {
+  query: string;
+  page: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+};
+
+type RegisteredUserStats = {
+  total: number;
+  newInPeriod: number;
+  excludedInternal: number;
+};
+
+const DEFAULT_MARKETING_ANALYTICS_SETTINGS: MarketingAnalyticsSettings = {
+  excludedSources: ['accounts.google.com'],
+  excludedPagePrefixes: ['/login', '/login2', '/sign-up', '/sign-up2', '/onboarding', '/onboarding2', '/sso-callback'],
+  productPagePrefixes: ['/innerbloom2', '/dashboard', '/dashboard-v3', '/editor'],
+  marketingPagePaths: ['/', '/v2', '/v3'],
+  internalUserEmails: ['ramagpt23@gmail.com', 'rfullivarri22@gmail.com'],
+  internalUserIds: [],
+};
+
 let cachedGoogleToken: GoogleAccessToken | null = null;
 let schemaReady: Promise<void> | null = null;
 
@@ -75,6 +135,7 @@ export async function getMarketingAnalyticsStatus() {
   await ensureMarketingAnalyticsSchema();
   const config = getMarketingAnalyticsConfig();
   const latestRun = await getLatestRun();
+  const settings = await getMarketingAnalyticsSettings();
 
   return {
     configured: config.configured,
@@ -82,6 +143,7 @@ export async function getMarketingAnalyticsStatus() {
     ga4PropertyId: config.ga4PropertyId || null,
     gscSiteUrl: config.gscSiteUrl || null,
     latestRun,
+    settings,
   };
 }
 
@@ -89,39 +151,45 @@ export async function getMarketingAnalyticsInsights() {
   await ensureMarketingAnalyticsSchema();
   const config = getMarketingAnalyticsConfig();
   const latestRun = await getLatestRun();
+  const settings = await getMarketingAnalyticsSettings();
 
   if (!latestRun || latestRun.status !== 'completed') {
     return {
       configured: config.configured,
       missing: config.missing,
       latestRun,
+      settings,
       summary: null,
       topPages: [],
       topSources: [],
+      marketingPages: [],
+      productPages: [],
+      cleanSources: [],
       topEvents: [],
       topQueries: [],
+      registeredUsers: null,
     };
   }
 
   const [insightResult, pageResult, sourceResult, eventResult, queryResult] = await Promise.all([
     pool.query<{ summary: unknown }>('SELECT summary FROM marketing_insights WHERE run_id = $1 LIMIT 1', [latestRun.runId]),
-    pool.query(
+    pool.query<PageMetricRecord>(
       `SELECT page_path, page_title, active_users, sessions, screen_page_views, event_count
        FROM marketing_ga4_page_metrics
        WHERE run_id = $1
        ORDER BY screen_page_views DESC, active_users DESC
-       LIMIT 10`,
+       LIMIT 100`,
       [latestRun.runId],
     ),
-    pool.query(
+    pool.query<SourceMetricRecord>(
       `SELECT source, medium, campaign, active_users, sessions, screen_page_views
        FROM marketing_ga4_source_metrics
        WHERE run_id = $1
        ORDER BY sessions DESC, active_users DESC
-       LIMIT 10`,
+       LIMIT 100`,
       [latestRun.runId],
     ),
-    pool.query(
+    pool.query<{ event_name: string; event_count: number }>(
       `SELECT event_name, event_count
        FROM marketing_ga4_event_metrics
        WHERE run_id = $1
@@ -129,7 +197,7 @@ export async function getMarketingAnalyticsInsights() {
        LIMIT 10`,
       [latestRun.runId],
     ),
-    pool.query(
+    pool.query<QueryMetricRecord>(
       `SELECT query, page, clicks, impressions, ctr::float AS ctr, position::float AS position
        FROM marketing_gsc_query_page_metrics
        WHERE run_id = $1
@@ -138,17 +206,84 @@ export async function getMarketingAnalyticsInsights() {
       [latestRun.runId],
     ),
   ]);
+  const registeredUsers = await getRegisteredUserStats(latestRun.periodStart, latestRun.periodEnd, settings);
+  const topPages = pageResult.rows.map(normalizePageMetricRecord);
+  const topSources = sourceResult.rows.map(normalizeSourceMetricRecord);
+  const topQueries = queryResult.rows.map(normalizeQueryMetricRecord);
+  const visiblePages = topPages.filter((row) => !isExcludedPage(row.page_path, settings));
+  const marketingPages = visiblePages.filter((row) => isMarketingPage(row.page_path, settings));
+  const productPages = visiblePages.filter((row) => isProductPage(row.page_path, settings));
+  const cleanSources = topSources.filter((row) => !isExcludedSource(row.source, settings));
+  const rawSummary = readSummaryRecord(insightResult.rows[0]?.summary);
+  const summary = rawSummary
+    ? decorateMarketingSummary(rawSummary, {
+        marketingPages,
+        productPages,
+        cleanSources,
+        topQueries,
+        registeredUsers,
+      })
+    : null;
 
   return {
     configured: config.configured,
     missing: config.missing,
     latestRun,
-    summary: insightResult.rows[0]?.summary ?? null,
-    topPages: pageResult.rows,
-    topSources: sourceResult.rows,
+    settings,
+    summary,
+    topPages,
+    topSources,
+    marketingPages,
+    productPages,
+    cleanSources,
     topEvents: eventResult.rows,
-    topQueries: queryResult.rows,
+    topQueries,
+    registeredUsers,
   };
+}
+
+export async function updateMarketingAnalyticsSettings(input: Partial<MarketingAnalyticsSettings>) {
+  await ensureMarketingAnalyticsSchema();
+  const current = await getMarketingAnalyticsSettings();
+  const next: MarketingAnalyticsSettings = {
+    excludedSources: normalizeStringList(input.excludedSources, current.excludedSources),
+    excludedPagePrefixes: normalizePathList(input.excludedPagePrefixes, current.excludedPagePrefixes),
+    productPagePrefixes: normalizePathList(input.productPagePrefixes, current.productPagePrefixes),
+    marketingPagePaths: normalizePathList(input.marketingPagePaths, current.marketingPagePaths),
+    internalUserEmails: normalizeStringList(input.internalUserEmails, current.internalUserEmails).map((email) => email.toLowerCase()),
+    internalUserIds: normalizeUuidList(input.internalUserIds, current.internalUserIds),
+  };
+
+  await pool.query(
+    `INSERT INTO marketing_analytics_settings (
+      id,
+      excluded_sources,
+      excluded_page_prefixes,
+      product_page_prefixes,
+      marketing_page_paths,
+      internal_user_emails,
+      internal_user_ids,
+      updated_at
+    ) VALUES (true, $1, $2, $3, $4, $5, $6::uuid[], now())
+    ON CONFLICT (id) DO UPDATE SET
+      excluded_sources = EXCLUDED.excluded_sources,
+      excluded_page_prefixes = EXCLUDED.excluded_page_prefixes,
+      product_page_prefixes = EXCLUDED.product_page_prefixes,
+      marketing_page_paths = EXCLUDED.marketing_page_paths,
+      internal_user_emails = EXCLUDED.internal_user_emails,
+      internal_user_ids = EXCLUDED.internal_user_ids,
+      updated_at = now()`,
+    [
+      next.excludedSources,
+      next.excludedPagePrefixes,
+      next.productPagePrefixes,
+      next.marketingPagePaths,
+      next.internalUserEmails,
+      next.internalUserIds,
+    ],
+  );
+
+  return next;
 }
 
 export async function runMarketingAnalyticsSync(options: MarketingAnalyticsSyncOptions = {}) {
@@ -178,7 +313,13 @@ export async function runMarketingAnalyticsSync(options: MarketingAnalyticsSyncO
 
   try {
     const token = await getGoogleAccessToken(config.serviceAccount);
-    const [ga4Pages, ga4Sources, ga4Events, gscQueries] = await Promise.all([
+    const [ga4Totals, ga4Pages, ga4Sources, ga4Events, gscQueries] = await Promise.all([
+      fetchGa4Rows(config.ga4PropertyId, token, dateRange, [], [
+        'activeUsers',
+        'sessions',
+        'screenPageViews',
+        'eventCount',
+      ]),
       fetchGa4Rows(config.ga4PropertyId, token, dateRange, ['pagePath', 'pageTitle'], [
         'activeUsers',
         'sessions',
@@ -197,9 +338,9 @@ export async function runMarketingAnalyticsSync(options: MarketingAnalyticsSyncO
     const summary = buildMarketingInsightSummary({
       runId,
       dateRange,
+      ga4Totals,
       ga4Pages,
       ga4Sources,
-      ga4Events,
       gscQueries,
     });
 
@@ -331,23 +472,24 @@ export async function runMarketingAnalyticsSync(options: MarketingAnalyticsSyncO
 function buildMarketingInsightSummary({
   runId,
   dateRange,
+  ga4Totals,
   ga4Pages,
   ga4Sources,
-  ga4Events,
   gscQueries,
 }: {
   runId: string;
   dateRange: DateRange;
+  ga4Totals: Ga4MetricRow[];
   ga4Pages: Ga4MetricRow[];
   ga4Sources: Ga4MetricRow[];
-  ga4Events: Ga4MetricRow[];
   gscQueries: GscMetricRow[];
 }) {
+  const aggregateTotals = ga4Totals[0]?.metrics ?? [];
   const totals = {
-    activeUsers: sumMetric(ga4Pages, 0),
-    sessions: sumMetric(ga4Pages, 1),
-    pageViews: sumMetric(ga4Pages, 2),
-    events: sumMetric(ga4Events, 0),
+    activeUsers: toInteger(aggregateTotals[0]),
+    sessions: toInteger(aggregateTotals[1]),
+    pageViews: toInteger(aggregateTotals[2]),
+    events: toInteger(aggregateTotals[3]),
     searchClicks: gscQueries.reduce((total, row) => total + toInteger(row.clicks), 0),
     searchImpressions: gscQueries.reduce((total, row) => total + toInteger(row.impressions), 0),
   };
@@ -375,6 +517,281 @@ function buildMarketingInsightSummary({
   };
 }
 
+function decorateMarketingSummary(
+  summary: Record<string, unknown>,
+  {
+    marketingPages,
+    productPages,
+    cleanSources,
+    topQueries,
+    registeredUsers,
+  }: {
+    marketingPages: PageMetricRecord[];
+    productPages: PageMetricRecord[];
+    cleanSources: SourceMetricRecord[];
+    topQueries: QueryMetricRecord[];
+    registeredUsers: RegisteredUserStats;
+  },
+) {
+  const rawTotals = readTotals(summary.totals);
+  const marketingTotals = sumPageRecords(marketingPages);
+  const productTotals = sumPageRecords(productPages);
+  const topMarketingPage = [...marketingPages].sort(byPageViews)[0] ?? null;
+  const topProductPage = [...productPages].sort(byPageViews)[0] ?? null;
+  const topSource = [...cleanSources].sort((left, right) => right.sessions - left.sessions)[0] ?? null;
+  const topQuery = [...topQueries].sort((left, right) => right.impressions - left.impressions)[0] ?? null;
+  const highlights = [
+    topMarketingPage
+      ? `Top marketing landing: ${topMarketingPage.page_path} with ${topMarketingPage.screen_page_views} views.`
+      : 'No clean marketing landing page data returned yet.',
+    topProductPage
+      ? `Top product page: ${topProductPage.page_path} with ${topProductPage.screen_page_views} views.`
+      : 'No product usage page data returned yet.',
+    topSource
+      ? `Top acquisition source after filters: ${formatSourceLabel(topSource)} with ${topSource.sessions} sessions.`
+      : 'No clean acquisition source data returned yet.',
+    topQuery
+      ? `Top search query: "${topQuery.query}" with ${toInteger(topQuery.impressions)} impressions.`
+      : 'No Search Console query data returned yet.',
+  ];
+
+  return {
+    ...summary,
+    totals: rawTotals,
+    rawTotals,
+    marketingTotals,
+    productTotals,
+    registeredUsers,
+    highlights,
+    notes: [
+      'GA active users are anonymous, cookie/device-based visitors. They are not the same number as registered Neon users.',
+      'Landing and product page rows are directional rankings. Aggregate GA totals come from a no-dimension GA4 report.',
+      'Configured auth/internal sources and internal users are filtered from the clean dashboard views.',
+    ],
+  };
+}
+
+function readSummaryRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return null;
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function readTotals(value: unknown) {
+  const record = value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+
+  return {
+    activeUsers: toInteger(record.activeUsers),
+    sessions: toInteger(record.sessions),
+    pageViews: toInteger(record.pageViews),
+    events: toInteger(record.events),
+    searchClicks: toInteger(record.searchClicks),
+    searchImpressions: toInteger(record.searchImpressions),
+  };
+}
+
+function sumPageRecords(rows: PageMetricRecord[]) {
+  return rows.reduce(
+    (totals, row) => ({
+      activeUsers: totals.activeUsers + toInteger(row.active_users),
+      sessions: totals.sessions + toInteger(row.sessions),
+      pageViews: totals.pageViews + toInteger(row.screen_page_views),
+      events: totals.events + toInteger(row.event_count),
+    }),
+    { activeUsers: 0, sessions: 0, pageViews: 0, events: 0 },
+  );
+}
+
+function byPageViews(left: PageMetricRecord, right: PageMetricRecord) {
+  return right.screen_page_views - left.screen_page_views;
+}
+
+function normalizePageMetricRecord(row: PageMetricRecord): PageMetricRecord {
+  return {
+    page_path: normalizePagePath(String(row.page_path ?? '')),
+    page_title: String(row.page_title ?? ''),
+    active_users: toInteger(row.active_users),
+    sessions: toInteger(row.sessions),
+    screen_page_views: toInteger(row.screen_page_views),
+    event_count: toInteger(row.event_count),
+  };
+}
+
+function normalizeSourceMetricRecord(row: SourceMetricRecord): SourceMetricRecord {
+  return {
+    source: String(row.source ?? ''),
+    medium: String(row.medium ?? ''),
+    campaign: String(row.campaign ?? ''),
+    active_users: toInteger(row.active_users),
+    sessions: toInteger(row.sessions),
+    screen_page_views: toInteger(row.screen_page_views),
+  };
+}
+
+function normalizeQueryMetricRecord(row: QueryMetricRecord): QueryMetricRecord {
+  return {
+    query: String(row.query ?? ''),
+    page: String(row.page ?? ''),
+    clicks: toInteger(row.clicks),
+    impressions: toInteger(row.impressions),
+    ctr: Number(row.ctr ?? 0),
+    position: Number(row.position ?? 0),
+  };
+}
+
+function normalizePagePath(path: string) {
+  const trimmed = path.trim() || '/';
+  const withoutQuery = trimmed.split('?')[0]?.split('#')[0] || '/';
+  if (withoutQuery === '/') {
+    return '/';
+  }
+
+  return withoutQuery.endsWith('/') ? withoutQuery.slice(0, -1) : withoutQuery;
+}
+
+function isMarketingPage(path: string, settings: MarketingAnalyticsSettings) {
+  const normalized = normalizePagePath(path);
+  return settings.marketingPagePaths.some((marketingPath) => normalizePagePath(marketingPath) === normalized);
+}
+
+function isProductPage(path: string, settings: MarketingAnalyticsSettings) {
+  const normalized = normalizePagePath(path);
+  return settings.productPagePrefixes.some((prefix) => normalized.startsWith(normalizePagePath(prefix)));
+}
+
+function isExcludedPage(path: string, settings: MarketingAnalyticsSettings) {
+  const normalized = normalizePagePath(path);
+  return settings.excludedPagePrefixes.some((prefix) => normalized.startsWith(normalizePagePath(prefix)));
+}
+
+function isExcludedSource(source: string, settings: MarketingAnalyticsSettings) {
+  const normalized = source.trim().toLowerCase();
+  return settings.excludedSources.some((excludedSource) => {
+    const normalizedExcludedSource = excludedSource.trim().toLowerCase();
+    return normalizedExcludedSource.length > 0 && normalized.includes(normalizedExcludedSource);
+  });
+}
+
+function formatSourceLabel(row: SourceMetricRecord) {
+  return [row.source || '(direct)', row.medium || '(none)'].join(' / ');
+}
+
+async function getMarketingAnalyticsSettings(): Promise<MarketingAnalyticsSettings> {
+  const result = await pool.query<MarketingAnalyticsSettingsRow>(
+    `SELECT
+      excluded_sources,
+      excluded_page_prefixes,
+      product_page_prefixes,
+      marketing_page_paths,
+      internal_user_emails,
+      internal_user_ids
+     FROM marketing_analytics_settings
+     WHERE id = true
+     LIMIT 1`,
+  );
+
+  if (!result.rows[0]) {
+    await pool.query('INSERT INTO marketing_analytics_settings (id) VALUES (true) ON CONFLICT (id) DO NOTHING');
+    return DEFAULT_MARKETING_ANALYTICS_SETTINGS;
+  }
+
+  return normalizeSettingsRow(result.rows[0]);
+}
+
+function normalizeSettingsRow(row: MarketingAnalyticsSettingsRow): MarketingAnalyticsSettings {
+  return {
+    excludedSources: normalizeStringList(row.excluded_sources, DEFAULT_MARKETING_ANALYTICS_SETTINGS.excludedSources),
+    excludedPagePrefixes: normalizePathList(
+      row.excluded_page_prefixes,
+      DEFAULT_MARKETING_ANALYTICS_SETTINGS.excludedPagePrefixes,
+    ),
+    productPagePrefixes: normalizePathList(
+      row.product_page_prefixes,
+      DEFAULT_MARKETING_ANALYTICS_SETTINGS.productPagePrefixes,
+    ),
+    marketingPagePaths: normalizePathList(row.marketing_page_paths, DEFAULT_MARKETING_ANALYTICS_SETTINGS.marketingPagePaths),
+    internalUserEmails: normalizeStringList(
+      row.internal_user_emails,
+      DEFAULT_MARKETING_ANALYTICS_SETTINGS.internalUserEmails,
+    ).map((email) => email.toLowerCase()),
+    internalUserIds: normalizeUuidList(row.internal_user_ids, DEFAULT_MARKETING_ANALYTICS_SETTINGS.internalUserIds),
+  };
+}
+
+function normalizeStringList(value: unknown, fallback: string[]) {
+  const source = Array.isArray(value) ? value : fallback;
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const item of source) {
+    const text = String(item ?? '').trim();
+    const key = text.toLowerCase();
+    if (!text || seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    result.push(text);
+  }
+
+  return result;
+}
+
+function normalizePathList(value: unknown, fallback: string[]) {
+  return normalizeStringList(value, fallback).map(normalizePagePath);
+}
+
+function normalizeUuidList(value: unknown, fallback: string[]) {
+  const source = Array.isArray(value) ? value : fallback;
+  return source
+    .map((item) => String(item ?? '').trim())
+    .filter((item) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item));
+}
+
+async function getRegisteredUserStats(periodStart: string, periodEnd: string, settings: MarketingAnalyticsSettings) {
+  const emails = settings.internalUserEmails.map((email) => email.toLowerCase());
+  const ids = settings.internalUserIds;
+  const result = await pool.query<{
+    total: string | number;
+    new_in_period: string | number;
+    excluded_internal: string | number;
+  }>(
+    `SELECT
+      COUNT(*) FILTER (
+        WHERE deleted_at IS NULL
+          AND NOT (
+            user_id = ANY($1::uuid[])
+            OR lower(coalesce(email_primary, email, '')) = ANY($2::text[])
+          )
+      ) AS total,
+      COUNT(*) FILTER (
+        WHERE deleted_at IS NULL
+          AND created_at::date BETWEEN $3::date AND $4::date
+          AND NOT (
+            user_id = ANY($1::uuid[])
+            OR lower(coalesce(email_primary, email, '')) = ANY($2::text[])
+          )
+      ) AS new_in_period,
+      COUNT(*) FILTER (
+        WHERE deleted_at IS NULL
+          AND (
+            user_id = ANY($1::uuid[])
+            OR lower(coalesce(email_primary, email, '')) = ANY($2::text[])
+          )
+      ) AS excluded_internal
+     FROM users`,
+    [ids, emails, periodStart, periodEnd],
+  );
+  const row = result.rows[0];
+
+  return {
+    total: toInteger(row?.total),
+    newInPeriod: toInteger(row?.new_in_period),
+    excludedInternal: toInteger(row?.excluded_internal),
+  };
+}
+
 async function fetchGa4Rows(
   propertyId: string,
   accessToken: string,
@@ -390,7 +807,7 @@ async function fetchGa4Rows(
     },
     body: JSON.stringify({
       dateRanges: [dateRange],
-      dimensions: dimensions.map((name) => ({ name })),
+      ...(dimensions.length > 0 ? { dimensions: dimensions.map((name) => ({ name })) } : {}),
       metrics: metrics.map((name) => ({ name })),
       limit: '100',
     }),
@@ -611,10 +1028,6 @@ function toInteger(value: unknown) {
   return Number.isFinite(numberValue) ? Math.round(numberValue) : 0;
 }
 
-function sumMetric(rows: Ga4MetricRow[], metricIndex: number) {
-  return rows.reduce((total, row) => total + toInteger(row.metrics[metricIndex]), 0);
-}
-
 function sortGa4RowsByMetric(rows: Ga4MetricRow[], metricIndex: number) {
   return [...rows].sort((left, right) => toInteger(right.metrics[metricIndex]) - toInteger(left.metrics[metricIndex]));
 }
@@ -687,6 +1100,43 @@ function ensureMarketingAnalyticsSchema() {
             summary JSONB NOT NULL,
             created_at TIMESTAMPTZ NOT NULL DEFAULT now()
           )
+        `);
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS marketing_analytics_settings (
+            id BOOLEAN PRIMARY KEY DEFAULT true CHECK (id),
+            excluded_sources TEXT[] NOT NULL DEFAULT ARRAY['accounts.google.com'],
+            excluded_page_prefixes TEXT[] NOT NULL DEFAULT ARRAY[
+              '/login',
+              '/login2',
+              '/sign-up',
+              '/sign-up2',
+              '/onboarding',
+              '/onboarding2',
+              '/sso-callback'
+            ],
+            product_page_prefixes TEXT[] NOT NULL DEFAULT ARRAY[
+              '/innerbloom2',
+              '/dashboard',
+              '/dashboard-v3',
+              '/editor'
+            ],
+            marketing_page_paths TEXT[] NOT NULL DEFAULT ARRAY[
+              '/',
+              '/v2',
+              '/v3'
+            ],
+            internal_user_emails TEXT[] NOT NULL DEFAULT ARRAY[
+              'ramagpt23@gmail.com',
+              'rfullivarri22@gmail.com'
+            ],
+            internal_user_ids UUID[] NOT NULL DEFAULT ARRAY[]::UUID[],
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+          )
+        `);
+        await client.query(`
+          INSERT INTO marketing_analytics_settings (id)
+          VALUES (true)
+          ON CONFLICT (id) DO NOTHING
         `);
         await client.query(`
           CREATE INDEX IF NOT EXISTS marketing_analytics_sync_runs_completed_idx
