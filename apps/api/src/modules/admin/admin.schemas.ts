@@ -193,6 +193,45 @@ export const adminSubscriptionUpdateBodySchema = z.object({
   status: subscriptionStatusSchema.optional().default('active'),
 });
 
+export const marketingR2AssetUploadBodySchema = z.object({
+  assets: z
+    .array(
+      z.object({
+        key: z.string().trim().min(1).max(240),
+        contentBase64: z.string().trim().min(1),
+        contentType: z.string().trim().min(1).max(100).optional(),
+      }),
+    )
+    .min(1)
+    .max(10),
+});
+
+export const marketingAnalyticsSyncBodySchema = z.object({
+  startDate: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'startDate must be YYYY-MM-DD' })
+    .optional(),
+  endDate: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'endDate must be YYYY-MM-DD' })
+    .optional(),
+  force: z.coerce.boolean().default(false),
+});
+
+const marketingAnalyticsStringListSchema = z
+  .array(z.string().trim().min(1).max(240))
+  .max(100);
+
+export const marketingAnalyticsSettingsBodySchema = z.object({
+  excludedSources: marketingAnalyticsStringListSchema.optional(),
+  excludedPagePrefixes: marketingAnalyticsStringListSchema.optional(),
+  productPagePrefixes: marketingAnalyticsStringListSchema.optional(),
+  marketingPagePaths: marketingAnalyticsStringListSchema.optional(),
+  internalUserEmails: marketingAnalyticsStringListSchema.optional(),
+  internalUserIds: z.array(z.string().uuid()).max(50).optional(),
+});
 
 export const subscriptionNotificationsTriggerBodySchema = z.object({
   runAt: z.string().datetime().optional(),

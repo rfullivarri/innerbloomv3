@@ -2314,6 +2314,7 @@ function EmotionChartPanel({
   }, [data, localSnapshot]);
   const heatmap = useMemo(() => buildEmotionWeekHeatmap(snapshots), [snapshots]);
   const frequent = useMemo(() => resolveMostFrequentEmotion(snapshots.slice(-15)), [snapshots]);
+  const hasEmotionData = snapshots.some((snapshot) => Boolean(snapshot.mood));
   const periodStart = heatmap.periodStart;
   const periodEnd = heatmap.periodEnd;
   const latestEmotionDate = useMemo(() => {
@@ -2326,11 +2327,14 @@ function EmotionChartPanel({
   useEffect(() => {
     const node = heatmapScrollRef.current;
     if (!node || heatmap.columns.length <= 0) return undefined;
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const maxScroll = Math.max(0, node.scrollWidth - node.clientWidth);
+    node.scrollLeft = 0;
+
+    if (!heatmap.shouldAutoScrollToLatest) return undefined;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (maxScroll <= 0) return undefined;
 
-    node.scrollLeft = 0;
     if (reduceMotion) {
       node.scrollLeft = maxScroll;
       return undefined;
@@ -2356,7 +2360,7 @@ function EmotionChartPanel({
       window.clearTimeout(timeout);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [heatmap.columns.length]);
+  }, [heatmap.columns.length, heatmap.shouldAutoScrollToLatest]);
 
   return (
     <section className="space-y-5">
@@ -2482,16 +2486,22 @@ function EmotionChartPanel({
 
       <ThinSeparator />
 
-      <div className="flex items-center gap-7 pb-3">
-        <span
-          className="h-20 w-20 rounded-full shadow-[0_0_34px_rgba(164,99,242,0.3)]"
-          style={{ backgroundColor: frequent.color }}
-        />
-        <div>
-          <p className="text-2xl font-light text-[color:var(--mp-text)]">{translateEmotionLegendLabel(frequent.key, t)}</p>
-          <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">{t('mobilePremium.emotionChart.mostFrequent')}</p>
+      {hasEmotionData ? (
+        <div className="flex items-center gap-7 pb-3">
+          <span
+            className="h-20 w-20 rounded-full shadow-[0_0_34px_rgba(164,99,242,0.3)]"
+            style={{ backgroundColor: frequent.color }}
+          />
+          <div>
+            <p className="text-2xl font-light text-[color:var(--mp-text)]">{translateEmotionLegendLabel(frequent.key, t)}</p>
+            <p className="mt-1 text-sm text-[color:var(--mp-text-secondary)]">{t('mobilePremium.emotionChart.mostFrequent')}</p>
+          </div>
         </div>
-      </div>
+      ) : (
+        <p className="pb-3 text-sm leading-6 text-[color:var(--mp-text-secondary)]">
+          {t('mobilePremium.dashboard.emptyDailyQuest')}
+        </p>
+      )}
     </section>
   );
 }
@@ -2668,24 +2678,31 @@ function resolveMostFrequentEmotion(snapshots: EmotionSnapshot[]) {
 function buildEmotionWeekHeatmap(snapshots: EmotionSnapshot[]) {
   const byDate = new Map(snapshots.map((snapshot) => [snapshot.date, snapshot.mood ?? null]));
   const today = startOfLocalDay(new Date());
+  const recordedSnapshots = snapshots.filter((snapshot) => Boolean(snapshot.mood));
+  const firstSnapshotDate = recordedSnapshots[0]?.date
+    ? startOfLocalDay(new Date(`${recordedSnapshots[0].date}T00:00:00`))
+    : null;
   const latestSnapshotDate = snapshots[snapshots.length - 1]?.date
     ? startOfLocalDay(new Date(`${snapshots[snapshots.length - 1].date}T00:00:00`))
     : today;
   const anchorDate = latestSnapshotDate > today ? latestSnapshotDate : today;
   const totalDays = 26 * 7;
   const historicalDays = Math.floor(totalDays * 0.75);
-  const periodStartDate = addLocalDays(anchorDate, -(historicalDays - 1));
+  const isInitialEmotionHistory = firstSnapshotDate !== null && recordedSnapshots.length <= 1;
+  const periodStartDate = isInitialEmotionHistory
+    ? firstSnapshotDate
+    : addLocalDays(anchorDate, -(historicalDays - 1));
   const periodEndDate = addLocalDays(periodStartDate, totalDays - 1);
   const periodStart = toLocalIsoDate(periodStartDate);
   const periodEnd = toLocalIsoDate(periodEndDate);
-  const startMonday = startOfMondayWeek(periodStartDate);
+  const firstColumnDate = isInitialEmotionHistory ? periodStartDate : startOfMondayWeek(periodStartDate);
   const endMonday = startOfMondayWeek(periodEndDate);
   const columns: Array<{
     key: string;
     cells: Array<{ date: string; mood: string | null; inPeriod: boolean }>;
   }> = [];
 
-  for (let monday = new Date(startMonday); monday <= endMonday; monday = addLocalDays(monday, 7)) {
+  for (let monday = new Date(firstColumnDate); monday <= endMonday; monday = addLocalDays(monday, 7)) {
     const cells = Array.from({ length: 7 }, (_, dayIndex) => {
       const date = addLocalDays(monday, dayIndex);
       const iso = toLocalIsoDate(date);
@@ -2704,6 +2721,7 @@ function buildEmotionWeekHeatmap(snapshots: EmotionSnapshot[]) {
     monthSegments: buildEmotionMonthSegments(columns),
     periodStart,
     periodEnd,
+    shouldAutoScrollToLatest: !isInitialEmotionHistory,
   };
 }
 

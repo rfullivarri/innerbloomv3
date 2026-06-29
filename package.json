@@ -26,7 +26,8 @@
     "start:api": "npm --workspace apps/api run start",
     "lint": "npm --workspace apps/api run lint",
     "test": "npm --workspace apps/api run test",
-    "routes:print": "npm --workspace apps/api run routes:print"
+    "routes:print": "npm --workspace apps/api run routes:print",
+    "marketing:generate": "node scripts/marketing/generate-campaign-assets.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.6.2",

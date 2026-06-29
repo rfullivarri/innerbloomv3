@@ -19,6 +19,7 @@
     "backfill:task-difficulty": "tsx scripts/task-difficulty-backfill.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1075.0",
     "@fastify/express": "^4.0.2",
     "@innerbloom/missions-v2-contracts": "file:../../packages/missions-v2-contracts",
     "ajv": "^8.17.1",

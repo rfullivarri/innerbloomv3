@@ -40,6 +40,11 @@ export const mobilePremiumTranslations = {
   'mobilePremium.delete.placeholder': { es: 'ELIMINAR', en: 'DELETE' },
   'mobilePremium.delete.cancel': { es: 'Cancelar', en: 'Cancel' },
   'mobilePremium.delete.confirm': { es: 'Eliminar definitivamente', en: 'Delete permanently' },
+  'mobilePremium.delete.deleting': { es: 'Eliminando...', en: 'Deleting...' },
+  'mobilePremium.delete.error': {
+    es: 'No se pudo eliminar la cuenta. Revisá tu conexión e intentá otra vez.',
+    en: 'Could not delete the account. Check your connection and try again.',
+  },
 
   'mobilePremium.widgets.eyebrow': { es: 'Widgets', en: 'Widgets' },
   'mobilePremium.widgets.title': { es: 'Tu dashboard', en: 'Your dashboard' },
@@ -134,7 +139,8 @@ export const mobilePremiumTranslations = {
   'mobilePremium.dashboard.needsAttention': { es: 'Necesita atención', en: 'Needs attention' },
   'mobilePremium.dashboard.closeToHabit': { es: 'Cerca del hábito', en: 'Close to habit' },
   'mobilePremium.dashboard.monthSuffix': { es: 'mes', en: 'mo' },
-  'mobilePremium.dashboard.noSignals': { es: 'A partir de la primera semana podremos mostrar señales útiles sobre tus tareas.', en: 'After the first week, we can show useful signals about your tasks.' },
+  'mobilePremium.dashboard.noSignals': { es: 'Completá tu primer Daily Quest para ver tus estadísticas reales.', en: 'Complete your first Daily Quest to see your real stats.' },
+  'mobilePremium.dashboard.emptyDailyQuest': { es: 'Completá tu primer Daily Quest para ver tus estadísticas reales.', en: 'Complete your first Daily Quest to see your real stats.' },
   'mobilePremium.dashboard.dailyEnergy': { es: 'Energía diaria', en: 'Daily Energy' },
   'mobilePremium.dashboard.dailyEnergyA11y': { es: 'Ver explicación de Daily Energy', en: 'View Daily Energy explanation' },
   'mobilePremium.dashboard.sevenDays': { es: '7 días', en: '7 days' },

@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/runtimeAuth';
 import { readCookieConsentState } from '../lib/cookieConsent';
 import { ensureGa4Initialized, sendGaEvent } from '../lib/ga4';
+import { getMarketingEventParams } from '../lib/marketingAttribution';
 
 const GA4_MEASUREMENT_ID = (
   import.meta.env.VITE_GA4_MEASUREMENT_ID
@@ -15,11 +16,17 @@ const AUTH_SURFACE_UNKNOWN = 'unknown';
 type AuthenticatedView = 'dashboard_home' | 'missions' | 'dquest' | 'rewards' | 'editor';
 
 function isAuthLoginPath(pathname: string): boolean {
-  return pathname === '/login' || pathname.startsWith('/login/');
+  return pathname === '/login'
+    || pathname.startsWith('/login/')
+    || pathname === '/login2'
+    || pathname.startsWith('/login2/');
 }
 
 function isAuthSignUpPath(pathname: string): boolean {
-  return pathname === '/sign-up' || pathname.startsWith('/sign-up/');
+  return pathname === '/sign-up'
+    || pathname.startsWith('/sign-up/')
+    || pathname === '/sign-up2'
+    || pathname.startsWith('/sign-up2/');
 }
 
 function getAuthSurfaceFromPath(pathname: string): 'login' | 'sign_up' | null {
@@ -56,46 +63,48 @@ function writeLastAuthSurface(surface: 'login' | 'sign_up'): void {
   window.sessionStorage.setItem(AUTH_SURFACE_STORAGE_KEY, surface);
 }
 
-function resolveAuthenticatedView(pathname: string, dashboardBasePath: string): AuthenticatedView | null {
+function resolveAuthenticatedView(pathname: string, dashboardBasePaths: readonly string[]): AuthenticatedView | null {
   if (pathname === '/editor' || pathname.startsWith('/editor/')) {
     return 'editor';
   }
 
-  if (pathname === dashboardBasePath) {
-    return 'dashboard_home';
-  }
+  for (const dashboardBasePath of dashboardBasePaths) {
+    if (pathname === dashboardBasePath) {
+      return 'dashboard_home';
+    }
 
-  if (!pathname.startsWith(`${dashboardBasePath}/`)) {
-    return null;
-  }
+    if (!pathname.startsWith(`${dashboardBasePath}/`)) {
+      continue;
+    }
 
-  const suffix = pathname.slice(dashboardBasePath.length + 1);
+    const suffix = pathname.slice(dashboardBasePath.length + 1);
 
-  if (suffix === 'rewards' || suffix.startsWith('rewards/')) {
-    return 'rewards';
-  }
+    if (suffix === 'rewards' || suffix.startsWith('rewards/')) {
+      return 'rewards';
+    }
 
-  if (
-    suffix === 'misiones'
-    || suffix.startsWith('misiones/')
-    || suffix === 'missions'
-    || suffix.startsWith('missions/')
-    || suffix === 'missions-v2'
-    || suffix.startsWith('missions-v2/')
-    || suffix === 'missions-v3'
-    || suffix.startsWith('missions-v3/')
-  ) {
-    return 'missions';
-  }
+    if (
+      suffix === 'misiones'
+      || suffix.startsWith('misiones/')
+      || suffix === 'missions'
+      || suffix.startsWith('missions/')
+      || suffix === 'missions-v2'
+      || suffix.startsWith('missions-v2/')
+      || suffix === 'missions-v3'
+      || suffix.startsWith('missions-v3/')
+    ) {
+      return 'missions';
+    }
 
-  if (suffix === 'dquest' || suffix.startsWith('dquest/')) {
-    return 'dquest';
+    if (suffix === 'dquest' || suffix.startsWith('dquest/')) {
+      return 'dquest';
+    }
   }
 
   return null;
 }
 
-export function useGa4FunnelTracking({ dashboardBasePath }: { dashboardBasePath: string }) {
+export function useGa4FunnelTracking({ dashboardBasePaths }: { dashboardBasePaths: readonly string[] }) {
   const location = useLocation();
   const { isLoaded, userId } = useAuth();
   const [isReady, setIsReady] = useState(false);
@@ -146,6 +155,11 @@ export function useGa4FunnelTracking({ dashboardBasePath }: { dashboardBasePath:
       sendGaEvent('page_view', {
         page_path: location.pathname,
         page_type: pageType,
+        ...getMarketingEventParams({
+          pathname: location.pathname,
+          search: location.search,
+          allowStoredAttribution: true,
+        }),
       });
     }
 
@@ -155,11 +169,16 @@ export function useGa4FunnelTracking({ dashboardBasePath }: { dashboardBasePath:
         auth_surface: authSurface,
         auth_method: 'unknown',
         page_path: location.pathname,
+        ...getMarketingEventParams({
+          pathname: location.pathname,
+          search: location.search,
+          allowStoredAttribution: true,
+        }),
       });
     }
 
     writeLastAuthSurface(authSurface);
-  }, [isReady, location.pathname]);
+  }, [isReady, location.pathname, location.search]);
 
   useEffect(() => {
     if (!isReady || !isLoaded) {
@@ -179,17 +198,24 @@ export function useGa4FunnelTracking({ dashboardBasePath }: { dashboardBasePath:
         auth_surface: readLastAuthSurface(),
         auth_method: 'unknown',
         redirect_target: location.pathname,
+        ...getMarketingEventParams({
+          pathname: location.pathname,
+          search: location.search,
+          allowStoredAttribution: true,
+        }),
       });
     }
-  }, [isLoaded, isReady, location.pathname, userId]);
+  }, [isLoaded, isReady, location.pathname, location.search, userId]);
 
   useEffect(() => {
     if (!isReady || trackedDashboardViewRef.current) {
       return;
     }
 
-    const isDashboardPath = location.pathname === dashboardBasePath
-      || location.pathname.startsWith(`${dashboardBasePath}/`);
+    const isDashboardPath = dashboardBasePaths.some((dashboardBasePath) => (
+      location.pathname === dashboardBasePath
+      || location.pathname.startsWith(`${dashboardBasePath}/`)
+    ));
 
     if (!isDashboardPath) {
       return;
@@ -200,15 +226,20 @@ export function useGa4FunnelTracking({ dashboardBasePath }: { dashboardBasePath:
       page_path: location.pathname,
       page_type: 'dashboard',
       is_first_dashboard_view: true,
+      ...getMarketingEventParams({
+        pathname: location.pathname,
+        search: location.search,
+        allowStoredAttribution: true,
+      }),
     });
-  }, [dashboardBasePath, isReady, location.pathname]);
+  }, [dashboardBasePaths, isReady, location.pathname, location.search]);
 
   useEffect(() => {
     if (!isReady || !isLoaded || !userId) {
       return;
     }
 
-    const currentView = resolveAuthenticatedView(location.pathname, dashboardBasePath);
+    const currentView = resolveAuthenticatedView(location.pathname, dashboardBasePaths);
     if (!currentView) {
       return;
     }
@@ -221,6 +252,11 @@ export function useGa4FunnelTracking({ dashboardBasePath }: { dashboardBasePath:
       previous_section: previousView ?? 'none',
       page_path: location.pathname,
       is_authenticated: true,
+      ...getMarketingEventParams({
+        pathname: location.pathname,
+        search: location.search,
+        allowStoredAttribution: true,
+      }),
     });
-  }, [dashboardBasePath, isLoaded, isReady, location.pathname, userId]);
+  }, [dashboardBasePaths, isLoaded, isReady, location.pathname, location.search, userId]);
 }

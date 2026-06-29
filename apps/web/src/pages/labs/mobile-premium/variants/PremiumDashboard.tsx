@@ -36,41 +36,6 @@ type DashboardTask = {
   monthWeeks: number[];
 };
 
-const FALLBACK_TASKS: DashboardTask[] = [
-  { id: 'sleep', name: 'Dormir 8hs', stat: 'Sueño', streakDays: 12, weeklyDone: 2, weeklyGoal: 3, monthlyCount: 10, monthWeeks: [3, 3, 2, 1, 1] },
-  { id: 'sugar', name: 'No dulces', stat: 'Nutrición', streakDays: 0, weeklyDone: 0, weeklyGoal: 3, monthlyCount: 0, monthWeeks: [0, 0, 0, 0, 0] },
-  { id: 'water', name: 'Tomar agua', stat: 'Hidratación', streakDays: 4, weeklyDone: 2, weeklyGoal: 3, monthlyCount: 8, monthWeeks: [3, 3, 2, 0, 0] },
-];
-
-const FALLBACK_EMOTIONS: EmotionSnapshot[] = [
-  ['2026-05-07', 'Calma'],
-  ['2026-05-08', 'Felicidad'],
-  ['2026-05-09', 'Motivación'],
-  ['2026-05-10', 'Tristeza'],
-  ['2026-05-11', 'Calma'],
-  ['2026-05-12', 'Ansiedad'],
-  ['2026-05-13', 'Motivación'],
-  ['2026-05-14', 'Calma'],
-  ['2026-05-15', 'Cansancio'],
-  ['2026-05-16', 'Felicidad'],
-  ['2026-05-17', 'Motivación'],
-  ['2026-05-18', 'Calma'],
-  ['2026-05-19', 'Frustración'],
-  ['2026-05-20', 'Calma'],
-  ['2026-05-21', 'Calma'],
-].map(([date, mood]) => ({ date, mood }));
-
-const FALLBACK_ENERGY_SERIES: EnergyTimeseriesPoint[] = [
-  { date: '2026-05-20', Body: 76, Soul: 36, Mind: 51 },
-  { date: '2026-05-21', Body: 70, Soul: 42, Mind: 48 },
-  { date: '2026-05-22', Body: 78, Soul: 39, Mind: 56 },
-  { date: '2026-05-23', Body: 73, Soul: 47, Mind: 52 },
-  { date: '2026-05-24', Body: 68, Soul: 44, Mind: 49 },
-  { date: '2026-05-25', Body: 80, Soul: 51, Mind: 46 },
-  { date: '2026-05-26', Body: 77, Soul: 62, Mind: 45 },
-  { date: '2026-05-27', Body: 74, Soul: 56, Mind: 42 },
-];
-
 const EMOTION_COLORS: Record<string, string> = {
   calma: '#5ee178',
   felicidad: '#f8c842',
@@ -174,18 +139,17 @@ export function PremiumDashboard({
   const localBalanceTraits = useMemo(() => buildLocalBalanceTraits(localSnapshot), [localSnapshot]);
   const localEnergy = useMemo(() => buildLocalEnergyData(localSnapshot), [localSnapshot]);
   const emotionSummary = useMemo(
-    () => buildEmotionSummary(onboardingPreview ? localEmotions : emotionData, !onboardingPreview, language, t),
+    () => buildEmotionSummary(onboardingPreview ? localEmotions : emotionData, language, t),
     [emotionData, language, localEmotions, onboardingPreview, t],
   );
   const balance = useMemo(
-    () => buildBalanceSummary(onboardingPreview ? localBalanceTraits : balanceData?.traits, !onboardingPreview, t),
+    () => buildBalanceSummary(onboardingPreview ? localBalanceTraits : balanceData?.traits, t),
     [balanceData?.traits, localBalanceTraits, onboardingPreview, t],
   );
   const energy = useMemo(
     () => buildEnergySummary(
       onboardingPreview ? localEnergy.snapshot : energyData,
       onboardingPreview ? localEnergy.series : energySeriesData,
-      !onboardingPreview,
       t,
     ),
     [energyData, energySeriesData, localEnergy, onboardingPreview, t],
@@ -205,7 +169,7 @@ export function PremiumDashboard({
           xp_to_next: Math.max(0, 100 - (localXpTotal % 100)),
           progress_percent: localXpTotal % 100,
         }
-      : { xp_total: 6248, current_level: 24, xp_to_next: 318, progress_percent: 55 }
+      : { xp_total: 0, current_level: 0, xp_to_next: 100, progress_percent: 0 }
   );
   const emotionCardRef = useRef<HTMLAnchorElement | null>(null);
   const balanceCardRef = useRef<HTMLAnchorElement | null>(null);
@@ -382,6 +346,14 @@ function MiniHeading({ heading, label }: { heading: string; label: string }) {
 
 function EmotionSummaryDots({ active, summary }: { active: boolean; summary: ReturnType<typeof buildEmotionSummary> }) {
   const compactDays = summary.days.slice(-15);
+  if (!summary.hasData) {
+    return (
+      <p className="mt-5 text-sm leading-5 text-[color:var(--mp-text-secondary)]">
+        {summary.emptyLabel}
+      </p>
+    );
+  }
+
   return (
     <div className="mt-5 space-y-3">
       <div className="flex items-center gap-3">
@@ -412,6 +384,14 @@ function EmotionDayDot({ active, day, index }: { active: boolean; day: ReturnTyp
 
 function PremiumBalanceCompact({ active, balance }: { active: boolean; balance: ReturnType<typeof buildBalanceSummary> }) {
   const { t } = usePostLoginLanguage();
+  if (!balance.hasData) {
+    return (
+      <p className="mt-5 text-sm leading-5 text-[color:var(--mp-text-secondary)]">
+        {t('mobilePremium.dashboard.emptyDailyQuest')}
+      </p>
+    );
+  }
+
   const bars = [balance.body, balance.mind, balance.soul];
   const tone = balance.dominant.code === 'body'
     ? 'var(--mp-body)'
@@ -654,6 +634,11 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
         </div>
       ) : null}
 
+      {!energy.hasData ? (
+        <p className="mt-5 border-y border-[color:var(--mp-border)] py-8 text-sm leading-6 text-[color:var(--mp-text-secondary)]">
+          {t('mobilePremium.dashboard.emptyDailyQuest')}
+        </p>
+      ) : (
       <svg
         aria-label={`Evolución de energía: ${energy.metrics.map((metric) => `${metric.label} ${metric.percent}%, ${metric.pillar}`).join(', ')}`}
         className="mt-5 block w-full overflow-visible"
@@ -759,6 +744,7 @@ function PremiumDailyEnergy({ energy }: { energy: ReturnType<typeof buildEnergyS
           );
         })}
       </svg>
+      )}
     </section>
   );
 }
@@ -801,7 +787,7 @@ function buildLocalDashboardTasks(snapshot: LocalOnboardingSnapshot | null | und
     streakDays: task.streakDays,
     weeklyDone: task.weeklyDone,
     weeklyGoal,
-    monthlyCount: task.monthlyCount,
+    monthlyCount: task.monthlyCount ?? 0,
     monthWeeks: task.monthWeeks,
   }));
 }
@@ -903,7 +889,7 @@ function normalizeDashboardTasks(
   groups: Array<{ pillar: StreakPanelPillar; response: { tasks: StreakPanelTask[] } }> | null | undefined,
   weeklyGoal: number,
 ): DashboardTask[] {
-  if (!groups) return FALLBACK_TASKS;
+  if (!groups) return [];
   const byId = new Map<string, DashboardTask>();
   groups.forEach(({ response }) => {
     response.tasks.forEach((task) => {
@@ -920,7 +906,7 @@ function normalizeDashboardTasks(
       });
     });
   });
-  return Array.from(byId.values()).length ? Array.from(byId.values()) : FALLBACK_TASKS;
+  return Array.from(byId.values());
 }
 
 function buildOverview(tasks: DashboardTask[], localSnapshot?: LocalOnboardingSnapshot | null) {
@@ -941,26 +927,32 @@ function buildOverview(tasks: DashboardTask[], localSnapshot?: LocalOnboardingSn
         : null,
     };
   }
-  const streak = [...tasks].sort((a, b) => b.streakDays - a.streakDays)[0] ?? FALLBACK_TASKS[0];
-  const attention = [...tasks].sort((a, b) => a.monthlyCount - b.monthlyCount)[0] ?? FALLBACK_TASKS[1];
+  const hasAnyActivity = tasks.some((task) => (
+    task.streakDays > 0 ||
+    task.weeklyDone > 0 ||
+    task.monthlyCount > 0 ||
+    task.monthWeeks.some((week) => week > 0)
+  ));
+  if (!hasAnyActivity) {
+    return { streak: null, attention: null, close: null };
+  }
+
+  const streak = [...tasks].filter((task) => task.streakDays > 0).sort((a, b) => b.streakDays - a.streakDays)[0] ?? null;
+  const attention = [...tasks].filter((task) => task.monthlyCount > 0).sort((a, b) => a.monthlyCount - b.monthlyCount)[0] ?? null;
   const close =
     [...tasks]
-      .filter((task) => task.id !== streak.id && task.id !== attention.id)
+      .filter((task) => task.id !== streak?.id && task.id !== attention?.id)
       .filter((task) => task.weeklyDone > 0 && task.weeklyDone < task.weeklyGoal)
-      .sort((a, b) => b.weeklyDone / b.weeklyGoal - a.weeklyDone / a.weeklyGoal)[0] ??
-    tasks.find((task) => task.id !== streak.id && task.id !== attention.id) ??
-    tasks.find((task) => task.id !== streak.id) ??
-    FALLBACK_TASKS[2];
+      .sort((a, b) => b.weeklyDone / b.weeklyGoal - a.weeklyDone / a.weeklyGoal)[0] ?? null;
   return { streak, attention, close };
 }
 
 function buildEmotionSummary(
   data: EmotionSnapshot[] | null | undefined,
-  allowFallback = true,
   language: 'es' | 'en',
   t: (key: string, params?: Record<string, string | number>) => string,
 ) {
-  const source = (data && data.length ? data : allowFallback ? FALLBACK_EMOTIONS : [])
+  const source = (data ?? [])
     .slice()
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(-15);
@@ -972,19 +964,21 @@ function buildEmotionSummary(
   days.forEach((day) => counts.set(day.label, (counts.get(day.label) ?? 0) + 1));
   const fallbackLabel = language === 'es' ? 'Sin registros' : 'No records';
   const label = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? fallbackLabel;
-  return { label, color: label === fallbackLabel ? 'var(--mp-track-strong)' : resolveEmotionColor(label), days };
+  return {
+    hasData: days.length > 0,
+    emptyLabel: t('mobilePremium.dashboard.emptyDailyQuest'),
+    label,
+    color: label === fallbackLabel ? 'var(--mp-track-strong)' : resolveEmotionColor(label),
+    days,
+  };
 }
 
 function buildBalanceSummary(
   traits: TraitXpEntry[] | null | undefined,
-  allowFallback = true,
   t: (key: string, params?: Record<string, string | number>) => string,
 ) {
-  const values = allowFallback ? { body: 1757, mind: 1102, soul: 1106 } : { body: 0, mind: 0, soul: 0 };
+  const values = { body: 0, mind: 0, soul: 0 };
   if (traits?.length) {
-    values.body = 0;
-    values.mind = 0;
-    values.soul = 0;
     traits.forEach((trait) => {
       const pillar = (trait.pillar ?? '').toLowerCase();
       if (pillar.includes('body')) values.body += trait.xp;
@@ -992,39 +986,40 @@ function buildBalanceSummary(
       else if (pillar.includes('soul')) values.soul += trait.xp;
     });
   }
-  const total = Math.max(values.body + values.mind + values.soul, 1);
+  const rawTotal = values.body + values.mind + values.soul;
+  const total = Math.max(rawTotal, 1);
   const body = { code: 'body' as const, label: t('mobilePremium.pillar.body'), value: values.body, percent: Math.round((values.body / total) * 100) };
   const mind = { code: 'mind' as const, label: t('mobilePremium.pillar.mind'), value: values.mind, percent: Math.round((values.mind / total) * 100) };
   const soul = { code: 'soul' as const, label: t('mobilePremium.pillar.soul'), value: values.soul, percent: Math.max(0, 100 - body.percent - mind.percent) };
   const dominant = [body, mind, soul].sort((a, b) => b.value - a.value)[0];
-  return { body, mind, soul, dominant };
+  return { hasData: rawTotal > 0, body, mind, soul, dominant };
 }
 
 function buildEnergySummary(
   data: Awaited<ReturnType<typeof getUserDailyEnergy>> | null | undefined,
   series: EnergyTimeseriesPoint[] | null | undefined,
-  allowFallback = true,
   t: (key: string, params?: Record<string, string | number>) => string,
 ) {
   const hasRealData = Boolean(data);
   const normalizedSeries = normalizeEnergySeries(series);
   const hasMatureSeries = normalizedSeries.length >= 7;
-  const hasHistory = hasRealData ? hasMatureSeries : allowFallback;
+  const hasHistory = hasRealData ? hasMatureSeries : false;
   const trend = data?.trend?.pillars;
-  const points = hasRealData ? normalizedSeries : allowFallback ? FALLBACK_ENERGY_SERIES.slice(-7) : [];
+  const points = hasRealData ? normalizedSeries : [];
   const latestSeriesPoint = points.at(-1) ?? null;
-  const bodyPercent = latestSeriesPoint ? latestSeriesPoint.Body : hasRealData ? data?.hp_pct : allowFallback ? 74 : 0;
-  const soulPercent = latestSeriesPoint ? latestSeriesPoint.Soul : hasRealData ? data?.mood_pct : allowFallback ? 56 : 0;
-  const mindPercent = latestSeriesPoint ? latestSeriesPoint.Mind : hasRealData ? data?.focus_pct : allowFallback ? 42 : 0;
+  const bodyPercent = latestSeriesPoint ? latestSeriesPoint.Body : hasRealData ? data?.hp_pct : 0;
+  const soulPercent = latestSeriesPoint ? latestSeriesPoint.Soul : hasRealData ? data?.mood_pct : 0;
+  const mindPercent = latestSeriesPoint ? latestSeriesPoint.Mind : hasRealData ? data?.focus_pct : 0;
 
   return {
+    hasData: hasRealData,
     hasHistory,
     metrics: [
       {
         label: 'HP',
         pillar: t('mobilePremium.pillar.body'),
         percent: clampEnergyLevel(bodyPercent),
-        deltaPct: hasHistory ? (hasRealData ? trend?.Body.deltaPct ?? null : -2.8) : null,
+        deltaPct: hasHistory ? trend?.Body.deltaPct ?? null : null,
         points: buildEnergyPoints(points, 'Body', bodyPercent),
         color: 'var(--mp-body)',
       },
@@ -1032,7 +1027,7 @@ function buildEnergySummary(
         label: 'Mood',
         pillar: t('mobilePremium.pillar.soul'),
         percent: clampEnergyLevel(soulPercent),
-        deltaPct: hasHistory ? (hasRealData ? trend?.Soul.deltaPct ?? null : 53.7) : null,
+        deltaPct: hasHistory ? trend?.Soul.deltaPct ?? null : null,
         points: buildEnergyPoints(points, 'Soul', soulPercent),
         color: '#f5c56b',
       },
@@ -1040,7 +1035,7 @@ function buildEnergySummary(
         label: 'Focus',
         pillar: t('mobilePremium.pillar.mind'),
         percent: clampEnergyLevel(mindPercent),
-        deltaPct: hasHistory ? (hasRealData ? trend?.Mind.deltaPct ?? null : -18.2) : null,
+        deltaPct: hasHistory ? trend?.Mind.deltaPct ?? null : null,
         points: buildEnergyPoints(points, 'Mind', mindPercent),
         color: '#a78bfa',
       },

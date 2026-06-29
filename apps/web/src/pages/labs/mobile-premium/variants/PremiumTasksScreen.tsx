@@ -5,6 +5,14 @@ import { useCreateTask } from '../../../../hooks/useUserTasks';
 import { QUICK_START_TASKS, type QuickStartTask } from '../../../../onboarding/quickStart';
 import { usePostLoginLanguage } from '../../../../i18n/postLoginLanguage';
 import {
+  fetchCatalogDifficulties,
+  fetchCatalogPillars,
+  fetchCatalogTraits,
+  type Difficulty,
+  type Pillar,
+  type Trait,
+} from '../../../../lib/api/catalogs';
+import {
   getUserStreakPanel,
   type StreakPanelPillar,
   type StreakPanelTask,
@@ -50,7 +58,9 @@ type TaskDraft = {
 
 type SuggestedTask = TaskDraft & {
   id: string;
+  difficultyCode: string;
   reason: string;
+  traitCode: string;
 };
 
 const QUICK_START_SELECTED_MOCK = new Set([
@@ -190,6 +200,27 @@ export function PremiumTasksScreen({
   const localTasks = addedTasks ?? internalAddedTasks;
   const weeklyGoal = resolveWeeklyGoal(gameMode, weeklyTarget);
   const normalizedMode = normalizeGameModeValue(gameMode) ?? 'Flow';
+  const catalogsRequest = useRequest(
+    async () => {
+      const [pillars, difficulties] = await Promise.all([
+        fetchCatalogPillars(),
+        fetchCatalogDifficulties(),
+      ]);
+      const traitsByPillar = await Promise.all(
+        pillars.map(async (pillar) => ({
+          pillar,
+          traits: await fetchCatalogTraits(pillar.id),
+        })),
+      );
+      return {
+        difficulties,
+        pillars,
+        traits: traitsByPillar.flatMap((entry) => entry.traits),
+      };
+    },
+    [],
+    { enabled: Boolean(backendUserId) },
+  );
   const { data } = useRequest(
     async () => {
       if (!backendUserId) return null;
@@ -233,13 +264,17 @@ export function PremiumTasksScreen({
     if (backendUserId) {
       try {
         const persisted = await Promise.all(
-          suggestions.map(async (suggestion) => ({
-            suggestion,
-            task: await createTaskMutation.createTask(backendUserId, {
-              title: suggestion.name,
-              isActive: true,
-            }),
-          })),
+          suggestions.map(async (suggestion) => {
+            const payload = buildSuggestedTaskCreatePayload(suggestion, catalogsRequest.data);
+            if (!payload) {
+              throw new Error(language === 'es' ? 'No se pudo resolver la categoría de la tarea.' : 'Could not resolve the task category.');
+            }
+
+            return {
+              suggestion,
+              task: await createTaskMutation.createTask(backendUserId, payload),
+            };
+          }),
         );
         created = persisted.map(({ suggestion, task }) => buildTaskRowFromUserTask(task, suggestion, weeklyGoal));
       } catch (error) {
@@ -829,11 +864,13 @@ function resolveTaskPillar(value: string | null, fallback: StreakPanelPillar): S
 function buildQuickStartSuggestion(pillar: StreakPanelPillar, task: QuickStartTask): SuggestedTask {
   return {
     id: `quickstart-${pillar}-${task.id}`,
+    difficultyCode: resolveQuickStartDifficultyCode(pillar),
     name: resolveQuickStartTaskName(task),
     stat: formatQuickStartTrait(task.trait),
     pillar,
     difficultyLabel: resolveQuickStartDifficulty(pillar),
     reason: '',
+    traitCode: task.id.toUpperCase(),
   };
 }
 
@@ -910,6 +947,70 @@ function formatQuickStartTrait(value: string) {
 function resolveQuickStartDifficulty(pillar: StreakPanelPillar): TaskDraft['difficultyLabel'] {
   if (pillar === 'Mind') return 'Media';
   return 'Fácil';
+}
+
+function resolveQuickStartDifficultyCode(pillar: StreakPanelPillar): string {
+  if (pillar === 'Mind') return 'Medium';
+  return 'Easy';
+}
+
+function normalizeCatalogCode(value: string | null | undefined): string {
+  return (value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toUpperCase();
+}
+
+function resolveSuggestedPillarId(pillars: Pillar[], pillar: StreakPanelPillar): string | null {
+  const expectedCode = pillar.toUpperCase();
+  return pillars.find((candidate) => normalizeCatalogCode(candidate.code) === expectedCode)?.id ?? null;
+}
+
+function resolveSuggestedDifficultyId(difficulties: Difficulty[], suggestion: SuggestedTask): string | null {
+  const expectedCode = normalizeCatalogCode(suggestion.difficultyCode);
+  const expectedLabel = normalizeCatalogCode(suggestion.difficultyLabel);
+  return difficulties.find((difficulty) => {
+    const code = normalizeCatalogCode(difficulty.code);
+    const name = normalizeCatalogCode(difficulty.name);
+    return code === expectedCode || name === expectedLabel;
+  })?.id ?? null;
+}
+
+function resolveSuggestedTraitId(traits: Trait[], suggestion: SuggestedTask, pillarId: string): string | null {
+  const expectedCode = normalizeCatalogCode(suggestion.traitCode);
+  return traits.find((trait) => (
+    trait.pillarId === pillarId && normalizeCatalogCode(trait.code) === expectedCode
+  ))?.id ?? null;
+}
+
+function buildSuggestedTaskCreatePayload(
+  suggestion: SuggestedTask,
+  catalogs: { difficulties: Difficulty[]; pillars: Pillar[]; traits: Trait[] } | null | undefined,
+) {
+  if (!catalogs) {
+    return null;
+  }
+
+  const pillarId = resolveSuggestedPillarId(catalogs.pillars, suggestion.pillar);
+  if (!pillarId) {
+    return null;
+  }
+
+  const traitId = resolveSuggestedTraitId(catalogs.traits, suggestion, pillarId);
+  const difficultyId = resolveSuggestedDifficultyId(catalogs.difficulties, suggestion);
+
+  if (!traitId || !difficultyId) {
+    return null;
+  }
+
+  return {
+    title: suggestion.name,
+    pillarId,
+    traitId,
+    difficultyId,
+    isActive: true,
+  };
 }
 
 function resolveWeeklyGoal(gameMode: string | null, weeklyTarget: number | null) {

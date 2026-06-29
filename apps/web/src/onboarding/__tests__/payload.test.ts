@@ -96,4 +96,63 @@ describe('buildPayload onboarding_path', () => {
 
     vi.unstubAllGlobals();
   });
+
+  it('uses canonical trait codes for quick_start even when browser language is English', () => {
+    vi.stubGlobal('window', {
+      localStorage: {
+        getItem: vi.fn().mockReturnValue('cid-456'),
+        setItem: vi.fn(),
+      },
+      navigator: {
+        language: 'en-US',
+        userAgent: 'Mozilla/5.0',
+      },
+      crypto: {
+        randomUUID: vi.fn().mockReturnValue('cid-456'),
+      },
+    });
+
+    const payload = buildPayload(
+      {
+        ...initialAnswers,
+        mode: 'EVOLVE',
+        email: 'english@quick.com',
+        user_id: 'user_3',
+        quickStart: {
+          selectedTasksByPillar: {
+            Body: ['SUENO', 'POSTURA'],
+            Mind: ['AUTOCONTROL', 'ORDEN'],
+            Soul: ['GRATITUD', 'AUTOESTIMA'],
+          },
+          editableTaskValues: {
+            'Body-SUENO': '7',
+          },
+          selectedModerations: [],
+        },
+      },
+      { Body: 6, Mind: 6, Soul: 6, total: 18 },
+      'quick_start',
+    );
+
+    const traitCodes = payload.data.quick_start?.manual_task_candidates.map((candidate) => candidate.trait_code);
+
+    expect(traitCodes).toEqual([
+      'SUENO',
+      'POSTURA',
+      'AUTOCONTROL',
+      'ORDEN',
+      'GRATITUD',
+      'AUTOESTIMA',
+    ]);
+    expect(traitCodes).not.toContain('SLEEP');
+    expect(traitCodes).not.toContain('POSTURE');
+    expect(traitCodes).not.toContain('GRATITUDE');
+    expect(payload.data.quick_start?.manual_task_candidates[0]).toEqual(expect.objectContaining({
+      task: 'Sleep at least',
+      trait_code: 'SUENO',
+      input_value: '7',
+    }));
+
+    vi.unstubAllGlobals();
+  });
 });

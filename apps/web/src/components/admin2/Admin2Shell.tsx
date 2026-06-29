@@ -6,6 +6,7 @@ import { NotificationsPage } from '../../pages/admin2/NotificationsPage';
 import { MarketingPage } from '../../pages/admin2/MarketingPage';
 import { AiTaskgenPage } from '../../pages/admin2/AiTaskgenPage';
 import { AdvancedPage } from '../../pages/admin2/AdvancedPage';
+import { MarketingPage } from '../../pages/admin2/MarketingPage';
 import { TaskgenUserPage } from '../../pages/admin/TaskgenUserPage';
 import { useAdmin2Theme } from './Admin2ThemeProvider';
 
