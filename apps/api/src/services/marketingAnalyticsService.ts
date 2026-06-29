@@ -39,6 +39,31 @@ type GscMetricRow = {
   position: number;
 };
 
+type GoogleMetricValue = {
+  value?: unknown;
+};
+
+type Ga4ApiRow = {
+  dimensionValues?: GoogleMetricValue[];
+  metricValues?: GoogleMetricValue[];
+};
+
+type Ga4ApiResponse = {
+  rows?: Ga4ApiRow[];
+};
+
+type GscApiRow = {
+  keys?: unknown[];
+  clicks?: unknown;
+  impressions?: unknown;
+  ctr?: unknown;
+  position?: unknown;
+};
+
+type GscApiResponse = {
+  rows?: GscApiRow[];
+};
+
 let cachedGoogleToken: GoogleAccessToken | null = null;
 let schemaReady: Promise<void> | null = null;
 
@@ -371,18 +396,14 @@ async function fetchGa4Rows(
     }),
   });
 
-  const body = await response.json().catch(() => null);
+  const body = await response.json().catch(() => null) as Ga4ApiResponse | null;
   if (!response.ok) {
     throw new HttpError(response.status, 'ga4_request_failed', 'GA4 Data API request failed.', body);
   }
 
-  return (Array.isArray(body?.rows) ? body.rows : []).map((row: any) => ({
-    dimensions: Array.isArray(row.dimensionValues)
-      ? row.dimensionValues.map((value: any) => String(value?.value ?? ''))
-      : [],
-    metrics: Array.isArray(row.metricValues)
-      ? row.metricValues.map((value: any) => Number(value?.value ?? 0))
-      : [],
+  return (Array.isArray(body?.rows) ? body.rows : []).map((row) => ({
+    dimensions: readGoogleMetricValues(row.dimensionValues).map((value) => String(value ?? '')),
+    metrics: readGoogleMetricValues(row.metricValues).map((value) => Number(value ?? 0)),
   }));
 }
 
@@ -404,18 +425,22 @@ async function fetchGscRows(siteUrl: string, accessToken: string, dateRange: Dat
     },
   );
 
-  const body = await response.json().catch(() => null);
+  const body = await response.json().catch(() => null) as GscApiResponse | null;
   if (!response.ok) {
     throw new HttpError(response.status, 'gsc_request_failed', 'Search Console API request failed.', body);
   }
 
-  return (Array.isArray(body?.rows) ? body.rows : []).map((row: any) => ({
+  return (Array.isArray(body?.rows) ? body.rows : []).map((row) => ({
     keys: Array.isArray(row.keys) ? row.keys.map((value: unknown) => String(value ?? '')) : [],
     clicks: Number(row.clicks ?? 0),
     impressions: Number(row.impressions ?? 0),
     ctr: Number(row.ctr ?? 0),
     position: Number(row.position ?? 0),
   }));
+}
+
+function readGoogleMetricValues(values: GoogleMetricValue[] | undefined) {
+  return Array.isArray(values) ? values.map((value) => value.value) : [];
 }
 
 async function getGoogleAccessToken(serviceAccount: GoogleServiceAccount) {
