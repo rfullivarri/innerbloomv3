@@ -18,7 +18,7 @@ const SECTIONS = [
   },
   {
     title: 'Marketing',
-    description: 'Editor operativo para posts, captions, calendario, métricas e imágenes de campaña.',
+    description: 'Aprobación mensual de posts, estrategia, fuentes de datos y export CSV para Metricool.',
     to: '/admin/marketing',
   },
   {

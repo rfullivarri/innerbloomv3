@@ -1,1142 +1,666 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Clock3,
-  FileDown,
-  ImagePlus,
-  Pencil,
-  RotateCcw,
-  RefreshCcwDot,
-  Trash2,
-  UploadCloud,
-  WandSparkles,
-  XCircle,
-} from '../../lib/lucide-react';
-import {
-  marketingCampaignSeeds,
-  type MarketingAsset,
-  type MarketingCampaignSeed,
-  type MarketingPostSeed,
-  type MarketingPostStatus,
-} from '../../content/marketingAdminSeed';
-import { downloadMetricoolCalendarCsv } from '../../lib/marketingMetricoolCsv';
-import {
-  buildMarketingAssetKey,
-  fetchMarketingR2Status,
-  isMarketingAssetStoredOnR2,
-  uploadMarketingAssetsToR2,
-  type MarketingR2Status,
-} from '../../lib/marketingR2Assets';
-import {
-  fetchMarketingAnalyticsInsights,
-  syncMarketingAnalytics,
-  updateMarketingAnalyticsSettings,
-  type MarketingAnalyticsInsights,
-  type MarketingAnalyticsSettings,
-} from '../../lib/marketingAnalytics';
+  parseStrategyMemoryMarkdown,
+  type StrategyMemoryEntry,
+} from '../../lib/marketingStrategyMemory';
+import type { ReactNode } from 'react';
 
-const STATUS_LABELS: Record<MarketingPostStatus, string> = {
+type MarketingTab = 'posts' | 'insights' | 'sources';
+type PostStatus = 'draft' | 'review' | 'approved' | 'rejected';
+
+type MarketingAsset = {
+  file: string;
+  title: string;
+  type: string;
+};
+
+type MarketingPost = {
+  id: string;
+  date: string;
+  platform: string;
+  format: string;
+  status: PostStatus;
+  hook: string;
+  caption: string;
+  hypothesis: string;
+  trackingUrl: string;
+  assets: MarketingAsset[];
+  selectedAssets: string[];
+};
+
+const ASSET_BASE = '/marketing/campaigns/2026-06-mvp/assets';
+
+const STRATEGY_MEMORY_MARKDOWN = `# Innerbloom Marketing Strategy Memory
+
+## Strategic Changelog
+
+<!-- STRATEGY_MEMORY_ENTRIES:START -->
+
+### 2026-06-29 | 2026-06 MVP baseline
+
+- **Period analyzed:** 2026-06-01 -> 2026-06-28
+
+- **Insights detected:** Instagram / social is the top acquisition source after hygiene filters; product dashboard pages are receiving more views than the landing page; Search Console has very low click volume and should not drive messaging decisions yet
+
+- **Hypotheses:** Adaptive rhythm and real-week positioning can differentiate Innerbloom from rigid streak-based habit apps; product screenshots should make the promise more concrete
+
+- **Decisions taken:** Keep the 2026-06 MVP campaign as a small validation loop; export only approved posts to Metricool; separate post approval work from analytics and source configuration
+
+- **Changes vs previous strategy:** Move from one long operational board to a tabbed monthly workflow; use Cost of Inaction instead of Cost of Safe in UI copy
+
+- **What worked:** Clear anti-perfect-days hook; explicit tracking URLs per post; reusable campaign assets
+
+- **What did not work:** Ambiguous internal shorthand such as Cost of Safe; stacking GA4 and Search Console in one low-hierarchy column
+
+- **Learnings:** Keep post operations, strategic interpretation, and data source health in separate views; every post should map to a measurable funnel event
+
+- **Next experiments:** Test dashboard walkthrough carousel; compare product-mechanism hooks against general habit advice; add Metricool results after publishing
+
+- **Recommendations for future content proposals:** Tie each hook to one user pain and one product mechanism; keep data source status visible before generating proposals; preserve strategy memory before monthly regeneration
+
+<!-- STRATEGY_MEMORY_ENTRIES:END -->`;
+
+const INITIAL_POSTS: MarketingPost[] = [
+  {
+    id: 'post_001',
+    date: '2026-06-30 19:30',
+    platform: 'Instagram',
+    format: 'Carousel',
+    status: 'approved',
+    hook: 'Your habits should adapt to your real life.',
+    caption:
+      'Most habit apps assume every day is the same. Then a busy week hits, your streak breaks, and the whole plan starts feeling useless. Innerbloom is built around adaptive rhythm: lower the intensity when life gets heavy, keep visible progress, recalibrate instead of starting over, and build a Journey that can survive real weeks.',
+    hypothesis:
+      'People who have failed with streak-based apps will respond to adaptive rhythm and real weeks.',
+    trackingUrl:
+      'https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib20_mvp&utm_content=post_001&ib_post=001',
+    assets: [
+      { file: 'post-001-carousel-01.png', title: 'Your habits should adapt to your real life.', type: 'image' },
+      { file: 'post-001-carousel-02.png', title: 'Most habit apps assume every day is the same.', type: 'split' },
+      { file: 'post-001-carousel-03.png', title: 'Lower the intensity. Keep the direction.', type: 'image' },
+      { file: 'post-001-carousel-04.png', title: 'Build a Journey that can survive real weeks.', type: 'brand' },
+    ],
+    selectedAssets: [
+      'post-001-carousel-01.png',
+      'post-001-carousel-02.png',
+      'post-001-carousel-03.png',
+      'post-001-carousel-04.png',
+    ],
+  },
+  {
+    id: 'post_002',
+    date: '2026-07-02 22:30',
+    platform: 'Instagram',
+    format: 'Static',
+    status: 'approved',
+    hook: 'If your plan only works on perfect days, it is not a plan.',
+    caption:
+      'Most people do not fail habits because they are lazy. They fail because the system expects the same output from them every day, even when their energy, stress, sleep, and schedule change. Innerbloom is an adaptive habit app. It helps you keep direction without forcing the same rhythm all the time.',
+    hypothesis:
+      'A direct anti-perfect-days message will perform better for people tired of rigid productivity systems.',
+    trackingUrl:
+      'https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib20_mvp&utm_content=post_002&ib_post=002',
+    assets: [
+      { file: 'post-002-static-pain-proposal.png', title: 'If your plan only works on perfect days, it is not a plan.', type: 'static' },
+    ],
+    selectedAssets: ['post-002-static-pain-proposal.png'],
+  },
+];
+
+const TABS: Array<{ id: MarketingTab; label: string; description: string }> = [
+  { id: 'posts', label: 'Posts', description: 'Propuestas, previews, edición, aprobación, imágenes y CSV.' },
+  { id: 'insights', label: 'Insights y estrategia', description: 'Métricas, análisis, recomendaciones y memoria estratégica.' },
+  { id: 'sources', label: 'Data Sources', description: 'GA4, Search Console, sincronización, errores y aporte de datos.' },
+];
+
+const STATUS_LABELS: Record<PostStatus, string> = {
   draft: 'Draft',
-  needs_review: 'Needs review',
+  review: 'Needs review',
   approved: 'Approved',
+  rejected: 'Rejected',
 };
 
-const STORAGE_PREFIX = 'innerbloom:admin-marketing:posts:';
-
-const iconButtonBase =
-  'inline-flex h-9 w-9 items-center justify-center rounded-lg border text-[color:var(--admin-text)] transition hover:border-[color:var(--admin-accent)] hover:bg-[color:var(--admin-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--admin-accent)] disabled:cursor-not-allowed disabled:opacity-35';
-
-const iconButtonVariants = {
-  ghost: 'border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)]',
-  primary: 'border-[color:var(--admin-btn-primary-border)] bg-[color:var(--admin-btn-primary-bg)] text-[color:var(--admin-btn-primary-text)] hover:bg-[color:var(--admin-btn-primary-bg)]',
-  success: 'border-[color:var(--admin-btn-success-border)] bg-[color:var(--admin-btn-success-bg)] text-[color:var(--admin-btn-success-text)]',
-  danger: 'border-[color:var(--admin-btn-danger-border)] bg-[color:var(--admin-btn-danger-bg)] text-[color:var(--admin-btn-danger-text)]',
-  warning: 'border-amber-500/50 bg-amber-500/15 text-amber-200',
-} as const;
-
-type IconButtonVariant = keyof typeof iconButtonVariants;
-
-const DEFAULT_PAGE_TOTALS = {
-  activeUsers: 0,
-  sessions: 0,
-  pageViews: 0,
-  events: 0,
+const STATUS_CLASSES: Record<PostStatus, string> = {
+  draft: 'border-slate-400/40 bg-slate-500/10 text-[color:var(--admin-muted)]',
+  review: 'border-amber-400/50 bg-amber-500/10 text-[color:var(--admin-text)]',
+  approved: 'border-emerald-400/50 bg-emerald-500/10 text-[color:var(--admin-text)]',
+  rejected: 'border-rose-400/50 bg-rose-500/10 text-[color:var(--admin-text)]',
 };
 
-function statusClass(status: MarketingPostStatus) {
-  if (status === 'approved') {
-    return 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200';
-  }
+const csvEscape = (value: string) => `"${value.replace(/"/g, '""')}"`;
 
-  if (status === 'needs_review') {
-    return 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-200';
-  }
+function buildMetricoolCsv(posts: MarketingPost[]) {
+  const rows = [
+    ['post_id', 'platform', 'format', 'status', 'asset_files', 'caption_file_or_source', 'tracking_url', 'notes'],
+    ...posts
+      .filter((post) => post.status === 'approved')
+      .map((post) => [
+        post.id,
+        post.platform.toLowerCase(),
+        post.format.toLowerCase(),
+        'ready',
+        post.selectedAssets.map((asset) => `assets/${asset}`).join('; '),
+        'content-plan.md',
+        post.trackingUrl,
+        post.format === 'Carousel' ? 'Upload as carousel' : 'Upload as single image',
+      ]),
+  ];
 
-  return 'border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] text-[color:var(--admin-muted)]';
-}
-
-function IconButton({
-  label,
-  variant = 'ghost',
-  disabled,
-  onClick,
-  children,
-}: {
-  label: string;
-  variant?: IconButtonVariant;
-  disabled?: boolean;
-  onClick?: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      disabled={disabled}
-      onClick={onClick}
-      className={`${iconButtonBase} ${iconButtonVariants[variant]}`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function IconLabel({
-  label,
-  variant = 'ghost',
-  children,
-}: {
-  label: string;
-  variant?: IconButtonVariant;
-  children: ReactNode;
-}) {
-  return (
-    <label
-      aria-label={label}
-      title={label}
-      className={`${iconButtonBase} ${iconButtonVariants[variant]} cursor-pointer`}
-    >
-      {children}
-    </label>
-  );
-}
-
-function PostCard({
-  post,
-  expanded,
-  editing,
-  onToggle,
-  onEditToggle,
-  onPostChange,
-  onStatusChange,
-}: {
-  post: MarketingPostSeed;
-  expanded: boolean;
-  editing: boolean;
-  onToggle: (postId: string) => void;
-  onEditToggle: (postId: string) => void;
-  onPostChange: (postId: string, updater: (post: MarketingPostSeed) => MarketingPostSeed) => void;
-  onStatusChange: (postId: string, status: MarketingPostStatus) => void;
-}) {
-  const updateField = <Key extends keyof MarketingPostSeed>(key: Key, value: MarketingPostSeed[Key]) => {
-    onPostChange(post.id, (currentPost) => ({ ...currentPost, [key]: value }));
-  };
-
-  const updateAsset = (assetIndex: number, updater: (asset: MarketingAsset) => MarketingAsset) => {
-    onPostChange(post.id, (currentPost) => ({
-      ...currentPost,
-      assets: currentPost.assets.map((asset, index) => (index === assetIndex ? updater(asset) : asset)),
-    }));
-  };
-
-  const removeAsset = (assetIndex: number) => {
-    onPostChange(post.id, (currentPost) => ({
-      ...currentPost,
-      assets: currentPost.assets.filter((_, index) => index !== assetIndex),
-    }));
-  };
-
-  const moveAsset = (assetIndex: number, direction: -1 | 1) => {
-    onPostChange(post.id, (currentPost) => {
-      const nextIndex = assetIndex + direction;
-      if (nextIndex < 0 || nextIndex >= currentPost.assets.length) {
-        return currentPost;
-      }
-
-      const nextAssets = [...currentPost.assets];
-      const [asset] = nextAssets.splice(assetIndex, 1);
-      nextAssets.splice(nextIndex, 0, asset);
-      return { ...currentPost, assets: nextAssets };
-    });
-  };
-
-  const addAssets = async (files: FileList | null) => {
-    if (!files?.length) {
-      return;
-    }
-
-    const assets = await Promise.all(Array.from(files).map(fileToMarketingAsset));
-    onPostChange(post.id, (currentPost) => ({
-      ...currentPost,
-      assets: [...currentPost.assets, ...assets],
-    }));
-  };
-
-  return (
-    <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)]">
-      <div className="flex w-full flex-wrap items-center justify-between gap-3 border-b border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-4">
-        <div className="grid min-w-0 flex-1 gap-1 sm:grid-cols-[9rem_10rem_minmax(0,1fr)] sm:items-center">
-          <p className="text-sm font-semibold text-[color:var(--admin-text)]">
-            {post.scheduledDate} {post.scheduledTime.slice(0, 5)}
-          </p>
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">
-            {post.platform} / {post.format}
-          </p>
-          <h3 className="min-w-0 truncate text-sm font-semibold tracking-tight text-[color:var(--admin-text)]">
-            {post.assets[0]?.title ?? post.id}
-          </h3>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass(post.status)}`}>
-            {STATUS_LABELS[post.status]}
-          </span>
-          <IconButton label={editing ? 'Close edit' : 'Edit post'} variant={editing ? 'primary' : 'ghost'} onClick={() => onEditToggle(post.id)}>
-            <Pencil size={17} />
-          </IconButton>
-          <IconButton label={expanded ? 'Collapse post' : 'Expand post'} onClick={() => onToggle(post.id)}>
-            {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-          </IconButton>
-        </div>
-      </div>
-
-      {expanded ? (
-        <div className="p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Assets</p>
-            {editing ? (
-              <IconLabel label="Add image" variant="primary">
-                <ImagePlus size={18} />
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="sr-only"
-                  onChange={(event) => {
-                    void addAssets(event.currentTarget.files);
-                    event.currentTarget.value = '';
-                  }}
-                />
-              </IconLabel>
-            ) : null}
-          </div>
-
-          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {post.assets.map((asset, index) => (
-              <figure
-                key={`${asset.file}-${index}`}
-                className="group overflow-hidden rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)]"
-              >
-                <div className="relative aspect-square bg-[color:var(--admin-bg)]">
-                  <img
-                    src={asset.url}
-                    alt={asset.title}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                  {editing ? (
-                    <div className="absolute right-2 top-2 flex items-center gap-1 rounded-xl border border-white/15 bg-slate-950/70 p-1 shadow-lg backdrop-blur">
-                      <IconButton
-                        label="Move image left"
-                        disabled={index === 0}
-                        onClick={() => moveAsset(index, -1)}
-                      >
-                        <ChevronUp size={16} className="-rotate-90" />
-                      </IconButton>
-                      <IconButton
-                        label="Move image right"
-                        disabled={index === post.assets.length - 1}
-                        onClick={() => moveAsset(index, 1)}
-                      >
-                        <ChevronDown size={16} className="-rotate-90" />
-                      </IconButton>
-                      <IconButton label="Delete image" variant="danger" onClick={() => removeAsset(index)}>
-                        <Trash2 size={16} />
-                      </IconButton>
-                    </div>
-                  ) : null}
-                </div>
-                <figcaption className="space-y-2 p-3">
-                  <input
-                    value={asset.title}
-                    disabled={!editing}
-                    onChange={(event) => updateAsset(index, (currentAsset) => ({ ...currentAsset, title: event.target.value }))}
-                    className="w-full rounded-lg border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-2 py-1 text-sm font-semibold text-[color:var(--admin-text)] disabled:border-transparent disabled:bg-transparent disabled:p-0"
-                  />
-                  <p className="truncate font-mono text-xs text-[color:var(--admin-muted)]">{asset.file}</p>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-
-          <div className="mt-4 grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Caption</p>
-              {editing ? (
-                <textarea
-                  value={post.caption}
-                  rows={16}
-                  onChange={(event) => updateField('caption', event.target.value)}
-                  className="mt-2 min-h-72 w-full resize-y rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 font-mono text-xs leading-relaxed text-[color:var(--admin-text)]"
-                />
-              ) : (
-                <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-xs leading-relaxed text-[color:var(--admin-text)]">
-                  {post.caption}
-                </pre>
-              )}
-            </div>
-            <div className="space-y-3 text-sm">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Schedule</p>
-                {editing ? (
-                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                    <input
-                      type="date"
-                      value={post.scheduledDate}
-                      onChange={(event) => updateField('scheduledDate', event.target.value)}
-                      className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-[color:var(--admin-text)]"
-                    />
-                    <input
-                      type="time"
-                      value={post.scheduledTime.slice(0, 5)}
-                      onChange={(event) => updateField('scheduledTime', `${event.target.value}:00`)}
-                      className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-[color:var(--admin-text)]"
-                    />
-                  </div>
-                ) : (
-                  <p className="mt-1 font-medium">{post.scheduledDate} / {post.scheduledTime}</p>
-                )}
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Post type</p>
-                {editing ? (
-                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                    <select
-                      value={post.platform}
-                      onChange={(event) => updateField('platform', event.target.value as MarketingPostSeed['platform'])}
-                      className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-[color:var(--admin-text)]"
-                    >
-                      <option value="instagram">Instagram</option>
-                    </select>
-                    <select
-                      value={post.format}
-                      onChange={(event) => updateField('format', event.target.value as MarketingPostSeed['format'])}
-                      className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-[color:var(--admin-text)]"
-                    >
-                      <option value="carousel">Carousel</option>
-                      <option value="static">Static</option>
-                    </select>
-                  </div>
-                ) : (
-                  <p className="mt-1 font-medium">{post.platform} / {post.format}</p>
-                )}
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Hypothesis</p>
-                {editing ? (
-                  <textarea
-                    value={post.hypothesis}
-                    rows={3}
-                    onChange={(event) => updateField('hypothesis', event.target.value)}
-                    className="mt-2 w-full resize-y rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-[color:var(--admin-text)]"
-                  />
-                ) : (
-                  <p className="mt-1 text-[color:var(--admin-muted)]">{post.hypothesis}</p>
-                )}
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Metric</p>
-                {editing ? (
-                  <textarea
-                    value={post.metric}
-                    rows={3}
-                    onChange={(event) => updateField('metric', event.target.value)}
-                    className="mt-2 w-full resize-y rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-[color:var(--admin-text)]"
-                  />
-                ) : (
-                  <p className="mt-1 text-[color:var(--admin-muted)]">{post.metric}</p>
-                )}
-              </div>
-              {editing ? (
-                <label className="block">
-                  <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">
-                    Tracking URL
-                  </span>
-                  <input
-                    value={post.trackingUrl}
-                    onChange={(event) => updateField('trackingUrl', event.target.value)}
-                    className="mt-2 w-full rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-xs text-[color:var(--admin-text)]"
-                  />
-                </label>
-              ) : (
-                <a
-                  href={post.trackingUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block break-all text-xs font-semibold text-[color:var(--admin-accent)]"
-                >
-                  {post.trackingUrl}
-                </a>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--admin-border)] pt-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Status</span>
-              <div className="flex items-center gap-1 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-1">
-                <IconButton label="Approve post" variant="success" onClick={() => onStatusChange(post.id, 'approved')}>
-                  <Check size={16} />
-                </IconButton>
-                <IconButton label="Mark needs review" variant="warning" onClick={() => onStatusChange(post.id, 'needs_review')}>
-                  <Clock3 size={16} />
-                </IconButton>
-                <IconButton label="Move to draft" onClick={() => onStatusChange(post.id, 'draft')}>
-                  <XCircle size={16} />
-                </IconButton>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-1">
-              <IconButton label="Regenerate copy" disabled>
-                <WandSparkles size={16} />
-              </IconButton>
-              <IconButton label="Regenerate image" disabled>
-                <ImagePlus size={16} />
-              </IconButton>
-            </div>
-          </div>
-        </div>
-      ) : null}
-    </article>
-  );
+  return rows.map((row) => row.map(csvEscape).join(',')).join('\n');
 }
 
 export function MarketingPage() {
-  const [selectedCampaignCode, setSelectedCampaignCode] = useState(marketingCampaignSeeds[0].campaignCode);
-  const selectedCampaign = useMemo(
-    () => marketingCampaignSeeds.find((campaign) => campaign.campaignCode === selectedCampaignCode) ?? marketingCampaignSeeds[0],
-    [selectedCampaignCode],
-  );
-  const [postCount, setPostCount] = useState(selectedCampaign.postCount);
-  const [posts, setPosts] = useState(() => readStoredCampaignPosts(selectedCampaign));
-  const [expandedPostIds, setExpandedPostIds] = useState<Set<string>>(() => new Set());
-  const [editingPostId, setEditingPostId] = useState<string | null>(null);
-  const [r2Status, setR2Status] = useState<MarketingR2Status | null>(null);
-  const [r2StatusError, setR2StatusError] = useState<string | null>(null);
-  const [isUploadingAssets, setIsUploadingAssets] = useState(false);
-  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
-  const [analyticsInsights, setAnalyticsInsights] = useState<MarketingAnalyticsInsights | null>(null);
-  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
-  const [analyticsMessage, setAnalyticsMessage] = useState<string | null>(null);
-  const [isSyncingAnalytics, setIsSyncingAnalytics] = useState(false);
-  const [settingsDraft, setSettingsDraft] = useState<MarketingAnalyticsSettings | null>(null);
-  const [isSavingSettings, setIsSavingSettings] = useState(false);
-  const approvedPosts = useMemo(() => posts.filter((post) => post.status === 'approved'), [posts]);
-  const needsReviewCount = posts.filter((post) => post.status === 'needs_review').length;
-  const analyticsTotals = getAnalyticsTotals(analyticsInsights);
-  const analyticsMarketingTotals = analyticsInsights?.summary?.marketingTotals ?? DEFAULT_PAGE_TOTALS;
-  const analyticsProductTotals = analyticsInsights?.summary?.productTotals ?? DEFAULT_PAGE_TOTALS;
-  const registeredUsers = analyticsInsights?.registeredUsers ?? analyticsInsights?.summary?.registeredUsers ?? null;
-  const approvedAssetCount = approvedPosts.reduce((total, post) => total + post.assets.length, 0);
-  const r2ReadyAssetCount = approvedPosts.reduce(
-    (total, post) =>
-      total + post.assets.filter((asset) => isMarketingAssetStoredOnR2(asset.url, r2Status?.publicBaseUrl)).length,
-    0,
-  );
+  const [activeTab, setActiveTab] = useState<MarketingTab>('posts');
+  const [posts, setPosts] = useState<MarketingPost[]>(INITIAL_POSTS);
+  const [selectedPostId, setSelectedPostId] = useState(INITIAL_POSTS[0]?.id ?? '');
 
-  useEffect(() => {
-    setPostCount(selectedCampaign.postCount);
-    setPosts(readStoredCampaignPosts(selectedCampaign));
-    setExpandedPostIds(new Set());
-    setEditingPostId(null);
-    setUploadMessage(null);
-  }, [selectedCampaign]);
+  const selectedPost = posts.find((post) => post.id === selectedPostId) ?? posts[0];
+  const approvedCount = posts.filter((post) => post.status === 'approved').length;
+  const reviewCount = posts.filter((post) => post.status === 'review').length;
+  const selectedAssetCount = posts.reduce((total, post) => total + post.selectedAssets.length, 0);
 
-  useEffect(() => {
-    let cancelled = false;
+  const csvPreview = useMemo(() => buildMetricoolCsv(posts), [posts]);
 
-    fetchMarketingR2Status()
-      .then((status) => {
-        if (!cancelled) {
-          setR2Status(status);
-          setR2StatusError(null);
-        }
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          setR2Status(null);
-          setR2StatusError(error instanceof Error ? error.message : 'Unable to load R2 status.');
-        }
-      });
+  const updatePost = (postId: string, updater: (post: MarketingPost) => MarketingPost) => {
+    setPosts((current) => current.map((post) => (post.id === postId ? updater(post) : post)));
+  };
 
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    void loadAnalyticsInsights();
-  }, []);
-
-  async function loadAnalyticsInsights() {
-    try {
-      const nextInsights = await fetchMarketingAnalyticsInsights();
-      setAnalyticsInsights(nextInsights);
-      setSettingsDraft(nextInsights.settings);
-      setAnalyticsError(null);
-    } catch (error) {
-      setAnalyticsInsights(null);
-      setAnalyticsError(error instanceof Error ? error.message : 'Unable to load marketing analytics.');
-    }
-  }
-
-  function updateStatus(postId: string, status: MarketingPostStatus) {
-    updatePost(postId, (post) => ({ ...post, status }));
-  }
-
-  function updatePost(postId: string, updater: (post: MarketingPostSeed) => MarketingPostSeed) {
-    setPosts((currentPosts) => {
-      const nextPosts = currentPosts.map((post) => (post.id === postId ? updater(post) : post));
-      persistCampaignPosts(selectedCampaign.campaignCode, nextPosts);
-      return nextPosts;
-    });
-  }
-
-  function togglePost(postId: string) {
-    setExpandedPostIds((current) => {
-      const next = new Set(current);
-      if (next.has(postId)) {
-        next.delete(postId);
-      } else {
-        next.add(postId);
-      }
-      return next;
-    });
-  }
-
-  function togglePostEdit(postId: string) {
-    setEditingPostId((currentPostId) => (currentPostId === postId ? null : postId));
-    setExpandedPostIds((current) => new Set(current).add(postId));
-  }
-
-  function resetCampaignEdits() {
-    const nextPosts = cloneCampaignPosts(selectedCampaign);
-    setPosts(nextPosts);
-    setEditingPostId(null);
-    setExpandedPostIds(new Set());
-    window.localStorage.removeItem(storageKeyForCampaign(selectedCampaign.campaignCode));
-  }
-
-  function downloadApprovedCsv() {
-    downloadMetricoolCalendarCsv(approvedPosts);
-  }
-
-  async function uploadApprovedAssets() {
-    if (approvedPosts.length === 0) {
-      return;
-    }
-
-    setUploadMessage(null);
-
-    try {
-      const uploadInputs = approvedPosts.flatMap((post) =>
-        post.assets
-          .filter((asset) => !isMarketingAssetStoredOnR2(asset.url, r2Status?.publicBaseUrl))
-          .map((asset) => ({
-            asset,
-            campaignCode: selectedCampaign.campaignCode,
-            postId: post.id,
-          })),
-      );
-
-      if (uploadInputs.length === 0) {
-        setUploadMessage('All approved assets are already on R2.');
-        return;
-      }
-
-      setIsUploadingAssets(true);
-
-      const result = await uploadMarketingAssetsToR2(uploadInputs);
-      const uploadedByKey = new Map(result.assets.map((asset) => [asset.key, asset]));
-
-      setPosts((currentPosts) => {
-        const nextPosts = currentPosts.map((post) => ({
-          ...post,
-          assets: post.assets.map((asset) => {
-            const key = buildMarketingAssetKey({
-              campaignCode: selectedCampaign.campaignCode,
-              postId: post.id,
-              file: asset.file,
-            });
-            const uploaded = uploadedByKey.get(key);
-
-            return uploaded ? { ...asset, url: uploaded.url } : asset;
-          }),
-        }));
-
-        persistCampaignPosts(selectedCampaign.campaignCode, nextPosts);
-        return nextPosts;
-      });
-
-      setUploadMessage(`Uploaded ${result.assets.length} approved asset${result.assets.length === 1 ? '' : 's'} to R2.`);
-    } catch (error) {
-      setUploadMessage(error instanceof Error ? error.message : 'R2 upload failed.');
-    } finally {
-      setIsUploadingAssets(false);
-    }
-  }
-
-  async function runAnalyticsSync() {
-    setIsSyncingAnalytics(true);
-    setAnalyticsMessage(null);
-
-    try {
-      const result = await syncMarketingAnalytics();
-      setAnalyticsMessage(`Synced ${result.periodStart} to ${result.periodEnd}.`);
-      await loadAnalyticsInsights();
-    } catch (error) {
-      setAnalyticsMessage(error instanceof Error ? error.message : 'Marketing analytics sync failed.');
-    } finally {
-      setIsSyncingAnalytics(false);
-    }
-  }
-
-  async function saveAnalyticsSettings() {
-    if (!settingsDraft) {
-      return;
-    }
-
-    setIsSavingSettings(true);
-    setAnalyticsMessage(null);
-
-    try {
-      await updateMarketingAnalyticsSettings(settingsDraft);
-      setAnalyticsMessage('Saved analytics filters.');
-      await loadAnalyticsInsights();
-    } catch (error) {
-      setAnalyticsMessage(error instanceof Error ? error.message : 'Analytics filter save failed.');
-    } finally {
-      setIsSavingSettings(false);
-    }
-  }
+  const exportCsv = () => {
+    const blob = new Blob([csvPreview], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'metricool-upload.csv';
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-      <header className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">Marketing</p>
-        <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
+      <header className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5 md:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-3xl font-semibold tracking-tight">Monthly content approval board</h2>
-            <p className="mt-3 max-w-3xl text-sm text-[color:var(--admin-muted)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">Marketing</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">Monthly content approval board</h2>
+            <p className="mt-2 max-w-3xl text-sm text-[color:var(--admin-muted)]">
               Review generated posts, approve the ones that are ready, and export a Metricool CSV for the approved queue.
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="admin2-btn admin2-btn--primary inline-flex items-center gap-2"
-              onClick={downloadApprovedCsv}
-              disabled={approvedPosts.length === 0}
-            >
-              <FileDown size={16} />
-              <span>CSV</span>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className="admin2-btn admin2-btn--primary" onClick={exportCsv}>
+              Export CSV
             </button>
-            <IconButton label="Reset edits" onClick={resetCampaignEdits}>
-              <RotateCcw size={16} />
-            </IconButton>
+            <button type="button" className="admin2-btn admin2-btn--ghost" onClick={() => setPosts(INITIAL_POSTS)}>
+              Reset
+            </button>
           </div>
         </div>
       </header>
 
-      <section className="grid gap-4 md:grid-cols-5">
-        <div className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Configured posts</p>
-          <label className="mt-3 block">
-            <span className="sr-only">Monthly post count</span>
-            <input
-              type="number"
-              min={1}
-              max={100}
-              value={postCount}
-              onChange={(event) => setPostCount(Number(event.target.value))}
-              className="w-full rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-2xl font-semibold text-[color:var(--admin-text)]"
-            />
-          </label>
-        </div>
-        <div className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Approved</p>
-          <p className="mt-3 text-3xl font-semibold">{approvedPosts.length}</p>
-        </div>
-        <div className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Needs review</p>
-          <p className="mt-3 text-3xl font-semibold">{needsReviewCount}</p>
-        </div>
-        <div className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Campaign</p>
-          <label className="mt-3 block">
-            <span className="sr-only">Marketing campaign</span>
-            <select
-              value={selectedCampaign.campaignCode}
-              onChange={(event) => setSelectedCampaignCode(event.target.value)}
-              className="w-full rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-sm font-semibold text-[color:var(--admin-text)]"
-            >
-              {marketingCampaignSeeds.map((campaign) => (
-                <option key={campaign.campaignCode} value={campaign.campaignCode}>
-                  {campaign.campaignCode}
-                </option>
-              ))}
-            </select>
-          </label>
-          <p className="mt-2 text-xs text-[color:var(--admin-muted)]">{selectedCampaign.language}</p>
-        </div>
-        <div className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Metricool assets</p>
-          <p className="mt-3 text-3xl font-semibold">{r2ReadyAssetCount}/{approvedAssetCount}</p>
-          <p className="mt-1 text-xs text-[color:var(--admin-muted)]">Approved assets on R2</p>
-        </div>
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <SummaryCard label="Configured posts" value={String(posts.length)} helper="Monthly queue" />
+        <SummaryCard label="Approved" value={String(approvedCount)} helper="Included in CSV" />
+        <SummaryCard label="Needs review" value={String(reviewCount)} helper="Requires decision" />
+        <SummaryCard label="Campaign" value="ib20_mvp" helper="English test" />
+        <SummaryCard label="Metricool assets" value={`${selectedAssetCount}/5`} helper="Selected assets" />
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
-        <div className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5">
-          <h3 className="text-lg font-semibold tracking-tight">Data & storage</h3>
-          <p className="mt-2 text-sm text-[color:var(--admin-muted)]">
-            GA4 and Search Console snapshots are stored in Neon. Metricool stays manual through approved CSV exports.
-          </p>
-          <div className="mt-4 grid gap-3 text-sm">
-            <a className="font-semibold text-[color:var(--admin-accent)]" href={selectedCampaign.driveRootUrl} target="_blank" rel="noreferrer">
-              Google Drive marketing root
-            </a>
-            <a className="font-semibold text-[color:var(--admin-accent)]" href={selectedCampaign.strategyMemoryUrl} target="_blank" rel="noreferrer">
-              Strategy memory file
-            </a>
-            <a className="font-semibold text-[color:var(--admin-accent)]" href={selectedCampaign.assetsFolderUrl} target="_blank" rel="noreferrer">
-              Assets folder
-            </a>
-            <a className="font-semibold text-[color:var(--admin-accent)]" href={selectedCampaign.campaignsFolderUrl} target="_blank" rel="noreferrer">
-              Campaigns folder
-            </a>
-          </div>
-          <div className="mt-5 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-sm">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="font-semibold">GA4 + Search Console</p>
-                <p className="mt-1 text-xs text-[color:var(--admin-muted)]">
-                  {analyticsError
-                    ? analyticsError
-                    : analyticsInsights?.latestRun
-                      ? `Last sync ${analyticsInsights.latestRun.periodStart} -> ${analyticsInsights.latestRun.periodEnd}`
-                      : 'No Neon analytics snapshot yet.'}
-                </p>
-              </div>
-              <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${
-                analyticsInsights?.configured
-                  ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200'
-                  : 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-200'
-              }`}>
-                {analyticsInsights?.configured ? 'Ready' : 'Pending'}
-              </span>
-            </div>
-            {analyticsInsights && !analyticsInsights.configured ? (
-              <p className="mt-2 text-xs text-[color:var(--admin-muted)]">
-                Missing: {analyticsInsights.missing.join(', ')}
-              </p>
-            ) : null}
-            {analyticsInsights?.latestRun?.errorMessage ? (
-              <p className="mt-2 text-xs text-amber-700 dark:text-amber-200">
-                {analyticsInsights.latestRun.errorMessage}
-              </p>
-            ) : null}
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+      <nav className="grid gap-2 rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-2 md:grid-cols-3">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+            className={[
+              'rounded-xl px-4 py-3 text-left transition',
+              activeTab === tab.id
+                ? 'bg-[color:var(--admin-active-bg)] text-[color:var(--admin-active-text)]'
+                : 'text-[color:var(--admin-muted)] hover:bg-[color:var(--admin-hover)] hover:text-[color:var(--admin-text)]',
+            ].join(' ')}
+          >
+            <span className="block text-sm font-semibold">{tab.label}</span>
+            <span className="mt-1 block text-xs opacity-80">{tab.description}</span>
+          </button>
+        ))}
+      </nav>
+
+      {activeTab === 'posts' ? (
+        <PostsTab
+          posts={posts}
+          selectedPost={selectedPost}
+          selectedPostId={selectedPostId}
+          setSelectedPostId={setSelectedPostId}
+          updatePost={updatePost}
+          csvPreview={csvPreview}
+          exportCsv={exportCsv}
+        />
+      ) : null}
+      {activeTab === 'insights' ? <InsightsTab /> : null}
+      {activeTab === 'sources' ? <DataSourcesTab /> : null}
+    </div>
+  );
+}
+
+function SummaryCard({ label, value, helper }: { label: string; value: string; helper: string }) {
+  return (
+    <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">{label}</p>
+      <p className="mt-4 text-3xl font-semibold tracking-tight">{value}</p>
+      <p className="mt-2 text-xs text-[color:var(--admin-muted)]">{helper}</p>
+    </article>
+  );
+}
+
+function PostsTab({
+  posts,
+  selectedPost,
+  selectedPostId,
+  setSelectedPostId,
+  updatePost,
+  csvPreview,
+  exportCsv,
+}: {
+  posts: MarketingPost[];
+  selectedPost: MarketingPost;
+  selectedPostId: string;
+  setSelectedPostId: (postId: string) => void;
+  updatePost: (postId: string, updater: (post: MarketingPost) => MarketingPost) => void;
+  csvPreview: string;
+  exportCsv: () => void;
+}) {
+  return (
+    <section className="grid gap-4 xl:grid-cols-[minmax(280px,0.82fr)_minmax(0,1.18fr)]">
+      <div className="flex flex-col gap-3">
+        <Panel title="Generation queue" eyebrow="Posts">
+          <div className="flex flex-col gap-2">
+            {posts.map((post) => (
               <button
+                key={post.id}
                 type="button"
-                className="admin2-btn admin2-btn--secondary inline-flex items-center gap-2"
-                onClick={runAnalyticsSync}
-                disabled={!analyticsInsights?.configured || isSyncingAnalytics}
+                onClick={() => setSelectedPostId(post.id)}
+                className={[
+                  'rounded-xl border p-4 text-left transition',
+                  selectedPostId === post.id
+                    ? 'border-[color:var(--admin-accent)] bg-[color:var(--admin-hover)]'
+                    : 'border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] hover:border-[color:var(--admin-accent)]',
+                ].join(' ')}
               >
-                <RefreshCcwDot size={16} />
-                <span>{isSyncingAnalytics ? 'Syncing' : 'Sync data'}</span>
-              </button>
-              {analyticsMessage ? (
-                <p className="text-xs text-[color:var(--admin-muted)]">{analyticsMessage}</p>
-              ) : null}
-            </div>
-          </div>
-          {settingsDraft ? (
-            <div className="mt-5 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-sm">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-semibold">Analytics hygiene filters</p>
-                  <p className="mt-1 text-xs text-[color:var(--admin-muted)]">
-                    Exclude internal users and auth noise before generating marketing insights.
-                  </p>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold">{post.date}</p>
+                    <p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">
+                      {post.platform} / {post.format}
+                    </p>
+                  </div>
+                  <StatusPill status={post.status} />
                 </div>
-                <button
-                  type="button"
-                  className="admin2-btn admin2-btn--secondary inline-flex items-center gap-2"
-                  onClick={saveAnalyticsSettings}
-                  disabled={isSavingSettings}
-                >
-                  <Check size={16} />
-                  <span>{isSavingSettings ? 'Saving' : 'Save'}</span>
-                </button>
-              </div>
-              <div className="mt-3 grid gap-3 md:grid-cols-2">
-                <SettingsListField
-                  label="Internal user emails"
-                  value={settingsDraft.internalUserEmails}
-                  onChange={(internalUserEmails) => setSettingsDraft((current) => current ? { ...current, internalUserEmails } : current)}
-                />
-                <SettingsListField
-                  label="Excluded sources"
-                  value={settingsDraft.excludedSources}
-                  onChange={(excludedSources) => setSettingsDraft((current) => current ? { ...current, excludedSources } : current)}
-                />
-                <SettingsListField
-                  label="Marketing landing paths"
-                  value={settingsDraft.marketingPagePaths}
-                  onChange={(marketingPagePaths) => setSettingsDraft((current) => current ? { ...current, marketingPagePaths } : current)}
-                />
-                <SettingsListField
-                  label="Product page prefixes"
-                  value={settingsDraft.productPagePrefixes}
-                  onChange={(productPagePrefixes) => setSettingsDraft((current) => current ? { ...current, productPagePrefixes } : current)}
-                />
-              </div>
-            </div>
-          ) : null}
-          <div className="mt-5 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3 text-sm">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="font-semibold">Cloudflare R2</p>
-                <p className="mt-1 text-xs text-[color:var(--admin-muted)]">
-                  {r2StatusError
-                    ? r2StatusError
-                    : r2Status?.configured
-                      ? `${r2Status.bucket} -> ${r2Status.publicBaseUrl}`
-                      : 'Checking R2 configuration...'}
-                </p>
-              </div>
-              <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${
-                r2Status?.configured
-                  ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200'
-                  : 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-200'
-              }`}>
-                {r2Status?.configured ? 'Ready' : 'Pending'}
-              </span>
-            </div>
-            {r2Status && !r2Status.configured ? (
-              <p className="mt-2 text-xs text-[color:var(--admin-muted)]">
-                Missing: {r2Status.missing.join(', ')}
-              </p>
-            ) : null}
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                className="admin2-btn admin2-btn--secondary inline-flex items-center gap-2"
-                onClick={uploadApprovedAssets}
-                disabled={!r2Status?.configured || approvedPosts.length === 0 || isUploadingAssets}
-              >
-                <UploadCloud size={16} />
-                <span>{isUploadingAssets ? 'Uploading' : 'Upload R2'}</span>
+                <p className="mt-3 line-clamp-2 text-sm text-[color:var(--admin-text)]">{post.hook}</p>
               </button>
-              {uploadMessage ? (
-                <p className="text-xs text-[color:var(--admin-muted)]">{uploadMessage}</p>
-              ) : null}
-            </div>
+            ))}
           </div>
-        </div>
+        </Panel>
 
-        <div className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5">
-          <h3 className="text-lg font-semibold tracking-tight">Monthly generation protocol</h3>
-          <ol className="mt-3 space-y-2 text-sm text-[color:var(--admin-muted)]">
-            <li>1. Read and update the latest strategy memory Markdown.</li>
-            <li>2. Read new GA4, Search Console and Metricool data when available.</li>
-            <li>3. Generate drafts and save copy, assets, schedule and tracking URLs.</li>
-            <li>4. Review drafts here, approve or request regeneration.</li>
-            <li>5. Export a Metricool CSV only after approval.</li>
-          </ol>
-        </div>
-      </section>
+        <Panel title="Metricool CSV" eyebrow="Export">
+          <p className="text-sm text-[color:var(--admin-muted)]">
+            Export only includes approved posts and the currently selected assets.
+          </p>
+          <pre className="mt-3 max-h-52 overflow-auto rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-bg)] p-3 text-xs text-[color:var(--admin-muted)]">
+            {csvPreview}
+          </pre>
+          <button type="button" className="admin2-btn admin2-btn--primary mt-3" onClick={exportCsv}>
+            Export CSV for Metricool
+          </button>
+        </Panel>
+      </div>
 
-      <section className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h3 className="text-lg font-semibold tracking-tight">Marketing insights</h3>
-            <p className="mt-2 text-sm text-[color:var(--admin-muted)]">
-              Latest GA4 and Search Console snapshot saved in Neon.
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.75fr)]">
+        <Panel title="Preview and manual editing" eyebrow={selectedPost.id}>
+          <div className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">
+                {selectedPost.platform} / {selectedPost.format}
+              </p>
+              <StatusPill status={selectedPost.status} />
+            </div>
+            <h3 className="mt-4 text-xl font-semibold tracking-tight">{selectedPost.hook}</h3>
+            <p className="mt-3 text-sm leading-6 text-[color:var(--admin-muted)]">{selectedPost.caption}</p>
+            <p className="mt-4 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-bg)] p-3 text-xs text-[color:var(--admin-muted)]">
+              Tracking: {selectedPost.trackingUrl}
             </p>
           </div>
-          {analyticsInsights?.latestRun ? (
-            <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${
-              analyticsInsights.latestRun.status === 'completed'
-                ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200'
-                : analyticsInsights.latestRun.status === 'failed'
-                  ? 'border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-200'
-                  : 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-200'
-            }`}>
-              {analyticsInsights.latestRun.status}
-            </span>
-          ) : null}
+
+          <label className="mt-4 block">
+            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">Hook</span>
+            <input
+              value={selectedPost.hook}
+              onChange={(event) => updatePost(selectedPost.id, (post) => ({ ...post, hook: event.target.value }))}
+              className="mt-2 w-full rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-bg)] px-3 py-2 text-sm outline-none focus:border-[color:var(--admin-accent)]"
+            />
+          </label>
+
+          <label className="mt-4 block">
+            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">Caption</span>
+            <textarea
+              value={selectedPost.caption}
+              rows={8}
+              onChange={(event) => updatePost(selectedPost.id, (post) => ({ ...post, caption: event.target.value }))}
+              className="mt-2 w-full resize-y rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-bg)] px-3 py-2 text-sm leading-6 outline-none focus:border-[color:var(--admin-accent)]"
+            />
+          </label>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="admin2-btn admin2-btn--success"
+              onClick={() => updatePost(selectedPost.id, (post) => ({ ...post, status: 'approved' }))}
+            >
+              Approve
+            </button>
+            <button
+              type="button"
+              className="admin2-btn admin2-btn--danger"
+              onClick={() => updatePost(selectedPost.id, (post) => ({ ...post, status: 'rejected' }))}
+            >
+              Reject
+            </button>
+            <button
+              type="button"
+              className="admin2-btn admin2-btn--secondary"
+              onClick={() => updatePost(selectedPost.id, (post) => ({ ...post, status: 'review' }))}
+            >
+              Request review
+            </button>
+          </div>
+        </Panel>
+
+        <Panel title="Image selection" eyebrow="Assets">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            {selectedPost.assets.map((asset) => {
+              const isSelected = selectedPost.selectedAssets.includes(asset.file);
+              return (
+                <label
+                  key={asset.file}
+                  className={[
+                    'flex cursor-pointer gap-3 rounded-xl border p-3 transition',
+                    isSelected
+                      ? 'border-[color:var(--admin-accent)] bg-[color:var(--admin-hover)]'
+                      : 'border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)]',
+                  ].join(' ')}
+                >
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={(event) =>
+                      updatePost(selectedPost.id, (post) => ({
+                        ...post,
+                        selectedAssets: event.target.checked
+                          ? [...post.selectedAssets, asset.file]
+                          : post.selectedAssets.filter((file) => file !== asset.file),
+                      }))
+                    }
+                    className="mt-1"
+                  />
+                  <img
+                    src={`${ASSET_BASE}/${asset.file}`}
+                    alt={asset.title}
+                    className="h-20 w-20 shrink-0 rounded-lg border border-[color:var(--admin-border)] object-cover"
+                    loading="lazy"
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold">{asset.title}</span>
+                    <span className="mt-1 block text-xs uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">{asset.type}</span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </Panel>
+      </div>
+    </section>
+  );
+}
+
+function InsightsTab() {
+  const strategyMemoryEntries = useMemo(
+    () => parseStrategyMemoryMarkdown(STRATEGY_MEMORY_MARKDOWN),
+    [],
+  );
+
+  return (
+    <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.75fr)]">
+      <Panel title="Marketing insights" eyebrow="Latest snapshot">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <SummaryCard label="GA active users" value="14" helper="Anonymous visitors" />
+          <SummaryCard label="Registered users" value="22" helper="Neon users" />
+          <SummaryCard label="Landing views" value="85" helper="Top path: /" />
+          <SummaryCard label="Product views" value="759" helper="/innerbloom2/dashboard" />
+          <SummaryCard label="Search clicks" value="0" helper="Search Console" />
+          <SummaryCard label="Search impressions" value="3" helper="Brand queries" />
         </div>
 
-        {analyticsInsights?.summary ? (
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-            <InsightStat label="GA active users" value={formatNumber(analyticsTotals.activeUsers)} />
-            <InsightStat label="Registered users" value={formatNumber(registeredUsers?.total)} />
-            <InsightStat label="Landing views" value={formatNumber(analyticsMarketingTotals.pageViews)} />
-            <InsightStat label="Product views" value={formatNumber(analyticsProductTotals.pageViews)} />
-            <InsightStat label="Search clicks" value={formatNumber(analyticsTotals.searchClicks)} />
-            <InsightStat label="Search impressions" value={formatNumber(analyticsTotals.searchImpressions)} />
-          </div>
-        ) : (
-          <p className="mt-5 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-4 text-sm text-[color:var(--admin-muted)]">
-            Run the first sync to populate this dashboard.
-          </p>
-        )}
-
-        {analyticsInsights?.summary?.highlights.length ? (
-          <div className="mt-5 grid gap-2">
-            {analyticsInsights.summary.highlights.map((highlight) => (
-              <p key={highlight} className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-sm text-[color:var(--admin-text)]">
-                {highlight}
-              </p>
-            ))}
-          </div>
-        ) : null}
-
-        {analyticsInsights?.summary ? (
-          <div className="mt-5 grid gap-4 lg:grid-cols-4">
-            <InsightTable
-              title="Landing pages"
-              rows={analyticsInsights.marketingPages.slice(0, 5).map((row) => ({
-                label: row.page_path || '/',
-                detail: row.page_title,
-                value: formatNumber(row.screen_page_views),
-              }))}
-            />
-            <InsightTable
-              title="Product pages"
-              rows={analyticsInsights.productPages.slice(0, 5).map((row) => ({
-                label: row.page_path || '/',
-                detail: row.page_title,
-                value: formatNumber(row.screen_page_views),
-              }))}
-            />
-            <InsightTable
-              title="Acquisition sources"
-              rows={analyticsInsights.cleanSources.slice(0, 5).map((row) => ({
-                label: [row.source || '(direct)', row.medium || '(none)'].join(' / '),
-                detail: row.campaign || 'No campaign',
-                value: formatNumber(row.sessions),
-              }))}
-            />
-            <InsightTable
-              title="Search queries"
-              rows={analyticsInsights.topQueries.slice(0, 5).map((row) => ({
-                label: row.query || '(not provided)',
-                detail: row.page,
-                value: `${formatNumber(row.impressions)} imp. / ${formatNumber(row.clicks)} clicks`,
-              }))}
-            />
-          </div>
-        ) : null}
-
-        {analyticsInsights?.summary?.notes?.length ? (
-          <div className="mt-5 grid gap-2">
-            {analyticsInsights.summary.notes.map((note) => (
-              <p key={note} className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-xs text-[color:var(--admin-muted)]">
-                {note}
-              </p>
-            ))}
-          </div>
-        ) : null}
-      </section>
-
-      <section className="flex flex-col gap-4">
-        {posts.map((post) => (
-          <PostCard
-            key={post.id}
-            post={post}
-            expanded={expandedPostIds.has(post.id)}
-            editing={editingPostId === post.id}
-            onToggle={togglePost}
-            onEditToggle={togglePostEdit}
-            onPostChange={updatePost}
-            onStatusChange={updateStatus}
+        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+          <InsightList
+            title="Analysis"
+            items={[
+              'Top landing: / with 67 views.',
+              'Top product page: /innerbloom2/dashboard with 220 views.',
+              'Top acquisition source after filters: instagram / social with 11 sessions.',
+              'Top query: inner bloom mrr with 2 impressions.',
+            ]}
           />
-        ))}
-      </section>
-    </div>
+          <InsightList
+            title="Recommendations"
+            items={[
+              'Keep testing adaptive rhythm and real-week positioning.',
+              'Use dashboard screenshots when the hook promises product behavior.',
+              'Watch page_view -> landing_cta_clicked -> auth_started -> dashboard_view.',
+              'Rename unclear strategic language: use Cost of Inaction instead of Cost of Safe.',
+            ]}
+          />
+        </div>
+      </Panel>
+
+      <Panel title="Strategy memory" eyebrow="STRATEGY_MEMORY.md">
+        <div className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-4">
+          <p className="text-sm font-semibold">Historical source</p>
+          <p className="mt-2 text-sm text-[color:var(--admin-muted)]">
+            The persistent source is <code>Docs/marketing/STRATEGY_MEMORY.md</code>. New runs append dated entries to the changelog instead of replacing earlier strategy context.
+          </p>
+        </div>
+
+        <StrategyMemoryTimeline entries={strategyMemoryEntries} />
+
+        <InsightList
+          title="Monthly generation protocol"
+          items={[
+            'Read the latest strategy memory Markdown before generating drafts.',
+            'Append a dated changelog entry with insights, decisions, learnings and next experiments.',
+            'Read new GA4, Search Console and Metricool data when available.',
+            'Generate drafts and save copy, assets, schedule and tracking URLs.',
+            'Review drafts here, then approve, reject or request review.',
+            'Export a Metricool CSV only after approval.',
+          ]}
+        />
+      </Panel>
+    </section>
   );
 }
 
-function cloneCampaignPosts(campaign: MarketingCampaignSeed) {
-  return campaign.posts.map((post) => ({
-    ...post,
-    assets: post.assets.map((asset) => ({ ...asset })),
-  }));
-}
+function StrategyMemoryTimeline({ entries }: { entries: StrategyMemoryEntry[] }) {
+  if (!entries.length) {
+    return (
+      <p className="mt-4 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-bg)] p-4 text-sm text-[color:var(--admin-muted)]">
+        No strategy memory entries found yet.
+      </p>
+    );
+  }
 
-function InsightStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-[color:var(--admin-text)]">{value}</p>
-    </div>
-  );
-}
-
-function InsightTable({
-  title,
-  rows,
-}: {
-  title: string;
-  rows: Array<{ label: string; detail?: string; value: string }>;
-}) {
-  return (
-    <div className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3">
-      <p className="text-sm font-semibold text-[color:var(--admin-text)]">{title}</p>
-      <div className="mt-3 divide-y divide-[color:var(--admin-border)]">
-        {rows.length ? rows.map((row) => (
-          <div key={`${row.label}-${row.value}`} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 py-2 text-sm">
-            <div className="min-w-0">
-              <p className="truncate font-medium text-[color:var(--admin-text)]">{row.label}</p>
-              {row.detail ? (
-                <p className="mt-1 truncate text-xs text-[color:var(--admin-muted)]">{row.detail}</p>
-              ) : null}
+    <div className="mt-4 flex flex-col gap-3">
+      {entries.map((entry) => (
+        <article key={`${entry.date}-${entry.period}`} className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-bg)] p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">{entry.date}</p>
+              <h4 className="mt-1 text-base font-semibold">{entry.period}</h4>
             </div>
-            <p className="whitespace-nowrap font-semibold text-[color:var(--admin-text)]">{row.value}</p>
+            {entry.periodAnalyzed[0] ? (
+              <span className="rounded-full border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-1 text-xs text-[color:var(--admin-muted)]">
+                {entry.periodAnalyzed[0]}
+              </span>
+            ) : null}
           </div>
-        )) : (
-          <p className="py-2 text-sm text-[color:var(--admin-muted)]">No data yet.</p>
-        )}
-      </div>
+
+          <div className="mt-4 grid gap-3">
+            <StrategyMemorySection title="Insights" items={entry.insights} />
+            <StrategyMemorySection title="Decisions" items={entry.decisions} />
+            <StrategyMemorySection title="Changes" items={entry.changes} />
+            <StrategyMemorySection title="Worked" items={entry.worked} />
+            <StrategyMemorySection title="Did not work" items={entry.didNotWork} />
+            <StrategyMemorySection title="Learnings" items={entry.learnings} />
+            <StrategyMemorySection title="Next actions" items={entry.nextExperiments} />
+            <StrategyMemorySection title="Future recommendations" items={entry.futureRecommendations} />
+          </div>
+        </article>
+      ))}
     </div>
   );
 }
 
-function SettingsListField({
-  label,
-  value,
-  onChange,
+function StrategyMemorySection({ title, items }: { title: string; items: string[] }) {
+  if (!items.length) {
+    return null;
+  }
+
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">{title}</p>
+      <ul className="mt-2 space-y-1.5 text-sm text-[color:var(--admin-muted)]">
+        {items.map((item) => (
+          <li key={item} className="rounded-lg border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2">
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function DataSourcesTab() {
+  return (
+    <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.62fr)]">
+      <Panel title="Connected data sources" eyebrow="Data Sources">
+        <div className="grid gap-3 lg:grid-cols-2">
+          <SourceCard
+            name="GA4"
+            status="Connected"
+            lastSync="2026-06-01 -> 2026-06-28"
+            error="No active sync errors"
+            action="Sync GA4 data"
+            contributes="Landing views, product views, active users, acquisition source and funnel events."
+          />
+          <SourceCard
+            name="Google Search Console"
+            status="Connected"
+            lastSync="2026-06-01 -> 2026-06-28"
+            error="No active sync errors"
+            action="Sync Search Console"
+            contributes="Search impressions, clicks, queries and destination URLs."
+          />
+        </div>
+      </Panel>
+
+      <Panel title="Storage and files" eyebrow="Data Storage">
+        <div className="flex flex-col gap-3">
+          {[
+            ['Google Drive marketing root', 'Campaign folders, generated assets and copy sources.'],
+            ['Strategy memory file', 'Expected Markdown source for positioning and recommendations.'],
+            ['Assets folder', 'Approved post images used by the Metricool export.'],
+            ['Campaigns folder', 'Monthly campaign plan and CSV upload files.'],
+          ].map(([title, detail]) => (
+            <div key={title} className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-4">
+              <p className="text-sm font-semibold text-[color:var(--admin-accent)]">{title}</p>
+              <p className="mt-1 text-xs text-[color:var(--admin-muted)]">{detail}</p>
+            </div>
+          ))}
+        </div>
+      </Panel>
+    </section>
+  );
+}
+
+function Panel({ eyebrow, title, children }: { eyebrow: string; title: string; children: ReactNode }) {
+  return (
+    <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 md:p-5">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">{eyebrow}</p>
+      <h3 className="mt-1 text-lg font-semibold tracking-tight">{title}</h3>
+      <div className="mt-4">{children}</div>
+    </article>
+  );
+}
+
+function StatusPill({ status }: { status: PostStatus }) {
+  return (
+    <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${STATUS_CLASSES[status]}`}>
+      {STATUS_LABELS[status]}
+    </span>
+  );
+}
+
+function InsightList({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div className="mt-4 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-4">
+      <p className="text-sm font-semibold">{title}</p>
+      <ul className="mt-3 space-y-2 text-sm text-[color:var(--admin-muted)]">
+        {items.map((item) => (
+          <li key={item} className="rounded-lg border border-[color:var(--admin-border)] bg-[color:var(--admin-bg)] px-3 py-2">
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SourceCard({
+  name,
+  status,
+  lastSync,
+  error,
+  action,
+  contributes,
 }: {
-  label: string;
-  value: string[];
-  onChange: (value: string[]) => void;
+  name: string;
+  status: string;
+  lastSync: string;
+  error: string;
+  action: string;
+  contributes: string;
 }) {
   return (
-    <label className="block">
-      <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">{label}</span>
-      <textarea
-        value={value.join('\n')}
-        rows={4}
-        onChange={(event) => onChange(parseSettingsList(event.target.value))}
-        className="mt-2 w-full resize-y rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-3 py-2 font-mono text-xs leading-relaxed text-[color:var(--admin-text)]"
-      />
-    </label>
+    <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h4 className="text-lg font-semibold">{name}</h4>
+          <p className="mt-1 text-xs text-[color:var(--admin-muted)]">{contributes}</p>
+        </div>
+        <span className="rounded-full border border-emerald-400/50 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-[color:var(--admin-text)]">
+          {status}
+        </span>
+      </div>
+      <dl className="mt-4 grid gap-3 text-sm">
+        <div>
+          <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">Last sync</dt>
+          <dd className="mt-1">{lastSync}</dd>
+        </div>
+        <div>
+          <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">Errors</dt>
+          <dd className="mt-1">{error}</dd>
+        </div>
+      </dl>
+      <button type="button" className="admin2-btn admin2-btn--secondary mt-4">
+        {action}
+      </button>
+    </article>
   );
-}
-
-function parseSettingsList(value: string) {
-  const seen = new Set<string>();
-  const result: string[] = [];
-
-  for (const item of value.split(/[\n,]/)) {
-    const text = item.trim();
-    const key = text.toLowerCase();
-    if (!text || seen.has(key)) {
-      continue;
-    }
-    seen.add(key);
-    result.push(text);
-  }
-
-  return result;
-}
-
-function getAnalyticsTotals(insights: MarketingAnalyticsInsights | null) {
-  return insights?.summary?.totals ?? {
-    activeUsers: 0,
-    sessions: 0,
-    pageViews: 0,
-    events: 0,
-    searchClicks: 0,
-    searchImpressions: 0,
-  };
-}
-
-function formatNumber(value: number | string | null | undefined) {
-  const numberValue = Number(value ?? 0);
-  if (!Number.isFinite(numberValue)) {
-    return '0';
-  }
-
-  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(numberValue);
-}
-
-function storageKeyForCampaign(campaignCode: string) {
-  return `${STORAGE_PREFIX}${campaignCode}`;
-}
-
-function readStoredCampaignPosts(campaign: MarketingCampaignSeed) {
-  if (typeof window === 'undefined') {
-    return cloneCampaignPosts(campaign);
-  }
-
-  const raw = window.localStorage.getItem(storageKeyForCampaign(campaign.campaignCode));
-  if (!raw) {
-    return cloneCampaignPosts(campaign);
-  }
-
-  try {
-    const parsed = JSON.parse(raw) as { posts?: MarketingPostSeed[] };
-    if (!Array.isArray(parsed.posts)) {
-      return cloneCampaignPosts(campaign);
-    }
-
-    return parsed.posts.map((post) => ({
-      ...post,
-      assets: Array.isArray(post.assets) ? post.assets.map((asset) => ({ ...asset })) : [],
-    }));
-  } catch {
-    return cloneCampaignPosts(campaign);
-  }
-}
-
-function persistCampaignPosts(campaignCode: string, posts: MarketingPostSeed[]) {
-  window.localStorage.setItem(
-    storageKeyForCampaign(campaignCode),
-    JSON.stringify({
-      updatedAt: new Date().toISOString(),
-      posts,
-    }),
-  );
-}
-
-function fileToMarketingAsset(file: File) {
-  return new Promise<MarketingAsset>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      resolve({
-        file: file.name,
-        title: file.name.replace(/\.[^.]+$/, ''),
-        url: String(reader.result),
-      });
-    };
-    reader.onerror = () => reject(reader.error ?? new Error('Failed to read image file.'));
-    reader.readAsDataURL(file);
-  });
 }

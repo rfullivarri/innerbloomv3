@@ -3,6 +3,7 @@ import { OverviewPage } from '../../pages/admin2/OverviewPage';
 import { CoreEnginePage } from '../../pages/admin2/CoreEnginePage';
 import { UserOpsPage } from '../../pages/admin2/UserOpsPage';
 import { NotificationsPage } from '../../pages/admin2/NotificationsPage';
+import { MarketingPage } from '../../pages/admin2/MarketingPage';
 import { AiTaskgenPage } from '../../pages/admin2/AiTaskgenPage';
 import { AdvancedPage } from '../../pages/admin2/AdvancedPage';
 import { MarketingPage } from '../../pages/admin2/MarketingPage';
