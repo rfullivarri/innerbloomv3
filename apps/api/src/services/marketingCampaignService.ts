@@ -70,11 +70,11 @@ export type MarketingPostUpdateInput = Partial<{
 const CAMPAIGN_ASSET_BASE_URL =
   'https://raw.githubusercontent.com/rfullivarri/innerbloomv3/main/Docs/marketing/campaigns/2026-06-mvp/assets';
 
-const DRIVE_THUMBNAIL_URLS: Record<string, string> = {
+const CAMPAIGN_ASSET_URLS: Record<string, string> = {
   innerbloom_mobile_dailyquest_dark_tasks_selection:
-    'https://drive.google.com/thumbnail?id=1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA&sz=w1200',
+    `${CAMPAIGN_ASSET_BASE_URL}/innerbloom_mobile_dailyquest_dark_tasks_selection.png`,
   innerbloom_mobile_dailyquest_dark_tasks_selection_png:
-    'https://drive.google.com/thumbnail?id=1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA&sz=w1200',
+    `${CAMPAIGN_ASSET_BASE_URL}/innerbloom_mobile_dailyquest_dark_tasks_selection.png`,
 };
 
 const DEFAULT_CAMPAIGN = {
@@ -146,8 +146,8 @@ const DEFAULT_CAMPAIGN = {
         {
           file: 'innerbloom_mobile_dailyquest_dark_tasks_selection.png',
           title: 'Daily Quest task selection screen',
-          type: 'drive-image',
-          url: DRIVE_THUMBNAIL_URLS.innerbloom_mobile_dailyquest_dark_tasks_selection,
+          type: 'static',
+          url: CAMPAIGN_ASSET_URLS.innerbloom_mobile_dailyquest_dark_tasks_selection,
           selected: true,
         },
       ],
@@ -413,8 +413,8 @@ function resolveMarketingAssetUrl(file: string, url: string | undefined) {
     return `${CAMPAIGN_ASSET_BASE_URL}/${encodeURIComponent(file)}`;
   }
 
-  const driveThumbnail = DRIVE_THUMBNAIL_URLS[file.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '')];
-  return driveThumbnail || undefined;
+  const campaignAssetUrl = CAMPAIGN_ASSET_URLS[file.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '')];
+  return campaignAssetUrl || undefined;
 }
 
 function extractDriveFileId(url: string) {
