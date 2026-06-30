@@ -67,14 +67,16 @@ export async function uploadMarketingAssetsToR2(inputs: UploadAssetInput[]) {
         }),
       };
 
-      if (/^https?:\/\//i.test(asset.url)) {
+      const sourceUrl = asset.sourceUrl || asset.url;
+
+      if (/^https?:\/\//i.test(sourceUrl)) {
         return {
           ...basePayload,
-          sourceUrl: asset.url,
+          sourceUrl,
         };
       }
 
-      const fetchedAsset = await fetchAssetAsBase64(asset.url);
+      const fetchedAsset = await fetchAssetAsBase64(sourceUrl);
       return {
         ...basePayload,
         contentBase64: fetchedAsset.contentBase64,

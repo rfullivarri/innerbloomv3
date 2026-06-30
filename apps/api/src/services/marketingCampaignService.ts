@@ -15,6 +15,8 @@ export type MarketingAssetPayload = {
   title: string;
   type?: string;
   url?: string;
+  previewUrl?: string;
+  sourceUrl?: string;
   selected?: boolean;
 };
 
@@ -148,6 +150,8 @@ const DEFAULT_CAMPAIGN = {
           title: 'Daily Quest task selection screen',
           type: 'static',
           url: CAMPAIGN_ASSET_URLS.innerbloom_mobile_dailyquest_dark_tasks_selection,
+          previewUrl: CAMPAIGN_ASSET_URLS.innerbloom_mobile_dailyquest_dark_tasks_selection,
+          sourceUrl: 'https://drive.google.com/file/d/1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA/view?usp=drivesdk',
           selected: true,
         },
       ],
@@ -392,10 +396,35 @@ function normalizeAssets(value: unknown): MarketingAssetPayload[] {
         title: String(asset.title ?? asset.file ?? ''),
         type: typeof asset.type === 'string' ? asset.type : undefined,
         url: resolveMarketingAssetUrl(file, typeof asset.url === 'string' ? asset.url : undefined),
+        previewUrl: resolveMarketingAssetPreviewUrl(
+          file,
+          typeof asset.previewUrl === 'string' ? asset.previewUrl : undefined,
+          typeof asset.url === 'string' ? asset.url : undefined,
+          typeof asset.sourceUrl === 'string' ? asset.sourceUrl : undefined,
+        ),
+        sourceUrl: typeof asset.sourceUrl === 'string' ? asset.sourceUrl : undefined,
         selected: typeof asset.selected === 'boolean' ? asset.selected : true,
       };
     })
     .filter((asset) => asset.file);
+}
+
+function resolveMarketingAssetPreviewUrl(
+  file: string,
+  previewUrl: string | undefined,
+  url: string | undefined,
+  sourceUrl: string | undefined,
+) {
+  if (previewUrl?.trim()) {
+    return previewUrl.trim();
+  }
+
+  const sourceDriveId = extractDriveFileId(String(sourceUrl ?? ''));
+  if (sourceDriveId) {
+    return `https://drive.google.com/thumbnail?id=${sourceDriveId}&sz=w1200`;
+  }
+
+  return resolveMarketingAssetUrl(file, url);
 }
 
 function resolveMarketingAssetUrl(file: string, url: string | undefined) {
