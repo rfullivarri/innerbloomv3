@@ -40,9 +40,11 @@ import {
   putAdminUserModeUpgradeCtaOverride,
   deleteAdminUserModeUpgradeCtaOverride,
   getAdminMonthlyPipelineStatus,
+  getAdminMarketingCampaigns,
   getAdminMarketingAnalyticsInsights,
   getAdminMarketingAnalyticsStatus,
   getAdminMarketingR2Status,
+  patchAdminMarketingPost,
   postAdminMonthlyPipelineRun,
   postAdminMarketingAnalyticsSync,
   postAdminMarketingR2Assets,
@@ -55,6 +57,8 @@ const adminRouter = Router();
 
 adminRouter.get('/me', getAdminMe);
 adminRouter.get('/users', getAdminUsers);
+adminRouter.get('/marketing/campaigns', getAdminMarketingCampaigns);
+adminRouter.patch('/marketing/campaigns/:campaignCode/posts/:postCode', patchAdminMarketingPost);
 adminRouter.get('/marketing/analytics/status', getAdminMarketingAnalyticsStatus);
 adminRouter.get('/marketing/analytics/insights', getAdminMarketingAnalyticsInsights);
 adminRouter.post('/marketing/analytics/sync', postAdminMarketingAnalyticsSync);

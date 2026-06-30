@@ -28,6 +28,8 @@ import {
   habitAchievementDiagnosticsQuerySchema,
   adminManualGameModeChangeBodySchema,
   adminModeUpgradeCtaOverrideUpsertBodySchema,
+  marketingPostParamsSchema,
+  marketingPostUpdateBodySchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -79,6 +81,7 @@ import {
   runMarketingAnalyticsSync,
   updateMarketingAnalyticsSettings,
 } from '../../services/marketingAnalyticsService.js';
+import { listMarketingCampaigns, updateMarketingPost } from '../../services/marketingCampaignService.js';
 import { pool } from '../../db.js';
 
 const taskgenForceRunRequestSchema = z
@@ -152,6 +155,18 @@ export const postAdminMarketingR2Assets = asyncHandler(async (req: Request, res:
 export const getAdminMarketingAnalyticsStatus = asyncHandler(async (_req: Request, res: Response) => {
   const status = await getMarketingAnalyticsStatus();
   res.json({ ok: true, ...status });
+});
+
+export const getAdminMarketingCampaigns = asyncHandler(async (_req: Request, res: Response) => {
+  const campaigns = await listMarketingCampaigns();
+  res.json({ ok: true, campaigns });
+});
+
+export const patchAdminMarketingPost = asyncHandler(async (req: Request, res: Response) => {
+  const { campaignCode, postCode } = marketingPostParamsSchema.parse(req.params);
+  const body = marketingPostUpdateBodySchema.parse(req.body ?? {});
+  const post = await updateMarketingPost(campaignCode, postCode, body);
+  res.json({ ok: true, post });
 });
 
 export const getAdminMarketingAnalyticsInsights = asyncHandler(async (_req: Request, res: Response) => {
