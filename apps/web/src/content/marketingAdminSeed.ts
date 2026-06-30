@@ -173,7 +173,7 @@ export const marketingCampaignSeeds: MarketingCampaignSeed[] = [{
         {
           file: 'innerbloom_mobile_dailyquest_dark_tasks_selection.png',
           title: 'Daily Quest task selection screen',
-          url: 'https://drive.google.com/thumbnail?id=1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA&sz=w1200',
+          url: `${assetBaseUrl}/innerbloom_mobile_dailyquest_dark_tasks_selection.png`,
         },
       ],
     },
