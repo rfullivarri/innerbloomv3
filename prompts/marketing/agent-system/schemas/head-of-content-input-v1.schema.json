@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "innerbloom://marketing/head-of-content-input-v1",
+  "title": "Innerbloom Head of Content Input v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "period", "strategy", "brand", "product_context", "available_assets", "operational_constraints", "tracking", "source_manifest"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["period_key", "campaign_code", "timezone", "target_post_count", "publishing_start_date", "publishing_end_date"],
+      "properties": {
+        "period_key": {"$ref": "#/$defs/periodKey"},
+        "campaign_code": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$"},
+        "timezone": {"type": "string", "minLength": 1},
+        "target_post_count": {"type": "integer", "minimum": 1, "maximum": 100},
+        "publishing_start_date": {"type": "string", "format": "date"},
+        "publishing_end_date": {"type": "string", "format": "date"}
+      }
+    },
+    "strategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["review_status", "cmo_output_path", "cmo_output"],
+      "properties": {
+        "review_status": {"const": "approved"},
+        "cmo_output_path": {"type": "string", "minLength": 1},
+        "cmo_output": {"type": "object"}
+      }
+    },
+    "brand": {"$ref": "#/$defs/freeObject"},
+    "product_context": {"$ref": "#/$defs/freeObject"},
+    "available_assets": {"$ref": "#/$defs/freeObject"},
+    "operational_constraints": {
+      "type": "object",
+      "required": ["platforms", "formats", "max_carousel_slides", "max_assets_per_post", "publishing_method", "public_asset_store", "review_required", "calendar_rules"],
+      "properties": {
+        "platforms": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "formats": {"type": "array", "minItems": 1, "items": {"enum": ["static", "carousel", "reel", "story", "thread", "short_video"]}},
+        "max_carousel_slides": {"type": "integer", "minimum": 1, "maximum": 20},
+        "max_assets_per_post": {"type": "integer", "minimum": 1, "maximum": 20},
+        "publishing_method": {"type": "string"},
+        "public_asset_store": {"type": "string"},
+        "review_required": {"const": true},
+        "calendar_rules": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "tracking": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base_url", "utm_source", "utm_medium", "campaign_code", "additional_parameters"],
+      "properties": {
+        "base_url": {"type": "string", "format": "uri"},
+        "utm_source": {"type": "string"},
+        "utm_medium": {"type": "string"},
+        "campaign_code": {"type": "string"},
+        "additional_parameters": {"type": "object"}
+      }
+    },
+    "source_manifest": {"type": "array", "minItems": 1, "items": {"type": "object"}}
+  },
+  "$defs": {
+    "periodKey": {"type": "string", "pattern": "^\\d{4}-\\d{2}$"},
+    "freeObject": {"type": "object"}
+  }
+}
