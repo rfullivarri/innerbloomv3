@@ -198,8 +198,17 @@ export const marketingR2AssetUploadBodySchema = z.object({
     .array(
       z.object({
         key: z.string().trim().min(1).max(240),
-        contentBase64: z.string().trim().min(1),
+        contentBase64: z.string().trim().min(1).optional(),
+        sourceUrl: z.string().trim().url().max(2000).optional(),
         contentType: z.string().trim().min(1).max(100).optional(),
+      }).superRefine((value, ctx) => {
+        if (!value.contentBase64 && !value.sourceUrl) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'contentBase64 or sourceUrl is required',
+            path: ['contentBase64'],
+          });
+        }
       }),
     )
     .min(1)
@@ -314,7 +323,7 @@ export const marketingPostUpdateBodySchema = z.object({
   agentNotes: z.string().max(3000).optional(),
   decisionNote: z.string().max(3000).optional(),
   rejectionReason: z.string().max(3000).optional(),
-  scheduledAt: z.string().datetime().nullable().optional(),
+  scheduledAt: z.string().datetime({ offset: true }).nullable().optional(),
 }).superRefine((value, ctx) => {
   if (!Object.keys(value).length) {
     ctx.addIssue({
