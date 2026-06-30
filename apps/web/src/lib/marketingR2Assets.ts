@@ -59,13 +59,24 @@ export async function fetchMarketingR2Status() {
 export async function uploadMarketingAssetsToR2(inputs: UploadAssetInput[]) {
   const assets = await Promise.all(
     inputs.map(async ({ asset, campaignCode, postId }) => {
-      const fetchedAsset = await fetchAssetAsBase64(asset.url);
-      return {
+      const basePayload = {
         key: buildMarketingAssetKey({
           campaignCode,
           postId,
           file: asset.file,
         }),
+      };
+
+      if (/^https?:\/\//i.test(asset.url)) {
+        return {
+          ...basePayload,
+          sourceUrl: asset.url,
+        };
+      }
+
+      const fetchedAsset = await fetchAssetAsBase64(asset.url);
+      return {
+        ...basePayload,
         contentBase64: fetchedAsset.contentBase64,
         contentType: fetchedAsset.contentType,
       };

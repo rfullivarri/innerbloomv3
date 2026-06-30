@@ -3,7 +3,8 @@ import { HttpError } from '../lib/http-error.js';
 
 export type MarketingR2AssetUpload = {
   key: string;
-  contentBase64: string;
+  contentBase64?: string;
+  sourceUrl?: string;
   contentType?: string;
 };
 
@@ -53,7 +54,8 @@ export async function uploadMarketingR2Assets(assets: MarketingR2AssetUpload[]) 
 
   for (const asset of assets) {
     const key = sanitizeAssetKey(asset.key);
-    const bytes = parseBase64Asset(asset.contentBase64);
+    const source = await readAssetBytes(asset);
+    const bytes = source.bytes;
 
     if (bytes.length === 0 || bytes.length > 10 * 1024 * 1024) {
       throw new HttpError(400, 'invalid_asset_size', `Invalid asset size for ${key}.`);
@@ -63,7 +65,7 @@ export async function uploadMarketingR2Assets(assets: MarketingR2AssetUpload[]) 
       Bucket: config.bucket,
       Key: key,
       Body: bytes,
-      ContentType: normalizeContentType(asset.contentType),
+      ContentType: normalizeContentType(asset.contentType ?? source.contentType),
       CacheControl: 'public, max-age=31536000, immutable',
     }));
 
@@ -155,6 +157,52 @@ function parseBase64Asset(value: string) {
   } catch {
     throw new HttpError(400, 'invalid_asset_content', 'Invalid base64 asset content.');
   }
+}
+
+async function readAssetBytes(asset: MarketingR2AssetUpload) {
+  if (asset.contentBase64) {
+    return {
+      bytes: parseBase64Asset(asset.contentBase64),
+      contentType: asset.contentType,
+    };
+  }
+
+  if (!asset.sourceUrl) {
+    throw new HttpError(400, 'invalid_asset_content', 'contentBase64 or sourceUrl is required.');
+  }
+
+  const url = normalizeSourceUrl(asset.sourceUrl);
+  const response = await fetch(url, {
+    redirect: 'follow',
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (!response.ok) {
+    throw new HttpError(400, 'asset_source_fetch_failed', `Asset fetch failed with HTTP ${response.status}.`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+
+  return {
+    bytes: Buffer.from(arrayBuffer),
+    contentType: response.headers.get('content-type') ?? asset.contentType,
+  };
+}
+
+function normalizeSourceUrl(value: string) {
+  let url: URL;
+
+  try {
+    url = new URL(value);
+  } catch {
+    throw new HttpError(400, 'invalid_asset_source_url', 'Invalid asset source URL.');
+  }
+
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    throw new HttpError(400, 'invalid_asset_source_url', 'Asset source URL must be HTTP or HTTPS.');
+  }
+
+  return url.toString();
 }
 
 function normalizeContentType(value: string | undefined) {
