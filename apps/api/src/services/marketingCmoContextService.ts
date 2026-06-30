@@ -29,7 +29,7 @@ export type MarketingCmoContextResult = {
   periodKey: string;
   previousPeriodKey: string;
   outputPath: string;
-  sourceSummary: Array<Pick<MarketingCmoSourceManifestEntry, 'source_type' | 'source_path_or_id'>>;
+  sourceSummary: Pick<MarketingCmoSourceManifestEntry, 'source_type' | 'source_path_or_id'>[];
 };
 
 export type MarketingCmoSourceManifestEntry = {
@@ -90,14 +90,14 @@ export type MarketingAnalyticsContext = {
   marketing_totals: Record<string, unknown>;
   product_totals: Record<string, unknown>;
   registered_users: Record<string, unknown>;
-  top_pages: Array<Record<string, unknown>>;
-  marketing_pages: Array<Record<string, unknown>>;
-  product_pages: Array<Record<string, unknown>>;
-  top_sources: Array<Record<string, unknown>>;
-  clean_sources: Array<Record<string, unknown>>;
-  top_events: Array<Record<string, unknown>>;
-  search_console_queries: Array<Record<string, unknown>>;
-  funnel_events: Array<Record<string, unknown>>;
+  top_pages: Record<string, unknown>[];
+  marketing_pages: Record<string, unknown>[];
+  product_pages: Record<string, unknown>[];
+  top_sources: Record<string, unknown>[];
+  clean_sources: Record<string, unknown>[];
+  top_events: Record<string, unknown>[];
+  search_console_queries: Record<string, unknown>[];
+  funnel_events: Record<string, unknown>[];
 };
 
 export type MarketingCmoCampaignContext = {
@@ -107,7 +107,7 @@ export type MarketingCmoCampaignContext = {
   status: string;
   strategy_summary: string;
   posts: MarketingCmoPostContext[];
-  results: Array<Record<string, unknown>>;
+  results: Record<string, unknown>[];
   human_decisions: string[];
   rejection_reasons: string[];
 };
@@ -133,7 +133,7 @@ export type MarketingCmoPostContext = {
     published_at: string | null;
     measured_at: string | null;
   };
-  metrics: Array<Record<string, unknown>>;
+  metrics: Record<string, unknown>[];
 };
 
 export type MarketingCmoAsset = {
@@ -400,8 +400,8 @@ async function readStrategyMemory(strategyPath: string, repoRoot: string): Promi
   };
 }
 
-function extractMarkdownBullets(markdown: string): Array<{ label: string; text: string }> {
-  const result: Array<{ label: string; text: string }> = [];
+function extractMarkdownBullets(markdown: string): { label: string; text: string }[] {
+  const result: { label: string; text: string }[] = [];
   const bulletPattern = /^-\s+\*\*(.+?):\*\*\s*(.+)$/gm;
   let match: RegExpExecArray | null;
 
@@ -415,7 +415,7 @@ function extractMarkdownBullets(markdown: string): Array<{ label: string; text: 
   return result;
 }
 
-function filterBullets(bullets: Array<{ label: string; text: string }>, labels: string[]): string[] {
+function filterBullets(bullets: { label: string; text: string }[], labels: string[]): string[] {
   const labelSet = new Set(labels.map((label) => label.toLowerCase()));
   return bullets
     .filter((item) => labelSet.has(item.label))
@@ -565,7 +565,7 @@ function normalizeCampaigns(campaigns: MarketingCampaignWithMetricsPayload[]): M
 function normalizePostAssets(
   campaignCode: string,
   postCode: string,
-  assets: Array<{ file: string; title: string; type?: string; url?: string }>,
+  assets: { file: string; title: string; type?: string; url?: string }[],
 ): MarketingCmoAsset[] {
   return assets.map((asset, index) => ({
     asset_id: stableId(['campaign', campaignCode, postCode, asset.file || String(index)]),
@@ -808,7 +808,7 @@ async function validateCmoContext(context: MarketingCmoContext, schemaPath: stri
   }
 }
 
-function formatAjvErrors(errors: ErrorObject[]): Array<{ path: string; message: string }> {
+function formatAjvErrors(errors: ErrorObject[]): { path: string; message: string }[] {
   return errors.map((error) => ({
     path: error.instancePath || '/',
     message: error.message ?? 'invalid',
@@ -870,7 +870,7 @@ function normalizeRecord(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
-function recordArrayFrom(value: unknown): Array<Record<string, unknown>> {
+function recordArrayFrom(value: unknown): Record<string, unknown>[] {
   return Array.isArray(value)
     ? value.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === 'object' && !Array.isArray(item))
     : [];

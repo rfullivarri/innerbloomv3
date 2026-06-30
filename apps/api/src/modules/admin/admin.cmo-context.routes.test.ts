@@ -10,7 +10,7 @@ const {
   authState: {
     authenticated: true,
   },
-  mockQuery: vi.fn<(sql: string, params?: unknown[]) => Promise<{ rows: Array<{ is_admin: boolean }> }>>(),
+  mockQuery: vi.fn<(sql: string, params?: unknown[]) => Promise<{ rows: { is_admin: boolean }[] }>>(),
   mockBuildContext: vi.fn(async () => ({
     status: 'written',
     periodKey: '2026-07',
