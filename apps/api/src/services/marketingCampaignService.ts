@@ -67,6 +67,16 @@ export type MarketingPostUpdateInput = Partial<{
   scheduledAt: string | null;
 }>;
 
+const CAMPAIGN_ASSET_BASE_URL =
+  'https://raw.githubusercontent.com/rfullivarri/innerbloomv3/main/Docs/marketing/campaigns/2026-06-mvp/assets';
+
+const DRIVE_THUMBNAIL_URLS: Record<string, string> = {
+  innerbloom_mobile_dailyquest_dark_tasks_selection:
+    'https://drive.google.com/thumbnail?id=1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA&sz=w1200',
+  innerbloom_mobile_dailyquest_dark_tasks_selection_png:
+    'https://drive.google.com/thumbnail?id=1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA&sz=w1200',
+};
+
 const DEFAULT_CAMPAIGN = {
   periodKey: '2026-06',
   campaignCode: 'ib20_mvp',
@@ -96,10 +106,10 @@ const DEFAULT_CAMPAIGN = {
         'https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib20_mvp&utm_content=post_001&ib_post=001',
       scheduledAt: '2026-06-30T19:30:00+02:00',
       assetUrls: [
-        { file: 'post-001-carousel-01.png', title: 'Your habits should adapt to your real life.', type: 'image', selected: true },
-        { file: 'post-001-carousel-02.png', title: 'Most habit apps assume every day is the same.', type: 'split', selected: true },
-        { file: 'post-001-carousel-03.png', title: 'Lower the intensity. Keep the direction.', type: 'image', selected: true },
-        { file: 'post-001-carousel-04.png', title: 'Build a Journey that can survive real weeks.', type: 'brand', selected: true },
+        { file: 'post-001-carousel-01.png', title: 'Your habits should adapt to your real life.', type: 'image', url: `${CAMPAIGN_ASSET_BASE_URL}/post-001-carousel-01.png`, selected: true },
+        { file: 'post-001-carousel-02.png', title: 'Most habit apps assume every day is the same.', type: 'split', url: `${CAMPAIGN_ASSET_BASE_URL}/post-001-carousel-02.png`, selected: true },
+        { file: 'post-001-carousel-03.png', title: 'Lower the intensity. Keep the direction.', type: 'image', url: `${CAMPAIGN_ASSET_BASE_URL}/post-001-carousel-03.png`, selected: true },
+        { file: 'post-001-carousel-04.png', title: 'Build a Journey that can survive real weeks.', type: 'brand', url: `${CAMPAIGN_ASSET_BASE_URL}/post-001-carousel-04.png`, selected: true },
       ],
     },
     {
@@ -116,7 +126,7 @@ const DEFAULT_CAMPAIGN = {
         'https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib20_mvp&utm_content=post_002&ib_post=002',
       scheduledAt: '2026-07-02T22:30:00+02:00',
       assetUrls: [
-        { file: 'post-002-static-pain-proposal.png', title: 'If your plan only works on perfect days, it is not a plan.', type: 'static', selected: true },
+        { file: 'post-002-static-pain-proposal.png', title: 'If your plan only works on perfect days, it is not a plan.', type: 'static', url: `${CAMPAIGN_ASSET_BASE_URL}/post-002-static-pain-proposal.png`, selected: true },
       ],
     },
     {
@@ -137,7 +147,7 @@ const DEFAULT_CAMPAIGN = {
           file: 'innerbloom_mobile_dailyquest_dark_tasks_selection.png',
           title: 'Daily Quest task selection screen',
           type: 'drive-image',
-          url: 'https://drive.google.com/file/d/1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA/view?usp=drivesdk',
+          url: DRIVE_THUMBNAIL_URLS.innerbloom_mobile_dailyquest_dark_tasks_selection,
           selected: true,
         },
       ],
@@ -374,14 +384,45 @@ function normalizeAssets(value: unknown): MarketingAssetPayload[] {
 
   return value
     .filter((asset): asset is Record<string, unknown> => Boolean(asset) && typeof asset === 'object')
-    .map((asset) => ({
-      file: String(asset.file ?? ''),
-      title: String(asset.title ?? asset.file ?? ''),
-      type: typeof asset.type === 'string' ? asset.type : undefined,
-      url: typeof asset.url === 'string' ? asset.url : undefined,
-      selected: typeof asset.selected === 'boolean' ? asset.selected : true,
-    }))
+    .map((asset) => {
+      const file = String(asset.file ?? '');
+
+      return {
+        file,
+        title: String(asset.title ?? asset.file ?? ''),
+        type: typeof asset.type === 'string' ? asset.type : undefined,
+        url: resolveMarketingAssetUrl(file, typeof asset.url === 'string' ? asset.url : undefined),
+        selected: typeof asset.selected === 'boolean' ? asset.selected : true,
+      };
+    })
     .filter((asset) => asset.file);
+}
+
+function resolveMarketingAssetUrl(file: string, url: string | undefined) {
+  const trimmedUrl = String(url ?? '').trim();
+  const driveId = extractDriveFileId(trimmedUrl);
+  if (driveId) {
+    return `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`;
+  }
+
+  if (trimmedUrl) {
+    return trimmedUrl;
+  }
+
+  if (/^post-\d{3}-.+\.png$/i.test(file)) {
+    return `${CAMPAIGN_ASSET_BASE_URL}/${encodeURIComponent(file)}`;
+  }
+
+  const driveThumbnail = DRIVE_THUMBNAIL_URLS[file.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '')];
+  return driveThumbnail || undefined;
+}
+
+function extractDriveFileId(url: string) {
+  if (!url.includes('drive.google.com')) {
+    return null;
+  }
+
+  return url.match(/\/d\/([^/]+)/)?.[1] ?? url.match(/[?&]id=([^&]+)/)?.[1] ?? null;
 }
 
 function normalizeRecord(value: unknown): Record<string, unknown> {

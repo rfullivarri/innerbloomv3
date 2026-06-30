@@ -70,6 +70,16 @@ const DEFAULT_PAGE_TOTALS = {
   events: 0,
 };
 
+const CAMPAIGN_ASSET_BASE_URL =
+  'https://raw.githubusercontent.com/rfullivarri/innerbloomv3/main/Docs/marketing/campaigns/2026-06-mvp/assets';
+
+const DRIVE_THUMBNAIL_URLS: Record<string, string> = {
+  innerbloom_mobile_dailyquest_dark_tasks_selection:
+    'https://drive.google.com/thumbnail?id=1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA&sz=w1200',
+  innerbloom_mobile_dailyquest_dark_tasks_selection_png:
+    'https://drive.google.com/thumbnail?id=1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA&sz=w1200',
+};
+
 function statusClass(status: MarketingPostStatus) {
   if (status === 'approved') {
     return 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200';
@@ -1136,7 +1146,7 @@ function mapApiAssetToSeed(asset: MarketingAssetRecord): MarketingAsset {
   return {
     file: asset.file,
     title: asset.title,
-    url: asset.url ?? '',
+    url: resolveMarketingAssetUrl(asset.file, asset.url),
   };
 }
 
@@ -1196,6 +1206,33 @@ function readString(value: unknown, fallback: string) {
 
 function readLanguage(value: unknown): MarketingCampaignSeed['language'] {
   return value === 'Spanish' ? 'Spanish' : 'English';
+}
+
+function resolveMarketingAssetUrl(file: string, url: string | undefined) {
+  const trimmedUrl = String(url ?? '').trim();
+  const driveId = extractDriveFileId(trimmedUrl);
+  if (driveId) {
+    return `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`;
+  }
+
+  if (trimmedUrl) {
+    return trimmedUrl;
+  }
+
+  if (/^post-\d{3}-.+\.png$/i.test(file)) {
+    return `${CAMPAIGN_ASSET_BASE_URL}/${encodeURIComponent(file)}`;
+  }
+
+  const driveThumbnail = DRIVE_THUMBNAIL_URLS[file.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '')];
+  return driveThumbnail || '';
+}
+
+function extractDriveFileId(url: string) {
+  if (!url.includes('drive.google.com')) {
+    return null;
+  }
+
+  return url.match(/\/d\/([^/]+)/)?.[1] ?? url.match(/[?&]id=([^&]+)/)?.[1] ?? null;
 }
 
 function InsightStat({ label, value }: { label: string; value: string }) {
