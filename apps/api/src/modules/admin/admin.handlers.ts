@@ -30,6 +30,8 @@ import {
   adminModeUpgradeCtaOverrideUpsertBodySchema,
   marketingPostParamsSchema,
   marketingPostUpdateBodySchema,
+  marketingCmoContextBodySchema,
+  marketingCmoContextStatusQuerySchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -82,6 +84,10 @@ import {
   updateMarketingAnalyticsSettings,
 } from '../../services/marketingAnalyticsService.js';
 import { listMarketingCampaigns, updateMarketingPost } from '../../services/marketingCampaignService.js';
+import {
+  buildMarketingCmoContext,
+  getMarketingCmoContextStatus,
+} from '../../services/marketingCmoContextService.js';
 import { pool } from '../../db.js';
 
 const taskgenForceRunRequestSchema = z
@@ -167,6 +173,29 @@ export const patchAdminMarketingPost = asyncHandler(async (req: Request, res: Re
   const body = marketingPostUpdateBodySchema.parse(req.body ?? {});
   const post = await updateMarketingPost(campaignCode, postCode, body);
   res.json({ ok: true, post });
+});
+
+export const postAdminMarketingCmoContext = asyncHandler(async (req: Request, res: Response) => {
+  const body = marketingCmoContextBodySchema.parse(req.body ?? {});
+  const result = await buildMarketingCmoContext({
+    periodKey: body.periodKey,
+    force: body.force,
+  });
+
+  res.json({
+    ok: true,
+    status: result.status,
+    periodKey: result.periodKey,
+    previousPeriodKey: result.previousPeriodKey,
+    outputPath: result.outputPath,
+    sources: result.sourceSummary,
+  });
+});
+
+export const getAdminMarketingCmoContextStatus = asyncHandler(async (req: Request, res: Response) => {
+  const query = marketingCmoContextStatusQuerySchema.parse(req.query);
+  const status = await getMarketingCmoContextStatus(query.periodKey);
+  res.json({ ok: true, ...status });
 });
 
 export const getAdminMarketingAnalyticsInsights = asyncHandler(async (_req: Request, res: Response) => {

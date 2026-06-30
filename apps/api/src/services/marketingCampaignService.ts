@@ -42,6 +42,26 @@ export type MarketingPostPayload = {
   updatedAt: string;
 };
 
+export type MarketingPostMetricPayload = {
+  source: string;
+  periodStart: string;
+  periodEnd: string;
+  impressions: number;
+  reach: number;
+  clicks: number;
+  sessions: number;
+  landingCtaClicks: number;
+  signups: number;
+  dashboardViews: number;
+  leads: number;
+  notes: string;
+  importedAt: string;
+};
+
+export type MarketingPostWithMetricsPayload = MarketingPostPayload & {
+  metrics: MarketingPostMetricPayload[];
+};
+
 export type MarketingCampaignPayload = {
   id: string;
   periodKey: string;
@@ -53,6 +73,10 @@ export type MarketingCampaignPayload = {
   sourceContext: Record<string, unknown>;
   posts: MarketingPostPayload[];
   updatedAt: string;
+};
+
+export type MarketingCampaignWithMetricsPayload = Omit<MarketingCampaignPayload, 'posts'> & {
+  posts: MarketingPostWithMetricsPayload[];
 };
 
 export type MarketingPostUpdateInput = Partial<{
@@ -194,6 +218,45 @@ export async function listMarketingCampaigns(): Promise<MarketingCampaignPayload
     sourceContext: normalizeRecord(row.source_context),
     posts: postsByCampaign.get(row.marketing_campaign_id) ?? [],
     updatedAt: toIso(row.updated_at),
+  }));
+}
+
+export async function listRecentMarketingCampaignsForContext(limit = 12): Promise<MarketingCampaignWithMetricsPayload[]> {
+  const campaigns = (await listMarketingCampaigns()).slice(0, limit);
+  const postCodes = campaigns.flatMap((campaign) =>
+    campaign.posts.map((post) => ({ campaignCode: campaign.campaignCode, postCode: post.postCode })),
+  );
+
+  if (postCodes.length === 0) {
+    return campaigns.map((campaign) => ({ ...campaign, posts: [] }));
+  }
+
+  const metrics = await pool.query<PostMetricRow>(
+    `SELECT mc.campaign_code, mp.post_code, m.source, m.period_start, m.period_end,
+            m.impressions, m.reach, m.clicks, m.sessions, m.landing_cta_clicks,
+            m.signups, m.dashboard_views, m.leads, m.notes, m.imported_at
+       FROM marketing_post_metrics m
+       JOIN marketing_posts mp ON mp.marketing_post_id = m.marketing_post_id
+       JOIN marketing_campaigns mc ON mc.marketing_campaign_id = mp.marketing_campaign_id
+      WHERE mc.campaign_code = ANY($1::text[])
+      ORDER BY mc.period_key DESC, mp.post_code, m.period_start DESC, m.source`,
+    [Array.from(new Set(postCodes.map((item) => item.campaignCode)))],
+  );
+
+  const metricsByPost = new Map<string, MarketingPostMetricPayload[]>();
+  for (const row of metrics.rows) {
+    const key = `${row.campaign_code}:${row.post_code}`;
+    const items = metricsByPost.get(key) ?? [];
+    items.push(mapPostMetricRow(row));
+    metricsByPost.set(key, items);
+  }
+
+  return campaigns.map((campaign) => ({
+    ...campaign,
+    posts: campaign.posts.map((post) => ({
+      ...post,
+      metrics: metricsByPost.get(`${campaign.campaignCode}:${post.postCode}`) ?? [],
+    })),
   }));
 }
 
@@ -357,6 +420,24 @@ type PostRow = {
   updated_at: string | Date;
 };
 
+type PostMetricRow = {
+  campaign_code: string;
+  post_code: string;
+  source: string;
+  period_start: string | Date;
+  period_end: string | Date;
+  impressions: number;
+  reach: number;
+  clicks: number;
+  sessions: number;
+  landing_cta_clicks: number;
+  signups: number;
+  dashboard_views: number;
+  leads: number;
+  notes: string;
+  imported_at: string | Date;
+};
+
 function mapPostRow(row: PostRow): MarketingPostPayload {
   return {
     postCode: row.post_code,
@@ -378,6 +459,24 @@ function mapPostRow(row: PostRow): MarketingPostPayload {
     publishedAt: toIsoOrNull(row.published_at),
     measuredAt: toIsoOrNull(row.measured_at),
     updatedAt: toIso(row.updated_at),
+  };
+}
+
+function mapPostMetricRow(row: PostMetricRow): MarketingPostMetricPayload {
+  return {
+    source: row.source,
+    periodStart: toDateOnly(row.period_start),
+    periodEnd: toDateOnly(row.period_end),
+    impressions: Number(row.impressions),
+    reach: Number(row.reach),
+    clicks: Number(row.clicks),
+    sessions: Number(row.sessions),
+    landingCtaClicks: Number(row.landing_cta_clicks),
+    signups: Number(row.signups),
+    dashboardViews: Number(row.dashboard_views),
+    leads: Number(row.leads),
+    notes: row.notes,
+    importedAt: toIso(row.imported_at),
   };
 }
 
@@ -467,4 +566,12 @@ function toIso(value: string | Date): string {
 
 function toIsoOrNull(value: string | Date | null): string | null {
   return value ? toIso(value) : null;
+}
+
+function toDateOnly(value: string | Date): string {
+  if (value instanceof Date) {
+    return value.toISOString().slice(0, 10);
+  }
+
+  return String(value).slice(0, 10);
 }

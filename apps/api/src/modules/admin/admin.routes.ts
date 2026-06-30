@@ -43,8 +43,10 @@ import {
   getAdminMarketingCampaigns,
   getAdminMarketingAnalyticsInsights,
   getAdminMarketingAnalyticsStatus,
+  getAdminMarketingCmoContextStatus,
   getAdminMarketingR2Status,
   patchAdminMarketingPost,
+  postAdminMarketingCmoContext,
   postAdminMonthlyPipelineRun,
   postAdminMarketingAnalyticsSync,
   postAdminMarketingR2Assets,
@@ -59,6 +61,8 @@ adminRouter.get('/me', getAdminMe);
 adminRouter.get('/users', getAdminUsers);
 adminRouter.get('/marketing/campaigns', getAdminMarketingCampaigns);
 adminRouter.patch('/marketing/campaigns/:campaignCode/posts/:postCode', patchAdminMarketingPost);
+adminRouter.post('/marketing/agents/cmo/context', postAdminMarketingCmoContext);
+adminRouter.get('/marketing/agents/cmo/context/status', getAdminMarketingCmoContextStatus);
 adminRouter.get('/marketing/analytics/status', getAdminMarketingAnalyticsStatus);
 adminRouter.get('/marketing/analytics/insights', getAdminMarketingAnalyticsInsights);
 adminRouter.post('/marketing/analytics/sync', postAdminMarketingAnalyticsSync);

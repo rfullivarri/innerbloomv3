@@ -336,6 +336,21 @@ export const marketingPostUpdateBodySchema = z.object({
   }
 });
 
+export const marketingCmoContextBodySchema = z.object({
+  periodKey: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}$/, { message: 'periodKey must be YYYY-MM' }),
+  force: z.coerce.boolean().default(false),
+});
+
+export const marketingCmoContextStatusQuerySchema = z.object({
+  periodKey: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}$/, { message: 'periodKey must be YYYY-MM' }),
+});
+
 export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>;
 export type LogsQuery = z.infer<typeof logsQuerySchema>;
 export type InsightQuery = z.infer<typeof insightQuerySchema>;
@@ -359,3 +374,5 @@ export type SubscriptionNotificationsTriggerBody = z.infer<typeof subscriptionNo
 export type FeedbackDefinitionUpdateInput = z.infer<typeof feedbackDefinitionUpdateSchema>;
 export type FeedbackUserNotificationUpdateInput = z.infer<typeof feedbackUserNotificationUpdateSchema>;
 export type MarketingPostUpdateBody = z.infer<typeof marketingPostUpdateBodySchema>;
+export type MarketingCmoContextBody = z.infer<typeof marketingCmoContextBodySchema>;
+export type MarketingCmoContextStatusQuery = z.infer<typeof marketingCmoContextStatusQuerySchema>;
