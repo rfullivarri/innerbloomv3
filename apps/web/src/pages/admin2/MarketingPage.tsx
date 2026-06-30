@@ -256,7 +256,7 @@ function PostCard({
               >
                 <div className="relative aspect-square bg-[color:var(--admin-bg)]">
                   <img
-                    src={asset.url}
+                    src={asset.previewUrl || asset.url}
                     alt={asset.title}
                     className="h-full w-full object-cover"
                     loading="lazy"
@@ -1144,10 +1144,14 @@ function mapApiPostToSeed(post: MarketingPostRecord): MarketingPostSeed {
 }
 
 function mapApiAssetToSeed(asset: MarketingAssetRecord): MarketingAsset {
+  const url = resolveMarketingAssetUrl(asset.file, asset.url);
+
   return {
     file: asset.file,
     title: asset.title,
-    url: resolveMarketingAssetUrl(asset.file, asset.url),
+    url,
+    previewUrl: resolveMarketingAssetPreviewUrl(asset.file, asset.previewUrl, url, asset.sourceUrl),
+    sourceUrl: asset.sourceUrl,
   };
 }
 
@@ -1163,6 +1167,8 @@ function seedPostToApiUpdate(post: MarketingPostSeed) {
       file: asset.file,
       title: asset.title,
       url: asset.url,
+      previewUrl: asset.previewUrl,
+      sourceUrl: asset.sourceUrl,
       selected: true,
     })),
   };
@@ -1226,6 +1232,24 @@ function resolveMarketingAssetUrl(file: string, url: string | undefined) {
 
   const campaignAssetUrl = CAMPAIGN_ASSET_URLS[file.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '')];
   return campaignAssetUrl || '';
+}
+
+function resolveMarketingAssetPreviewUrl(
+  file: string,
+  previewUrl: string | undefined,
+  url: string,
+  sourceUrl: string | undefined,
+) {
+  if (previewUrl?.trim()) {
+    return previewUrl.trim();
+  }
+
+  const sourceDriveId = extractDriveFileId(String(sourceUrl ?? ''));
+  if (sourceDriveId) {
+    return `https://drive.google.com/thumbnail?id=${sourceDriveId}&sz=w1200`;
+  }
+
+  return resolveMarketingAssetUrl(file, url);
 }
 
 function extractDriveFileId(url: string) {

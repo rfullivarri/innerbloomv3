@@ -14,6 +14,8 @@ export type MarketingAssetRecord = {
   title: string;
   type?: string;
   url?: string;
+  previewUrl?: string;
+  sourceUrl?: string;
   selected?: boolean;
 };
 
