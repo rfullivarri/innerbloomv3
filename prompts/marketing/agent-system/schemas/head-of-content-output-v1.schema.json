@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "innerbloom://marketing/head-of-content-output-v1",
+  "title": "Innerbloom Head of Content Output v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "agent", "period_key", "generated_at", "campaign", "campaign_execution_summary", "posts", "asset_generation_queue", "campaign_quality_report", "source_manifest"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "agent": {"const": "innerbloom_head_of_content"},
+    "period_key": {"type": "string", "pattern": "^\\d{4}-\\d{2}$"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "campaign": {
+      "type": "object",
+      "required": ["campaign_code", "title", "objective", "status", "strategy_summary", "language", "platforms", "formats", "target_post_count", "publishing_start_date", "publishing_end_date"],
+      "properties": {
+        "campaign_code": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$"},
+        "title": {"type": "string", "minLength": 1},
+        "objective": {"enum": ["new_users", "leads", "activation", "awareness", "retention"]},
+        "status": {"const": "review"},
+        "strategy_summary": {"type": "string"},
+        "language": {"type": "string"},
+        "platforms": {"type": "array", "items": {"type": "string"}},
+        "formats": {"type": "array", "items": {"enum": ["static", "carousel", "reel", "story", "thread", "short_video"]}},
+        "target_post_count": {"type": "integer", "minimum": 1, "maximum": 100},
+        "publishing_start_date": {"type": "string", "format": "date"},
+        "publishing_end_date": {"type": "string", "format": "date"}
+      }
+    },
+    "campaign_execution_summary": {"type": "object"},
+    "posts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["post_code", "sequence_number", "platform", "format", "status", "scheduled_at", "content_pillar", "funnel_stage", "experiment_code", "hook", "caption", "cta", "hypothesis", "primary_metric", "tracking_url", "utm", "visual_brief", "assets"],
+        "properties": {
+          "post_code": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$"},
+          "sequence_number": {"type": "integer", "minimum": 1},
+          "platform": {"type": "string"},
+          "format": {"enum": ["static", "carousel", "reel", "story", "thread", "short_video"]},
+          "status": {"const": "needs_review"},
+          "scheduled_at": {"type": "string", "format": "date-time"},
+          "content_pillar": {"type": "string"},
+          "funnel_stage": {"enum": ["awareness", "consideration", "activation"]},
+          "experiment_code": {"type": "string"},
+          "hook": {"type": "string", "minLength": 1},
+          "caption": {"type": "string", "minLength": 1},
+          "cta": {"type": "object"},
+          "hypothesis": {"type": "string", "minLength": 1},
+          "primary_metric": {"type": "string", "minLength": 1},
+          "tracking_url": {"type": "string", "format": "uri"},
+          "utm": {"type": "object"},
+          "visual_brief": {"type": "object"},
+          "assets": {"type": "array", "items": {"type": "object"}}
+        }
+      }
+    },
+    "asset_generation_queue": {"type": "array", "items": {"type": "object"}},
+    "campaign_quality_report": {"type": "object"},
+    "source_manifest": {"type": "array", "items": {"type": "object"}}
+  }
+}
