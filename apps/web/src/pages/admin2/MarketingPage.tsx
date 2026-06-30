@@ -73,11 +73,11 @@ const DEFAULT_PAGE_TOTALS = {
 const CAMPAIGN_ASSET_BASE_URL =
   'https://raw.githubusercontent.com/rfullivarri/innerbloomv3/main/Docs/marketing/campaigns/2026-06-mvp/assets';
 
-const DRIVE_THUMBNAIL_URLS: Record<string, string> = {
+const CAMPAIGN_ASSET_URLS: Record<string, string> = {
   innerbloom_mobile_dailyquest_dark_tasks_selection:
-    'https://drive.google.com/thumbnail?id=1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA&sz=w1200',
+    `${CAMPAIGN_ASSET_BASE_URL}/innerbloom_mobile_dailyquest_dark_tasks_selection.png`,
   innerbloom_mobile_dailyquest_dark_tasks_selection_png:
-    'https://drive.google.com/thumbnail?id=1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA&sz=w1200',
+    `${CAMPAIGN_ASSET_BASE_URL}/innerbloom_mobile_dailyquest_dark_tasks_selection.png`,
 };
 
 function statusClass(status: MarketingPostStatus) {
@@ -475,6 +475,7 @@ export function MarketingPage() {
       total + post.assets.filter((asset) => isMarketingAssetStoredOnR2(asset.url, r2Status?.publicBaseUrl)).length,
     0,
   );
+  const canDownloadApprovedCsv = approvedPosts.length > 0 && approvedAssetCount > 0 && approvedAssetCount === r2ReadyAssetCount;
 
   useEffect(() => {
     void loadCampaigns();
@@ -750,7 +751,7 @@ export function MarketingPage() {
               type="button"
               className="admin2-btn admin2-btn--primary inline-flex items-center gap-2"
               onClick={downloadApprovedCsv}
-              disabled={approvedPosts.length === 0}
+              disabled={!canDownloadApprovedCsv}
             >
               <FileDown size={16} />
               <span>CSV</span>
@@ -1223,8 +1224,8 @@ function resolveMarketingAssetUrl(file: string, url: string | undefined) {
     return `${CAMPAIGN_ASSET_BASE_URL}/${encodeURIComponent(file)}`;
   }
 
-  const driveThumbnail = DRIVE_THUMBNAIL_URLS[file.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '')];
-  return driveThumbnail || '';
+  const campaignAssetUrl = CAMPAIGN_ASSET_URLS[file.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '')];
+  return campaignAssetUrl || '';
 }
 
 function extractDriveFileId(url: string) {
