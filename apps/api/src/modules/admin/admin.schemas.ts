@@ -309,6 +309,8 @@ const marketingPostAssetSchema = z.object({
   title: z.string().trim().min(1).max(500),
   type: z.string().trim().min(1).max(120).optional(),
   url: z.string().trim().max(2000).optional(),
+  previewUrl: z.string().trim().max(2000).optional(),
+  sourceUrl: z.string().trim().max(2000).optional(),
   selected: z.boolean().optional(),
 });
 

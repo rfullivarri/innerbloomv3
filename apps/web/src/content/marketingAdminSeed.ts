@@ -2,6 +2,8 @@ export type MarketingAsset = {
   file: string;
   title: string;
   url: string;
+  previewUrl?: string;
+  sourceUrl?: string;
 };
 
 export type MarketingPostStatus = 'draft' | 'needs_review' | 'approved';
@@ -174,6 +176,8 @@ export const marketingCampaignSeeds: MarketingCampaignSeed[] = [{
           file: 'innerbloom_mobile_dailyquest_dark_tasks_selection.png',
           title: 'Daily Quest task selection screen',
           url: `${assetBaseUrl}/innerbloom_mobile_dailyquest_dark_tasks_selection.png`,
+          previewUrl: `${assetBaseUrl}/innerbloom_mobile_dailyquest_dark_tasks_selection.png`,
+          sourceUrl: 'https://drive.google.com/file/d/1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA/view?usp=drivesdk',
         },
       ],
     },
