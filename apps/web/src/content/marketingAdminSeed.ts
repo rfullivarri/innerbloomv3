@@ -144,6 +144,39 @@ export const marketingCampaignSeeds: MarketingCampaignSeed[] = [{
         },
       ],
     },
+    {
+      id: 'post_003',
+      number: '003',
+      platform: 'instagram',
+      format: 'static',
+      status: 'needs_review',
+      scheduledDate: '2026-07-04',
+      scheduledTime: '19:30:00',
+      hypothesis:
+        'A concrete Daily Quest product screenshot will make the adaptive habit promise easier to understand than abstract habit advice.',
+      metric: 'page_view -> landing_cta_clicked -> auth_started -> dashboard_view',
+      trackingUrl:
+        'https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib20_mvp&utm_content=post_003&ib_post=003',
+      caption: [
+        'A daily quest should fit the day you actually have.',
+        '',
+        'Innerbloom turns daily habit work into a small adaptive quest.',
+        '',
+        'Pick what fits your energy, keep the direction visible, and avoid throwing away progress when the day gets messy.',
+        '',
+        'Try it here:',
+        'https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib20_mvp&utm_content=post_003&ib_post=003',
+        '',
+        '#habits #selfimprovement #wellbeing #productivity #habittracker #buildinpublic',
+      ].join('\n'),
+      assets: [
+        {
+          file: 'innerbloom_mobile_dailyquest_dark_tasks_selection.png',
+          title: 'Daily Quest task selection screen',
+          url: 'https://drive.google.com/file/d/1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA/view?usp=drivesdk',
+        },
+      ],
+    },
   ],
 }];
 

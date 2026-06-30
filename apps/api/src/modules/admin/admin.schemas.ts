@@ -287,6 +287,44 @@ export const feedbackUserNotificationUpdateSchema = z.object({
   muteUntil: z.string().datetime().nullable().optional(),
 });
 
+export const marketingCampaignParamsSchema = z.object({
+  campaignCode: z.string().trim().min(1).max(120),
+});
+
+export const marketingPostParamsSchema = marketingCampaignParamsSchema.extend({
+  postCode: z.string().trim().min(1).max(120),
+});
+
+const marketingPostAssetSchema = z.object({
+  file: z.string().trim().min(1).max(500),
+  title: z.string().trim().min(1).max(500),
+  type: z.string().trim().min(1).max(120).optional(),
+  url: z.string().trim().max(2000).optional(),
+  selected: z.boolean().optional(),
+});
+
+export const marketingPostUpdateBodySchema = z.object({
+  status: z.enum(['draft', 'needs_review', 'approved', 'rejected', 'published', 'measured', 'archived']).optional(),
+  hook: z.string().max(1000).optional(),
+  caption: z.string().max(10000).optional(),
+  hypothesis: z.string().max(3000).optional(),
+  targetMetric: z.string().max(1000).optional(),
+  trackingUrl: z.string().max(2000).optional(),
+  assetUrls: z.array(marketingPostAssetSchema).max(20).optional(),
+  agentNotes: z.string().max(3000).optional(),
+  decisionNote: z.string().max(3000).optional(),
+  rejectionReason: z.string().max(3000).optional(),
+  scheduledAt: z.string().datetime().nullable().optional(),
+}).superRefine((value, ctx) => {
+  if (!Object.keys(value).length) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'At least one property must be provided',
+      path: [],
+    });
+  }
+});
+
 export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>;
 export type LogsQuery = z.infer<typeof logsQuerySchema>;
 export type InsightQuery = z.infer<typeof insightQuerySchema>;
@@ -309,3 +347,4 @@ export type AdminSubscriptionUpdateBody = z.infer<typeof adminSubscriptionUpdate
 export type SubscriptionNotificationsTriggerBody = z.infer<typeof subscriptionNotificationsTriggerBodySchema>;
 export type FeedbackDefinitionUpdateInput = z.infer<typeof feedbackDefinitionUpdateSchema>;
 export type FeedbackUserNotificationUpdateInput = z.infer<typeof feedbackUserNotificationUpdateSchema>;
+export type MarketingPostUpdateBody = z.infer<typeof marketingPostUpdateBodySchema>;

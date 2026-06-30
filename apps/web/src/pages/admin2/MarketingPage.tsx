@@ -21,6 +21,13 @@ import {
   type MarketingPostSeed,
   type MarketingPostStatus,
 } from '../../content/marketingAdminSeed';
+import {
+  fetchMarketingCampaigns,
+  updateMarketingCampaignPost,
+  type MarketingAssetRecord,
+  type MarketingCampaignRecord,
+  type MarketingPostRecord,
+} from '../../lib/marketingCampaigns';
 import { downloadMetricoolCalendarCsv } from '../../lib/marketingMetricoolCsv';
 import {
   buildMarketingAssetKey,
@@ -42,8 +49,6 @@ const STATUS_LABELS: Record<MarketingPostStatus, string> = {
   needs_review: 'Needs review',
   approved: 'Approved',
 };
-
-const STORAGE_PREFIX = 'innerbloom:admin-marketing:posts:';
 
 const iconButtonBase =
   'inline-flex h-9 w-9 items-center justify-center rounded-lg border text-[color:var(--admin-text)] transition hover:border-[color:var(--admin-accent)] hover:bg-[color:var(--admin-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--admin-accent)] disabled:cursor-not-allowed disabled:opacity-35';
@@ -425,15 +430,19 @@ function PostCard({
 }
 
 export function MarketingPage() {
+  const [campaigns, setCampaigns] = useState<MarketingCampaignSeed[]>(marketingCampaignSeeds);
   const [selectedCampaignCode, setSelectedCampaignCode] = useState(marketingCampaignSeeds[0].campaignCode);
   const selectedCampaign = useMemo(
-    () => marketingCampaignSeeds.find((campaign) => campaign.campaignCode === selectedCampaignCode) ?? marketingCampaignSeeds[0],
-    [selectedCampaignCode],
+    () => campaigns.find((campaign) => campaign.campaignCode === selectedCampaignCode) ?? campaigns[0] ?? marketingCampaignSeeds[0],
+    [campaigns, selectedCampaignCode],
   );
   const [postCount, setPostCount] = useState(selectedCampaign.postCount);
-  const [posts, setPosts] = useState(() => readStoredCampaignPosts(selectedCampaign));
+  const [posts, setPosts] = useState(() => cloneCampaignPosts(selectedCampaign));
   const [expandedPostIds, setExpandedPostIds] = useState<Set<string>>(() => new Set());
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [campaignError, setCampaignError] = useState<string | null>(null);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [savingPostId, setSavingPostId] = useState<string | null>(null);
   const [r2Status, setR2Status] = useState<MarketingR2Status | null>(null);
   const [r2StatusError, setR2StatusError] = useState<string | null>(null);
   const [isUploadingAssets, setIsUploadingAssets] = useState(false);
@@ -458,8 +467,12 @@ export function MarketingPage() {
   );
 
   useEffect(() => {
+    void loadCampaigns();
+  }, []);
+
+  useEffect(() => {
     setPostCount(selectedCampaign.postCount);
-    setPosts(readStoredCampaignPosts(selectedCampaign));
+    setPosts(cloneCampaignPosts(selectedCampaign));
     setExpandedPostIds(new Set());
     setEditingPostId(null);
     setUploadMessage(null);
@@ -503,16 +516,51 @@ export function MarketingPage() {
     }
   }
 
+  async function loadCampaigns() {
+    try {
+      const result = await fetchMarketingCampaigns();
+      const nextCampaigns = result.campaigns.map(mapApiCampaignToSeed);
+
+      if (nextCampaigns.length === 0) {
+        setCampaigns(marketingCampaignSeeds);
+        return;
+      }
+
+      setCampaigns(nextCampaigns);
+      setCampaignError(null);
+      setSelectedCampaignCode((currentCode) =>
+        nextCampaigns.some((campaign) => campaign.campaignCode === currentCode)
+          ? currentCode
+          : nextCampaigns[0].campaignCode,
+      );
+    } catch (error) {
+      setCampaigns(marketingCampaignSeeds);
+      setCampaignError(error instanceof Error ? error.message : 'Unable to load marketing campaigns from backend.');
+    }
+  }
+
   function updateStatus(postId: string, status: MarketingPostStatus) {
     updatePost(postId, (post) => ({ ...post, status }));
   }
 
   function updatePost(postId: string, updater: (post: MarketingPostSeed) => MarketingPostSeed) {
-    setPosts((currentPosts) => {
-      const nextPosts = currentPosts.map((post) => (post.id === postId ? updater(post) : post));
-      persistCampaignPosts(selectedCampaign.campaignCode, nextPosts);
-      return nextPosts;
-    });
+    const currentPost = posts.find((post) => post.id === postId);
+    if (!currentPost) {
+      return;
+    }
+
+    const nextPost = updater(currentPost);
+    const nextPosts = posts.map((post) => (post.id === postId ? nextPost : post));
+
+    setPosts(nextPosts);
+    setCampaigns((currentCampaigns) =>
+      currentCampaigns.map((campaign) =>
+        campaign.campaignCode === selectedCampaign.campaignCode
+          ? { ...campaign, posts: clonePosts(nextPosts) }
+          : campaign,
+      ),
+    );
+    void persistPost(selectedCampaign.campaignCode, nextPost);
   }
 
   function togglePost(postId: string) {
@@ -537,7 +585,7 @@ export function MarketingPage() {
     setPosts(nextPosts);
     setEditingPostId(null);
     setExpandedPostIds(new Set());
-    window.localStorage.removeItem(storageKeyForCampaign(selectedCampaign.campaignCode));
+    setSaveMessage('Reloaded campaign posts from backend state.');
   }
 
   function downloadApprovedCsv() {
@@ -572,8 +620,7 @@ export function MarketingPage() {
       const result = await uploadMarketingAssetsToR2(uploadInputs);
       const uploadedByKey = new Map(result.assets.map((asset) => [asset.key, asset]));
 
-      setPosts((currentPosts) => {
-        const nextPosts = currentPosts.map((post) => ({
+      const nextPosts = posts.map((post) => ({
           ...post,
           assets: post.assets.map((asset) => {
             const key = buildMarketingAssetKey({
@@ -587,15 +634,54 @@ export function MarketingPage() {
           }),
         }));
 
-        persistCampaignPosts(selectedCampaign.campaignCode, nextPosts);
-        return nextPosts;
-      });
+      setPosts(nextPosts);
+      setCampaigns((currentCampaigns) =>
+        currentCampaigns.map((campaign) =>
+          campaign.campaignCode === selectedCampaign.campaignCode
+            ? { ...campaign, posts: clonePosts(nextPosts) }
+            : campaign,
+        ),
+      );
+      await Promise.all(nextPosts.map((post) => persistPost(selectedCampaign.campaignCode, post, { silent: true })));
 
       setUploadMessage(`Uploaded ${result.assets.length} approved asset${result.assets.length === 1 ? '' : 's'} to R2.`);
     } catch (error) {
       setUploadMessage(error instanceof Error ? error.message : 'R2 upload failed.');
     } finally {
       setIsUploadingAssets(false);
+    }
+  }
+
+  async function persistPost(campaignCode: string, post: MarketingPostSeed, options: { silent?: boolean } = {}) {
+    setSavingPostId(post.id);
+    if (!options.silent) {
+      setSaveMessage(null);
+    }
+
+    try {
+      const result = await updateMarketingCampaignPost(campaignCode, post.id, seedPostToApiUpdate(post));
+      const nextPost = mapApiPostToSeed(result.post);
+
+      setPosts((currentPosts) => currentPosts.map((currentPost) => (currentPost.id === post.id ? nextPost : currentPost)));
+      setCampaigns((currentCampaigns) =>
+        currentCampaigns.map((campaign) =>
+          campaign.campaignCode === campaignCode
+            ? {
+                ...campaign,
+                posts: campaign.posts.map((currentPost) => (currentPost.id === post.id ? nextPost : currentPost)),
+              }
+            : campaign,
+        ),
+      );
+
+      if (!options.silent) {
+        setSaveMessage(`Saved ${post.id} in Neon.`);
+      }
+    } catch (error) {
+      setSaveMessage(error instanceof Error ? error.message : `Could not save ${post.id}.`);
+      await loadCampaigns();
+    } finally {
+      setSavingPostId((currentPostId) => (currentPostId === post.id ? null : currentPostId));
     }
   }
 
@@ -645,6 +731,11 @@ export function MarketingPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            {savingPostId ? (
+              <span className="rounded-full border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--admin-muted)]">
+                Saving {savingPostId}
+              </span>
+            ) : null}
             <button
               type="button"
               className="admin2-btn admin2-btn--primary inline-flex items-center gap-2"
@@ -659,6 +750,16 @@ export function MarketingPage() {
             </IconButton>
           </div>
         </div>
+        {campaignError ? (
+          <p className="mt-3 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-200">
+            Backend campaign fallback: {campaignError}
+          </p>
+        ) : null}
+        {saveMessage ? (
+          <p className="mt-3 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-xs text-[color:var(--admin-muted)]">
+            {saveMessage}
+          </p>
+        ) : null}
       </header>
 
       <section className="grid gap-4 md:grid-cols-5">
@@ -693,7 +794,7 @@ export function MarketingPage() {
               onChange={(event) => setSelectedCampaignCode(event.target.value)}
               className="w-full rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-sm font-semibold text-[color:var(--admin-text)]"
             >
-              {marketingCampaignSeeds.map((campaign) => (
+              {campaigns.map((campaign) => (
                 <option key={campaign.campaignCode} value={campaign.campaignCode}>
                   {campaign.campaignCode}
                 </option>
@@ -984,10 +1085,117 @@ export function MarketingPage() {
 }
 
 function cloneCampaignPosts(campaign: MarketingCampaignSeed) {
-  return campaign.posts.map((post) => ({
+  return clonePosts(campaign.posts);
+}
+
+function clonePosts(posts: MarketingPostSeed[]) {
+  return posts.map((post) => ({
     ...post,
     assets: post.assets.map((asset) => ({ ...asset })),
   }));
+}
+
+function mapApiCampaignToSeed(campaign: MarketingCampaignRecord): MarketingCampaignSeed {
+  const sourceContext = campaign.sourceContext ?? {};
+  const posts = campaign.posts.map(mapApiPostToSeed);
+
+  return {
+    title: campaign.title,
+    campaignCode: campaign.campaignCode,
+    primaryUrl: readString(sourceContext.primaryUrl, 'https://innerbloomjourney.org/'),
+    postCount: posts.length || marketingCampaignSeeds[0].postCount,
+    language: readLanguage(sourceContext.language),
+    driveRootUrl: readString(sourceContext.driveRootUrl, ''),
+    strategyMemoryUrl: readString(sourceContext.strategyMemoryUrl, ''),
+    assetsFolderUrl: readString(sourceContext.assetsFolderUrl, ''),
+    campaignsFolderUrl: readString(sourceContext.campaignsFolderUrl, ''),
+    posts,
+  };
+}
+
+function mapApiPostToSeed(post: MarketingPostRecord): MarketingPostSeed {
+  const { scheduledDate, scheduledTime } = splitScheduledAt(post.scheduledAt);
+
+  return {
+    id: post.postCode,
+    number: post.postCode.replace(/^post_?/, '').padStart(3, '0'),
+    platform: 'instagram',
+    format: post.format === 'carousel' ? 'carousel' : 'static',
+    status: normalizePostStatus(post.status),
+    scheduledDate,
+    scheduledTime,
+    hypothesis: post.hypothesis,
+    metric: post.targetMetric,
+    caption: post.caption,
+    trackingUrl: post.trackingUrl,
+    assets: post.assetUrls.map(mapApiAssetToSeed),
+  };
+}
+
+function mapApiAssetToSeed(asset: MarketingAssetRecord): MarketingAsset {
+  return {
+    file: asset.file,
+    title: asset.title,
+    url: asset.url ?? '',
+  };
+}
+
+function seedPostToApiUpdate(post: MarketingPostSeed) {
+  return {
+    status: post.status,
+    caption: post.caption,
+    hypothesis: post.hypothesis,
+    targetMetric: post.metric,
+    trackingUrl: post.trackingUrl,
+    scheduledAt: toScheduledAt(post.scheduledDate, post.scheduledTime),
+    assetUrls: post.assets.map((asset) => ({
+      file: asset.file,
+      title: asset.title,
+      url: asset.url,
+      selected: true,
+    })),
+  };
+}
+
+function normalizePostStatus(status: MarketingPostRecord['status']): MarketingPostStatus {
+  if (status === 'approved' || status === 'draft') {
+    return status;
+  }
+
+  return 'needs_review';
+}
+
+function splitScheduledAt(value: string | null) {
+  if (!value) {
+    return { scheduledDate: '', scheduledTime: '19:30:00' };
+  }
+
+  const match = value.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}(?::\d{2})?)/);
+  if (!match) {
+    return { scheduledDate: '', scheduledTime: '19:30:00' };
+  }
+
+  return {
+    scheduledDate: match[1],
+    scheduledTime: match[2].length === 5 ? `${match[2]}:00` : match[2],
+  };
+}
+
+function toScheduledAt(date: string, time: string) {
+  if (!date) {
+    return null;
+  }
+
+  const normalizedTime = time.length === 5 ? `${time}:00` : time || '19:30:00';
+  return `${date}T${normalizedTime}+02:00`;
+}
+
+function readString(value: unknown, fallback: string) {
+  return typeof value === 'string' && value.trim() ? value : fallback;
+}
+
+function readLanguage(value: unknown): MarketingCampaignSeed['language'] {
+  return value === 'Spanish' ? 'Spanish' : 'English';
 }
 
 function InsightStat({ label, value }: { label: string; value: string }) {
@@ -1085,45 +1293,6 @@ function formatNumber(value: number | string | null | undefined) {
   }
 
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(numberValue);
-}
-
-function storageKeyForCampaign(campaignCode: string) {
-  return `${STORAGE_PREFIX}${campaignCode}`;
-}
-
-function readStoredCampaignPosts(campaign: MarketingCampaignSeed) {
-  if (typeof window === 'undefined') {
-    return cloneCampaignPosts(campaign);
-  }
-
-  const raw = window.localStorage.getItem(storageKeyForCampaign(campaign.campaignCode));
-  if (!raw) {
-    return cloneCampaignPosts(campaign);
-  }
-
-  try {
-    const parsed = JSON.parse(raw) as { posts?: MarketingPostSeed[] };
-    if (!Array.isArray(parsed.posts)) {
-      return cloneCampaignPosts(campaign);
-    }
-
-    return parsed.posts.map((post) => ({
-      ...post,
-      assets: Array.isArray(post.assets) ? post.assets.map((asset) => ({ ...asset })) : [],
-    }));
-  } catch {
-    return cloneCampaignPosts(campaign);
-  }
-}
-
-function persistCampaignPosts(campaignCode: string, posts: MarketingPostSeed[]) {
-  window.localStorage.setItem(
-    storageKeyForCampaign(campaignCode),
-    JSON.stringify({
-      updatedAt: new Date().toISOString(),
-      posts,
-    }),
-  );
 }
 
 function fileToMarketingAsset(file: File) {
