@@ -1,6 +1,7 @@
 import process from 'node:process';
-import { buildMarketingCmoContext } from '../src/services/marketingCmoContextService.js';
-import { endPool } from '../src/db.js';
+import { buildMarketingCmoContextWithDeps } from '../src/services/marketingCmoContextService.js';
+import { getBestAvailableMarketingAnalyticsContextForPeriod } from '../src/services/marketingCmoAnalyticsFallback.js';
+import { endPool, pool } from '../src/db.js';
 
 function readArgs(argv: string[]): { periodKey: string; force: boolean } {
   const periodArg = argv.find((arg) => arg.startsWith('--period='));
@@ -16,10 +17,16 @@ function readArgs(argv: string[]): { periodKey: string; force: boolean } {
 
 async function main(): Promise<void> {
   const args = readArgs(process.argv.slice(2));
-  const result = await buildMarketingCmoContext({
-    periodKey: args.periodKey,
-    force: args.force,
-  });
+  const result = await buildMarketingCmoContextWithDeps(
+    {
+      periodKey: args.periodKey,
+      force: args.force,
+    },
+    {
+      dbPool: pool,
+      analyticsLoader: getBestAvailableMarketingAnalyticsContextForPeriod,
+    },
+  );
 
   console.log(JSON.stringify(result, null, 2));
 }
