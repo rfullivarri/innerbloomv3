@@ -690,7 +690,8 @@
     flex: 1 1 0;
     flex-direction: column;
     gap: clamp(0.24rem, 0.78dvh, 0.45rem);
-    overflow: visible;
+    overflow: hidden;
+    pointer-events: none;
   }
   .native-welcome-frame {
     display: flex;
@@ -744,7 +745,7 @@
     border-radius: 1.5rem;
     border: 1px solid transparent;
     background: transparent;
-    padding: clamp(0.16rem, 0.65dvh, 0.34rem) clamp(0.16rem, 0.75dvw, 0.28rem) clamp(0.18rem, 0.75dvh, 0.42rem);
+    padding: clamp(0.48rem, 1.1dvh, 0.7rem) clamp(0.16rem, 0.75dvw, 0.28rem) clamp(0.18rem, 0.75dvh, 0.42rem);
     box-shadow: none;
   }
 
@@ -755,6 +756,7 @@
     height: auto;
     max-height: none;
     overflow: hidden;
+    contain: paint;
     border-radius: calc(1.5rem - 2px);
     border: 0;
     background: transparent;
@@ -772,11 +774,40 @@
     margin-inline: auto;
     width: min(100%, 460px);
     max-width: 460px;
-    height: 100%;
+    min-height: var(--native-welcome-visual-viewport-height);
+    height: var(--native-welcome-visual-viewport-height);
   }
 
   .native-welcome-visual-shell .v3-method-product-visual {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
     margin: 0;
+  }
+
+  .native-welcome-visual-shell :is(
+    .v3-method-quickstart__scene,
+    .v3-method-signals-loop,
+    .v3-method-tasks-loop,
+    .ib20-showcase,
+    .v3-adjustment-demo,
+    .v3-method-logros__scene
+  ) {
+    margin-top: 0;
+  }
+
+  .native-welcome-visual-shell :is(
+    .v3-method-signals-loop,
+    .v3-method-tasks-loop,
+    .ib20-showcase
+  ) {
+    min-height: var(--native-welcome-visual-viewport-height);
+    place-items: start center;
+    align-items: start;
+  }
+
+  .native-welcome-visual-shell .v3-method-signals-slide {
+    justify-content: flex-start;
   }
 
   .native-welcome-visual-shell .v3-method-quickstart__scene { transform: translateY(var(--native-welcome-visual-y)) scale(var(--native-welcome-visual-scale)); transform-origin: center top; }
@@ -785,11 +816,19 @@
   .native-welcome-visual-shell .v3-method-logros__scene { transform: translateY(var(--native-welcome-visual-y)) scale(var(--native-welcome-visual-scale)); transform-origin: center top; width: min(116%, 530px); margin-left: auto; margin-right: auto; }
 
   .native-welcome-actions {
-    position: static;
+    position: relative;
+    z-index: 5;
     flex: 0 0 auto;
     transform: none;
     padding-bottom: 0;
     margin-top: clamp(0.24rem, 0.65dvh, 0.44rem);
+    background: linear-gradient(
+      180deg,
+      rgba(7, 16, 30, 0) 0%,
+      rgba(7, 16, 30, 0.72) 18%,
+      rgba(7, 16, 30, 0.96) 100%
+    );
+    border-radius: 1.6rem 1.6rem 0 0;
   }
 
   .native-welcome-root.native-welcome--compact-viewport .native-welcome-carousel {
