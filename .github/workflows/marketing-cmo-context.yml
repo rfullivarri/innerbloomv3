@@ -177,8 +177,8 @@ jobs:
           base: main
           branch: automation/marketing-cmo-context-${{ steps.period.outputs.period_key }}
           delete-branch: false
-          commit-message: chore(marketing): generate CMO context for ${{ steps.period.outputs.period_key }}
-          title: chore(marketing): CMO context ${{ steps.period.outputs.period_key }}
+          commit-message: "chore(marketing): generate CMO context for ${{ steps.period.outputs.period_key }}"
+          title: "chore(marketing): CMO context ${{ steps.period.outputs.period_key }}"
           body-path: /tmp/marketing-cmo-context-pr-body.md
           add-paths: |
             marketing/agent-inputs/${{ steps.period.outputs.period_key }}/**
