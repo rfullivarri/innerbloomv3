@@ -181,11 +181,16 @@ async function readAssetBytes(asset: MarketingR2AssetUpload) {
     throw new HttpError(400, 'asset_source_fetch_failed', `Asset fetch failed with HTTP ${response.status}.`);
   }
 
+  const contentType = response.headers.get('content-type') ?? asset.contentType;
+  if (!isSupportedImageContentType(contentType)) {
+    throw new HttpError(400, 'invalid_asset_source_type', `Asset source did not return an image. Content-Type: ${contentType || 'unknown'}.`);
+  }
+
   const arrayBuffer = await response.arrayBuffer();
 
   return {
     bytes: Buffer.from(arrayBuffer),
-    contentType: response.headers.get('content-type') ?? asset.contentType,
+    contentType,
   };
 }
 
@@ -202,7 +207,41 @@ function normalizeSourceUrl(value: string) {
     throw new HttpError(400, 'invalid_asset_source_url', 'Asset source URL must be HTTP or HTTPS.');
   }
 
+  const driveFileId = extractGoogleDriveFileId(url);
+  if (driveFileId) {
+    return `https://drive.google.com/uc?export=download&id=${encodeURIComponent(driveFileId)}`;
+  }
+
   return url.toString();
+}
+
+function extractGoogleDriveFileId(url: URL) {
+  const host = url.hostname.toLowerCase();
+  if (!host.endsWith('drive.google.com')) {
+    return null;
+  }
+
+  const idParam = url.searchParams.get('id');
+  if (idParam) {
+    return idParam;
+  }
+
+  const filePathMatch = url.pathname.match(/\/file\/d\/([^/]+)/);
+  if (filePathMatch?.[1]) {
+    return filePathMatch[1];
+  }
+
+  const directPathMatch = url.pathname.match(/\/d\/([^/]+)/);
+  if (directPathMatch?.[1]) {
+    return directPathMatch[1];
+  }
+
+  return null;
+}
+
+function isSupportedImageContentType(value: string | undefined) {
+  const contentType = String(value || '').split(';')[0].trim().toLowerCase();
+  return contentType.startsWith('image/');
 }
 
 function normalizeContentType(value: string | undefined) {
