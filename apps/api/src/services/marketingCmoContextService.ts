@@ -9,6 +9,10 @@ import type { ErrorObject } from 'ajv';
 import type { Pool } from 'pg';
 import { HttpError } from '../lib/http-error.js';
 import {
+  getPersistedMarketingAnalyticsContextForPeriod,
+  type PersistedMarketingAnalyticsContext,
+} from './marketingAnalyticsService.js';
+import {
   listRecentMarketingCampaignsForContext,
   type MarketingCampaignWithMetricsPayload,
 } from './marketingCampaignService.js';
@@ -70,6 +74,7 @@ export type MarketingCmoContext = {
 
 export type MarketingStrategyMemoryContext = {
   document_path: string;
+  current_objective: string;
   current_positioning: string[];
   historical_learnings: string[];
   previous_experiments: string[];
@@ -77,6 +82,13 @@ export type MarketingStrategyMemoryContext = {
   content_rules: string[];
   known_risks: string[];
   open_questions: string[];
+  campaign_defaults: {
+    default_platform: string;
+    default_language: string;
+    default_monthly_post_count: number | null;
+    current_tested_formats: string[];
+    current_mvp_campaign_code: string;
+  };
 };
 
 export type MarketingAnalyticsContext = {
@@ -172,15 +184,11 @@ type MarketingCmoContextDeps = {
   schemaPath?: string;
   dbPool?: Pick<Pool, 'query'>;
   campaignLoader?: (limit: number) => Promise<MarketingCampaignWithMetricsPayload[]>;
-};
-
-type AnalyticsSnapshotRow = {
-  sync_run_id: string;
-  period_start: string | Date;
-  period_end: string | Date;
-  snapshot_payload: unknown;
-  data_quality: unknown;
-  updated_at: string | Date;
+  analyticsLoader?: (params: {
+    periodStart: string;
+    periodEnd: string;
+    dbPool: Pick<Pool, 'query'>;
+  }) => Promise<PersistedMarketingAnalyticsContext>;
 };
 
 export async function buildMarketingCmoContext(
@@ -247,13 +255,18 @@ export async function buildMarketingCmoContextWithDeps(
 
   const dbPool = deps.dbPool ?? (await import('../db.js')).pool;
   const campaignLoader = deps.campaignLoader ?? listRecentMarketingCampaignsForContext;
+  const analyticsLoader = deps.analyticsLoader ?? getPersistedMarketingAnalyticsContextForPeriod;
   const schemaPath = deps.schemaPath ?? path.join(repoRoot, 'prompts/marketing/agent-system/schemas/cmo-input-v1.schema.json');
   const strategyPath = resolveStrategyMemoryPath(repoRoot);
 
   const [strategyMemory, campaigns, analytics] = await Promise.all([
     readStrategyMemory(strategyPath, repoRoot),
     campaignLoader(MAX_CONTEXT_CAMPAIGNS),
-    loadPersistedAnalyticsSnapshot(dbPool, period),
+    analyticsLoader({
+      periodStart: period.analyticsWindow.period_start,
+      periodEnd: period.analyticsWindow.period_end,
+      dbPool,
+    }),
   ]);
 
   const campaignContext = normalizeCampaigns(campaigns);
@@ -263,14 +276,15 @@ export async function buildMarketingCmoContextWithDeps(
   sourceManifest.push(buildCampaignSourceManifest(campaigns));
 
   const availableAssets = await buildAvailableAssets(repoRoot, campaigns, sourceManifest);
-  const operationalConstraints = buildOperationalConstraints(campaigns);
+  const operationalConstraints = buildOperationalConstraints(campaigns, strategyMemory);
+  const targetPostCount = strategyMemory.campaign_defaults.default_monthly_post_count ?? DEFAULT_MONTHLY_CAPACITY_POSTS;
   const context: MarketingCmoContext = scrubSensitiveValues({
     schema_version: SCHEMA_VERSION,
     period: {
       current_period: params.periodKey,
       previous_period: period.previousPeriodKey,
       timezone: MARKETING_TIMEZONE,
-      target_post_count: DEFAULT_MONTHLY_CAPACITY_POSTS,
+      target_post_count: targetPostCount,
       analysis_window: {
         start_date: period.analyticsWindow.period_start,
         end_date: period.analyticsWindow.period_end,
@@ -386,118 +400,146 @@ function resolveStrategyMemoryPath(repoRoot: string): string {
 
 async function readStrategyMemory(strategyPath: string, repoRoot: string): Promise<MarketingStrategyMemoryContext> {
   const markdown = await readFile(strategyPath, 'utf8');
-  const bullets = extractMarkdownBullets(markdown);
+  const sections = parseMarkdownSections(markdown);
+  const campaignDefaults = parseCampaignDefaults(sections.get('campaign defaults') ?? []);
+  const knownGaps = sectionItems(sections, 'Known Gaps');
+  const nextRunInstructions = sectionItems(sections, 'Next Run Instructions');
+  const firstStrategyProposal = sectionItems(sections, 'First 20-Post Strategy Proposal');
 
   return {
     document_path: path.relative(repoRoot, strategyPath),
-    current_positioning: filterBullets(bullets, ['hypotheses']),
-    historical_learnings: filterBullets(bullets, ['learnings', 'what worked', 'what did not work', 'insights detected']),
-    previous_experiments: filterBullets(bullets, ['next experiments']),
-    previous_decisions: filterBullets(bullets, ['decisions taken']),
-    content_rules: filterBullets(bullets, ['recommendations for future content proposals']),
-    known_risks: filterBullets(bullets, ['what did not work']),
-    open_questions: [],
+    current_objective: firstSectionText(sections, 'Current Objective'),
+    current_positioning: sectionItems(sections, 'Current Positioning'),
+    historical_learnings: sectionItemsByPrefix(sections, 'Baseline:'),
+    previous_experiments: firstStrategyProposal,
+    previous_decisions: nextRunInstructions,
+    content_rules: [
+      ...sectionItems(sections, 'Data Interpretation Rules'),
+      ...firstStrategyProposal,
+      ...nextRunInstructions,
+    ],
+    known_risks: knownGaps,
+    open_questions: knownGaps,
+    campaign_defaults: campaignDefaults,
   };
 }
 
-function extractMarkdownBullets(markdown: string): { label: string; text: string }[] {
-  const result: { label: string; text: string }[] = [];
-  const bulletPattern = /^-\s+\*\*(.+?):\*\*\s*(.+)$/gm;
-  let match: RegExpExecArray | null;
+export function parseMarkdownSections(markdown: string): Map<string, string[]> {
+  const sections = new Map<string, string[]>();
+  let currentSection = '';
+  let currentLines: string[] = [];
 
-  while ((match = bulletPattern.exec(markdown)) !== null) {
-    result.push({
-      label: match[1].trim().toLowerCase(),
-      text: match[2].trim(),
-    });
-  }
-
-  return result;
-}
-
-function filterBullets(bullets: { label: string; text: string }[], labels: string[]): string[] {
-  const labelSet = new Set(labels.map((label) => label.toLowerCase()));
-  return bullets
-    .filter((item) => labelSet.has(item.label))
-    .flatMap((item) => splitSemicolonText(item.text));
-}
-
-function splitSemicolonText(text: string): string[] {
-  return text
-    .split(';')
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-async function loadPersistedAnalyticsSnapshot(
-  dbPool: Pick<Pool, 'query'>,
-  period: ReturnType<typeof buildMarketingPeriod>,
-): Promise<{ context: MarketingAnalyticsContext; updatedAt: string; syncRunId: string }> {
-  const tableExists = await dbPool.query<{ exists: boolean }>(
-    `SELECT EXISTS (
-       SELECT 1
-         FROM information_schema.tables
-        WHERE table_schema = 'public'
-          AND table_name = 'marketing_analytics_snapshots'
-     ) AS exists`,
-  );
-
-  if (!tableExists.rows[0]?.exists) {
-    throw new HttpError(
-      409,
-      'marketing_analytics_snapshot_missing',
-      'No persisted marketing analytics snapshot table is available for the previous period.',
-    );
-  }
-
-  const result = await dbPool.query<AnalyticsSnapshotRow>(
-    `SELECT sync_run_id, period_start, period_end, snapshot_payload, data_quality, updated_at
-       FROM marketing_analytics_snapshots
-      WHERE period_start = $1::date
-        AND period_end = $2::date
-        AND COALESCE((data_quality->>'status') NOT IN ('invalid', 'blocked'), true)
-      ORDER BY updated_at DESC
-      LIMIT 1`,
-    [period.analyticsWindow.period_start, period.analyticsWindow.period_end],
-  );
-
-  const row = result.rows[0];
-  if (!row) {
-    throw new HttpError(
-      409,
-      'marketing_analytics_snapshot_missing',
-      `No valid persisted marketing analytics snapshot found for ${period.previousPeriodKey}.`,
-    );
-  }
-
-  const payload = normalizeRecord(row.snapshot_payload);
-  const dataQuality = normalizeRecord(row.data_quality);
-  const context: MarketingAnalyticsContext = {
-    sync_run_id: String(row.sync_run_id),
-    period_start: toDateOnly(row.period_start),
-    period_end: toDateOnly(row.period_end),
-    data_quality: {
-      status: stringFrom(dataQuality.status, 'valid'),
-      issues: stringArrayFrom(dataQuality.issues),
-    },
-    marketing_totals: normalizeRecord(payload.marketing_totals),
-    product_totals: normalizeRecord(payload.product_totals),
-    registered_users: normalizeRecord(payload.registered_users),
-    top_pages: recordArrayFrom(payload.top_pages),
-    marketing_pages: recordArrayFrom(payload.marketing_pages),
-    product_pages: recordArrayFrom(payload.product_pages),
-    top_sources: recordArrayFrom(payload.top_sources),
-    clean_sources: recordArrayFrom(payload.clean_sources),
-    top_events: recordArrayFrom(payload.top_events),
-    search_console_queries: recordArrayFrom(payload.search_console_queries),
-    funnel_events: recordArrayFrom(payload.funnel_events),
+  const flush = () => {
+    if (!currentSection) {
+      return;
+    }
+    sections.set(normalizeSectionName(currentSection), normalizeMarkdownContent(currentLines));
   };
 
-  return {
-    context,
-    updatedAt: toIso(row.updated_at),
-    syncRunId: String(row.sync_run_id),
+  for (const line of markdown.split(/\r?\n/)) {
+    const heading = line.match(/^##\s+(.+?)\s*$/);
+    if (heading) {
+      flush();
+      currentSection = heading[1].trim();
+      currentLines = [];
+      continue;
+    }
+
+    if (currentSection) {
+      currentLines.push(line);
+    }
+  }
+
+  flush();
+  return sections;
+}
+
+function normalizeSectionName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/`/g, '')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+function normalizeMarkdownContent(lines: string[]): string[] {
+  const items: string[] = [];
+  const paragraph: string[] = [];
+
+  const flushParagraph = () => {
+    if (paragraph.length === 0) {
+      return;
+    }
+    items.push(paragraph.join(' ').trim());
+    paragraph.length = 0;
   };
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) {
+      flushParagraph();
+      continue;
+    }
+
+    const bullet = line.match(/^[-*]\s+(.+)$/);
+    const numbered = line.match(/^\d+\.\s+(.+)$/);
+    if (bullet || numbered) {
+      flushParagraph();
+      items.push((bullet?.[1] ?? numbered?.[1] ?? '').trim());
+      continue;
+    }
+
+    paragraph.push(line);
+  }
+
+  flushParagraph();
+  return items.filter(Boolean);
+}
+
+function sectionItems(sections: Map<string, string[]>, name: string): string[] {
+  return sections.get(normalizeSectionName(name)) ?? [];
+}
+
+function sectionItemsByPrefix(sections: Map<string, string[]>, prefix: string): string[] {
+  const normalizedPrefix = normalizeSectionName(prefix);
+  return Array.from(sections.entries())
+    .filter(([name]) => name.startsWith(normalizedPrefix))
+    .flatMap(([, items]) => items);
+}
+
+function firstSectionText(sections: Map<string, string[]>, name: string): string {
+  return sectionItems(sections, name)[0] ?? '';
+}
+
+function parseCampaignDefaults(items: string[]): MarketingStrategyMemoryContext['campaign_defaults'] {
+  const defaults: MarketingStrategyMemoryContext['campaign_defaults'] = {
+    default_platform: '',
+    default_language: '',
+    default_monthly_post_count: null,
+    current_tested_formats: [],
+    current_mvp_campaign_code: '',
+  };
+
+  for (const item of items) {
+    const [rawKey, ...rest] = item.split(':');
+    const key = rawKey.trim().toLowerCase();
+    const value = rest.join(':').trim().replace(/^`|`$/g, '');
+    if (key === 'default platform') {
+      defaults.default_platform = value;
+    } else if (key === 'default language') {
+      defaults.default_language = value;
+    } else if (key === 'default monthly post count') {
+      const parsed = Number.parseInt(value, 10);
+      defaults.default_monthly_post_count = Number.isFinite(parsed) ? parsed : null;
+    } else if (key === 'current tested format') {
+      defaults.current_tested_formats = value.split('+').map((part) => part.trim()).filter(Boolean);
+    } else if (key === 'current mvp campaign code') {
+      defaults.current_mvp_campaign_code = value;
+    }
+  }
+
+  return defaults;
 }
 
 function normalizeCampaigns(campaigns: MarketingCampaignWithMetricsPayload[]): MarketingCmoCampaignContext[] {
@@ -599,12 +641,13 @@ async function buildAvailableAssets(
   });
 
   const allAssets = stableUniqueAssets([...campaignAssets, ...repoAssets.assets]);
+  const contentAssets = allAssets.filter((asset) => isContentAssetKind(asset.kind));
 
   return {
-    product_screenshots: allAssets.filter((asset) => asset.kind === 'product_screenshot'),
-    brand_assets: allAssets.filter((asset) => asset.kind === 'brand_asset'),
-    reusable_templates: allAssets.filter((asset) => asset.kind === 'reusable_template'),
-    existing_visuals: allAssets.filter((asset) => asset.kind === 'existing_visual'),
+    product_screenshots: contentAssets.filter((asset) => asset.kind === 'product_screenshot'),
+    brand_assets: contentAssets.filter((asset) => asset.kind === 'brand_asset'),
+    reusable_templates: contentAssets.filter((asset) => asset.kind === 'reusable_template'),
+    existing_visuals: contentAssets.filter((asset) => asset.kind === 'existing_visual'),
     missing_assets: [],
   };
 }
@@ -680,8 +723,20 @@ async function walkFiles(root: string): Promise<string[]> {
 
 function classifyAssetKind(fileOrType: string): string {
   const value = fileOrType.toLowerCase();
-  if (value.includes('template') || value.endsWith('.html') || value.endsWith('.csv')) {
+  if (value.endsWith('.md')) {
+    return 'reference_document';
+  }
+  if (value.endsWith('.json') || value.endsWith('.csv')) {
+    return 'data_file';
+  }
+  if (value.includes('template') || value.endsWith('.html')) {
     return 'reusable_template';
+  }
+  if (value.includes('asset') && value.includes('drive.google.com')) {
+    return 'existing_visual';
+  }
+  if (/^https?:/.test(value) && !/\.(png|jpe?g|webp|gif)(\?|#|$)/i.test(value)) {
+    return 'reference_document';
   }
   if (value.includes('logo') || value.includes('brand')) {
     return 'brand_asset';
@@ -690,6 +745,10 @@ function classifyAssetKind(fileOrType: string): string {
     return 'product_screenshot';
   }
   return 'existing_visual';
+}
+
+function isContentAssetKind(kind: string): boolean {
+  return ['product_screenshot', 'brand_asset', 'reusable_template', 'existing_visual'].includes(kind);
 }
 
 function stableUniqueAssets(assets: MarketingCmoAsset[]): MarketingCmoAsset[] {
@@ -706,15 +765,16 @@ function buildBusinessContext(
   constraints: MarketingOperationalConstraints,
 ): MarketingCmoContext['business_context'] {
   const latestCampaign = campaigns[0];
-  const currentObjective = latestCampaign?.objective ?? '';
-  const audience = campaigns
-    .flatMap((campaign) => campaign.posts.map((post) => post.hypothesis))
-    .filter(Boolean)
-    .slice(0, 8);
+  const currentObjective = strategyMemory.current_objective || latestCampaign?.objective || '';
+  const audience: string[] = [];
+  const notes = [
+    ...(audience.length === 0 ? ['No explicit audience section found in strategy memory or structured configuration.'] : []),
+    ...(strategyMemory.current_objective ? [] : ['No explicit Current Objective section found in strategy memory.']),
+  ];
 
   return {
     current_marketing_objective: currentObjective,
-    product_stage: strategyMemory.previous_decisions.join('; ').includes('MVP') ? 'MVP validation loop' : '',
+    product_stage: detectProductStage(strategyMemory),
     audience,
     current_priorities: [
       ...strategyMemory.previous_experiments,
@@ -726,20 +786,44 @@ function buildBusinessContext(
       ...constraints.legal_and_brand,
     ],
     known_product_changes: strategyMemory.historical_learnings.filter((item) =>
-      /change|move|ui|copy|dashboard|source|workflow/i.test(item),
+      /r2|drive|ga4|search console|neon|admin|dashboard|metricool|publishing|asset|csv/i.test(item),
     ),
-    notes: strategyMemory.open_questions.length === 0 ? ['No explicit open questions section found in strategy memory.'] : [],
+    notes,
   };
 }
 
-function buildOperationalConstraints(campaigns: MarketingCampaignWithMetricsPayload[]): MarketingOperationalConstraints {
-  const platforms = Array.from(new Set(campaigns.flatMap((campaign) => campaign.posts.map((post) => post.platform)))).sort();
+function detectProductStage(strategyMemory: MarketingStrategyMemoryContext): string {
+  const text = [
+    ...strategyMemory.current_positioning,
+    ...strategyMemory.historical_learnings,
+    strategyMemory.campaign_defaults.current_mvp_campaign_code,
+  ].join(' ').toLowerCase();
+
+  if (text.includes('mvp') || text.includes('early product') || text.includes('early version')) {
+    return 'early-stage MVP';
+  }
+
+  return '';
+}
+
+function buildOperationalConstraints(
+  campaigns: MarketingCampaignWithMetricsPayload[],
+  strategyMemory: MarketingStrategyMemoryContext,
+): MarketingOperationalConstraints {
+  const platforms = Array.from(new Set([
+    strategyMemory.campaign_defaults.default_platform.toLowerCase(),
+    ...campaigns.flatMap((campaign) => campaign.posts.map((post) => post.platform)),
+  ].filter(Boolean))).sort();
+  const configuredFormats = strategyMemory.campaign_defaults.current_tested_formats.length
+    ? strategyMemory.campaign_defaults.current_tested_formats
+    : ['carousel', 'static', 'reel', 'story', 'thread', 'short_video'];
+
   return {
     platforms: platforms.length ? platforms : ['instagram'],
-    supported_formats: ['carousel', 'static', 'reel', 'story', 'thread', 'short_video'],
+    supported_formats: configuredFormats,
     publishing: 'Approved posts are exported to Metricool CSV; this exporter does not publish content.',
     public_storage: 'Public marketing files can be served from R2 or repository public assets; this exporter does not upload binaries.',
-    monthly_capacity_posts: DEFAULT_MONTHLY_CAPACITY_POSTS,
+    monthly_capacity_posts: strategyMemory.campaign_defaults.default_monthly_post_count ?? DEFAULT_MONTHLY_CAPACITY_POSTS,
     asset_limits: ['Do not download or duplicate binary assets during context export.', 'Use stable asset IDs that trace to campaign, URL, or repository paths.'],
     legal_and_brand: ['Human review is required before publishing.', 'Do not include secrets, service account keys, unnecessary PII, or individual user identifiers.'],
     human_review_required: true,
@@ -861,38 +945,6 @@ function getTimeZoneOffsetMinutes(date: Date, timeZone: string): number {
     Number(values.get('second')),
   );
   return (asUtc - date.getTime()) / 60_000;
-}
-
-function normalizeRecord(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return {};
-  }
-  return value as Record<string, unknown>;
-}
-
-function recordArrayFrom(value: unknown): Record<string, unknown>[] {
-  return Array.isArray(value)
-    ? value.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === 'object' && !Array.isArray(item))
-    : [];
-}
-
-function stringArrayFrom(value: unknown): string[] {
-  return Array.isArray(value) ? value.map((item) => String(item)).filter(Boolean) : [];
-}
-
-function stringFrom(value: unknown, fallback: string): string {
-  return typeof value === 'string' && value.trim() ? value : fallback;
-}
-
-function toIso(value: string | Date): string {
-  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
-}
-
-function toDateOnly(value: string | Date): string {
-  if (value instanceof Date) {
-    return value.toISOString().slice(0, 10);
-  }
-  return String(value).slice(0, 10);
 }
 
 function checksumBuffer(buffer: Buffer): string {

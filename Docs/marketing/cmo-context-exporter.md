@@ -24,11 +24,18 @@ The exporter reads:
 
 - Strategy memory from `Docs/marketing/strategy-memory.md` when present, otherwise `Docs/marketing/STRATEGY_MEMORY.md`.
 - Recent persisted marketing campaigns and post metrics from Neon through `marketingCampaignService`.
-- Persisted analytics snapshots from `marketing_analytics_snapshots`.
+- Persisted analytics from the real marketing analytics tables:
+  - `marketing_analytics_sync_runs`
+  - `marketing_insights`
+  - `marketing_ga4_page_metrics`
+  - `marketing_ga4_source_metrics`
+  - `marketing_ga4_event_metrics`
+  - `marketing_gsc_query_page_metrics`
+  - `marketing_analytics_settings`
 - Repository marketing assets under `Docs/marketing`, `apps/web/public/marketing`, and `assest visuales`.
 - Documented service defaults such as Europe/Madrid timezone, a monthly capacity fallback of 20 posts, and a recent campaign limit of 12 campaigns.
 
-The current repository does not include the requested `apps/api/src/services/marketingAnalyticsService.ts` or the original prompt files under `prompts/marketing`. The exporter therefore expects analytics to already be persisted in `marketing_analytics_snapshots` and blocks clearly when no valid snapshot exists.
+The exporter uses `getPersistedMarketingAnalyticsContextForPeriod` from `apps/api/src/services/marketingAnalyticsService.ts`. It requires a completed persisted run that exactly matches the previous-period date window. It does not trigger a new GA4 or Search Console sync.
 
 ## CLI
 
@@ -86,13 +93,13 @@ If validation fails, the final file is not written. The error includes AJV paths
 ## Expected Errors
 
 - `invalid_period_key`: the requested period is not `YYYY-MM`.
-- `marketing_analytics_snapshot_missing`: no persisted analytics table or no valid previous-period snapshot exists.
+- `marketing_analytics_run_missing`: no completed persisted analytics run exists for the previous period.
+- `marketing_analytics_run_not_completed`: a run exists for the previous period but is still running or failed.
 - `cmo_context_schema_invalid`: generated context failed schema validation.
 - `already_exists`: not an error; the file already exists and `force` was false.
 
 ## Next Work
 
-- Add or connect the real marketing analytics persistence service when available.
-- Backfill `marketing_analytics_snapshots` from the approved analytics sync process.
-- Version the missing CMO prompt files if they are still required by the agent runtime.
 - Add richer structured business configuration if marketing objectives, product stage, and audience move out of docs/campaign records into a dedicated table.
+- Add Metricool performance ingestion once it is no longer manual.
+- Add an explicit audience field to strategy memory or structured marketing settings when audience targeting becomes stable enough to encode.

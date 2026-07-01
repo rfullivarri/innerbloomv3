@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { importPKCS8, SignJWT } from 'jose';
+import type { Pool } from 'pg';
 import { HttpError } from '../lib/http-error.js';
 import { pool, withClient } from '../db.js';
 
@@ -113,6 +114,41 @@ type RegisteredUserStats = {
   total: number;
   newInPeriod: number;
   excludedInternal: number;
+};
+
+type DbPool = Pick<Pool, 'query'>;
+
+export type PersistedMarketingAnalyticsContextParams = {
+  periodStart: string;
+  periodEnd: string;
+  dbPool?: DbPool;
+};
+
+export type PersistedMarketingAnalyticsContext = {
+  context: {
+    sync_run_id: string;
+    period_start: string;
+    period_end: string;
+    data_quality: {
+      status: 'valid' | 'warning';
+      issues: string[];
+    };
+    marketing_totals: ReturnType<typeof sumPageRecords>;
+    product_totals: ReturnType<typeof sumPageRecords>;
+    registered_users: RegisteredUserStats;
+    top_pages: PageMetricRecord[];
+    marketing_pages: PageMetricRecord[];
+    product_pages: PageMetricRecord[];
+    top_sources: SourceMetricRecord[];
+    clean_sources: SourceMetricRecord[];
+    top_events: { event_name: string; event_count: number }[];
+    search_console_queries: QueryMetricRecord[];
+    funnel_events: { event_name: string; event_count: number }[];
+    insights: Record<string, unknown> | null;
+    settings: MarketingAnalyticsSettings;
+  };
+  syncRunId: string;
+  updatedAt: string;
 };
 
 const DEFAULT_MARKETING_ANALYTICS_SETTINGS: MarketingAnalyticsSettings = {
@@ -239,6 +275,151 @@ export async function getMarketingAnalyticsInsights() {
     topEvents: eventResult.rows,
     topQueries,
     registeredUsers,
+  };
+}
+
+export async function getPersistedMarketingAnalyticsContextForPeriod({
+  periodStart,
+  periodEnd,
+  dbPool = pool,
+}: PersistedMarketingAnalyticsContextParams): Promise<PersistedMarketingAnalyticsContext> {
+  const [startDate, endDate] = [
+    assertDateOnly(periodStart, 'periodStart'),
+    assertDateOnly(periodEnd, 'periodEnd'),
+  ];
+  const completedRun = await dbPool.query<{
+    run_id: string;
+    status: string;
+    period_start: string | Date;
+    period_end: string | Date;
+    started_at: string | Date;
+    completed_at: string | Date | null;
+    error_message: string | null;
+  }>(
+    `SELECT run_id, status, period_start, period_end, started_at, completed_at, error_message
+       FROM marketing_analytics_sync_runs
+      WHERE period_start = $1::date
+        AND period_end = $2::date
+        AND status = 'completed'
+      ORDER BY completed_at DESC NULLS LAST, started_at DESC
+      LIMIT 1`,
+    [startDate, endDate],
+  );
+
+  const run = completedRun.rows[0];
+  if (!run) {
+    const latestRunForPeriod = await dbPool.query<{
+      run_id: string;
+      status: string;
+      error_message: string | null;
+    }>(
+      `SELECT run_id, status, error_message
+         FROM marketing_analytics_sync_runs
+        WHERE period_start = $1::date
+          AND period_end = $2::date
+        ORDER BY started_at DESC
+        LIMIT 1`,
+      [startDate, endDate],
+    );
+    const latest = latestRunForPeriod.rows[0];
+    if (latest) {
+      throw new HttpError(
+        409,
+        'marketing_analytics_run_not_completed',
+        `Marketing analytics run ${latest.run_id} for ${startDate} -> ${endDate} is ${latest.status}.`,
+      );
+    }
+
+    throw new HttpError(
+      409,
+      'marketing_analytics_run_missing',
+      `No completed marketing analytics run found for ${startDate} -> ${endDate}.`,
+    );
+  }
+
+  const settings = await getMarketingAnalyticsSettings(dbPool);
+  const [insightResult, pageResult, sourceResult, eventResult, queryResult] = await Promise.all([
+    dbPool.query<{ summary: unknown }>('SELECT summary FROM marketing_insights WHERE run_id = $1 LIMIT 1', [run.run_id]),
+    dbPool.query<PageMetricRecord>(
+      `SELECT page_path, page_title, active_users, sessions, screen_page_views, event_count
+         FROM marketing_ga4_page_metrics
+        WHERE run_id = $1
+        ORDER BY screen_page_views DESC, active_users DESC
+        LIMIT 100`,
+      [run.run_id],
+    ),
+    dbPool.query<SourceMetricRecord>(
+      `SELECT source, medium, campaign, active_users, sessions, screen_page_views
+         FROM marketing_ga4_source_metrics
+        WHERE run_id = $1
+        ORDER BY sessions DESC, active_users DESC
+        LIMIT 100`,
+      [run.run_id],
+    ),
+    dbPool.query<{ event_name: string; event_count: number }>(
+      `SELECT event_name, event_count
+         FROM marketing_ga4_event_metrics
+        WHERE run_id = $1
+        ORDER BY event_count DESC
+        LIMIT 100`,
+      [run.run_id],
+    ),
+    dbPool.query<QueryMetricRecord>(
+      `SELECT query, page, clicks, impressions, ctr::float AS ctr, position::float AS position
+         FROM marketing_gsc_query_page_metrics
+        WHERE run_id = $1
+        ORDER BY impressions DESC, clicks DESC
+        LIMIT 100`,
+      [run.run_id],
+    ),
+  ]);
+
+  const topPages = pageResult.rows.map(normalizePageMetricRecord);
+  const topSources = sourceResult.rows.map(normalizeSourceMetricRecord);
+  const topEvents = eventResult.rows.map((row) => ({
+    event_name: String(row.event_name ?? ''),
+    event_count: toInteger(row.event_count),
+  }));
+  const searchConsoleQueries = queryResult.rows.map(normalizeQueryMetricRecord);
+  const visiblePages = topPages.filter((row) => !isExcludedPage(row.page_path, settings));
+  const marketingPages = visiblePages.filter((row) => isMarketingPage(row.page_path, settings));
+  const productPages = visiblePages.filter((row) => isProductPage(row.page_path, settings));
+  const cleanSources = topSources.filter((row) => !isExcludedSource(row.source, settings));
+  const registeredUsers = await getRegisteredUserStats(startDate, endDate, settings, dbPool);
+  const insights = readSummaryRecord(insightResult.rows[0]?.summary);
+  const issues = [
+    ...(insights ? [] : ['marketing_insights row is missing for the selected run.']),
+    ...(topPages.length ? [] : ['No GA4 page metrics are available for the selected run.']),
+    ...(topSources.length ? [] : ['No GA4 source metrics are available for the selected run.']),
+    ...(topEvents.length ? [] : ['No GA4 event metrics are available for the selected run.']),
+    ...(searchConsoleQueries.length ? [] : ['No Search Console query metrics are available for the selected run.']),
+  ];
+
+  return {
+    syncRunId: run.run_id,
+    updatedAt: run.completed_at ? toIsoString(run.completed_at) : toIsoString(run.started_at),
+    context: {
+      sync_run_id: run.run_id,
+      period_start: toDateString(run.period_start),
+      period_end: toDateString(run.period_end),
+      data_quality: {
+        status: issues.length ? 'warning' : 'valid',
+        issues,
+      },
+      marketing_totals: sumPageRecords(marketingPages),
+      product_totals: sumPageRecords(productPages),
+      registered_users: registeredUsers,
+      top_pages: topPages,
+      marketing_pages: marketingPages,
+      product_pages: productPages,
+      top_sources: topSources,
+      clean_sources: cleanSources,
+      top_events: topEvents,
+      search_console_queries: searchConsoleQueries,
+      funnel_events: topEvents.filter((row) => isFunnelEvent(row.event_name)),
+      insights,
+      settings,
+    },
   };
 }
 
@@ -674,12 +855,24 @@ function isExcludedSource(source: string, settings: MarketingAnalyticsSettings) 
   });
 }
 
+function isFunnelEvent(eventName: string) {
+  return new Set([
+    'page_view',
+    'landing_cta_clicked',
+    'auth_started',
+    'auth_completed',
+    'dashboard_view',
+    'sign_up',
+    'login',
+  ]).has(eventName);
+}
+
 function formatSourceLabel(row: SourceMetricRecord) {
   return [row.source || '(direct)', row.medium || '(none)'].join(' / ');
 }
 
-async function getMarketingAnalyticsSettings(): Promise<MarketingAnalyticsSettings> {
-  const result = await pool.query<MarketingAnalyticsSettingsRow>(
+async function getMarketingAnalyticsSettings(dbPool: DbPool = pool): Promise<MarketingAnalyticsSettings> {
+  const result = await dbPool.query<MarketingAnalyticsSettingsRow>(
     `SELECT
       excluded_sources,
       excluded_page_prefixes,
@@ -693,7 +886,7 @@ async function getMarketingAnalyticsSettings(): Promise<MarketingAnalyticsSettin
   );
 
   if (!result.rows[0]) {
-    await pool.query('INSERT INTO marketing_analytics_settings (id) VALUES (true) ON CONFLICT (id) DO NOTHING');
+    await dbPool.query('INSERT INTO marketing_analytics_settings (id) VALUES (true) ON CONFLICT (id) DO NOTHING');
     return DEFAULT_MARKETING_ANALYTICS_SETTINGS;
   }
 
@@ -749,10 +942,15 @@ function normalizeUuidList(value: unknown, fallback: string[]) {
     .filter((item) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item));
 }
 
-async function getRegisteredUserStats(periodStart: string, periodEnd: string, settings: MarketingAnalyticsSettings) {
+async function getRegisteredUserStats(
+  periodStart: string,
+  periodEnd: string,
+  settings: MarketingAnalyticsSettings,
+  dbPool: DbPool = pool,
+) {
   const emails = settings.internalUserEmails.map((email) => email.toLowerCase());
   const ids = settings.internalUserIds;
-  const result = await pool.query<{
+  const result = await dbPool.query<{
     total: string | number;
     new_in_period: string | number;
     excluded_internal: string | number;

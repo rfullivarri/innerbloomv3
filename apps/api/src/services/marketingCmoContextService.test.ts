@@ -6,6 +6,7 @@ import { HttpError } from '../lib/http-error.js';
 import {
   buildMarketingCmoContextWithDeps,
   buildMarketingPeriod,
+  parseMarkdownSections,
   type MarketingAnalyticsContext,
 } from './marketingCmoContextService.js';
 import type { MarketingCampaignWithMetricsPayload } from './marketingCampaignService.js';
@@ -38,14 +39,16 @@ describe('marketingCmoContextService', () => {
     expect(json.analytics.top_pages).toHaveLength(1);
   });
 
-  it('fails clearly when no analytics snapshot table exists', async () => {
-    const fixture = await createFixture({ analyticsTableExists: false });
+  it('fails clearly when no analytics run exists', async () => {
+    const fixture = await createFixture({
+      analyticsError: new HttpError(409, 'marketing_analytics_run_missing', 'No completed marketing analytics run found.'),
+    });
 
     await expect(
       buildMarketingCmoContextWithDeps({ periodKey: '2026-07' }, fixture.deps),
     ).rejects.toMatchObject({
       status: 409,
-      code: 'marketing_analytics_snapshot_missing',
+      code: 'marketing_analytics_run_missing',
     });
   });
 
@@ -122,32 +125,139 @@ describe('marketingCmoContextService', () => {
     expect(contents).not.toContain('user-123');
     expect(contents).toContain('[redacted]');
   });
+
+  it('parses markdown headings, bullets, and numbered lists', () => {
+    const sections = parseMarkdownSections(`
+## Current Objective
+
+Acquire early adopters.
+
+## Known Gaps
+
+- Metrics are sparse.
+1. Metricool is manual.
+`);
+
+    expect(sections.get('current objective')).toEqual(['Acquire early adopters.']);
+    expect(sections.get('known gaps')).toEqual(['Metrics are sparse.', 'Metricool is manual.']);
+  });
+
+  it('extracts objective, known gaps, campaign defaults, and keeps audience explicit-only', async () => {
+    const fixture = await createFixture();
+    const result = await buildMarketingCmoContextWithDeps(
+      { periodKey: '2026-07', force: true },
+      fixture.deps,
+    );
+    const json = JSON.parse(await readFile(result.outputPath, 'utf8')) as {
+      business_context: {
+        current_marketing_objective: string;
+        product_stage: string;
+        audience: string[];
+        notes: string[];
+      };
+      strategy_memory: {
+        known_risks: string[];
+        open_questions: string[];
+        campaign_defaults: {
+          default_platform: string;
+          default_language: string;
+          default_monthly_post_count: number;
+          current_tested_formats: string[];
+        };
+      };
+      period: { target_post_count: number };
+      available_assets: {
+        existing_visuals: { file_path?: string }[];
+        reusable_templates: { file_path?: string }[];
+      };
+    };
+
+    expect(json.business_context.current_marketing_objective).toContain('Acquire early adopter users');
+    expect(json.business_context.product_stage).toBe('early-stage MVP');
+    expect(json.business_context.audience).toEqual([]);
+    expect(json.business_context.notes).toContain('No explicit audience section found in strategy memory or structured configuration.');
+    expect(json.strategy_memory.known_risks).toContain('Monthly draft generation is not automated yet.');
+    expect(json.strategy_memory.open_questions).toContain('Metricool performance data is manual export for now.');
+    expect(json.strategy_memory.campaign_defaults).toMatchObject({
+      default_platform: 'Instagram',
+      default_language: 'English',
+      default_monthly_post_count: 20,
+      current_tested_formats: ['square static', 'square carousel'],
+    });
+    expect(json.period.target_post_count).toBe(20);
+    expect(JSON.stringify(json.available_assets)).not.toContain('notes.md');
+    expect(JSON.stringify(json.available_assets)).not.toContain('asset-manifest.json');
+    expect(json.available_assets.reusable_templates.some((asset) => asset.file_path?.endsWith('template.html'))).toBe(true);
+  });
 });
 
 async function createFixture(options: {
-  analyticsTableExists?: boolean;
   analyticsPayload?: Record<string, unknown>;
+  analyticsError?: Error;
 } = {}) {
   const repoRoot = await mkdtemp(path.join(os.tmpdir(), 'innerbloom-cmo-'));
   const outputRoot = path.join(repoRoot, 'marketing/agent-inputs');
   await mkdir(path.join(repoRoot, 'Docs/marketing'), { recursive: true });
   await mkdir(path.join(repoRoot, 'Docs/marketing/campaigns/2026-06-mvp/assets'), { recursive: true });
   await writeFile(path.join(repoRoot, 'Docs/marketing/campaigns/2026-06-mvp/assets/post.png'), 'not-binary');
+  await writeFile(path.join(repoRoot, 'Docs/marketing/campaigns/2026-06-mvp/assets/template.html'), '<html></html>');
+  await writeFile(path.join(repoRoot, 'Docs/marketing/campaigns/2026-06-mvp/assets/notes.md'), '# Notes');
+  await writeFile(path.join(repoRoot, 'Docs/marketing/campaigns/2026-06-mvp/assets/asset-manifest.json'), '{}');
   await writeFile(
-    path.join(repoRoot, 'Docs/marketing/STRATEGY_MEMORY.md'),
+    path.join(repoRoot, 'Docs/marketing/strategy-memory.md'),
     `# Innerbloom Marketing Strategy Memory
 
-### 2026-06-29 | 2026-06 MVP baseline
+## Current Objective
 
-- **Insights detected:** Instagram / social is the top acquisition source after hygiene filters
-- **Hypotheses:** Adaptive rhythm can differentiate Innerbloom from rigid streak-based habit apps
-- **Decisions taken:** Keep the 2026-06 MVP campaign as a small validation loop; export only approved posts to Metricool
-- **Changes vs previous strategy:** Move from one long operational board to a tabbed monthly workflow
-- **What worked:** Clear anti-perfect-days hook
-- **What did not work:** Ambiguous internal shorthand
-- **Learnings:** Every post should map to a measurable funnel event
-- **Next experiments:** Test dashboard walkthrough carousel
-- **Recommendations for future content proposals:** Tie each hook to one user pain and one product mechanism
+Acquire early adopter users for Innerbloom 2.0 with lightweight, measurable social content.
+
+## Current Positioning
+
+Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks.
+
+- adaptive habits
+- early product, feedback welcome
+
+## Campaign Defaults
+
+- Default platform: Instagram
+- Default language: English
+- Default monthly post count: 20
+- Current MVP campaign code: \`ib20_mvp\`
+- Current tested format: square static + square carousel
+
+## Baseline: 2026-06 MVP
+
+- Metricool CSV import works.
+- Cloudflare R2 is now the publishing asset store for CSV exports.
+- GA4 and Search Console snapshots can be synced into Neon and shown in \`/admin/marketing\`.
+
+## Data Interpretation Rules
+
+- Treat landing page views as acquisition signal.
+- Treat \`/innerbloom2/...\` pages as product usage signal.
+
+## First 20-Post Strategy Proposal
+
+Planned mix:
+
+- 8 pain/friction posts.
+- 5 product mechanism/demo posts.
+
+Creative rules:
+
+1. Prefer real Innerbloom 2.0 screenshots over generic lifestyle imagery.
+2. Use R2 URLs in Metricool CSV output.
+
+## Known Gaps
+
+- Monthly draft generation is not automated yet.
+- Metricool performance data is manual export for now.
+
+## Next Run Instructions
+
+1. Keep the number of configurable knobs small.
+2. Preserve every decision and result in this strategy memory.
 `,
   );
 
@@ -166,26 +276,34 @@ async function createFixture(options: {
     ...options.analyticsPayload,
   };
 
-  const dbPool = {
-    query: vi.fn(async (sql: string) => {
-      if (sql.includes('information_schema.tables')) {
-        return { rows: [{ exists: options.analyticsTableExists ?? true }] };
-      }
+  const dbPool = { query: vi.fn() };
+  const analyticsLoader = vi.fn(async () => {
+    if (options.analyticsError) {
+      throw options.analyticsError;
+    }
 
-      return {
-        rows: [
-          {
-            sync_run_id: 'sync-1',
-            period_start: '2026-06-01',
-            period_end: '2026-06-30',
-            snapshot_payload: analyticsPayload,
-            data_quality: { status: 'valid', issues: [] },
-            updated_at: '2026-07-01T00:00:00.000Z',
-          },
-        ],
-      };
-    }),
-  };
+    return {
+      syncRunId: 'sync-1',
+      updatedAt: '2026-07-01T00:00:00.000Z',
+      context: {
+        sync_run_id: 'sync-1',
+        period_start: '2026-06-01',
+        period_end: '2026-06-30',
+        data_quality: { status: 'valid', issues: [] },
+        marketing_totals: analyticsPayload.marketing_totals,
+        product_totals: analyticsPayload.product_totals,
+        registered_users: analyticsPayload.registered_users,
+        top_pages: analyticsPayload.top_pages,
+        marketing_pages: analyticsPayload.marketing_pages,
+        product_pages: analyticsPayload.product_pages,
+        top_sources: analyticsPayload.top_sources,
+        clean_sources: analyticsPayload.clean_sources,
+        top_events: analyticsPayload.top_events,
+        search_console_queries: analyticsPayload.search_console_queries,
+        funnel_events: analyticsPayload.funnel_events,
+      },
+    };
+  });
 
   const campaigns: MarketingCampaignWithMetricsPayload[] = [
     {
@@ -251,6 +369,7 @@ async function createFixture(options: {
       schemaPath,
       dbPool,
       campaignLoader: vi.fn(async () => campaigns),
+      analyticsLoader,
     },
   };
 }
