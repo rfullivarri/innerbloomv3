@@ -31,9 +31,11 @@ Required output:
 Do not execute unless:
 
 - `content-context.json` exists and validates;
-- the embedded CMO strategy exists and validates;
-- `strategy.review_status` is `approved`;
+- `content-context.json.strategy.review_status` is `approved`;
+- the embedded CMO strategy exists;
 - period, campaign code, dates, tracking, formats, product context, and asset context are present.
+
+The approval recorded in `content-context.json.strategy.review_status` is the authoritative human approval checkpoint. The original `cmo-strategy.json` and the embedded `strategy.cmo_output.review_status` may remain `draft` because they preserve the agent-generated source artifact. That source status must not block execution after the wrapper approval is `approved`.
 
 The agent may never approve the CMO strategy itself.
 
@@ -75,17 +77,35 @@ The agent may never approve the CMO strategy itself.
 
 Priority order:
 
-1. Real product screenshots
-2. Existing reusable brand assets
-3. Existing templates
-4. Simple typographic compositions
-5. New asset generation
+1. Existing Google Drive assets referenced by the input
+2. Real product screenshots
+3. Existing reusable brand assets
+4. Existing templates
+5. Simple typographic compositions
+6. New asset generation
 
 Every existing asset reference must exist in the input.
 
-When a new asset is necessary, mark it as generated, provide a complete brief, and add a matching item to `asset_generation_queue` with post references, dimensions, format, text, references, and acceptance criteria.
+The agent may reuse a full existing asset or propose a derivative edit of it. Permitted derivative instructions include cropping, reframing, zooming, resizing, adding text overlays, callouts, arrows, highlights, annotations, logo composition, background treatment, and emphasis on a specific product UI region.
 
-Do not create binary assets unless a separate task explicitly authorises asset generation.
+Example: use the existing Innerbloom 2.0 dashboard screenshot, crop or zoom to the Daily Energy chart, and add a restrained highlight or callout that directs attention to that chart for a post explaining Daily Energy.
+
+For every derivative edit, the campaign output must include:
+
+- the exact source asset reference from the input;
+- transformation type;
+- crop or focal region;
+- overlays, callouts, or text to add;
+- elements that must remain unchanged;
+- target dimensions and format;
+- accessibility and alt-text guidance;
+- acceptance criteria.
+
+Never overwrite the source asset. The edited derivative must be treated as a new output asset linked back to its source.
+
+When a new or edited asset is necessary, mark it as generated or derivative, provide a complete brief, and add a matching item to `asset_generation_queue` with post references, source references, dimensions, format, text, transformations, references, and acceptance criteria.
+
+Do not create binary assets unless a separate asset-production task explicitly authorises image generation or editing. The Head of Content defines the transformation precisely; a later asset-production step performs the actual edit and stores the resulting file.
 
 ## Tracking rules
 
@@ -126,14 +146,16 @@ Before writing a successful campaign, verify:
 - Pillar, format, and funnel distributions equal campaign totals.
 - Every post has a hypothesis, primary metric, visual brief, and accessibility guidance.
 - Tracking URLs, `utm_content`, and `ib_post` values are unique.
-- Every traffic URL contains all required parameters.
 - Every referenced asset exists or has a matching generation-queue item.
+- Every derivative asset references an existing source asset and includes explicit transformation instructions.
 - No unsupported product capability or claim is introduced.
 - The quality report truthfully reflects the checks.
 
 ## Failure behaviour
 
-Do not create a partial campaign when the strategy is unapproved, inputs are invalid, dates conflict, tracking cannot be generated, or the campaign cannot satisfy the strategy honestly.
+Do not create a partial campaign when the wrapper strategy approval is not `approved`, inputs are invalid, dates conflict, tracking cannot be generated, or the campaign cannot satisfy the strategy honestly.
+
+Do not fail solely because the source `cmo-strategy.json.review_status` or embedded `strategy.cmo_output.review_status` remains `draft` when `content-context.json.strategy.review_status` is `approved`.
 
 Write `campaign-failure.json` containing:
 
