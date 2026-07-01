@@ -25,7 +25,7 @@ import { buildDemoModeSelectUrl } from "../lib/demoEntry";
 import PremiumTimeline from "../components/PremiumTimeline";
 import { AdaptiveText } from "../components/landing/AdaptiveText";
 import { CookieConsentBanner } from "../components/landing/CookieConsentBanner";
-import { useLandingAnalytics } from "../components/landing/useLandingAnalytics";
+import { debugLandingGa4, useLandingAnalytics } from "../components/landing/useLandingAnalytics";
 import { HeroPhoneShowcase } from "../components/landing/HeroPhoneShowcase";
 import { HeroProductScene } from "../components/landing/hero/HeroProductScene";
 import { AdaptiveJourneyGraphic } from "../components/landing/problem/AdaptiveJourneyGraphic";
@@ -449,6 +449,8 @@ function LanguageDropdown({
             role="option"
             aria-selected={value === option.code}
             className={value === option.code ? "active" : ""}
+            data-analytics-event="landing_language_changed"
+            data-analytics-value={option.code}
             onClick={() => handleSelect(option.code)}
           >
             {option.label}
@@ -1170,7 +1172,7 @@ export default function LandingPage({
   const activeMode = copy.modes.items[activeModeIndex] ?? copy.modes.items[0];
   const activeVisual = MODE_VISUALS[language][activeMode.id];
   useEffect(() => {
-    console.info(
+    debugLandingGa4(
       "[landing][ga4-debug] cookie consent read on load",
       initialCookieConsentStateRef.current,
     );
@@ -1185,6 +1187,7 @@ export default function LandingPage({
   useLandingAnalytics({
     consent: analyticsConsent,
     pathname: location.pathname,
+    search: location.search,
   });
 
   const handleLanguageChange = (nextLanguage: Language) => {
@@ -1372,7 +1375,7 @@ export default function LandingPage({
 
   const handleAnalyticsConsent = (nextDecision: "accepted" | "rejected") => {
     const nextState = persistCookieConsentState(nextDecision);
-    console.info("[landing][ga4-debug] cookie consent updated", {
+    debugLandingGa4("[landing][ga4-debug] cookie consent updated", {
       nextDecision,
       persistedState: nextState,
     });
@@ -1423,6 +1426,8 @@ export default function LandingPage({
             type="button"
             onClick={toggleThemeMode}
             className="landing-theme-toggle"
+            data-analytics-event="landing_theme_toggled"
+            data-analytics-value={themeMode === "dark" ? "light" : "dark"}
             aria-label={
               themeMode === "dark"
                 ? language === "es"

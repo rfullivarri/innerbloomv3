@@ -110,6 +110,7 @@ export async function ensureGa4Initialized(measurementId: string): Promise<void>
 
   gtag('config', normalizedMeasurementId, {
     anonymize_ip: true,
+    send_page_view: false,
   });
 
   gaConfiguredForId = normalizedMeasurementId;

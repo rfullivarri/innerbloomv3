@@ -40,6 +40,10 @@ import {
   putAdminUserModeUpgradeCtaOverride,
   deleteAdminUserModeUpgradeCtaOverride,
   getAdminMonthlyPipelineStatus,
+  getAdminMarketingCampaigns,
+  getAdminMarketingCmoContextStatus,
+  patchAdminMarketingPost,
+  postAdminMarketingCmoContext,
   postAdminMonthlyPipelineRun,
 } from './admin.handlers.js';
 import { requireAdmin } from './admin.middleware.js';
@@ -49,6 +53,10 @@ const adminRouter = Router();
 
 adminRouter.get('/me', getAdminMe);
 adminRouter.get('/users', getAdminUsers);
+adminRouter.get('/marketing/campaigns', getAdminMarketingCampaigns);
+adminRouter.patch('/marketing/campaigns/:campaignCode/posts/:postCode', patchAdminMarketingPost);
+adminRouter.post('/marketing/agents/cmo/context', postAdminMarketingCmoContext);
+adminRouter.get('/marketing/agents/cmo/context/status', getAdminMarketingCmoContextStatus);
 adminRouter.get('/taskgen/jobs', getTaskgenJobs);
 adminRouter.get('/taskgen/jobs/:jobId/logs', getTaskgenJobLogsHandler);
 adminRouter.post('/taskgen/jobs/:jobId/retry', retryTaskgenJobHandler);

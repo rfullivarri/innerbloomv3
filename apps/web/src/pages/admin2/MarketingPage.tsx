@@ -1,17 +1,26 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   parseStrategyMemoryMarkdown,
   type StrategyMemoryEntry,
 } from '../../lib/marketingStrategyMemory';
+import {
+  fetchMarketingCampaigns,
+  updateMarketingCampaignPost,
+  type MarketingAssetRecord,
+  type MarketingCampaignRecord,
+  type MarketingPostRecord,
+} from '../../lib/marketingCampaigns';
 import type { ReactNode } from 'react';
 
 type MarketingTab = 'posts' | 'insights' | 'sources';
-type PostStatus = 'draft' | 'review' | 'approved' | 'rejected';
+type PostStatus = 'draft' | 'needs_review' | 'approved' | 'rejected';
 
 type MarketingAsset = {
   file: string;
   title: string;
   type: string;
+  url?: string;
+  selected?: boolean;
 };
 
 type MarketingPost = {
@@ -23,6 +32,7 @@ type MarketingPost = {
   hook: string;
   caption: string;
   hypothesis: string;
+  targetMetric: string;
   trackingUrl: string;
   assets: MarketingAsset[];
   selectedAssets: string[];
@@ -66,12 +76,13 @@ const INITIAL_POSTS: MarketingPost[] = [
     date: '2026-06-30 19:30',
     platform: 'Instagram',
     format: 'Carousel',
-    status: 'approved',
+    status: 'needs_review',
     hook: 'Your habits should adapt to your real life.',
     caption:
       'Most habit apps assume every day is the same. Then a busy week hits, your streak breaks, and the whole plan starts feeling useless. Innerbloom is built around adaptive rhythm: lower the intensity when life gets heavy, keep visible progress, recalibrate instead of starting over, and build a Journey that can survive real weeks.',
     hypothesis:
       'People who have failed with streak-based apps will respond to adaptive rhythm and real weeks.',
+    targetMetric: 'page_view -> landing_cta_clicked -> auth_started -> auth_completed -> dashboard_view',
     trackingUrl:
       'https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib20_mvp&utm_content=post_001&ib_post=001',
     assets: [
@@ -92,12 +103,13 @@ const INITIAL_POSTS: MarketingPost[] = [
     date: '2026-07-02 22:30',
     platform: 'Instagram',
     format: 'Static',
-    status: 'approved',
+    status: 'needs_review',
     hook: 'If your plan only works on perfect days, it is not a plan.',
     caption:
       'Most people do not fail habits because they are lazy. They fail because the system expects the same output from them every day, even when their energy, stress, sleep, and schedule change. Innerbloom is an adaptive habit app. It helps you keep direction without forcing the same rhythm all the time.',
     hypothesis:
       'A direct anti-perfect-days message will perform better for people tired of rigid productivity systems.',
+    targetMetric: 'page_view, scroll depth, landing_cta_clicked, and dashboard_view',
     trackingUrl:
       'https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib20_mvp&utm_content=post_002&ib_post=002',
     assets: [
@@ -115,14 +127,14 @@ const TABS: Array<{ id: MarketingTab; label: string; description: string }> = [
 
 const STATUS_LABELS: Record<PostStatus, string> = {
   draft: 'Draft',
-  review: 'Needs review',
+  needs_review: 'Needs review',
   approved: 'Approved',
   rejected: 'Rejected',
 };
 
 const STATUS_CLASSES: Record<PostStatus, string> = {
   draft: 'border-slate-400/40 bg-slate-500/10 text-[color:var(--admin-muted)]',
-  review: 'border-amber-400/50 bg-amber-500/10 text-[color:var(--admin-text)]',
+  needs_review: 'border-amber-400/50 bg-amber-500/10 text-[color:var(--admin-text)]',
   approved: 'border-emerald-400/50 bg-emerald-500/10 text-[color:var(--admin-text)]',
   rejected: 'border-rose-400/50 bg-rose-500/10 text-[color:var(--admin-text)]',
 };
@@ -149,20 +161,174 @@ function buildMetricoolCsv(posts: MarketingPost[]) {
   return rows.map((row) => row.map(csvEscape).join(',')).join('\n');
 }
 
+function mapApiPostToMarketingPost(post: MarketingPostRecord): MarketingPost {
+  const assets = post.assetUrls.map((asset) => ({
+    file: asset.file,
+    title: asset.title,
+    type: asset.type ?? 'image',
+    url: asset.url,
+    selected: asset.selected ?? true,
+  }));
+
+  return {
+    id: post.postCode,
+    date: formatPostDate(post.scheduledAt),
+    platform: post.platform,
+    format: post.format,
+    status: normalizePostStatus(post.status),
+    hook: post.hook,
+    caption: post.caption,
+    hypothesis: post.hypothesis,
+    targetMetric: post.targetMetric,
+    trackingUrl: post.trackingUrl,
+    assets,
+    selectedAssets: assets.filter((asset) => asset.selected !== false).map((asset) => asset.file),
+  };
+}
+
+function mapMarketingPostToUpdate(post: MarketingPost) {
+  return {
+    status: post.status,
+    hook: post.hook,
+    caption: post.caption,
+    hypothesis: post.hypothesis,
+    targetMetric: post.targetMetric,
+    trackingUrl: post.trackingUrl,
+    assetUrls: post.assets.map((asset): MarketingAssetRecord => ({
+      file: asset.file,
+      title: asset.title,
+      type: asset.type,
+      url: asset.url,
+      selected: post.selectedAssets.includes(asset.file),
+    })),
+  };
+}
+
+function normalizePostStatus(status: MarketingPostRecord['status']): PostStatus {
+  if (status === 'approved' || status === 'rejected' || status === 'draft') {
+    return status;
+  }
+
+  return 'needs_review';
+}
+
+function formatPostDate(value: string | null) {
+  if (!value) {
+    return 'Unscheduled';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat('en-GB', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+}
+
 export function MarketingPage() {
   const [activeTab, setActiveTab] = useState<MarketingTab>('posts');
+  const [campaigns, setCampaigns] = useState<MarketingCampaignRecord[]>([]);
+  const [selectedCampaignCode, setSelectedCampaignCode] = useState('ib20_mvp');
   const [posts, setPosts] = useState<MarketingPost[]>(INITIAL_POSTS);
   const [selectedPostId, setSelectedPostId] = useState(INITIAL_POSTS[0]?.id ?? '');
+  const [isLoadingCampaigns, setIsLoadingCampaigns] = useState(true);
+  const [campaignError, setCampaignError] = useState<string | null>(null);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [savingPostId, setSavingPostId] = useState<string | null>(null);
 
+  const selectedCampaign = campaigns.find((campaign) => campaign.campaignCode === selectedCampaignCode) ?? campaigns[0] ?? null;
   const selectedPost = posts.find((post) => post.id === selectedPostId) ?? posts[0];
   const approvedCount = posts.filter((post) => post.status === 'approved').length;
-  const reviewCount = posts.filter((post) => post.status === 'review').length;
+  const reviewCount = posts.filter((post) => post.status === 'needs_review').length;
   const selectedAssetCount = posts.reduce((total, post) => total + post.selectedAssets.length, 0);
 
   const csvPreview = useMemo(() => buildMetricoolCsv(posts), [posts]);
 
-  const updatePost = (postId: string, updater: (post: MarketingPost) => MarketingPost) => {
-    setPosts((current) => current.map((post) => (post.id === postId ? updater(post) : post)));
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCampaigns() {
+      setIsLoadingCampaigns(true);
+      try {
+        const result = await fetchMarketingCampaigns();
+        if (cancelled) {
+          return;
+        }
+        setCampaigns(result.campaigns);
+        const nextCampaign = result.campaigns.find((campaign) => campaign.campaignCode === selectedCampaignCode) ?? result.campaigns[0] ?? null;
+        if (nextCampaign) {
+          setSelectedCampaignCode(nextCampaign.campaignCode);
+          const nextPosts = nextCampaign.posts.map(mapApiPostToMarketingPost);
+          setPosts(nextPosts);
+          setSelectedPostId(nextPosts[0]?.id ?? '');
+        }
+        setCampaignError(null);
+      } catch (error) {
+        if (!cancelled) {
+          setCampaignError(error instanceof Error ? error.message : 'Unable to load marketing campaigns.');
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingCampaigns(false);
+        }
+      }
+    }
+
+    void loadCampaigns();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const updatePost = async (postId: string, updater: (post: MarketingPost) => MarketingPost) => {
+    const currentPost = posts.find((post) => post.id === postId);
+    if (!currentPost || !selectedCampaign) {
+      return;
+    }
+
+    const nextPost = updater(currentPost);
+    setPosts((current) => current.map((post) => (post.id === postId ? nextPost : post)));
+    setSavingPostId(postId);
+    setSaveMessage(null);
+
+    try {
+      const result = await updateMarketingCampaignPost(
+        selectedCampaign.campaignCode,
+        nextPost.id,
+        mapMarketingPostToUpdate(nextPost),
+      );
+      const savedPost = mapApiPostToMarketingPost(result.post);
+      setPosts((current) => current.map((post) => (post.id === postId ? savedPost : post)));
+      setCampaigns((current) => current.map((campaign) => (
+        campaign.campaignCode === selectedCampaign.campaignCode
+          ? {
+              ...campaign,
+              posts: campaign.posts.map((post) => (
+                post.postCode === result.post.postCode ? result.post : post
+              )),
+            }
+          : campaign
+      )));
+      setSaveMessage(`${savedPost.id} saved in Neon.`);
+    } catch (error) {
+      setPosts((current) => current.map((post) => (post.id === postId ? currentPost : post)));
+      setSaveMessage(error instanceof Error ? error.message : 'Unable to save marketing post.');
+    } finally {
+      setSavingPostId(null);
+    }
+  };
+
+  const resetCampaign = async () => {
+    const nextPosts = (selectedCampaign?.posts ?? []).map(mapApiPostToMarketingPost);
+    setPosts(nextPosts.length ? nextPosts : INITIAL_POSTS);
+    setSelectedPostId(nextPosts[0]?.id ?? INITIAL_POSTS[0]?.id ?? '');
   };
 
   const exportCsv = () => {
@@ -190,18 +356,23 @@ export function MarketingPage() {
             <button type="button" className="admin2-btn admin2-btn--primary" onClick={exportCsv}>
               Export CSV
             </button>
-            <button type="button" className="admin2-btn admin2-btn--ghost" onClick={() => setPosts(INITIAL_POSTS)}>
-              Reset
+            <button type="button" className="admin2-btn admin2-btn--ghost" onClick={resetCampaign}>
+              Reload DB
             </button>
           </div>
         </div>
+        {campaignError || saveMessage || isLoadingCampaigns ? (
+          <p className="mt-4 rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-sm text-[color:var(--admin-muted)]">
+            {campaignError ?? saveMessage ?? 'Loading marketing campaign from Neon...'}
+          </p>
+        ) : null}
       </header>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <SummaryCard label="Configured posts" value={String(posts.length)} helper="Monthly queue" />
         <SummaryCard label="Approved" value={String(approvedCount)} helper="Included in CSV" />
         <SummaryCard label="Needs review" value={String(reviewCount)} helper="Requires decision" />
-        <SummaryCard label="Campaign" value="ib20_mvp" helper="English test" />
+        <SummaryCard label="Campaign" value={selectedCampaign?.campaignCode ?? selectedCampaignCode} helper={selectedCampaign?.periodKey ?? 'English test'} />
         <SummaryCard label="Metricool assets" value={`${selectedAssetCount}/5`} helper="Selected assets" />
       </section>
 
@@ -233,6 +404,7 @@ export function MarketingPage() {
           updatePost={updatePost}
           csvPreview={csvPreview}
           exportCsv={exportCsv}
+          savingPostId={savingPostId}
         />
       ) : null}
       {activeTab === 'insights' ? <InsightsTab /> : null}
@@ -259,15 +431,19 @@ function PostsTab({
   updatePost,
   csvPreview,
   exportCsv,
+  savingPostId,
 }: {
   posts: MarketingPost[];
   selectedPost: MarketingPost;
   selectedPostId: string;
   setSelectedPostId: (postId: string) => void;
-  updatePost: (postId: string, updater: (post: MarketingPost) => MarketingPost) => void;
+  updatePost: (postId: string, updater: (post: MarketingPost) => MarketingPost) => Promise<void>;
   csvPreview: string;
   exportCsv: () => void;
+  savingPostId: string | null;
 }) {
+  const isSavingSelectedPost = savingPostId === selectedPost.id;
+
   return (
     <section className="grid gap-4 xl:grid-cols-[minmax(280px,0.82fr)_minmax(0,1.18fr)]">
       <div className="flex flex-col gap-3">
@@ -332,8 +508,9 @@ function PostsTab({
           <label className="mt-4 block">
             <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">Hook</span>
             <input
-              value={selectedPost.hook}
-              onChange={(event) => updatePost(selectedPost.id, (post) => ({ ...post, hook: event.target.value }))}
+              key={`${selectedPost.id}-hook`}
+              defaultValue={selectedPost.hook}
+              onBlur={(event) => void updatePost(selectedPost.id, (post) => ({ ...post, hook: event.target.value }))}
               className="mt-2 w-full rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-bg)] px-3 py-2 text-sm outline-none focus:border-[color:var(--admin-accent)]"
             />
           </label>
@@ -341,9 +518,10 @@ function PostsTab({
           <label className="mt-4 block">
             <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">Caption</span>
             <textarea
-              value={selectedPost.caption}
+              key={`${selectedPost.id}-caption`}
+              defaultValue={selectedPost.caption}
               rows={8}
-              onChange={(event) => updatePost(selectedPost.id, (post) => ({ ...post, caption: event.target.value }))}
+              onBlur={(event) => void updatePost(selectedPost.id, (post) => ({ ...post, caption: event.target.value }))}
               className="mt-2 w-full resize-y rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-bg)] px-3 py-2 text-sm leading-6 outline-none focus:border-[color:var(--admin-accent)]"
             />
           </label>
@@ -352,21 +530,24 @@ function PostsTab({
             <button
               type="button"
               className="admin2-btn admin2-btn--success"
-              onClick={() => updatePost(selectedPost.id, (post) => ({ ...post, status: 'approved' }))}
+              disabled={isSavingSelectedPost}
+              onClick={() => void updatePost(selectedPost.id, (post) => ({ ...post, status: 'approved' }))}
             >
               Approve
             </button>
             <button
               type="button"
               className="admin2-btn admin2-btn--danger"
-              onClick={() => updatePost(selectedPost.id, (post) => ({ ...post, status: 'rejected' }))}
+              disabled={isSavingSelectedPost}
+              onClick={() => void updatePost(selectedPost.id, (post) => ({ ...post, status: 'rejected' }))}
             >
               Reject
             </button>
             <button
               type="button"
               className="admin2-btn admin2-btn--secondary"
-              onClick={() => updatePost(selectedPost.id, (post) => ({ ...post, status: 'review' }))}
+              disabled={isSavingSelectedPost}
+              onClick={() => void updatePost(selectedPost.id, (post) => ({ ...post, status: 'needs_review' }))}
             >
               Request review
             </button>
@@ -391,17 +572,22 @@ function PostsTab({
                     type="checkbox"
                     checked={isSelected}
                     onChange={(event) =>
-                      updatePost(selectedPost.id, (post) => ({
+                      void updatePost(selectedPost.id, (post) => ({
                         ...post,
                         selectedAssets: event.target.checked
                           ? [...post.selectedAssets, asset.file]
                           : post.selectedAssets.filter((file) => file !== asset.file),
+                        assets: post.assets.map((currentAsset) => (
+                          currentAsset.file === asset.file
+                            ? { ...currentAsset, selected: event.target.checked }
+                            : currentAsset
+                        )),
                       }))
                     }
                     className="mt-1"
                   />
                   <img
-                    src={`${ASSET_BASE}/${asset.file}`}
+                    src={asset.url || `${ASSET_BASE}/${asset.file}`}
                     alt={asset.title}
                     className="h-20 w-20 shrink-0 rounded-lg border border-[color:var(--admin-border)] object-cover"
                     loading="lazy"

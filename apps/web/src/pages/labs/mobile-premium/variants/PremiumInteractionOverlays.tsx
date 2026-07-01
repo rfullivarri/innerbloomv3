@@ -1,7 +1,8 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { ModerationTrackerIcon, moderationTrackerMeta } from '../../../../components/moderation/trackerMeta';
-import { classifyUserTask, createUserTask, getDailyReminderSettings, updateDailyReminderSettings, type GameModeUpgradeSuggestion, type ModerationTracker, type ModerationTrackerType, type SubmitDailyQuestFeedbackEvent, type SubmitDailyQuestResponse, type UserTaskClassification } from '../../../../lib/api';
+import { classifyUserTask, deleteCurrentAccount, getDailyReminderSettings, updateDailyReminderSettings, type GameModeUpgradeSuggestion, type ModerationTracker, type ModerationTrackerType, type SubmitDailyQuestFeedbackEvent, type SubmitDailyQuestResponse, type UserTaskClassification } from '../../../../lib/api';
 import { useDifficulties } from '../../../../hooks/useCatalogs';
+import { useCreateTask } from '../../../../hooks/useUserTasks';
 import { TimezoneCombobox } from '../../../../components/common/TimezoneCombobox';
 import { getTimezoneCatalog, resolveDefaultTimezone } from '../../../../lib/timezones';
 import { usePostLoginLanguage } from '../../../../i18n/postLoginLanguage';
@@ -127,7 +128,7 @@ export function PremiumInteractionOverlays({
       {activeOverlay === 'profile' ? (
         <ProfileSheet imageUrl={userImageUrl ?? null} onClose={onClose} onDelete={() => onOpen('delete-account')} onOpenUserProfile={onOpenUserProfile} userEmail={userEmail} userName={userName} />
       ) : null}
-      {activeOverlay === 'delete-account' ? <DeleteAccountSheet onCancel={() => onOpen('profile')} onClose={onClose} /> : null}
+      {activeOverlay === 'delete-account' ? <DeleteAccountSheet onCancel={() => onOpen('profile')} onClose={onClose} onDeleted={onSignOut ?? onClose} /> : null}
       {activeOverlay === 'rhythm' && hasActivePremiumRhythmSuggestion(rhythmSuggestion ?? null) && rhythmSuggestion ? (
         <PremiumRhythmRecommendationSheet
           isSubmitting={rhythmSuggestionSubmitting}
@@ -339,14 +340,33 @@ function ProfileSheet({
 function DeleteAccountSheet({
   onCancel,
   onClose,
+  onDeleted,
 }: {
   onCancel: () => void;
   onClose: () => void;
+  onDeleted: () => void;
 }) {
   const { t } = usePostLoginLanguage();
   const [confirmation, setConfirmation] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const normalizedConfirmation = confirmation.trim().toUpperCase();
   const canDelete = normalizedConfirmation === 'ELIMINAR' || normalizedConfirmation === 'DELETE';
+
+  async function handleDelete() {
+    if (!canDelete || isDeleting) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteCurrentAccount();
+      onDeleted();
+    } catch (error) {
+      console.error('[mobile-premium] delete account failed', error);
+      setDeleteError(t('mobilePremium.delete.error'));
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   return (
     <section className="max-h-[88vh] w-full overflow-y-auto rounded-[1.45rem] border border-rose-300/40 bg-[color:var(--mp-bg-elevated)] p-5 text-[color:var(--mp-text)] shadow-[0_24px_72px_rgba(0,0,0,0.48)]">
@@ -358,6 +378,7 @@ function DeleteAccountSheet({
         <button
           aria-label={t('mobilePremium.a11y.close')}
           className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-2xl text-[color:var(--mp-text-secondary)]"
+          disabled={isDeleting}
           onClick={onClose}
           type="button"
         >
@@ -373,27 +394,32 @@ function DeleteAccountSheet({
         <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.delete.confirmLabel')}</span>
         <input
           className="mt-3 h-14 w-full rounded-[1rem] border border-rose-300/38 bg-rose-950/20 px-4 text-base font-semibold uppercase tracking-[0.12em] text-[color:var(--mp-text)] outline-none placeholder:text-rose-100/24 focus:border-rose-200"
+          disabled={isDeleting}
           onChange={(event) => setConfirmation(event.target.value)}
           placeholder={t('mobilePremium.delete.placeholder')}
           value={confirmation}
         />
       </label>
 
+      {deleteError ? (
+        <p className="mt-4 rounded-[1rem] border border-red-300/25 bg-red-400/8 px-4 py-3 text-sm text-[color:var(--mp-red)]">{deleteError}</p>
+      ) : null}
+
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <button className="min-h-12 rounded-full border border-[color:var(--mp-border)] text-sm font-semibold text-[color:var(--mp-text-secondary)]" onClick={onCancel} type="button">
+        <button className="min-h-12 rounded-full border border-[color:var(--mp-border)] text-sm font-semibold text-[color:var(--mp-text-secondary)] disabled:opacity-50" disabled={isDeleting} onClick={onCancel} type="button">
           {t('mobilePremium.delete.cancel')}
         </button>
         <button
           className={`min-h-12 rounded-full border px-4 text-sm font-semibold transition ${
-            canDelete
+            canDelete && !isDeleting
               ? 'border-rose-300/45 bg-rose-500/18 text-rose-100'
               : 'border-rose-300/20 bg-rose-500/8 text-rose-200/40'
           }`}
-          disabled={!canDelete}
-          onClick={onClose}
+          disabled={!canDelete || isDeleting}
+          onClick={() => void handleDelete()}
           type="button"
         >
-          {t('mobilePremium.delete.confirm')}
+          {isDeleting ? t('mobilePremium.delete.deleting') : t('mobilePremium.delete.confirm')}
         </button>
       </div>
     </section>
@@ -956,6 +982,7 @@ function ReminderSheet({
 
 function AiTaskSheet({ backendUserId, onClose }: { backendUserId: string | null; onClose: () => void }) {
   const { language, t } = usePostLoginLanguage();
+  const { createTask } = useCreateTask();
   const [difficulty, setDifficulty] = useState<'Fácil' | 'Media' | 'Difícil'>('Media');
   const [intention, setIntention] = useState('');
   const [phase, setPhase] = useState<'idle' | 'analyzing' | 'generated' | 'error'>('idle');
@@ -998,7 +1025,7 @@ function AiTaskSheet({ backendUserId, onClose }: { backendUserId: string | null;
     setAiError(null);
     try {
       const difficultyId = difficultyCatalog.data.find((item) => normalizeDifficultyLabel(item.name) === difficulty || normalizeDifficultyLabel(item.code) === difficulty)?.id ?? null;
-      await createUserTask(backendUserId, {
+      await createTask(backendUserId, {
         title: intention.trim(),
         pillarId: classification.pillarId == null ? null : String(classification.pillarId),
         traitId: classification.traitId == null ? null : String(classification.traitId),

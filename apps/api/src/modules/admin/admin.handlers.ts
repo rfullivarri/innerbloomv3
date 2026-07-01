@@ -25,6 +25,10 @@ import {
   habitAchievementDiagnosticsQuerySchema,
   adminManualGameModeChangeBodySchema,
   adminModeUpgradeCtaOverrideUpsertBodySchema,
+  marketingPostParamsSchema,
+  marketingPostUpdateBodySchema,
+  marketingCmoContextBodySchema,
+  marketingCmoContextStatusQuerySchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -69,6 +73,11 @@ import {
 import { runUserMonthlyModeUpgradeAggregation } from '../../services/modeUpgradeMonthlyAggregationService.js';
 import { runRetroactiveHabitAchievementDetection } from '../../services/habitAchievementService.js';
 import { getMonthlyPipelineStatus, runMonthlyPipelineForPeriod } from '../../services/monthlyPipelineService.js';
+import { listMarketingCampaigns, updateMarketingPost } from '../../services/marketingCampaignService.js';
+import {
+  buildMarketingCmoContext,
+  getMarketingCmoContextStatus,
+} from '../../services/marketingCmoContextService.js';
 import { pool } from '../../db.js';
 
 const taskgenForceRunRequestSchema = z
@@ -217,6 +226,41 @@ export const postAdminRunSubscriptionNotifications = asyncHandler(async (req: Re
 
 export const getAdminMe = asyncHandler(async (_req: Request, res: Response) => {
   res.json({ ok: true });
+});
+
+export const getAdminMarketingCampaigns = asyncHandler(async (_req: Request, res: Response) => {
+  const campaigns = await listMarketingCampaigns();
+  res.json({ ok: true, campaigns });
+});
+
+export const patchAdminMarketingPost = asyncHandler(async (req: Request, res: Response) => {
+  const { campaignCode, postCode } = marketingPostParamsSchema.parse(req.params);
+  const body = marketingPostUpdateBodySchema.parse(req.body ?? {});
+  const post = await updateMarketingPost(campaignCode, postCode, body);
+  res.json({ ok: true, post });
+});
+
+export const postAdminMarketingCmoContext = asyncHandler(async (req: Request, res: Response) => {
+  const body = marketingCmoContextBodySchema.parse(req.body ?? {});
+  const result = await buildMarketingCmoContext({
+    periodKey: body.periodKey,
+    force: body.force,
+  });
+
+  res.json({
+    ok: true,
+    status: result.status,
+    periodKey: result.periodKey,
+    previousPeriodKey: result.previousPeriodKey,
+    outputPath: result.outputPath,
+    sources: result.sourceSummary,
+  });
+});
+
+export const getAdminMarketingCmoContextStatus = asyncHandler(async (req: Request, res: Response) => {
+  const query = marketingCmoContextStatusQuerySchema.parse(req.query);
+  const status = await getMarketingCmoContextStatus(query.periodKey);
+  res.json({ ok: true, ...status });
 });
 
 export const getTaskgenJobs = asyncHandler(async (req: Request, res: Response) => {

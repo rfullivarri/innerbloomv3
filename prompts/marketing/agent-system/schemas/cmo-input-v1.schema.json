@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://innerbloom.local/schemas/marketing/cmo-input-v1.schema.json",
+  "title": "Innerbloom Marketing CMO Agent Input v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "current_period",
+    "previous_period",
+    "timezone",
+    "analytics_window",
+    "business_context",
+    "strategy_memory",
+    "analytics",
+    "previous_campaigns",
+    "available_assets",
+    "operational_constraints",
+    "source_manifest"
+  ],
+  "properties": {
+    "schema_version": { "const": "cmo-input-v1" },
+    "current_period": { "$ref": "#/$defs/periodKey" },
+    "previous_period": { "$ref": "#/$defs/periodKey" },
+    "timezone": { "const": "Europe/Madrid" },
+    "analytics_window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["period_start", "period_end", "period_start_utc", "period_end_utc"],
+      "properties": {
+        "period_start": { "type": "string", "format": "date" },
+        "period_end": { "type": "string", "format": "date" },
+        "period_start_utc": { "type": "string", "format": "date-time" },
+        "period_end_utc": { "type": "string", "format": "date-time" }
+      }
+    },
+    "business_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "current_marketing_objective",
+        "product_stage",
+        "audience",
+        "current_priorities",
+        "constraints",
+        "known_product_changes"
+      ],
+      "properties": {
+        "current_marketing_objective": { "type": "string" },
+        "product_stage": { "type": "string" },
+        "audience": { "type": "array", "items": { "type": "string" } },
+        "current_priorities": { "type": "array", "items": { "type": "string" } },
+        "constraints": { "type": "array", "items": { "type": "string" } },
+        "known_product_changes": { "type": "array", "items": { "type": "string" } },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "strategy_memory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "document_path",
+        "current_positioning",
+        "historical_learnings",
+        "previous_experiments",
+        "previous_decisions",
+        "content_rules",
+        "known_risks",
+        "open_questions"
+      ],
+      "properties": {
+        "document_path": { "type": "string" },
+        "current_positioning": { "type": "array", "items": { "type": "string" } },
+        "historical_learnings": { "type": "array", "items": { "type": "string" } },
+        "previous_experiments": { "type": "array", "items": { "type": "string" } },
+        "previous_decisions": { "type": "array", "items": { "type": "string" } },
+        "content_rules": { "type": "array", "items": { "type": "string" } },
+        "known_risks": { "type": "array", "items": { "type": "string" } },
+        "open_questions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "analytics": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "sync_run_id",
+        "period_start",
+        "period_end",
+        "data_quality",
+        "marketing_totals",
+        "product_totals",
+        "registered_users",
+        "top_pages",
+        "marketing_pages",
+        "product_pages",
+        "top_sources",
+        "clean_sources",
+        "top_events",
+        "search_console_queries",
+        "funnel_events"
+      ],
+      "properties": {
+        "sync_run_id": { "type": "string", "minLength": 1 },
+        "period_start": { "type": "string", "format": "date" },
+        "period_end": { "type": "string", "format": "date" },
+        "data_quality": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["status", "issues"],
+          "properties": {
+            "status": { "type": "string" },
+            "issues": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "marketing_totals": { "type": "object", "additionalProperties": true },
+        "product_totals": { "type": "object", "additionalProperties": true },
+        "registered_users": { "type": "object", "additionalProperties": true },
+        "top_pages": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+        "marketing_pages": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+        "product_pages": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+        "top_sources": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+        "clean_sources": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+        "top_events": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+        "search_console_queries": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+        "funnel_events": { "type": "array", "items": { "type": "object", "additionalProperties": true } }
+      }
+    },
+    "previous_campaigns": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/campaign" }
+    },
+    "available_assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["product_screenshots", "brand_assets", "reusable_templates", "existing_visuals", "missing_assets"],
+      "properties": {
+        "product_screenshots": { "type": "array", "items": { "$ref": "#/$defs/asset" } },
+        "brand_assets": { "type": "array", "items": { "$ref": "#/$defs/asset" } },
+        "reusable_templates": { "type": "array", "items": { "$ref": "#/$defs/asset" } },
+        "existing_visuals": { "type": "array", "items": { "$ref": "#/$defs/asset" } },
+        "missing_assets": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "operational_constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "platforms",
+        "supported_formats",
+        "publishing",
+        "public_storage",
+        "monthly_capacity_posts",
+        "asset_limits",
+        "legal_and_brand",
+        "human_review_required"
+      ],
+      "properties": {
+        "platforms": { "type": "array", "items": { "type": "string" } },
+        "supported_formats": { "type": "array", "items": { "type": "string" } },
+        "publishing": { "type": "string" },
+        "public_storage": { "type": "string" },
+        "monthly_capacity_posts": { "type": "integer", "minimum": 1 },
+        "asset_limits": { "type": "array", "items": { "type": "string" } },
+        "legal_and_brand": { "type": "array", "items": { "type": "string" } },
+        "human_review_required": { "type": "boolean" }
+      }
+    },
+    "source_manifest": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/source" }
+    }
+  },
+  "$defs": {
+    "periodKey": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_type", "source_path_or_id", "captured_at"],
+      "properties": {
+        "source_type": { "type": "string" },
+        "source_path_or_id": { "type": "string" },
+        "captured_at": { "type": "string", "format": "date-time" },
+        "checksum": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asset_id", "source", "kind", "label"],
+      "properties": {
+        "asset_id": { "type": "string" },
+        "source": { "type": "string" },
+        "kind": { "type": "string" },
+        "label": { "type": "string" },
+        "url": { "type": "string" },
+        "file_path": { "type": "string" },
+        "campaign_code": { "type": "string" },
+        "post_code": { "type": "string" }
+      }
+    },
+    "campaign": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaign_code",
+        "period_key",
+        "objective",
+        "status",
+        "strategy_summary",
+        "posts",
+        "results",
+        "human_decisions",
+        "rejection_reasons"
+      ],
+      "properties": {
+        "campaign_code": { "type": "string" },
+        "period_key": { "$ref": "#/$defs/periodKey" },
+        "objective": { "type": "string" },
+        "status": { "type": "string" },
+        "strategy_summary": { "type": "string" },
+        "posts": { "type": "array", "items": { "$ref": "#/$defs/post" } },
+        "results": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+        "human_decisions": { "type": "array", "items": { "type": "string" } },
+        "rejection_reasons": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "post": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "post_code",
+        "platform",
+        "format",
+        "status",
+        "hook",
+        "caption",
+        "hypothesis",
+        "target_metric",
+        "tracking_url",
+        "assets",
+        "agent_notes",
+        "decision_note",
+        "rejection_reason",
+        "timestamps",
+        "metrics"
+      ],
+      "properties": {
+        "post_code": { "type": "string" },
+        "platform": { "type": "string" },
+        "format": { "type": "string" },
+        "status": { "type": "string" },
+        "hook": { "type": "string" },
+        "caption": { "type": "string" },
+        "hypothesis": { "type": "string" },
+        "target_metric": { "type": "string" },
+        "tracking_url": { "type": "string" },
+        "assets": { "type": "array", "items": { "$ref": "#/$defs/asset" } },
+        "agent_notes": { "type": "string" },
+        "decision_note": { "type": "string" },
+        "rejection_reason": { "type": "string" },
+        "timestamps": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "scheduled_at": { "type": ["string", "null"], "format": "date-time" },
+            "approved_at": { "type": ["string", "null"], "format": "date-time" },
+            "rejected_at": { "type": ["string", "null"], "format": "date-time" },
+            "published_at": { "type": ["string", "null"], "format": "date-time" },
+            "measured_at": { "type": ["string", "null"], "format": "date-time" }
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": { "type": "object", "additionalProperties": true }
+        }
+      }
+    }
+  }
+}
