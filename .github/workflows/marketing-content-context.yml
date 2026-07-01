@@ -1,0 +1,164 @@
+name: Generate Head of Content context
+
+on:
+  workflow_dispatch:
+    inputs:
+      period_key:
+        description: Approved CMO strategy period in YYYY-MM format
+        required: true
+        type: string
+      approve_strategy:
+        description: I reviewed and approve the CMO strategy for campaign development
+        required: true
+        default: false
+        type: boolean
+      force:
+        description: Rebuild content-context.json when it already exists
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: marketing-content-context-${{ github.event.inputs.period_key }}
+  cancel-in-progress: false
+
+jobs:
+  generate-content-context:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate approval and period
+        id: period
+        shell: bash
+        env:
+          PERIOD_KEY: ${{ github.event.inputs.period_key }}
+          APPROVED: ${{ github.event.inputs.approve_strategy }}
+        run: |
+          set -euo pipefail
+          node -e '
+            const value = process.argv[1];
+            const match = /^(\d{4})-(\d{2})$/.exec(value);
+            if (!match || Number(match[2]) < 1 || Number(match[2]) > 12) process.exit(1);
+          ' "${PERIOD_KEY}"
+          if [[ "${APPROVED}" != "true" ]]; then
+            echo "Strategy approval must be confirmed." >&2
+            exit 1
+          fi
+          echo "branch=automation/marketing-cycle-${PERIOD_KEY}" >> "${GITHUB_OUTPUT}"
+          echo "output_path=marketing/agent-inputs/${PERIOD_KEY}/content-context.json" >> "${GITHUB_OUTPUT}"
+
+      - name: Check out monthly marketing branch
+        shell: bash
+        env:
+          CYCLE_BRANCH: ${{ steps.period.outputs.branch }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main --prune
+          if ! git ls-remote --exit-code --heads origin "${CYCLE_BRANCH}" >/dev/null 2>&1; then
+            echo "Monthly branch ${CYCLE_BRANCH} does not exist." >&2
+            exit 1
+          fi
+          git fetch origin "${CYCLE_BRANCH}:${CYCLE_BRANCH}"
+          git checkout "${CYCLE_BRANCH}"
+          git merge --no-edit origin/main
+
+      - name: Verify approved strategy inputs
+        shell: bash
+        env:
+          PERIOD_KEY: ${{ github.event.inputs.period_key }}
+        run: |
+          set -euo pipefail
+          test -s "marketing/agent-inputs/${PERIOD_KEY}/cmo-context.json"
+          test -s "marketing/agent-outputs/${PERIOD_KEY}/cmo-strategy.json"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck API
+        run: npm -w @innerbloom/api run typecheck
+
+      - name: Validate CMO strategy
+        env:
+          PERIOD_KEY: ${{ github.event.inputs.period_key }}
+        run: >-
+          npx tsx apps/api/scripts/validate-marketing-agent-json.ts
+          --schema=prompts/marketing/agent-system/schemas/cmo-output-v1.schema.json
+          --input="marketing/agent-outputs/${PERIOD_KEY}/cmo-strategy.json"
+
+      - name: Generate Head of Content context
+        shell: bash
+        env:
+          PERIOD_KEY: ${{ github.event.inputs.period_key }}
+          FORCE_INPUT: ${{ github.event.inputs.force }}
+        run: |
+          set -euo pipefail
+          args=(--period="${PERIOD_KEY}" --approve-strategy)
+          if [[ "${FORCE_INPUT}" == "true" ]]; then args+=(--force); fi
+          npx tsx apps/api/scripts/export-marketing-content-context.ts "${args[@]}"
+
+      - name: Validate Head of Content context
+        env:
+          OUTPUT_PATH: ${{ steps.period.outputs.output_path }}
+        run: >-
+          npx tsx apps/api/scripts/validate-marketing-agent-json.ts
+          --schema=prompts/marketing/agent-system/schemas/head-of-content-input-v1.schema.json
+          --input="${OUTPUT_PATH}"
+
+      - name: Commit and push monthly branch
+        shell: bash
+        env:
+          PERIOD_KEY: ${{ github.event.inputs.period_key }}
+          CYCLE_BRANCH: ${{ steps.period.outputs.branch }}
+          OUTPUT_PATH: ${{ steps.period.outputs.output_path }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "${OUTPUT_PATH}"
+          if git diff --cached --quiet; then
+            echo "The validated content context is unchanged."
+          else
+            git commit -m "chore(marketing): approve strategy and generate content context for ${PERIOD_KEY}"
+          fi
+          git push origin "${CYCLE_BRANCH}"
+
+      - name: Upload content context artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: marketing-content-context-${{ github.event.inputs.period_key }}
+          path: ${{ steps.period.outputs.output_path }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Report next step
+        shell: bash
+        env:
+          PERIOD_KEY: ${{ github.event.inputs.period_key }}
+          CYCLE_BRANCH: ${{ steps.period.outputs.branch }}
+          OUTPUT_PATH: ${{ steps.period.outputs.output_path }}
+        run: |
+          {
+            echo "## Head of Content context ready"
+            echo "- Period: \`${PERIOD_KEY}\`"
+            echo "- Branch: \`${CYCLE_BRANCH}\`"
+            echo "- Input: \`${OUTPUT_PATH}\`"
+            echo "- CMO strategy approval: confirmed by workflow dispatch"
+            echo "- Validation: passed"
+            echo "- Next step: run the Head of Content agent on the same branch"
+          } >> "${GITHUB_STEP_SUMMARY}"
