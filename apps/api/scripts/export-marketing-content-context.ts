@@ -66,6 +66,9 @@ async function main(): Promise<void> {
     },
     strategy: {
       review_status: 'approved',
+      approval_authority: 'human_workflow_dispatch',
+      approval_recorded_at: now,
+      original_cmo_review_status: strategy.review_status,
       cmo_output_path: `marketing/agent-outputs/${period}/cmo-strategy.json`,
       cmo_output: strategy,
     },

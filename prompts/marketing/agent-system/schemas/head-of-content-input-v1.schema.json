@@ -23,9 +23,12 @@
     "strategy": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["review_status", "cmo_output_path", "cmo_output"],
+      "required": ["review_status", "approval_authority", "approval_recorded_at", "original_cmo_review_status", "cmo_output_path", "cmo_output"],
       "properties": {
         "review_status": {"const": "approved"},
+        "approval_authority": {"const": "human_workflow_dispatch"},
+        "approval_recorded_at": {"type": "string", "format": "date-time"},
+        "original_cmo_review_status": {"enum": ["draft", "approved"]},
         "cmo_output_path": {"type": "string", "minLength": 1},
         "cmo_output": {"type": "object"}
       }
