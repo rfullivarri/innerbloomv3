@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { useAuth } from '../auth/runtimeAuth';
-import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
+import {
+  DASHBOARD_PATH,
+  DEFAULT_DASHBOARD_PATH,
+  INNERBLOOM2_DASHBOARD_PATH,
+  INNERBLOOM2_INTRO_JOURNEY_PATH,
+} from '../config/auth';
 import { LANDING_V3_CONTENT } from '../content/landingV3Content';
 import { useBackendUser } from '../hooks/useBackendUser';
 import { useOnboardingProgress } from '../hooks/useOnboardingProgress';
@@ -304,10 +309,10 @@ function resolveNativeEntryRoute({
   }
 
   if (authMode === 'sign-up') {
-    return isOnboardingComplete ? dashboardPath : '/intro-journey';
+    return isOnboardingComplete ? dashboardPath : INNERBLOOM2_INTRO_JOURNEY_PATH;
   }
 
-  return isOnboardingComplete ? dashboardPath : '/intro-journey';
+  return isOnboardingComplete ? dashboardPath : INNERBLOOM2_INTRO_JOURNEY_PATH;
 }
 
 export function MobileAppEntry() {
@@ -322,7 +327,7 @@ export function MobileAppEntry() {
   const hasEffectiveSession = isSignedIn || hasNativeCallbackSession;
   const shouldLoadOnboarding = hasEffectiveSession && backendUser.status === 'success';
   const onboarding = useOnboardingProgress({ enabled: shouldLoadOnboarding });
-  const dashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
+  const dashboardPath = isNativeApp ? INNERBLOOM2_DASHBOARD_PATH : (DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH);
   const nativeAuthMode = isNativeApp ? mobileAuthSession?.authMode ?? null : null;
   const onboardingSignals = {
     state: onboarding.progress?.state ?? null,
@@ -438,8 +443,8 @@ export function MobileAppEntry() {
   }
 
   if (!isOnboardingComplete) {
-    if (finalRoute === '/intro-journey') {
-      return <Navigate to="/intro-journey" replace />;
+    if (finalRoute === INNERBLOOM2_INTRO_JOURNEY_PATH) {
+      return <Navigate to={INNERBLOOM2_INTRO_JOURNEY_PATH} replace />;
     }
   }
 

@@ -16,7 +16,14 @@ import { DEV_USER_SWITCH_ACTIVE, setApiAuthTokenProvider } from './lib/api';
 import { getDailyReminderSettings } from './lib/api';
 import OnboardingIntroPage from './pages/OnboardingIntro';
 import PricingPage from './pages/Pricing';
-import { CLERK_TOKEN_TEMPLATE, DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from './config/auth';
+import {
+  CLERK_TOKEN_TEMPLATE,
+  DASHBOARD_PATH,
+  DEFAULT_DASHBOARD_PATH,
+  INNERBLOOM2_BASE_PATH,
+  INNERBLOOM2_DASHBOARD_PATH,
+  INNERBLOOM2_ONBOARDING_PATH,
+} from './config/auth';
 import SubscriptionPage from './pages/Subscription';
 import PremiumTimelineDemoPage from './pages/PremiumTimelineDemo';
 import BillingSuccessPage from './pages/BillingSuccess';
@@ -303,11 +310,9 @@ export default function App() {
   const dashboardAliases = ['/dashboard', '/dashboard-v3'].filter(
     (alias) => alias !== trimmedDashboardPath,
   );
-  const innerbloom2BasePath = '/innerbloom2';
-  const innerbloom2DashboardPath = `${innerbloom2BasePath}/dashboard`;
   const analyticsDashboardBasePaths = useMemo(
-    () => [trimmedDashboardPath, innerbloom2DashboardPath],
-    [innerbloom2DashboardPath, trimmedDashboardPath],
+    () => [trimmedDashboardPath, INNERBLOOM2_DASHBOARD_PATH],
+    [trimmedDashboardPath],
   );
   useGa4FunnelTracking({ dashboardBasePaths: analyticsDashboardBasePaths });
 
@@ -343,7 +348,7 @@ export default function App() {
           path="/innerbloom2/*"
           element={(
             <RequireUser loginPath="/login2">
-              <MobilePremiumLabPage basePath={innerbloom2BasePath} />
+              <MobilePremiumLabPage basePath={INNERBLOOM2_BASE_PATH} />
             </RequireUser>
           )}
         />
@@ -364,9 +369,9 @@ export default function App() {
           path="/onboarding2"
           element={(
             <OnboardingIntroPage
-              defaultDashboardPath={innerbloom2DashboardPath}
-              quickStartDashboardPath={innerbloom2DashboardPath}
-              quickStartPreviewDashboardPath={`${innerbloom2DashboardPath}?onboardingPreview=1`}
+              defaultDashboardPath={INNERBLOOM2_DASHBOARD_PATH}
+              quickStartDashboardPath={INNERBLOOM2_DASHBOARD_PATH}
+              quickStartPreviewDashboardPath={`${INNERBLOOM2_DASHBOARD_PATH}?onboardingPreview=1`}
             />
           )}
         />
@@ -374,9 +379,9 @@ export default function App() {
           path="/intro-journey2"
           element={(
             <OnboardingIntroPage
-              defaultDashboardPath={innerbloom2DashboardPath}
-              quickStartDashboardPath={innerbloom2DashboardPath}
-              quickStartPreviewDashboardPath={`${innerbloom2DashboardPath}?onboardingPreview=1`}
+              defaultDashboardPath={INNERBLOOM2_DASHBOARD_PATH}
+              quickStartDashboardPath={INNERBLOOM2_DASHBOARD_PATH}
+              quickStartPreviewDashboardPath={`${INNERBLOOM2_DASHBOARD_PATH}?onboardingPreview=1`}
             />
           )}
         />
@@ -399,10 +404,10 @@ export default function App() {
         <Route
           path="/login2/*"
           element={
-            <RedirectIfSignedIn redirectPath={innerbloom2DashboardPath}>
+            <RedirectIfSignedIn redirectPath={INNERBLOOM2_DASHBOARD_PATH}>
               <LoginPage
                 authPath="/login2"
-                defaultRedirectPath={innerbloom2DashboardPath}
+                defaultRedirectPath={INNERBLOOM2_DASHBOARD_PATH}
                 secondaryActionHref="/"
                 signUpPath="/sign-up2"
               />
@@ -420,10 +425,10 @@ export default function App() {
         <Route
           path="/sign-up2/*"
           element={
-            <RedirectIfSignedIn redirectPath={innerbloom2DashboardPath}>
+            <RedirectIfSignedIn redirectPath={INNERBLOOM2_DASHBOARD_PATH}>
               <SignUpPage
                 authPath="/sign-up2"
-                defaultRedirectPath="/onboarding2"
+                defaultRedirectPath={INNERBLOOM2_ONBOARDING_PATH}
                 secondaryActionHref="/"
                 signInPath="/login2"
               />
