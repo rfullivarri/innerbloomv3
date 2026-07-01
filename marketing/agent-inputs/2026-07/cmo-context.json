@@ -1,0 +1,1497 @@
+{
+  "schema_version": "1.0",
+  "period": {
+    "current_period": "2026-07",
+    "previous_period": "2026-06",
+    "timezone": "Europe/Madrid",
+    "target_post_count": 20,
+    "analysis_window": {
+      "start_date": "2026-06-01",
+      "end_date": "2026-06-30"
+    }
+  },
+  "business_context": {
+    "current_marketing_objective": "Acquire early adopter users for Innerbloom 2.0 with lightweight, measurable social content. The system should minimize manual marketing operations while keeping final approval under human control.",
+    "product_stage": "early-stage MVP",
+    "audience": [],
+    "current_priorities": [
+      "This is the first real monthly plan once draft generation is wired.",
+      "Planned mix:",
+      "8 pain/friction posts: streak pressure, perfect-day planning, restarting from zero, habits collapsing during messy weeks.",
+      "5 product mechanism/demo posts: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum.",
+      "4 belief/differentiation posts: real weeks over perfect calendars, progress without shame, sustainable habit design, anti-all-or-nothing routines.",
+      "3 early-adopter CTA posts: try the early version, help shape the product, give feedback after using the dashboard.",
+      "Creative rules:",
+      "Prefer real Innerbloom 2.0 screenshots over generic lifestyle imagery.",
+      "Use both dark-mode and light-mode product assets when available.",
+      "Keep carousel slides readable on mobile.",
+      "Use R2 URLs in Metricool CSV output.",
+      "Store source assets and planning context in Google Drive for browsing.",
+      "Measurement:",
+      "Primary acquisition: landing views and CTA events from UTM-tagged links.",
+      "Primary activation: `auth_started -> auth_completed -> dashboard_view`.",
+      "Product-interest proxy: views of `/innerbloom2/dashboard`, `/innerbloom2/tareas`, `/innerbloom2/task-detail`, and `/innerbloom2/logros`.",
+      "GA4 active users are anonymous, cookie/device-based users. They are not the same as registered users in Neon.",
+      "For marketing decisions:",
+      "Treat landing page views as acquisition signal.",
+      "Treat `/innerbloom2/...` pages as product usage signal.",
+      "Exclude auth redirects such as `accounts.google.com`.",
+      "Exclude internal/admin emails before reading registered-user growth.",
+      "Search Console is sparse until Google has more impressions.",
+      "This is the first real monthly plan once draft generation is wired.",
+      "Planned mix:",
+      "8 pain/friction posts: streak pressure, perfect-day planning, restarting from zero, habits collapsing during messy weeks.",
+      "5 product mechanism/demo posts: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum.",
+      "4 belief/differentiation posts: real weeks over perfect calendars, progress without shame, sustainable habit design, anti-all-or-nothing routines.",
+      "3 early-adopter CTA posts: try the early version, help shape the product, give feedback after using the dashboard.",
+      "Creative rules:",
+      "Prefer real Innerbloom 2.0 screenshots over generic lifestyle imagery.",
+      "Use both dark-mode and light-mode product assets when available.",
+      "Keep carousel slides readable on mobile.",
+      "Use R2 URLs in Metricool CSV output.",
+      "Store source assets and planning context in Google Drive for browsing.",
+      "Measurement:",
+      "Primary acquisition: landing views and CTA events from UTM-tagged links.",
+      "Primary activation: `auth_started -> auth_completed -> dashboard_view`.",
+      "Product-interest proxy: views of `/innerbloom2/dashboard`, `/innerbloom2/tareas`, `/innerbloom2/task-detail`, and `/innerbloom2/logros`.",
+      "For the next monthly run:",
+      "Keep the number of configurable knobs small.",
+      "Prefer strong hooks and measurable hypotheses over generic motivational posts.",
+      "Reuse visual patterns that remain readable on mobile.",
+      "Generate only new visuals when the existing asset library cannot support the post.",
+      "Preserve every decision and result in this strategy memory."
+    ],
+    "constraints": [
+      "Approved posts are exported to Metricool CSV; this exporter does not publish content.",
+      "Public marketing files can be served from R2 or repository public assets; this exporter does not upload binaries.",
+      "Human review is required before publishing.",
+      "Do not include secrets, service account keys, unnecessary PII, or individual user identifiers."
+    ],
+    "known_product_changes": [
+      "Metricool CSV import works.",
+      "Metricool can ingest image URLs from Cloudflare R2 URLs.",
+      "Instagram posts published successfully from the generated CSV.",
+      "Cloudflare R2 is now the publishing asset store for CSV exports.",
+      "Google Drive remains the human-readable marketing library.",
+      "GA4 and Search Console snapshots can be synced into Neon and shown in `/admin/marketing`."
+    ],
+    "notes": [
+      "No explicit audience section found in strategy memory or structured configuration."
+    ]
+  },
+  "strategy_memory": {
+    "document_path": "Docs/marketing/strategy-memory.md",
+    "current_objective": "Acquire early adopter users for Innerbloom 2.0 with lightweight, measurable social content. The system should minimize manual marketing operations while keeping final approval under human control.",
+    "current_positioning": [
+      "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity.",
+      "Core message:",
+      "adaptive habits",
+      "real-life rhythm",
+      "recalibration instead of restart",
+      "visible progress without perfection pressure",
+      "early product, feedback welcome"
+    ],
+    "historical_learnings": [
+      "The first operational MVP proved that:",
+      "Metricool CSV import works.",
+      "Metricool can ingest image URLs from Cloudflare R2 URLs.",
+      "Instagram posts published successfully from the generated CSV.",
+      "Cloudflare R2 is now the publishing asset store for CSV exports.",
+      "Google Drive remains the human-readable marketing library.",
+      "GA4 and Search Console snapshots can be synced into Neon and shown in `/admin/marketing`.",
+      "The first content batch was only a technical proof. Its performance should not be treated as a strategic signal yet."
+    ],
+    "previous_experiments": [
+      "This is the first real monthly plan once draft generation is wired.",
+      "Planned mix:",
+      "8 pain/friction posts: streak pressure, perfect-day planning, restarting from zero, habits collapsing during messy weeks.",
+      "5 product mechanism/demo posts: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum.",
+      "4 belief/differentiation posts: real weeks over perfect calendars, progress without shame, sustainable habit design, anti-all-or-nothing routines.",
+      "3 early-adopter CTA posts: try the early version, help shape the product, give feedback after using the dashboard.",
+      "Creative rules:",
+      "Prefer real Innerbloom 2.0 screenshots over generic lifestyle imagery.",
+      "Use both dark-mode and light-mode product assets when available.",
+      "Keep carousel slides readable on mobile.",
+      "Use R2 URLs in Metricool CSV output.",
+      "Store source assets and planning context in Google Drive for browsing.",
+      "Measurement:",
+      "Primary acquisition: landing views and CTA events from UTM-tagged links.",
+      "Primary activation: `auth_started -> auth_completed -> dashboard_view`.",
+      "Product-interest proxy: views of `/innerbloom2/dashboard`, `/innerbloom2/tareas`, `/innerbloom2/task-detail`, and `/innerbloom2/logros`."
+    ],
+    "previous_decisions": [
+      "For the next monthly run:",
+      "Keep the number of configurable knobs small.",
+      "Prefer strong hooks and measurable hypotheses over generic motivational posts.",
+      "Reuse visual patterns that remain readable on mobile.",
+      "Generate only new visuals when the existing asset library cannot support the post.",
+      "Preserve every decision and result in this strategy memory."
+    ],
+    "content_rules": [
+      "GA4 active users are anonymous, cookie/device-based users. They are not the same as registered users in Neon.",
+      "For marketing decisions:",
+      "Treat landing page views as acquisition signal.",
+      "Treat `/innerbloom2/...` pages as product usage signal.",
+      "Exclude auth redirects such as `accounts.google.com`.",
+      "Exclude internal/admin emails before reading registered-user growth.",
+      "Search Console is sparse until Google has more impressions.",
+      "This is the first real monthly plan once draft generation is wired.",
+      "Planned mix:",
+      "8 pain/friction posts: streak pressure, perfect-day planning, restarting from zero, habits collapsing during messy weeks.",
+      "5 product mechanism/demo posts: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum.",
+      "4 belief/differentiation posts: real weeks over perfect calendars, progress without shame, sustainable habit design, anti-all-or-nothing routines.",
+      "3 early-adopter CTA posts: try the early version, help shape the product, give feedback after using the dashboard.",
+      "Creative rules:",
+      "Prefer real Innerbloom 2.0 screenshots over generic lifestyle imagery.",
+      "Use both dark-mode and light-mode product assets when available.",
+      "Keep carousel slides readable on mobile.",
+      "Use R2 URLs in Metricool CSV output.",
+      "Store source assets and planning context in Google Drive for browsing.",
+      "Measurement:",
+      "Primary acquisition: landing views and CTA events from UTM-tagged links.",
+      "Primary activation: `auth_started -> auth_completed -> dashboard_view`.",
+      "Product-interest proxy: views of `/innerbloom2/dashboard`, `/innerbloom2/tareas`, `/innerbloom2/task-detail`, and `/innerbloom2/logros`.",
+      "For the next monthly run:",
+      "Keep the number of configurable knobs small.",
+      "Prefer strong hooks and measurable hypotheses over generic motivational posts.",
+      "Reuse visual patterns that remain readable on mobile.",
+      "Generate only new visuals when the existing asset library cannot support the post.",
+      "Preserve every decision and result in this strategy memory."
+    ],
+    "known_risks": [
+      "Monthly draft generation is not automated yet.",
+      "The scheduled Codex prompt still needs to be created and tested.",
+      "Metricool performance data is manual export for now.",
+      "The admin marketing approval board is still seeded/local-storage based until backend post persistence is added.",
+      "Image generation is template-based; new visual assets should be generated only when needed."
+    ],
+    "open_questions": [
+      "Monthly draft generation is not automated yet.",
+      "The scheduled Codex prompt still needs to be created and tested.",
+      "Metricool performance data is manual export for now.",
+      "The admin marketing approval board is still seeded/local-storage based until backend post persistence is added.",
+      "Image generation is template-based; new visual assets should be generated only when needed."
+    ],
+    "campaign_defaults": {
+      "default_platform": "Instagram",
+      "default_language": "English",
+      "default_monthly_post_count": 20,
+      "current_tested_formats": [
+        "square static",
+        "square carousel"
+      ],
+      "current_mvp_campaign_code": "ib20_mvp"
+    }
+  },
+  "analytics": {
+    "sync_run_id": "marketing-2026-06-03-2026-06-30-3335db68-368b-473a-b9f3-45225f6170ab",
+    "period_start": "2026-06-03",
+    "period_end": "2026-06-30",
+    "data_quality": {
+      "status": "warning",
+      "issues": [
+        "Partial analytics coverage: requested 2026-06-01 -> 2026-06-30; using 2026-06-03 -> 2026-06-30. No unavailable dates were inferred."
+      ]
+    },
+    "marketing_totals": {
+      "activeUsers": 14,
+      "sessions": 55,
+      "pageViews": 81,
+      "events": 256
+    },
+    "product_totals": {
+      "activeUsers": 45,
+      "sessions": 370,
+      "pageViews": 805,
+      "events": 1273
+    },
+    "registered_users": {
+      "total": 22,
+      "newInPeriod": 4,
+      "excludedInternal": 2
+    },
+    "top_pages": [
+      {
+        "page_path": "/innerbloom2/dashboard",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 74,
+        "screen_page_views": 237,
+        "event_count": 363
+      },
+      {
+        "page_path": "/innerbloom2/logros",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 63,
+        "screen_page_views": 146,
+        "event_count": 268
+      },
+      {
+        "page_path": "/innerbloom2/tareas",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 56,
+        "screen_page_views": 146,
+        "event_count": 175
+      },
+      {
+        "page_path": "/innerbloom2/task-detail",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 31,
+        "screen_page_views": 69,
+        "event_count": 83
+      },
+      {
+        "page_path": "/",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 12,
+        "sessions": 41,
+        "screen_page_views": 66,
+        "event_count": 212
+      },
+      {
+        "page_path": "/innerbloom2/emotion-chart",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 28,
+        "screen_page_views": 44,
+        "event_count": 47
+      },
+      {
+        "page_path": "/dashboard-v3",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 19,
+        "screen_page_views": 31,
+        "event_count": 135
+      },
+      {
+        "page_path": "/innerbloom2/dquest",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 27,
+        "screen_page_views": 28,
+        "event_count": 29
+      },
+      {
+        "page_path": "/innerbloom2/vision-general",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 17,
+        "screen_page_views": 23,
+        "event_count": 28
+      },
+      {
+        "page_path": "/login2",
+        "page_title": "Innerbloom",
+        "active_users": 3,
+        "sessions": 17,
+        "screen_page_views": 21,
+        "event_count": 48
+      },
+      {
+        "page_path": "/login",
+        "page_title": "Innerbloom",
+        "active_users": 3,
+        "sessions": 7,
+        "screen_page_views": 18,
+        "event_count": 35
+      },
+      {
+        "page_path": "/innerbloom2/balance",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 14,
+        "screen_page_views": 17,
+        "event_count": 18
+      },
+      {
+        "page_path": "/dashboard-v3/rewards",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 5,
+        "screen_page_views": 11,
+        "event_count": 40
+      },
+      {
+        "page_path": "/innerbloom2/dashboard",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 2,
+        "sessions": 5,
+        "screen_page_views": 9,
+        "event_count": 14
+      },
+      {
+        "page_path": "/innerbloom2/dashboard",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 8,
+        "event_count": 9
+      },
+      {
+        "page_path": "/v2",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 8,
+        "screen_page_views": 8,
+        "event_count": 25
+      },
+      {
+        "page_path": "/onboarding2",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 3,
+        "sessions": 5,
+        "screen_page_views": 7,
+        "event_count": 12
+      },
+      {
+        "page_path": "/v3",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 6,
+        "screen_page_views": 7,
+        "event_count": 19
+      },
+      {
+        "page_path": "/innerbloom2/tareas",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 6,
+        "event_count": 7
+      },
+      {
+        "page_path": "/dashboard-v3",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 2,
+        "sessions": 2,
+        "screen_page_views": 5,
+        "event_count": 18
+      },
+      {
+        "page_path": "/admin/marketing",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 13,
+        "screen_page_views": 5,
+        "event_count": 61
+      },
+      {
+        "page_path": "/admin/overview",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 4,
+        "screen_page_views": 4,
+        "event_count": 4
+      },
+      {
+        "page_path": "/innerbloom2/tareas",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 4,
+        "event_count": 4
+      },
+      {
+        "page_path": "/innerbloom2/dquest",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 2,
+        "sessions": 3,
+        "screen_page_views": 3,
+        "event_count": 3
+      },
+      {
+        "page_path": "/innerbloom2/task-detail",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 2,
+        "event_count": 2
+      },
+      {
+        "page_path": "/innerbloom2/logros",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 2,
+        "event_count": 2
+      },
+      {
+        "page_path": "/admin/user-ops",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 2,
+        "event_count": 2
+      },
+      {
+        "page_path": "/sign-up",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 2,
+        "event_count": 3
+      },
+      {
+        "page_path": "/innerbloom2/logros",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/admin/advanced",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/admin/core-engine",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 2
+      },
+      {
+        "page_path": "/admin/notifications",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/dashboard",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/dashboard-v3",
+        "page_title": "Floración interior",
+        "active_users": 1,
+        "sessions": 3,
+        "screen_page_views": 1,
+        "event_count": 5
+      },
+      {
+        "page_path": "/dashboard-v3/dquest",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 4
+      },
+      {
+        "page_path": "/dashboard-v3/misiones",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 2
+      },
+      {
+        "page_path": "/dashboard-v3/rewards",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 3
+      },
+      {
+        "page_path": "/editor",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 1,
+        "event_count": 3
+      },
+      {
+        "page_path": "/editor",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 2
+      },
+      {
+        "page_path": "/innerbloom2/balance",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/dquest",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/emotion-chart",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/emotion-chart",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/task-detail",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/vision-general",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/privacy",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 2
+      },
+      {
+        "page_path": "/sign-up2",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 1,
+        "event_count": 3
+      },
+      {
+        "page_path": "/admin",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 0,
+        "event_count": 2
+      },
+      {
+        "page_path": "/sso-callback",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 0,
+        "event_count": 1
+      },
+      {
+        "page_path": "/dashboard-v3",
+        "page_title": "Innerbloom Guided Demo",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 0,
+        "event_count": 1
+      },
+      {
+        "page_path": "/mobile-auth",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 0,
+        "event_count": 3
+      }
+    ],
+    "marketing_pages": [
+      {
+        "page_path": "/",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 12,
+        "sessions": 41,
+        "screen_page_views": 66,
+        "event_count": 212
+      },
+      {
+        "page_path": "/v2",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 8,
+        "screen_page_views": 8,
+        "event_count": 25
+      },
+      {
+        "page_path": "/v3",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 6,
+        "screen_page_views": 7,
+        "event_count": 19
+      }
+    ],
+    "product_pages": [
+      {
+        "page_path": "/innerbloom2/dashboard",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 74,
+        "screen_page_views": 237,
+        "event_count": 363
+      },
+      {
+        "page_path": "/innerbloom2/logros",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 63,
+        "screen_page_views": 146,
+        "event_count": 268
+      },
+      {
+        "page_path": "/innerbloom2/tareas",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 56,
+        "screen_page_views": 146,
+        "event_count": 175
+      },
+      {
+        "page_path": "/innerbloom2/task-detail",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 31,
+        "screen_page_views": 69,
+        "event_count": 83
+      },
+      {
+        "page_path": "/innerbloom2/emotion-chart",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 28,
+        "screen_page_views": 44,
+        "event_count": 47
+      },
+      {
+        "page_path": "/dashboard-v3",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 19,
+        "screen_page_views": 31,
+        "event_count": 135
+      },
+      {
+        "page_path": "/innerbloom2/dquest",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 27,
+        "screen_page_views": 28,
+        "event_count": 29
+      },
+      {
+        "page_path": "/innerbloom2/vision-general",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 17,
+        "screen_page_views": 23,
+        "event_count": 28
+      },
+      {
+        "page_path": "/innerbloom2/balance",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 14,
+        "screen_page_views": 17,
+        "event_count": 18
+      },
+      {
+        "page_path": "/dashboard-v3/rewards",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 5,
+        "screen_page_views": 11,
+        "event_count": 40
+      },
+      {
+        "page_path": "/innerbloom2/dashboard",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 2,
+        "sessions": 5,
+        "screen_page_views": 9,
+        "event_count": 14
+      },
+      {
+        "page_path": "/innerbloom2/dashboard",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 8,
+        "event_count": 9
+      },
+      {
+        "page_path": "/innerbloom2/tareas",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 6,
+        "event_count": 7
+      },
+      {
+        "page_path": "/dashboard-v3",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 2,
+        "sessions": 2,
+        "screen_page_views": 5,
+        "event_count": 18
+      },
+      {
+        "page_path": "/innerbloom2/tareas",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 4,
+        "event_count": 4
+      },
+      {
+        "page_path": "/innerbloom2/dquest",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 2,
+        "sessions": 3,
+        "screen_page_views": 3,
+        "event_count": 3
+      },
+      {
+        "page_path": "/innerbloom2/task-detail",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 2,
+        "event_count": 2
+      },
+      {
+        "page_path": "/innerbloom2/logros",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 2,
+        "event_count": 2
+      },
+      {
+        "page_path": "/innerbloom2/logros",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/dashboard",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/dashboard-v3",
+        "page_title": "Floración interior",
+        "active_users": 1,
+        "sessions": 3,
+        "screen_page_views": 1,
+        "event_count": 5
+      },
+      {
+        "page_path": "/dashboard-v3/dquest",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 4
+      },
+      {
+        "page_path": "/dashboard-v3/misiones",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 2
+      },
+      {
+        "page_path": "/dashboard-v3/rewards",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 3
+      },
+      {
+        "page_path": "/editor",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 1,
+        "event_count": 3
+      },
+      {
+        "page_path": "/editor",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 2
+      },
+      {
+        "page_path": "/innerbloom2/balance",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/dquest",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/emotion-chart",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/emotion-chart",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/task-detail",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/vision-general",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/dashboard-v3",
+        "page_title": "Innerbloom Guided Demo",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 0,
+        "event_count": 1
+      }
+    ],
+    "top_sources": [
+      {
+        "source": "accounts.google.com",
+        "medium": "referral",
+        "campaign": "(referral)",
+        "active_users": 5,
+        "sessions": 123,
+        "screen_page_views": 850
+      },
+      {
+        "source": "instagram",
+        "medium": "social",
+        "campaign": "ib20_mvp",
+        "active_users": 7,
+        "sessions": 17,
+        "screen_page_views": 78
+      },
+      {
+        "source": "(direct)",
+        "medium": "(none)",
+        "campaign": "(direct)",
+        "active_users": 2,
+        "sessions": 3,
+        "screen_page_views": 18
+      },
+      {
+        "source": "(not set)",
+        "medium": "(not set)",
+        "campaign": "(not set)",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1
+      },
+      {
+        "source": "facebook.com",
+        "medium": "referral",
+        "campaign": "(referral)",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1
+      },
+      {
+        "source": "mokka.corp.google.com",
+        "medium": "referral",
+        "campaign": "(referral)",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 2
+      }
+    ],
+    "clean_sources": [
+      {
+        "source": "instagram",
+        "medium": "social",
+        "campaign": "ib20_mvp",
+        "active_users": 7,
+        "sessions": 17,
+        "screen_page_views": 78
+      },
+      {
+        "source": "(direct)",
+        "medium": "(none)",
+        "campaign": "(direct)",
+        "active_users": 2,
+        "sessions": 3,
+        "screen_page_views": 18
+      },
+      {
+        "source": "(not set)",
+        "medium": "(not set)",
+        "campaign": "(not set)",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1
+      },
+      {
+        "source": "facebook.com",
+        "medium": "referral",
+        "campaign": "(referral)",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1
+      },
+      {
+        "source": "mokka.corp.google.com",
+        "medium": "referral",
+        "campaign": "(referral)",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 2
+      }
+    ],
+    "top_events": [
+      {
+        "event_name": "page_view",
+        "event_count": 950
+      },
+      {
+        "event_name": "scroll",
+        "event_count": 292
+      },
+      {
+        "event_name": "user_engagement",
+        "event_count": 153
+      },
+      {
+        "event_name": "session_start",
+        "event_count": 145
+      },
+      {
+        "event_name": "app_section_view",
+        "event_count": 68
+      },
+      {
+        "event_name": "dashboard_view",
+        "event_count": 38
+      },
+      {
+        "event_name": "app_menu_navigation",
+        "event_count": 16
+      },
+      {
+        "event_name": "landing_cta_clicked",
+        "event_count": 13
+      },
+      {
+        "event_name": "auth_started",
+        "event_count": 12
+      },
+      {
+        "event_name": "first_visit",
+        "event_count": 9
+      },
+      {
+        "event_name": "app_panel_interaction",
+        "event_count": 5
+      },
+      {
+        "event_name": "click",
+        "event_count": 5
+      },
+      {
+        "event_name": "landing_theme_toggled",
+        "event_count": 2
+      },
+      {
+        "event_name": "landing_language_changed",
+        "event_count": 1
+      }
+    ],
+    "search_console_queries": [
+      {
+        "query": "inner bloom mrr",
+        "page": "https://innerbloomjourney.org/onboarding",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 67.5
+      },
+      {
+        "query": "innerbloom app",
+        "page": "https://innerbloomjourney.org/",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      }
+    ],
+    "funnel_events": [
+      {
+        "event_name": "page_view",
+        "event_count": 950
+      },
+      {
+        "event_name": "dashboard_view",
+        "event_count": 38
+      },
+      {
+        "event_name": "landing_cta_clicked",
+        "event_count": 13
+      },
+      {
+        "event_name": "auth_started",
+        "event_count": 12
+      }
+    ],
+    "insights": {
+      "runId": "marketing-2026-06-03-2026-06-30-3335db68-368b-473a-b9f3-45225f6170ab",
+      "totals": {
+        "events": 1709,
+        "sessions": 145,
+        "pageViews": 950,
+        "activeUsers": 14,
+        "searchClicks": 0,
+        "searchImpressions": 3
+      },
+      "periodEnd": "2026-06-30",
+      "highlights": [
+        "Top landing page: /innerbloom2/dashboard with 237 views.",
+        "Top acquisition source: accounts.google.com / referral.",
+        "Top search query: \"inner bloom mrr\" with 2 impressions."
+      ],
+      "periodStart": "2026-06-03"
+    },
+    "settings": {
+      "excludedSources": [
+        "accounts.google.com"
+      ],
+      "excludedPagePrefixes": [
+        "/login",
+        "/login2",
+        "/sign-up",
+        "/sign-up2",
+        "/onboarding",
+        "/onboarding2",
+        "/sso-callback"
+      ],
+      "productPagePrefixes": [
+        "/innerbloom2",
+        "/dashboard",
+        "/dashboard-v3",
+        "/editor"
+      ],
+      "marketingPagePaths": [
+        "/",
+        "/v2",
+        "/v3"
+      ],
+      "internalUserEmails": "[redacted]",
+      "internalUserIds": "[redacted]"
+    }
+  },
+  "previous_campaigns": [
+    {
+      "campaign_code": "ib20_mvp",
+      "period_key": "2026-06",
+      "objective": "new_users",
+      "status": "review",
+      "strategy_summary": "Validate the first acquisition loop with two simple Instagram posts before scaling to a monthly system.",
+      "posts": [
+        {
+          "post_code": "post_001",
+          "platform": "instagram",
+          "format": "carousel",
+          "status": "approved",
+          "hook": "Your habits should adapt to your real life.",
+          "caption": "Most habit apps assume every day is the same. Then a busy week hits, your streak breaks, and the whole plan starts feeling useless. Innerbloom is built around adaptive rhythm: lower the intensity when life gets heavy, keep visible progress, recalibrate instead of starting over, and build a Journey that can survive real weeks.",
+          "hypothesis": "People who have failed with streak-based apps will respond to adaptive rhythm and real weeks.",
+          "target_metric": "page_view -> landing_cta_clicked -> auth_started -> auth_completed -> dashboard_view",
+          "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib20_mvp&utm_content=post_001&ib_post=001",
+          "assets": [
+            {
+              "asset_id": "campaign-ib20-mvp-post-001-post-001-carousel-01-png",
+              "source": "campaign_post_asset",
+              "kind": "existing_visual",
+              "label": "Your habits should adapt to your real life.",
+              "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_001/post-001-carousel-01.png",
+              "file_path": "post-001-carousel-01.png",
+              "campaign_code": "ib20_mvp",
+              "post_code": "post_001"
+            },
+            {
+              "asset_id": "campaign-ib20-mvp-post-001-post-001-carousel-02-png",
+              "source": "campaign_post_asset",
+              "kind": "existing_visual",
+              "label": "Most habit apps assume every day is the same.",
+              "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_001/post-001-carousel-02.png",
+              "file_path": "post-001-carousel-02.png",
+              "campaign_code": "ib20_mvp",
+              "post_code": "post_001"
+            },
+            {
+              "asset_id": "campaign-ib20-mvp-post-001-post-001-carousel-03-png",
+              "source": "campaign_post_asset",
+              "kind": "existing_visual",
+              "label": "Lower the intensity. Keep the direction.",
+              "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_001/post-001-carousel-03.png",
+              "file_path": "post-001-carousel-03.png",
+              "campaign_code": "ib20_mvp",
+              "post_code": "post_001"
+            },
+            {
+              "asset_id": "campaign-ib20-mvp-post-001-post-001-carousel-04-png",
+              "source": "campaign_post_asset",
+              "kind": "existing_visual",
+              "label": "Build a Journey that can survive real weeks.",
+              "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_001/post-001-carousel-04.png",
+              "file_path": "post-001-carousel-04.png",
+              "campaign_code": "ib20_mvp",
+              "post_code": "post_001"
+            }
+          ],
+          "agent_notes": "",
+          "decision_note": "",
+          "rejection_reason": "",
+          "timestamps": {
+            "scheduled_at": "2026-06-30T11:30:00.000Z",
+            "approved_at": "2026-07-01T07:45:37.003Z",
+            "rejected_at": null,
+            "published_at": null,
+            "measured_at": null
+          },
+          "metrics": []
+        },
+        {
+          "post_code": "post_002",
+          "platform": "instagram",
+          "format": "static",
+          "status": "approved",
+          "hook": "If your plan only works on perfect days, it is not a plan.",
+          "caption": "Most people do not fail habits because they are lazy. They fail because the system expects the same output from them every day, even when their energy, stress, sleep, and schedule change. Innerbloom is an adaptive habit app. It helps you keep direction without forcing the same rhythm all the time.",
+          "hypothesis": "A direct anti-perfect-days message will perform better for people tired of rigid productivity systems.",
+          "target_metric": "page_view, scroll depth, landing_cta_clicked, and dashboard_view",
+          "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib20_mvp&utm_content=post_002&ib_post=002",
+          "assets": [
+            {
+              "asset_id": "campaign-ib20-mvp-post-002-post-002-static-pain-proposal-png",
+              "source": "campaign_post_asset",
+              "kind": "existing_visual",
+              "label": "If your plan only works on perfect days, it is not a plan.",
+              "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_002/post-002-static-pain-proposal.png",
+              "file_path": "post-002-static-pain-proposal.png",
+              "campaign_code": "ib20_mvp",
+              "post_code": "post_002"
+            }
+          ],
+          "agent_notes": "",
+          "decision_note": "",
+          "rejection_reason": "",
+          "timestamps": {
+            "scheduled_at": "2026-07-02T14:30:00.000Z",
+            "approved_at": "2026-06-30T20:50:23.880Z",
+            "rejected_at": null,
+            "published_at": null,
+            "measured_at": null
+          },
+          "metrics": []
+        },
+        {
+          "post_code": "post_003",
+          "platform": "instagram",
+          "format": "static",
+          "status": "needs_review",
+          "hook": "A daily quest should fit the day you actually have.",
+          "caption": "Innerbloom turns daily habit work into a small adaptive quest. Pick what fits your energy, keep the direction visible, and avoid throwing away progress when the day gets messy.",
+          "hypothesis": "A concrete Daily Quest product screenshot will make the adaptive habit promise easier to understand than abstract habit advice.",
+          "target_metric": "page_view -> landing_cta_clicked -> auth_started -> dashboard_view",
+          "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib20_mvp&utm_content=post_003&ib_post=003",
+          "assets": [
+            {
+              "asset_id": "campaign-ib20-mvp-post-003-innerbloom-mobile-dailyquest-dark-tasks-selection-png",
+              "source": "campaign_post_asset",
+              "kind": "product_screenshot",
+              "label": "Daily Quest task selection screen",
+              "url": "https://raw.githubusercontent.com/rfullivarri/innerbloomv3/codex/marketing-post3-public-asset/Docs/marketing/campaigns/2026-06-mvp/assets/innerbloom_mobile_dailyquest_dark_tasks_selection.png",
+              "file_path": "innerbloom_mobile_dailyquest_dark_tasks_selection.png",
+              "campaign_code": "ib20_mvp",
+              "post_code": "post_003"
+            }
+          ],
+          "agent_notes": "",
+          "decision_note": "",
+          "rejection_reason": "",
+          "timestamps": {
+            "scheduled_at": "2026-07-04T09:30:00.000Z",
+            "approved_at": "2026-06-30T15:30:04.820Z",
+            "rejected_at": null,
+            "published_at": null,
+            "measured_at": null
+          },
+          "metrics": []
+        }
+      ],
+      "results": [],
+      "human_decisions": [],
+      "rejection_reasons": []
+    }
+  ],
+  "available_assets": {
+    "product_screenshots": [
+      {
+        "asset_id": "campaign-ib20-mvp-post-003-innerbloom-mobile-dailyquest-dark-tasks-selection-png",
+        "source": "campaign_post_asset",
+        "kind": "product_screenshot",
+        "label": "Daily Quest task selection screen",
+        "url": "https://raw.githubusercontent.com/rfullivarri/innerbloomv3/codex/marketing-post3-public-asset/Docs/marketing/campaigns/2026-06-mvp/assets/innerbloom_mobile_dailyquest_dark_tasks_selection.png",
+        "file_path": "innerbloom_mobile_dailyquest_dark_tasks_selection.png",
+        "campaign_code": "ib20_mvp",
+        "post_code": "post_003"
+      },
+      {
+        "asset_id": "repo-docs-marketing-campaigns-2026-06-mvp-assets-innerbloom-mobile-dailyquest-dark-tasks-selection-png",
+        "source": "repository_asset",
+        "kind": "product_screenshot",
+        "label": "innerbloom_mobile_dailyquest_dark_tasks_selection.png",
+        "file_path": "Docs/marketing/campaigns/2026-06-mvp/assets/innerbloom_mobile_dailyquest_dark_tasks_selection.png"
+      }
+    ],
+    "brand_assets": [],
+    "reusable_templates": [],
+    "existing_visuals": [
+      {
+        "asset_id": "campaign-ib20-mvp-post-001-post-001-carousel-01-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Your habits should adapt to your real life.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_001/post-001-carousel-01.png",
+        "file_path": "post-001-carousel-01.png",
+        "campaign_code": "ib20_mvp",
+        "post_code": "post_001"
+      },
+      {
+        "asset_id": "campaign-ib20-mvp-post-001-post-001-carousel-02-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Most habit apps assume every day is the same.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_001/post-001-carousel-02.png",
+        "file_path": "post-001-carousel-02.png",
+        "campaign_code": "ib20_mvp",
+        "post_code": "post_001"
+      },
+      {
+        "asset_id": "campaign-ib20-mvp-post-001-post-001-carousel-03-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Lower the intensity. Keep the direction.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_001/post-001-carousel-03.png",
+        "file_path": "post-001-carousel-03.png",
+        "campaign_code": "ib20_mvp",
+        "post_code": "post_001"
+      },
+      {
+        "asset_id": "campaign-ib20-mvp-post-001-post-001-carousel-04-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Build a Journey that can survive real weeks.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_001/post-001-carousel-04.png",
+        "file_path": "post-001-carousel-04.png",
+        "campaign_code": "ib20_mvp",
+        "post_code": "post_001"
+      },
+      {
+        "asset_id": "campaign-ib20-mvp-post-002-post-002-static-pain-proposal-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "If your plan only works on perfect days, it is not a plan.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_002/post-002-static-pain-proposal.png",
+        "file_path": "post-002-static-pain-proposal.png",
+        "campaign_code": "ib20_mvp",
+        "post_code": "post_002"
+      },
+      {
+        "asset_id": "campaign-source-ib20-mvp-assetsfolderurl-https-drive-google-com-drive-folders-1fplcaovdgla9p73fa7-piqh16d0nsueg",
+        "source": "drive_url",
+        "kind": "existing_visual",
+        "label": "assetsFolderUrl",
+        "url": "https://drive.google.com/drive/folders/1FplCAOvdgLA9p73fA7-piQH16d0nSuEg",
+        "campaign_code": "ib20_mvp"
+      },
+      {
+        "asset_id": "campaign-source-ib20-mvp-campaignsfolderurl-https-drive-google-com-drive-folders-1s3j3afgtd1np7mjbkgbpn1w5xuyugyuh",
+        "source": "drive_url",
+        "kind": "existing_visual",
+        "label": "campaignsFolderUrl",
+        "url": "https://drive.google.com/drive/folders/1S3J3aFgtd1np7mjBKGBpN1w5xuyuGyuH",
+        "campaign_code": "ib20_mvp"
+      },
+      {
+        "asset_id": "campaign-source-ib20-mvp-driverooturl-https-drive-google-com-drive-folders-1oms5zzpqcx9db9rjpa7j-xl5h1b5v9cz",
+        "source": "drive_url",
+        "kind": "existing_visual",
+        "label": "driveRootUrl",
+        "url": "https://drive.google.com/drive/folders/1OMs5zzPQcx9Db9RjpA7J-xL5h1b5V9cZ",
+        "campaign_code": "ib20_mvp"
+      },
+      {
+        "asset_id": "campaign-source-ib20-mvp-primaryurl-https-innerbloomjourney-org",
+        "source": "campaign_source_url",
+        "kind": "existing_visual",
+        "label": "primaryUrl",
+        "url": "https://innerbloomjourney.org/",
+        "campaign_code": "ib20_mvp"
+      },
+      {
+        "asset_id": "campaign-source-ib20-mvp-strategymemoryurl-https-drive-google-com-file-d-1fgqpoj1gp0a7-ynbpdmkhgdop89gres-view-usp-drivesdk",
+        "source": "drive_url",
+        "kind": "existing_visual",
+        "label": "strategyMemoryUrl",
+        "url": "https://drive.google.com/file/d/1FGQPOJ1Gp0A7--yNbPDMKhgdOP89Gres/view?usp=drivesdk",
+        "campaign_code": "ib20_mvp"
+      },
+      {
+        "asset_id": "repo-docs-marketing-campaigns-2026-06-mvp-assets-post-001-carousel-01-png",
+        "source": "repository_asset",
+        "kind": "existing_visual",
+        "label": "post-001-carousel-01.png",
+        "file_path": "Docs/marketing/campaigns/2026-06-mvp/assets/post-001-carousel-01.png"
+      },
+      {
+        "asset_id": "repo-docs-marketing-campaigns-2026-06-mvp-assets-post-001-carousel-02-png",
+        "source": "repository_asset",
+        "kind": "existing_visual",
+        "label": "post-001-carousel-02.png",
+        "file_path": "Docs/marketing/campaigns/2026-06-mvp/assets/post-001-carousel-02.png"
+      },
+      {
+        "asset_id": "repo-docs-marketing-campaigns-2026-06-mvp-assets-post-001-carousel-03-png",
+        "source": "repository_asset",
+        "kind": "existing_visual",
+        "label": "post-001-carousel-03.png",
+        "file_path": "Docs/marketing/campaigns/2026-06-mvp/assets/post-001-carousel-03.png"
+      },
+      {
+        "asset_id": "repo-docs-marketing-campaigns-2026-06-mvp-assets-post-001-carousel-04-png",
+        "source": "repository_asset",
+        "kind": "existing_visual",
+        "label": "post-001-carousel-04.png",
+        "file_path": "Docs/marketing/campaigns/2026-06-mvp/assets/post-001-carousel-04.png"
+      },
+      {
+        "asset_id": "repo-docs-marketing-campaigns-2026-06-mvp-assets-post-002-static-pain-proposal-png",
+        "source": "repository_asset",
+        "kind": "existing_visual",
+        "label": "post-002-static-pain-proposal.png",
+        "file_path": "Docs/marketing/campaigns/2026-06-mvp/assets/post-002-static-pain-proposal.png"
+      }
+    ],
+    "missing_assets": []
+  },
+  "operational_constraints": {
+    "platforms": [
+      "instagram"
+    ],
+    "supported_formats": [
+      "square static",
+      "square carousel"
+    ],
+    "publishing": "Approved posts are exported to Metricool CSV; this exporter does not publish content.",
+    "public_storage": "Public marketing files can be served from R2 or repository public assets; this exporter does not upload binaries.",
+    "monthly_capacity_posts": 20,
+    "asset_limits": [
+      "Do not download or duplicate binary assets during context export.",
+      "Use stable asset IDs that trace to campaign, URL, or repository paths."
+    ],
+    "legal_and_brand": [
+      "Human review is required before publishing.",
+      "Do not include secrets, service account keys, unnecessary PII, or individual user identifiers."
+    ],
+    "human_review_required": true
+  },
+  "source_manifest": [
+    {
+      "source_type": "repo_file",
+      "source_path_or_id": "/home/runner/work/innerbloomv3/innerbloomv3/Docs/marketing/strategy-memory.md",
+      "captured_at": "2026-07-01T10:48:25.153Z",
+      "checksum": "sha256:8212bd0c401b2fae6c52b2fbcee08f98657c95b2b21f768797fd59e550e76e9d"
+    },
+    {
+      "source_type": "analytics_sync",
+      "source_path_or_id": "marketing-2026-06-03-2026-06-30-3335db68-368b-473a-b9f3-45225f6170ab",
+      "captured_at": "2026-07-01 09:52:58.21955+00",
+      "checksum": "sha256:6f5194cb01b02e370e01ce9db505daef6a59a581147db07da5d085f578310e84"
+    },
+    {
+      "source_type": "database_snapshot",
+      "source_path_or_id": "marketing_campaigns_recent_limit_12",
+      "captured_at": "2026-07-01T10:49:24.691Z",
+      "checksum": "sha256:c887d8693f3bc23306633a3e1f2d94cd41136bce7bc40f463f0b1c2d0d15b90a"
+    },
+    {
+      "source_type": "asset_manifest",
+      "source_path_or_id": "Docs/marketing; apps/web/public/marketing; assest visuales",
+      "captured_at": "2026-07-01T10:48:25.153Z",
+      "checksum": "sha256:3e92e78553e05323d90cca98cb307e1dff32644b42f4df5109ac6d8a6cfd9619"
+    },
+    {
+      "source_type": "manual_input",
+      "source_path_or_id": "marketing_cmo_context_service.defaults",
+      "captured_at": "2026-06-30T00:00:00.000Z",
+      "checksum": "sha256:3bc14a6f4b3354f813a644b080f5768b13c54b5de8fef7e9ffba867bcf9396d6"
+    }
+  ]
+}
