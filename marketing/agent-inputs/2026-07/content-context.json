@@ -10,6 +10,9 @@
   },
   "strategy": {
     "review_status": "approved",
+    "approval_authority": "human_workflow_dispatch",
+    "approval_recorded_at": "2026-07-01T18:30:44.716Z",
+    "original_cmo_review_status": "draft",
     "cmo_output_path": "marketing/agent-outputs/2026-07/cmo-strategy.json",
     "cmo_output": {
       "schema_version": "1.0",
@@ -1011,19 +1014,19 @@
     {
       "source_type": "repo_file",
       "source_path_or_id": "marketing/agent-inputs/2026-07/cmo-context.json",
-      "captured_at": "2026-07-01T15:21:17.487Z",
+      "captured_at": "2026-07-01T18:30:44.716Z",
       "checksum": "sha256:ca9f26683ccb07ef74b32dd8f72145efde3e8f6419e0437dc23e99960f78390e"
     },
     {
       "source_type": "approved_strategy",
       "source_path_or_id": "marketing/agent-outputs/2026-07/cmo-strategy.json",
-      "captured_at": "2026-07-01T15:21:17.487Z",
+      "captured_at": "2026-07-01T18:30:44.716Z",
       "checksum": "sha256:56c58a2e00ea685256b0452b3d77ad4e2fbfaf35af4d542df119d650cc488182"
     },
     {
       "source_type": "human_approval",
       "source_path_or_id": "workflow_dispatch:approve_strategy",
-      "captured_at": "2026-07-01T15:21:17.487Z",
+      "captured_at": "2026-07-01T18:30:44.716Z",
       "checksum": "sha256:d75d391e8bedd0108a605b98bdfc3f9e814c9defb9c13af145eab0fa812dcc5d"
     }
   ]
