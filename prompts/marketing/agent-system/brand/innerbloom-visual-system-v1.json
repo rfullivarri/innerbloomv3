@@ -1,0 +1,362 @@
+{
+  "schema_version": "1.0",
+  "brand": {
+    "name": "Innerbloom",
+    "positioning": "Adaptive habit system for real people",
+    "visual_personality": [
+      "calm",
+      "premium",
+      "adaptive",
+      "clean",
+      "product-led",
+      "emotion-aware",
+      "high-contrast in dark mode",
+      "soft and warm in light mode"
+    ],
+    "avoid_personality": [
+      "generic wellness pastel",
+      "Canva-template look",
+      "flat startup SaaS aesthetic",
+      "aggressive neon overload",
+      "random motivational poster style",
+      "green-and-beige lifestyle branding",
+      "cold enterprise dashboard aesthetic"
+    ]
+  },
+  "source_of_truth": {
+    "priority_order": [
+      "current approved landing and application screenshots",
+      "approved logo and exported visual assets in Google Drive",
+      "this visual system JSON",
+      "current CSS and design tokens",
+      "campaign JSON message and objective",
+      "historical examples as loose reference only"
+    ],
+    "rules": [
+      "If campaign styling hints conflict with the current approved visual system, the current approved visual system wins.",
+      "Real current screenshots override outdated written descriptions.",
+      "Do not invent a new logo or substitute the logo with arbitrary text styling.",
+      "Do not use historical campaign pieces as direct templates unless explicitly approved.",
+      "The Asset Producer must rely on approved real assets before generating from scratch."
+    ]
+  },
+  "modes": {
+    "default_post_mode": "dark",
+    "supported_modes": ["dark", "light"],
+    "mode_selection_rule": "Use the explicitly approved post mode. If no mode is approved, default to dark. Match source screenshots and palette to the selected mode."
+  },
+  "logo_system": {
+    "primary_logo": {
+      "components": ["lotus_icon", "wordmark"],
+      "wordmark_style": "uppercase, widely tracked, refined sans-serif appearance",
+      "icon_style": "violet and lilac lotus mark with soft tonal variation",
+      "approved_asset_required": true
+    },
+    "usage_rules": [
+      "Use the real approved logo asset whenever possible.",
+      "Prefer the full icon plus wordmark in headers and hero compositions.",
+      "Use icon-only only when space is constrained or as a secondary brand mark.",
+      "Never recreate the wordmark with a substitute font.",
+      "Do not distort proportions, rotate the mark, or recolor it outside the approved violet/lilac system.",
+      "Use a light logo treatment on dark backgrounds and the approved violet/dark treatment on light backgrounds."
+    ],
+    "placement_guidelines": {
+      "typical_header_position": "top-left",
+      "minimum_clear_space": "at least one lotus-icon height around the full logo",
+      "minimum_visibility": "logo must remain legible at mobile feed preview size",
+      "avoid_busy_background_without_separation": true
+    }
+  },
+  "typography": {
+    "families": {
+      "headline": "Sora",
+      "body": "Manrope",
+      "ui_reference": "Use typography visible in current product screenshots as the fidelity reference"
+    },
+    "headline": {
+      "tone": "bold, concise, high-clarity, confident",
+      "weight": "700-800",
+      "tracking": "normal to slightly tight",
+      "line_height": "tight but readable"
+    },
+    "body": {
+      "tone": "neutral, calm, readable",
+      "weight": "400-500",
+      "line_height": "comfortable"
+    },
+    "eyebrow": {
+      "tone": "small uppercase metadata or step labels",
+      "weight": "500-600",
+      "tracking": "wide"
+    },
+    "rules": [
+      "Do not use decorative or script fonts.",
+      "Do not imitate the logo with arbitrary typography.",
+      "Keep text readable at Instagram mobile preview size.",
+      "Avoid excessive all-caps outside short labels and eyebrows.",
+      "Headlines should feel product-led and editorial, not like generic quote cards."
+    ]
+  },
+  "color_system": {
+    "dark_mode": {
+      "background": {
+        "base": "#06060B",
+        "surface": "#0D0C14",
+        "surface_2": "#141320",
+        "navy_glow": "#101726",
+        "border": "#242235"
+      },
+      "text": {
+        "primary": "#F3F0FA",
+        "secondary": "#A8A2B8",
+        "muted": "#7F7A91"
+      },
+      "brand": {
+        "primary_violet": "#8E63FF",
+        "secondary_violet": "#9B7CFF",
+        "lilac": "#C88DFF",
+        "peach": "#F2AE9B",
+        "hero_gradient": ["#8E63FF", "#C88DFF", "#F2AE9B"]
+      },
+      "functional": {
+        "green": "#67D98B",
+        "yellow": "#EBC85E",
+        "cyan": "#6FD3F6",
+        "blue": "#5D7DF0",
+        "red": "#F26A63",
+        "orange": "#E9A45A",
+        "purple": "#9B7CFF"
+      },
+      "cta": {
+        "primary_fill": "#8E63FF",
+        "primary_text": "#F8F5FF",
+        "secondary_fill": "transparent",
+        "secondary_border": "#2A2740"
+      },
+      "effects": {
+        "glow_violet": "rgba(142,99,255,0.30)",
+        "glow_blue": "rgba(65,125,255,0.18)",
+        "glow_soft_white": "rgba(255,255,255,0.08)"
+      }
+    },
+    "light_mode": {
+      "background": {
+        "base": "#F1E9DE",
+        "surface": "#FBF8F3",
+        "surface_2": "#F4EFE8",
+        "border": "#D6D0C8"
+      },
+      "text": {
+        "primary": "#211C2B",
+        "secondary": "#666171",
+        "muted": "#9A94A0"
+      },
+      "brand": {
+        "primary_violet": "#8E63FF",
+        "secondary_violet": "#9B7CFF",
+        "lilac": "#C88DFF",
+        "peach": "#F2AE9B",
+        "hero_gradient": ["#8E63FF", "#C88DFF", "#F2AE9B"]
+      },
+      "functional": {
+        "green": "#65D685",
+        "yellow": "#E4C15C",
+        "cyan": "#5BAFCA",
+        "blue": "#6A86E8",
+        "red": "#E4615D",
+        "orange": "#D39833",
+        "purple": "#8E63FF"
+      },
+      "cta": {
+        "primary_fill": "#8E63FF",
+        "primary_text": "#FFFFFF",
+        "secondary_fill": "transparent",
+        "secondary_border": "#D8D1C7"
+      },
+      "effects": {
+        "shadow_soft": "rgba(42,30,60,0.10)",
+        "glow_violet": "rgba(155,124,255,0.14)",
+        "glow_soft_white": "rgba(255,255,255,0.40)"
+      }
+    },
+    "rules": [
+      "Violet and lilac are the primary brand accents.",
+      "Do not use green as the primary brand colour.",
+      "Do not use pure white as the standard light-mode background.",
+      "Do not flatten the brand into beige plus dark green aesthetics.",
+      "Functional colours must preserve their product meaning.",
+      "Use gradients sparingly and only where they reflect the current landing system."
+    ]
+  },
+  "gradients": {
+    "hero_text_gradient": {
+      "allowed": true,
+      "usage": "selected emphasis words or short phrases",
+      "stops": ["#8E63FF", "#C88DFF", "#F2AE9B"]
+    },
+    "ambient_background_glow": {
+      "allowed": true,
+      "usage": "soft radial depth behind product compositions",
+      "recommended_colors": ["#8E63FF", "#4B3DB8", "#173A63"]
+    },
+    "prohibitions": [
+      "Do not apply the hero gradient to every text element.",
+      "Do not use full-spectrum rainbow gradients.",
+      "Do not use saturated cyberpunk neon fields."
+    ]
+  },
+  "screenshot_treatment": {
+    "principles": [
+      "Use real current product screenshots from approved Drive assets.",
+      "Preserve truthful UI and visible data.",
+      "Screenshots are a primary proof element, not generic decoration.",
+      "Match dark screenshots to dark compositions and light screenshots to light compositions unless an intentional approved contrast is required."
+    ],
+    "allowed_treatments": [
+      "crop",
+      "scale",
+      "reframe",
+      "mask into a restrained device frame",
+      "soft shadow",
+      "soft glow",
+      "subtle highlight around a key chart or module",
+      "compose multiple real screenshots",
+      "truthful annotation or callout",
+      "dim non-focal areas without obscuring relevant meaning"
+    ],
+    "disallowed_treatments": [
+      "rewrite UI labels into unrelated concepts",
+      "invent dashboards or product states",
+      "alter chart values or visible metrics",
+      "reuse one screenshot as the hero for the entire campaign",
+      "use generic device mockups that conflict with the approved visual language",
+      "distort screenshots or use unreadable low-resolution crops"
+    ],
+    "module_highlighting": {
+      "daily_energy": {
+        "preferred_colors": ["#6FD3F6", "#EBC85E", "#9B7CFF"],
+        "allowed_effects": ["subtle glow", "ring emphasis", "single callout label"],
+        "goal": "Make the chart clearly readable and the hero module without changing its data"
+      },
+      "tasks": {
+        "preferred_effects": ["focused crop", "soft depth", "progress emphasis"],
+        "goal": "Show real task progress and adaptive difficulty clearly"
+      },
+      "emotion_chart": {
+        "preferred_effects": ["clean crop", "preserve semantic colours", "minimal annotations"],
+        "goal": "Keep the emotional data legible and truthful"
+      }
+    }
+  },
+  "composition": {
+    "general_principles": [
+      "Use generous negative space with intentional hierarchy.",
+      "Balance editorial copy and product evidence.",
+      "Every composition must feel unmistakably branded.",
+      "Avoid empty layouts that look unfinished.",
+      "Use one dominant focal point per asset.",
+      "Use rounded cards, restrained borders, subtle glow, and atmospheric depth."
+    ],
+    "static_post": {
+      "default_ratio": "1080x1080",
+      "approved_patterns": [
+        "headline left plus product composition right",
+        "centered concise statement plus subtle product proof",
+        "full-screen product crop plus minimal editorial framing",
+        "single module spotlight with one truthful callout"
+      ],
+      "branding_presence": "subtle but always visible through logo, palette, typography, or product UI",
+      "text_density": "medium"
+    },
+    "carousel_post": {
+      "default_ratio": "1080x1080",
+      "approved_patterns": [
+        "problem to mechanism to proof to adaptation to CTA",
+        "step-by-step product walkthrough",
+        "educational sequence using varied but related layouts"
+      ],
+      "rules": [
+        "Do not repeat the exact same layout on every slide.",
+        "Slides must feel like one system without becoming duplicates.",
+        "Use progress indicators only when they add clarity.",
+        "Use at least two distinct real product states when the subject supports it."
+      ]
+    }
+  },
+  "content_art_direction": {
+    "tone": [
+      "clear",
+      "adaptive",
+      "practical",
+      "non-judgmental",
+      "smart",
+      "calm confidence"
+    ],
+    "do": [
+      "Show real UI modules such as Daily Energy, Dashboard, Tasks, DQuest, Emotion Chart, habit detail, and rhythm selection.",
+      "Use approved dark assets for dark posts and approved light assets for light posts.",
+      "Keep the approved lotus or full logo visible in a refined way.",
+      "Use soft glows and ambient depth.",
+      "Use the product itself as primary proof."
+    ],
+    "dont": [
+      "Create generic motivational quote cards disconnected from the product.",
+      "Use muted green and beige as the core brand system.",
+      "Replace the real logo with plain text.",
+      "Build the entire campaign from one screenshot.",
+      "Overuse empty whitespace without compositional intent.",
+      "Create generic stock-wellness artwork when real product evidence exists."
+    ]
+  },
+  "asset_selection_rules": {
+    "preferred_modules": [
+      "dashboard",
+      "daily_energy",
+      "tasks",
+      "dquest",
+      "emotion_chart",
+      "habit_detail",
+      "rhythm_selection",
+      "landing_product_composite"
+    ],
+    "mode_matching": [
+      "dark post uses dark source assets first",
+      "light post uses light source assets first"
+    ],
+    "variation_rules": [
+      "Vary source modules across the campaign.",
+      "Do not reuse one screenshot as the hero in more than two produced assets unless explicitly approved.",
+      "For carousels, use at least two distinct visual states when relevant.",
+      "Do not duplicate the same template across the entire campaign."
+    ]
+  },
+  "production_review_policy": {
+    "sample_first_required": true,
+    "sample_set": [
+      "one static conceptual asset",
+      "one product-led static asset",
+      "one complete carousel"
+    ],
+    "stop_after_samples": true,
+    "approval_required_before_full_batch": true,
+    "rule": "Do not produce the remaining campaign assets until the sample set has been reviewed and explicitly approved by a human."
+  },
+  "output_requirements": {
+    "default_ratio": "1080x1080",
+    "required_metadata": [
+      "mode",
+      "source_asset_ids",
+      "derived_from_modules",
+      "brand_checks_passed"
+    ],
+    "brand_checks": [
+      "correct approved logo usage",
+      "correct mode palette",
+      "real product UI",
+      "non-generic composition",
+      "correct typography",
+      "headline and CTA aligned with the campaign brief",
+      "source-asset variation rules respected"
+    ]
+  }
+}
