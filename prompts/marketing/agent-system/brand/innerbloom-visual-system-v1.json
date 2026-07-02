@@ -331,15 +331,10 @@
     ]
   },
   "production_review_policy": {
-    "sample_first_required": true,
-    "sample_set": [
-      "one static conceptual asset",
-      "one product-led static asset",
-      "one complete carousel"
-    ],
-    "stop_after_samples": true,
-    "approval_required_before_full_batch": true,
-    "rule": "Do not produce the remaining campaign assets until the sample set has been reviewed and explicitly approved by a human."
+    "full_batch_required": true,
+    "intermediate_sample_gate_required": false,
+    "human_review_after_production": true,
+    "rule": "Produce the complete campaign batch defined in campaign.json in one execution. Do not stop after a limited sample set. Human review occurs after the full batch is produced."
   },
   "output_requirements": {
     "default_ratio": "1080x1080",
