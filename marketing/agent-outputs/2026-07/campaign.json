@@ -131,7 +131,35 @@
             "dashboard_dark"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_001 desde dashboard_dark en modo dark; foco en Si tu racha se rompe, no sos el problema.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_001 desde dashboard_dark en modo dark; foco en Si tu racha se rompe, no sos el problema.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_01_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1luPOy4_TlBldDH-w1akx-_HU36JnABa-"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1luPOy4_TlBldDH-w1akx-_HU36JnABa-/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "dashboard"
+          ],
+          "drive_file_id": "1Eqp-vb11084O-e9IiScIC42E-rWccGjj",
+          "drive_url": "https://drive.google.com/file/d/1Eqp-vb11084O-e9IiScIC42E-rWccGjj/view?usp=drivesdk",
+          "file_name": "ib_202607_01_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:c82572a8e7abdc475fc8d72cf148750bdc772713d90162fb26bd077663077bc9",
+          "production_notes": "compose_existing_assets; composed from approved Drive source 'dashboard_dark'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Si tu racha se rompe, no sos el problema.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -215,7 +243,35 @@
             "daily_energy_dark"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_002 desde daily_energy_dark en modo dark; foco en Tu plan no debería depender de días perfectos.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_002 desde daily_energy_dark en modo dark; foco en Tu plan no debería depender de días perfectos.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_02_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1dLcNjKkBfVvTvFjWK-BFIJ8919BMo_Bj"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1dLcNjKkBfVvTvFjWK-BFIJ8919BMo_Bj/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "daily_energy"
+          ],
+          "drive_file_id": "1l26HreoP2FsLeL1yhC9NENtJZAeawpH-",
+          "drive_url": "https://drive.google.com/file/d/1l26HreoP2FsLeL1yhC9NENtJZAeawpH-/view?usp=drivesdk",
+          "file_name": "ib_202607_02_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:eb196b562eda1fb22fdfcae53916205b14f20b6a5b19baba9ed4c50d4ec89f49",
+          "production_notes": "edit_existing_asset; composed from approved Drive source 'daily_energy_dark'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Tu plan no debería depender de días perfectos.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -299,7 +355,35 @@
             "approved_lotus_icon"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_003 desde approved_lotus_icon en modo dark; foco en Consistencia no es hacer siempre lo mismo.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_003 desde approved_lotus_icon en modo dark; foco en Consistencia no es hacer siempre lo mismo.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_03_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1g33pJFN6hdyZGUFTe8P9IVhzjBBL-ICc"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1g33pJFN6hdyZGUFTe8P9IVhzjBBL-ICc/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "lotus_icon"
+          ],
+          "drive_file_id": "1gd-J3E6Cfis2p9O7TbxWeyk7kQvtjI46",
+          "drive_url": "https://drive.google.com/file/d/1gd-J3E6Cfis2p9O7TbxWeyk7kQvtjI46/view?usp=drivesdk",
+          "file_name": "ib_202607_03_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:53e0f4cf2a84b9c4b28fbfa730e05560685c6eca04a41e136330f87a57a6369c",
+          "production_notes": "generate_new_asset; composed from approved Drive source 'approved_lotus_icon'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Consistencia no es hacer siempre lo mismo.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "approved logo source",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -383,7 +467,35 @@
             "dquest_dark"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_004 desde dquest_dark en modo dark; foco en Daily Quest empieza por el día que tenés.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_004 desde dquest_dark en modo dark; foco en Daily Quest empieza por el día que tenés.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_04_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "dquest"
+          ],
+          "drive_file_id": "1PGDgJNBkcV2T0LD7D4yHdKVj920OM6bY",
+          "drive_url": "https://drive.google.com/file/d/1PGDgJNBkcV2T0LD7D4yHdKVj920OM6bY/view?usp=drivesdk",
+          "file_name": "ib_202607_04_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:19f3f0249d0b80da9883a334a0b8c15bc6ccde19ecd96667e2e8dabc4134892e",
+          "production_notes": "edit_existing_asset; composed from approved Drive source 'dquest_dark'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Daily Quest empieza por el día que tenés.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -467,7 +579,35 @@
             "rhythm_selection_light"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_005 desde rhythm_selection_light en modo light; foco en No necesitás reiniciar cada lunes.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_005 desde rhythm_selection_light en modo light; foco en No necesitás reiniciar cada lunes.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_05_feed",
+          "status": "produced",
+          "mode": "light",
+          "source_drive_file_ids": [
+            "1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "rhythm_selection"
+          ],
+          "drive_file_id": "1aQnIhpPiLxkv9xaDny8WZEpLxWh4nYwi",
+          "drive_url": "https://drive.google.com/file/d/1aQnIhpPiLxkv9xaDny8WZEpLxWh4nYwi/view?usp=drivesdk",
+          "file_name": "ib_202607_05_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:090881b726a9a5e8961061fc85737b2c7c400856a92619dbaa8cebe42829002a",
+          "production_notes": "compose_existing_assets; composed from approved Drive source 'rhythm_selection_light'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: No necesitás reiniciar cada lunes.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct light palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -551,7 +691,35 @@
             "landing_product_composite_dark"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_006 desde landing_product_composite_dark en modo dark; foco en Probá la versión temprana y contanos qué falta.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_006 desde landing_product_composite_dark en modo dark; foco en Probá la versión temprana y contanos qué falta.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_06_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1onxU2RHosmChfOs2xSKg3UmZJXDH0dFJ"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1onxU2RHosmChfOs2xSKg3UmZJXDH0dFJ/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "landing_product_composite"
+          ],
+          "drive_file_id": "1Ewrnfhd2wa3QmbXKksNN5agO3rrGhFYj",
+          "drive_url": "https://drive.google.com/file/d/1Ewrnfhd2wa3QmbXKksNN5agO3rrGhFYj/view?usp=drivesdk",
+          "file_name": "ib_202607_06_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:0d1a0a82a10445cc9764a74c04ef68af9322109e236a26472b83316b9828a2a2",
+          "production_notes": "compose_existing_assets; composed from approved Drive source 'landing_product_composite_dark'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Probá la versión temprana y contanos qué falta.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -635,7 +803,35 @@
             "dashboard_dark"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_007 desde dashboard_dark en modo dark; foco en El progreso visible no exige perfección.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_007 desde dashboard_dark en modo dark; foco en El progreso visible no exige perfección.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_07_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1luPOy4_TlBldDH-w1akx-_HU36JnABa-"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1luPOy4_TlBldDH-w1akx-_HU36JnABa-/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "dashboard"
+          ],
+          "drive_file_id": "1L7YjGGOmpitr1pynLjFRM3B_A6VGs5rn",
+          "drive_url": "https://drive.google.com/file/d/1L7YjGGOmpitr1pynLjFRM3B_A6VGs5rn/view?usp=drivesdk",
+          "file_name": "ib_202607_07_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:013322bae3792693999f34b3170295b33d8efcdd186bb47ee57062e8785b07e5",
+          "production_notes": "edit_existing_asset; composed from approved Drive source 'dashboard_dark'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: El progreso visible no exige perfección.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -719,7 +915,35 @@
             "emotion_chart_dark"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_008 desde emotion_chart_dark en modo dark; foco en La vida real también cuenta como contexto.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_008 desde emotion_chart_dark en modo dark; foco en La vida real también cuenta como contexto.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_08_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1ajkM1kCdUYKrMVKSsfUv98vJa9uFM9AT"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1ajkM1kCdUYKrMVKSsfUv98vJa9uFM9AT/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "emotion_chart"
+          ],
+          "drive_file_id": "1CrWYSQkoWs2KIQPR_flWjxhxXNICVhVb",
+          "drive_url": "https://drive.google.com/file/d/1CrWYSQkoWs2KIQPR_flWjxhxXNICVhVb/view?usp=drivesdk",
+          "file_name": "ib_202607_08_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:6ae34e3c39ee38d526af0c4f65678b70bd1ed9141592197cb27921e6ebb4466c",
+          "production_notes": "compose_existing_assets; composed from approved Drive source 'emotion_chart_dark'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: La vida real también cuenta como contexto.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -803,7 +1027,35 @@
             "habit_detail_dark"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_009 desde habit_detail_dark en modo dark; foco en Romper una racha no borra tu dirección.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_009 desde habit_detail_dark en modo dark; foco en Romper una racha no borra tu dirección.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_09_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1KJie-5xlq3okx9aE88WmOConrz3mq2re"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1KJie-5xlq3okx9aE88WmOConrz3mq2re/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "habit_detail"
+          ],
+          "drive_file_id": "1PgEn6Cmj6G_mcSzm6lFCb5r9nrGRr0ST",
+          "drive_url": "https://drive.google.com/file/d/1PgEn6Cmj6G_mcSzm6lFCb5r9nrGRr0ST/view?usp=drivesdk",
+          "file_name": "ib_202607_09_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:6a7b6a442e8f7529feddd85c8f6ba3fc1ad232a0ce53c9746ac782da111eccda",
+          "production_notes": "edit_existing_asset; composed from approved Drive source 'habit_detail_dark'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Romper una racha no borra tu dirección.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -887,7 +1139,35 @@
             "task_detail_dark"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_010 desde task_detail_dark en modo dark; foco en Ajustá la tarea, no abandones el hábito.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_010 desde task_detail_dark en modo dark; foco en Ajustá la tarea, no abandones el hábito.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_10_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1QbrMSYoygqTPT4fpYqVbYSUyIqI5Ki7O"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1QbrMSYoygqTPT4fpYqVbYSUyIqI5Ki7O/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "task_detail"
+          ],
+          "drive_file_id": "1zS3kDyxzIfX9cZluTmvoNYXgAFe7ztbs",
+          "drive_url": "https://drive.google.com/file/d/1zS3kDyxzIfX9cZluTmvoNYXgAFe7ztbs/view?usp=drivesdk",
+          "file_name": "ib_202607_10_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:4c7f8f08c7da026c75fb81d0fc548c0aa8ea4cbd09dece0ca018ad76d88f4447",
+          "production_notes": "compose_existing_assets; composed from approved Drive source 'task_detail_dark'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Ajustá la tarea, no abandones el hábito.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -971,7 +1251,35 @@
             "daily_energy_dark"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_011 desde daily_energy_dark en modo dark; foco en Tu energía cambia. Tu sistema también debería.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_011 desde daily_energy_dark en modo dark; foco en Tu energía cambia. Tu sistema también debería.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_11_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1dLcNjKkBfVvTvFjWK-BFIJ8919BMo_Bj"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1dLcNjKkBfVvTvFjWK-BFIJ8919BMo_Bj/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "daily_energy"
+          ],
+          "drive_file_id": "1FXo41CfIa-yo97BC8raHF1M6YHrP5ke6",
+          "drive_url": "https://drive.google.com/file/d/1FXo41CfIa-yo97BC8raHF1M6YHrP5ke6/view?usp=drivesdk",
+          "file_name": "ib_202607_11_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:71d59e7b6aef017fe34dd334cf8b853ef5dc76f781a4325fae36ba94278b3aa0",
+          "production_notes": "edit_existing_asset; composed from approved Drive source 'daily_energy_dark'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Tu energía cambia. Tu sistema también debería.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -1055,7 +1363,35 @@
             "dashboard_light"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_012 desde dashboard_light en modo light; foco en Ayudanos a diseñar hábitos menos rígidos.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_012 desde dashboard_light en modo light; foco en Ayudanos a diseñar hábitos menos rígidos.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_12_feed",
+          "status": "produced",
+          "mode": "light",
+          "source_drive_file_ids": [
+            "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "dashboard"
+          ],
+          "drive_file_id": "1-p3bg2xItkAd_WtGL3yg6qsfsN8P6lYA",
+          "drive_url": "https://drive.google.com/file/d/1-p3bg2xItkAd_WtGL3yg6qsfsN8P6lYA/view?usp=drivesdk",
+          "file_name": "ib_202607_12_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:bfcb04a49e7c11d51d3261f34bf90d629866913e2ada4a324176ad7e86e46c14",
+          "production_notes": "compose_existing_assets; composed from approved Drive source 'dashboard_light'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Ayudanos a diseñar hábitos menos rígidos.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct light palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -1139,7 +1475,35 @@
             "approved_full_logo"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_013 desde approved_full_logo en modo dark; foco en Menos culpa. Más recalibración.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_013 desde approved_full_logo en modo dark; foco en Menos culpa. Más recalibración.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_13_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "full_logo"
+          ],
+          "drive_file_id": "11yRMgrAhC_lVhfIycklMZ9ItF47hScMe",
+          "drive_url": "https://drive.google.com/file/d/11yRMgrAhC_lVhfIycklMZ9ItF47hScMe/view?usp=drivesdk",
+          "file_name": "ib_202607_13_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:b68fceee052207ffd3bfe8144976ee8174fab1d6f1c5c602d6b6ea4df11a4482",
+          "production_notes": "generate_new_asset; composed from approved Drive source 'approved_full_logo'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Menos culpa. Más recalibración.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "approved logo source",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -1223,7 +1587,35 @@
             "rhythm_selection_dark"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_014 desde rhythm_selection_dark en modo dark; foco en Cuando todo cambia, el hábito necesita margen.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_014 desde rhythm_selection_dark en modo dark; foco en Cuando todo cambia, el hábito necesita margen.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_14_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1f_tngCBJHJmeLr-t_7JWdoyvUPgL5N3A"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1f_tngCBJHJmeLr-t_7JWdoyvUPgL5N3A/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "rhythm_selection"
+          ],
+          "drive_file_id": "1d1QYVZAesS8FFRoUY6zNYRsv251DkzMg",
+          "drive_url": "https://drive.google.com/file/d/1d1QYVZAesS8FFRoUY6zNYRsv251DkzMg/view?usp=drivesdk",
+          "file_name": "ib_202607_14_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:6551531a7ae01e5017f44bf8b39d4755f569592a54f76cd2195ff16916c87024",
+          "production_notes": "compose_existing_assets; composed from approved Drive source 'rhythm_selection_dark'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Cuando todo cambia, el hábito necesita margen.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -1307,7 +1699,35 @@
             "dquest_dark"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_015 desde dquest_dark en modo dark; foco en Daily Quest convierte intención en una tarea posible.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_015 desde dquest_dark en modo dark; foco en Daily Quest convierte intención en una tarea posible.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_15_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "dquest"
+          ],
+          "drive_file_id": "1XfRtA2VSdUlQR_8Z1SHsiGbwOys_ronY",
+          "drive_url": "https://drive.google.com/file/d/1XfRtA2VSdUlQR_8Z1SHsiGbwOys_ronY/view?usp=drivesdk",
+          "file_name": "ib_202607_15_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:2518967749b85eeb6f21cf95ff89c1438db77f2f8a0d20b9fbcbfc7dc9f6e97c",
+          "production_notes": "edit_existing_asset; composed from approved Drive source 'dquest_dark'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Daily Quest convierte intención en una tarea posible.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -1391,7 +1811,35 @@
             "emotion_chart_light"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_016 desde emotion_chart_light en modo light; foco en Un mal día no debería decidir todo el mes.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_016 desde emotion_chart_light en modo light; foco en Un mal día no debería decidir todo el mes.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_16_feed",
+          "status": "produced",
+          "mode": "light",
+          "source_drive_file_ids": [
+            "1axbJGjHorYCpG74j4BY6Hcnfoq6iqZyc"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1axbJGjHorYCpG74j4BY6Hcnfoq6iqZyc/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "emotion_chart"
+          ],
+          "drive_file_id": "1rYd-C19ZRY_MNzonZbzj4y5w7jWANK3A",
+          "drive_url": "https://drive.google.com/file/d/1rYd-C19ZRY_MNzonZbzj4y5w7jWANK3A/view?usp=drivesdk",
+          "file_name": "ib_202607_16_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:e4d9b925e724f4bd6c959cceb240d0d20c9a7b08a017137c96916c4a13b22d1b",
+          "production_notes": "compose_existing_assets; composed from approved Drive source 'emotion_chart_light'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Un mal día no debería decidir todo el mes.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct light palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -1475,7 +1923,35 @@
             "landing_product_composite_dark"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_017 desde landing_product_composite_dark en modo dark; foco en El objetivo no es ser perfecto. Es volver.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_017 desde landing_product_composite_dark en modo dark; foco en El objetivo no es ser perfecto. Es volver.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_17_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1onxU2RHosmChfOs2xSKg3UmZJXDH0dFJ"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1onxU2RHosmChfOs2xSKg3UmZJXDH0dFJ/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "landing_product_composite"
+          ],
+          "drive_file_id": "1W4HFxeZXaR59QAy7xHd568-afN1U7EKf",
+          "drive_url": "https://drive.google.com/file/d/1W4HFxeZXaR59QAy7xHd568-afN1U7EKf/view?usp=drivesdk",
+          "file_name": "ib_202607_17_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:25ae7c965a94d792604f75e294db9a5de560e8ced2a0d95f712fe1653e1e204b",
+          "production_notes": "compose_existing_assets; composed from approved Drive source 'landing_product_composite_dark'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: El objetivo no es ser perfecto. Es volver.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -1559,7 +2035,35 @@
             "dashboard_dark"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_018 desde dashboard_dark en modo dark; foco en Mirá el ritmo antes de exigirte más.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_018 desde dashboard_dark en modo dark; foco en Mirá el ritmo antes de exigirte más.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_18_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1luPOy4_TlBldDH-w1akx-_HU36JnABa-"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1luPOy4_TlBldDH-w1akx-_HU36JnABa-/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "dashboard"
+          ],
+          "drive_file_id": "1Gg6K3j8rO2u00A19de_xOowMMVxyECAc",
+          "drive_url": "https://drive.google.com/file/d/1Gg6K3j8rO2u00A19de_xOowMMVxyECAc/view?usp=drivesdk",
+          "file_name": "ib_202607_18_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:7ac442942990645fc4688daea48a52e6f1c9b74a22d827f30b5e0ab5d7e96868",
+          "production_notes": "compose_existing_assets; composed from approved Drive source 'dashboard_dark'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Mirá el ritmo antes de exigirte más.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -1643,7 +2147,35 @@
             "habit_detail_light"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_019 desde habit_detail_light en modo light; foco en El hábito que sobrevive es el que se adapta.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_019 desde habit_detail_light en modo light; foco en El hábito que sobrevive es el que se adapta.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_19_feed",
+          "status": "produced",
+          "mode": "light",
+          "source_drive_file_ids": [
+            "1Qeux1VU8gRASYVE7IjH62EyeBTkKY5ce"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1Qeux1VU8gRASYVE7IjH62EyeBTkKY5ce/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "habit_detail"
+          ],
+          "drive_file_id": "1cBOZ_-Sy1AArzpqVX-gG5Z_-B-dndeZL",
+          "drive_url": "https://drive.google.com/file/d/1cBOZ_-Sy1AArzpqVX-gG5Z_-B-dndeZL/view?usp=drivesdk",
+          "file_name": "ib_202607_19_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:2cf37d420b4ebda9a15a2882aab082f9cb3f5066d71d00c0a141e39b4b1053f8",
+          "production_notes": "compose_existing_assets; composed from approved Drive source 'habit_detail_light'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: El hábito que sobrevive es el que se adapta.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct light palette",
+            "truthful product screenshot",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -1727,7 +2259,35 @@
             "approved_lotus_icon"
           ],
           "production_required": true,
-          "production_brief": "Producir asset_post_020 desde approved_lotus_icon en modo dark; foco en Si esto te pasa, queremos aprender con vos.; sin alterar datos de producto."
+          "production_brief": "Producir asset_post_020 desde approved_lotus_icon en modo dark; foco en Si esto te pasa, queremos aprender con vos.; sin alterar datos de producto.",
+          "asset_code": "ib_202607_20_feed",
+          "status": "produced",
+          "mode": "dark",
+          "source_drive_file_ids": [
+            "1g33pJFN6hdyZGUFTe8P9IVhzjBBL-ICc"
+          ],
+          "source_drive_urls": [
+            "https://drive.google.com/file/d/1g33pJFN6hdyZGUFTe8P9IVhzjBBL-ICc/view?usp=drivesdk"
+          ],
+          "derived_from_modules": [
+            "lotus_icon"
+          ],
+          "drive_file_id": "1-7gI2GcHEOZ2kFjbQ7CyuDSXmQa8xB4r",
+          "drive_url": "https://drive.google.com/file/d/1-7gI2GcHEOZ2kFjbQ7CyuDSXmQa8xB4r/view?usp=drivesdk",
+          "file_name": "ib_202607_20_01_feed.png",
+          "mime_type": "image/png",
+          "dimensions": "1080x1080",
+          "checksum": "sha256:ce17267ed4ac4e9845b472a727272ed0cf931e38175f49e7b244bac1d825df8e",
+          "production_notes": "generate_new_asset; composed from approved Drive source 'approved_lotus_icon'. Product screenshot data and visible UI were not edited; only crop, scale, highlight, logo, and brief text were applied.",
+          "alt_text": "Visual de Innerbloom para el mensaje: Si esto te pasa, queremos aprender con vos.",
+          "brand_checks_passed": [
+            "approved logo",
+            "correct dark palette",
+            "approved logo source",
+            "Sora and Manrope",
+            "module variation respected"
+          ],
+          "produced_at": "2026-07-02T14:54:19.228387Z"
         }
       ],
       "accessibility": {
@@ -1753,7 +2313,7 @@
       "source_asset_refs": [
         "dashboard_dark"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia dashboard_dark como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -1775,7 +2335,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_01_feed",
+      "drive_file_id": "1Eqp-vb11084O-e9IiScIC42E-rWccGjj",
+      "drive_url": "https://drive.google.com/file/d/1Eqp-vb11084O-e9IiScIC42E-rWccGjj/view?usp=drivesdk",
+      "file_name": "ib_202607_01_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:c82572a8e7abdc475fc8d72cf148750bdc772713d90162fb26bd077663077bc9",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_002",
@@ -1787,7 +2355,7 @@
       "source_asset_refs": [
         "daily_energy_dark"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia daily_energy_dark como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -1809,7 +2377,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_02_feed",
+      "drive_file_id": "1l26HreoP2FsLeL1yhC9NENtJZAeawpH-",
+      "drive_url": "https://drive.google.com/file/d/1l26HreoP2FsLeL1yhC9NENtJZAeawpH-/view?usp=drivesdk",
+      "file_name": "ib_202607_02_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:eb196b562eda1fb22fdfcae53916205b14f20b6a5b19baba9ed4c50d4ec89f49",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_003",
@@ -1821,7 +2397,7 @@
       "source_asset_refs": [
         "approved_lotus_icon"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia approved_lotus_icon como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -1843,7 +2419,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_03_feed",
+      "drive_file_id": "1gd-J3E6Cfis2p9O7TbxWeyk7kQvtjI46",
+      "drive_url": "https://drive.google.com/file/d/1gd-J3E6Cfis2p9O7TbxWeyk7kQvtjI46/view?usp=drivesdk",
+      "file_name": "ib_202607_03_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:53e0f4cf2a84b9c4b28fbfa730e05560685c6eca04a41e136330f87a57a6369c",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_004",
@@ -1855,7 +2439,7 @@
       "source_asset_refs": [
         "dquest_dark"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia dquest_dark como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -1877,7 +2461,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_04_feed",
+      "drive_file_id": "1PGDgJNBkcV2T0LD7D4yHdKVj920OM6bY",
+      "drive_url": "https://drive.google.com/file/d/1PGDgJNBkcV2T0LD7D4yHdKVj920OM6bY/view?usp=drivesdk",
+      "file_name": "ib_202607_04_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:19f3f0249d0b80da9883a334a0b8c15bc6ccde19ecd96667e2e8dabc4134892e",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_005",
@@ -1889,7 +2481,7 @@
       "source_asset_refs": [
         "rhythm_selection_light"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia rhythm_selection_light como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -1911,7 +2503,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_05_feed",
+      "drive_file_id": "1aQnIhpPiLxkv9xaDny8WZEpLxWh4nYwi",
+      "drive_url": "https://drive.google.com/file/d/1aQnIhpPiLxkv9xaDny8WZEpLxWh4nYwi/view?usp=drivesdk",
+      "file_name": "ib_202607_05_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:090881b726a9a5e8961061fc85737b2c7c400856a92619dbaa8cebe42829002a",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_006",
@@ -1923,7 +2523,7 @@
       "source_asset_refs": [
         "landing_product_composite_dark"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia landing_product_composite_dark como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -1945,7 +2545,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_06_feed",
+      "drive_file_id": "1Ewrnfhd2wa3QmbXKksNN5agO3rrGhFYj",
+      "drive_url": "https://drive.google.com/file/d/1Ewrnfhd2wa3QmbXKksNN5agO3rrGhFYj/view?usp=drivesdk",
+      "file_name": "ib_202607_06_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:0d1a0a82a10445cc9764a74c04ef68af9322109e236a26472b83316b9828a2a2",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_007",
@@ -1957,7 +2565,7 @@
       "source_asset_refs": [
         "dashboard_dark"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia dashboard_dark como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -1979,7 +2587,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_07_feed",
+      "drive_file_id": "1L7YjGGOmpitr1pynLjFRM3B_A6VGs5rn",
+      "drive_url": "https://drive.google.com/file/d/1L7YjGGOmpitr1pynLjFRM3B_A6VGs5rn/view?usp=drivesdk",
+      "file_name": "ib_202607_07_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:013322bae3792693999f34b3170295b33d8efcdd186bb47ee57062e8785b07e5",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_008",
@@ -1991,7 +2607,7 @@
       "source_asset_refs": [
         "emotion_chart_dark"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia emotion_chart_dark como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -2013,7 +2629,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_08_feed",
+      "drive_file_id": "1CrWYSQkoWs2KIQPR_flWjxhxXNICVhVb",
+      "drive_url": "https://drive.google.com/file/d/1CrWYSQkoWs2KIQPR_flWjxhxXNICVhVb/view?usp=drivesdk",
+      "file_name": "ib_202607_08_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:6ae34e3c39ee38d526af0c4f65678b70bd1ed9141592197cb27921e6ebb4466c",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_009",
@@ -2025,7 +2649,7 @@
       "source_asset_refs": [
         "habit_detail_dark"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia habit_detail_dark como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -2047,7 +2671,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_09_feed",
+      "drive_file_id": "1PgEn6Cmj6G_mcSzm6lFCb5r9nrGRr0ST",
+      "drive_url": "https://drive.google.com/file/d/1PgEn6Cmj6G_mcSzm6lFCb5r9nrGRr0ST/view?usp=drivesdk",
+      "file_name": "ib_202607_09_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:6a7b6a442e8f7529feddd85c8f6ba3fc1ad232a0ce53c9746ac782da111eccda",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_010",
@@ -2059,7 +2691,7 @@
       "source_asset_refs": [
         "task_detail_dark"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia task_detail_dark como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -2081,7 +2713,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_10_feed",
+      "drive_file_id": "1zS3kDyxzIfX9cZluTmvoNYXgAFe7ztbs",
+      "drive_url": "https://drive.google.com/file/d/1zS3kDyxzIfX9cZluTmvoNYXgAFe7ztbs/view?usp=drivesdk",
+      "file_name": "ib_202607_10_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:4c7f8f08c7da026c75fb81d0fc548c0aa8ea4cbd09dece0ca018ad76d88f4447",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_011",
@@ -2093,7 +2733,7 @@
       "source_asset_refs": [
         "daily_energy_dark"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia daily_energy_dark como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -2115,7 +2755,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_11_feed",
+      "drive_file_id": "1FXo41CfIa-yo97BC8raHF1M6YHrP5ke6",
+      "drive_url": "https://drive.google.com/file/d/1FXo41CfIa-yo97BC8raHF1M6YHrP5ke6/view?usp=drivesdk",
+      "file_name": "ib_202607_11_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:71d59e7b6aef017fe34dd334cf8b853ef5dc76f781a4325fae36ba94278b3aa0",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_012",
@@ -2127,7 +2775,7 @@
       "source_asset_refs": [
         "dashboard_light"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia dashboard_light como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -2149,7 +2797,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_12_feed",
+      "drive_file_id": "1-p3bg2xItkAd_WtGL3yg6qsfsN8P6lYA",
+      "drive_url": "https://drive.google.com/file/d/1-p3bg2xItkAd_WtGL3yg6qsfsN8P6lYA/view?usp=drivesdk",
+      "file_name": "ib_202607_12_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:bfcb04a49e7c11d51d3261f34bf90d629866913e2ada4a324176ad7e86e46c14",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_013",
@@ -2161,7 +2817,7 @@
       "source_asset_refs": [
         "approved_full_logo"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia approved_full_logo como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -2183,7 +2839,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_13_feed",
+      "drive_file_id": "11yRMgrAhC_lVhfIycklMZ9ItF47hScMe",
+      "drive_url": "https://drive.google.com/file/d/11yRMgrAhC_lVhfIycklMZ9ItF47hScMe/view?usp=drivesdk",
+      "file_name": "ib_202607_13_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:b68fceee052207ffd3bfe8144976ee8174fab1d6f1c5c602d6b6ea4df11a4482",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_014",
@@ -2195,7 +2859,7 @@
       "source_asset_refs": [
         "rhythm_selection_dark"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia rhythm_selection_dark como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -2217,7 +2881,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_14_feed",
+      "drive_file_id": "1d1QYVZAesS8FFRoUY6zNYRsv251DkzMg",
+      "drive_url": "https://drive.google.com/file/d/1d1QYVZAesS8FFRoUY6zNYRsv251DkzMg/view?usp=drivesdk",
+      "file_name": "ib_202607_14_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:6551531a7ae01e5017f44bf8b39d4755f569592a54f76cd2195ff16916c87024",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_015",
@@ -2229,7 +2901,7 @@
       "source_asset_refs": [
         "dquest_dark"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia dquest_dark como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -2251,7 +2923,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_15_feed",
+      "drive_file_id": "1XfRtA2VSdUlQR_8Z1SHsiGbwOys_ronY",
+      "drive_url": "https://drive.google.com/file/d/1XfRtA2VSdUlQR_8Z1SHsiGbwOys_ronY/view?usp=drivesdk",
+      "file_name": "ib_202607_15_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:2518967749b85eeb6f21cf95ff89c1438db77f2f8a0d20b9fbcbfc7dc9f6e97c",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_016",
@@ -2263,7 +2943,7 @@
       "source_asset_refs": [
         "emotion_chart_light"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia emotion_chart_light como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -2285,7 +2965,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_16_feed",
+      "drive_file_id": "1rYd-C19ZRY_MNzonZbzj4y5w7jWANK3A",
+      "drive_url": "https://drive.google.com/file/d/1rYd-C19ZRY_MNzonZbzj4y5w7jWANK3A/view?usp=drivesdk",
+      "file_name": "ib_202607_16_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:e4d9b925e724f4bd6c959cceb240d0d20c9a7b08a017137c96916c4a13b22d1b",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_017",
@@ -2297,7 +2985,7 @@
       "source_asset_refs": [
         "landing_product_composite_dark"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia landing_product_composite_dark como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -2319,7 +3007,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_17_feed",
+      "drive_file_id": "1W4HFxeZXaR59QAy7xHd568-afN1U7EKf",
+      "drive_url": "https://drive.google.com/file/d/1W4HFxeZXaR59QAy7xHd568-afN1U7EKf/view?usp=drivesdk",
+      "file_name": "ib_202607_17_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:25ae7c965a94d792604f75e294db9a5de560e8ced2a0d95f712fe1653e1e204b",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_018",
@@ -2331,7 +3027,7 @@
       "source_asset_refs": [
         "dashboard_dark"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia dashboard_dark como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -2353,7 +3049,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_18_feed",
+      "drive_file_id": "1Gg6K3j8rO2u00A19de_xOowMMVxyECAc",
+      "drive_url": "https://drive.google.com/file/d/1Gg6K3j8rO2u00A19de_xOowMMVxyECAc/view?usp=drivesdk",
+      "file_name": "ib_202607_18_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:7ac442942990645fc4688daea48a52e6f1c9b74a22d827f30b5e0ab5d7e96868",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_019",
@@ -2365,7 +3069,7 @@
       "source_asset_refs": [
         "habit_detail_light"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia habit_detail_light como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -2387,7 +3091,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_19_feed",
+      "drive_file_id": "1cBOZ_-Sy1AArzpqVX-gG5Z_-B-dndeZL",
+      "drive_url": "https://drive.google.com/file/d/1cBOZ_-Sy1AArzpqVX-gG5Z_-B-dndeZL/view?usp=drivesdk",
+      "file_name": "ib_202607_19_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:2cf37d420b4ebda9a15a2882aab082f9cb3f5066d71d00c0a141e39b4b1053f8",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     },
     {
       "asset_code": "asset_post_020",
@@ -2399,7 +3111,7 @@
       "source_asset_refs": [
         "approved_lotus_icon"
       ],
-      "dimensions": "1080x1080 px",
+      "dimensions": "1080x1080",
       "format": "PNG or JPG for Instagram feed",
       "transformation_instructions": [
         "Usar referencia approved_lotus_icon como fuente semántica actual; módulo/modo indicado en el visual_brief.",
@@ -2421,7 +3133,15 @@
         "Asset source semántico claramente resoluble en carpeta aprobada 02 Assets o screenshots actuales.",
         "Cumple dark/light del sistema visual canónico.",
         "Incluye alt-text o información suficiente para accesibilidad."
-      ]
+      ],
+      "status": "produced",
+      "produced_asset_code": "ib_202607_20_feed",
+      "drive_file_id": "1-7gI2GcHEOZ2kFjbQ7CyuDSXmQa8xB4r",
+      "drive_url": "https://drive.google.com/file/d/1-7gI2GcHEOZ2kFjbQ7CyuDSXmQa8xB4r/view?usp=drivesdk",
+      "file_name": "ib_202607_20_01_feed.png",
+      "mime_type": "image/png",
+      "checksum": "sha256:ce17267ed4ac4e9845b472a727272ed0cf931e38175f49e7b244bac1d825df8e",
+      "produced_at": "2026-07-02T14:54:19.228387Z"
     }
   ],
   "campaign_quality_report": {
