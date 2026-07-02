@@ -86,44 +86,31 @@ If any capability is unavailable, stop without changing `campaign.json` and repo
 4. Inspect the available dark-mode and light-mode source assets in `02 Assets`.
 5. Select the correct mode for each post according to the canonical visual system and approved campaign intent.
 6. Reuse current approved assets before generating from scratch.
-7. Produce the mandatory sample set only.
-8. Upload the samples to the approved Drive hierarchy.
-9. Stop and request human visual-direction approval.
-10. Produce the remaining batch only after explicit approval.
-11. Update only asset-related fields inside the existing `campaign.json`.
-12. Validate the updated campaign and all asset business rules.
-13. Commit only the updated `campaign.json`.
-14. Create a pull request toward `automation/marketing-cycle-<YYYY-MM>`.
-15. Stop without merging.
+7. Produce the complete asset batch defined in `campaign.json` in one execution.
+8. Upload the complete batch to the approved Drive hierarchy.
+9. Update only asset-related fields inside the existing `campaign.json`.
+10. Validate the updated campaign and all asset business rules.
+11. Commit only the updated `campaign.json`.
+12. Create a pull request toward `automation/marketing-cycle-<YYYY-MM>`.
+13. Stop without merging.
 
-## Mandatory sample-first gate
+## Full-batch production policy
 
-For every new campaign or substantially changed visual system, produce exactly this representative sample set first:
+For each campaign, produce every asset required by the current validated `campaign.json`.
 
-- one conceptual static post;
-- one product-led static post;
-- one complete carousel.
-
-Store samples in:
-
-`Innerbloom Marketing/02 Assets/Generated Assets/<YYYY-MM>/Visual Direction Review/`
-
-After uploading these samples:
-
-- do not generate the rest of the campaign;
-- do not mark the full production queue complete;
-- present the samples for human review;
-- continue only after explicit approval of palette, typography, logo treatment, screenshot treatment, layout system, and overall direction.
-
-This gate is mandatory. It exists to prevent producing a large off-brand batch.
+- Do not stop after a representative sample.
+- Do not require an intermediate visual-direction approval gate.
+- Do not leave the production queue partially completed unless a concrete blocking condition prevents production.
+- Human review occurs after the complete batch has been produced and uploaded.
+- If one asset is blocked, report that exact blocker honestly and continue with other independent assets when doing so cannot corrupt campaign consistency.
 
 ## Google Drive destination
 
-Final approved deliverables belong under:
+Final deliverables belong under:
 
 `Innerbloom Marketing/02 Assets/Generated Assets/<YYYY-MM>/`
 
-If `Generated Assets`, the period folder, or `Visual Direction Review` does not exist, create it only inside `02 Assets`.
+If `Generated Assets` or the period folder does not exist, create it only inside `02 Assets`.
 
 Do not create another marketing root, another `02 Assets`, or a parallel generated-assets hierarchy.
 
@@ -282,7 +269,7 @@ Everything else in the repository is read-only during production. Binary images 
 - Approving or rejecting campaign posts.
 - Overwriting source assets in Drive.
 - Creating another Drive marketing root.
-- Producing the complete batch before sample approval.
+- Stopping after a limited sample instead of producing the complete campaign batch.
 - Replacing the real logo with plain text.
 - Using generic beige-and-green branding.
 - Reusing one screenshot or one template across the campaign.
