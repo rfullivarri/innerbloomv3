@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "innerbloom://marketing/head-of-content-input-v2",
+  "title": "Innerbloom Head of Content Input v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "period",
+    "approval",
+    "approved_strategy",
+    "audience",
+    "messaging",
+    "visual_direction",
+    "product_and_brand_sources",
+    "evidence",
+    "operational_constraints",
+    "tracking",
+    "measurement",
+    "source_manifest"
+  ],
+  "properties": {
+    "schema_version": { "const": "2.0" },
+    "period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["period_key", "campaign_code", "timezone", "target_post_count", "publishing_start_date", "publishing_end_date"],
+      "properties": {
+        "period_key": { "$ref": "#/$defs/periodKey" },
+        "campaign_code": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+        "timezone": { "type": "string", "minLength": 1 },
+        "target_post_count": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "publishing_start_date": { "type": "string", "format": "date" },
+        "publishing_end_date": { "type": "string", "format": "date" }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["review_status", "approval_authority", "approval_recorded_at", "original_cmo_review_status", "cmo_output_path"],
+      "properties": {
+        "review_status": { "const": "approved" },
+        "approval_authority": { "const": "human_workflow_dispatch" },
+        "approval_recorded_at": { "type": "string", "format": "date-time" },
+        "original_cmo_review_status": { "enum": ["draft", "approved"] },
+        "cmo_output_path": { "type": "string", "minLength": 1 }
+      }
+    },
+    "approved_strategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["executive_summary", "primary_objective", "secondary_objectives", "core_value_proposition", "period_narrative", "strategic_priorities", "content_pillars", "content_mix", "experiments", "head_of_content_brief"],
+      "properties": {
+        "executive_summary": { "type": "string", "minLength": 1 },
+        "primary_objective": { "type": "string", "minLength": 1 },
+        "secondary_objectives": { "type": "array", "items": { "type": "string" } },
+        "core_value_proposition": { "type": "string", "minLength": 1 },
+        "period_narrative": { "type": "string", "minLength": 1 },
+        "strategic_priorities": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "content_pillars": { "type": "array", "minItems": 1, "items": { "type": "object" } },
+        "content_mix": { "type": "object" },
+        "experiments": { "type": "array", "items": { "type": "object" } },
+        "head_of_content_brief": { "type": "object" }
+      }
+    },
+    "audience": { "type": "object" },
+    "messaging": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["language", "positioning", "content_rules", "approved_guidelines"],
+      "properties": {
+        "language": { "type": "string", "minLength": 1 },
+        "positioning": { "type": "array", "items": { "type": "string" } },
+        "content_rules": { "type": "array", "items": { "type": "string" } },
+        "approved_guidelines": { "type": "object" }
+      }
+    },
+    "visual_direction": { "type": "object" },
+    "product_and_brand_sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["product_stage", "known_product_changes", "product_truth_path", "product_marketing_path", "social_creative_path", "visual_system_path", "asset_registry_path", "source_policy"],
+      "properties": {
+        "product_stage": { "type": ["string", "null"] },
+        "known_product_changes": { "type": "array", "items": { "type": "string" } },
+        "product_truth_path": { "$ref": "#/$defs/repoPath" },
+        "product_marketing_path": { "$ref": "#/$defs/repoPath" },
+        "social_creative_path": { "$ref": "#/$defs/repoPath" },
+        "visual_system_path": { "$ref": "#/$defs/repoPath" },
+        "asset_registry_path": { "$ref": "#/$defs/repoPath" },
+        "source_policy": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["data_quality", "relevant_learnings", "previous_period_summary", "primary_problem", "supporting_problems", "decision_needed_after_period", "evidence_gaps", "tracking_issues", "assumptions"],
+      "properties": {
+        "data_quality": { "type": "string" },
+        "relevant_learnings": { "type": "array", "items": { "type": "object" } },
+        "previous_period_summary": { "type": ["string", "null"] },
+        "primary_problem": { "type": ["string", "null"] },
+        "supporting_problems": { "type": "array", "items": { "type": "string" } },
+        "decision_needed_after_period": { "type": ["string", "null"] },
+        "evidence_gaps": { "type": "array", "items": { "type": "string" } },
+        "tracking_issues": { "type": "array", "items": { "type": "string" } },
+        "assumptions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "operational_constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platforms", "formats", "max_carousel_slides", "max_assets_per_post", "image_generation_batch_size", "publishing_method", "public_asset_store", "human_review_required", "calendar_rules"],
+      "properties": {
+        "platforms": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "formats": { "type": "array", "minItems": 1, "items": { "enum": ["static", "carousel", "reel", "story", "thread", "short_video"] } },
+        "max_carousel_slides": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "max_assets_per_post": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "image_generation_batch_size": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "publishing_method": { "type": "string", "minLength": 1 },
+        "public_asset_store": { "type": "string", "minLength": 1 },
+        "human_review_required": { "const": true },
+        "calendar_rules": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "tracking": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base_url", "utm_source", "utm_medium", "campaign_code", "additional_parameters"],
+      "properties": {
+        "base_url": { "type": "string", "format": "uri" },
+        "utm_source": { "type": "string", "minLength": 1 },
+        "utm_medium": { "type": "string", "minLength": 1 },
+        "campaign_code": { "type": "string", "minLength": 1 },
+        "additional_parameters": { "type": "object" }
+      }
+    },
+    "measurement": { "type": "object" },
+    "source_manifest": { "type": "array", "minItems": 1, "items": { "type": "object" } }
+  },
+  "$defs": {
+    "periodKey": { "type": "string", "pattern": "^\\d{4}-\\d{2}$" },
+    "repoPath": { "type": "string", "minLength": 1, "pattern": "^[^/].+" }
+  }
+}
