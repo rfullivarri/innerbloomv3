@@ -154,7 +154,45 @@
             "dashboard_light_02"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_001 in English for post_001; prove: Show dashboard progress as the proof that direction can remain visible beyond streak language. Keep UI truthful. Do not produce in this Head of Content step."
+          "production_brief": "Produce asset_post_001 in English for post_001; prove: Show dashboard progress as the proof that direction can remain visible beyond streak language. Keep UI truthful. Do not produce in this Head of Content step.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_001_asset_post_001_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1unpD459_rd_7-Ett3cZ1IHHsLn_YkCmD",
+          "drive_url": "https://drive.google.com/file/d/1unpD459_rd_7-Ett3cZ1IHHsLn_YkCmD/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "If your streak breaks, you are not the problem.",
+            "supporting_copy": "Progress stays visible against your selected rhythm.",
+            "narrative_role": null,
+            "composition_intent": "Show dashboard progress as the proof that direction can remain visible beyond streak language.",
+            "visual_proof_requirement": "Show dashboard progress as the proof that direction can remain visible beyond streak language.",
+            "claim_to_screenshot_reasoning": "Dashboard progress can prove visible direction; it must not imply missed days disappear or that rhythm changes automatically.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: If your streak breaks, you are not the problem.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -365,7 +403,45 @@
             "dashboard_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_002_01 for post_002 slide 1. Narrative role: hook. Visible message: Your plan should not depend on perfect days.. Visual proof requirement: Brand-led opening with Daily Energy as optional secondary proof; the slide introduces the capacity problem without claiming automatic planning.. Recommended module: dashboard_light_01. Composition intent: Editorial hook with a legible Daily Energy crop in the background or secondary card.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_002_01 for post_002 slide 1. Narrative role: hook. Visible message: Your plan should not depend on perfect days.. Visual proof requirement: Brand-led opening with Daily Energy as optional secondary proof; the slide introduces the capacity problem without claiming automatic planning.. Recommended module: dashboard_light_01. Composition intent: Editorial hook with a legible Daily Energy crop in the background or secondary card.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_002_asset_post_002_01_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1BxrMXJ0P88MUHsPoRTyz3uazQ2oK7Tku",
+          "drive_url": "https://drive.google.com/file/d/1BxrMXJ0P88MUHsPoRTyz3uazQ2oK7Tku/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Your plan should not depend on perfect days.",
+            "supporting_copy": "Daily Energy shows recent momentum across Body, Mind, and Soul.",
+            "narrative_role": "hook",
+            "composition_intent": "Editorial hook with a legible Daily Energy crop in the background or secondary card.",
+            "visual_proof_requirement": "Brand-led opening with Daily Energy as optional secondary proof; the slide introduces the capacity problem without claiming automatic planning.",
+            "claim_to_screenshot_reasoning": "Daily Energy directly supports momentum language; it must not be framed as biological energy or automatic planning.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Your plan should not depend on perfect days.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_002_02",
@@ -375,7 +451,45 @@
             "tasks_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_002_02 for post_002 slide 2. Narrative role: problem. Visible message: Some days only have enough energy for the minimum viable action.. Visual proof requirement: Use task or dashboard evidence to show continued action without perfection pressure.. Recommended module: tasks_light_01. Composition intent: Show a real task/progress state as the concrete sign that imperfect days still count.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_002_02 for post_002 slide 2. Narrative role: problem. Visible message: Some days only have enough energy for the minimum viable action.. Visual proof requirement: Use task or dashboard evidence to show continued action without perfection pressure.. Recommended module: tasks_light_01. Composition intent: Show a real task/progress state as the concrete sign that imperfect days still count.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_002_asset_post_002_02_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "14nqYjJdjh4VZRi03JsERw9pMHst2bNjX",
+          "drive_url": "https://drive.google.com/file/d/14nqYjJdjh4VZRi03JsERw9pMHst2bNjX/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "tasks_light_01",
+              "drive_file_id": "1UKc1FKisqoAnrWpzKp1lkoaZMwhXMS93",
+              "drive_file_name": "innerbloom_mobile_task_light_01.png",
+              "mode": "light",
+              "module": "tasks"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Some days only have enough energy for the minimum viable action.",
+            "supporting_copy": "Daily Energy shows recent momentum across Body, Mind, and Soul.",
+            "narrative_role": "problem",
+            "composition_intent": "Show a real task/progress state as the concrete sign that imperfect days still count.",
+            "visual_proof_requirement": "Use task or dashboard evidence to show continued action without perfection pressure.",
+            "claim_to_screenshot_reasoning": "Daily Energy directly supports momentum language; it must not be framed as biological energy or automatic planning.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Your plan should not depend on perfect days.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_002_03",
@@ -385,7 +499,45 @@
             "dashboard_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_002_03 for post_002 slide 3. Narrative role: mechanism. Visible message: Daily Energy shows accumulated momentum across Body, Mind, and Soul.. Visual proof requirement: Daily Energy must be the proof: preserve HP, Focus, Mood, current values, and seven-day trend.. Recommended module: dashboard_light_01. Composition intent: Spotlight the Daily Energy module with restrained labels around HP, Focus, and Mood.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_002_03 for post_002 slide 3. Narrative role: mechanism. Visible message: Daily Energy shows accumulated momentum across Body, Mind, and Soul.. Visual proof requirement: Daily Energy must be the proof: preserve HP, Focus, Mood, current values, and seven-day trend.. Recommended module: dashboard_light_01. Composition intent: Spotlight the Daily Energy module with restrained labels around HP, Focus, and Mood.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_002_asset_post_002_03_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1uM3AVf5gMSVM619s9zHxVVizBPBs8wlQ",
+          "drive_url": "https://drive.google.com/file/d/1uM3AVf5gMSVM619s9zHxVVizBPBs8wlQ/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Daily Energy shows accumulated momentum across Body, Mind, and Soul.",
+            "supporting_copy": "Daily Energy shows recent momentum across Body, Mind, and Soul.",
+            "narrative_role": "mechanism",
+            "composition_intent": "Spotlight the Daily Energy module with restrained labels around HP, Focus, and Mood.",
+            "visual_proof_requirement": "Daily Energy must be the proof: preserve HP, Focus, Mood, current values, and seven-day trend.",
+            "claim_to_screenshot_reasoning": "Daily Energy directly supports momentum language; it must not be framed as biological energy or automatic planning.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Your plan should not depend on perfect days.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_002_04",
@@ -395,7 +547,45 @@
             "dashboard_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_002_04 for post_002 slide 4. Narrative role: proof. Visible message: Momentum is recent and accumulated, not a perfect-day score.. Visual proof requirement: Daily Energy must prove accumulated momentum and must not imply biological energy or automatic plan changes.. Recommended module: dashboard_light_01. Composition intent: Zoom into the seven-day trend and current values while keeping the UI unchanged.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_002_04 for post_002 slide 4. Narrative role: proof. Visible message: Momentum is recent and accumulated, not a perfect-day score.. Visual proof requirement: Daily Energy must prove accumulated momentum and must not imply biological energy or automatic plan changes.. Recommended module: dashboard_light_01. Composition intent: Zoom into the seven-day trend and current values while keeping the UI unchanged.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_002_asset_post_002_04_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "10K17Gkylp_QFBn5KWJF3Fr2GTuY6TWup",
+          "drive_url": "https://drive.google.com/file/d/10K17Gkylp_QFBn5KWJF3Fr2GTuY6TWup/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Momentum is recent and accumulated, not a perfect-day score.",
+            "supporting_copy": "Daily Energy shows recent momentum across Body, Mind, and Soul.",
+            "narrative_role": "proof",
+            "composition_intent": "Zoom into the seven-day trend and current values while keeping the UI unchanged.",
+            "visual_proof_requirement": "Daily Energy must prove accumulated momentum and must not imply biological energy or automatic plan changes.",
+            "claim_to_screenshot_reasoning": "Daily Energy directly supports momentum language; it must not be framed as biological energy or automatic planning.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Your plan should not depend on perfect days.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_002_05",
@@ -405,7 +595,45 @@
             "dashboard_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_002_05 for post_002 slide 5. Narrative role: CTA. Visible message: See how adaptive habits work. Visual proof requirement: Use product-led CTA support; screenshot only if it reinforces the Daily Energy momentum story.. Recommended module: dashboard_light_01. Composition intent: Close with clear CTA and small product proof, no new claim.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_002_05 for post_002 slide 5. Narrative role: CTA. Visible message: See how adaptive habits work. Visual proof requirement: Use product-led CTA support; screenshot only if it reinforces the Daily Energy momentum story.. Recommended module: dashboard_light_01. Composition intent: Close with clear CTA and small product proof, no new claim.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_002_asset_post_002_05_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1zubKgK9BLEn_nOKy_Y7od_51ISG_ogAF",
+          "drive_url": "https://drive.google.com/file/d/1zubKgK9BLEn_nOKy_Y7od_51ISG_ogAF/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "See how adaptive habits work",
+            "supporting_copy": "Daily Energy shows recent momentum across Body, Mind, and Soul.",
+            "narrative_role": "CTA",
+            "composition_intent": "Close with clear CTA and small product proof, no new claim.",
+            "visual_proof_requirement": "Use product-led CTA support; screenshot only if it reinforces the Daily Energy momentum story.",
+            "claim_to_screenshot_reasoning": "Daily Energy directly supports momentum language; it must not be framed as biological energy or automatic planning.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Your plan should not depend on perfect days.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -525,7 +753,45 @@
             "approved_full_logo"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_003 in English for post_003; prove: Use brand-led composition because this is a belief statement, not a product-behaviour proof claim. Keep UI truthful. Do not produce in this Head of Content step."
+          "production_brief": "Produce asset_post_003 in English for post_003; prove: Use brand-led composition because this is a belief statement, not a product-behaviour proof claim. Keep UI truthful. Do not produce in this Head of Content step.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_003_asset_post_003_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1M91bkCCrDgFAavvOxWJqkA2bJipP8LZs",
+          "drive_url": "https://drive.google.com/file/d/1M91bkCCrDgFAavvOxWJqkA2bJipP8LZs/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "approved_logo_primary_512_png",
+              "drive_file_id": "1g33pJFN6hdyZGUFTe8P9IVhzjBBL-ICc",
+              "drive_file_name": "IB_NEW_LOGO1 512.png",
+              "mode": "transparent",
+              "module": "brand"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Consistency is not doing the same thing every day.",
+            "supporting_copy": "Innerbloom positions consistency as sustainable habit construction, not perfection.",
+            "narrative_role": null,
+            "composition_intent": "Use brand-led composition because this is a belief statement, not a product-behaviour proof claim.",
+            "visual_proof_requirement": "Use brand-led composition because this is a belief statement, not a product-behaviour proof claim.",
+            "claim_to_screenshot_reasoning": "A product screenshot is not required because the claim is philosophical; using one could imply a specific feature proves a broader worldview.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Consistency is not doing the same thing every day.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -738,7 +1004,45 @@
             "daily_quest_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_004_01 for post_004 slide 1. Narrative role: hook. Visible message: Daily Quest starts with the day you actually had.. Visual proof requirement: Daily Quest screen proves retrospective review of existing tasks.. Recommended module: daily_quest_light_01. Composition intent: Open on the Daily Quest UI with the hook as the dominant text.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_004_01 for post_004 slide 1. Narrative role: hook. Visible message: Daily Quest starts with the day you actually had.. Visual proof requirement: Daily Quest screen proves retrospective review of existing tasks.. Recommended module: daily_quest_light_01. Composition intent: Open on the Daily Quest UI with the hook as the dominant text.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_004_asset_post_004_01_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "13e0MKG-iQMI8VkepqgYNPP6BXqlm4k_6",
+          "drive_url": "https://drive.google.com/file/d/13e0MKG-iQMI8VkepqgYNPP6BXqlm4k_6/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "daily_quest_light_01",
+              "drive_file_id": "1yC0Vlj-NbpnWJcobmE3stl7QVdFNQSoW",
+              "drive_file_name": "innerbloom_mobile_dquest_light_01.png",
+              "mode": "light",
+              "module": "daily_quest"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Daily Quest starts with the day you actually had.",
+            "supporting_copy": "Daily Quest reviews yesterday; it is not a planner, generator, or prediction engine.",
+            "narrative_role": "hook",
+            "composition_intent": "Open on the Daily Quest UI with the hook as the dominant text.",
+            "visual_proof_requirement": "Daily Quest screen proves retrospective review of existing tasks.",
+            "claim_to_screenshot_reasoning": "Daily Quest screenshots prove review and completion marking; they must not imply the app invents new tasks or predicts tomorrow.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Daily Quest starts with the day you actually had.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_004_02",
@@ -748,7 +1052,45 @@
             "daily_quest_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_004_02 for post_004 slide 2. Narrative role: problem. Visible message: A habit check-in should not invent a new plan for tomorrow.. Visual proof requirement: Daily Quest/task review evidence must show existing task review, not generated tasks.. Recommended module: daily_quest_light_01. Composition intent: Show review context with invented-planner implications excluded.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_004_02 for post_004 slide 2. Narrative role: problem. Visible message: A habit check-in should not invent a new plan for tomorrow.. Visual proof requirement: Daily Quest/task review evidence must show existing task review, not generated tasks.. Recommended module: daily_quest_light_01. Composition intent: Show review context with invented-planner implications excluded.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_004_asset_post_004_02_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1pcqR4tp8RwzBgUjIgY1qvkJqcxhoHinA",
+          "drive_url": "https://drive.google.com/file/d/1pcqR4tp8RwzBgUjIgY1qvkJqcxhoHinA/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "daily_quest_light_01",
+              "drive_file_id": "1yC0Vlj-NbpnWJcobmE3stl7QVdFNQSoW",
+              "drive_file_name": "innerbloom_mobile_dquest_light_01.png",
+              "mode": "light",
+              "module": "daily_quest"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "A habit check-in should not invent a new plan for tomorrow.",
+            "supporting_copy": "Daily Quest reviews yesterday; it is not a planner, generator, or prediction engine.",
+            "narrative_role": "problem",
+            "composition_intent": "Show review context with invented-planner implications excluded.",
+            "visual_proof_requirement": "Daily Quest/task review evidence must show existing task review, not generated tasks.",
+            "claim_to_screenshot_reasoning": "Daily Quest screenshots prove review and completion marking; they must not imply the app invents new tasks or predicts tomorrow.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Daily Quest starts with the day you actually had.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_004_03",
@@ -758,7 +1100,45 @@
             "daily_quest_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_004_03 for post_004 slide 3. Narrative role: mechanism. Visible message: Review existing tasks, mark completed ones, and leave the rest unmarked.. Visual proof requirement: Daily Quest task selection/review UI directly proves the retrospective mechanism.. Recommended module: daily_quest_light_01. Composition intent: Focus on task rows/checkboxes while preserving labels and state.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_004_03 for post_004 slide 3. Narrative role: mechanism. Visible message: Review existing tasks, mark completed ones, and leave the rest unmarked.. Visual proof requirement: Daily Quest task selection/review UI directly proves the retrospective mechanism.. Recommended module: daily_quest_light_01. Composition intent: Focus on task rows/checkboxes while preserving labels and state.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_004_asset_post_004_03_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1n6hk0EMpBzq1vN1hxTy-sdQxCcZ4RGou",
+          "drive_url": "https://drive.google.com/file/d/1n6hk0EMpBzq1vN1hxTy-sdQxCcZ4RGou/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "daily_quest_light_01",
+              "drive_file_id": "1yC0Vlj-NbpnWJcobmE3stl7QVdFNQSoW",
+              "drive_file_name": "innerbloom_mobile_dquest_light_01.png",
+              "mode": "light",
+              "module": "daily_quest"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Review existing tasks, mark completed ones, and leave the rest unmarked.",
+            "supporting_copy": "Daily Quest reviews yesterday; it is not a planner, generator, or prediction engine.",
+            "narrative_role": "mechanism",
+            "composition_intent": "Focus on task rows/checkboxes while preserving labels and state.",
+            "visual_proof_requirement": "Daily Quest task selection/review UI directly proves the retrospective mechanism.",
+            "claim_to_screenshot_reasoning": "Daily Quest screenshots prove review and completion marking; they must not imply the app invents new tasks or predicts tomorrow.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Daily Quest starts with the day you actually had.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_004_04",
@@ -768,7 +1148,45 @@
             "daily_quest_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_004_04 for post_004 slide 4. Narrative role: proof. Visible message: Record the predominant emotion as context for the day.. Visual proof requirement: Use Daily Quest emotion capture if visible; use Emotion Chart only if the slide shows historical emotion patterns.. Recommended module: daily_quest_light_01. Composition intent: Show emotion capture within Daily Quest; avoid Emotion Chart unless replacing with a historical-pattern slide.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_004_04 for post_004 slide 4. Narrative role: proof. Visible message: Record the predominant emotion as context for the day.. Visual proof requirement: Use Daily Quest emotion capture if visible; use Emotion Chart only if the slide shows historical emotion patterns.. Recommended module: daily_quest_light_01. Composition intent: Show emotion capture within Daily Quest; avoid Emotion Chart unless replacing with a historical-pattern slide.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_004_asset_post_004_04_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1kjHWR972VGKcpi_GjXImk5zNio_DfdJi",
+          "drive_url": "https://drive.google.com/file/d/1kjHWR972VGKcpi_GjXImk5zNio_DfdJi/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "daily_quest_light_01",
+              "drive_file_id": "1yC0Vlj-NbpnWJcobmE3stl7QVdFNQSoW",
+              "drive_file_name": "innerbloom_mobile_dquest_light_01.png",
+              "mode": "light",
+              "module": "daily_quest"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Record the predominant emotion as context for the day.",
+            "supporting_copy": "Daily Quest reviews yesterday; it is not a planner, generator, or prediction engine.",
+            "narrative_role": "proof",
+            "composition_intent": "Show emotion capture within Daily Quest; avoid Emotion Chart unless replacing with a historical-pattern slide.",
+            "visual_proof_requirement": "Use Daily Quest emotion capture if visible; use Emotion Chart only if the slide shows historical emotion patterns.",
+            "claim_to_screenshot_reasoning": "Daily Quest screenshots prove review and completion marking; they must not imply the app invents new tasks or predicts tomorrow.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Daily Quest starts with the day you actually had.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_004_05",
@@ -778,7 +1196,45 @@
             "daily_quest_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_004_05 for post_004 slide 5. Narrative role: CTA. Visible message: Try the early version. Visual proof requirement: CTA can sit beside Daily Quest proof; do not claim planning or prediction.. Recommended module: daily_quest_light_01. Composition intent: Close with product CTA and truthful Daily Quest context.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_004_05 for post_004 slide 5. Narrative role: CTA. Visible message: Try the early version. Visual proof requirement: CTA can sit beside Daily Quest proof; do not claim planning or prediction.. Recommended module: daily_quest_light_01. Composition intent: Close with product CTA and truthful Daily Quest context.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_004_asset_post_004_05_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1AABZ6pq7VeL8yYI2qLSQGpUUM7hHWhCp",
+          "drive_url": "https://drive.google.com/file/d/1AABZ6pq7VeL8yYI2qLSQGpUUM7hHWhCp/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "daily_quest_light_01",
+              "drive_file_id": "1yC0Vlj-NbpnWJcobmE3stl7QVdFNQSoW",
+              "drive_file_name": "innerbloom_mobile_dquest_light_01.png",
+              "mode": "light",
+              "module": "daily_quest"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Try the early version",
+            "supporting_copy": "Daily Quest reviews yesterday; it is not a planner, generator, or prediction engine.",
+            "narrative_role": "CTA",
+            "composition_intent": "Close with product CTA and truthful Daily Quest context.",
+            "visual_proof_requirement": "CTA can sit beside Daily Quest proof; do not claim planning or prediction.",
+            "claim_to_screenshot_reasoning": "Daily Quest screenshots prove review and completion marking; they must not imply the app invents new tasks or predicts tomorrow.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Daily Quest starts with the day you actually had.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -905,7 +1361,45 @@
             "progress_history_light"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_005 in English for post_005; prove continuity with dashboard, task, weekly progress, or progress-history evidence. Do not use rhythm_selection and do not imply weekly rhythm reselection. Keep UI truthful. Do not produce in this Head of Content step."
+          "production_brief": "Produce asset_post_005 in English for post_005; prove continuity with dashboard, task, weekly progress, or progress-history evidence. Do not use rhythm_selection and do not imply weekly rhythm reselection. Keep UI truthful. Do not produce in this Head of Content step.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_005_asset_post_005_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1hP8Vw11oal4Rlf1CP659uHRTcBd9wPwa",
+          "drive_url": "https://drive.google.com/file/d/1hP8Vw11oal4Rlf1CP659uHRTcBd9wPwa/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "You do not need to restart every Monday.",
+            "supporting_copy": "Progress is visible daily and weekly evidence of continued habit construction against the selected rhythm, not a Monda.",
+            "narrative_role": null,
+            "composition_intent": "Use dashboard, tasks, weekly progress, or progress-history evidence to show continuity after an uneven week.",
+            "visual_proof_requirement": "Use dashboard, tasks, weekly progress, or progress-history evidence to show continuity after an uneven week.",
+            "claim_to_screenshot_reasoning": "Dashboard, task, weekly progress, or progress-history evidence can show continuity without implying the rhythm is reselected weekly; rhythm selection would mislead for a no-Monday-reset claim.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: You do not need to restart every Monday.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -1026,7 +1520,45 @@
             "approved_full_logo"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_006 in English for post_006; prove: Use a landing/product composite to invite trial without pretending the MVP is finished. Keep UI truthful. Do not produce in this Head of Content step."
+          "production_brief": "Produce asset_post_006 in English for post_006; prove: Use a landing/product composite to invite trial without pretending the MVP is finished. Keep UI truthful. Do not produce in this Head of Content step.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_006_asset_post_006_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1tY2tVuQzXG3JISKeLfsLPBV5FBN9AnK7",
+          "drive_url": "https://drive.google.com/file/d/1tY2tVuQzXG3JISKeLfsLPBV5FBN9AnK7/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "approved_logo_primary_png",
+              "drive_file_id": "1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0",
+              "drive_file_name": "IB_NEW_LOGO1.png",
+              "mode": "transparent",
+              "module": "brand"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Try the early version and tell us what is missing.",
+            "supporting_copy": "The product is early and reviewable; feedback CTA should not overstate maturity.",
+            "narrative_role": null,
+            "composition_intent": "Use a landing/product composite to invite trial without pretending the MVP is finished.",
+            "visual_proof_requirement": "Use a landing/product composite to invite trial without pretending the MVP is finished.",
+            "claim_to_screenshot_reasoning": "A landing/product composite supports a trial invitation; product screenshots should be secondary because the main claim is early access.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Try the early version and tell us what is missing.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -1148,7 +1680,45 @@
             "tasks_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_007 in English for post_007; prove: Show dashboard progress and weekly evidence as proof of visible direction. Keep UI truthful. Do not produce in this Head of Content step."
+          "production_brief": "Produce asset_post_007 in English for post_007; prove: Show dashboard progress and weekly evidence as proof of visible direction. Keep UI truthful. Do not produce in this Head of Content step.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_007_asset_post_007_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1yHfGtoauMXjgE0gQdSPkH0Qg9VC1v-sC",
+          "drive_url": "https://drive.google.com/file/d/1yHfGtoauMXjgE0gQdSPkH0Qg9VC1v-sC/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Visible progress does not require perfection.",
+            "supporting_copy": "Dashboard and task progress are best evidence for progress without perfection.",
+            "narrative_role": null,
+            "composition_intent": "Show dashboard progress and weekly evidence as proof of visible direction.",
+            "visual_proof_requirement": "Show dashboard progress and weekly evidence as proof of visible direction.",
+            "claim_to_screenshot_reasoning": "Dashboard progress directly proves visible progress; it must not claim guaranteed consistency or reset-free magic.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Visible progress does not require perfection.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -1365,7 +1935,45 @@
             "approved_logo_primary_png"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_008_01 for post_008 slide 1. Narrative role: hook. Visible message: Real life counts as context.. Visual proof requirement: emotional-context concept can frame emotional context over time.. Recommended module: approved_logo_primary_png. Composition intent: Open with emotional-context concept as mood-pattern evidence, not progress evidence.. Acceptance criteria: English visible copy; brand-led no-screenshot composition; no invented UI; readable at mobile preview size."
+          "production_brief": "Produce asset_post_008_01 for post_008 slide 1. Narrative role: hook. Visible message: Real life counts as context.. Visual proof requirement: emotional-context concept can frame emotional context over time.. Recommended module: approved_logo_primary_png. Composition intent: Open with emotional-context concept as mood-pattern evidence, not progress evidence.. Acceptance criteria: English visible copy; brand-led no-screenshot composition; no invented UI; readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_008_asset_post_008_01_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1Cme-iOwNfR_FZ4bZam3DCRmqzheRzcM5",
+          "drive_url": "https://drive.google.com/file/d/1Cme-iOwNfR_FZ4bZam3DCRmqzheRzcM5/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "approved_logo_primary_png",
+              "drive_file_id": "1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0",
+              "drive_file_name": "IB_NEW_LOGO1.png",
+              "mode": "transparent",
+              "module": "brand"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Real life counts as context.",
+            "supporting_copy": "Emotion Chart shows a calendar-like history of predominant emotions and supports pattern recognition.",
+            "narrative_role": "hook",
+            "composition_intent": "Approved logo/brand-led editorial slide with no screenshot; use copy hierarchy to explain emotional context and pattern perspective.",
+            "visual_proof_requirement": "Brand-led no-screenshot slide; explain the emotional-context concept without depicting or inventing Emotion Chart UI.",
+            "claim_to_screenshot_reasoning": "Emotion Chart is the correct product concept for emotional patterns, but no registered physical Emotion Chart asset exists; use approved logo/brand assets only and avoid showing or inventing an Emotion Chart screenshot.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Real life counts as context.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_008_02",
@@ -1375,7 +1983,45 @@
             "approved_logo_primary_png"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_008_02 for post_008 slide 2. Narrative role: problem. Visible message: One difficult day can feel bigger than the rest of the month.. Visual proof requirement: emotional-context concept month/history view proves perspective across days.. Recommended module: approved_logo_primary_png. Composition intent: Use a calendar-like view emphasizing multiple days without changing colors or labels.. Acceptance criteria: English visible copy; brand-led no-screenshot composition; no invented UI; readable at mobile preview size."
+          "production_brief": "Produce asset_post_008_02 for post_008 slide 2. Narrative role: problem. Visible message: One difficult day can feel bigger than the rest of the month.. Visual proof requirement: emotional-context concept month/history view proves perspective across days.. Recommended module: approved_logo_primary_png. Composition intent: Use a calendar-like view emphasizing multiple days without changing colors or labels.. Acceptance criteria: English visible copy; brand-led no-screenshot composition; no invented UI; readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_008_asset_post_008_02_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1JU-0d-9d6G6KiEOCDaZMPz60TbrUA0C5",
+          "drive_url": "https://drive.google.com/file/d/1JU-0d-9d6G6KiEOCDaZMPz60TbrUA0C5/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "approved_logo_primary_png",
+              "drive_file_id": "1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0",
+              "drive_file_name": "IB_NEW_LOGO1.png",
+              "mode": "transparent",
+              "module": "brand"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "One difficult day can feel bigger than the rest of the month.",
+            "supporting_copy": "Emotion Chart shows a calendar-like history of predominant emotions and supports pattern recognition.",
+            "narrative_role": "problem",
+            "composition_intent": "Approved logo/brand-led editorial slide with no screenshot; use copy hierarchy to explain emotional context and pattern perspective.",
+            "visual_proof_requirement": "Brand-led no-screenshot slide; explain the emotional-context concept without depicting or inventing Emotion Chart UI.",
+            "claim_to_screenshot_reasoning": "Emotion Chart is the correct product concept for emotional patterns, but no registered physical Emotion Chart asset exists; use approved logo/brand assets only and avoid showing or inventing an Emotion Chart screenshot.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Real life counts as context.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_008_03",
@@ -1385,7 +2031,45 @@
             "approved_logo_primary_png"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_008_03 for post_008 slide 3. Narrative role: mechanism. Visible message: emotional-context concept records predominant emotions over time.. Visual proof requirement: emotional-context concept directly proves historical predominant-emotion tracking.. Recommended module: approved_logo_primary_png. Composition intent: Spotlight emotion distribution/history with restrained callouts.. Acceptance criteria: English visible copy; brand-led no-screenshot composition; no invented UI; readable at mobile preview size."
+          "production_brief": "Produce asset_post_008_03 for post_008 slide 3. Narrative role: mechanism. Visible message: emotional-context concept records predominant emotions over time.. Visual proof requirement: emotional-context concept directly proves historical predominant-emotion tracking.. Recommended module: approved_logo_primary_png. Composition intent: Spotlight emotion distribution/history with restrained callouts.. Acceptance criteria: English visible copy; brand-led no-screenshot composition; no invented UI; readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_008_asset_post_008_03_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1beppwASq5tseLfDha4NGS3uNJ49zNsJN",
+          "drive_url": "https://drive.google.com/file/d/1beppwASq5tseLfDha4NGS3uNJ49zNsJN/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "approved_logo_primary_png",
+              "drive_file_id": "1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0",
+              "drive_file_name": "IB_NEW_LOGO1.png",
+              "mode": "transparent",
+              "module": "brand"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Emotion Chart records predominant emotions over time.",
+            "supporting_copy": "Emotion Chart shows a calendar-like history of predominant emotions and supports pattern recognition.",
+            "narrative_role": "mechanism",
+            "composition_intent": "Spotlight emotion distribution/history with restrained callouts.",
+            "visual_proof_requirement": "Brand-led no-screenshot slide; explain the emotional-context concept without depicting or inventing Emotion Chart UI.",
+            "claim_to_screenshot_reasoning": "Emotion Chart is the correct product concept for emotional patterns, but no registered physical Emotion Chart asset exists; use approved logo/brand assets only and avoid showing or inventing an Emotion Chart screenshot.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Real life counts as context.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_008_04",
@@ -1395,7 +2079,45 @@
             "approved_logo_primary_png"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_008_04 for post_008 slide 4. Narrative role: proof. Visible message: Patterns become visible without turning feelings into a score.. Visual proof requirement: emotional-context concept proves pattern recognition; it must not imply mental-health measurement.. Recommended module: approved_logo_primary_png. Composition intent: Show the chart as evidence of pattern perspective, not diagnosis.. Acceptance criteria: English visible copy; brand-led no-screenshot composition; no invented UI; readable at mobile preview size."
+          "production_brief": "Produce asset_post_008_04 for post_008 slide 4. Narrative role: proof. Visible message: Patterns become visible without turning feelings into a score.. Visual proof requirement: emotional-context concept proves pattern recognition; it must not imply mental-health measurement.. Recommended module: approved_logo_primary_png. Composition intent: Show the chart as evidence of pattern perspective, not diagnosis.. Acceptance criteria: English visible copy; brand-led no-screenshot composition; no invented UI; readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_008_asset_post_008_04_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1kPJPTHoq5ZDGKCVV07seUQ2iB2kxJjhS",
+          "drive_url": "https://drive.google.com/file/d/1kPJPTHoq5ZDGKCVV07seUQ2iB2kxJjhS/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "approved_logo_primary_png",
+              "drive_file_id": "1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0",
+              "drive_file_name": "IB_NEW_LOGO1.png",
+              "mode": "transparent",
+              "module": "brand"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Patterns become visible without turning feelings into a score.",
+            "supporting_copy": "Emotion Chart shows a calendar-like history of predominant emotions and supports pattern recognition.",
+            "narrative_role": "proof",
+            "composition_intent": "Show the chart as evidence of pattern perspective, not diagnosis.",
+            "visual_proof_requirement": "Brand-led no-screenshot slide; explain the emotional-context concept without depicting or inventing Emotion Chart UI.",
+            "claim_to_screenshot_reasoning": "Emotion Chart is the correct product concept for emotional patterns, but no registered physical Emotion Chart asset exists; use approved logo/brand assets only and avoid showing or inventing an Emotion Chart screenshot.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Real life counts as context.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_008_05",
@@ -1405,7 +2127,45 @@
             "approved_logo_primary_png"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_008_05 for post_008 slide 5. Narrative role: CTA. Visible message: Start with a rhythm that fits your life. Visual proof requirement: CTA may be brand-led; do not use rhythm_selection unless explaining onboarding rhythm separately.. Recommended module: approved_logo_primary_png. Composition intent: Close with CTA and emotional-context proof, avoiding rhythm-selection visuals.. Acceptance criteria: English visible copy; brand-led no-screenshot composition; no invented UI; readable at mobile preview size."
+          "production_brief": "Produce asset_post_008_05 for post_008 slide 5. Narrative role: CTA. Visible message: Start with a rhythm that fits your life. Visual proof requirement: CTA may be brand-led; do not use rhythm_selection unless explaining onboarding rhythm separately.. Recommended module: approved_logo_primary_png. Composition intent: Close with CTA and emotional-context proof, avoiding rhythm-selection visuals.. Acceptance criteria: English visible copy; brand-led no-screenshot composition; no invented UI; readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_008_asset_post_008_05_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "13IFDO5W1zdcBEYQDuNQG7LEZ4hLUpliH",
+          "drive_url": "https://drive.google.com/file/d/13IFDO5W1zdcBEYQDuNQG7LEZ4hLUpliH/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "approved_logo_primary_png",
+              "drive_file_id": "1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0",
+              "drive_file_name": "IB_NEW_LOGO1.png",
+              "mode": "transparent",
+              "module": "brand"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Start with a rhythm that fits your life",
+            "supporting_copy": "Emotion Chart shows a calendar-like history of predominant emotions and supports pattern recognition.",
+            "narrative_role": "CTA",
+            "composition_intent": "Close with CTA and emotional-context proof, avoiding rhythm-selection visuals.",
+            "visual_proof_requirement": "Brand-led no-screenshot slide; explain the emotional-context concept without depicting or inventing Emotion Chart UI.",
+            "claim_to_screenshot_reasoning": "Emotion Chart is the correct product concept for emotional patterns, but no registered physical Emotion Chart asset exists; use approved logo/brand assets only and avoid showing or inventing an Emotion Chart screenshot.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Real life counts as context.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -1527,7 +2287,45 @@
             "dashboard_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_009 in English for post_009; prove: Use task or habit detail only if it shows ongoing progress, not a streak as the sole proof. Keep UI truthful. Do not produce in this Head of Content step."
+          "production_brief": "Produce asset_post_009 in English for post_009; prove: Use task or habit detail only if it shows ongoing progress, not a streak as the sole proof. Keep UI truthful. Do not produce in this Head of Content step.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_009_asset_post_009_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1jejUqSAFd5CtQV2iNJ0eRoNR_wsrZ98l",
+          "drive_url": "https://drive.google.com/file/d/1jejUqSAFd5CtQV2iNJ0eRoNR_wsrZ98l/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "tasks_light_01",
+              "drive_file_id": "1UKc1FKisqoAnrWpzKp1lkoaZMwhXMS93",
+              "drive_file_name": "innerbloom_mobile_task_light_01.png",
+              "mode": "light",
+              "module": "tasks"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Breaking a streak does not erase your direction.",
+            "supporting_copy": "Progress is daily and weekly evidence, not perfection. Streak-only UI is not enough.",
+            "narrative_role": null,
+            "composition_intent": "Use task or habit detail only if it shows ongoing progress, not a streak as the sole proof.",
+            "visual_proof_requirement": "Use task or habit detail only if it shows ongoing progress, not a streak as the sole proof.",
+            "claim_to_screenshot_reasoning": "Habit/task detail can support ongoing habit evidence; it must not visually reduce the claim to a streak counter.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Breaking a streak does not erase your direction.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -1739,7 +2537,45 @@
             "task_detail_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_010_01 for post_010 slide 1. Narrative role: hook. Visible message: Adjust the task, do not abandon the habit.. Visual proof requirement: Task detail proves task-level adjustment context.. Recommended module: task_detail_light_01. Composition intent: Open with task detail as the focal product proof.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_010_01 for post_010 slide 1. Narrative role: hook. Visible message: Adjust the task, do not abandon the habit.. Visual proof requirement: Task detail proves task-level adjustment context.. Recommended module: task_detail_light_01. Composition intent: Open with task detail as the focal product proof.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_010_asset_post_010_01_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1FK63sFcppJhWi1H16fk74XVzvRSHgdBY",
+          "drive_url": "https://drive.google.com/file/d/1FK63sFcppJhWi1H16fk74XVzvRSHgdBY/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "task_detail_light_01",
+              "drive_file_id": "1Qeux1VU8gRASYVE7IjH62EyeBTkKY5ce",
+              "drive_file_name": "innerbloom_mobile_task_detail_light_01.png",
+              "mode": "light",
+              "module": "task_detail"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Adjust the task, do not abandon the habit.",
+            "supporting_copy": "Growth Calibration recalibrates monthly by task; user edits can reset habit tracking if history exists.",
+            "narrative_role": "hook",
+            "composition_intent": "Open with task detail as the focal product proof.",
+            "visual_proof_requirement": "Task detail proves task-level adjustment context.",
+            "claim_to_screenshot_reasoning": "Task detail can prove task-level challenge context; it must not imply Daily Energy or emotions automatically change difficulty.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Adjust the task, do not abandon the habit.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_010_02",
@@ -1749,7 +2585,45 @@
             "task_detail_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_010_02 for post_010 slide 2. Narrative role: problem. Visible message: When a task gets too easy or too hard, quitting is not the only option.. Visual proof requirement: Tasks/task detail evidence can show task state and challenge context.. Recommended module: task_detail_light_01. Composition intent: Show task-level information rather than generic dashboard progress.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_010_02 for post_010 slide 2. Narrative role: problem. Visible message: When a task gets too easy or too hard, quitting is not the only option.. Visual proof requirement: Tasks/task detail evidence can show task state and challenge context.. Recommended module: task_detail_light_01. Composition intent: Show task-level information rather than generic dashboard progress.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_010_asset_post_010_02_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1FqHTgPTnU-amMaYSyB2wJRsSJhE53WW8",
+          "drive_url": "https://drive.google.com/file/d/1FqHTgPTnU-amMaYSyB2wJRsSJhE53WW8/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "task_detail_light_01",
+              "drive_file_id": "1Qeux1VU8gRASYVE7IjH62EyeBTkKY5ce",
+              "drive_file_name": "innerbloom_mobile_task_detail_light_01.png",
+              "mode": "light",
+              "module": "task_detail"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "When a task gets too easy or too hard, quitting is not the only option.",
+            "supporting_copy": "Growth Calibration recalibrates monthly by task; user edits can reset habit tracking if history exists.",
+            "narrative_role": "problem",
+            "composition_intent": "Show task-level information rather than generic dashboard progress.",
+            "visual_proof_requirement": "Tasks/task detail evidence can show task state and challenge context.",
+            "claim_to_screenshot_reasoning": "Task detail can prove task-level challenge context; it must not imply Daily Energy or emotions automatically change difficulty.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Adjust the task, do not abandon the habit.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_010_03",
@@ -1759,7 +2633,45 @@
             "task_detail_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_010_03 for post_010 slide 3. Narrative role: mechanism. Visible message: Growth Calibration is monthly and based on actual completion.. Visual proof requirement: Task detail or calibration-related UI must prove task-level completion/calibration context.. Recommended module: task_detail_light_01. Composition intent: Highlight task-level history/calibration cues without implying real-time automation.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_010_03 for post_010 slide 3. Narrative role: mechanism. Visible message: Growth Calibration is monthly and based on actual completion.. Visual proof requirement: Task detail or calibration-related UI must prove task-level completion/calibration context.. Recommended module: task_detail_light_01. Composition intent: Highlight task-level history/calibration cues without implying real-time automation.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_010_asset_post_010_03_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1RlIkgxLTFSQmgpmPMeZWvYUtdTls_oLY",
+          "drive_url": "https://drive.google.com/file/d/1RlIkgxLTFSQmgpmPMeZWvYUtdTls_oLY/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "task_detail_light_01",
+              "drive_file_id": "1Qeux1VU8gRASYVE7IjH62EyeBTkKY5ce",
+              "drive_file_name": "innerbloom_mobile_task_detail_light_01.png",
+              "mode": "light",
+              "module": "task_detail"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Growth Calibration is monthly and based on actual completion.",
+            "supporting_copy": "Growth Calibration recalibrates monthly by task; user edits can reset habit tracking if history exists.",
+            "narrative_role": "mechanism",
+            "composition_intent": "Highlight task-level history/calibration cues without implying real-time automation.",
+            "visual_proof_requirement": "Task detail or calibration-related UI must prove task-level completion/calibration context.",
+            "claim_to_screenshot_reasoning": "Task detail can prove task-level challenge context; it must not imply Daily Energy or emotions automatically change difficulty.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Adjust the task, do not abandon the habit.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_010_04",
@@ -1769,7 +2681,45 @@
             "task_detail_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_010_04 for post_010 slide 4. Narrative role: proof. Visible message: Challenge can change because the task changed, not because your worth changed.. Visual proof requirement: Task detail/calibration evidence supports challenge framing; do not use Daily Energy or Emotion Chart.. Recommended module: task_detail_light_01. Composition intent: Use annotated task detail with values preserved and no moral-score language.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_010_04 for post_010 slide 4. Narrative role: proof. Visible message: Challenge can change because the task changed, not because your worth changed.. Visual proof requirement: Task detail/calibration evidence supports challenge framing; do not use Daily Energy or Emotion Chart.. Recommended module: task_detail_light_01. Composition intent: Use annotated task detail with values preserved and no moral-score language.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_010_asset_post_010_04_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1UbTMxcAUQIyGqbf-5K13Cn9kCDGAsgng",
+          "drive_url": "https://drive.google.com/file/d/1UbTMxcAUQIyGqbf-5K13Cn9kCDGAsgng/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "task_detail_light_01",
+              "drive_file_id": "1Qeux1VU8gRASYVE7IjH62EyeBTkKY5ce",
+              "drive_file_name": "innerbloom_mobile_task_detail_light_01.png",
+              "mode": "light",
+              "module": "task_detail"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Challenge can change because the task changed, not because your worth changed.",
+            "supporting_copy": "Growth Calibration recalibrates monthly by task; user edits can reset habit tracking if history exists.",
+            "narrative_role": "proof",
+            "composition_intent": "Use annotated task detail with values preserved and no moral-score language.",
+            "visual_proof_requirement": "Task detail/calibration evidence supports challenge framing; do not use Daily Energy or Emotion Chart.",
+            "claim_to_screenshot_reasoning": "Task detail can prove task-level challenge context; it must not imply Daily Energy or emotions automatically change difficulty.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Adjust the task, do not abandon the habit.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_010_05",
@@ -1779,7 +2729,45 @@
             "task_detail_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_010_05 for post_010 slide 5. Narrative role: CTA. Visible message: Try the early version. Visual proof requirement: CTA sits beside task detail proof; keep early-version framing honest.. Recommended module: task_detail_light_01. Composition intent: Close with product CTA and a task-detail visual anchor.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_010_05 for post_010 slide 5. Narrative role: CTA. Visible message: Try the early version. Visual proof requirement: CTA sits beside task detail proof; keep early-version framing honest.. Recommended module: task_detail_light_01. Composition intent: Close with product CTA and a task-detail visual anchor.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_010_asset_post_010_05_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1salP3VDWcrJ4CIGyJ-9V7dkfLSX6_Rr6",
+          "drive_url": "https://drive.google.com/file/d/1salP3VDWcrJ4CIGyJ-9V7dkfLSX6_Rr6/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "task_detail_light_01",
+              "drive_file_id": "1Qeux1VU8gRASYVE7IjH62EyeBTkKY5ce",
+              "drive_file_name": "innerbloom_mobile_task_detail_light_01.png",
+              "mode": "light",
+              "module": "task_detail"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Try the early version",
+            "supporting_copy": "Growth Calibration recalibrates monthly by task; user edits can reset habit tracking if history exists.",
+            "narrative_role": "CTA",
+            "composition_intent": "Close with product CTA and a task-detail visual anchor.",
+            "visual_proof_requirement": "CTA sits beside task detail proof; keep early-version framing honest.",
+            "claim_to_screenshot_reasoning": "Task detail can prove task-level challenge context; it must not imply Daily Energy or emotions automatically change difficulty.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Adjust the task, do not abandon the habit.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -1897,7 +2885,45 @@
             "dashboard_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_011 in English for post_011; prove: Spotlight Daily Energy chart and its HP, Focus, Mood dimensions. Keep UI truthful. Do not produce in this Head of Content step."
+          "production_brief": "Produce asset_post_011 in English for post_011; prove: Spotlight Daily Energy chart and its HP, Focus, Mood dimensions. Keep UI truthful. Do not produce in this Head of Content step.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_011_asset_post_011_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1OHVtJxdBXUXedG7wuD-VRmgDps4uDEgc",
+          "drive_url": "https://drive.google.com/file/d/1OHVtJxdBXUXedG7wuD-VRmgDps4uDEgc/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Your momentum changes. Your system should notice.",
+            "supporting_copy": "Daily Energy visualizes accumulated momentum and seven-day trends; it is not a medical or cognitive measurement.",
+            "narrative_role": null,
+            "composition_intent": "Spotlight Daily Energy chart and its HP, Focus, Mood dimensions.",
+            "visual_proof_requirement": "Spotlight Daily Energy chart and its HP, Focus, Mood dimensions.",
+            "claim_to_screenshot_reasoning": "Daily Energy proves momentum visibility; it must not claim biological energy or automatic plan changes.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Your momentum changes. Your system should notice.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -2106,7 +3132,45 @@
             "dashboard_light"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_012_01 for post_012 slide 1. Narrative role: hook. Visible message: Help us design less rigid habits.. Visual proof requirement: Dashboard/product tour proof grounds the early-adopter feedback request.. Recommended module: dashboard_light. Composition intent: Open with dashboard light mode and a transparent feedback invitation.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_012_01 for post_012 slide 1. Narrative role: hook. Visible message: Help us design less rigid habits.. Visual proof requirement: Dashboard/product tour proof grounds the early-adopter feedback request.. Recommended module: dashboard_light. Composition intent: Open with dashboard light mode and a transparent feedback invitation.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_012_asset_post_012_01_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1Sz6TBTpP0_XEhz6RkzF2R34GEI3B2OVk",
+          "drive_url": "https://drive.google.com/file/d/1Sz6TBTpP0_XEhz6RkzF2R34GEI3B2OVk/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Help us design less rigid habits.",
+            "supporting_copy": "Early-adopter feedback is a transparent CTA; dashboard can show the area users can react to.",
+            "narrative_role": "hook",
+            "composition_intent": "Open with dashboard light mode and a transparent feedback invitation.",
+            "visual_proof_requirement": "Dashboard/product tour proof grounds the early-adopter feedback request.",
+            "claim_to_screenshot_reasoning": "Dashboard screenshots show what users can evaluate; they must not imply completed research or guaranteed outcomes.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Help us design less rigid habits.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_012_02",
@@ -2116,7 +3180,45 @@
             "dashboard_light"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_012_02 for post_012 slide 2. Narrative role: problem. Visible message: If rigid systems made you restart, your feedback matters here.. Visual proof requirement: Brand-led or dashboard proof can connect user pain to feedback; no screenshot should imply research results.. Recommended module: dashboard_light. Composition intent: Use dashboard as the object users can evaluate.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_012_02 for post_012 slide 2. Narrative role: problem. Visible message: If rigid systems made you restart, your feedback matters here.. Visual proof requirement: Brand-led or dashboard proof can connect user pain to feedback; no screenshot should imply research results.. Recommended module: dashboard_light. Composition intent: Use dashboard as the object users can evaluate.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_012_asset_post_012_02_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1Uoi4rlGX4YeWr_5NBzabmzGyV-vwmY6x",
+          "drive_url": "https://drive.google.com/file/d/1Uoi4rlGX4YeWr_5NBzabmzGyV-vwmY6x/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "If rigid systems made you restart, your feedback matters here.",
+            "supporting_copy": "Early-adopter feedback is a transparent CTA; dashboard can show the area users can react to.",
+            "narrative_role": "problem",
+            "composition_intent": "Use dashboard as the object users can evaluate.",
+            "visual_proof_requirement": "Brand-led or dashboard proof can connect user pain to feedback; no screenshot should imply research results.",
+            "claim_to_screenshot_reasoning": "Dashboard screenshots show what users can evaluate; they must not imply completed research or guaranteed outcomes.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Help us design less rigid habits.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_012_03",
@@ -2126,7 +3228,45 @@
             "dashboard_light"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_012_03 for post_012 slide 3. Narrative role: mechanism. Visible message: Try the dashboard, then tell us what should be clearer.. Visual proof requirement: Dashboard module directly proves what users can inspect before giving feedback.. Recommended module: dashboard_light. Composition intent: Show the dashboard area that feedback will address.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_012_03 for post_012 slide 3. Narrative role: mechanism. Visible message: Try the dashboard, then tell us what should be clearer.. Visual proof requirement: Dashboard module directly proves what users can inspect before giving feedback.. Recommended module: dashboard_light. Composition intent: Show the dashboard area that feedback will address.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_012_asset_post_012_03_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1bkleJtlESytsa93Ty7TkHVhbg4gQUG3n",
+          "drive_url": "https://drive.google.com/file/d/1bkleJtlESytsa93Ty7TkHVhbg4gQUG3n/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Try the dashboard, then tell us what should be clearer.",
+            "supporting_copy": "Early-adopter feedback is a transparent CTA; dashboard can show the area users can react to.",
+            "narrative_role": "mechanism",
+            "composition_intent": "Show the dashboard area that feedback will address.",
+            "visual_proof_requirement": "Dashboard module directly proves what users can inspect before giving feedback.",
+            "claim_to_screenshot_reasoning": "Dashboard screenshots show what users can evaluate; they must not imply completed research or guaranteed outcomes.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Help us design less rigid habits.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_012_04",
@@ -2136,7 +3276,45 @@
             "tasks_light"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_012_04 for post_012 slide 4. Narrative role: proof. Visible message: Early users can react to real product screens, not a finished promise.. Visual proof requirement: Dashboard/tasks screen proves the product surface available for review; avoid maturity claims.. Recommended module: tasks_light. Composition intent: Use tasks or dashboard evidence as concrete product surface.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_012_04 for post_012 slide 4. Narrative role: proof. Visible message: Early users can react to real product screens, not a finished promise.. Visual proof requirement: Dashboard/tasks screen proves the product surface available for review; avoid maturity claims.. Recommended module: tasks_light. Composition intent: Use tasks or dashboard evidence as concrete product surface.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_012_asset_post_012_04_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1RknnvWVMZKTQ1Oj16q_IvIWpLN4SfIVW",
+          "drive_url": "https://drive.google.com/file/d/1RknnvWVMZKTQ1Oj16q_IvIWpLN4SfIVW/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "tasks_light_01",
+              "drive_file_id": "1UKc1FKisqoAnrWpzKp1lkoaZMwhXMS93",
+              "drive_file_name": "innerbloom_mobile_task_light_01.png",
+              "mode": "light",
+              "module": "tasks"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Early users can react to real product screens, not a finished promise.",
+            "supporting_copy": "Early-adopter feedback is a transparent CTA; dashboard can show the area users can react to.",
+            "narrative_role": "proof",
+            "composition_intent": "Use tasks or dashboard evidence as concrete product surface.",
+            "visual_proof_requirement": "Dashboard/tasks screen proves the product surface available for review; avoid maturity claims.",
+            "claim_to_screenshot_reasoning": "Dashboard screenshots show what users can evaluate; they must not imply completed research or guaranteed outcomes.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Help us design less rigid habits.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_012_05",
@@ -2146,7 +3324,45 @@
             "dashboard_light"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_012_05 for post_012 slide 5. Narrative role: CTA. Visible message: Give feedback after trying the dashboard. Visual proof requirement: Dashboard or brand-led CTA; must not imply the MVP is complete.. Recommended module: dashboard_light. Composition intent: Close with clear feedback CTA and early-product caveat.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_012_05 for post_012 slide 5. Narrative role: CTA. Visible message: Give feedback after trying the dashboard. Visual proof requirement: Dashboard or brand-led CTA; must not imply the MVP is complete.. Recommended module: dashboard_light. Composition intent: Close with clear feedback CTA and early-product caveat.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_012_asset_post_012_05_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1VL3zPEEzBjXIz50pOGlvdxi721zuHb9V",
+          "drive_url": "https://drive.google.com/file/d/1VL3zPEEzBjXIz50pOGlvdxi721zuHb9V/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Give feedback after trying the dashboard",
+            "supporting_copy": "Early-adopter feedback is a transparent CTA; dashboard can show the area users can react to.",
+            "narrative_role": "CTA",
+            "composition_intent": "Close with clear feedback CTA and early-product caveat.",
+            "visual_proof_requirement": "Dashboard or brand-led CTA; must not imply the MVP is complete.",
+            "claim_to_screenshot_reasoning": "Dashboard screenshots show what users can evaluate; they must not imply completed research or guaranteed outcomes.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Help us design less rigid habits.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -2266,7 +3482,45 @@
             "approved_lotus_icon"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_013 in English for post_013; prove: Use brand-led statement with subtle product motif; avoid unsupported feature proof. Keep UI truthful. Do not produce in this Head of Content step."
+          "production_brief": "Produce asset_post_013 in English for post_013; prove: Use brand-led statement with subtle product motif; avoid unsupported feature proof. Keep UI truthful. Do not produce in this Head of Content step.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_013_asset_post_013_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1To-v3UmVWrojQmCaxkI4ihUGo339EQ8F",
+          "drive_url": "https://drive.google.com/file/d/1To-v3UmVWrojQmCaxkI4ihUGo339EQ8F/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "approved_logo_primary_png",
+              "drive_file_id": "1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0",
+              "drive_file_name": "IB_NEW_LOGO1.png",
+              "mode": "transparent",
+              "module": "brand"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Less guilt. More recalibration.",
+            "supporting_copy": "Growth Points and calibration represent challenge, not worth or moral effort.",
+            "narrative_role": null,
+            "composition_intent": "Use brand-led statement with subtle product motif; avoid unsupported feature proof.",
+            "visual_proof_requirement": "Use brand-led statement with subtle product motif; avoid unsupported feature proof.",
+            "claim_to_screenshot_reasoning": "A logo-led asset is safest because this is a values claim; screenshots could overstate a feature if used as proof.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Less guilt. More recalibration.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -2476,7 +3730,45 @@
             "rhythm_selection_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_014_01 for post_014 slide 1. Narrative role: hook. Visible message: When everything changes, the habit needs margin.. Visual proof requirement: Rhythm selection proves a realistic starting target, not weekly resets.. Recommended module: rhythm_selection_light_01. Composition intent: Open with rhythm selection as onboarding target setup.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_014_01 for post_014 slide 1. Narrative role: hook. Visible message: When everything changes, the habit needs margin.. Visual proof requirement: Rhythm selection proves a realistic starting target, not weekly resets.. Recommended module: rhythm_selection_light_01. Composition intent: Open with rhythm selection as onboarding target setup.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_014_asset_post_014_01_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1VkojEQ_M7sD7tJYBvc-9_UlE49P-W5Jo",
+          "drive_url": "https://drive.google.com/file/d/1VkojEQ_M7sD7tJYBvc-9_UlE49P-W5Jo/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "rhythm_selection_light_01",
+              "drive_file_id": "1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp",
+              "drive_file_name": "innerbloom_mobile_rythm_light_01.png",
+              "mode": "light",
+              "module": "rhythm_selection"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "When everything changes, the habit needs margin.",
+            "supporting_copy": "Rhythm selection sets intended weekly frequency; later recommendations are optional and never automatic.",
+            "narrative_role": "hook",
+            "composition_intent": "Open with rhythm selection as onboarding target setup.",
+            "visual_proof_requirement": "Rhythm selection proves a realistic starting target, not weekly resets.",
+            "claim_to_screenshot_reasoning": "Rhythm selection proves target choice; it must not imply automatic weekly adaptation or missed-week resets.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: When everything changes, the habit needs margin.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_014_02",
@@ -2486,7 +3778,45 @@
             "rhythm_selection_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_014_02 for post_014 slide 2. Narrative role: problem. Visible message: A target that ignores your life becomes pressure fast.. Visual proof requirement: Rhythm selection proves the user chooses a realistic weekly frequency.. Recommended module: rhythm_selection_light_01. Composition intent: Show selectable rhythm options without saying they reset weekly.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_014_02 for post_014 slide 2. Narrative role: problem. Visible message: A target that ignores your life becomes pressure fast.. Visual proof requirement: Rhythm selection proves the user chooses a realistic weekly frequency.. Recommended module: rhythm_selection_light_01. Composition intent: Show selectable rhythm options without saying they reset weekly.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_014_asset_post_014_02_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "17ZTDBDDMUUX4_DiKm2eYEiZS4IzbyYyk",
+          "drive_url": "https://drive.google.com/file/d/17ZTDBDDMUUX4_DiKm2eYEiZS4IzbyYyk/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "rhythm_selection_light_01",
+              "drive_file_id": "1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp",
+              "drive_file_name": "innerbloom_mobile_rythm_light_01.png",
+              "mode": "light",
+              "module": "rhythm_selection"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "A target that ignores your life becomes pressure fast.",
+            "supporting_copy": "Rhythm selection sets intended weekly frequency; later recommendations are optional and never automatic.",
+            "narrative_role": "problem",
+            "composition_intent": "Show selectable rhythm options without saying they reset weekly.",
+            "visual_proof_requirement": "Rhythm selection proves the user chooses a realistic weekly frequency.",
+            "claim_to_screenshot_reasoning": "Rhythm selection proves target choice; it must not imply automatic weekly adaptation or missed-week resets.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: When everything changes, the habit needs margin.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_014_03",
@@ -2496,7 +3826,45 @@
             "rhythm_selection_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_014_03 for post_014 slide 3. Narrative role: mechanism. Visible message: Choose an intended weekly frequency from 1 to 4.. Visual proof requirement: Rhythm selection directly proves the 1-to-4 weekly frequency choice.. Recommended module: rhythm_selection_light_01. Composition intent: Focus on the 1-to-4 rhythm controls and preserve labels.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_014_03 for post_014 slide 3. Narrative role: mechanism. Visible message: Choose an intended weekly frequency from 1 to 4.. Visual proof requirement: Rhythm selection directly proves the 1-to-4 weekly frequency choice.. Recommended module: rhythm_selection_light_01. Composition intent: Focus on the 1-to-4 rhythm controls and preserve labels.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_014_asset_post_014_03_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1Zt45FR9vZaLydhuOCctwZC5KvALiRelN",
+          "drive_url": "https://drive.google.com/file/d/1Zt45FR9vZaLydhuOCctwZC5KvALiRelN/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "rhythm_selection_light_01",
+              "drive_file_id": "1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp",
+              "drive_file_name": "innerbloom_mobile_rythm_light_01.png",
+              "mode": "light",
+              "module": "rhythm_selection"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Choose an intended weekly frequency from 1 to 4.",
+            "supporting_copy": "Rhythm selection sets intended weekly frequency; later recommendations are optional and never automatic.",
+            "narrative_role": "mechanism",
+            "composition_intent": "Focus on the 1-to-4 rhythm controls and preserve labels.",
+            "visual_proof_requirement": "Rhythm selection directly proves the 1-to-4 weekly frequency choice.",
+            "claim_to_screenshot_reasoning": "Rhythm selection proves target choice; it must not imply automatic weekly adaptation or missed-week resets.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: When everything changes, the habit needs margin.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_014_04",
@@ -2506,7 +3874,45 @@
             "tasks_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_014_04 for post_014 slide 4. Narrative role: proof. Visible message: Later recommendations are optional and never applied automatically.. Visual proof requirement: Use task/dashboard recommendation context only if current UI shows it; otherwise use brand-led explanatory slide with no fabricated UI.. Recommended module: tasks_light_01. Composition intent: If no recommendation screenshot exists, avoid screenshot proof and use approved brand composition.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_014_04 for post_014 slide 4. Narrative role: proof. Visible message: Later recommendations are optional and never applied automatically.. Visual proof requirement: Use task/dashboard recommendation context only if current UI shows it; otherwise use brand-led explanatory slide with no fabricated UI.. Recommended module: tasks_light_01. Composition intent: If no recommendation screenshot exists, avoid screenshot proof and use approved brand composition.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_014_asset_post_014_04_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1xnCnnYegbwysbBVBpRqJMf_2726U_bxg",
+          "drive_url": "https://drive.google.com/file/d/1xnCnnYegbwysbBVBpRqJMf_2726U_bxg/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "tasks_light_01",
+              "drive_file_id": "1UKc1FKisqoAnrWpzKp1lkoaZMwhXMS93",
+              "drive_file_name": "innerbloom_mobile_task_light_01.png",
+              "mode": "light",
+              "module": "tasks"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Later recommendations are optional and never applied automatically.",
+            "supporting_copy": "Rhythm selection sets intended weekly frequency; later recommendations are optional and never automatic.",
+            "narrative_role": "proof",
+            "composition_intent": "If no recommendation screenshot exists, avoid screenshot proof and use approved brand composition.",
+            "visual_proof_requirement": "Use task/dashboard recommendation context only if current UI shows it; otherwise use brand-led explanatory slide with no fabricated UI.",
+            "claim_to_screenshot_reasoning": "Rhythm selection proves target choice; it must not imply automatic weekly adaptation or missed-week resets.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: When everything changes, the habit needs margin.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_014_05",
@@ -2516,7 +3922,45 @@
             "rhythm_selection_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_014_05 for post_014 slide 5. Narrative role: CTA. Visible message: Start with a rhythm that fits your life. Visual proof requirement: CTA may use rhythm selection because it is about onboarding target choice, not weekly reselection.. Recommended module: rhythm_selection_light_01. Composition intent: Close with onboarding rhythm proof and safe CTA wording.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_014_05 for post_014 slide 5. Narrative role: CTA. Visible message: Start with a rhythm that fits your life. Visual proof requirement: CTA may use rhythm selection because it is about onboarding target choice, not weekly reselection.. Recommended module: rhythm_selection_light_01. Composition intent: Close with onboarding rhythm proof and safe CTA wording.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_014_asset_post_014_05_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1coocpaJxZinC_7vQ1_YR1Tt4KXz8hZfY",
+          "drive_url": "https://drive.google.com/file/d/1coocpaJxZinC_7vQ1_YR1Tt4KXz8hZfY/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "rhythm_selection_light_01",
+              "drive_file_id": "1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp",
+              "drive_file_name": "innerbloom_mobile_rythm_light_01.png",
+              "mode": "light",
+              "module": "rhythm_selection"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Start with a rhythm that fits your life",
+            "supporting_copy": "Rhythm selection sets intended weekly frequency; later recommendations are optional and never automatic.",
+            "narrative_role": "CTA",
+            "composition_intent": "Close with onboarding rhythm proof and safe CTA wording.",
+            "visual_proof_requirement": "CTA may use rhythm selection because it is about onboarding target choice, not weekly reselection.",
+            "claim_to_screenshot_reasoning": "Rhythm selection proves target choice; it must not imply automatic weekly adaptation or missed-week resets.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: When everything changes, the habit needs margin.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -2636,7 +4080,45 @@
             "tasks_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_015 in English for post_015; prove: Use Daily Quest interface as proof of task review and emotion recording. Keep UI truthful. Do not produce in this Head of Content step."
+          "production_brief": "Produce asset_post_015 in English for post_015; prove: Use Daily Quest interface as proof of task review and emotion recording. Keep UI truthful. Do not produce in this Head of Content step.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_015_asset_post_015_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1-DCqc4MYFmDeGTsCp4PWS2zbttGB7smT",
+          "drive_url": "https://drive.google.com/file/d/1-DCqc4MYFmDeGTsCp4PWS2zbttGB7smT/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "daily_quest_light_01",
+              "drive_file_id": "1yC0Vlj-NbpnWJcobmE3stl7QVdFNQSoW",
+              "drive_file_name": "innerbloom_mobile_dquest_light_01.png",
+              "mode": "light",
+              "module": "daily_quest"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Daily Quest turns yesterday into a clear next signal.",
+            "supporting_copy": "Daily Quest is a retrospective on the previous day.",
+            "narrative_role": null,
+            "composition_intent": "Use Daily Quest interface as proof of task review and emotion recording.",
+            "visual_proof_requirement": "Use Daily Quest interface as proof of task review and emotion recording.",
+            "claim_to_screenshot_reasoning": "Daily Quest proves retrospective review; it must not be presented as a new daily plan generator.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Daily Quest turns yesterday into a clear next signal.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -2674,7 +4156,7 @@
       "editorial_function": "surface audience pain",
       "audience_and_problem": "People who want better habits but feel failed by rigid streaks, perfect-day planners, and systems that collapse during stressful or inconsistent weeks.",
       "hook": "One hard day should not define the whole month.",
-      "caption": "Emotion patterns are easier to understand when you can see them over time. Innerbloom’s Emotion Chart gives perspective without turning feelings into a score.",
+      "caption": "Emotion patterns are easier to understand when you can see them over time. Innerbloom\u2019s Emotion Chart gives perspective without turning feelings into a score.",
       "cta": {
         "label": "See how adaptive habits work",
         "destination_url": "https://innerbloomjourney.org/",
@@ -2755,7 +4237,45 @@
             "approved_logo_primary_png"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_016 in English for post_016; prove: Show Emotion Chart calendar/history as proof of perspective over time. Keep UI truthful. Do not produce in this Head of Content step."
+          "production_brief": "Produce asset_post_016 in English for post_016; prove: Show Emotion Chart calendar/history as proof of perspective over time. Keep UI truthful. Do not produce in this Head of Content step.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_016_asset_post_016_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1ZYRR7VlCP1dmGfZ9RoW7cxZYlLtWLpdZ",
+          "drive_url": "https://drive.google.com/file/d/1ZYRR7VlCP1dmGfZ9RoW7cxZYlLtWLpdZ/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "approved_logo_primary_png",
+              "drive_file_id": "1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0",
+              "drive_file_name": "IB_NEW_LOGO1.png",
+              "mode": "transparent",
+              "module": "brand"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "One hard day should not define the whole month.",
+            "supporting_copy": "Emotion Chart supports emotional pattern recognition and month-level perspective.",
+            "narrative_role": null,
+            "composition_intent": "Show Emotion Chart calendar/history as proof of perspective over time.",
+            "visual_proof_requirement": "Use a brand-led no-screenshot composition because no approved physical Emotion Chart asset is registered for this period; discuss emotional context without depicting or inventing the chart.",
+            "claim_to_screenshot_reasoning": "Emotion Chart is the correct product concept for emotional patterns, but no registered physical Emotion Chart asset exists; use approved logo/brand assets only and avoid showing or inventing an Emotion Chart screenshot.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: One hard day should not define the whole month.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -2969,7 +4489,45 @@
             "approved_logo_primary_png"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_017_01 for post_017 slide 1. Narrative role: hook. Visible message: The goal is not perfection. It is returning.. Visual proof requirement: Landing/product composite can introduce the overall product promise.. Recommended module: approved_logo_primary_png. Composition intent: Open with a product composite and restrained brand type.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_017_01 for post_017 slide 1. Narrative role: hook. Visible message: The goal is not perfection. It is returning.. Visual proof requirement: Landing/product composite can introduce the overall product promise.. Recommended module: approved_logo_primary_png. Composition intent: Open with a product composite and restrained brand type.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_017_asset_post_017_01_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1x4MkrCY7c_wKWjnk7X9KDFPH9D3At1Jc",
+          "drive_url": "https://drive.google.com/file/d/1x4MkrCY7c_wKWjnk7X9KDFPH9D3At1Jc/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "approved_logo_primary_png",
+              "drive_file_id": "1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0",
+              "drive_file_name": "IB_NEW_LOGO1.png",
+              "mode": "transparent",
+              "module": "brand"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "The goal is not perfection. It is returning.",
+            "supporting_copy": "Core promise: see progress, adjust challenge, and build habits sustainably.",
+            "narrative_role": "hook",
+            "composition_intent": "Open with a product composite and restrained brand type.",
+            "visual_proof_requirement": "Landing/product composite can introduce the overall product promise.",
+            "claim_to_screenshot_reasoning": "Composite can show the broader promise; screenshots must only support visible progress, not guaranteed transformation.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: The goal is not perfection. It is returning.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_017_02",
@@ -2979,7 +4537,45 @@
             "dashboard_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_017_02 for post_017 slide 2. Narrative role: problem. Visible message: The useful moment is after the ideal plan breaks.. Visual proof requirement: Dashboard/progress evidence can show return/continuity after imperfection.. Recommended module: dashboard_light_01. Composition intent: Use dashboard progress as proof of visible direction.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_017_02 for post_017 slide 2. Narrative role: problem. Visible message: The useful moment is after the ideal plan breaks.. Visual proof requirement: Dashboard/progress evidence can show return/continuity after imperfection.. Recommended module: dashboard_light_01. Composition intent: Use dashboard progress as proof of visible direction.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_017_asset_post_017_02_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1sdlfO6Xvcs-VzbQwI4ZwJZcOhKWbVSaM",
+          "drive_url": "https://drive.google.com/file/d/1sdlfO6Xvcs-VzbQwI4ZwJZcOhKWbVSaM/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "The useful moment is after the ideal plan breaks.",
+            "supporting_copy": "Core promise: see progress, adjust challenge, and build habits sustainably.",
+            "narrative_role": "problem",
+            "composition_intent": "Use dashboard progress as proof of visible direction.",
+            "visual_proof_requirement": "Dashboard/progress evidence can show return/continuity after imperfection.",
+            "claim_to_screenshot_reasoning": "Composite can show the broader promise; screenshots must only support visible progress, not guaranteed transformation.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: The goal is not perfection. It is returning.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_017_03",
@@ -2989,7 +4585,45 @@
             "dashboard_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_017_03 for post_017 slide 3. Narrative role: mechanism. Visible message: See progress, adjust challenge, and keep building sustainably.. Visual proof requirement: Use dashboard for progress and task detail for challenge context; do not use a logo as proof.. Recommended module: dashboard_light_01. Composition intent: Combine dashboard and task-detail evidence if available, with clear hierarchy.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_017_03 for post_017 slide 3. Narrative role: mechanism. Visible message: See progress, adjust challenge, and keep building sustainably.. Visual proof requirement: Use dashboard for progress and task detail for challenge context; do not use a logo as proof.. Recommended module: dashboard_light_01. Composition intent: Combine dashboard and task-detail evidence if available, with clear hierarchy.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_017_asset_post_017_03_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1UUuXEEIQC2iscx-_vvSwmHNl-6I50I8e",
+          "drive_url": "https://drive.google.com/file/d/1UUuXEEIQC2iscx-_vvSwmHNl-6I50I8e/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "See progress, adjust challenge, and keep building sustainably.",
+            "supporting_copy": "Core promise: see progress, adjust challenge, and build habits sustainably.",
+            "narrative_role": "mechanism",
+            "composition_intent": "Combine dashboard and task-detail evidence if available, with clear hierarchy.",
+            "visual_proof_requirement": "Use dashboard for progress and task detail for challenge context; do not use a logo as proof.",
+            "claim_to_screenshot_reasoning": "Composite can show the broader promise; screenshots must only support visible progress, not guaranteed transformation.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: The goal is not perfection. It is returning.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_017_04",
@@ -2999,7 +4633,45 @@
             "dashboard_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_017_04 for post_017 slide 4. Narrative role: proof. Visible message: Returning is easier when direction stays visible.. Visual proof requirement: Dashboard or weekly progress directly proves visible direction.. Recommended module: dashboard_light_01. Composition intent: Zoom on progress/weekly evidence without guaranteeing outcomes.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_017_04 for post_017 slide 4. Narrative role: proof. Visible message: Returning is easier when direction stays visible.. Visual proof requirement: Dashboard or weekly progress directly proves visible direction.. Recommended module: dashboard_light_01. Composition intent: Zoom on progress/weekly evidence without guaranteeing outcomes.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_017_asset_post_017_04_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1U8yW5CEfNXmRv2yT3V0ozUA68ssVxBcU",
+          "drive_url": "https://drive.google.com/file/d/1U8yW5CEfNXmRv2yT3V0ozUA68ssVxBcU/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Returning is easier when direction stays visible.",
+            "supporting_copy": "Core promise: see progress, adjust challenge, and build habits sustainably.",
+            "narrative_role": "proof",
+            "composition_intent": "Zoom on progress/weekly evidence without guaranteeing outcomes.",
+            "visual_proof_requirement": "Dashboard or weekly progress directly proves visible direction.",
+            "claim_to_screenshot_reasoning": "Composite can show the broader promise; screenshots must only support visible progress, not guaranteed transformation.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: The goal is not perfection. It is returning.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_017_05",
@@ -3009,7 +4681,45 @@
             "approved_logo_primary_png"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_017_05 for post_017 slide 5. Narrative role: CTA. Visible message: Start with a rhythm that fits your life. Visual proof requirement: CTA can be brand-led with product proof behind it; avoid implying weekly rhythm reselection.. Recommended module: approved_logo_primary_png. Composition intent: Close with brand CTA and product-led background.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_017_05 for post_017 slide 5. Narrative role: CTA. Visible message: Start with a rhythm that fits your life. Visual proof requirement: CTA can be brand-led with product proof behind it; avoid implying weekly rhythm reselection.. Recommended module: approved_logo_primary_png. Composition intent: Close with brand CTA and product-led background.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_017_asset_post_017_05_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "18Iau9a7kcPZXVpaMkFZb4djgxny13oqa",
+          "drive_url": "https://drive.google.com/file/d/18Iau9a7kcPZXVpaMkFZb4djgxny13oqa/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "approved_logo_primary_png",
+              "drive_file_id": "1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0",
+              "drive_file_name": "IB_NEW_LOGO1.png",
+              "mode": "transparent",
+              "module": "brand"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Start with a rhythm that fits your life",
+            "supporting_copy": "Core promise: see progress, adjust challenge, and build habits sustainably.",
+            "narrative_role": "CTA",
+            "composition_intent": "Close with brand CTA and product-led background.",
+            "visual_proof_requirement": "CTA can be brand-led with product proof behind it; avoid implying weekly rhythm reselection.",
+            "claim_to_screenshot_reasoning": "Composite can show the broader promise; screenshots must only support visible progress, not guaranteed transformation.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: The goal is not perfection. It is returning.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -3222,7 +4932,45 @@
             "dashboard_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_018_01 for post_018 slide 1. Narrative role: hook. Visible message: Look at the rhythm before asking for more.. Visual proof requirement: Dashboard/task rhythm evidence proves progress should be interpreted in context.. Recommended module: dashboard_light_01. Composition intent: Open with dashboard and rhythm/progress context.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_018_01 for post_018 slide 1. Narrative role: hook. Visible message: Look at the rhythm before asking for more.. Visual proof requirement: Dashboard/task rhythm evidence proves progress should be interpreted in context.. Recommended module: dashboard_light_01. Composition intent: Open with dashboard and rhythm/progress context.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_018_asset_post_018_01_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1PCpR2ed0wdy93Lu8U0fsdevGqPDO-Z09",
+          "drive_url": "https://drive.google.com/file/d/1PCpR2ed0wdy93Lu8U0fsdevGqPDO-Z09/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Look at the rhythm before asking for more.",
+            "supporting_copy": "Rhythm and progress should be interpreted together; recommendations are optional, not automatic.",
+            "narrative_role": "hook",
+            "composition_intent": "Open with dashboard and rhythm/progress context.",
+            "visual_proof_requirement": "Dashboard/task rhythm evidence proves progress should be interpreted in context.",
+            "claim_to_screenshot_reasoning": "Dashboard/task rhythm can prove progress context; it must not imply Daily Energy determines difficulty.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Look at the rhythm before asking for more.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_018_02",
@@ -3232,7 +4980,45 @@
             "tasks_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_018_02 for post_018 slide 2. Narrative role: problem. Visible message: More challenge should not come from pressure alone.. Visual proof requirement: Task or dashboard evidence should show actual progress context, not emotion or Daily Energy.. Recommended module: tasks_light_01. Composition intent: Use task progress or weekly evidence as the concrete basis.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_018_02 for post_018 slide 2. Narrative role: problem. Visible message: More challenge should not come from pressure alone.. Visual proof requirement: Task or dashboard evidence should show actual progress context, not emotion or Daily Energy.. Recommended module: tasks_light_01. Composition intent: Use task progress or weekly evidence as the concrete basis.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_018_asset_post_018_02_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1p48ToBJfEsksnwekrm-5MZAZn1j1PZ4P",
+          "drive_url": "https://drive.google.com/file/d/1p48ToBJfEsksnwekrm-5MZAZn1j1PZ4P/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "tasks_light_01",
+              "drive_file_id": "1UKc1FKisqoAnrWpzKp1lkoaZMwhXMS93",
+              "drive_file_name": "innerbloom_mobile_task_light_01.png",
+              "mode": "light",
+              "module": "tasks"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "More challenge should not come from pressure alone.",
+            "supporting_copy": "Rhythm and progress should be interpreted together; recommendations are optional, not automatic.",
+            "narrative_role": "problem",
+            "composition_intent": "Use task progress or weekly evidence as the concrete basis.",
+            "visual_proof_requirement": "Task or dashboard evidence should show actual progress context, not emotion or Daily Energy.",
+            "claim_to_screenshot_reasoning": "Dashboard/task rhythm can prove progress context; it must not imply Daily Energy determines difficulty.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Look at the rhythm before asking for more.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_018_03",
@@ -3242,7 +5028,45 @@
             "dashboard_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_018_03 for post_018 slide 3. Narrative role: mechanism. Visible message: Rhythm and progress should be interpreted together.. Visual proof requirement: Dashboard/tasks/weekly charts directly prove progress against selected rhythm.. Recommended module: dashboard_light_01. Composition intent: Show rhythm/progress relationship without inventing calculations.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_018_03 for post_018 slide 3. Narrative role: mechanism. Visible message: Rhythm and progress should be interpreted together.. Visual proof requirement: Dashboard/tasks/weekly charts directly prove progress against selected rhythm.. Recommended module: dashboard_light_01. Composition intent: Show rhythm/progress relationship without inventing calculations.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_018_asset_post_018_03_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1ryy70-VMAHDUBVWpWeLbi-X5p6hJeSC1",
+          "drive_url": "https://drive.google.com/file/d/1ryy70-VMAHDUBVWpWeLbi-X5p6hJeSC1/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Rhythm and progress should be interpreted together.",
+            "supporting_copy": "Rhythm and progress should be interpreted together; recommendations are optional, not automatic.",
+            "narrative_role": "mechanism",
+            "composition_intent": "Show rhythm/progress relationship without inventing calculations.",
+            "visual_proof_requirement": "Dashboard/tasks/weekly charts directly prove progress against selected rhythm.",
+            "claim_to_screenshot_reasoning": "Dashboard/task rhythm can prove progress context; it must not imply Daily Energy determines difficulty.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Look at the rhythm before asking for more.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_018_04",
@@ -3252,7 +5076,45 @@
             "tasks_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_018_04 for post_018 slide 4. Narrative role: proof. Visible message: Recommendations are optional, not automatic punishments.. Visual proof requirement: Use recommendation/task context only if current UI proves it; otherwise use brand-led text with dashboard context and no fabricated control.. Recommended module: tasks_light_01. Composition intent: Avoid auto-change visuals and preserve all UI state.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_018_04 for post_018 slide 4. Narrative role: proof. Visible message: Recommendations are optional, not automatic punishments.. Visual proof requirement: Use recommendation/task context only if current UI proves it; otherwise use brand-led text with dashboard context and no fabricated control.. Recommended module: tasks_light_01. Composition intent: Avoid auto-change visuals and preserve all UI state.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_018_asset_post_018_04_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1YeutOINxTXNL2PcxTB5hrshd4eg2sOmP",
+          "drive_url": "https://drive.google.com/file/d/1YeutOINxTXNL2PcxTB5hrshd4eg2sOmP/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "tasks_light_01",
+              "drive_file_id": "1UKc1FKisqoAnrWpzKp1lkoaZMwhXMS93",
+              "drive_file_name": "innerbloom_mobile_task_light_01.png",
+              "mode": "light",
+              "module": "tasks"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "Recommendations are optional, not automatic punishments.",
+            "supporting_copy": "Rhythm and progress should be interpreted together; recommendations are optional, not automatic.",
+            "narrative_role": "proof",
+            "composition_intent": "Avoid auto-change visuals and preserve all UI state.",
+            "visual_proof_requirement": "Use recommendation/task context only if current UI proves it; otherwise use brand-led text with dashboard context and no fabricated control.",
+            "claim_to_screenshot_reasoning": "Dashboard/task rhythm can prove progress context; it must not imply Daily Energy determines difficulty.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Look at the rhythm before asking for more.",
+          "asset_ready_for_review": true
         },
         {
           "asset_code": "asset_post_018_05",
@@ -3262,7 +5124,45 @@
             "dashboard_light_01"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_018_05 for post_018 slide 5. Narrative role: CTA. Visible message: See how adaptive habits work. Visual proof requirement: CTA can use dashboard/task proof of adaptive habit context.. Recommended module: dashboard_light_01. Composition intent: Close with dashboard-led CTA and no automatic-change implication.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size."
+          "production_brief": "Produce asset_post_018_05 for post_018 slide 5. Narrative role: CTA. Visible message: See how adaptive habits work. Visual proof requirement: CTA can use dashboard/task proof of adaptive habit context.. Recommended module: dashboard_light_01. Composition intent: Close with dashboard-led CTA and no automatic-change implication.. Acceptance criteria: English visible copy; One clear product-specific idea; Recommended module directly proves this slide message or screenshot is not used; No invented UI or product behavior; Readable at mobile preview size.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_018_asset_post_018_05_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1dWdK4mofPbQqDAbMKa63DRaImcofhPMo",
+          "drive_url": "https://drive.google.com/file/d/1dWdK4mofPbQqDAbMKa63DRaImcofhPMo/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "dashboard_light_01",
+              "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+              "drive_file_name": "innerbloom_mobile_dashboard_light_01.png",
+              "mode": "light",
+              "module": "dashboard"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "See how adaptive habits work",
+            "supporting_copy": "Rhythm and progress should be interpreted together; recommendations are optional, not automatic.",
+            "narrative_role": "CTA",
+            "composition_intent": "Close with dashboard-led CTA and no automatic-change implication.",
+            "visual_proof_requirement": "CTA can use dashboard/task proof of adaptive habit context.",
+            "claim_to_screenshot_reasoning": "Dashboard/task rhythm can prove progress context; it must not imply Daily Energy determines difficulty.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: Look at the rhythm before asking for more.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -3382,7 +5282,45 @@
             "dashboard_light"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_019 in English for post_019; prove: Use habit/task detail if it shows adjustable habit evidence. Keep UI truthful. Do not produce in this Head of Content step."
+          "production_brief": "Produce asset_post_019 in English for post_019; prove: Use habit/task detail if it shows adjustable habit evidence. Keep UI truthful. Do not produce in this Head of Content step.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_019_asset_post_019_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1U-75XdcSqKQ-oo0jpZIYOU1TQbMujcbk",
+          "drive_url": "https://drive.google.com/file/d/1U-75XdcSqKQ-oo0jpZIYOU1TQbMujcbk/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "tasks_light_01",
+              "drive_file_id": "1UKc1FKisqoAnrWpzKp1lkoaZMwhXMS93",
+              "drive_file_name": "innerbloom_mobile_task_light_01.png",
+              "mode": "light",
+              "module": "tasks"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "The habit that survives is the one that adapts.",
+            "supporting_copy": "Challenge can be recalibrated; progress is sustainable habit construction, not a fixed streak demand.",
+            "narrative_role": null,
+            "composition_intent": "Use habit/task detail if it shows adjustable habit evidence.",
+            "visual_proof_requirement": "Use habit/task detail if it shows adjustable habit evidence.",
+            "claim_to_screenshot_reasoning": "Habit detail supports adjustable habit evidence; it must not imply automatic real-time recalibration.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: The habit that survives is the one that adapts.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -3501,7 +5439,45 @@
             "approved_full_logo"
           ],
           "production_required": true,
-          "production_brief": "Produce asset_post_020 in English for post_020; prove: Use brand-led CTA with approved logo; no product screenshot is necessary for the invitation. Keep UI truthful. Do not produce in this Head of Content step."
+          "production_brief": "Produce asset_post_020 in English for post_020; prove: Use brand-led CTA with approved logo; no product screenshot is necessary for the invitation. Keep UI truthful. Do not produce in this Head of Content step.",
+          "production_status": "produced",
+          "production_version": "v3",
+          "output_file_name": "ib_202607_post_020_asset_post_020_v3.png",
+          "output_mime_type": "image/png",
+          "output_dimensions": {
+            "width": 1080,
+            "height": 1080,
+            "unit": "px"
+          },
+          "destination_folder": {
+            "name": "Innerbloom Marketing/02 Assets/Generated Assets/2026-07/",
+            "drive_folder_id": "1LX0E9G9uGRiQRwxeSUFqpGVD3FIKslzn"
+          },
+          "drive_file_id": "1yneUpqQVpeY2fM5dcK5KpCHwsJYno59s",
+          "drive_url": "https://drive.google.com/file/d/1yneUpqQVpeY2fM5dcK5KpCHwsJYno59s/view?usp=drivesdk",
+          "registered_sources_used": [
+            {
+              "asset_key": "approved_logo_primary_512_png",
+              "drive_file_id": "1g33pJFN6hdyZGUFTe8P9IVhzjBBL-ICc",
+              "drive_file_name": "IB_NEW_LOGO1 512.png",
+              "mode": "transparent",
+              "module": "brand"
+            }
+          ],
+          "production_notes": {
+            "visible_copy": "If this sounds familiar, we want to learn with you.",
+            "supporting_copy": "Early-stage feedback CTA should be transparent and not overclaim product maturity.",
+            "narrative_role": null,
+            "composition_intent": "Use brand-led CTA with approved logo; no product screenshot is necessary for the invitation.",
+            "visual_proof_requirement": "Use brand-led CTA with approved logo; no product screenshot is necessary for the invitation.",
+            "claim_to_screenshot_reasoning": "A logo-led invitation avoids implying a specific product result; screenshots are optional only as secondary context.",
+            "typography": "Sora headings; Manrope supporting text",
+            "logo_policy": "Approved registered logo binaries only; wordmark not recreated",
+            "ui_truth_policy": "Registered real UI source preserved; no UI values, labels, charts, controls, or product meaning changed",
+            "overwrite_policy": "Created as deterministic v3 asset file; no unrelated previous asset overwritten"
+          },
+          "alt_text": "Innerbloom post: If this sounds familiar, we want to learn with you.",
+          "asset_ready_for_review": true
         }
       ],
       "accessibility": {
@@ -5358,7 +7334,7 @@
     "asset_policy": "No images produced; future Asset Producer must use screenshots only when they directly prove the claim.",
     "carousel_message_module_audit": "All carousel slides now use slide-specific messages and recommended modules selected to directly prove that slide or avoid screenshot use.",
     "asset_brief_audit": "Every carousel asset production brief includes narrative role, visible message, visual proof requirement, recommended module, composition intent, and acceptance criteria.",
-    "post_005_fix": "post_005 now uses dashboard/tasks/weekly-progress evidence and the CTA wording “Start with a rhythm that fits your life,” avoiding weekly rhythm reselection implications.",
+    "post_005_fix": "post_005 now uses dashboard/tasks/weekly-progress evidence and the CTA wording \u201cStart with a rhythm that fits your life,\u201d avoiding weekly rhythm reselection implications.",
     "physical_registry_resolution": "validated_zero_unresolved_physical_references",
     "registry_rule": "Only module_or_asset_reference, preferred_asset_keys, acceptable_asset_keys, recommended_asset_key, and source_asset_key were treated as physical references."
   },
