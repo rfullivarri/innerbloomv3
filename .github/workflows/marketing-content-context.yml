@@ -86,6 +86,11 @@ jobs:
           set -euo pipefail
           test -s "marketing/agent-inputs/${PERIOD_KEY}/cmo-context.json"
           test -s "marketing/agent-outputs/${PERIOD_KEY}/cmo-strategy.json"
+          test -s "prompts/marketing/agent-system/brand/innerbloom-product-truth-map-v1.md"
+          test -s "prompts/marketing/agent-system/brand/innerbloom-product-marketing-system-v1.md"
+          test -s "prompts/marketing/agent-system/brand/innerbloom-social-creative-system-v1.md"
+          test -s "prompts/marketing/agent-system/brand/innerbloom-visual-system-v2.md"
+          test -s "prompts/marketing/agent-system/brand/innerbloom-asset-registry-v1.json"
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
@@ -101,7 +106,7 @@ jobs:
           --schema=prompts/marketing/agent-system/schemas/cmo-output-v1.schema.json
           --input="marketing/agent-outputs/${PERIOD_KEY}/cmo-strategy.json"
 
-      - name: Generate Head of Content context
+      - name: Generate Head of Content context v2
         shell: bash
         env:
           PERIOD_KEY: ${{ github.event.inputs.period_key }}
@@ -112,12 +117,12 @@ jobs:
           if [[ "${FORCE_INPUT}" == "true" ]]; then args+=(--force); fi
           npx tsx apps/api/scripts/export-marketing-content-context.ts "${args[@]}"
 
-      - name: Validate Head of Content context
+      - name: Validate Head of Content context v2
         env:
           OUTPUT_PATH: ${{ steps.period.outputs.output_path }}
         run: >-
           npx tsx apps/api/scripts/validate-marketing-agent-json.ts
-          --schema=prompts/marketing/agent-system/schemas/head-of-content-input-v1.schema.json
+          --schema=prompts/marketing/agent-system/schemas/head-of-content-input-v2.schema.json
           --input="${OUTPUT_PATH}"
 
       - name: Commit and push monthly branch
@@ -134,7 +139,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "The validated content context is unchanged."
           else
-            git commit -m "chore(marketing): approve strategy and generate content context for ${PERIOD_KEY}"
+            git commit -m "chore(marketing): approve strategy and generate content context v2 for ${PERIOD_KEY}"
           fi
           git push origin "${CYCLE_BRANCH}"
 
@@ -154,11 +159,12 @@ jobs:
           OUTPUT_PATH: ${{ steps.period.outputs.output_path }}
         run: |
           {
-            echo "## Head of Content context ready"
+            echo "## Head of Content context v2 ready"
             echo "- Period: \`${PERIOD_KEY}\`"
             echo "- Branch: \`${CYCLE_BRANCH}\`"
             echo "- Input: \`${OUTPUT_PATH}\`"
             echo "- CMO strategy approval: confirmed by workflow dispatch"
-            echo "- Validation: passed"
-            echo "- Next step: run the Head of Content agent on the same branch"
+            echo "- Canonical product and asset sources: verified"
+            echo "- Validation: head-of-content-input-v2 passed"
+            echo "- Next step: run the Head of Content v4 agent after its implementation"
           } >> "${GITHUB_STEP_SUMMARY}"
