@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.0",
-  "updated_at": "2026-07-03T11:30:00Z",
+  "schema_version": "1.1",
+  "updated_at": "2026-07-03T16:15:00Z",
   "source_folder": {
     "name": "Innerbloom Marketing/02 Assets",
     "drive_folder_id": "1FplCAOvdgLA9p73fA7-piQH16d0nSuEg"
@@ -8,10 +8,57 @@
   "policy": {
     "manual_update": true,
     "approved_only": true,
-    "head_of_content_usage": "Use asset_key, module, mode, supports_claims, does_not_support_claims, and crop_capabilities. Do not invent semantic keys that are not present.",
-    "asset_producer_usage": "Resolve exact Drive file IDs and filenames from this registry before production. If a requested key is absent, use an approved fallback declared here or stop with a blocker.",
-    "update_rule": "When new source assets are added to Drive, inspect them and append one registry entry per asset before campaign generation or production."
+    "update_rule": "When new source assets are added to Drive, inspect them and append one registry entry per approved asset before campaign generation or production.",
+    "physical_reference_fields": [
+      "module_or_asset_reference",
+      "preferred_asset_keys",
+      "acceptable_asset_keys",
+      "recommended_asset_key",
+      "source_asset_key"
+    ],
+    "descriptive_fields_not_to_resolve_as_assets": [
+      "forbidden_modules",
+      "forbidden_uses",
+      "does_not_support_claims",
+      "visual_proof_goal",
+      "claim_to_screenshot_reasoning",
+      "acceptance_criteria",
+      "production_brief"
+    ],
+    "head_of_content_usage": "Only fields listed in physical_reference_fields must resolve to a registered asset_key or alias. Policy phrases such as 'emotion_chart as progress proof' are descriptive restrictions and must never be treated as missing assets.",
+    "asset_producer_usage": "Resolve physical references through exact registered asset_key or alias, then use the exact Drive file ID and filename. Never infer a binary from a descriptive restriction.",
+    "mode_rule": "A visual mode is a property, not an asset key. A request such as dark or light does not resolve unless paired with a registered physical asset.",
+    "module_rule": "A module name describes product area. It may guide selection but is not sufficient for production unless at least one approved physical asset in that module is registered."
   },
+  "registered_modules": [
+    "brand",
+    "dashboard",
+    "tasks",
+    "task_detail",
+    "daily_quest",
+    "rhythm_selection",
+    "growth_calibration",
+    "achievements",
+    "menu"
+  ],
+  "forbidden_uses": [
+    {
+      "rule_key": "daily_energy_not_auto_calibration",
+      "description": "Do not use Daily Energy as proof of automatic calibration or as the mechanism that changes task difficulty."
+    },
+    {
+      "rule_key": "emotion_chart_not_progress_proof",
+      "description": "Do not use Emotion Chart as proof of task progress, habit progress, or automatic adaptation."
+    },
+    {
+      "rule_key": "streak_only_not_progress_without_perfection",
+      "description": "Do not use streak-only UI as the hero proof for progress without perfection."
+    },
+    {
+      "rule_key": "rhythm_not_weekly_reset",
+      "description": "Do not use Rhythm Selection to imply weekly reset, weekly reselection, or automatic weekly change."
+    }
+  ],
   "assets": [
     {
       "asset_key": "approved_logo_primary_png",
@@ -47,9 +94,9 @@
       "mode": "light",
       "module": "dashboard",
       "asset_type": "full_screen",
-      "aliases": ["dashboard_light", "progress_dashboard_light"],
+      "aliases": ["dashboard_light", "progress_dashboard_light", "daily_energy_light"],
       "supports_claims": ["visible_progress", "weekly_continuity", "body_mind_soul_balance", "daily_energy_overview"],
-      "does_not_support_claims": ["weekly_rhythm_reselection", "emotion_history", "automatic_real_time_adaptation"],
+      "does_not_support_claims": ["weekly_rhythm_reselection", "emotion_history", "automatic_real_time_adaptation", "automatic_difficulty_change"],
       "crop_capabilities": ["daily_energy", "task_summary", "pillar_balance", "weekly_progress"]
     },
     {
@@ -73,7 +120,7 @@
       "mode": "light",
       "module": "tasks",
       "asset_type": "full_screen",
-      "aliases": ["tasks_light", "task_list_light"],
+      "aliases": ["tasks_light", "task_list_light", "habit_detail_light"],
       "supports_claims": ["task_progress", "habit_tracking", "visible_continuity"],
       "does_not_support_claims": ["emotion_history", "rhythm_reselection"],
       "crop_capabilities": ["task_list", "completion_state", "task_progress"]
@@ -235,10 +282,46 @@
       "crop_capabilities": ["navigation_items"]
     }
   ],
-  "unavailable_semantic_keys": {
+  "unavailable_physical_references": {
     "emotion_chart_light": {
       "available": false,
-      "required_action": "Use a registered dark emotion-chart asset once added to this registry, or change the creative concept. Do not fabricate a light version."
+      "required_action": "Change the creative concept or use a separately registered physical emotion-chart asset. Do not fabricate a light version."
+    },
+    "daily_energy_dark": {
+      "available": false,
+      "required_action": "Use dashboard_light_01 when it truthfully proves the claim, or change the visual concept. Do not assume a dark binary exists until it is registered with an exact Drive ID."
+    },
+    "dashboard_dark": {
+      "available": false,
+      "required_action": "Use a registered light dashboard source or a brand-led composition until an exact approved dark binary is registered."
+    },
+    "dquest_dark": {
+      "available": false,
+      "required_action": "Use daily_quest_light_01 or daily_quest_light_02, or change the composition."
+    },
+    "emotion_chart_dark": {
+      "available": false,
+      "required_action": "Do not use until the exact approved Drive binary is registered."
+    },
+    "task_detail_dark": {
+      "available": false,
+      "required_action": "Use task_detail_light_01 or task_detail_light_02."
+    },
+    "tasks_dark": {
+      "available": false,
+      "required_action": "Use tasks_light_01."
+    },
+    "weekly_charts_dark": {
+      "available": false,
+      "required_action": "Use the approved weekly_chart crop capability from dashboard_light_02."
+    },
+    "habit_detail_dark": {
+      "available": false,
+      "required_action": "Use tasks_light_01 or task_detail_light assets where truthful."
+    },
+    "landing_product_composite_dark": {
+      "available": false,
+      "required_action": "Use a brand-led composition built from registered physical sources; do not treat this phrase as an existing screenshot."
     }
   }
 }
