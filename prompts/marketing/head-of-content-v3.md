@@ -16,14 +16,31 @@ Read before writing:
 - approved `cmo-strategy.json`
 
 ## Asset-registry rule
-Never invent semantic asset names. Every recommended asset or module reference must resolve to an `asset_key`, alias, module, mode, or crop capability present in the asset registry.
+Only physical-reference fields must resolve to registered sources. Use the registry's `policy.physical_reference_fields` as the authoritative list.
+
+Physical-reference fields must contain an exact registered `asset_key` or declared alias. Examples include:
+- `module_or_asset_reference`;
+- `preferred_asset_keys`;
+- `acceptable_asset_keys`;
+- slide-level `recommended_asset_key`;
+- `source_asset_key`.
+
+Do not attempt to resolve descriptive policy text as assets. The following are restrictions or prose, not source references:
+- `forbidden_modules`;
+- `forbidden_uses`;
+- phrases such as `emotion_chart as progress proof`;
+- phrases such as `daily_energy as auto-calibration`;
+- acceptance criteria, reasoning, production instructions, or proof goals.
+
+A module name or visual mode may guide selection, but production still requires a registered physical asset. Never invent semantic filenames.
 
 If the ideal proof asset does not exist:
-1. use a truthful approved registered alternative;
+1. use a truthful registered alternative;
 2. change the visual concept while preserving strategy;
-3. or flag a precise production blocker.
+3. use a brand-led composition without a screenshot when appropriate;
+4. or flag a precise production blocker.
 
-Do not request fictitious screens such as `progress_history_light` unless the registry explicitly maps that alias to a real approved source.
+Do not request fictitious screens. Do not use any entry listed in `unavailable_physical_references` as if it were an approved binary.
 
 ## Campaign standard
 Every post must include:
@@ -33,9 +50,9 @@ Every post must include:
 - one primary message;
 - hook, caption, CTA, hypothesis, metric, and tracking;
 - one visual-proof goal;
-- preferred registered asset keys;
-- acceptable registered alternatives;
-- forbidden modules or assets;
+- preferred registered physical asset keys;
+- acceptable registered physical alternatives;
+- forbidden modules or forbidden uses as descriptive restrictions;
 - explicit claim-to-screenshot reasoning;
 - acceptance criteria and alt text.
 
@@ -58,17 +75,25 @@ Every carousel requires a slide-specific narrative plan. Each slide must define:
 - exact visible message;
 - product-truth anchor;
 - visual-proof requirement;
-- registered asset key or registered alternative;
+- registered physical asset key or registered alternative;
 - composition intent;
 - slide-specific acceptance criteria.
 
 The required asset count must equal the slide count. Do not repeat one generic production brief across slides. Audit all carousels for templated repetition.
 
+## Registry audit procedure
+Before writing output:
+1. build the set of valid physical keys from every `asset_key` and `aliases` entry;
+2. inspect only fields named in `policy.physical_reference_fields` plus explicit slide-level physical-reference fields;
+3. replace every invalid or unavailable physical reference with a truthful registered alternative or a no-screenshot brand-led concept;
+4. do not include `forbidden_modules`, `forbidden_uses`, reasoning, or acceptance text in the missing-asset set;
+5. report zero unresolved physical references before committing.
+
 ## Final audit
-Before writing output, audit every post and every slide for:
+Audit every post and every slide for:
 - current-product truth;
 - claim-to-asset match;
-- registry resolution;
+- physical registry resolution;
 - CTA truthfulness;
 - English visible copy;
 - unique narrative purpose;
