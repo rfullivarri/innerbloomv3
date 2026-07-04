@@ -12,8 +12,9 @@ import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
 import { useLongPress } from "../../hooks/useLongPress";
 import { useRequest } from "../../hooks/useRequest";
 import { useThemePreference } from "../../theme/ThemePreferenceProvider";
-import { isNativeCapacitorPlatform } from "../../mobile/capacitor";
+import { isNativeCapacitorPlatform, openUrlInCapacitorBrowser } from "../../mobile/capacitor";
 import {
+  buildNativeMobileAuthUrl,
   clearMobileAuthSession,
   setForceNativeWelcome,
 } from "../../mobile/mobileAuthSession";
@@ -578,20 +579,26 @@ export function DashboardMenu({
   const handleSignOut = useCallback(async () => {
     handleClose();
     if (isNativeCapacitorPlatform()) {
+      await cancelNativeDailyReminderNotification();
       clearMobileAuthSession("manual-sign-out");
       setForceNativeWelcome(true);
       setApiAuthTokenProvider(null);
       try {
-        await signOut();
+        await openUrlInCapacitorBrowser(buildNativeMobileAuthUrl("logout", language));
       } catch (error) {
-        console.warn("[dashboard-menu] Clerk signOut failed during native logout", error);
+        console.warn("[dashboard-menu] native browser logout failed, falling back to local signOut", error);
+        try {
+          await signOut();
+        } catch (signOutError) {
+          console.warn("[dashboard-menu] Clerk signOut failed during native logout fallback", signOutError);
+        }
       }
       navigate("/", { replace: true });
       return;
     }
 
     await signOut({ redirectUrl: "/" });
-  }, [signOut, handleClose, navigate]);
+  }, [signOut, handleClose, language, navigate]);
 
   const deleteAccountKeyword = language === "en" ? "DELETE" : "ELIMINAR";
   const canConfirmAccountDeletion =

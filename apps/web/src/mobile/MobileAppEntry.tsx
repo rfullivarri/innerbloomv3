@@ -60,16 +60,41 @@ function MobileEntryShell({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+2rem)] pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] text-white">
-      <div className="w-full max-w-md rounded-[2rem] bg-[linear-gradient(180deg,rgba(36,59,112,0.96),rgba(20,29,72,0.98))] p-6 shadow-[0_24px_80px_rgba(7,14,40,0.44)] backdrop-blur-2xl">
-        <div className="text-center">
-          <div className="flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.4em] text-white/58">
-            <BrandWordmark className="gap-2" textClassName="tracking-[0.4em]" iconClassName="h-[1.8em]" />
+    <div className="native-welcome-root relative flex min-h-dvh overflow-hidden px-5 pb-[calc(env(safe-area-inset-bottom,0px)+1.4rem)] pt-[calc(env(safe-area-inset-top,0px)+1rem)] text-white">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,13,38,0.12)_0%,rgba(8,13,38,0.52)_54%,rgba(4,8,27,0.9)_100%)]"
+      />
+      <div className="relative z-10 mx-auto flex min-h-full w-full max-w-md flex-col">
+        <div className="shrink-0 pt-[clamp(0.2rem,1.1dvh,0.75rem)] text-center">
+          <div className="flex items-center justify-center text-[clamp(0.78rem,1.9dvh,1rem)] font-semibold uppercase tracking-[0.42em] text-white/66">
+            <BrandWordmark className="gap-3" textClassName="tracking-[0.42em]" iconClassName="h-[3em]" />
           </div>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">{title}</h1>
-          <p className="mt-3 text-sm leading-6 text-white/72">{description}</p>
         </div>
-        {children ? <div className="mt-6">{children}</div> : null}
+
+        <main className="flex min-h-0 flex-1 flex-col justify-center py-[clamp(1.5rem,7dvh,4rem)]">
+          <div className="relative overflow-hidden rounded-[1.65rem] border border-white/10 bg-white/[0.07] px-5 py-6 shadow-[0_26px_70px_rgba(0,0,0,0.28)] backdrop-blur-2xl">
+            <div
+              aria-hidden="true"
+              className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(253,185,155,0.6),rgba(167,112,239,0.7),transparent)]"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute -right-12 -top-16 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(253,185,155,0.18),transparent_64%)]"
+            />
+            <div className="relative">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/15 px-3 py-1 text-[0.64rem] font-semibold uppercase tracking-[0.24em] text-white/58">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#fdb99b] shadow-[0_0_16px_rgba(253,185,155,0.75)]" />
+                Innerbloom 2.0
+              </div>
+              <h1 className="mt-4 text-[clamp(1.85rem,8vw,2.65rem)] font-semibold leading-[0.98] tracking-normal text-white">
+                {title}
+              </h1>
+              <p className="mt-4 max-w-[20rem] text-sm leading-6 text-white/66">{description}</p>
+              {children ? <div className="mt-6">{children}</div> : null}
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );
