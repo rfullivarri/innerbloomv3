@@ -17,3 +17,5 @@ coverage
 apps/mobile/android/keystore.properties
 apps/mobile/android/.idea/
 apps/mobile/ios/build/
+
+marketing/agent-outputs/*/generated-assets/
