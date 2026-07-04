@@ -35,14 +35,26 @@ The agent must save each accepted image to the job's exact `expected_output.loca
 For each job:
 
 - use `generation_prompt` as the main prompt;
-- apply `negative_prompt` as hard exclusions;
+- apply `negative_prompt` as exclusions;
 - preserve `visible_copy` exactly;
 - follow `composition_spec`;
 - respect `product_truth_anchor`;
 - respect `source_assets`;
 - respect `must_show`, `must_preserve`, `must_avoid`, and `acceptance_criteria`;
-- generate an actual local image file;
+- generate an actual local final image file;
 - inspect and regenerate when quality is not acceptable.
+
+Do not use Python/Pillow/SVG/HTML/Canvas composition as a replacement for image generation. If only programmatic composition is available, stop and report the image jobs as blocked.
+
+Do not produce background-only files for later text overlay. Every output must be a complete final campaign image.
+
+## Current brand guardrails
+
+Use Innerbloom v2 direction: premium, product-led, violet/lilac/peach accents, and strong mobile-readable social hierarchy.
+
+Avoid old outlined flower identity, `IB-B-cont-logo.png`, beige/green wellness cards, generic botanical stationery, generic Canva templates, and anything that looks like the old brand.
+
+When logo usage is needed, use the current approved assets referenced by the campaign jobs and registry: `approved_logo_primary_png` / `IB_NEW_LOGO1.png`, or `approved_logo_primary_512_png` / `IB_NEW_LOGO1 512.png`.
 
 ## Source asset policy
 
@@ -83,11 +95,12 @@ The next automation script will attach produced files to campaign records by mat
 Accept an image only if it is:
 
 - readable at Instagram mobile size;
-- visibly on-brand for Innerbloom;
+- visibly on-brand for Innerbloom v2;
 - coherent with the job's visual concept;
 - truthful to the product constraints;
 - free of fake UI, fake metrics, fake testimonials, medical claims, and unsupported outcomes;
 - not a generic quote card or generic SaaS template;
+- not using the old logo or old color direction;
 - not embarrassing as a real campaign asset.
 
 Weak output should be regenerated before moving on.
