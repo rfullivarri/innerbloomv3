@@ -117,6 +117,24 @@ Each caption must be specific to the post's hook, content pillar, funnel stage, 
 
 Before finalizing, compare captions across the full campaign. If more than a small minority share the same sentence structure or reusable explanatory paragraph, rewrite them.
 
+
+## Visible copy fields are final user-facing copy only
+All `visible_copy` and `visible_copy_plan` fields are final social-image text, not production notes. They must contain only polished, user-facing English that could safely appear on the exported Instagram image.
+
+Never put internal creative instructions, proof logic, slide-role explanations, asset-selection notes, or generation notes inside:
+
+- `posts[].visible_copy_plan.headline`
+- `posts[].visible_copy_plan.supporting_text`
+- `posts[].visible_copy_plan.eyebrow`
+- `posts[].visible_copy_plan.microcopy`
+- `posts[].carousel.slides[].visible_copy.headline`
+- `posts[].carousel.slides[].visible_copy.supporting_text`
+- `posts[].carousel.slides[].visible_copy.eyebrow`
+- `posts[].carousel.slides[].visible_copy.microcopy`
+- `image_generation.jobs[].visible_copy`
+
+Invalid visible copy includes phrases such as “show dashboard progress as proof,” “slide 1 changes composition,” “serve the tension opener role,” “registered screenshot only if,” “proof source,” “visual role,” or “generation.” Move those instructions into `visual_strategy`, `visual_proof_requirement`, `composition_spec`, `generation_prompt`, or `acceptance_criteria`.
+
 ## Image-generation contract
 Every required visual asset must have exactly one matching `image_generation.jobs[]` entry.
 
@@ -278,6 +296,7 @@ Before writing the final JSON, verify:
 - all `cta.destination` and `tracking_url` values use `tracking.base_url` unless a canonical override is recorded;
 - every `tracking_url` preserves `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, and `ib_post`;
 - captions are specific and not boilerplate repeated across most posts;
+- all visible copy fields contain only final user-facing image copy, with no internal creative instructions or proof/generation notes;
 - every image prompt has concrete art direction and is directly usable by native GPT Image generation;
 - the first 10 image jobs are varied enough for a quality pilot batch;
 - unavailable physical references are not used;
