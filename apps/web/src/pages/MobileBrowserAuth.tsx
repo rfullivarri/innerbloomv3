@@ -99,11 +99,11 @@ export function buildRedirectUrl(
   return callbackUrl.toString();
 }
 
-function buildModeUrl(language: AuthLanguage, mode: 'sign-in' | 'sign-up', search: string): string {
+export function buildModeUrl(language: AuthLanguage, mode: 'sign-in' | 'sign-up', search: string): string {
   const url = new URL(buildWebAbsoluteUrl(buildLocalizedAuthPath('/mobile-auth', language)));
   const params = new URLSearchParams(search);
   url.searchParams.set('mode', mode);
-  for (const key of ['return_to', 'fresh']) {
+  for (const key of ['return_to', 'fresh', 'experience', 'redirect_path']) {
     const value = params.get(key)?.trim();
     if (value) {
       url.searchParams.set(key, value);
@@ -143,10 +143,10 @@ function MinimalAuthTransitionLayout({
   secondaryActionHref: string;
 }) {
   return (
-    <div className="relative flex min-h-screen min-h-dvh flex-col items-center justify-center overflow-hidden bg-[#0b1335] px-4 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] pt-[calc(env(safe-area-inset-top,0px)+1.15rem)] text-white sm:px-6 sm:pb-[calc(env(safe-area-inset-bottom)+3rem)] sm:pt-[calc(env(safe-area-inset-top,0px)+1.35rem)]">
+    <div className="relative flex min-h-screen min-h-dvh flex-col items-center justify-center overflow-hidden bg-black px-4 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] pt-[calc(env(safe-area-inset-top,0px)+1.15rem)] text-white sm:px-6 sm:pb-[calc(env(safe-area-inset-bottom)+3rem)] sm:pt-[calc(env(safe-area-inset-top,0px)+1.35rem)]">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-100">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(104,69,255,0.28),transparent_34%),radial-gradient(circle_at_78%_18%,rgba(167,139,250,0.18),transparent_22%),linear-gradient(180deg,#10193f_0%,#0b1335_50%,#090f2d_100%)]" />
-        <div className="absolute inset-x-0 top-0 h-44 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,#05070b_0%,#05070b_58%,#07101e_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-44 bg-[linear-gradient(180deg,rgba(255,255,255,0.025),transparent)]" />
       </div>
       <a
         href={secondaryActionHref}
