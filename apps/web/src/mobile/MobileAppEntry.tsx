@@ -148,7 +148,12 @@ function NativeWelcomeCarousel({ language }: { language: 'es' | 'en' }) {
         <span>{activeSlide.badge}</span>
         <h1>{activeSlide.title}</h1>
       </div>
-      <div className="native-welcome-visual-shell landing landing--v3-conversion" data-theme-mode="dark" data-native-step={activeIndex + 1} key={`visual-${activeIndex}`}>
+      <div
+        className={`native-welcome-visual-shell native-welcome-visual-shell--step-${activeIndex + 1} landing landing--v3-conversion`}
+        data-theme-mode="dark"
+        data-native-step={activeIndex + 1}
+        key={`visual-${activeIndex}`}
+      >
         <LandingV3MethodVisual index={activeIndex} language={language} logrosCycleMs={activeIndex === 3 ? 2100 : undefined} nativePreview />
       </div>
       <div className="native-welcome-carousel-controls" aria-label="Carousel progress" role="tablist">

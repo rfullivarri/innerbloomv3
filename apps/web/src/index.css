@@ -1018,41 +1018,49 @@
     }
   }
 
-  /* Logros is a real mobile card carousel, not a scaled desktop preview. */
+  /* Step 4 gets the remaining screen height and does not inherit desktop scaling. */
   .native-welcome-carousel[data-native-step="4"] {
-    --native-welcome-visual-viewport-height: clamp(330px, 44dvh, 390px);
     --native-welcome-visual-scale: 1;
   }
 
-  .native-welcome-carousel[data-native-step="4"] .native-welcome-visual-shell {
-    padding-top: clamp(0.5rem, 1.2dvh, 0.8rem);
+  .native-welcome-visual-shell--step-4 {
+    contain: layout paint;
+    overflow: hidden;
+    padding-top: clamp(0.55rem, 1.3dvh, 0.9rem);
   }
 
-  .native-welcome-carousel[data-native-step="4"] .v3-method-logros {
+  .native-welcome-visual-shell--step-4 .v3-step-visual {
+    --native-welcome-visual-viewport-height: clamp(350px, 46dvh, 430px) !important;
+    --v3-method-visual-viewport-height: clamp(350px, 46dvh, 430px) !important;
+    height: 100%;
     min-height: 0;
   }
 
-  .native-welcome-carousel[data-native-step="4"] .v3-method-logros__scene {
-    --logros-card-w: min(72vw, 280px);
+  .native-welcome-visual-shell--step-4 .v3-method-logros {
+    min-height: 0;
+  }
+
+  .native-welcome-visual-shell--step-4 .v3-method-logros__scene {
+    --logros-card-w: min(72vw, 300px);
     --logros-gap: 14px;
     width: 100%;
-    transform: none;
+    transform: none !important;
     animation: none;
   }
 
-  .native-welcome-carousel[data-native-step="4"] .v3-logros-tabs {
+  .native-welcome-visual-shell--step-4 .v3-logros-tabs {
     width: min(100%, 340px);
     margin-top: 0;
   }
 
-  .native-welcome-carousel[data-native-step="4"] .v3-logros-viewport {
+  .native-welcome-visual-shell--step-4 .v3-logros-viewport {
     width: 100%;
     margin-top: 10px;
-    padding-bottom: 0;
+    padding-block: 4px 0;
   }
 
-  .native-welcome-carousel[data-native-step="4"] :is(.v3-logros-card, .v3-logros-card__inner) {
-    min-height: 300px !important;
+  .native-welcome-visual-shell--step-4 :is(.v3-logros-card, .v3-logros-card__inner) {
+    min-height: clamp(310px, 40dvh, 380px) !important;
   }
 }
 
