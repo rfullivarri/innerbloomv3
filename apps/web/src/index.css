@@ -903,18 +903,7 @@
   }
 
   .native-welcome-carousel[data-native-step="4"] {
-    --native-welcome-visual-viewport-height: clamp(326px, 43dvh, 390px);
-    --native-welcome-visual-scale: 0.9;
     --native-welcome-visual-y: 0px;
-  }
-
-  .native-welcome-carousel[data-native-step="4"] .native-welcome-visual-shell {
-    overflow: visible;
-  }
-
-  .native-welcome-carousel[data-native-step="4"] .v3-method-logros__scene {
-    --logros-card-w: clamp(228px, 62vw, 270px);
-    width: min(100%, 430px);
   }
 
   .native-welcome-carousel-controls {
@@ -1018,49 +1007,109 @@
     }
   }
 
-  /* Step 4 gets the remaining screen height and does not inherit desktop scaling. */
-  .native-welcome-carousel[data-native-step="4"] {
-    --native-welcome-visual-scale: 1;
-  }
-
   .native-welcome-visual-shell--step-4 {
     contain: layout paint;
     overflow: hidden;
-    padding-top: clamp(0.55rem, 1.3dvh, 0.9rem);
   }
 
-  .native-welcome-visual-shell--step-4 .v3-step-visual {
-    --native-welcome-visual-viewport-height: clamp(350px, 46dvh, 430px) !important;
-    --v3-method-visual-viewport-height: clamp(350px, 46dvh, 430px) !important;
+  .native-welcome-logros {
+    display: flex;
     height: 100%;
     min-height: 0;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.4rem, 1.15dvh, 0.72rem);
+    padding: clamp(0.3rem, 0.8dvh, 0.5rem) clamp(0.2rem, 0.7dvw, 0.4rem) 0;
+    animation: native-welcome-rise 420ms var(--motion-ease-enter, ease-out) both;
   }
 
-  .native-welcome-visual-shell--step-4 .v3-method-logros {
+  .native-welcome-logros__tabs {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    border: 1px solid rgba(226, 232, 240, 0.16);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.055);
+    padding: 0.16rem;
+  }
+
+  .native-welcome-logros__tabs span {
+    border-radius: 999px;
+    color: rgba(226, 232, 240, 0.68);
+    font-size: clamp(0.66rem, 1.38dvh, 0.82rem);
+    font-weight: 700;
+    line-height: 1;
+    padding: clamp(0.36rem, 0.8dvh, 0.48rem) clamp(0.54rem, 1.5dvw, 0.8rem);
+  }
+
+  .native-welcome-logros__tabs span.is-active {
+    background: #f8fafc;
+    color: #111827;
+  }
+
+  .native-welcome-logros__card {
+    display: grid;
+    width: 100%;
     min-height: 0;
+    flex: 1 1 0;
+    grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+    align-items: center;
+    gap: clamp(0.45rem, 1.6dvw, 0.82rem);
+    overflow: hidden;
+    border: 1px solid rgba(167, 139, 250, 0.28);
+    border-radius: 1.1rem;
+    background: linear-gradient(135deg, rgba(22, 20, 25, 0.98), rgba(12, 16, 29, 0.98));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+    padding: clamp(0.45rem, 1.1dvh, 0.72rem) clamp(0.55rem, 1.6dvw, 0.9rem);
   }
 
-  .native-welcome-visual-shell--step-4 .v3-method-logros__scene {
-    --logros-card-w: min(72vw, 300px);
-    --logros-gap: 14px;
+  .native-welcome-logros__card img {
+    display: block;
     width: 100%;
-    transform: none !important;
-    animation: none;
+    max-height: 100%;
+    min-height: 0;
+    object-fit: contain;
   }
 
-  .native-welcome-visual-shell--step-4 .v3-logros-tabs {
-    width: min(100%, 340px);
-    margin-top: 0;
+  .native-welcome-logros__details {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(0.22rem, 0.68dvh, 0.4rem);
   }
 
-  .native-welcome-visual-shell--step-4 .v3-logros-viewport {
-    width: 100%;
-    margin-top: 10px;
-    padding-block: 4px 0;
+  .native-welcome-logros__details strong {
+    color: #fff;
+    font-size: clamp(0.88rem, 2dvh, 1.15rem);
+    line-height: 1.08;
   }
 
-  .native-welcome-visual-shell--step-4 :is(.v3-logros-card, .v3-logros-card__inner) {
-    min-height: clamp(310px, 40dvh, 380px) !important;
+  .native-welcome-logros__details p {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin: 0;
+    color: rgba(226, 232, 240, 0.62);
+    font-size: clamp(0.66rem, 1.4dvh, 0.82rem);
+  }
+
+  .native-welcome-logros__details p i {
+    font-style: normal;
+  }
+
+  .native-welcome-logros__details p b,
+  .native-welcome-logros__share {
+    color: #a78bfa;
+    font-weight: 700;
+  }
+
+  .native-welcome-logros__share {
+    margin-top: clamp(0.1rem, 0.5dvh, 0.32rem);
+    font-size: clamp(0.66rem, 1.4dvh, 0.8rem);
   }
 }
 
