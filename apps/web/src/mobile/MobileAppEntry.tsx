@@ -13,7 +13,7 @@ import { useBackendUser } from '../hooks/useBackendUser';
 import { useOnboardingProgress } from '../hooks/useOnboardingProgress';
 import { resolveAuthLanguage } from '../lib/authLanguage';
 import { LandingV3MethodVisual } from '../pages/Landing';
-import { isNativeCapacitorPlatform, openUrlInCapacitorBrowser } from './capacitor';
+import { getCapacitorPlatform, isNativeCapacitorPlatform, openUrlInCapacitorBrowser } from './capacitor';
 import {
   buildNativeMobileAuthUrl,
   setForceNativeWelcome,
@@ -24,20 +24,6 @@ import {
 import type { OnboardingProgress } from '../lib/api';
 
 const NATIVE_WELCOME_SLIDE_MS = 5200;
-const NATIVE_LOGROS_SLIDE_MS = 2100;
-
-type NativeLogro = {
-  name: string;
-  pillar: 'body' | 'mind' | 'soul';
-  src: string;
-  trait: string;
-};
-
-const NATIVE_LOGROS: NativeLogro[] = [
-  { name: '2L de agua', pillar: 'body', src: '/sellos/body/sello_body_hydration.png', trait: 'Hidratacion' },
-  { name: 'Ingles', pillar: 'mind', src: '/sellos/mind/sello_mind_focus.png', trait: 'Focus' },
-  { name: 'Llamar familia', pillar: 'soul', src: '/sellos/soul/soul_connection_transparent.png', trait: 'Conexion' },
-];
 
 type MobileEntryCopy = {
   loadingTitle: string;
@@ -138,47 +124,6 @@ function MobileEntryError({
   );
 }
 
-function NativeWelcomeLogrosVisual({ language }: { language: 'es' | 'en' }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const activeLogro = NATIVE_LOGROS[activeIndex] ?? NATIVE_LOGROS[0];
-  const isSpanish = language === 'es';
-  const pillarLabels = isSpanish
-    ? { body: 'Cuerpo', mind: 'Mente', soul: 'Alma' }
-    : { body: 'Body', mind: 'Mind', soul: 'Soul' };
-
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % NATIVE_LOGROS.length);
-    }, NATIVE_LOGROS_SLIDE_MS);
-
-    return () => window.clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="native-welcome-logros" aria-label={isSpanish ? 'Vista previa de logros' : 'Achievement preview'}>
-      <div className="native-welcome-logros__tabs" aria-hidden="true">
-        {(['body', 'mind', 'soul'] as const).map((pillar) => (
-          <span className={pillar === activeLogro.pillar ? 'is-active' : ''} key={pillar}>
-            {pillarLabels[pillar]}
-          </span>
-        ))}
-      </div>
-      <article className="native-welcome-logros__card" key={activeLogro.name}>
-        <img src={activeLogro.src} alt="" />
-        <div className="native-welcome-logros__details">
-          <strong>{activeLogro.name}</strong>
-          <p>
-            <span>{activeLogro.trait}</span>
-            <i aria-hidden="true">.</i>
-            <b>{isSpanish ? 'Logrado' : 'Achieved'}</b>
-          </p>
-          <span className="native-welcome-logros__share">{isSpanish ? 'Compartir' : 'Share'}</span>
-        </div>
-      </article>
-    </div>
-  );
-}
-
 function NativeWelcomeCarousel({ language }: { language: 'es' | 'en' }) {
   const slides = LANDING_V3_CONTENT[language].how.steps;
   const [activeIndex, setActiveIndex] = useState(0);
@@ -209,11 +154,7 @@ function NativeWelcomeCarousel({ language }: { language: 'es' | 'en' }) {
         data-native-step={activeIndex + 1}
         key={`visual-${activeIndex}`}
       >
-        {activeIndex === 3 ? (
-          <NativeWelcomeLogrosVisual language={language} />
-        ) : (
-          <LandingV3MethodVisual index={activeIndex} language={language} nativePreview />
-        )}
+        <LandingV3MethodVisual index={activeIndex} language={language} logrosCycleMs={activeIndex === 3 ? 2100 : undefined} nativePreview />
       </div>
       <div className="native-welcome-carousel-controls" aria-label="Carousel progress" role="tablist">
         {slides.map((slide, index) => (
@@ -241,6 +182,7 @@ function NativeWelcomeCarousel({ language }: { language: 'es' | 'en' }) {
 
 function MobileWelcome() {
   const language = resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
+  const platform = getCapacitorPlatform();
   const copy = language === 'en'
     ? {
         googleSignIn: 'Log in with Google',
@@ -295,7 +237,7 @@ function MobileWelcome() {
   };
 
   return (
-    <div className={`native-welcome-root ${viewportClassName} relative flex h-dvh max-h-dvh min-h-dvh items-center justify-center overflow-hidden px-3 pb-[max(0.45rem,env(safe-area-inset-bottom,0px))] pt-[calc(env(safe-area-inset-top,0px)+0.35rem)] text-white`}>
+    <div className={`native-welcome-root native-welcome--${platform} ${viewportClassName} relative flex h-dvh max-h-dvh min-h-dvh items-center justify-center overflow-hidden px-3 pb-[max(0.45rem,env(safe-area-inset-bottom,0px))] pt-[calc(env(safe-area-inset-top,0px)+0.35rem)] text-white`}>
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(5,11,47,0.18)_0%,rgba(5,11,47,0.1)_38%,rgba(5,11,47,0.68)_100%)]"
