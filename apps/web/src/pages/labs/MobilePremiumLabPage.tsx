@@ -84,6 +84,10 @@ import {
   normalizeMobilePremiumBasePath,
   useMobilePremiumBasePath,
 } from './mobile-premium/mobilePremiumRouting';
+import { buildNativeMobileAuthUrl, clearMobileAuthSession, setForceNativeWelcome, useMobileAuthSession } from '../../mobile/mobileAuthSession';
+import { cancelNativeDailyReminderNotification } from '../../mobile/localNotifications';
+import { isNativeCapacitorPlatform, openUrlInCapacitorBrowser } from '../../mobile/capacitor';
+import { setApiAuthTokenProvider } from '../../lib/api';
 
 const LAB_BASE = DEFAULT_MOBILE_PREMIUM_BASE;
 const LAB_THEME_STORAGE_KEY = 'innerbloom.mobilePremiumLab.theme';
@@ -495,6 +499,7 @@ function MobilePremiumLabPageInner() {
   const { signOut } = useAuth();
   const clerk = useClerk();
   const runtimeUser = useUser();
+  const mobileAuthSession = useMobileAuthSession();
   const [onboardingPreview] = useState(() => {
     if (typeof window === 'undefined') return false;
     return new URLSearchParams(window.location.search).get('onboardingPreview') === '1'
@@ -525,6 +530,28 @@ function MobilePremiumLabPageInner() {
   const [localRhythmSuggestion, setLocalRhythmSuggestion] = useState<GameModeUpgradeSuggestion>(LAB_FALLBACK_UPGRADE_SUGGESTION);
   const [rhythmSuggestionSubmitting, setRhythmSuggestionSubmitting] = useState(false);
   const [localGameModeOverride, setLocalGameModeOverride] = useState<string | null>(null);
+
+  const handleNativeSignOut = useCallback(async () => {
+    if (!isNativeCapacitorPlatform()) {
+      await signOut({ redirectUrl: '/login2' });
+      return;
+    }
+
+    await cancelNativeDailyReminderNotification();
+    clearMobileAuthSession('manual-sign-out');
+    setForceNativeWelcome(true);
+    setApiAuthTokenProvider(null);
+    try {
+      await openUrlInCapacitorBrowser(buildNativeMobileAuthUrl('logout'));
+    } catch (error) {
+      console.warn('[mobile-premium] browser logout failed; keeping local signed-out state', error);
+      window.location.replace('/');
+    }
+  }, [signOut]);
+
+  const handleOpenAccountSettings = useCallback(() => {
+    clerk.openUserProfile();
+  }, [clerk]);
   const moderationRequest = useRequest(() => getModerationState(), [effectiveBackendUserId], {
     enabled: Boolean(effectiveBackendUserId),
   });
@@ -1071,10 +1098,8 @@ function MobilePremiumLabPageInner() {
         onClose={handleCloseActiveOverlay}
         onGoDashboard={goToDashboard}
         onOpen={(overlay) => setActiveOverlay(overlay)}
-        onOpenUserProfile={() => clerk.openUserProfile()}
-        onSignOut={() => {
-          void signOut({ redirectUrl: '/login2' });
-        }}
+        onOpenUserProfile={handleOpenAccountSettings}
+        onSignOut={() => { void handleNativeSignOut(); }}
         onReminderSaved={async () => {
           if (effectiveBackendUserId) {
             await onboardingProgressRequest.reload();
@@ -1091,7 +1116,7 @@ function MobilePremiumLabPageInner() {
         rhythmSuggestionSubmitting={rhythmSuggestionSubmitting}
         theme={theme}
         userEmail={userEmail}
-        userImageUrl={runtimeUser.user?.imageUrl ?? null}
+        userImageUrl={runtimeUser.user?.imageUrl ?? mobileAuthSession?.clerkImageUrl ?? null}
         userName={userName}
       />
       {weeklyWrapped.isModalOpen && weeklyWrapped.activeRecord && !activeOverlay ? (

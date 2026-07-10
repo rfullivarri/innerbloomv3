@@ -2,6 +2,7 @@ import type { DailyReminderSettingsResponse } from '../lib/api';
 import { resolvePostLoginTranslation } from '../i18n/post-login';
 import { type PostLoginLanguage, POSTLOGIN_LANGUAGE_STORAGE_KEY, detectDeviceLanguage } from '../i18n/postLoginLanguage';
 import { AUTH_LANGUAGE_STORAGE_KEY } from '../lib/authLanguage';
+import { INNERBLOOM2_DAILY_QUEST_PATH } from '../config/auth';
 import { getCapacitorLocalNotificationsPlugin, isNativeCapacitorPlatform } from './capacitor';
 import { writeMobileDebug } from './mobileDebug';
 
@@ -9,7 +10,7 @@ const DAILY_REMINDER_NOTIFICATION_CHANNEL_ID = 'daily-quest-reminders';
 
 export const DAILY_REMINDER_NOTIFICATION_ID = 41001;
 export const DAILY_REMINDER_TEST_NOTIFICATION_ID = 41999;
-export const DAILY_REMINDER_NOTIFICATION_TARGET_PATH = '/dashboard-v3?dailyQuest=1';
+export const DAILY_REMINDER_NOTIFICATION_TARGET_PATH = INNERBLOOM2_DAILY_QUEST_PATH;
 
 type DailyReminderNotificationPermissionResult = {
   granted: boolean;

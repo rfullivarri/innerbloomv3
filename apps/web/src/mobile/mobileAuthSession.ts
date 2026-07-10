@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
+import { INNERBLOOM2_DASHBOARD_PATH, INNERBLOOM2_INTRO_JOURNEY_PATH } from '../config/auth';
 import { buildWebAbsoluteUrl } from '../lib/siteUrl';
 import {
   buildNativeAppUrl,
@@ -19,6 +20,7 @@ export type MobileAuthSession = {
   token: string;
   clerkUserId: string | null;
   email: string | null;
+  clerkImageUrl: string | null;
   authMode: MobileAuthMode | null;
   expiresAt: number | null;
   updatedAt: number;
@@ -231,6 +233,7 @@ function normalizeSession(session: Partial<MobileAuthSession> & { token: string 
     token: session.token,
     clerkUserId: typeof session.clerkUserId === 'string' ? session.clerkUserId : null,
     email: typeof session.email === 'string' ? session.email : null,
+    clerkImageUrl: typeof session.clerkImageUrl === 'string' ? session.clerkImageUrl : null,
     authMode: normalizeAuthMode(session.authMode),
     expiresAt: typeof session.expiresAt === 'number' ? session.expiresAt : decodeJwtExp(session.token),
     updatedAt: typeof session.updatedAt === 'number' ? session.updatedAt : Date.now(),
@@ -266,6 +269,11 @@ export function buildNativeMobileAuthUrl(
       : resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
   const mobileAuthUrl = new URL(buildWebAbsoluteUrl(buildLocalizedAuthPath('/mobile-auth', resolvedLanguage)));
   mobileAuthUrl.searchParams.set('mode', mode);
+  mobileAuthUrl.searchParams.set('experience', 'innerbloom2');
+  mobileAuthUrl.searchParams.set(
+    'redirect_path',
+    mode === 'sign-up' ? INNERBLOOM2_INTRO_JOURNEY_PATH : INNERBLOOM2_DASHBOARD_PATH,
+  );
   mobileAuthUrl.searchParams.set(
     'return_to',
     buildNativeAppUrl(mode === 'logout' ? CAPACITOR_SIGNED_OUT_HOST : CAPACITOR_CALLBACK_HOST),
@@ -528,6 +536,7 @@ export function resolveMobileAuthSessionFromCallback(url: string): MobileAuthCal
       token,
       clerkUserId: parsed?.params.get('user_id')?.trim() || null,
       email: parsed?.params.get('email')?.trim() || null,
+      clerkImageUrl: parsed?.params.get('clerk_image_url')?.trim() || null,
       authMode: normalizeAuthMode(parsed?.params.get('auth_mode')?.trim()),
       expiresAt: decodeJwtExp(token),
       updatedAt: Date.now(),

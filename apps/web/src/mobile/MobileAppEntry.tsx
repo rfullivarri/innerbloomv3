@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { useAuth } from '../auth/runtimeAuth';
-import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
+import {
+  DASHBOARD_PATH,
+  DEFAULT_DASHBOARD_PATH,
+  INNERBLOOM2_DASHBOARD_PATH,
+  INNERBLOOM2_INTRO_JOURNEY_PATH,
+} from '../config/auth';
 import { LANDING_V3_CONTENT } from '../content/landingV3Content';
 import { useBackendUser } from '../hooks/useBackendUser';
 import { useOnboardingProgress } from '../hooks/useOnboardingProgress';
@@ -22,7 +27,6 @@ const NATIVE_WELCOME_SLIDE_MS = 5200;
 
 type MobileEntryCopy = {
   loadingTitle: string;
-  loadingDescription: string;
   errorTitle: string;
   errorDescription: string;
   retry: string;
@@ -31,14 +35,12 @@ type MobileEntryCopy = {
 const MOBILE_ENTRY_COPY: Record<'es' | 'en', MobileEntryCopy> = {
   es: {
     loadingTitle: 'Cargando tu perfil',
-    loadingDescription: 'Estamos comprobando tu estado de cuenta antes de enviarte a la experiencia correcta.',
     errorTitle: 'No pudimos cargar tu perfil',
     errorDescription: 'La sesión existe, pero no pudimos conectarnos. Vuelve a intentar.',
     retry: 'Reintentar',
   },
   en: {
     loadingTitle: 'Loading your profile',
-    loadingDescription: 'We are checking your account status before sending you to the right experience.',
     errorTitle: 'We could not load your profile',
     errorDescription: 'The session exists, but we could not connect. Try again.',
     retry: 'Retry',
@@ -51,20 +53,31 @@ function MobileEntryShell({
   children,
 }: {
   title: string;
-  description: string;
+  description?: string;
   children?: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+2rem)] pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] text-white">
-      <div className="w-full max-w-md rounded-[2rem] bg-[linear-gradient(180deg,rgba(36,59,112,0.96),rgba(20,29,72,0.98))] p-6 shadow-[0_24px_80px_rgba(7,14,40,0.44)] backdrop-blur-2xl">
-        <div className="text-center">
-          <div className="flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.4em] text-white/58">
-            <BrandWordmark className="gap-2" textClassName="tracking-[0.4em]" iconClassName="h-[1.8em]" />
+    <div className="native-welcome-loading-root relative flex min-h-dvh overflow-hidden bg-black px-5 pb-[calc(env(safe-area-inset-bottom,0px)+1.4rem)] pt-[calc(env(safe-area-inset-top,0px)+1rem)] text-white">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(124,58,237,0.14),transparent_34%),linear-gradient(180deg,#000_0%,#030409_100%)]"
+      />
+      <div className="relative z-10 mx-auto flex min-h-full w-full max-w-md flex-col">
+        <div className="shrink-0 pt-[clamp(0.2rem,1.1dvh,0.75rem)] text-center">
+          <div className="flex items-center justify-center text-[clamp(0.78rem,1.9dvh,1rem)] font-semibold uppercase tracking-[0.42em] text-white/72">
+            <BrandWordmark className="gap-3" textClassName="tracking-[0.42em]" iconClassName="h-[3em]" />
           </div>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">{title}</h1>
-          <p className="mt-3 text-sm leading-6 text-white/72">{description}</p>
         </div>
-        {children ? <div className="mt-6">{children}</div> : null}
+
+        <main className="flex min-h-0 flex-1 flex-col items-center justify-center py-[clamp(1.5rem,7dvh,4rem)] text-center">
+          <div className="w-full space-y-5">
+              <h1 className="text-[clamp(2rem,8vw,2.75rem)] font-semibold leading-[0.98] tracking-normal text-white">
+                {title}
+              </h1>
+              {description ? <p className="mx-auto max-w-[20rem] text-sm leading-6 text-white/62">{description}</p> : null}
+              {children ? <div className="mt-6">{children}</div> : null}
+          </div>
+        </main>
       </div>
     </div>
   );
@@ -75,13 +88,13 @@ function MobileEntryLoading({
   description,
 }: {
   title: string;
-  description: string;
+  description?: string;
 }) {
   return (
     <MobileEntryShell title={title} description={description}>
       <div
         aria-hidden="true"
-        className="mx-auto h-5 w-5 animate-spin rounded-full border-2 border-white/18 border-t-white/80"
+        className="mx-auto h-9 w-9 animate-spin rounded-full border-[3px] border-white/16 border-t-white/85"
       />
     </MobileEntryShell>
   );
@@ -137,26 +150,26 @@ function NativeWelcomeCarousel({ language }: { language: 'es' | 'en' }) {
       </div>
       <div className="native-welcome-visual-shell landing landing--v3-conversion" data-theme-mode="dark" data-native-step={activeIndex + 1} key={`visual-${activeIndex}`}>
         <LandingV3MethodVisual index={activeIndex} language={language} logrosCycleMs={activeIndex === 3 ? 2100 : undefined} nativePreview />
-        <div className="native-welcome-carousel-controls" aria-label="Carousel progress" role="tablist">
-          {slides.map((slide, index) => (
-            <button
-              type="button"
-              className={index === activeIndex ? 'is-active' : ''}
-              key={slide.badge}
-              aria-label={`${index + 1} / ${slides.length}`}
-              aria-selected={index === activeIndex}
-              role="tab"
-              onClick={() => handleDotSelect(index)}
-            >
-              {index === activeIndex ? (
-                <i
-                  style={{ animationDuration: `${NATIVE_WELCOME_SLIDE_MS}ms` }}
-                  key={`progress-${activeIndex}`}
-                />
-              ) : null}
-            </button>
-          ))}
-        </div>
+      </div>
+      <div className="native-welcome-carousel-controls" aria-label="Carousel progress" role="tablist">
+        {slides.map((slide, index) => (
+          <button
+            type="button"
+            className={index === activeIndex ? 'is-active' : ''}
+            key={slide.badge}
+            aria-label={`${index + 1} / ${slides.length}`}
+            aria-selected={index === activeIndex}
+            role="tab"
+            onClick={() => handleDotSelect(index)}
+          >
+            {index === activeIndex ? (
+              <i
+                style={{ animationDuration: `${NATIVE_WELCOME_SLIDE_MS}ms` }}
+                key={`progress-${activeIndex}`}
+              />
+            ) : null}
+          </button>
+        ))}
       </div>
     </section>
   );
@@ -218,7 +231,7 @@ function MobileWelcome() {
   };
 
   return (
-    <div className={`native-welcome-root ${viewportClassName} relative flex h-dvh max-h-dvh min-h-dvh items-center justify-center overflow-hidden px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.7rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] text-white`}>
+    <div className={`native-welcome-root ${viewportClassName} relative flex h-dvh max-h-dvh min-h-dvh items-center justify-center overflow-hidden px-3 pb-[max(0.45rem,env(safe-area-inset-bottom,0px))] pt-[calc(env(safe-area-inset-top,0px)+0.35rem)] text-white`}>
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(5,11,47,0.18)_0%,rgba(5,11,47,0.1)_38%,rgba(5,11,47,0.68)_100%)]"
@@ -226,7 +239,7 @@ function MobileWelcome() {
       <div className="native-welcome-frame relative z-10 flex h-full w-full max-w-md flex-col">
         <div className="shrink-0 pt-[clamp(0.25rem,1.1dvh,0.75rem)] text-center">
           <div className="flex items-center justify-center text-[clamp(0.82rem,2.1dvh,1.06rem)] font-semibold uppercase tracking-[0.42em] text-white/66">
-            <BrandWordmark className="gap-3.5" textClassName="tracking-[0.42em]" iconClassName="h-[3.2em]" />
+            <BrandWordmark className="gap-3" textClassName="tracking-[0.42em]" iconClassName="h-[2.8em]" />
           </div>
         </div>
 
@@ -234,7 +247,7 @@ function MobileWelcome() {
           <div className="native-welcome-main flex min-h-0 flex-1 flex-col">
             <NativeWelcomeCarousel language={language} />
 
-            <div className="native-welcome-actions mt-auto space-y-[clamp(0.5rem,1.35dvh,0.7rem)] px-2 pt-[clamp(0.8rem,2.5dvh,1.45rem)]">
+            <div className="native-welcome-actions mt-auto space-y-[clamp(0.48rem,1.1dvh,0.62rem)] px-2 pt-[clamp(0.48rem,1.35dvh,0.78rem)]">
               <button
                 type="button"
                 onClick={() => void openNativeAuth('sign-up')}
@@ -304,10 +317,10 @@ function resolveNativeEntryRoute({
   }
 
   if (authMode === 'sign-up') {
-    return isOnboardingComplete ? dashboardPath : '/intro-journey';
+    return isOnboardingComplete ? dashboardPath : INNERBLOOM2_INTRO_JOURNEY_PATH;
   }
 
-  return isOnboardingComplete ? dashboardPath : '/intro-journey';
+  return isOnboardingComplete ? dashboardPath : INNERBLOOM2_INTRO_JOURNEY_PATH;
 }
 
 export function MobileAppEntry() {
@@ -322,7 +335,7 @@ export function MobileAppEntry() {
   const hasEffectiveSession = isSignedIn || hasNativeCallbackSession;
   const shouldLoadOnboarding = hasEffectiveSession && backendUser.status === 'success';
   const onboarding = useOnboardingProgress({ enabled: shouldLoadOnboarding });
-  const dashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
+  const dashboardPath = isNativeApp ? INNERBLOOM2_DASHBOARD_PATH : (DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH);
   const nativeAuthMode = isNativeApp ? mobileAuthSession?.authMode ?? null : null;
   const onboardingSignals = {
     state: onboarding.progress?.state ?? null,
@@ -386,7 +399,6 @@ export function MobileAppEntry() {
     return (
       <MobileEntryLoading
         title={entryCopy.loadingTitle}
-        description={entryCopy.loadingDescription}
       />
     );
   }
@@ -410,7 +422,6 @@ export function MobileAppEntry() {
     return (
       <MobileEntryLoading
         title={entryCopy.loadingTitle}
-        description={entryCopy.loadingDescription}
       />
     );
   }
@@ -432,14 +443,13 @@ export function MobileAppEntry() {
     return (
       <MobileEntryLoading
         title={entryCopy.loadingTitle}
-        description={entryCopy.loadingDescription}
       />
     );
   }
 
   if (!isOnboardingComplete) {
-    if (finalRoute === '/intro-journey') {
-      return <Navigate to="/intro-journey" replace />;
+    if (finalRoute === INNERBLOOM2_INTRO_JOURNEY_PATH) {
+      return <Navigate to={INNERBLOOM2_INTRO_JOURNEY_PATH} replace />;
     }
   }
 

@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
+import {
+  INNERBLOOM2_DASHBOARD_PATH,
+  INNERBLOOM2_INTRO_JOURNEY_PATH,
+} from '../config/auth';
 import {
   CAPACITOR_KEYBOARD_RESIZE_NATIVE,
   CAPACITOR_KEYBOARD_STYLE_DARK,
@@ -144,14 +147,14 @@ function resolveCallbackTargetPath(
   authMode: string | null | undefined,
   currentPath: string,
 ): string {
-  const dashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
+  const dashboardPath = INNERBLOOM2_DASHBOARD_PATH;
 
   if (authMode === 'sign-in') {
     return consumePendingNotificationTargetPath() ?? dashboardPath;
   }
 
   if (authMode === 'sign-up') {
-    return '/intro-journey';
+    return INNERBLOOM2_INTRO_JOURNEY_PATH;
   }
 
   if (authMode === 'refresh') {

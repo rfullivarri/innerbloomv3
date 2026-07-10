@@ -99,11 +99,11 @@ export function buildRedirectUrl(
   return callbackUrl.toString();
 }
 
-function buildModeUrl(language: AuthLanguage, mode: 'sign-in' | 'sign-up', search: string): string {
+export function buildModeUrl(language: AuthLanguage, mode: 'sign-in' | 'sign-up', search: string): string {
   const url = new URL(buildWebAbsoluteUrl(buildLocalizedAuthPath('/mobile-auth', language)));
   const params = new URLSearchParams(search);
   url.searchParams.set('mode', mode);
-  for (const key of ['return_to', 'fresh']) {
+  for (const key of ['return_to', 'fresh', 'experience', 'redirect_path']) {
     const value = params.get(key)?.trim();
     if (value) {
       url.searchParams.set(key, value);
@@ -143,8 +143,11 @@ function MinimalAuthTransitionLayout({
   secondaryActionHref: string;
 }) {
   return (
-    <div className="relative flex min-h-screen min-h-dvh flex-col items-center justify-center overflow-hidden bg-[#05070b] px-4 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] pt-[calc(env(safe-area-inset-top,0px)+1.15rem)] text-white sm:px-6 sm:pb-[calc(env(safe-area-inset-bottom)+3rem)] sm:pt-[calc(env(safe-area-inset-top,0px)+1.35rem)]">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#05070b_0%,#05070b_68%,#07101e_100%)]" />
+    <div className="relative flex min-h-screen min-h-dvh flex-col items-center justify-center overflow-hidden bg-black px-4 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] pt-[calc(env(safe-area-inset-top,0px)+1.15rem)] text-white sm:px-6 sm:pb-[calc(env(safe-area-inset-bottom)+3rem)] sm:pt-[calc(env(safe-area-inset-top,0px)+1.35rem)]">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-100">
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,#05070b_0%,#05070b_58%,#07101e_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-44 bg-[linear-gradient(180deg,rgba(255,255,255,0.025),transparent)]" />
+      </div>
       <a
         href={secondaryActionHref}
         className="absolute left-4 top-[calc(env(safe-area-inset-top,0px)+0.45rem)] z-20 inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.055] px-3 py-2 text-sm font-semibold text-white/68 shadow-[0_12px_28px_rgba(0,0,0,0.16)] backdrop-blur transition-colors duration-200 hover:border-white/18 hover:bg-white/[0.08] hover:text-white sm:left-6 lg:left-8"

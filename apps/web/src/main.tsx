@@ -53,7 +53,9 @@ function LocalizedClerkProvider({ children }: { children: React.ReactNode }) {
   const authLanguage = resolveAuthLanguage(location.search);
   const clerkLocalization = getClerkLocalization(authLanguage);
   const isMobileBridgeRoute = location.pathname === '/mobile-auth';
-  const clerkEnabled = true;
+  // Clerk cannot initialize against Capacitor's custom WebView origin. Native
+  // authentication is supplied by the callback token instead.
+  const clerkEnabled = !isNativeApp;
   const mobileBridgeSearch = new URLSearchParams(location.search);
   const mobileBridgeMode = mobileBridgeSearch.get('mode') === 'sign-up' ? 'sign-up' : 'sign-in';
   const mobileBridgeReturnTo = mobileBridgeSearch.get('return_to');
