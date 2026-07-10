@@ -1,0 +1,22 @@
+/* Kept as a final native layer so the iOS shell is visually stable across bundles. */
+body[data-mobile-auth='true'] #root > div.relative.flex.min-h-screen {
+  background: #05070b !important;
+}
+
+body[data-mobile-auth='true'] #root > div.relative.flex.min-h-screen > div.pointer-events-none.absolute.inset-0 > div:first-child {
+  background: linear-gradient(180deg, #05070b 0%, #05070b 58%, #07101e 100%) !important;
+}
+
+body[data-mobile-auth='true'] #root > div.relative.flex.min-h-screen > div.pointer-events-none.absolute.inset-0 > div:last-child {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent) !important;
+}
+
+/* Keep the landing Logros animation at its natural scale in the iOS shell. */
+.native-welcome-root.native-welcome--ios .native-welcome-carousel[data-native-step='4'] {
+  --native-welcome-visual-scale: 1;
+  --native-welcome-visual-y: 0px;
+}
+
+.native-welcome-root.native-welcome--ios .native-welcome-visual-shell--step-4 .v3-logros-shelf-title {
+  display: block;
+}

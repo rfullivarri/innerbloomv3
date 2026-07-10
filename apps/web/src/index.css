@@ -1013,6 +1013,10 @@
   }
 
   /* iOS only: preserve the shared Logros animation while fitting it to the native viewport. */
+  .native-welcome-root.native-welcome--ios .native-welcome-carousel[data-native-step="4"] {
+    --native-welcome-visual-scale: 1;
+  }
+
   .native-welcome-root.native-welcome--ios .native-welcome-visual-shell--step-4 .v3-step-visual,
   .native-welcome-root.native-welcome--ios .native-welcome-visual-shell--step-4 .v3-method-logros {
     display: flex;
@@ -1032,7 +1036,7 @@
   }
 
   .native-welcome-root.native-welcome--ios .native-welcome-visual-shell--step-4 .v3-logros-shelf-title {
-    display: none;
+    display: block;
   }
 
   .native-welcome-root.native-welcome--ios .native-welcome-visual-shell--step-4 .v3-logros-tabs {
