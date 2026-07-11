@@ -24,27 +24,33 @@
     return /rutina rígida|sistema adaptativo|vuelves/i.test(text) ? 'es' : 'en';
   }
 
-  function ensureArrowMarker(svg) {
-    const defs = svg.querySelector('defs');
-    if (!defs || defs.querySelector('#ib-premium-arrow')) return;
-    const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
-    marker.setAttribute('id', 'ib-premium-arrow');
-    marker.setAttribute('viewBox', '0 0 12 12');
-    marker.setAttribute('refX', '9.5');
-    marker.setAttribute('refY', '6');
-    marker.setAttribute('markerWidth', '9');
-    marker.setAttribute('markerHeight', '9');
-    marker.setAttribute('orient', 'auto');
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'M2 2 L10 6 L2 10 Z');
-    path.setAttribute('fill', '#38f0a5');
-    marker.appendChild(path);
-    defs.appendChild(marker);
+  function ensurePremiumArrowhead(svg) {
+    if (svg.querySelector('.ib-premium-arrowhead')) return;
+
+    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    arrow.setAttribute('class', 'ib-premium-arrowhead');
+    arrow.setAttribute('transform', 'translate(800 302) rotate(-34)');
+    arrow.setAttribute('aria-hidden', 'true');
+
+    const glow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    glow.setAttribute('class', 'ib-premium-arrowhead__glow');
+    glow.setAttribute('d', 'M-18 0 H6');
+
+    const head = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    head.setAttribute('class', 'ib-premium-arrowhead__shape');
+    head.setAttribute('d', 'M-2 -8 L13 0 L-2 8 Z');
+
+    arrow.appendChild(glow);
+    arrow.appendChild(head);
+    svg.appendChild(arrow);
   }
 
   function reshapeCurves(svg) {
     const paths = Array.from(svg.querySelectorAll('path[d]'));
     paths.forEach((path) => {
+      path.removeAttribute('marker-end');
+      path.removeAttribute('markerEnd');
+
       const d = path.getAttribute('d') || '';
       if (d.includes('M90 120 H260') && d.includes('C575 210 580 176 650 176')) {
         path.setAttribute('d', d
@@ -56,12 +62,6 @@
       }
       if (d === 'M650 176 C710 178 742 230 800 260') {
         path.setAttribute('d', 'M650 192 C710 194 748 228 800 260');
-      }
-      if (d.includes('M90 350 H260') && d.includes('C742 350 772 328 800 302')) {
-        path.setAttribute('marker-end', 'url(#ib-premium-arrow)');
-      }
-      if (d === 'M650 378 C675 374 690 366 710 360 C742 350 772 328 800 302') {
-        path.setAttribute('marker-end', 'url(#ib-premium-arrow)');
       }
     });
 
@@ -111,9 +111,9 @@
       const root = host.firstElementChild;
       const svg = host.querySelector('svg');
       if (!root || !svg) return;
-      ensureArrowMarker(svg);
       reshapeCurves(svg);
       hideLegacyCallouts(svg);
+      ensurePremiumArrowhead(svg);
       createProcess(root, getLanguage(root));
       root.classList.add('ib-problem-premium-ready');
     });
