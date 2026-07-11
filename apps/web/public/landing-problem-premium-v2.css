@@ -1,0 +1,194 @@
+/* Premium refinement layered over the open problem graphic. */
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-premium-hidden-callout {
+  display: none !important;
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-phase] {
+  overflow: visible;
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic svg {
+  overflow: visible !important;
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic svg path[marker-end="url(#ib-premium-arrow)"] {
+  filter: drop-shadow(0 0 10px rgba(56, 240, 165, 0.34));
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr) 72px minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(12px, 1.5vw, 20px);
+  width: min(92%, 720px);
+  margin: -14px auto 0;
+  padding: clamp(18px, 2vw, 24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(139, 92, 246, 0.11), transparent 44%),
+    radial-gradient(circle at 82% 0%, rgba(56, 240, 165, 0.08), transparent 42%),
+    linear-gradient(180deg, rgba(15, 16, 27, 0.74), rgba(8, 9, 16, 0.62));
+  box-shadow:
+    0 18px 54px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__step {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  min-width: 0;
+  text-align: center;
+  opacity: 0.34;
+  transform: translateY(8px);
+  transition:
+    opacity 420ms ease,
+    transform 520ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 420ms ease;
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(176, 132, 255, 0.26);
+  border-radius: 999px;
+  background: rgba(139, 92, 246, 0.08);
+  color: #c69cff;
+  font-size: 1.45rem;
+  line-height: 1;
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.08);
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__step strong {
+  color: rgba(208, 174, 255, 0.96);
+  font-size: clamp(0.78rem, 0.9vw, 0.94rem);
+  font-weight: 860;
+  letter-spacing: 0.11em;
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__step p {
+  max-width: 18ch;
+  margin: 0;
+  color: rgba(226, 229, 246, 0.66) !important;
+  font-size: clamp(0.72rem, 0.78vw, 0.84rem);
+  line-height: 1.4;
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__step--recalibrate .ib-problem-process__icon,
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__step--recalibrate strong {
+  color: #83bfff;
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__step--recalibrate .ib-problem-process__icon {
+  border-color: rgba(95, 167, 255, 0.26);
+  background: rgba(95, 167, 255, 0.08);
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__step--propel .ib-problem-process__icon,
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__step--propel strong {
+  color: #45e7b1;
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__step--propel .ib-problem-process__icon {
+  border-color: rgba(56, 240, 165, 0.28);
+  background: rgba(56, 240, 165, 0.08);
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__connector {
+  position: relative;
+  height: 1px;
+  overflow: visible;
+  background: linear-gradient(90deg, rgba(167, 139, 250, 0.08), rgba(167, 139, 250, 0.62));
+  transform: scaleX(0.32);
+  transform-origin: left center;
+  opacity: 0.24;
+  transition: transform 560ms ease, opacity 420ms ease;
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__connector::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -1px;
+  width: 7px;
+  height: 7px;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  color: rgba(167, 139, 250, 0.72);
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__connector--green {
+  background: linear-gradient(90deg, rgba(95, 167, 255, 0.08), rgba(56, 240, 165, 0.62));
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__connector--green::after {
+  color: rgba(56, 240, 165, 0.72);
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-phase="intervention"] .ib-problem-process__step--analyze,
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-phase="recovery"] .ib-problem-process__step--analyze,
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-phase="outcome"] .ib-problem-process__step--analyze,
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-reduced-motion="true"] .ib-problem-process__step {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-phase="recovery"] .ib-problem-process__step--recalibrate,
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-phase="outcome"] .ib-problem-process__step--recalibrate,
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-phase="outcome"] .ib-problem-process__step--propel {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-phase="recovery"] .ib-problem-process__connector:first-of-type,
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-phase="outcome"] .ib-problem-process__connector,
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-reduced-motion="true"] .ib-problem-process__connector {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+@media (max-width: 900px) {
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process {
+    grid-template-columns: 1fr;
+    width: min(100%, 520px);
+    margin-top: 8px;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__connector {
+    width: 1px;
+    height: 30px;
+    margin: 0 auto;
+    background: linear-gradient(180deg, rgba(167, 139, 250, 0.12), rgba(167, 139, 250, 0.54));
+    transform: scaleY(0.32);
+    transform-origin: top center;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__connector::after {
+    top: auto;
+    right: auto;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%) rotate(135deg);
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-phase="recovery"] .ib-problem-process__connector:first-of-type,
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-phase="outcome"] .ib-problem-process__connector,
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-reduced-motion="true"] .ib-problem-process__connector {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process *,
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process *::before,
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
