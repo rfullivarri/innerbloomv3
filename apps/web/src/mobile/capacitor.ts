@@ -1,3 +1,5 @@
+import { registerPlugin } from '@capacitor/core';
+
 type CapacitorPluginListenerHandle = {
   remove: () => Promise<void> | void;
 };
@@ -102,6 +104,8 @@ type CapacitorGlobal = {
   Plugins?: Record<string, unknown>;
 };
 
+const innerbloomAuthBrowserPlugin = registerPlugin<InnerbloomAuthBrowserPlugin>('InnerbloomAuthBrowser');
+
 export const CAPACITOR_APP_SCHEME = 'innerbloom';
 export const CAPACITOR_APP_HOST = 'localhost';
 export const CAPACITOR_CALLBACK_HOST = 'callback';
@@ -154,7 +158,11 @@ export function getCapacitorBrowserPlugin(): CapacitorBrowserPlugin | null {
 }
 
 export function getInnerbloomAuthBrowserPlugin(): InnerbloomAuthBrowserPlugin | null {
-  return getCapacitorPlugin<InnerbloomAuthBrowserPlugin>('InnerbloomAuthBrowser');
+  if (!isNativeCapacitorPlatform()) {
+    return null;
+  }
+
+  return innerbloomAuthBrowserPlugin;
 }
 
 export function getCapacitorHttpPlugin(): CapacitorHttpPlugin | null {
@@ -264,8 +272,17 @@ function dispatchNativeAuthCallback(url: string): void {
 }
 
 export async function openUrlInCapacitorBrowser(url: string): Promise<void> {
-  const authBrowser = getInnerbloomAuthBrowserPlugin();
-  if (authBrowser && shouldUseEphemeralIOSGoogleAuth(url)) {
+  if (shouldUseEphemeralIOSGoogleAuth(url)) {
+    const authBrowser = getInnerbloomAuthBrowserPlugin();
+    if (!authBrowser) {
+      console.error('[mobile-auth] InnerbloomAuthBrowser unavailable for fresh iOS Google auth', {
+        url,
+        platform: getCapacitorPlatform(),
+        hasCapacitor: Boolean(getCapacitorGlobal()),
+      });
+      throw new Error('InnerbloomAuthBrowser is unavailable for fresh iOS Google auth.');
+    }
+
     const startedAt = Date.now();
     console.info('[mobile-auth] InnerbloomAuthBrowser.open() start', { url, startedAt });
     const result = await authBrowser.open({
