@@ -1,0 +1,108 @@
+/* Problem section visual refinement for the V3 conversion landing.
+   Keeps the existing curves and copy while removing the framed-card treatment. */
+
+@media (min-width: 901px) {
+  .landing.landing--v3-conversion .truth-problem-adaptive-stage {
+    width: min(100%, 1420px) !important;
+    grid-template-columns: minmax(220px, 0.7fr) minmax(620px, 1.75fr) minmax(220px, 0.7fr) !important;
+    gap: clamp(22px, 2.8vw, 44px) !important;
+    align-items: center !important;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic {
+    width: min(100%, 860px) !important;
+    overflow: visible !important;
+  }
+
+  /* Remove the central rounded container so the comparison reads as one open diagram. */
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg > rect:first-of-type {
+    fill: transparent !important;
+    stroke: transparent !important;
+  }
+
+  /* Keep only a restrained atmospheric glow behind the curves. */
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg > path:nth-of-type(1) {
+    opacity: 0.5 !important;
+    stroke-width: 44 !important;
+  }
+
+  /* Remove every flower mark from the diagram, including the oversized intervention seal. */
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg image[href="/innerbloom-flower-logo.png"],
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg image[*|href="/innerbloom-flower-logo.png"] {
+    display: none !important;
+  }
+
+  /* Turn the intervention point into a small signal node instead of a brand seal. */
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg g[transform="translate(405 440)"] circle {
+    r: 8px !important;
+    stroke-width: 1.5 !important;
+    opacity: 0.92 !important;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg g[transform="translate(405 440)"] circle:first-child {
+    fill: rgba(167, 139, 250, 0.12) !important;
+    stroke: rgba(184, 154, 255, 0.86) !important;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg g[transform="translate(405 440)"] circle:last-of-type {
+    fill: rgba(167, 139, 250, 0.32) !important;
+    stroke: rgba(211, 183, 255, 0.9) !important;
+  }
+
+  /* Pull Analyze / Recalibrate / Support into the body of the graphic. */
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg g[transform="translate(356 474)"],
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg g[transform="translate(514 470)"],
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg g[transform="translate(690 452)"] {
+    transform-box: fill-box !important;
+    transform-origin: center !important;
+    translate: 0 -34px !important;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg g[transform="translate(356 474)"] text,
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg g[transform="translate(514 470)"] text,
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg g[transform="translate(690 452)"] text {
+    font-size: 11px !important;
+    font-weight: 860 !important;
+    letter-spacing: 0.15em !important;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg g[transform="translate(356 474)"] path,
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg g[transform="translate(514 470)"] path,
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg g[transform="translate(690 452)"] path {
+    stroke-width: 1.35 !important;
+    opacity: 0.72 !important;
+  }
+
+  /* Side cards become supporting context instead of competing focal points. */
+  .landing.landing--v3-conversion .truth-problem-adaptive-stage .truth-problem-block {
+    min-height: clamp(270px, 22vw, 334px) !important;
+    padding: clamp(24px, 2.2vw, 34px) !important;
+    border-color: rgba(255, 255, 255, 0.09) !important;
+    background: linear-gradient(180deg, rgba(13, 14, 23, 0.58), rgba(6, 7, 12, 0.44)) !important;
+    box-shadow: 0 18px 52px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-stage .truth-problem-block--left {
+    border-color: rgba(255, 92, 104, 0.24) !important;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-stage .truth-problem-block--right {
+    border-color: rgba(55, 240, 166, 0.22) !important;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-stage .truth-problem-icon {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 2rem !important;
+  }
+}
+
+@media (max-width: 900px) {
+  /* On stacked layouts retain the existing card frame for legibility. */
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg image[href="/innerbloom-flower-logo.png"],
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic svg image[*|href="/innerbloom-flower-logo.png"] {
+    display: none !important;
+  }
+}
