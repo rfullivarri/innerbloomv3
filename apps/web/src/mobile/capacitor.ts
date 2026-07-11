@@ -15,6 +15,14 @@ type CapacitorBrowserPlugin = {
   close?: () => Promise<void>;
 };
 
+type InnerbloomAuthBrowserPlugin = {
+  open: (options: {
+    url: string;
+    callbackScheme: string;
+    prefersEphemeralWebBrowserSession?: boolean;
+  }) => Promise<{ url?: string } | undefined>;
+};
+
 type CapacitorHttpPlugin = {
   request: (options: {
     url: string;
@@ -101,6 +109,7 @@ export const CAPACITOR_SIGNED_OUT_HOST = 'signed-out';
 export const CAPACITOR_STATUS_BAR_STYLE_DARK = 'DARK' as const;
 export const CAPACITOR_KEYBOARD_STYLE_DARK = 'DARK' as const;
 export const CAPACITOR_KEYBOARD_RESIZE_NATIVE = 'native' as const;
+export const NATIVE_AUTH_CALLBACK_EVENT = 'innerbloom:native-auth-callback';
 
 function buildNativeCallbackPrefixes(): string[] {
   return [
@@ -142,6 +151,10 @@ export function getCapacitorAppPlugin(): CapacitorAppPlugin | null {
 
 export function getCapacitorBrowserPlugin(): CapacitorBrowserPlugin | null {
   return getCapacitorPlugin<CapacitorBrowserPlugin>('Browser');
+}
+
+export function getInnerbloomAuthBrowserPlugin(): InnerbloomAuthBrowserPlugin | null {
+  return getCapacitorPlugin<InnerbloomAuthBrowserPlugin>('InnerbloomAuthBrowser');
 }
 
 export function getCapacitorHttpPlugin(): CapacitorHttpPlugin | null {
@@ -225,7 +238,53 @@ export function buildNativeAppUrl(host: string): string {
   return `${CAPACITOR_APP_SCHEME}://${CAPACITOR_APP_HOST}/${host}`;
 }
 
+function shouldUseEphemeralIOSGoogleAuth(url: string): boolean {
+  if (getCapacitorPlatform() !== 'ios') {
+    return false;
+  }
+
+  try {
+    const parsed = new URL(url);
+    const mode = parsed.searchParams.get('mode');
+    return parsed.pathname.endsWith('/mobile-auth')
+      && parsed.searchParams.get('provider') === 'google'
+      && parsed.searchParams.get('fresh') === '1'
+      && (mode === 'sign-in' || mode === 'sign-up');
+  } catch {
+    return false;
+  }
+}
+
+function dispatchNativeAuthCallback(url: string): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.dispatchEvent(new CustomEvent(NATIVE_AUTH_CALLBACK_EVENT, { detail: { url } }));
+}
+
 export async function openUrlInCapacitorBrowser(url: string): Promise<void> {
+  const authBrowser = getInnerbloomAuthBrowserPlugin();
+  if (authBrowser && shouldUseEphemeralIOSGoogleAuth(url)) {
+    const startedAt = Date.now();
+    console.info('[mobile-auth] InnerbloomAuthBrowser.open() start', { url, startedAt });
+    const result = await authBrowser.open({
+      url,
+      callbackScheme: CAPACITOR_APP_SCHEME,
+      prefersEphemeralWebBrowserSession: true,
+    });
+    console.info('[mobile-auth] InnerbloomAuthBrowser.open() end', {
+      url,
+      callbackUrl: result?.url ?? null,
+      finishedAt: Date.now(),
+    });
+
+    if (result?.url) {
+      dispatchNativeAuthCallback(result.url);
+    }
+    return;
+  }
+
   const browser = getCapacitorBrowserPlugin();
   if (browser) {
     const startedAt = Date.now();

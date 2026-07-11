@@ -17,6 +17,7 @@ import {
   getCapacitorStatusBarPlugin,
   isNativeAuthCallbackUrl,
   isNativeCapacitorPlatform,
+  NATIVE_AUTH_CALLBACK_EVENT,
   normalizeAppUrlToPath,
   scheduleCapacitorBrowserCloseRetries,
   shouldOpenExternalUrl,
@@ -427,6 +428,14 @@ function useDeepLinkNavigation(enabled: boolean) {
       listenerHandle = handle;
     });
 
+    const handleNativeAuthCallback = (event: Event) => {
+      const resolvedUrl = coerceIncomingUrl(event);
+      console.info(`[mobile-auth] native auth callback event url=${resolvedUrl ?? 'null'}`);
+      void handleUrl(resolvedUrl, 'event');
+    };
+
+    window.addEventListener(NATIVE_AUTH_CALLBACK_EVENT, handleNativeAuthCallback);
+
     const localNotifications = getCapacitorLocalNotificationsPlugin();
     if (localNotifications) {
       void Promise.resolve(
@@ -451,6 +460,7 @@ function useDeepLinkNavigation(enabled: boolean) {
 
     return () => {
       console.info('[mobile-auth] NativeMobileBridge unmounted');
+      window.removeEventListener(NATIVE_AUTH_CALLBACK_EVENT, handleNativeAuthCallback);
       void listenerHandle?.remove();
       void localNotificationHandle?.remove();
     };
