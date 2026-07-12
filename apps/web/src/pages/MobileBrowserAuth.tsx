@@ -9,6 +9,7 @@ import { buildLocalizedAuthPath, resolveAuthLanguage, type AuthLanguage } from '
 import { AUTH_DIVIDER_CLASS, AUTH_STACK_CLASS, createAuthAppearance } from '../lib/clerkAppearance';
 import { buildWebAbsoluteUrl } from '../lib/siteUrl';
 import { CAPACITOR_APP_SCHEME, CAPACITOR_CALLBACK_HOST, CAPACITOR_SIGNED_OUT_HOST } from '../mobile/capacitor';
+import { getNativePostAuthPath, normalizeNativePostAuthPath, type MobileAuthMode } from '../mobile/mobileAuthSession';
 
 type BrowserAuthMode = 'sign-in' | 'sign-up' | 'logout' | 'refresh';
 
@@ -53,6 +54,7 @@ function buildSignedOutUrl(search: string): string {
 
 type MobileCallbackLegacyOptions = {
   includeLegacyImageUrl: boolean;
+  redirectPath: string | null;
 };
 
 export function shouldIncludeLegacyProfileImage(search: string): boolean {
@@ -70,6 +72,9 @@ export function buildRedirectUrl(
   const callbackUrl = new URL(baseUrl);
   callbackUrl.searchParams.set('token', token);
   callbackUrl.searchParams.set('auth_mode', mode);
+  if (options.redirectPath) {
+    callbackUrl.searchParams.set('redirect_path', options.redirectPath);
+  }
 
   if (user?.id) {
     callbackUrl.searchParams.set('user_id', user.id);
@@ -97,6 +102,19 @@ export function buildRedirectUrl(
   }
 
   return callbackUrl.toString();
+}
+
+function resolvePostAuthPath(search: string, mode: BrowserAuthMode): string | null {
+  const params = new URLSearchParams(search);
+  const requestedPath = normalizeNativePostAuthPath(params.get('redirect_path'));
+  const defaultPath = getNativePostAuthPath(mode as MobileAuthMode);
+
+  if (mode === 'sign-up') {
+    return getNativePostAuthPath('sign-up');
+  }
+
+  // Never let an arbitrary URL determine the destination of a native auth callback.
+  return requestedPath ?? defaultPath;
 }
 
 export function buildModeUrl(language: AuthLanguage, mode: 'sign-in' | 'sign-up', search: string): string {
@@ -194,6 +212,10 @@ export default function MobileBrowserAuthPage() {
     const params = new URLSearchParams(location.search);
     return params.get('return_to')?.trim() ?? null;
   }, [location.search]);
+  const postAuthPath = useMemo(
+    () => resolvePostAuthPath(location.search, mode),
+    [location.search, mode],
+  );
   const isHandoffStep = useMemo(() => {
     const params = new URLSearchParams(location.search);
     return params.get('handoff') === '1';
@@ -366,8 +388,8 @@ export default function MobileBrowserAuthPage() {
         strategy: 'oauth_google',
         redirectUrl: '/sso-callback',
         redirectUrlComplete: handoffUrl,
-        continueSignIn: false,
-        continueSignUp: false,
+        continueSignIn: true,
+        continueSignUp: true,
         oidcPrompt: 'select_account',
       })
       .catch((cause) => {
@@ -483,7 +505,7 @@ export default function MobileBrowserAuthPage() {
             user,
             token,
             mode === 'refresh' ? 'refresh' : mode,
-            { includeLegacyImageUrl },
+            { includeLegacyImageUrl, redirectPath: postAuthPath },
           );
           console.info('[mobile-auth-page] callback-build', {
             callbackUrl: resolvedCallbackUrl,
@@ -545,6 +567,7 @@ export default function MobileBrowserAuthPage() {
     returnTo,
     isHandoffStep,
     includeLegacyImageUrl,
+    postAuthPath,
     session?.id,
     signOut,
     shouldResetBrowserSession,
@@ -643,6 +666,7 @@ export default function MobileBrowserAuthPage() {
               mode={mode === 'sign-up' ? 'sign-up' : 'sign-in'}
               redirectUrlComplete={handoffUrl}
               forceAccountSelection
+              allowCrossModeCompletion
             />
             <div className={AUTH_DIVIDER_CLASS}>
               <span className="h-px flex-1 bg-white/12" aria-hidden />
