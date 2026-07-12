@@ -17,7 +17,6 @@ import {
   getCapacitorStatusBarPlugin,
   isNativeAuthCallbackUrl,
   isNativeCapacitorPlatform,
-  NATIVE_AUTH_CALLBACK_EVENT,
   normalizeAppUrlToPath,
   scheduleCapacitorBrowserCloseRetries,
   shouldOpenExternalUrl,
@@ -25,6 +24,8 @@ import {
 import { DAILY_REMINDER_NOTIFICATION_TARGET_PATH } from './localNotifications';
 import {
   getMobileAuthSession,
+  getNativePostAuthPath,
+  type MobileAuthSession,
   resolveMobileAuthSessionFromCallback,
   shouldForceNativeWelcome,
 } from './mobileAuthSession';
@@ -106,6 +107,25 @@ function getCurrentAppPath(): string {
   return `${pathname || '/'}${search || ''}${hash || ''}`;
 }
 
+function normalizeNativeInnerbloom2Path(path: string): string {
+  if (!isSafeInternalPath(path)) {
+    return INNERBLOOM2_DASHBOARD_PATH;
+  }
+
+  const [pathnameWithQuery] = path.split('#', 1);
+  const pathname = pathnameWithQuery.split('?', 1)[0]?.replace(/\/+$/, '') || '/';
+
+  if (pathname === '/dashboard' || pathname === '/dashboard-v3') {
+    return INNERBLOOM2_DASHBOARD_PATH;
+  }
+
+  if (pathname === '/login' || pathname === '/sign-up') {
+    return '/';
+  }
+
+  return path;
+}
+
 function coerceIncomingUrl(value: unknown): string | null {
   if (typeof value === 'string') {
     const trimmed = value.trim();
@@ -144,14 +164,20 @@ function coerceIncomingUrl(value: unknown): string | null {
   return null;
 }
 
-function resolveCallbackTargetPath(
-  authMode: string | null | undefined,
+export function resolveCallbackTargetPath(
+  session: Pick<MobileAuthSession, 'authMode' | 'redirectPath'>,
   currentPath: string,
 ): string {
-  const dashboardPath = INNERBLOOM2_DASHBOARD_PATH;
+  const { authMode, redirectPath } = session;
+
+  // A creation intent wins even when Google resolves an existing account through
+  // Clerk's sign-in branch. The native callback must continue V2 onboarding.
+  if (redirectPath === INNERBLOOM2_INTRO_JOURNEY_PATH) {
+    return INNERBLOOM2_INTRO_JOURNEY_PATH;
+  }
 
   if (authMode === 'sign-in') {
-    return consumePendingNotificationTargetPath() ?? dashboardPath;
+    return consumePendingNotificationTargetPath() ?? INNERBLOOM2_DASHBOARD_PATH;
   }
 
   if (authMode === 'sign-up') {
@@ -159,10 +185,12 @@ function resolveCallbackTargetPath(
   }
 
   if (authMode === 'refresh') {
-    return currentPath || dashboardPath;
+    return normalizeNativeInnerbloom2Path(currentPath || INNERBLOOM2_DASHBOARD_PATH);
   }
 
-  return '/';
+  // A callback without a mode must never fall back to the native welcome route.
+  // Use the validated V2 destination embedded by the browser auth page instead.
+  return redirectPath ?? getNativePostAuthPath('sign-in') ?? INNERBLOOM2_DASHBOARD_PATH;
 }
 
 function useNativeDocumentClass(enabled: boolean) {
@@ -360,7 +388,7 @@ function useDeepLinkNavigation(enabled: boolean) {
           clearPendingCallbackUrl();
           const currentPath = getCurrentAppPath();
           const nextPath = resolution.type === 'session'
-            ? resolveCallbackTargetPath(resolution.session.authMode, currentPath)
+            ? resolveCallbackTargetPath(resolution.session, currentPath)
             : '/';
 
           console.info('[mobile-auth] bridge consumed callback', {
@@ -387,7 +415,7 @@ function useDeepLinkNavigation(enabled: boolean) {
 
         const nextPath = normalizeAppUrlToPath(url);
         if (nextPath) {
-          navigateRef.current(nextPath, { replace: true });
+          navigateRef.current(normalizeNativeInnerbloom2Path(nextPath), { replace: true });
         }
       } catch (error) {
         console.error('[mobile-auth] handleUrl failed', {
@@ -428,14 +456,6 @@ function useDeepLinkNavigation(enabled: boolean) {
       listenerHandle = handle;
     });
 
-    const handleNativeAuthCallback = (event: Event) => {
-      const resolvedUrl = coerceIncomingUrl(event);
-      console.info(`[mobile-auth] native auth callback event url=${resolvedUrl ?? 'null'}`);
-      void handleUrl(resolvedUrl, 'event');
-    };
-
-    window.addEventListener(NATIVE_AUTH_CALLBACK_EVENT, handleNativeAuthCallback);
-
     const localNotifications = getCapacitorLocalNotificationsPlugin();
     if (localNotifications) {
       void Promise.resolve(
@@ -460,7 +480,6 @@ function useDeepLinkNavigation(enabled: boolean) {
 
     return () => {
       console.info('[mobile-auth] NativeMobileBridge unmounted');
-      window.removeEventListener(NATIVE_AUTH_CALLBACK_EVENT, handleNativeAuthCallback);
       void listenerHandle?.remove();
       void localNotificationHandle?.remove();
     };

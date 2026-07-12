@@ -63,7 +63,7 @@ export default function SignUpPage({
   });
 
   if (isNativeApp) {
-    const googleAuthUrl = buildNativeMobileAuthUrl('sign-up', language, { provider: 'google' });
+    const googleAuthUrl = buildNativeMobileAuthUrl('sign-up', language, { provider: 'google', redirectPath: fallbackRedirectUrl });
 
     return (
       <AuthLayout

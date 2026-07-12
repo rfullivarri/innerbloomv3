@@ -22,6 +22,7 @@ export type MobileAuthSession = {
   email: string | null;
   clerkImageUrl: string | null;
   authMode: MobileAuthMode | null;
+  redirectPath: string | null;
   expiresAt: number | null;
   updatedAt: number;
 };
@@ -211,6 +212,26 @@ function normalizeAuthMode(value: string | null | undefined): MobileAuthMode | n
   return null;
 }
 
+export function getNativePostAuthPath(mode: MobileAuthMode): string | null {
+  if (mode === 'sign-up') {
+    return INNERBLOOM2_INTRO_JOURNEY_PATH;
+  }
+
+  if (mode === 'sign-in' || mode === 'refresh') {
+    return INNERBLOOM2_DASHBOARD_PATH;
+  }
+
+  return null;
+}
+
+export function normalizeNativePostAuthPath(value: string | null | undefined): string | null {
+  if (value === INNERBLOOM2_INTRO_JOURNEY_PATH || value === INNERBLOOM2_DASHBOARD_PATH) {
+    return value;
+  }
+
+  return null;
+}
+
 function decodeJwtExp(token: string): number | null {
   const parts = token.split('.');
   if (parts.length < 2 || !parts[1]) {
@@ -235,6 +256,7 @@ function normalizeSession(session: Partial<MobileAuthSession> & { token: string 
     email: typeof session.email === 'string' ? session.email : null,
     clerkImageUrl: typeof session.clerkImageUrl === 'string' ? session.clerkImageUrl : null,
     authMode: normalizeAuthMode(session.authMode),
+    redirectPath: normalizeNativePostAuthPath(session.redirectPath),
     expiresAt: typeof session.expiresAt === 'number' ? session.expiresAt : decodeJwtExp(session.token),
     updatedAt: typeof session.updatedAt === 'number' ? session.updatedAt : Date.now(),
   };
@@ -261,6 +283,7 @@ export function buildNativeMobileAuthUrl(
   options?: {
     provider?: 'google';
     hideGoogle?: boolean;
+    redirectPath?: string;
   },
 ): string {
   const resolvedLanguage =
@@ -270,10 +293,13 @@ export function buildNativeMobileAuthUrl(
   const mobileAuthUrl = new URL(buildWebAbsoluteUrl(buildLocalizedAuthPath('/mobile-auth', resolvedLanguage)));
   mobileAuthUrl.searchParams.set('mode', mode);
   mobileAuthUrl.searchParams.set('experience', 'innerbloom2');
-  mobileAuthUrl.searchParams.set(
-    'redirect_path',
-    mode === 'sign-up' ? INNERBLOOM2_INTRO_JOURNEY_PATH : INNERBLOOM2_DASHBOARD_PATH,
-  );
+  const requestedRedirectPath = normalizeNativePostAuthPath(options?.redirectPath);
+  const redirectPath = mode === 'sign-up'
+    ? INNERBLOOM2_INTRO_JOURNEY_PATH
+    : requestedRedirectPath ?? getNativePostAuthPath(mode);
+  if (redirectPath) {
+    mobileAuthUrl.searchParams.set('redirect_path', redirectPath);
+  }
   mobileAuthUrl.searchParams.set(
     'return_to',
     buildNativeAppUrl(mode === 'logout' ? CAPACITOR_SIGNED_OUT_HOST : CAPACITOR_CALLBACK_HOST),
@@ -538,6 +564,7 @@ export function resolveMobileAuthSessionFromCallback(url: string): MobileAuthCal
       email: parsed?.params.get('email')?.trim() || null,
       clerkImageUrl: parsed?.params.get('clerk_image_url')?.trim() || null,
       authMode: normalizeAuthMode(parsed?.params.get('auth_mode')?.trim()),
+      redirectPath: normalizeNativePostAuthPath(parsed?.params.get('redirect_path')?.trim()),
       expiresAt: decodeJwtExp(token),
       updatedAt: Date.now(),
     });
