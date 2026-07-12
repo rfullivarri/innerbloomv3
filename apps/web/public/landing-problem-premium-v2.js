@@ -7,21 +7,36 @@
       recalibrate: 'RECALIBRA',
       recalibrateBody: 'Ajusta el plan a tu energía disponible.',
       propel: 'TE IMPULSA',
-      propelBody: 'Te acompaña para que avances más allá.'
+      propelBody: 'Te acompaña para que avances más allá.',
+      aria: 'Cómo actúa Innerbloom'
     },
     en: {
-      analyze: 'ANALYZES',
+      analyze: 'ANALYZE',
       analyzeBody: 'Understands your real state without judgment.',
-      recalibrate: 'RECALIBRATES',
+      recalibrate: 'RECALIBRATE',
       recalibrateBody: 'Adjusts the plan to your available energy.',
-      propel: 'PROPELS YOU',
-      propelBody: 'Supports you so you can move beyond the setback.'
+      propel: 'PROPEL',
+      propelBody: 'Helps you move beyond the setback.',
+      aria: 'How Innerbloom acts'
     }
   };
 
-  function getLanguage(root) {
-    const text = root.textContent || '';
-    return /rutina rígida|sistema adaptativo|vuelves/i.test(text) ? 'es' : 'en';
+  function getLanguage(host) {
+    const htmlLang = (document.documentElement.getAttribute('lang') || '').toLowerCase();
+    if (htmlLang.startsWith('es')) return 'es';
+    if (htmlLang.startsWith('en')) return 'en';
+
+    const landing = host.closest('.landing');
+    const landingLang = (landing?.getAttribute('lang') || landing?.getAttribute('data-language') || '').toLowerCase();
+    if (landingLang.startsWith('es')) return 'es';
+    if (landingLang.startsWith('en')) return 'en';
+
+    const pageText = document.body.textContent || '';
+    if (/\bLog in\b|Create account|The main problem|You do not need/i.test(pageText)) return 'en';
+    if (/\bIniciar sesión\b|Crear cuenta|El problema principal|No te falta/i.test(pageText)) return 'es';
+
+    const graphicText = host.textContent || '';
+    return /rutina rígida|sistema adaptativo|vuelves/i.test(graphicText) ? 'es' : 'en';
   }
 
   function ensurePremiumArrowhead(svg) {
@@ -79,13 +94,8 @@
       });
   }
 
-  function createProcess(root, language) {
-    if (root.querySelector('.ib-problem-process')) return;
-    const c = copy[language];
-    const panel = document.createElement('div');
-    panel.className = 'ib-problem-process';
-    panel.setAttribute('aria-label', language === 'es' ? 'Cómo actúa Innerbloom' : 'How Innerbloom acts');
-    panel.innerHTML = `
+  function processMarkup(c) {
+    return `
       <div class="ib-problem-process__step ib-problem-process__step--analyze">
         <span class="ib-problem-process__icon" aria-hidden="true">⌕</span>
         <strong>${c.analyze}</strong>
@@ -103,7 +113,23 @@
         <strong>${c.propel}</strong>
         <p>${c.propelBody}</p>
       </div>`;
-    root.appendChild(panel);
+  }
+
+  function syncProcess(root, language) {
+    const c = copy[language];
+    let panel = root.querySelector('.ib-problem-process');
+
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.className = 'ib-problem-process';
+      root.appendChild(panel);
+    }
+
+    if (panel.getAttribute('data-language') !== language) {
+      panel.setAttribute('data-language', language);
+      panel.setAttribute('aria-label', c.aria);
+      panel.innerHTML = processMarkup(c);
+    }
   }
 
   function enhance() {
@@ -114,7 +140,7 @@
       reshapeCurves(svg);
       hideLegacyCallouts(svg);
       ensurePremiumArrowhead(svg);
-      createProcess(root, getLanguage(root));
+      syncProcess(root, getLanguage(host));
       root.classList.add('ib-problem-premium-ready');
     });
   }
@@ -134,7 +160,7 @@
     childList: true,
     subtree: true,
     attributes: true,
-    attributeFilter: ['data-phase']
+    attributeFilter: ['data-phase', 'lang', 'data-language']
   });
   window.addEventListener('DOMContentLoaded', schedule, { once: true });
   schedule();
