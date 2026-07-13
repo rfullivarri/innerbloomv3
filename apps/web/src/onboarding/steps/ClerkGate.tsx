@@ -275,6 +275,7 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
         <GoogleOAuthButton
           language={language}
           mode={tab}
+          oauthMode="sign-in"
           redirectUrlComplete={currentUrl}
           allowCrossModeCompletion
         />

@@ -128,8 +128,10 @@ export default function SignUpPage({
         <GoogleOAuthButton
           language={language}
           mode="sign-up"
+          oauthMode="sign-in"
           redirectUrlComplete={fallbackRedirectUrl}
           forceAccountSelection
+          allowCrossModeCompletion
         />
         <div className={`${AUTH_DIVIDER_CLASS} ${isLightTheme ? '!text-[#3b305f]/76' : ''}`}>
           <span className={`h-px flex-1 ${isLightTheme ? 'bg-[#5a478f]/28' : 'bg-white/12'}`} aria-hidden />
