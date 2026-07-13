@@ -187,7 +187,7 @@ export default function MobileBrowserAuthPage() {
   const clerk = useClerk();
   const { session } = useSession();
   const { isLoaded: signInLoaded, signIn } = useSignIn();
-  const { isLoaded: signUpLoaded, signUp } = useSignUp();
+  const { signUp } = useSignUp();
   const { user } = useUser();
   const [error, setError] = useState<string | null>(null);
   const [isResettingBrowserSession, setIsResettingBrowserSession] = useState(false);
@@ -375,14 +375,17 @@ export default function MobileBrowserAuthPage() {
       return;
     }
 
-    const oauthMode = mode === 'sign-up' ? 'sign-up' : 'sign-in';
-    const resourceReady = oauthMode === 'sign-up' ? signUpLoaded && signUp : signInLoaded && signIn;
+    // Google OAuth uses Clerk's sign-in resource for both entry intents. Clerk
+    // creates a user when needed and reliably completes existing Google users
+    // through this resource. The URL still carries mode=sign-up, so the native
+    // callback goes to the V2 onboarding rather than the dashboard.
+    const resourceReady = signInLoaded && signIn;
     if (!isLoaded || !resourceReady) {
       return;
     }
 
     googleRedirectStartedRef.current = true;
-    const resource = oauthMode === 'sign-up' ? signUp : signIn;
+    const resource = signIn;
     void resource
       ?.authenticateWithRedirect({
         strategy: 'oauth_google',
@@ -417,7 +420,6 @@ export default function MobileBrowserAuthPage() {
     signIn,
     signInLoaded,
     signUp,
-    signUpLoaded,
     isResettingBrowserSession,
   ]);
 
@@ -664,6 +666,7 @@ export default function MobileBrowserAuthPage() {
             <GoogleOAuthButton
               language={language}
               mode={mode === 'sign-up' ? 'sign-up' : 'sign-in'}
+              oauthMode="sign-in"
               redirectUrlComplete={handoffUrl}
               forceAccountSelection
               allowCrossModeCompletion
