@@ -7,6 +7,7 @@ type GoogleOAuthButtonProps = {
   language: 'es' | 'en';
   mode: GoogleOAuthMode;
   redirectUrlComplete: string;
+  oauthMode?: GoogleOAuthMode;
   className?: string;
   forceAccountSelection?: boolean;
   allowCrossModeCompletion?: boolean;
@@ -18,6 +19,7 @@ export function GoogleOAuthButton({
   language,
   mode,
   redirectUrlComplete,
+  oauthMode = mode,
   className = '',
   forceAccountSelection = false,
   allowCrossModeCompletion = false,
@@ -26,7 +28,7 @@ export function GoogleOAuthButton({
   const { isLoaded: isSignUpLoaded, signUp } = useSignUp();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
-  const isLoaded = mode === 'sign-up' ? isSignUpLoaded : isSignInLoaded;
+  const isLoaded = oauthMode === 'sign-up' ? isSignUpLoaded : isSignInLoaded;
   const isDisabled = !isLoaded || isRedirecting;
   const shouldForceAccountSelection = forceAccountSelection || mode === 'sign-up';
 
@@ -58,7 +60,7 @@ export function GoogleOAuthButton({
     setIsRedirecting(true);
 
     try {
-      if (mode === 'sign-up') {
+      if (oauthMode === 'sign-up') {
         if (!signUp) {
           throw new Error('Clerk sign-up resource is not ready');
         }
@@ -87,7 +89,7 @@ export function GoogleOAuthButton({
       console.error('[auth] Google OAuth redirect failed', error);
       setIsRedirecting(false);
     }
-  }, [allowCrossModeCompletion, isLoaded, isRedirecting, mode, redirectUrlComplete, shouldForceAccountSelection, signIn, signUp]);
+  }, [allowCrossModeCompletion, isLoaded, isRedirecting, mode, oauthMode, redirectUrlComplete, shouldForceAccountSelection, signIn, signUp]);
 
   return (
     <button
