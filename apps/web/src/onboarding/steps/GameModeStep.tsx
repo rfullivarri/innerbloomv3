@@ -153,7 +153,7 @@ export function GameModeStep({ language = 'es', selected, onSelect, onBack, vari
                 aria-label={`${content.title} · ${content.frequency[language]}${isActive ? copy.selectedSuffix : ''}`}
                 data-selected={isActive ? 'true' : 'false'}
                 className={visualOnly
-                  ? `onboarding-rhythm-card onboarding-rhythm-card--segments ${isActive ? 'onboarding-rhythm-card--selected' : ''}`
+                  ? `onboarding-rhythm-card onboarding-rhythm-card--segments w-full max-w-none ${isActive ? 'onboarding-rhythm-card--selected' : ''}`
                   : [
                       'onboarding-rhythm-card group relative grid min-h-[4.75rem] w-full grid-cols-[4.25rem_minmax(0,1fr)_4.9rem] items-center gap-2 overflow-hidden rounded-[1.45rem] border px-3 py-2 text-left transition-all duration-300 ease-out focus-visible:outline-none sm:grid-cols-[5.5rem_minmax(0,1fr)_6.6rem] sm:gap-4 sm:px-5 md:min-h-[6.05rem] md:grid-cols-[7rem_minmax(0,1fr)_7.5rem] md:rounded-[1.8rem] md:px-6',
                       isLight
