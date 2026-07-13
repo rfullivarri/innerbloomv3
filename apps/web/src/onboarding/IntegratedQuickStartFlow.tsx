@@ -715,6 +715,7 @@ function ControlledQuickStartFlow({
   onFinish,
   onExit,
   onRestart,
+  variant = 'default',
 }: {
   language: OnboardingLanguage;
   gameMode: GameMode;
@@ -732,6 +733,7 @@ function ControlledQuickStartFlow({
   onFinish: () => void;
   onExit: () => void;
   onRestart: () => void;
+  variant: 'default' | 'onboarding2';
 }) {
   const quickStartGp = computeQuickStartGp(selectedTasksByPillar);
   const route = [
@@ -749,9 +751,11 @@ function ControlledQuickStartFlow({
       tasks={QUICK_START_TASKS[language][pillar]}
       selectedIds={selectedTasksByPillar[pillar]}
       inputValues={editableTaskValues}
-      minimum={QUICK_START_MINIMUMS[gameMode]}
+      minimum={variant === 'onboarding2' ? 3 : QUICK_START_MINIMUMS[gameMode]}
       gameMode={gameMode}
       balancedBonusActive={quickStartGp.balancedBonusActive}
+      selectedTasksByPillar={selectedTasksByPillar}
+      variant={variant}
       onToggleTask={(taskId) => onToggleTask(pillar, taskId)}
       onInputChange={(taskId, value) => onTaskInputChange(`${pillar}-${taskId}`, value)}
       onBack={onBack}
@@ -760,7 +764,7 @@ function ControlledQuickStartFlow({
   );
 
   return (
-    <div className="quickstart-premium-root onboarding-premium-root min-h-screen min-h-dvh pb-12 pt-28 text-white sm:pt-32">
+    <div className={`quickstart-premium-root onboarding-premium-root ${variant === 'onboarding2' ? 'onboarding2-premium-root' : ''} min-h-screen min-h-dvh pb-12 pt-28 text-white sm:pt-32`}>
       <HUD
         language={language}
         mode={gameMode}
@@ -821,6 +825,7 @@ export function IntegratedQuickStartFlow({
   onBack,
   onConfirm,
   onFinish,
+  variant = 'default',
 }: IntegratedQuickStartFlowProps) {
   if (routeStepId) {
     return (
@@ -841,6 +846,7 @@ export function IntegratedQuickStartFlow({
         onFinish={onFinish ?? onConfirm ?? (() => undefined)}
         onExit={onExit}
         onRestart={onRestart}
+        variant={variant}
       />
     );
   }

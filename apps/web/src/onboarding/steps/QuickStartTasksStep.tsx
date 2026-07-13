@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { Pencil } from 'lucide-react';
 import type { OnboardingLanguage } from '../constants';
 import { NavButtons } from '../ui/NavButtons';
 import type { GameMode, Pillar } from '../state';
-import { getQuickStartSuggestedRule, type QuickStartTask } from '../quickStart';
+import { formatQuickStartTask, type QuickStartTask } from '../quickStart';
 import { TraitIcon } from '../../pages/labs/mobile-premium/MobilePremiumPrimitives';
 
 interface QuickStartTasksStepProps {
@@ -15,6 +16,8 @@ interface QuickStartTasksStepProps {
   minimum: number;
   gameMode: GameMode;
   balancedBonusActive: boolean;
+  selectedTasksByPillar?: Record<Pillar, string[]>;
+  variant?: 'default' | 'onboarding2';
   onToggleTask: (taskId: string) => void;
   onInputChange: (taskId: string, value: string) => void;
   onBack: () => void;
@@ -41,6 +44,7 @@ function InlineTaskRow({
   };
 }) {
   const hasInput = Boolean(task.inputAfter || task.inputBefore);
+  const unit = task.inputAfter?.startsWith('minut') ? 'min' : task.inputAfter?.startsWith('hour') || task.inputAfter?.startsWith('hora') ? 'hrs' : task.inputAfter?.startsWith('meal') || task.inputAfter?.startsWith('comida') ? 'meals' : task.inputAfter?.startsWith('glass') || task.inputAfter?.startsWith('vaso') ? 'glasses' : task.inputAfter?.startsWith('person') || task.inputAfter?.startsWith('persona') ? 'people' : task.inputAfter?.startsWith('thing') || task.inputAfter?.startsWith('cosa') ? 'things' : '';
   const [showSuggestions, setShowSuggestions] = useState(false);
   const rowRef = useRef<HTMLDivElement | null>(null);
 
@@ -73,7 +77,7 @@ function InlineTaskRow({
         role="button"
         tabIndex={0}
         data-selected={selected ? 'true' : undefined}
-        className={`quickstart-task-row onboarding-surface-inner relative z-10 grid w-full grid-cols-[38px_minmax(0,1fr)_auto] items-center gap-3 rounded-[1.15rem] px-3 py-3.5 text-left text-white/85 transition ${selected ? 'quickstart-task-row--selected' : ''}`}
+        className={`quickstart-task-row quickstart-task-row--foundation relative z-10 grid w-full grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-4 text-left text-white/85 transition ${selected ? 'quickstart-task-row--selected' : ''}`}
       >
         <span className="quickstart-task-icon grid h-9 w-9 place-items-center rounded-full border">
           {selected ? (
@@ -84,32 +88,17 @@ function InlineTaskRow({
         </span>
 
         <div className="min-w-0">
-          <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1.5 text-[0.98rem] leading-6 text-white/90">
-            {task.inputBefore ? <span>{task.inputBefore}</span> : null}
-            <span>{task.text}</span>
-            {hasInput ? (
-              <input
-                value={inputValue}
-                disabled={!selected}
-                inputMode="numeric"
-                onClick={(event) => event.stopPropagation()}
-                onChange={(event) => onInputChange(event.target.value)}
-                className="quickstart-task-input h-6 w-12 rounded-md border px-1.5 text-center text-xs focus:outline-none focus-visible:ring-2 disabled:opacity-40 sm:h-7 sm:w-14"
-                placeholder={copy.countPlaceholder}
-              />
-            ) : null}
-            {task.inputAfter ? <span>{task.inputAfter}</span> : null}
-            {task.helper ? <span className="w-full text-xs text-white/55">{task.helper}</span> : null}
-          </div>
-          {selected ? (
-            <p className="quickstart-selected-trait mt-2 text-[0.66rem] font-semibold uppercase tracking-[0.2em]">
-              <span className="mr-1.5 text-white/38">{copy.traitLabel}</span>
-              {task.trait}
-            </p>
-          ) : null}
+          <p className="quickstart-task-title">{task.inputBefore ? `${task.inputBefore} ${task.text}` : task.text}</p>
+          <p className="quickstart-selected-trait mt-2 text-[0.66rem] font-semibold uppercase tracking-[0.2em]">{copy.traitLabel} {task.trait}</p>
+          {selected && hasInput ? <p className="quickstart-task-resolved">{formatQuickStartTask(task, inputValue)}</p> : null}
         </div>
 
-        {task.suggestions?.length ? (
+        {hasInput ? (
+          <label className={`quickstart-quantity ${selected ? 'quickstart-quantity--selected' : ''}`} onClick={(event) => event.stopPropagation()}>
+            <span><input value={inputValue} disabled={!selected} inputMode="numeric" onChange={(event) => onInputChange(event.target.value)} placeholder={copy.countPlaceholder} aria-label={`${copy.countPlaceholder} ${unit}`} /><Pencil size={14} aria-hidden /></span>
+            {unit ? <small>{unit}</small> : null}
+          </label>
+        ) : task.suggestions?.length ? (
             <button
               type="button"
               onClick={(event) => {
@@ -153,6 +142,8 @@ export function QuickStartTasksStep({
   minimum,
   gameMode,
   balancedBonusActive,
+  selectedTasksByPillar,
+  variant = 'default',
   onToggleTask,
   onInputChange,
   onBack,
@@ -160,16 +151,10 @@ export function QuickStartTasksStep({
 }: QuickStartTasksStepProps) {
   const copy = language === 'en'
     ? {
-        title: `Quick Start · ${pillar === 'Body' ? 'Body 🫀' : pillar === 'Mind' ? 'Mind 🧠' : 'Soul 🏵️'}`,
-        subtitle: pillar === 'Body'
-          ? 'Review all 10 tasks and activate what you want to sustain.'
-          : pillar === 'Mind'
-            ? 'Tune your mental focus while keeping the current onboarding feel.'
-            : 'Choose habits that support connection and inner alignment.',
-        minRule: `Minimum: ${minimum} tasks`,
-        suggestedRule: getQuickStartSuggestedRule(gameMode, language),
-        minimumRequired: 'You need to select the minimum to continue.',
-        continue: 'Continue',
+        title: 'Build a rhythm you can keep.',
+        subtitle: 'Start with three foundations. You can always add more later.',
+        minimumRequired: 'Choose the minimum to unlock the next pillar.',
+        continue: pillar === 'Body' ? 'Continue to Mind' : pillar === 'Mind' ? 'Continue to Soul' : 'Review my foundations',
         inputRequired: 'Complete the selected quantities before continuing.',
         back: 'Back',
         countPlaceholder: 'qty',
@@ -179,16 +164,10 @@ export function QuickStartTasksStep({
         bonusPending: 'Balance Body, Mind and Soul to earn x1.5 GP',
       }
     : {
-        title: `Inicio rápido · ${pillar === 'Body' ? 'Cuerpo 🫀' : pillar === 'Mind' ? 'Mente 🧠' : 'Alma 🏵️'}`,
-        subtitle: pillar === 'Body'
-          ? 'Elegí 10 tareas visibles y activá las que querés sostener.'
-          : pillar === 'Mind'
-            ? 'Ajustá tu foco mental sin salir del ritmo del onboarding actual.'
-            : 'Definí hábitos que te ayuden a mantener centro y conexión.',
-        minRule: `Mínimo: ${minimum} tareas`,
-        suggestedRule: getQuickStartSuggestedRule(gameMode, language),
-        minimumRequired: 'Necesitás seleccionar el mínimo para continuar.',
-        continue: 'Continuar',
+        title: 'Construí un ritmo que puedas sostener.',
+        subtitle: 'Empezá con tres foundations. Después podés sumar más.',
+        minimumRequired: 'Elegí el mínimo para desbloquear el siguiente pilar.',
+        continue: pillar === 'Body' ? 'Continuar a Mente' : pillar === 'Mind' ? 'Continuar a Alma' : 'Revisar mis foundations',
         inputRequired: 'Completá las cantidades seleccionadas antes de continuar.',
         back: 'Volver',
         countPlaceholder: 'n',
@@ -207,28 +186,21 @@ export function QuickStartTasksStep({
   });
   const canContinue = selectedIds.length >= minimum && !hasMissingInput;
 
+  const pillarLabel = language === 'en' ? pillar : pillar === 'Body' ? 'Cuerpo' : pillar === 'Mind' ? 'Mente' : 'Alma';
+  const pillarLabels = language === 'en' ? { Body: 'Body', Mind: 'Mind', Soul: 'Soul' } : { Body: 'Cuerpo', Mind: 'Mente', Soul: 'Alma' };
+  const displayedSelections = selectedTasksByPillar ?? { Body: pillar === 'Body' ? selectedIds : [], Mind: pillar === 'Mind' ? selectedIds : [], Soul: pillar === 'Soul' ? selectedIds : [] };
+
   return (
-    <section className="onboarding-premium-root quickstart-premium-card onboarding-flow-panel mx-auto w-full max-w-3xl p-5 sm:p-7">
-      <header className="mb-6">
-        <p className="text-xs uppercase tracking-[0.25em] text-white/55">{gameMode} · Quick Start</p>
-        <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{copy.title}</h1>
-        <p className="mt-2 text-sm text-white/70">{copy.subtitle}</p>
-        <div
-          className="quickstart-min-rule mt-4 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold"
-        >
-          <span className="whitespace-nowrap">{copy.minRule}</span>
-          <span className="quickstart-min-rule__dot" aria-hidden>·</span>
-          <span className="whitespace-nowrap">{copy.suggestedRule}</span>
+    <section className={`quickstart-premium-card onboarding-flow-panel ${variant === 'onboarding2' ? 'onboarding2-foundations' : ''} mx-auto w-full max-w-3xl p-5 sm:p-7`}>
+      <header className="quickstart-foundations-header mb-6">
+        <p>Step 2 · {pillarLabel}</p>
+        <h1>{copy.title}</h1>
+        <span>{copy.subtitle}</span>
+        <div className="quickstart-pillar-status" aria-label="Pillar progress">
+          {(['Body', 'Mind', 'Soul'] as Pillar[]).map((item) => <span key={item} data-current={item === pillar}>{pillarLabels[item]} <small>{displayedSelections[item].length}/{minimum}</small></span>)}
         </div>
-        <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
-          <span
-            className={`quickstart-bonus-pill inline-flex text-[0.68rem] font-medium sm:text-[0.72rem] ${
-              balancedBonusActive ? 'quickstart-bonus-pill--ready' : 'quickstart-bonus-pill--pending'
-            }`}
-          >
-            {balancedBonusActive ? copy.bonusReady : copy.bonusPending}
-          </span>
-        </div>
+        <div className="quickstart-foundation-count" aria-live="polite"><span><strong>{selectedIds.length}</strong> / {minimum} foundations</span><span>{selectedIds.length * 3} GP ready</span></div>
+        <div className="quickstart-foundation-progress" aria-hidden><span style={{ width: `${Math.min(100, (selectedIds.length / minimum) * 100)}%` }} /></div>
       </header>
 
       <div className="space-y-2.5">
