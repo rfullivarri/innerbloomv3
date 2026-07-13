@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
+import { useId } from 'react';
 import type { GameMode } from '../state';
 import type { OnboardingLanguage } from '../constants';
 import { GAME_MODE_META } from '../../lib/gameModeMeta';
+import { useThemePreference } from '../../theme/ThemePreferenceProvider';
 
 interface GameModeStepProps {
   language?: OnboardingLanguage;
@@ -20,35 +22,121 @@ export const MODE_CARD_CONTENT = {
 
 const MODE_ORDER: GameMode[] = ['LOW', 'CHILL', 'FLOW', 'EVOLVE'];
 
+const RHYTHM_WAVE_CONFIG: Record<GameMode, { oscillations: number; amplitude: number; activeRatio: number }> = {
+  LOW: { oscillations: 2, amplitude: 18, activeRatio: 0.25 },
+  CHILL: { oscillations: 2.25, amplitude: 20, activeRatio: 0.37 },
+  FLOW: { oscillations: 2.75, amplitude: 22, activeRatio: 0.52 },
+  EVOLVE: { oscillations: 3.25, amplitude: 24, activeRatio: 0.62 },
+};
+
+const SVG_WIDTH = 320;
+const SVG_HEIGHT = 88;
+const WAVE_START_X = 18;
+const WAVE_END_X = 302;
+const WAVE_CENTER_Y = 44;
+const WAVE_PHASE = -0.34;
+
+function buildSinePath(mode: GameMode, phase = WAVE_PHASE) {
+  const config = RHYTHM_WAVE_CONFIG[mode];
+  return Array.from({ length: 116 }, (_, index) => {
+    const progress = index / 115;
+    const x = WAVE_START_X + (WAVE_END_X - WAVE_START_X) * progress;
+    const y = WAVE_CENTER_Y + Math.sin(progress * config.oscillations * Math.PI * 2 + phase) * config.amplitude;
+    return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+  }).join(' ');
+}
+
+function buildAnimatedSinePathValues(mode: GameMode) {
+  return [WAVE_PHASE, WAVE_PHASE + 0.3, WAVE_PHASE + 0.62, WAVE_PHASE]
+    .map((phase) => buildSinePath(mode, phase))
+    .join('; ');
+}
+
+function RhythmWave({ mode, active }: { mode: GameMode; active: boolean }) {
+  const rawId = useId().replace(/:/g, '');
+  const gradientId = `onboarding-rhythm-wave-gradient-${rawId}`;
+  const clipId = `onboarding-rhythm-wave-clip-${rawId}`;
+  const path = buildSinePath(mode);
+  const animatedPathValues = buildAnimatedSinePathValues(mode);
+  const activeWidth = WAVE_START_X + (WAVE_END_X - WAVE_START_X) * RHYTHM_WAVE_CONFIG[mode].activeRatio;
+  const animationDuration = active ? '7.6s' : `${8.8 + RHYTHM_WAVE_CONFIG[mode].activeRatio * 2}s`;
+
+  return (
+    <div className="relative h-[3.35rem] w-full min-w-[8.25rem] overflow-visible sm:h-16" role="img" aria-label={`${mode} weekly rhythm wave`}>
+      <svg className="absolute inset-0 h-full w-full overflow-visible" viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`} preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id={gradientId} x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stopColor="#8B5CF6" />
+            <stop offset="50%" stopColor="#D977FF" />
+            <stop offset="100%" stopColor="#FF86C8" />
+          </linearGradient>
+          <clipPath id={clipId}>
+            <rect x="0" y="0" width={activeWidth} height={SVG_HEIGHT} />
+          </clipPath>
+        </defs>
+        <path d={path} fill="none" stroke="rgba(125,128,159,0.34)" strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 5.8 : 5.2}>
+          <animate attributeName="d" dur={animationDuration} repeatCount="indefinite" values={animatedPathValues} />
+        </path>
+        <path d={path} fill="none" stroke={`url(#${gradientId})`} strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 14 : 10} opacity={active ? 0.5 : 0.22} clipPath={`url(#${clipId})`} filter="blur(4px)">
+          <animate attributeName="d" dur={animationDuration} repeatCount="indefinite" values={animatedPathValues} />
+        </path>
+        <path d={path} fill="none" stroke={`url(#${gradientId})`} strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 6.8 : 5.8} opacity={active ? 0.98 : 0.86} clipPath={`url(#${clipId})`}>
+          <animate attributeName="d" dur={animationDuration} repeatCount="indefinite" values={animatedPathValues} />
+        </path>
+      </svg>
+    </div>
+  );
+}
+
 function RhythmSegments({ intensity }: { intensity: number }) {
-  return <span className="onboarding-rhythm-segments" aria-hidden>{[1, 2, 3, 4].map((segment) => <i key={segment} data-active={segment <= intensity} />)}</span>;
+  return (
+    <span className="onboarding-rhythm-segments" aria-hidden>
+      {[1, 2, 3, 4].map((segment) => <i key={segment} data-active={segment <= intensity} />)}
+    </span>
+  );
 }
 
 export function GameModeStep({ language = 'es', selected, onSelect, onBack, variant = 'default' }: GameModeStepProps) {
-  const copy = language === 'en'
+  const { theme } = useThemePreference();
+  const isLight = theme === 'light';
+  const visualOnly = variant === 'onboarding2';
+  const defaultCopy = language === 'en'
     ? {
-        step: 'Step 1',
-        title: 'Start possible, not perfect.',
-        subtitle: 'Choose your rhythm.',
+        step: 'Step 1 · Choose your rhythm',
+        title: 'What is your rhythm today?',
+        subtitle: 'Choose the weekly intensity that best adapts to you.',
         back: 'Back',
         selectedSuffix: ' selected',
       }
     : {
-        step: 'Paso 1',
-        title: 'Empezá posible, no perfecto.',
-        subtitle: 'Elegí tu ritmo.',
+        step: 'Paso 1 · Elegí tu ritmo',
+        title: '¿Cuál es tu ritmo hoy?',
+        subtitle: 'Elegí la intensidad semanal que mejor se adapta a vos.',
         back: 'Volver',
         selectedSuffix: ' seleccionado',
       };
+  const visualCopy = language === 'en'
+    ? { ...defaultCopy, step: 'Step 1', title: 'Start possible, not perfect.', subtitle: 'Choose your rhythm.' }
+    : { ...defaultCopy, step: 'Paso 1', title: 'Empezá posible, no perfecto.', subtitle: 'Elegí tu ritmo.' };
+  const copy = visualOnly ? visualCopy : defaultCopy;
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-      <div className={`onboarding-flow-panel ${variant === 'onboarding2' ? 'onboarding-rhythm-selector' : ''} mx-auto max-w-4xl p-4 sm:p-6`}>
-        <header className="onboarding-rhythm-selector__header">
-          <p>{copy.step}</p>
-          <h2>{copy.title}</h2>
-          <span>{copy.subtitle}</span>
-        </header>
+      <div className={`onboarding-flow-panel ${visualOnly ? 'onboarding-rhythm-selector' : ''} mx-auto max-w-4xl p-4 sm:p-6`}>
+        {visualOnly ? (
+          <header className="onboarding-rhythm-selector__header">
+            <p>{copy.step}</p>
+            <h2>{copy.title}</h2>
+            <span>{copy.subtitle}</span>
+          </header>
+        ) : (
+          <header className="flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-[0.2em] text-white/50">{copy.step}</p>
+            <h2 className="text-3xl font-semibold text-white">{copy.title}</h2>
+            <p className="text-sm text-white/70">{copy.subtitle}</p>
+          </header>
+        )}
+
         <div className="mt-7 space-y-3 md:space-y-4" role="group" aria-label={copy.title}>
           {MODE_ORDER.map((mode) => {
             const content = MODE_CARD_CONTENT[mode];
@@ -64,18 +152,44 @@ export function GameModeStep({ language = 'es', selected, onSelect, onBack, vari
                 aria-pressed={isActive}
                 aria-label={`${content.title} · ${content.frequency[language]}${isActive ? copy.selectedSuffix : ''}`}
                 data-selected={isActive ? 'true' : 'false'}
-                className={[
-                  'onboarding-rhythm-card',
-                  variant === 'onboarding2' ? 'onboarding-rhythm-card--segments' : 'relative grid min-h-[4.75rem] w-full grid-cols-[4.25rem_minmax(0,1fr)_4.9rem] items-center gap-2 overflow-hidden rounded-[1.45rem] border px-3 py-2 text-left transition-all duration-300 ease-out sm:grid-cols-[5.5rem_minmax(0,1fr)_6.6rem] sm:gap-4 sm:px-5',
-                  isActive && variant === 'onboarding2' ? 'onboarding-rhythm-card--selected' : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
+                className={visualOnly
+                  ? `onboarding-rhythm-card onboarding-rhythm-card--segments ${isActive ? 'onboarding-rhythm-card--selected' : ''}`
+                  : [
+                      'onboarding-rhythm-card group relative grid min-h-[4.75rem] w-full grid-cols-[4.25rem_minmax(0,1fr)_4.9rem] items-center gap-2 overflow-hidden rounded-[1.45rem] border px-3 py-2 text-left transition-all duration-300 ease-out focus-visible:outline-none sm:grid-cols-[5.5rem_minmax(0,1fr)_6.6rem] sm:gap-4 sm:px-5 md:min-h-[6.05rem] md:grid-cols-[7rem_minmax(0,1fr)_7.5rem] md:rounded-[1.8rem] md:px-6',
+                      isLight
+                        ? isActive
+                          ? 'border-[#8b5cf6]/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(245,240,255,0.88))] shadow-[0_18px_42px_rgba(139,92,246,0.16)]'
+                          : 'border-slate-200/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(248,250,252,0.82))] shadow-[0_10px_24px_rgba(15,23,42,0.06)] hover:border-[#c4b5fd] hover:bg-white'
+                        : isActive
+                          ? 'border-[#b66cff]/80 bg-[linear-gradient(135deg,rgba(33,25,62,0.72),rgba(14,14,30,0.74))] shadow-[inset_0_0_32px_rgba(169,85,247,0.13),0_20px_56px_rgba(87,50,156,0.22)]'
+                          : 'border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055),rgba(10,12,27,0.48))] shadow-[inset_0_1px_0_rgba(255,255,255,0.055)] hover:border-white/18 hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(10,12,27,0.56))]',
+                    ].join(' ')}
               >
-                <span className="onboarding-rhythm-card__copy"><h3>
-                  {content.title.replace(' MOOD', '').replace(' Mood', '')}
-                </h3><small>{variant === 'onboarding2' ? content.state[language] : content.frequency[language]}</small></span>
-                {variant === 'onboarding2' ? <><span className="onboarding-rhythm-card__days"><strong>{intensity}</strong><small>{language === 'en' ? 'days/week' : 'días/semana'}</small></span><RhythmSegments intensity={intensity} /></> : null}
+                {visualOnly ? (
+                  <>
+                    <span className="onboarding-rhythm-card__copy">
+                      <h3>{content.title.replace(' MOOD', '').replace(' Mood', '')}</h3>
+                      <small>{content.state[language]}</small>
+                    </span>
+                    <span className="onboarding-rhythm-card__days">
+                      <strong>{intensity}</strong>
+                      <small>{language === 'en' ? 'days/week' : 'días/semana'}</small>
+                    </span>
+                    <RhythmSegments intensity={intensity} />
+                  </>
+                ) : (
+                  <>
+                    <h3 className="relative z-10 min-w-0 text-[1rem] font-semibold text-white/94 sm:text-[1.2rem] md:text-[1.58rem]">
+                      {content.title.replace(' MOOD', '').replace(' Mood', '')}
+                    </h3>
+                    <div className="relative z-10 min-w-0">
+                      <RhythmWave mode={mode} active={isActive} />
+                    </div>
+                    <div className="relative z-10 justify-self-end text-right text-[0.78rem] font-semibold text-white/88 sm:text-sm md:text-base">
+                      {content.frequency[language]}
+                    </div>
+                  </>
+                )}
               </motion.button>
             );
           })}
