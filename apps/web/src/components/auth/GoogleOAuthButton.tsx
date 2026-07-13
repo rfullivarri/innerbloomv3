@@ -13,6 +13,61 @@ type GoogleOAuthButtonProps = {
 };
 
 const SSO_CALLBACK_PATH = '/sso-callback';
+export const OAUTH_REDIRECT_INTENT_STORAGE_KEY = 'innerbloom:oauth-redirect-intent';
+const OAUTH_REDIRECT_INTENT_TTL_MS = 10 * 60 * 1000;
+
+export type OAuthRedirectIntent = {
+  mode: GoogleOAuthMode;
+  redirectUrlComplete: string;
+  createdAt: number;
+};
+
+function persistOAuthRedirectIntent(intent: OAuthRedirectIntent) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.sessionStorage.setItem(OAUTH_REDIRECT_INTENT_STORAGE_KEY, JSON.stringify(intent));
+  } catch (error) {
+    console.warn('[auth] Failed to persist OAuth redirect intent', error);
+  }
+}
+
+export function readOAuthRedirectIntent(): OAuthRedirectIntent | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const rawIntent = window.sessionStorage.getItem(OAUTH_REDIRECT_INTENT_STORAGE_KEY);
+    if (!rawIntent) {
+      return null;
+    }
+
+    const intent = JSON.parse(rawIntent) as Partial<OAuthRedirectIntent>;
+    const isSafeRedirect =
+      typeof intent.redirectUrlComplete === 'string' &&
+      intent.redirectUrlComplete.startsWith('/') &&
+      !intent.redirectUrlComplete.startsWith('//');
+    const isValidMode = intent.mode === 'sign-in' || intent.mode === 'sign-up';
+    const isRecent =
+      typeof intent.createdAt === 'number' &&
+      Date.now() - intent.createdAt >= 0 &&
+      Date.now() - intent.createdAt <= OAUTH_REDIRECT_INTENT_TTL_MS;
+
+    if (!isSafeRedirect || !isValidMode || !isRecent) {
+      window.sessionStorage.removeItem(OAUTH_REDIRECT_INTENT_STORAGE_KEY);
+      return null;
+    }
+
+    return intent as OAuthRedirectIntent;
+  } catch (error) {
+    console.warn('[auth] Failed to read OAuth redirect intent', error);
+    window.sessionStorage.removeItem(OAUTH_REDIRECT_INTENT_STORAGE_KEY);
+    return null;
+  }
+}
 
 export function GoogleOAuthButton({
   language,
@@ -56,6 +111,7 @@ export function GoogleOAuthButton({
     }
 
     setIsRedirecting(true);
+    persistOAuthRedirectIntent({ mode, redirectUrlComplete, createdAt: Date.now() });
 
     try {
       if (mode === 'sign-up') {
