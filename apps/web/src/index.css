@@ -2222,6 +2222,170 @@
     outline: none;
   }
 
+  .onboarding2-premium-root { background: #080910; }
+  .onboarding2-premium-root .onboarding-flow-panel { background: transparent; }
+  .onboarding2-premium-root .quickstart-premium-root { background: #080910; }
+
+  .onboarding2-premium-root .onboarding-rhythm-selector__header {
+    padding-top: 1.5rem;
+    text-align: center;
+  }
+
+  .onboarding2-premium-root .onboarding-rhythm-selector__header p {
+    color: var(--ib-onboarding-violet);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .onboarding2-premium-root .onboarding-rhythm-selector__header h2 {
+    margin-top: 0.85rem;
+    color: var(--ib-onboarding-text);
+    font-size: 1.65rem;
+    font-weight: 650;
+    line-height: 1.15;
+  }
+
+  .onboarding2-premium-root .onboarding-rhythm-selector__header span {
+    display: block;
+    margin-top: 1rem;
+    color: var(--ib-onboarding-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 650;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .onboarding2-premium-root .onboarding-rhythm-card--segments {
+    display: grid !important;
+    min-height: 6.35rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 0.8rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--ib-onboarding-violet) 20%, var(--ib-onboarding-border)) !important;
+    border-radius: 1.4rem !important;
+    background: rgba(255, 255, 255, 0.025) !important;
+    padding: 1rem !important;
+    text-align: left;
+  }
+
+  .onboarding2-premium-root .onboarding-rhythm-card--segments.onboarding-rhythm-card--selected {
+    border-color: color-mix(in srgb, var(--ib-onboarding-violet) 50%, var(--ib-onboarding-border)) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--ib-onboarding-violet) 68%, transparent) !important;
+  }
+
+  .onboarding2-premium-root .onboarding-rhythm-card__copy h3 {
+    color: var(--ib-onboarding-text);
+    font-size: 1.2rem;
+    font-weight: 750;
+    letter-spacing: 0.13em;
+    line-height: 1;
+  }
+
+  .onboarding2-premium-root .onboarding-rhythm-card__copy small,
+  .onboarding2-premium-root .onboarding-rhythm-card__days small {
+    display: block;
+    margin-top: 0.45rem;
+    color: var(--ib-onboarding-text-muted);
+    font-size: 0.78rem;
+    line-height: 1.1;
+  }
+
+  .onboarding2-premium-root .onboarding-rhythm-card__days { text-align: right; }
+  .onboarding2-premium-root .onboarding-rhythm-card__days strong { color: var(--ib-onboarding-text); font-size: 1.9rem; font-weight: 760; line-height: 0.8; }
+  .onboarding2-premium-root .onboarding-rhythm-card__days small { font-size: 0.74rem; }
+  .onboarding2-premium-root .onboarding-rhythm-segments { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; width: 100%; }
+  .onboarding2-premium-root .onboarding-rhythm-segments i { height: 0.42rem; border-radius: 999px; background: rgba(255,255,255,0.14); }
+  .onboarding2-premium-root .onboarding-rhythm-segments i[data-active="true"] { background: linear-gradient(90deg, #8f5bf2, #bc80e8); }
+
+  .onboarding2-premium-root .quickstart-foundations-header {
+    border-top: 1px solid var(--ib-onboarding-border);
+    padding-top: 1.35rem;
+  }
+
+  .onboarding2-premium-root .quickstart-foundations-header > p {
+    color: var(--ib-onboarding-violet);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .onboarding2-premium-root .quickstart-foundations-header h1 {
+    margin-top: 0.6rem;
+    color: var(--ib-onboarding-text);
+    font-size: 1.78rem;
+    font-weight: 650;
+    line-height: 1.08;
+  }
+
+  .onboarding2-premium-root .quickstart-foundations-header > span {
+    display: block;
+    margin-top: 0.7rem;
+    color: var(--ib-onboarding-text-secondary);
+    font-size: 0.96rem;
+    line-height: 1.45;
+  }
+
+  .onboarding2-premium-root .quickstart-pillar-status {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.15rem;
+    margin-top: 1.3rem;
+    padding: 0.2rem;
+    border: 1px solid var(--ib-onboarding-border);
+    border-radius: 0.8rem;
+    background: rgba(255,255,255,0.025);
+  }
+
+  .onboarding2-premium-root .quickstart-pillar-status span {
+    min-width: 0;
+    padding: 0.66rem 0.3rem;
+    border-radius: 0.6rem;
+    color: var(--ib-onboarding-text-muted);
+    font-size: 0.69rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .onboarding2-premium-root .quickstart-pillar-status span[data-current="true"] { background: color-mix(in srgb, var(--ib-onboarding-violet) 24%, transparent); color: #dfccff; }
+  .onboarding2-premium-root .quickstart-pillar-status small { color: inherit; font-size: 0.63rem; }
+  .onboarding2-premium-root .quickstart-foundation-count { display:flex; justify-content:space-between; gap:1rem; margin-top:1.25rem; color:var(--ib-onboarding-text-secondary); font-size:0.76rem; font-weight:650; }
+  .onboarding2-premium-root .quickstart-foundation-count strong { color:#c9adff; font-size:1.28rem; line-height:0.8; }
+  .onboarding2-premium-root .quickstart-foundation-count span:last-child { color:#dfc5ef; }
+  .onboarding2-premium-root .quickstart-foundation-progress { height:0.34rem; margin-top:0.55rem; overflow:hidden; border-radius:999px; background:rgba(255,255,255,0.09); }
+  .onboarding2-premium-root .quickstart-foundation-progress span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#8f5bf2,#c685e8 55%,#efaa91); transition:width 200ms ease; }
+
+  .onboarding2-premium-root .quickstart-task-row--foundation {
+    min-height: 6.8rem;
+    border: 1px solid var(--ib-onboarding-border);
+    border-radius: 1.45rem;
+    background: rgba(255,255,255,0.025);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.035);
+  }
+
+  .onboarding2-premium-root .quickstart-task-row--foundation.quickstart-task-row--selected {
+    border-color: color-mix(in srgb, var(--ib-onboarding-violet) 62%, var(--ib-onboarding-border));
+    background: linear-gradient(90deg, rgba(105,74,165,0.31), rgba(255,255,255,0.025) 72%);
+    box-shadow: inset 3px 0 0 var(--ib-onboarding-violet);
+  }
+
+  .onboarding2-premium-root .quickstart-task-title { color: var(--ib-onboarding-text); font-size: 1rem; line-height: 1.28; }
+  .onboarding2-premium-root .quickstart-task-row--foundation .quickstart-selected-trait { margin-top:0.5rem; color: var(--ib-onboarding-text-muted); text-shadow:none; }
+  .onboarding2-premium-root .quickstart-task-row--foundation.quickstart-task-row--selected .quickstart-selected-trait { color:#c9adff; }
+  .onboarding2-premium-root .quickstart-task-resolved { margin-top:0.38rem; overflow:hidden; color:var(--ib-onboarding-text-secondary); font-size:0.69rem; line-height:1.15; text-overflow:ellipsis; white-space:nowrap; }
+  .onboarding2-premium-root .quickstart-quantity { display:grid; min-width:3.75rem; grid-template-columns:2.45rem 0.88rem; column-gap:0.18rem; justify-items:end; color:var(--ib-onboarding-text-muted); cursor:text; }
+  .onboarding2-premium-root .quickstart-quantity > span { display:flex; grid-column:1 / -1; align-items:center; gap:0.18rem; }
+  .onboarding2-premium-root .quickstart-quantity input { width:2.45rem; margin:0; border:0; border-bottom:1px solid rgba(255,255,255,0.18); background:transparent; color:inherit; font-size:1.65rem; font-weight:760; line-height:1; text-align:center; outline:0; }
+  .onboarding2-premium-root .quickstart-quantity small { grid-column:1; justify-self:center; margin-top:0.35rem; color:inherit; font-size:0.56rem; font-weight:700; letter-spacing:0.14em; line-height:1; text-transform:uppercase; }
+  .onboarding2-premium-root .quickstart-quantity svg { color:#ab8dea; }
+  .onboarding2-premium-root .quickstart-quantity--selected { color:var(--ib-onboarding-text); }
+  .onboarding2-premium-root .quickstart-quantity--selected input { border-bottom-color:#bda0f8; }
+  .onboarding2-premium-root .quickstart-quantity input:disabled { opacity:0.45; }
+  .onboarding2-premium-root .quickstart-quantity input::-webkit-outer-spin-button, .onboarding2-premium-root .quickstart-quantity input::-webkit-inner-spin-button { margin:0; -webkit-appearance:none; }
+
   :root[data-theme="light"] .quickstart-task-row {
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
   }

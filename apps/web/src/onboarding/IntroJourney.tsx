@@ -30,6 +30,7 @@ interface IntroJourneyProps {
   isSubmitting?: boolean;
   submitError?: string | null;
   skipAuthGateForDev?: boolean;
+  variant?: 'default' | 'onboarding2';
 }
 
 const OPEN_TEXT_FIELDS: Partial<Record<StepId, 'bodyOpen' | 'soulOpen' | 'mindOpen'>> = {
@@ -49,6 +50,7 @@ export function IntroJourney({
   isSubmitting = false,
   submitError = null,
   skipAuthGateForDev = false,
+  variant = 'default',
 }: IntroJourneyProps) {
   const {
     state,
@@ -336,6 +338,7 @@ export function IntroJourney({
               goNext();
             }}
             onBack={() => goToStep('clerk-gate')}
+            variant={variant}
           />
         );
       case 'structure-intro':
@@ -647,6 +650,7 @@ export function IntroJourney({
             onBackToPathSelect={() => goToStep('structure-intro')}
             onExit={handleExit}
             onRestart={handleRestart}
+            variant={variant}
           />
         </div>
         {isGpExplainerOpen ? <GpExplainerOverlay language={language} onClose={handleCloseGpExplainer} /> : null}
@@ -655,7 +659,7 @@ export function IntroJourney({
   }
 
   return (
-    <div className="onboarding-premium-root relative flex min-h-screen min-h-dvh flex-col overflow-x-hidden pb-16">
+    <div className={`onboarding-premium-root ${variant === 'onboarding2' ? 'onboarding2-premium-root' : ''} relative flex min-h-screen min-h-dvh flex-col overflow-x-hidden pb-16`}>
       <HUD
         language={language}
         mode={answers.mode}

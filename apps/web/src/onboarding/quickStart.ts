@@ -230,6 +230,15 @@ export interface QuickStartManualTaskCandidate {
   };
 }
 
+export function formatQuickStartTask(task: QuickStartTask, inputValue?: string): string {
+  const value = inputValue?.trim();
+  if (!value) {
+    return task.text;
+  }
+
+  return [task.inputBefore, task.text, value, task.inputAfter].filter(Boolean).join(' ');
+}
+
 export const QUICK_START_MODE_SOFT_STYLES: Record<GameMode, { tint: string; border: string; glow: string }> = {
   LOW: { tint: ONBOARDING_RHYTHM_THEME.LOW.softTint, border: ONBOARDING_RHYTHM_THEME.LOW.border, glow: ONBOARDING_RHYTHM_THEME.LOW.glow },
   CHILL: { tint: ONBOARDING_RHYTHM_THEME.CHILL.softTint, border: ONBOARDING_RHYTHM_THEME.CHILL.border, glow: ONBOARDING_RHYTHM_THEME.CHILL.glow },
@@ -252,7 +261,7 @@ export function buildQuickStartManualCandidates(args: {
 
       const inputValue = args.editableTaskValues[`${pillar}-${taskId}`]?.trim();
       return [{
-        task: task.text,
+        task: formatQuickStartTask(task, inputValue),
         pillar_code: pillar.toUpperCase(),
         trait_code: task.id.toUpperCase(),
         input_value: inputValue || undefined,
