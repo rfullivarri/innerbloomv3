@@ -18,7 +18,7 @@ export const QUICK_START_MINIMUMS: Record<GameMode, number> = {
   LOW: 1,
   CHILL: 2,
   FLOW: 3,
-  EVOLVE: 3,
+  EVOLVE: 4,
 };
 
 export const QUICK_START_SUGGESTED_RANGES: Record<GameMode, { min: number; max: number }> = {
