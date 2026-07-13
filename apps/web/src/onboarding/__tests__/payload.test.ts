@@ -77,7 +77,7 @@ describe('buildPayload onboarding_path', () => {
     expect(payload.data.foundations.body).toContain('MODERACION');
     expect(payload.data.quick_start?.manual_task_candidates).toEqual(expect.arrayContaining([
       expect.objectContaining({
-        task: 'Caminar durante',
+        task: 'Caminar durante 20 minutos',
         pillar_code: 'BODY',
         trait_code: 'ENERGIA',
         input_value: '20',
@@ -148,7 +148,7 @@ describe('buildPayload onboarding_path', () => {
     expect(traitCodes).not.toContain('POSTURE');
     expect(traitCodes).not.toContain('GRATITUDE');
     expect(payload.data.quick_start?.manual_task_candidates[0]).toEqual(expect.objectContaining({
-      task: 'Sleep at least',
+      task: 'Sleep at least 7 hours per night',
       trait_code: 'SUENO',
       input_value: '7',
     }));

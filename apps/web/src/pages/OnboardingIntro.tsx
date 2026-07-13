@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { IntroJourney } from '../onboarding/IntroJourney';
 import { type JourneyPayload } from '../onboarding/payload';
 import { JourneyGeneratingScreen } from '../onboarding/screens/JourneyGeneratingScreen';
@@ -50,6 +50,8 @@ export default function OnboardingIntroPage({
   quickStartPreviewDashboardPath = '/labs/mobile-premium/dashboard?onboardingPreview=1',
 }: OnboardingIntroPageProps = {}) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const variant = location.pathname === '/onboarding2' || location.pathname === '/intro-journey2' ? 'onboarding2' : 'default';
   const language = typeof window !== 'undefined' ? resolveOnboardingLanguage(window.location.search) : 'es';
   const devQuickStartPreview =
     import.meta.env.DEV
@@ -202,6 +204,7 @@ export default function OnboardingIntroPage({
         isSubmitting={isSubmitting}
         submitError={submitError}
         skipAuthGateForDev={devQuickStartPreview}
+        variant={variant}
       />
     </OnboardingProvider>
   );
