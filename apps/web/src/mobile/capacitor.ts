@@ -246,7 +246,7 @@ export function buildNativeAppUrl(host: string): string {
   return `${CAPACITOR_APP_SCHEME}://${CAPACITOR_APP_HOST}/${host}`;
 }
 
-function shouldUseEphemeralIOSGoogleAuth(url: string): boolean {
+function shouldUseIOSNativeAuthSession(url: string): boolean {
   if (getCapacitorPlatform() !== 'ios') {
     return false;
   }
@@ -255,7 +255,6 @@ function shouldUseEphemeralIOSGoogleAuth(url: string): boolean {
     const parsed = new URL(url);
     const mode = parsed.searchParams.get('mode');
     return parsed.pathname.endsWith('/mobile-auth')
-      && parsed.searchParams.get('provider') === 'google'
       && parsed.searchParams.get('fresh') === '1'
       && (mode === 'sign-in' || mode === 'sign-up');
   } catch {
@@ -268,19 +267,33 @@ function dispatchNativeAuthCallback(url: string): void {
     return;
   }
 
-  window.dispatchEvent(new CustomEvent(NATIVE_AUTH_CALLBACK_EVENT, { detail: { url } }));
+  const event = new CustomEvent(NATIVE_AUTH_CALLBACK_EVENT, {
+    detail: { url },
+    cancelable: true,
+  });
+  const wasNotCancelled = window.dispatchEvent(event);
+
+  // The iOS auth plugin resolves inside the WebView rather than through
+  // Capacitor's appUrlOpen event. Older web bundles did not subscribe to the
+  // custom event, so fall back to the registered app scheme and let the
+  // existing appUrlOpen bridge consume the same normalized callback.
+  if (wasNotCancelled) {
+    window.setTimeout(() => {
+      window.location.assign(url);
+    }, 0);
+  }
 }
 
 export async function openUrlInCapacitorBrowser(url: string): Promise<void> {
-  if (shouldUseEphemeralIOSGoogleAuth(url)) {
+  if (shouldUseIOSNativeAuthSession(url)) {
     const authBrowser = getInnerbloomAuthBrowserPlugin();
     if (!authBrowser) {
-      console.error('[mobile-auth] InnerbloomAuthBrowser unavailable for fresh iOS Google auth', {
+      console.error('[mobile-auth] InnerbloomAuthBrowser unavailable for fresh iOS auth', {
         url,
         platform: getCapacitorPlatform(),
         hasCapacitor: Boolean(getCapacitorGlobal()),
       });
-      throw new Error('InnerbloomAuthBrowser is unavailable for fresh iOS Google auth.');
+      throw new Error('InnerbloomAuthBrowser is unavailable for fresh iOS auth.');
     }
 
     const startedAt = Date.now();
@@ -360,12 +373,8 @@ export function shouldOpenExternalUrl(url: string): boolean {
   }
 
   try {
-    const parsed = new URL(url, window.location.href);
-    if (!/^https?:$/i.test(parsed.protocol)) {
-      return false;
-    }
-
-    return parsed.origin !== window.location.origin;
+    const parsed = new URL(url, typeof window !== 'undefined' ? window.location.href : undefined);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
   } catch {
     return false;
   }
