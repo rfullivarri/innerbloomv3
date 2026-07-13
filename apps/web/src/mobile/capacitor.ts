@@ -255,7 +255,6 @@ function shouldUseIOSNativeAuthSession(url: string): boolean {
     const parsed = new URL(url);
     const mode = parsed.searchParams.get('mode');
     return parsed.pathname.endsWith('/mobile-auth')
-      && parsed.searchParams.get('fresh') === '1'
       && (mode === 'sign-in' || mode === 'sign-up');
   } catch {
     return false;
@@ -273,10 +272,6 @@ function dispatchNativeAuthCallback(url: string): void {
   });
   const wasNotCancelled = window.dispatchEvent(event);
 
-  // The iOS auth plugin resolves inside the WebView rather than through
-  // Capacitor's appUrlOpen event. Older web bundles did not subscribe to the
-  // custom event, so fall back to the registered app scheme and let the
-  // existing appUrlOpen bridge consume the same normalized callback.
   if (wasNotCancelled) {
     window.setTimeout(() => {
       window.location.assign(url);
@@ -288,12 +283,12 @@ export async function openUrlInCapacitorBrowser(url: string): Promise<void> {
   if (shouldUseIOSNativeAuthSession(url)) {
     const authBrowser = getInnerbloomAuthBrowserPlugin();
     if (!authBrowser) {
-      console.error('[mobile-auth] InnerbloomAuthBrowser unavailable for fresh iOS auth', {
+      console.error('[mobile-auth] InnerbloomAuthBrowser unavailable for iOS auth', {
         url,
         platform: getCapacitorPlatform(),
         hasCapacitor: Boolean(getCapacitorGlobal()),
       });
-      throw new Error('InnerbloomAuthBrowser is unavailable for fresh iOS auth.');
+      throw new Error('InnerbloomAuthBrowser is unavailable for iOS auth.');
     }
 
     const startedAt = Date.now();
