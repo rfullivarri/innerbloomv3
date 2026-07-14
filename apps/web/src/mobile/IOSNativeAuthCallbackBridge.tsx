@@ -1,9 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  INNERBLOOM2_DASHBOARD_PATH,
-  INNERBLOOM2_INTRO_JOURNEY_PATH,
-} from '../config/auth';
+import { INNERBLOOM2_DASHBOARD_PATH } from '../config/auth';
 import { NATIVE_AUTH_CALLBACK_EVENT, getCapacitorPlatform } from './capacitor';
 import { resolveMobileAuthSessionFromCallback } from './mobileAuthSession';
 import { resolveCallbackTargetPath } from './NativeMobileBridge';
@@ -46,18 +43,14 @@ export function IOSNativeAuthCallbackBridge() {
           ? '/'
           : INNERBLOOM2_DASHBOARD_PATH;
 
-      const safeNextPath = nextPath === '/intro-journey2'
-        ? INNERBLOOM2_INTRO_JOURNEY_PATH
-        : nextPath;
-
       console.info('[mobile-auth] iOS callback event consumed', {
         type: resolution.type,
         currentPath,
-        nextPath: safeNextPath,
+        nextPath,
         at: Date.now(),
       });
 
-      navigate(safeNextPath, { replace: true });
+      navigate(nextPath, { replace: true });
     };
 
     window.addEventListener(NATIVE_AUTH_CALLBACK_EVENT, handleNativeAuthCallback);
