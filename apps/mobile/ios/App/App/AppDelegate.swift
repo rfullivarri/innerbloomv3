@@ -2,7 +2,7 @@ import UIKit
 import Capacitor
 
 final class InnerbloomBridgeViewController: CAPBridgeViewController {
-    override open func capacitorDidLoad() {
+    override public func capacitorDidLoad() {
         bridge?.registerPluginInstance(InnerbloomAuthBrowserPlugin())
     }
 }

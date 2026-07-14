@@ -58,6 +58,7 @@ import PrivacyPage from './pages/legal/PrivacyPage';
 import TermsPage from './pages/legal/TermsPage';
 import SupportPage from './pages/legal/SupportPage';
 import AccountDeletionPage from './pages/AccountDeletion';
+import MobileAccountSettings from './pages/MobileAccountSettings';
 import SsoCallbackPage from './pages/SsoCallback';
 import { SHOW_BILLING_UI } from './config/releaseFlags';
 
@@ -306,7 +307,7 @@ export default function App() {
   const normalizedDashboardPath = rawDashboardPath.startsWith('/') ? rawDashboardPath : `/${rawDashboardPath}`;
   const trimmedDashboardPath = normalizedDashboardPath.replace(/\/+$/, '') || DEFAULT_DASHBOARD_PATH;
   const dashboardRoutePath = `${trimmedDashboardPath}/*`;
-  const signedInRedirectPath = isNativeApp ? '/' : trimmedDashboardPath;
+  const signedInRedirectPath = isNativeApp ? INNERBLOOM2_DASHBOARD_PATH : trimmedDashboardPath;
   const dashboardAliases = ['/dashboard', '/dashboard-v3'].filter(
     (alias) => alias !== trimmedDashboardPath,
   );
@@ -326,6 +327,7 @@ export default function App() {
         <Route path="/v2" element={isNativeApp ? <MobileAppEntry /> : <LandingV2Page />} />
         <Route path="/v3" element={isNativeApp ? <MobileAppEntry /> : <LandingLegacyPage />} />
         <Route path="/premium-timeline" element={<PremiumTimelineDemoPage />} />
+        <Route path="/mobile-account" element={<MobileAccountSettings />} />
         <Route path="/demo" element={<DemoDashboardPage />} />
         <Route path="/demo-mode-select" element={<DemoModeSelectPage />} />
         <Route path="/labs" element={<LabsIndexPage />} />
