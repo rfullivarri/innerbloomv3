@@ -15,41 +15,52 @@ final class InnerbloomBridgeViewController: CAPBridgeViewController {
 
     private func presentInnerbloomLaunchOverlay() {
         guard launchOverlay == nil else { return }
+
         let overlay = UIView()
         overlay.translatesAutoresizingMaskIntoConstraints = false
         overlay.backgroundColor = UIColor(red: 5 / 255, green: 7 / 255, blue: 11 / 255, alpha: 1)
         overlay.isUserInteractionEnabled = false
 
+        let glow = UIView()
+        glow.translatesAutoresizingMaskIntoConstraints = false
+        glow.backgroundColor = UIColor(red: 132 / 255, green: 92 / 255, blue: 246 / 255, alpha: 0.16)
+        glow.layer.cornerRadius = 150
+        glow.layer.shadowColor = UIColor(red: 132 / 255, green: 92 / 255, blue: 246 / 255, alpha: 1).cgColor
+        glow.layer.shadowOpacity = 0.38
+        glow.layer.shadowRadius = 72
+        glow.layer.shadowOffset = .zero
+
         let logo = UIImageView(image: UIImage(named: "Splash"))
         logo.translatesAutoresizingMaskIntoConstraints = false
         logo.contentMode = .scaleAspectFit
 
-        let wordmark = UILabel()
-        wordmark.translatesAutoresizingMaskIntoConstraints = false
-        wordmark.text = "INNERBLOOM"
-        wordmark.textColor = UIColor(white: 1, alpha: 0.92)
-        wordmark.font = UIFont.systemFont(ofSize: 21, weight: .semibold)
-        wordmark.textAlignment = .center
-
+        overlay.addSubview(glow)
         overlay.addSubview(logo)
-        overlay.addSubview(wordmark)
         view.addSubview(overlay)
+
         NSLayoutConstraint.activate([
             overlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             overlay.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             overlay.topAnchor.constraint(equalTo: view.topAnchor),
             overlay.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            glow.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
+            glow.centerYAnchor.constraint(equalTo: overlay.centerYAnchor),
+            glow.widthAnchor.constraint(equalToConstant: 300),
+            glow.heightAnchor.constraint(equalTo: glow.widthAnchor),
+
             logo.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
-            logo.centerYAnchor.constraint(equalTo: overlay.centerYAnchor, constant: -24),
-            logo.widthAnchor.constraint(equalToConstant: 156),
-            logo.heightAnchor.constraint(equalTo: logo.widthAnchor),
-            wordmark.topAnchor.constraint(equalTo: logo.bottomAnchor, constant: 18),
-            wordmark.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
+            logo.centerYAnchor.constraint(equalTo: overlay.centerYAnchor),
+            logo.widthAnchor.constraint(lessThanOrEqualTo: overlay.widthAnchor, multiplier: 0.58),
+            logo.heightAnchor.constraint(lessThanOrEqualToConstant: 260),
         ])
+
         launchOverlay = overlay
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.35) { [weak self, weak overlay] in
-            UIView.animate(withDuration: 0.28, animations: { overlay?.alpha = 0 }) { _ in
+            UIView.animate(withDuration: 0.28, animations: {
+                overlay?.alpha = 0
+            }) { _ in
                 overlay?.removeFromSuperview()
                 self?.launchOverlay = nil
             }
