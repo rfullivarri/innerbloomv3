@@ -255,7 +255,7 @@ function shouldUseIOSNativeAuthSession(url: string): boolean {
     const parsed = new URL(url);
     const mode = parsed.searchParams.get('mode');
     return parsed.pathname.endsWith('/mobile-auth')
-      && (mode === 'sign-in' || mode === 'sign-up');
+      && (mode === 'sign-in' || mode === 'sign-up' || mode === 'refresh' || mode === 'logout');
   } catch {
     return false;
   }
