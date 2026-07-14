@@ -14,25 +14,12 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="glw-IB-202">
-                                <rect key="frame" x="37.5" y="183.5" width="300" height="300"/>
-                                <color key="backgroundColor" red="0.5176470588" green="0.3607843137" blue="0.9647058824" alpha="0.12" colorSpace="custom" customColorSpace="sRGB"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <real key="value" value="150"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
-                            </view>
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Splash" translatesAutoresizingMaskIntoConstraints="NO" id="snD-IY-ifK">
                                 <rect key="frame" x="79" y="203.5" width="217" height="260"/>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" red="0.01960784314" green="0.02745098039" blue="0.0431372549" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="glw-IB-202" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="glw-x"/>
-                            <constraint firstItem="glw-IB-202" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="glw-y"/>
-                            <constraint firstItem="glw-IB-202" firstAttribute="width" constant="300" id="glw-w"/>
-                            <constraint firstItem="glw-IB-202" firstAttribute="height" constant="300" id="glw-h"/>
                             <constraint firstItem="snD-IY-ifK" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="logo-x"/>
                             <constraint firstItem="snD-IY-ifK" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="logo-y"/>
                             <constraint firstItem="snD-IY-ifK" firstAttribute="width" secondItem="Ze5-6b-2t3" secondAttribute="width" multiplier="0.58" id="logo-w"/>
