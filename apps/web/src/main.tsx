@@ -10,6 +10,7 @@ import { getClerkLocalization } from './lib/clerkLocalization';
 import { ThemePreferenceProvider } from './theme/ThemePreferenceProvider';
 import { applyStoredThemePreference } from './theme/themePreference';
 import { PostLoginLanguageProvider } from './i18n/postLoginLanguage';
+import { IOSNativeAuthCallbackBridge } from './mobile/IOSNativeAuthCallbackBridge';
 import { NativeMobileBridge } from './mobile/NativeMobileBridge';
 import { isNativeCapacitorPlatform } from './mobile/capacitor';
 import { RuntimeAuthProvider } from './auth/runtimeAuth';
@@ -98,6 +99,7 @@ createRoot(rootElement).render(
       <LocalizedClerkProvider>
         <PostLoginLanguageProvider>
           <ThemePreferenceProvider>
+            <IOSNativeAuthCallbackBridge />
             <NativeMobileBridge />
             <App />
           </ThemePreferenceProvider>
