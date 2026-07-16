@@ -48,7 +48,6 @@ public class InnerbloomAuthBrowserPlugin extends Plugin {
                         .setShowTitle(false)
                         .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
                         .build();
-                customTabsIntent.intent.setPackage(resolveCustomTabsPackage());
                 customTabsIntent.launchUrl(getContext(), uri);
 
                 // Android returns the final callback through Capacitor's appUrlOpen event.
@@ -60,10 +59,5 @@ public class InnerbloomAuthBrowserPlugin extends Plugin {
                 call.reject("Unable to start authentication session", "AUTH_START_FAILED", error);
             }
         });
-    }
-
-    private String resolveCustomTabsPackage() {
-        String packageName = CustomTabsIntent.getPackageName(getContext(), null);
-        return packageName != null ? packageName : getContext().getPackageName();
     }
 }
