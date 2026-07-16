@@ -115,6 +115,9 @@ export const CAPACITOR_KEYBOARD_STYLE_DARK = 'DARK' as const;
 export const CAPACITOR_KEYBOARD_RESIZE_NATIVE = 'native' as const;
 export const NATIVE_AUTH_CALLBACK_EVENT = 'innerbloom:native-auth-callback';
 
+const NATIVE_AUTH_LOGOUT_REMINDER_PRESERVE_KEY = 'innerbloom.mobile.auth.logout-reminder-preserve.v1';
+const NATIVE_AUTH_LOGOUT_REMINDER_PRESERVE_TTL_MS = 5_000;
+
 function buildNativeCallbackPrefixes(): string[] {
   return [
     `${CAPACITOR_APP_SCHEME}://${CAPACITOR_APP_HOST}/${CAPACITOR_CALLBACK_HOST}`,
@@ -246,19 +249,48 @@ export function buildNativeAppUrl(host: string): string {
   return `${CAPACITOR_APP_SCHEME}://${CAPACITOR_APP_HOST}/${host}`;
 }
 
-function shouldUseIOSNativeAuthSession(url: string): boolean {
-  if (getCapacitorPlatform() !== 'ios') {
+type NativeAuthMode = 'sign-in' | 'sign-up' | 'refresh' | 'logout';
+
+function resolveNativeAuthMode(url: string): NativeAuthMode | null {
+  try {
+    const parsed = new URL(url);
+    if (!parsed.pathname.endsWith('/mobile-auth')) {
+      return null;
+    }
+
+    const mode = parsed.searchParams.get('mode');
+    return mode === 'sign-in' || mode === 'sign-up' || mode === 'refresh' || mode === 'logout'
+      ? mode
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function shouldUseNativeAuthPlugin(url: string): boolean {
+  const platform = getCapacitorPlatform();
+  return (platform === 'ios' || platform === 'android') && resolveNativeAuthMode(url) !== null;
+}
+
+function markNativeLogoutReminderPreservation(): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.sessionStorage.setItem(NATIVE_AUTH_LOGOUT_REMINDER_PRESERVE_KEY, String(Date.now()));
+}
+
+export function consumeNativeLogoutReminderPreservation(): boolean {
+  if (typeof window === 'undefined') {
     return false;
   }
 
-  try {
-    const parsed = new URL(url);
-    const mode = parsed.searchParams.get('mode');
-    return parsed.pathname.endsWith('/mobile-auth')
-      && (mode === 'sign-in' || mode === 'sign-up' || mode === 'refresh' || mode === 'logout');
-  } catch {
-    return false;
-  }
+  const raw = window.sessionStorage.getItem(NATIVE_AUTH_LOGOUT_REMINDER_PRESERVE_KEY);
+  window.sessionStorage.removeItem(NATIVE_AUTH_LOGOUT_REMINDER_PRESERVE_KEY);
+  const startedAt = Number(raw);
+  return Number.isFinite(startedAt)
+    && startedAt > 0
+    && Date.now() - startedAt <= NATIVE_AUTH_LOGOUT_REMINDER_PRESERVE_TTL_MS;
 }
 
 function dispatchNativeAuthCallback(url: string): void {
@@ -280,34 +312,43 @@ function dispatchNativeAuthCallback(url: string): void {
 }
 
 export async function openUrlInCapacitorBrowser(url: string): Promise<void> {
-  if (shouldUseIOSNativeAuthSession(url)) {
+  const nativeAuthMode = resolveNativeAuthMode(url);
+  if (nativeAuthMode === 'logout') {
+    markNativeLogoutReminderPreservation();
+  }
+
+  if (shouldUseNativeAuthPlugin(url)) {
+    const platform = getCapacitorPlatform();
     const authBrowser = getInnerbloomAuthBrowserPlugin();
     if (!authBrowser) {
-      console.error('[mobile-auth] InnerbloomAuthBrowser unavailable for iOS auth', {
+      console.error('[mobile-auth] InnerbloomAuthBrowser unavailable for native auth', {
         url,
-        platform: getCapacitorPlatform(),
+        platform,
         hasCapacitor: Boolean(getCapacitorGlobal()),
       });
-      throw new Error('InnerbloomAuthBrowser is unavailable for iOS auth.');
-    }
+      if (platform === 'ios') {
+        throw new Error('InnerbloomAuthBrowser is unavailable for iOS auth.');
+      }
+    } else {
+      const startedAt = Date.now();
+      console.info('[mobile-auth] InnerbloomAuthBrowser.open() start', { url, platform, startedAt });
+      const result = await authBrowser.open({
+        url,
+        callbackScheme: CAPACITOR_APP_SCHEME,
+        prefersEphemeralWebBrowserSession: true,
+      });
+      console.info('[mobile-auth] InnerbloomAuthBrowser.open() end', {
+        url,
+        platform,
+        callbackUrl: result?.url ?? null,
+        finishedAt: Date.now(),
+      });
 
-    const startedAt = Date.now();
-    console.info('[mobile-auth] InnerbloomAuthBrowser.open() start', { url, startedAt });
-    const result = await authBrowser.open({
-      url,
-      callbackScheme: CAPACITOR_APP_SCHEME,
-      prefersEphemeralWebBrowserSession: true,
-    });
-    console.info('[mobile-auth] InnerbloomAuthBrowser.open() end', {
-      url,
-      callbackUrl: result?.url ?? null,
-      finishedAt: Date.now(),
-    });
-
-    if (result?.url) {
-      dispatchNativeAuthCallback(result.url);
+      if (result?.url) {
+        dispatchNativeAuthCallback(result.url);
+      }
+      return;
     }
-    return;
   }
 
   const browser = getCapacitorBrowserPlugin();
