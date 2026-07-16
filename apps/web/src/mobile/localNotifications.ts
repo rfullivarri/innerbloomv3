@@ -3,7 +3,11 @@ import { resolvePostLoginTranslation } from '../i18n/post-login';
 import { type PostLoginLanguage, POSTLOGIN_LANGUAGE_STORAGE_KEY, detectDeviceLanguage } from '../i18n/postLoginLanguage';
 import { AUTH_LANGUAGE_STORAGE_KEY } from '../lib/authLanguage';
 import { INNERBLOOM2_DAILY_QUEST_PATH } from '../config/auth';
-import { getCapacitorLocalNotificationsPlugin, isNativeCapacitorPlatform } from './capacitor';
+import {
+  consumeNativeLogoutReminderPreservation,
+  getCapacitorLocalNotificationsPlugin,
+  isNativeCapacitorPlatform,
+} from './capacitor';
 import { writeMobileDebug } from './mobileDebug';
 
 const DAILY_REMINDER_NOTIFICATION_CHANNEL_ID = 'daily-quest-reminders';
@@ -18,6 +22,7 @@ type DailyReminderNotificationPermissionResult = {
 };
 
 const ONBOARDING_LANGUAGE_STORAGE_KEY = 'innerbloom.onboarding.language';
+let isReminderSyncInProgress = false;
 
 function normalizeLanguage(raw: string | null | undefined): PostLoginLanguage | null {
   if (!raw) {
@@ -144,11 +149,7 @@ export async function ensureNativeDailyReminderNotificationPermissions(options?:
   return { granted: true, exactAlarm: null };
 }
 
-export async function cancelNativeDailyReminderNotification(): Promise<void> {
-  if (!isNativeCapacitorPlatform()) {
-    return;
-  }
-
+async function performNativeDailyReminderCancellation(): Promise<void> {
   const plugin = getCapacitorLocalNotificationsPlugin();
   if (!plugin) {
     logNativeReminder('cancel-plugin-missing');
@@ -160,6 +161,34 @@ export async function cancelNativeDailyReminderNotification(): Promise<void> {
   logNativeReminder('cancel-scheduled', {
     ids: notifications.map((notification) => notification.id),
   });
+}
+
+export async function cancelNativeDailyReminderNotification(): Promise<void> {
+  if (!isNativeCapacitorPlatform()) {
+    return;
+  }
+
+  if (isReminderSyncInProgress || typeof window === 'undefined') {
+    await performNativeDailyReminderCancellation();
+    return;
+  }
+
+  // Logout currently asks for cancellation before opening the auth surface. Defer
+  // one task so the unified auth adapter can mark that lifecycle as "preserve".
+  // Account deletion does not open logout auth, so its cancellation still runs.
+  logNativeReminder('cancel-deferred-for-lifecycle-check');
+  window.setTimeout(() => {
+    if (consumeNativeLogoutReminderPreservation()) {
+      logNativeReminder('cancel-skipped-for-logout');
+      return;
+    }
+
+    void performNativeDailyReminderCancellation().catch((error) => {
+      logNativeReminder('cancel-failed', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    });
+  }, 0);
 }
 
 export async function sendNativeDailyReminderTestNotification(): Promise<void> {
@@ -236,86 +265,91 @@ export async function syncNativeDailyReminderNotification(
     return;
   }
 
-  if (!isReminderEnabled(reminder)) {
-    logNativeReminder('sync-reminder-disabled', {
+  isReminderSyncInProgress = true;
+  try {
+    if (!isReminderEnabled(reminder)) {
+      logNativeReminder('sync-reminder-disabled', {
+        status: reminder?.status ?? null,
+        enabled: reminder?.enabled ?? null,
+      });
+      await cancelNativeDailyReminderNotification();
+      return;
+    }
+
+    const permissions = options?.requestPermissions
+      ? await ensureNativeDailyReminderNotificationPermissions()
+      : await plugin.checkPermissions().then((result) => ({ granted: result.display === 'granted' }));
+
+    if (!permissions.granted) {
+      logNativeReminder('sync-permission-denied', { requestPermissions: options?.requestPermissions === true });
+      await cancelNativeDailyReminderNotification();
+      if (options?.requestPermissions) {
+        throw new Error(tNotification('dailyQuest.mobile.permissionRequired'));
+      }
+      return;
+    }
+
+    const { hour, minute, second } = normalizeLocalTimeParts(reminder?.local_time ?? reminder?.localTime ?? '09:00:00');
+    const exactAlarm = await plugin.checkExactNotificationSetting?.().catch((error) => {
+      logNativeReminder('sync-exact-alarm-check-failed', { error: error instanceof Error ? error.message : String(error) });
+      return null;
+    });
+    if (exactAlarm) {
+      logNativeReminder('sync-exact-alarm-check', { exactAlarm: exactAlarm.exact_alarm });
+    }
+    await plugin.createChannel?.({
+      id: DAILY_REMINDER_NOTIFICATION_CHANNEL_ID,
+      name: 'Daily Quest reminders',
+      description: 'Daily reminders to open your Daily Quest.',
+      importance: 4,
+      visibility: 1,
+      lights: true,
+      vibration: true,
+    }).catch((error) => {
+      logNativeReminder('sync-channel-create-failed', { error: error instanceof Error ? error.message : String(error) });
+    });
+
+    logNativeReminder('sync-schedule-start', {
+      id: DAILY_REMINDER_NOTIFICATION_ID,
+      hour,
+      minute,
+      second,
       status: reminder?.status ?? null,
       enabled: reminder?.enabled ?? null,
+      channel: reminder?.channel ?? null,
     });
+
     await cancelNativeDailyReminderNotification();
-    return;
-  }
-
-  const permissions = options?.requestPermissions
-    ? await ensureNativeDailyReminderNotificationPermissions()
-    : await plugin.checkPermissions().then((result) => ({ granted: result.display === 'granted' }));
-
-  if (!permissions.granted) {
-    logNativeReminder('sync-permission-denied', { requestPermissions: options?.requestPermissions === true });
-    await cancelNativeDailyReminderNotification();
-    if (options?.requestPermissions) {
-      throw new Error(tNotification('dailyQuest.mobile.permissionRequired'));
-    }
-    return;
-  }
-
-  const { hour, minute, second } = normalizeLocalTimeParts(reminder?.local_time ?? reminder?.localTime ?? '09:00:00');
-  const exactAlarm = await plugin.checkExactNotificationSetting?.().catch((error) => {
-    logNativeReminder('sync-exact-alarm-check-failed', { error: error instanceof Error ? error.message : String(error) });
-    return null;
-  });
-  if (exactAlarm) {
-    logNativeReminder('sync-exact-alarm-check', { exactAlarm: exactAlarm.exact_alarm });
-  }
-  await plugin.createChannel?.({
-    id: DAILY_REMINDER_NOTIFICATION_CHANNEL_ID,
-    name: 'Daily Quest reminders',
-    description: 'Daily reminders to open your Daily Quest.',
-    importance: 4,
-    visibility: 1,
-    lights: true,
-    vibration: true,
-  }).catch((error) => {
-    logNativeReminder('sync-channel-create-failed', { error: error instanceof Error ? error.message : String(error) });
-  });
-
-  logNativeReminder('sync-schedule-start', {
-    id: DAILY_REMINDER_NOTIFICATION_ID,
-    hour,
-    minute,
-    second,
-    status: reminder?.status ?? null,
-    enabled: reminder?.enabled ?? null,
-    channel: reminder?.channel ?? null,
-  });
-
-  await cancelNativeDailyReminderNotification();
-  await plugin.schedule({
-    notifications: [
-      {
-        id: DAILY_REMINDER_NOTIFICATION_ID,
-        title: tNotification('dailyQuest.mobile.notification.title'),
-        body: tNotification('dailyQuest.mobile.notification.body'),
-        channelId: DAILY_REMINDER_NOTIFICATION_CHANNEL_ID,
-        smallIcon: 'ic_stat_innerbloom',
-        iconColor: '#A855F7',
-        schedule: {
-          on: { hour, minute, second },
-          allowWhileIdle: true,
+    await plugin.schedule({
+      notifications: [
+        {
+          id: DAILY_REMINDER_NOTIFICATION_ID,
+          title: tNotification('dailyQuest.mobile.notification.title'),
+          body: tNotification('dailyQuest.mobile.notification.body'),
+          channelId: DAILY_REMINDER_NOTIFICATION_CHANNEL_ID,
+          smallIcon: 'ic_stat_innerbloom',
+          iconColor: '#A855F7',
+          schedule: {
+            on: { hour, minute, second },
+            allowWhileIdle: true,
+          },
+          extra: {
+            targetPath: DAILY_REMINDER_NOTIFICATION_TARGET_PATH,
+            kind: 'daily-reminder',
+          },
         },
-        extra: {
-          targetPath: DAILY_REMINDER_NOTIFICATION_TARGET_PATH,
-          kind: 'daily-reminder',
-        },
-      },
-    ],
-  });
-  const pending = await plugin.getPending?.().catch((error) => {
-    logNativeReminder('sync-pending-check-failed', { error: error instanceof Error ? error.message : String(error) });
-    return null;
-  });
-  logNativeReminder('sync-scheduled', {
-    id: DAILY_REMINDER_NOTIFICATION_ID,
-    pendingCount: pending?.notifications?.length ?? null,
-    pendingIds: pending?.notifications?.map((notification) => notification.id).filter(Boolean) ?? null,
-  });
+      ],
+    });
+    const pending = await plugin.getPending?.().catch((error) => {
+      logNativeReminder('sync-pending-check-failed', { error: error instanceof Error ? error.message : String(error) });
+      return null;
+    });
+    logNativeReminder('sync-scheduled', {
+      id: DAILY_REMINDER_NOTIFICATION_ID,
+      pendingCount: pending?.notifications?.length ?? null,
+      pendingIds: pending?.notifications?.map((notification) => notification.id).filter(Boolean) ?? null,
+    });
+  } finally {
+    isReminderSyncInProgress = false;
+  }
 }
