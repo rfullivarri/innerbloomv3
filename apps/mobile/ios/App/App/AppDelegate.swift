@@ -6,36 +6,59 @@ final class InnerbloomBridgeViewController: CAPBridgeViewController {
 
     override public func viewDidLoad() {
         super.viewDidLoad()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(applicationDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
         presentInnerbloomLaunchOverlay()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     override public func capacitorDidLoad() {
         bridge?.registerPluginInstance(InnerbloomAuthBrowserPlugin())
     }
 
+    @objc private func applicationDidBecomeActive() {
+        presentInnerbloomLaunchOverlay()
+    }
+
     private func presentInnerbloomLaunchOverlay() {
-        guard launchOverlay == nil else { return }
+        guard launchOverlay == nil, isViewLoaded, view.window != nil else { return }
 
         let overlay = UIView()
         overlay.translatesAutoresizingMaskIntoConstraints = false
         overlay.backgroundColor = UIColor(red: 5 / 255, green: 7 / 255, blue: 11 / 255, alpha: 1)
         overlay.isUserInteractionEnabled = false
 
-        let glow = UIView()
-        glow.translatesAutoresizingMaskIntoConstraints = false
-        glow.backgroundColor = UIColor(red: 132 / 255, green: 92 / 255, blue: 246 / 255, alpha: 0.16)
-        glow.layer.cornerRadius = 150
-        glow.layer.shadowColor = UIColor(red: 132 / 255, green: 92 / 255, blue: 246 / 255, alpha: 1).cgColor
-        glow.layer.shadowOpacity = 0.38
-        glow.layer.shadowRadius = 72
-        glow.layer.shadowOffset = .zero
-
         let logo = UIImageView(image: UIImage(named: "Splash"))
         logo.translatesAutoresizingMaskIntoConstraints = false
         logo.contentMode = .scaleAspectFit
 
-        overlay.addSubview(glow)
-        overlay.addSubview(logo)
+        let wordmark = UILabel()
+        wordmark.translatesAutoresizingMaskIntoConstraints = false
+        wordmark.textAlignment = .center
+        wordmark.numberOfLines = 1
+        wordmark.attributedText = NSAttributedString(
+            string: "INNERBLOOM",
+            attributes: [
+                .font: UIFont(name: "AvenirNext-DemiBold", size: 17) ?? UIFont.systemFont(ofSize: 17, weight: .semibold),
+                .foregroundColor: UIColor(white: 1, alpha: 0.78),
+                .kern: 6.5,
+            ]
+        )
+
+        let lockup = UIStackView(arrangedSubviews: [logo, wordmark])
+        lockup.translatesAutoresizingMaskIntoConstraints = false
+        lockup.axis = .vertical
+        lockup.alignment = .center
+        lockup.spacing = 20
+
+        overlay.addSubview(lockup)
         view.addSubview(overlay)
 
         NSLayoutConstraint.activate([
@@ -44,43 +67,45 @@ final class InnerbloomBridgeViewController: CAPBridgeViewController {
             overlay.topAnchor.constraint(equalTo: view.topAnchor),
             overlay.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
-            glow.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
-            glow.centerYAnchor.constraint(equalTo: overlay.centerYAnchor),
-            glow.widthAnchor.constraint(equalToConstant: 300),
-            glow.heightAnchor.constraint(equalTo: glow.widthAnchor),
-
-            logo.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
-            logo.centerYAnchor.constraint(equalTo: overlay.centerYAnchor),
-            logo.widthAnchor.constraint(lessThanOrEqualTo: overlay.widthAnchor, multiplier: 0.58),
-            logo.heightAnchor.constraint(lessThanOrEqualToConstant: 260),
+            lockup.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
+            lockup.centerYAnchor.constraint(equalTo: overlay.centerYAnchor),
+            logo.widthAnchor.constraint(equalToConstant: 118),
+            logo.heightAnchor.constraint(equalToConstant: 118),
         ])
 
         launchOverlay = overlay
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.35) { [weak self, weak overlay] in
-            UIView.animate(withDuration: 0.28, animations: {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.25) { [weak self, weak overlay] in
+            UIView.animate(withDuration: 0.24, animations: {
                 overlay?.alpha = 0
-            }) { _ in
+            }, completion: { _ in
                 overlay?.removeFromSuperview()
                 self?.launchOverlay = nil
-            }
+            })
         }
     }
 }
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool { true }
 
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        return true
+    }
+
+    func application(
+        _ application: UIApplication,
+        configurationForConnecting connectingSceneSession: UISceneSession,
+        options: UIScene.ConnectionOptions
+    ) -> UISceneConfiguration {
         UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        ApplicationDelegateProxy.shared.application(app, open: url, options: options)
+        return ApplicationDelegateProxy.shared.application(app, open: url, options: options)
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
+        return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
     }
 }
