@@ -47,6 +47,8 @@ public class InnerbloomAuthBrowserPlugin extends Plugin {
                 CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
                         .setShowTitle(false)
                         .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+                        .setEphemeralBrowsingEnabled(true)
+                        .setSendToExternalDefaultHandlerEnabled(true)
                         .build();
                 customTabsIntent.launchUrl(getContext(), uri);
 
