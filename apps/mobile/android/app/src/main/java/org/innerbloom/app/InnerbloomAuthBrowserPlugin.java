@@ -47,7 +47,9 @@ public class InnerbloomAuthBrowserPlugin extends Plugin {
                 CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
                         .setShowTitle(false)
                         .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-                        .setEphemeralBrowsingEnabled(true)
+                        // Keep the Clerk browser session available so short-lived native callback
+                        // tokens can be refreshed without forcing the user through sign-in again.
+                        // Account selection is still forced by the web flow with prompt=select_account.
                         .setSendToExternalDefaultHandlerEnabled(true)
                         .build();
                 customTabsIntent.launchUrl(getContext(), uri);
