@@ -73,13 +73,55 @@ export function describeClerkOAuthError(error: unknown): Record<string, unknown>
   };
 }
 
-function persistOAuthRedirectIntent(intent: OAuthRedirectIntent) {
+export function normalizeOAuthRedirectIntentUrl(
+  redirectUrlComplete: string,
+  currentOrigin = typeof window !== 'undefined' ? window.location.origin : null,
+): string | null {
+  const candidate = redirectUrlComplete.trim();
+  if (!candidate) {
+    return null;
+  }
+
+  if (candidate.startsWith('/') && !candidate.startsWith('//')) {
+    return candidate;
+  }
+
+  if (!currentOrigin) {
+    return null;
+  }
+
+  try {
+    const trustedOrigin = new URL(currentOrigin).origin;
+    const parsed = new URL(candidate);
+    if (
+      (parsed.protocol !== 'http:' && parsed.protocol !== 'https:')
+      || parsed.origin !== trustedOrigin
+    ) {
+      return null;
+    }
+
+    return `${parsed.pathname}${parsed.search}${parsed.hash}` || '/';
+  } catch {
+    return null;
+  }
+}
+
+export function persistOAuthRedirectIntent(intent: OAuthRedirectIntent) {
   if (typeof window === 'undefined') {
     return;
   }
 
+  const redirectUrlComplete = normalizeOAuthRedirectIntentUrl(intent.redirectUrlComplete);
+  if (!redirectUrlComplete) {
+    console.warn('[auth] Refused to persist an unsafe OAuth redirect intent');
+    return;
+  }
+
   try {
-    window.sessionStorage.setItem(OAUTH_REDIRECT_INTENT_STORAGE_KEY, JSON.stringify(intent));
+    window.sessionStorage.setItem(OAUTH_REDIRECT_INTENT_STORAGE_KEY, JSON.stringify({
+      ...intent,
+      redirectUrlComplete,
+    }));
   } catch (error) {
     console.warn('[auth] Failed to persist OAuth redirect intent', error);
   }
@@ -97,22 +139,25 @@ export function readOAuthRedirectIntent(): OAuthRedirectIntent | null {
     }
 
     const intent = JSON.parse(rawIntent) as Partial<OAuthRedirectIntent>;
-    const isSafeRedirect =
-      typeof intent.redirectUrlComplete === 'string' &&
-      intent.redirectUrlComplete.startsWith('/') &&
-      !intent.redirectUrlComplete.startsWith('//');
+    const redirectUrlComplete = typeof intent.redirectUrlComplete === 'string'
+      ? normalizeOAuthRedirectIntentUrl(intent.redirectUrlComplete)
+      : null;
     const isValidMode = intent.mode === 'sign-in' || intent.mode === 'sign-up';
     const isRecent =
       typeof intent.createdAt === 'number' &&
       Date.now() - intent.createdAt >= 0 &&
       Date.now() - intent.createdAt <= OAUTH_REDIRECT_INTENT_TTL_MS;
 
-    if (!isSafeRedirect || !isValidMode || !isRecent) {
+    if (!redirectUrlComplete || !isValidMode || !isRecent) {
       window.sessionStorage.removeItem(OAUTH_REDIRECT_INTENT_STORAGE_KEY);
       return null;
     }
 
-    return intent as OAuthRedirectIntent;
+    return {
+      mode: intent.mode,
+      redirectUrlComplete,
+      createdAt: intent.createdAt,
+    };
   } catch (error) {
     console.warn('[auth] Failed to read OAuth redirect intent', error);
     window.sessionStorage.removeItem(OAUTH_REDIRECT_INTENT_STORAGE_KEY);
