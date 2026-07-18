@@ -52,6 +52,10 @@
   transform-origin: center;
 }
 
+.ib-store-badges[data-language="en"] .ib-store-badge--google-play .ib-store-badge-image {
+  transform: scale(1.29);
+}
+
 .ib-store-badge-coming-soon {
   position: relative;
 }
