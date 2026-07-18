@@ -10,7 +10,7 @@
     wrapper.setAttribute("aria-label", "Descargar Innerbloom");
 
     const appStore = document.createElement("span");
-    appStore.className = "ib-store-badge-disabled ib-store-badge-coming-soon";
+    appStore.className = "ib-store-badge ib-store-badge--app-store ib-store-badge-disabled ib-store-badge-coming-soon";
     appStore.setAttribute("aria-label", "Innerbloom estará disponible próximamente en App Store");
     appStore.setAttribute("role", "img");
 
@@ -23,7 +23,7 @@
     appStore.appendChild(appStoreImage);
 
     const googlePlay = document.createElement("a");
-    googlePlay.className = "ib-store-badge-link";
+    googlePlay.className = "ib-store-badge ib-store-badge--google-play ib-store-badge-link";
     googlePlay.href = GOOGLE_PLAY_URL;
     googlePlay.target = "_blank";
     googlePlay.rel = "noopener noreferrer";
@@ -43,18 +43,42 @@
     return wrapper;
   }
 
+  function syncBadgeTheme(wrapper) {
+    const heroTitle = document.querySelector(".hero .hero-copy h1");
+    if (!heroTitle) return;
+
+    const match = getComputedStyle(heroTitle).color.match(/\d+(?:\.\d+)?/g);
+    if (!match || match.length < 3) return;
+
+    const [red, green, blue] = match.slice(0, 3).map(Number);
+    const luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
+    wrapper.classList.toggle("ib-store-badges--dark", luminance > 0.6);
+    wrapper.classList.toggle("ib-store-badges--light", luminance <= 0.6);
+  }
+
   function mountStoreBadges() {
-    if (document.querySelector('[data-store-badges="hero"]')) return;
+    const existing = document.querySelector('[data-store-badges="hero"]');
+    if (existing) {
+      syncBadgeTheme(existing);
+      return;
+    }
 
     const heroCopy = document.querySelector(".hero .hero-copy");
-    const heroActions = heroCopy?.querySelector(".hero-actions");
-    if (!heroCopy || !heroActions) return;
+    const heroNote = heroCopy?.querySelector(".hero-cta-note");
+    if (!heroCopy || !heroNote) return;
 
-    heroActions.insertAdjacentElement("afterend", buildStoreBadges());
+    const badges = buildStoreBadges();
+    heroNote.insertAdjacentElement("afterend", badges);
+    syncBadgeTheme(badges);
   }
 
   const observer = new MutationObserver(mountStoreBadges);
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["class", "style", "data-theme"],
+  });
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", mountStoreBadges, { once: true });
