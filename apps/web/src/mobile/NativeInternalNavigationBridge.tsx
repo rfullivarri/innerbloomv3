@@ -2,6 +2,12 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isNativeCapacitorPlatform } from './capacitor';
 
+const TRUSTED_INTERNAL_HOSTS = new Set([
+  'innerbloomjourney.org',
+  'www.innerbloomjourney.org',
+  'localhost',
+]);
+
 function isPlainPrimaryClick(event: MouseEvent): boolean {
   return event.button === 0
     && !event.altKey
@@ -10,14 +16,19 @@ function isPlainPrimaryClick(event: MouseEvent): boolean {
     && !event.shiftKey;
 }
 
+function isTrustedInternalUrl(url: URL): boolean {
+  if (url.origin === window.location.origin) {
+    return true;
+  }
+
+  return (url.protocol === 'http:' || url.protocol === 'https:')
+    && TRUSTED_INTERNAL_HOSTS.has(url.hostname.toLowerCase());
+}
+
 /**
- * Capacitor can serve the app from the production HTTPS origin. In that setup,
- * React Router links resolve to absolute https://innerbloomjourney.org URLs.
- * The generic external-link bridge used to classify every HTTP(S) URL as
- * external and opened those routes in a Chrome Custom Tab.
- *
- * This bridge claims same-origin links first and routes them through React
- * Router, while leaving true external links to the existing browser bridge.
+ * Capacitor serves the native shell from its own local WebView origin, while
+ * React Router links can resolve against the production site origin. Those
+ * links still belong to the app and must stay inside the Capacitor WebView.
  */
 export function NativeInternalNavigationBridge() {
   const navigate = useNavigate();
@@ -28,7 +39,7 @@ export function NativeInternalNavigationBridge() {
     }
 
     const handleClick = (event: MouseEvent) => {
-      if (event.defaultPrevented || !isPlainPrimaryClick(event)) {
+      if (!isPlainPrimaryClick(event)) {
         return;
       }
 
@@ -50,7 +61,7 @@ export function NativeInternalNavigationBridge() {
         return;
       }
 
-      if (url.origin !== window.location.origin) {
+      if (!isTrustedInternalUrl(url)) {
         return;
       }
 
@@ -59,8 +70,9 @@ export function NativeInternalNavigationBridge() {
       navigate(`${url.pathname}${url.search}${url.hash}` || '/');
     };
 
-    document.addEventListener('click', handleClick, true);
-    return () => document.removeEventListener('click', handleClick, true);
+    // Window capture runs before the document-level external-link bridge.
+    window.addEventListener('click', handleClick, true);
+    return () => window.removeEventListener('click', handleClick, true);
   }, [navigate]);
 
   return null;
