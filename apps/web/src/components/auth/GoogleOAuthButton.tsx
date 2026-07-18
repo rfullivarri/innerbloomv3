@@ -17,6 +17,8 @@ type GoogleOAuthButtonProps = {
   redirectUrlComplete: string;
   className?: string;
   forceAccountSelection?: boolean;
+  /** @deprecated Cross-mode continuation is intentionally ignored because Clerk rejects it for this OAuth flow. */
+  allowCrossModeCompletion?: boolean;
 };
 
 const SSO_CALLBACK_PATH = '/sso-callback';
