@@ -1,5 +1,6 @@
 package org.innerbloom.app;
 
+import android.content.Intent;
 import android.net.Uri;
 
 import androidx.browser.customtabs.CustomTabsIntent;
@@ -52,7 +53,15 @@ public class InnerbloomAuthBrowserPlugin extends Plugin {
                         // Account selection is still forced by the web flow with prompt=select_account.
                         .setSendToExternalDefaultHandlerEnabled(true)
                         .build();
-                customTabsIntent.launchUrl(getContext(), uri);
+
+                // Authentication is the only reason this Custom Tab exists. Once the browser
+                // hands an innerbloom:// callback back to MainActivity, Android must discard the
+                // tab instead of leaving the web application visible above the Capacitor app.
+                customTabsIntent.intent.addFlags(
+                        Intent.FLAG_ACTIVITY_NO_HISTORY
+                                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                );
+                customTabsIntent.launchUrl(getActivity(), uri);
 
                 // Android returns the final callback through Capacitor's appUrlOpen event.
                 // Resolving here only confirms that the system authentication surface opened.
