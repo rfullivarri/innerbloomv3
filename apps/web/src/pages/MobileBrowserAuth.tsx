@@ -2,7 +2,11 @@ import { SignIn, SignUp, useAuth, useClerk, useSession, useSignIn, useSignUp, us
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { GoogleOAuthButton } from '../components/auth/GoogleOAuthButton';
+import {
+  GoogleOAuthButton,
+  buildGoogleOAuthRedirectOptions,
+  describeClerkOAuthError,
+} from '../components/auth/GoogleOAuthButton';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { CLERK_TOKEN_TEMPLATE } from '../config/auth';
 import { buildLocalizedAuthPath, resolveAuthLanguage, type AuthLanguage } from '../lib/authLanguage';
@@ -375,33 +379,24 @@ export default function MobileBrowserAuthPage() {
       return;
     }
 
-    // Google OAuth uses Clerk's sign-in resource for both entry intents. Clerk
-    // creates a user when needed and reliably completes existing Google users
-    // through this resource. The URL still carries mode=sign-up, so the native
-    // callback goes to the V2 onboarding rather than the dashboard.
+    // Google OAuth uses Clerk's sign-in resource for both entry intents. The URL
+    // still carries mode=sign-up when account creation should return to onboarding2.
     const resourceReady = signInLoaded && signIn;
     if (!isLoaded || !resourceReady) {
       return;
     }
 
     googleRedirectStartedRef.current = true;
-    const resource = signIn;
-    void resource
-      ?.authenticateWithRedirect({
-        strategy: 'oauth_google',
-        redirectUrl: '/sso-callback',
-        redirectUrlComplete: handoffUrl,
-        continueSignIn: true,
-        continueSignUp: true,
-        oidcPrompt: 'select_account',
-      })
+    const redirectOptions = buildGoogleOAuthRedirectOptions(handoffUrl, true);
+    void signIn
+      .authenticateWithRedirect(redirectOptions)
       .catch((cause) => {
         googleRedirectStartedRef.current = false;
-        console.error('[mobile-auth-page] google-oauth-start-failed', {
+        console.error(`[mobile-auth-page] google-oauth-start-failed ${JSON.stringify({
           at: Date.now(),
           mode,
-          error: cause instanceof Error ? cause.message : String(cause),
-        });
+          ...describeClerkOAuthError(cause),
+        })}`);
         setError(
           language === 'en'
             ? 'We could not start Google sign-in. Please try again.'
@@ -419,7 +414,6 @@ export default function MobileBrowserAuthPage() {
     shouldResetBrowserSession,
     signIn,
     signInLoaded,
-    signUp,
     isResettingBrowserSession,
   ]);
 
@@ -669,7 +663,6 @@ export default function MobileBrowserAuthPage() {
               oauthMode="sign-in"
               redirectUrlComplete={handoffUrl}
               forceAccountSelection
-              allowCrossModeCompletion
             />
             <div className={AUTH_DIVIDER_CLASS}>
               <span className="h-px flex-1 bg-white/12" aria-hidden />

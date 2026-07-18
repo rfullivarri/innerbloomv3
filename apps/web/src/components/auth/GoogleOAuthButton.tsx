@@ -3,6 +3,13 @@ import { useSignIn, useSignUp } from '@clerk/clerk-react';
 
 export type GoogleOAuthMode = 'sign-in' | 'sign-up';
 
+export type GoogleOAuthRedirectOptions = {
+  strategy: 'oauth_google';
+  redirectUrl: string;
+  redirectUrlComplete: string;
+  oidcPrompt?: 'select_account';
+};
+
 type GoogleOAuthButtonProps = {
   language: 'es' | 'en';
   mode: GoogleOAuthMode;
@@ -10,6 +17,7 @@ type GoogleOAuthButtonProps = {
   redirectUrlComplete: string;
   className?: string;
   forceAccountSelection?: boolean;
+  /** @deprecated Cross-mode continuation is intentionally ignored because Clerk rejects it for this OAuth flow. */
   allowCrossModeCompletion?: boolean;
 };
 
@@ -22,6 +30,48 @@ export type OAuthRedirectIntent = {
   redirectUrlComplete: string;
   createdAt: number;
 };
+
+export function buildGoogleOAuthRedirectOptions(
+  redirectUrlComplete: string,
+  forceAccountSelection: boolean,
+): GoogleOAuthRedirectOptions {
+  return {
+    strategy: 'oauth_google',
+    redirectUrl: SSO_CALLBACK_PATH,
+    redirectUrlComplete,
+    oidcPrompt: forceAccountSelection ? 'select_account' : undefined,
+  };
+}
+
+export function describeClerkOAuthError(error: unknown): Record<string, unknown> {
+  const candidate = error && typeof error === 'object'
+    ? error as {
+        name?: unknown;
+        message?: unknown;
+        code?: unknown;
+        errors?: Array<{ code?: unknown; message?: unknown; longMessage?: unknown }>;
+      }
+    : null;
+
+  return {
+    name: error instanceof Error ? error.name : typeof candidate?.name === 'string' ? candidate.name : null,
+    message: error instanceof Error
+      ? error.message
+      : typeof candidate?.message === 'string'
+        ? candidate.message
+        : typeof error === 'string'
+          ? error
+          : String(error),
+    code: typeof candidate?.code === 'string' ? candidate.code : null,
+    errors: Array.isArray(candidate?.errors)
+      ? candidate.errors.map((item) => ({
+          code: typeof item?.code === 'string' ? item.code : null,
+          message: typeof item?.message === 'string' ? item.message : null,
+          longMessage: typeof item?.longMessage === 'string' ? item.longMessage : null,
+        }))
+      : [],
+  };
+}
 
 function persistOAuthRedirectIntent(intent: OAuthRedirectIntent) {
   if (typeof window === 'undefined') {
@@ -77,7 +127,6 @@ export function GoogleOAuthButton({
   redirectUrlComplete,
   className = '',
   forceAccountSelection = false,
-  allowCrossModeCompletion = false,
 }: GoogleOAuthButtonProps) {
   const { isLoaded: isSignInLoaded, signIn } = useSignIn();
   const { isLoaded: isSignUpLoaded, signUp } = useSignUp();
@@ -114,38 +163,28 @@ export function GoogleOAuthButton({
 
     setIsRedirecting(true);
     persistOAuthRedirectIntent({ mode, redirectUrlComplete, createdAt: Date.now() });
+    const redirectOptions = buildGoogleOAuthRedirectOptions(
+      redirectUrlComplete,
+      shouldForceAccountSelection,
+    );
 
     try {
       if (oauthMode === 'sign-up') {
         if (!signUp) {
           throw new Error('Clerk sign-up resource is not ready');
         }
-        await signUp.authenticateWithRedirect({
-          strategy: 'oauth_google',
-          redirectUrl: SSO_CALLBACK_PATH,
-          redirectUrlComplete,
-          continueSignIn: allowCrossModeCompletion,
-          continueSignUp: allowCrossModeCompletion,
-          oidcPrompt: shouldForceAccountSelection ? 'select_account' : undefined,
-        });
+        await signUp.authenticateWithRedirect(redirectOptions);
       } else {
         if (!signIn) {
           throw new Error('Clerk sign-in resource is not ready');
         }
-        await signIn.authenticateWithRedirect({
-          strategy: 'oauth_google',
-          redirectUrl: SSO_CALLBACK_PATH,
-          redirectUrlComplete,
-          continueSignIn: allowCrossModeCompletion,
-          continueSignUp: allowCrossModeCompletion,
-          oidcPrompt: shouldForceAccountSelection ? 'select_account' : undefined,
-        });
+        await signIn.authenticateWithRedirect(redirectOptions);
       }
     } catch (error) {
-      console.error('[auth] Google OAuth redirect failed', error);
+      console.error(`[auth] Google OAuth redirect failed ${JSON.stringify(describeClerkOAuthError(error))}`);
       setIsRedirecting(false);
     }
-  }, [allowCrossModeCompletion, isLoaded, isRedirecting, mode, oauthMode, redirectUrlComplete, shouldForceAccountSelection, signIn, signUp]);
+  }, [isLoaded, isRedirecting, mode, oauthMode, redirectUrlComplete, shouldForceAccountSelection, signIn, signUp]);
 
   return (
     <button
