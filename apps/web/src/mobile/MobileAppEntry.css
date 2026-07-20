@@ -3,6 +3,63 @@
  * scenes for the bounded Capacitor viewport used by iOS and Android.
  */
 
+/* Keep the outer native step transition homogeneous while preserving every
+ * landing animation inside the copy and visual scene. The current step enters
+ * from the right, remains still for its reading interval, and exits to the left
+ * during the final part of the native 5.2 second cadence.
+ */
+.native-welcome-copy,
+.native-welcome-visual-shell {
+  animation: native-welcome-step-cycle 5200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: opacity, transform;
+}
+
+@keyframes native-welcome-step-cycle {
+  0% {
+    opacity: 0;
+    transform: translate3d(28px, 0, 0);
+  }
+
+  4.25% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  96.9% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(-28px, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .native-welcome-copy,
+  .native-welcome-visual-shell {
+    animation: native-welcome-step-cycle-reduced 5200ms linear both;
+  }
+
+  @keyframes native-welcome-step-cycle-reduced {
+    0%, 1.5% {
+      opacity: 0;
+      transform: none;
+    }
+
+    3%, 97% {
+      opacity: 1;
+      transform: none;
+    }
+
+    100% {
+      opacity: 0;
+      transform: none;
+    }
+  }
+}
+
 /* Step 1: remove the tiny internal "FLOW · Quick Start" label shown below the
  * native "Customize your tasks" phase heading. Keep the task cards and all
  * their internal rise/select animations unchanged.
