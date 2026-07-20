@@ -4,14 +4,23 @@
  */
 
 /* Keep the outer native step transition homogeneous while preserving every
- * landing animation inside the copy and visual scene. The current step enters
- * from the right, remains still for its reading interval, and exits to the left
- * during the final part of the native 5.2 second cadence.
+ * landing animation inside the visual scene. Copy and visual share the exact
+ * same cycle, while the copy's own descendants are prevented from adding a
+ * second pulse/transform on top of the native step transition.
  */
 .native-welcome-copy,
 .native-welcome-visual-shell {
   animation: native-welcome-step-cycle 5200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 0ms;
+  animation-iteration-count: 1;
   will-change: opacity, transform;
+}
+
+.native-welcome-copy > span,
+.native-welcome-copy > h1 {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 @keyframes native-welcome-step-cycle {
@@ -74,12 +83,36 @@
 
 /* Step 2: the native screen already has its own Step heading. Remove the
  * duplicate product topline ("Tareas / Cuerpo") while preserving the table
- * headings, rows, progress rings and all task animation behavior. Match the
- * landing selector specificity so the adapter wins consistently in WebViews.
+ * headings, rows and progress rings.
  */
 .native-welcome-visual-shell--step-2.landing.landing--v3-conversion
   .ib20-showcase-topline {
   display: none !important;
+}
+
+/* Landing's Step 2 loop eventually hides the task rows again. In native, each
+ * row enters once from below, then stays visible so the complete table can
+ * participate in the outer leftward exit instead of leaving a blank stage.
+ */
+.native-welcome-visual-shell--step-2.landing.landing--v3-conversion
+  .ib20-task-row {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  animation: native-welcome-step-2-row-enter 520ms cubic-bezier(0.22, 1, 0.36, 1) both !important;
+  animation-delay: var(--delay, 0ms) !important;
+  animation-iteration-count: 1 !important;
+}
+
+@keyframes native-welcome-step-2-row-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 /* Step 3: keep the detail scene on a stable width so the animated green chip
