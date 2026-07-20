@@ -14,6 +14,17 @@
   will-change: opacity, transform;
 }
 
+/* The native eyebrow and headline used to inherit their own landing motion,
+ * which read as a pulse on top of the outer slide. Keep the text internally
+ * still so STEP + headline travel in lockstep with the visual shell.
+ */
+.native-welcome-copy > span,
+.native-welcome-copy > h1 {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 @keyframes native-welcome-step-cycle {
   0% {
     opacity: 0;
@@ -80,6 +91,46 @@
 .native-welcome-visual-shell--step-2.landing.landing--v3-conversion
   .ib20-showcase-topline {
   display: none !important;
+}
+
+/* Landing loops the task panel and rows back to opacity: 0 near the end of its
+ * cycle. In native that creates a blank frame before the outer leftward exit.
+ * Run the panel and row entrances once, then hold their final visible state so
+ * the complete Step 2 composition is what exits the viewport.
+ */
+.native-welcome-visual-shell--step-2.landing.landing--v3-conversion
+  .ib20-tasks-panel {
+  animation: native-step-2-panel-enter 460ms cubic-bezier(0.22, 1, 0.36, 1) both !important;
+}
+
+.native-welcome-visual-shell--step-2.landing.landing--v3-conversion
+  .ib20-task-row {
+  animation: native-step-2-row-enter 520ms cubic-bezier(0.22, 1, 0.36, 1) both !important;
+  animation-delay: calc(90ms + var(--delay)) !important;
+}
+
+@keyframes native-step-2-panel-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes native-step-2-row-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 /* Step 3: keep the detail scene on a stable width so the animated green chip
