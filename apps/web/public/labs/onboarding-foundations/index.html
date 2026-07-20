@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Innerbloom Labs - Onboarding Foundations</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #05060c;
+        --panel: #0c0e17;
+        --panel-strong: #111522;
+        --line: rgba(255, 255, 255, 0.13);
+        --line-strong: rgba(181, 139, 255, 0.46);
+        --text: #f7f4ff;
+        --muted: rgba(247, 244, 255, 0.64);
+        --soft: rgba(247, 244, 255, 0.38);
+        --violet: #a77cff;
+        --violet-strong: #8b5cf6;
+        --peach: #ffb095;
+        --track: rgba(255, 255, 255, 0.13);
+        --selected: rgba(139, 92, 246, 0.2);
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body { margin: 0; min-height: 100%; background: var(--bg); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text); }
+      body { display: flex; justify-content: center; }
+      button, input { font: inherit; }
+      button { color: inherit; }
+
+      .shell { width: min(100%, 430px); min-height: 100vh; background: #070811; padding: max(20px, env(safe-area-inset-top)) 18px max(28px, env(safe-area-inset-bottom)); }
+      .brand { display: flex; align-items: center; justify-content: space-between; padding: 6px 0 28px; }
+      .brand-lockup { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
+      .flower { width: 31px; height: 31px; object-fit: contain; }
+      .mode { color: var(--violet); font-size: 13px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+      .progress { height: 5px; overflow: hidden; border-radius: 999px; background: var(--track); }
+      .progress span { display: block; width: 36%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--violet-strong), #d283e0, var(--peach)); }
+      .divider { height: 1px; margin: 28px 0 46px; background: var(--line); }
+
+      .eyebrow { margin: 0 0 20px; color: var(--violet); font-size: 14px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; }
+      h1 { margin: 0; max-width: 340px; font-size: 40px; line-height: 1.05; letter-spacing: -0.02em; }
+      .subtitle { margin: 26px 0 28px; max-width: 340px; color: var(--muted); font-size: 24px; line-height: 1.34; letter-spacing: -0.01em; }
+
+      .tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 5px; margin-bottom: 26px; border: 1px solid var(--line); border-radius: 17px; background: rgba(255, 255, 255, 0.025); }
+      .tab { min-height: 48px; border: 0; border-radius: 12px; background: transparent; color: rgba(247, 244, 255, 0.46); font-weight: 800; cursor: pointer; }
+      .tab.active { background: rgba(139, 92, 246, 0.28); color: #ddccff; }
+      .tab small { margin-left: 4px; color: inherit; opacity: 0.82; }
+
+      .summary { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+      .summary strong { color: #c69cff; font-size: 34px; line-height: 1; }
+      .summary span { color: var(--muted); font-size: 18px; font-weight: 700; }
+      .summary .gp { color: #e7d5ff; font-size: 17px; font-weight: 800; }
+      .pillar-progress { height: 7px; overflow: hidden; border-radius: 999px; background: var(--track); margin-bottom: 30px; }
+      .pillar-progress span { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--violet-strong), #d986df, var(--peach)); transition: width 180ms ease; }
+
+      .task-list { display: grid; gap: 18px; }
+      .task-card { position: relative; display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; align-items: center; gap: 18px; min-height: 126px; width: 100%; border: 1px solid var(--line); border-radius: 22px; background: linear-gradient(180deg, rgba(21, 25, 39, 0.92), rgba(14, 16, 25, 0.96)); padding: 22px 18px; text-align: left; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); cursor: pointer; transition: border-color 160ms ease, background 160ms ease, transform 160ms ease; }
+      .task-card:active { transform: scale(0.99); }
+      .task-card.selected { border-color: var(--line-strong); background: linear-gradient(115deg, rgba(139, 92, 246, 0.28), rgba(20, 23, 37, 0.94)); }
+      .task-card.selected::before { content: ""; position: absolute; inset: -1px auto -1px -1px; width: 6px; border-radius: 22px 0 0 22px; background: var(--violet-strong); }
+      .task-card::after { content: ""; position: absolute; left: 18px; right: 18px; bottom: 17px; height: 5px; border-radius: 999px; background: var(--track); }
+      .task-card.selected::after { background: linear-gradient(90deg, var(--violet-strong), #d986df, var(--peach)); }
+
+      .icon { display: grid; place-items: center; width: 45px; height: 45px; border: 1px solid var(--line); border-radius: 999px; color: var(--violet); }
+      .selected .icon { border-color: rgba(167, 124, 255, 0.68); background: rgba(139, 92, 246, 0.18); color: #caa9ff; }
+      .icon svg { width: 23px; height: 23px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+      .copy { min-width: 0; padding-bottom: 13px; }
+      .title { display: block; color: var(--text); font-size: 24px; line-height: 1.16; letter-spacing: -0.02em; }
+      .trait { display: block; margin-top: 12px; color: rgba(247,244,255,0.43); font-size: 13px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; }
+      .selected .trait { color: #c8a6ff; }
+
+      .quantity { display: grid; justify-items: center; min-width: 68px; padding-bottom: 14px; color: rgba(247,244,255,0.6); }
+      .number-row { display: flex; align-items: center; justify-content: center; gap: 7px; }
+      .qty-input { width: 54px; border: 0; border-bottom: 1px solid rgba(247,244,255,0.18); border-radius: 0; background: transparent; color: rgba(247,244,255,0.62); font-size: 40px; font-weight: 800; line-height: 1; text-align: center; outline: none; transition: color 160ms ease, border-color 160ms ease; }
+      .selected .qty-input, .qty-input:focus { color: var(--text); border-color: rgba(247,244,255,0.46); }
+      .edit { width: 17px; height: 17px; color: var(--violet); opacity: 0.9; }
+      .unit { margin-top: 8px; color: rgba(247,244,255,0.54); font-size: 12px; font-weight: 900; letter-spacing: 0.16em; text-transform: uppercase; }
+
+      .continue { position: sticky; bottom: max(14px, env(safe-area-inset-bottom)); width: 100%; min-height: 56px; margin-top: 28px; border: 0; border-radius: 999px; background: linear-gradient(135deg, var(--violet-strong), #a56cff); color: white; font-size: 17px; font-weight: 800; box-shadow: 0 16px 40px rgba(139, 92, 246, 0.34); }
+      .continue:disabled { background: rgba(255,255,255,0.11); color: rgba(255,255,255,0.36); box-shadow: none; }
+
+      @media (max-width: 370px) {
+        .shell { padding-left: 14px; padding-right: 14px; }
+        h1 { font-size: 36px; }
+        .subtitle { font-size: 21px; }
+        .task-card { grid-template-columns: 50px minmax(0, 1fr) auto; gap: 12px; padding-left: 14px; padding-right: 14px; }
+        .title { font-size: 21px; }
+        .qty-input { width: 46px; font-size: 35px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="brand">
+        <div class="brand-lockup"><img class="flower" alt="" src="/IB-COLOR-LOGO-v2.png" />INNERBLOOM</div>
+        <div class="mode">EVOLVE</div>
+      </header>
+      <div class="progress"><span></span></div>
+      <div class="divider"></div>
+
+      <p class="eyebrow" id="stepLabel">STEP 2 · BODY</p>
+      <h1>Build a rhythm you can keep.</h1>
+      <p class="subtitle">Start with three foundations. You can always add more later.</p>
+
+      <nav class="tabs" aria-label="Foundation pillars">
+        <button class="tab active" type="button" data-pillar="body">Body <small>0/3</small></button>
+        <button class="tab" type="button" data-pillar="mind">Mind <small>0/3</small></button>
+        <button class="tab" type="button" data-pillar="soul">Soul <small>0/3</small></button>
+      </nav>
+
+      <section class="summary" aria-live="polite">
+        <div><strong id="selectedCount">0</strong> <span>/ 3 foundations</span></div>
+        <div class="gp" id="gpReady">0 GP ready</div>
+      </section>
+      <div class="pillar-progress"><span id="pillarProgress"></span></div>
+
+      <section class="task-list" id="taskList"></section>
+      <button class="continue" type="button" id="continueButton" disabled>Choose 3 foundations</button>
+    </main>
+
+    <script>
+      const icons = {
+        energy: '<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/>',
+        nutrition: '<path d="M12 20c-4-2-6.5-5.2-6.5-9 0-2.2 1.5-3.5 3.3-3.5 1.4 0 2.4.7 3.2 1.8.8-1.1 1.8-1.8 3.2-1.8 1.8 0 3.3 1.3 3.3 3.5 0 3.8-2.5 7-6.5 9Z"/><path d="M12 6c0-2 1.1-3.2 3-3.5"/>',
+        sleep: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/>',
+        recovery: '<path d="M3 12a8 8 0 1 0 2.3-5.7"/><path d="M3 4v5h5"/>',
+        hydration: '<path d="M12 3s6 6.2 6 10.4A6 6 0 0 1 6 13.4C6 9.2 12 3 12 3Z"/><path d="M9 14.5a3 3 0 0 0 3 2.5"/>',
+        hygiene: '<path d="M8 4h8"/><path d="M9 4v4h6V4"/><path d="M7 8h10l1 13H6L7 8Z"/><path d="M9 13h6"/>',
+        focus: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+        learning: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21V5.5Z"/><path d="M4 5.5A2.5 2.5 0 0 1 6.5 8H20"/>',
+        creativity: '<path d="M12 3v3"/><path d="M5.6 5.6 7.8 7.8"/><path d="M3 12h3"/><path d="M18 12h3"/><path d="M16.2 7.8l2.2-2.2"/><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8 14a5 5 0 1 1 8 0c-.8.7-1.3 1.6-1.5 2.5h-5C9.3 15.6 8.8 14.7 8 14Z"/>',
+        regulation: '<path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h6"/>',
+        connection: '<path d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3Z"/><path d="M8 13c1.7 0 3-1.3 3-3S9.7 7 8 7s-3 1.3-3 3 1.3 3 3 3Z"/><path d="M2 21c.8-2.8 2.8-4 6-4s5.2 1.2 6 4"/><path d="M12 18c.8-1.5 2.1-2.2 4-2.2 2.4 0 4 .9 4.8 3.2"/>',
+        gratitude: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/>',
+        nature: '<path d="M11 20A7 7 0 0 1 4 13c0-5 8-10 8-10s8 5 8 10a7 7 0 0 1-7 7"/><path d="M12 13v9"/><path d="m8 17 4-4 4 4"/>'
+      };
+
+      const data = {
+        body: [
+          { id: 'energy', title: 'Walk every day', trait: 'TRAIT ENERGY', value: 20, unit: 'MIN', icon: 'energy' },
+          { id: 'nutrition', title: 'Have balanced meals', trait: 'TRAIT NUTRITION', value: 2, unit: 'MEALS', icon: 'nutrition' },
+          { id: 'sleep', title: 'Sleep every night', trait: 'TRAIT SLEEP', value: 7, unit: 'H', icon: 'sleep' },
+          { id: 'recovery', title: 'Take a recovery break during the day', trait: 'TRAIT RECOVERY', icon: 'recovery' },
+          { id: 'hydration', title: 'Drink water every day', trait: 'TRAIT HYDRATION', value: 6, unit: 'GLASSES', icon: 'hydration' },
+          { id: 'hygiene', title: 'Complete my personal hygiene routine', trait: 'TRAIT HYGIENE', icon: 'hygiene' }
+        ],
+        mind: [
+          { id: 'focus', title: 'Practice deep focus', trait: 'TRAIT FOCUS', value: 34, unit: 'MIN', icon: 'focus' },
+          { id: 'learning', title: 'Learn something new', trait: 'TRAIT LEARNING', value: 20, unit: 'MIN', icon: 'learning' },
+          { id: 'creativity', title: 'Create or write', trait: 'TRAIT CREATIVITY', value: 15, unit: 'MIN', icon: 'creativity' },
+          { id: 'regulation', title: 'Take a moment to breathe and regulate', trait: 'TRAIT REGULATION', icon: 'regulation' }
+        ],
+        soul: [
+          { id: 'connection', title: 'Talk with real presence', trait: 'TRAIT CONNECTION', value: 1, unit: 'PERSON', icon: 'connection' },
+          { id: 'gratitude', title: 'Log gratitude', trait: 'TRAIT GRATITUDE', value: 3, unit: 'THINGS', icon: 'gratitude' },
+          { id: 'nature', title: 'Connect with nature', trait: 'TRAIT NATURE', icon: 'nature' },
+          { id: 'purpose', title: 'Take one action aligned with purpose', trait: 'TRAIT PURPOSE', icon: 'focus' }
+        ]
+      };
+
+      const state = { pillar: 'body', selected: { body: ['energy', 'nutrition'], mind: [], soul: [] }, values: {} };
+      for (const pillar of Object.keys(data)) {
+        for (const task of data[pillar]) {
+          if (task.value != null) state.values[`${pillar}:${task.id}`] = String(task.value);
+        }
+      }
+
+      const tabs = document.querySelectorAll('.tab');
+      const list = document.getElementById('taskList');
+      const selectedCount = document.getElementById('selectedCount');
+      const gpReady = document.getElementById('gpReady');
+      const pillarProgress = document.getElementById('pillarProgress');
+      const continueButton = document.getElementById('continueButton');
+      const stepLabel = document.getElementById('stepLabel');
+
+      function render() {
+        const pillarTasks = data[state.pillar];
+        const selected = state.selected[state.pillar];
+        stepLabel.textContent = `STEP 2 · ${state.pillar.toUpperCase()}`;
+        tabs.forEach((tab) => {
+          const key = tab.dataset.pillar;
+          tab.classList.toggle('active', key === state.pillar);
+          tab.querySelector('small').textContent = `${state.selected[key].length}/3`;
+        });
+        selectedCount.textContent = selected.length;
+        gpReady.textContent = `${selected.length * 3} GP ready`;
+        pillarProgress.style.width = `${Math.min(100, selected.length / 3 * 100)}%`;
+        continueButton.disabled = selected.length < 3;
+        continueButton.textContent = selected.length >= 3 ? 'Continue' : 'Choose 3 foundations';
+        list.innerHTML = pillarTasks.map((task) => {
+          const isSelected = selected.includes(task.id);
+          const hasQuantity = task.value != null;
+          const valueKey = `${state.pillar}:${task.id}`;
+          return `
+            <button class="task-card ${isSelected ? 'selected' : ''}" type="button" data-id="${task.id}">
+              <span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true">${isSelected ? '<path d="m5 12 4 4 10-10"/>' : icons[task.icon]}</svg></span>
+              <span class="copy"><span class="title">${task.title}</span><span class="trait">${task.trait}</span></span>
+              ${hasQuantity ? `<span class="quantity"><span class="number-row"><input class="qty-input" inputmode="numeric" value="${state.values[valueKey]}" data-value-key="${valueKey}" aria-label="Edit ${task.title} quantity" /><svg class="edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="m16.5 3.5 4 4L7 21H3v-4L16.5 3.5Z"/></svg></span><span class="unit">${task.unit}</span></span>` : '<span></span>'}
+            </button>`;
+        }).join('');
+      }
+
+      tabs.forEach((tab) => tab.addEventListener('click', () => { state.pillar = tab.dataset.pillar; render(); }));
+      list.addEventListener('click', (event) => {
+        const input = event.target.closest('input');
+        if (input) return;
+        const card = event.target.closest('.task-card');
+        if (!card) return;
+        const selected = state.selected[state.pillar];
+        const id = card.dataset.id;
+        state.selected[state.pillar] = selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id];
+        render();
+      });
+      list.addEventListener('input', (event) => {
+        if (!event.target.matches('.qty-input')) return;
+        state.values[event.target.dataset.valueKey] = event.target.value.replace(/[^0-9]/g, '').slice(0, 3);
+        event.target.value = state.values[event.target.dataset.valueKey];
+      });
+      render();
+    </script>
+  </body>
+</html>
