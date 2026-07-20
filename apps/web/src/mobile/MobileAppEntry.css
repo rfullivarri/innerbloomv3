@@ -3,41 +3,90 @@
  * scenes for the bounded Capacitor viewport used by iOS and Android.
  */
 
+/* Step 1: remove the tiny internal "FLOW · Quick Start" label shown below the
+ * native "Customize your tasks" phase heading. Keep the task cards and all
+ * their internal rise/select animations unchanged.
+ */
+.native-welcome-visual-shell--step-1
+  .v3-quickstart-tasks-preview
+  .quickstart-premium-card
+  > header
+  > p:first-child {
+  display: none !important;
+}
+
 /* Step 2: the native screen already has its own Step heading. Remove the
  * duplicate product topline ("Tareas / Cuerpo") while preserving the table
- * headings, rows, progress rings and all task animation behavior.
+ * headings, rows, progress rings and all task animation behavior. Match the
+ * landing selector specificity so the adapter wins consistently in WebViews.
  */
-.native-welcome-visual-shell--step-2 .ib20-showcase-topline {
-  display: none;
+.native-welcome-visual-shell--step-2.landing.landing--v3-conversion
+  .ib20-showcase-topline {
+  display: none !important;
 }
 
 /* Step 3: keep the detail scene on a stable width so the animated green chip
- * cannot change the intrinsic width of the whole showcase. The task title is
- * deliberately smaller and single-line in native only.
+ * cannot change the intrinsic width of the whole showcase. Remove the trait
+ * chip, reduce the title further, and let Easy + the animated difficulty chip
+ * occupy that freed row without affecting Habit Development below.
  */
-.native-welcome-visual-shell--step-3 .ib20-showcase--detail,
-.native-welcome-visual-shell--step-3 .ib20-detail-shell,
-.native-welcome-visual-shell--step-3 .ib20-habit-dev,
-.native-welcome-visual-shell--step-3 .ib20-habit-body {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
+.native-welcome-visual-shell--step-3.landing.landing--v3-conversion
+  .ib20-showcase--detail,
+.native-welcome-visual-shell--step-3.landing.landing--v3-conversion
+  .ib20-detail-shell,
+.native-welcome-visual-shell--step-3.landing.landing--v3-conversion
+  .ib20-detail-head,
+.native-welcome-visual-shell--step-3.landing.landing--v3-conversion
+  .ib20-habit-dev,
+.native-welcome-visual-shell--step-3.landing.landing--v3-conversion
+  .ib20-habit-body {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
   box-sizing: border-box;
 }
 
-.native-welcome-visual-shell--step-3 .ib20-detail-copy,
-.native-welcome-visual-shell--step-3 .ib20-detail-chips {
+.native-welcome-visual-shell--step-3.landing.landing--v3-conversion
+  .ib20-detail-copy {
   min-width: 0;
+  overflow: hidden;
 }
 
-.native-welcome-visual-shell--step-3 .ib20-detail-copy h4 {
-  font-size: clamp(1.02rem, 4.6vw, 1.22rem);
-  line-height: 1.08;
+.native-welcome-visual-shell--step-3.landing.landing--v3-conversion
+  .ib20-detail-copy h4 {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(0.82rem, 3.7vw, 1rem) !important;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  text-overflow: clip;
   white-space: nowrap;
 }
 
-.native-welcome-visual-shell--step-3 .ib20-detail-chip--down {
-  max-width: min(11.5rem, 48vw);
+.native-welcome-visual-shell--step-3.landing.landing--v3-conversion
+  .ib20-detail-chip--trait {
+  display: none !important;
+}
+
+.native-welcome-visual-shell--step-3.landing.landing--v3-conversion
+  .ib20-detail-chips {
+  display: grid;
+  grid-template-columns: auto minmax(0, 11.5rem);
+  justify-content: start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.native-welcome-visual-shell--step-3.landing.landing--v3-conversion
+  .ib20-detail-chip--difficulty {
+  flex: 0 0 auto;
+}
+
+.native-welcome-visual-shell--step-3.landing.landing--v3-conversion
+  .ib20-detail-chip--down {
+  max-width: 11.5rem;
 }
 
 /* Step 4 uses the landing achievement shelf as its single visual source. */
