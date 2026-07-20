@@ -1,6 +1,46 @@
-/* Native Step 4 uses the landing achievement shelf as its single visual source.
- * This file only adapts that shared scene to the bounded Capacitor welcome viewport.
+/* Native welcome visual adapters.
+ * Landing remains the single source of truth; this file only tunes the shared
+ * scenes for the bounded Capacitor viewport used by iOS and Android.
  */
+
+/* Step 2: the native screen already has its own Step heading. Remove the
+ * duplicate product topline ("Tareas / Cuerpo") while preserving the table
+ * headings, rows, progress rings and all task animation behavior.
+ */
+.native-welcome-visual-shell--step-2 .ib20-showcase-topline {
+  display: none;
+}
+
+/* Step 3: keep the detail scene on a stable width so the animated green chip
+ * cannot change the intrinsic width of the whole showcase. The task title is
+ * deliberately smaller and single-line in native only.
+ */
+.native-welcome-visual-shell--step-3 .ib20-showcase--detail,
+.native-welcome-visual-shell--step-3 .ib20-detail-shell,
+.native-welcome-visual-shell--step-3 .ib20-habit-dev,
+.native-welcome-visual-shell--step-3 .ib20-habit-body {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.native-welcome-visual-shell--step-3 .ib20-detail-copy,
+.native-welcome-visual-shell--step-3 .ib20-detail-chips {
+  min-width: 0;
+}
+
+.native-welcome-visual-shell--step-3 .ib20-detail-copy h4 {
+  font-size: clamp(1.02rem, 4.6vw, 1.22rem);
+  line-height: 1.08;
+  white-space: nowrap;
+}
+
+.native-welcome-visual-shell--step-3 .ib20-detail-chip--down {
+  max-width: min(11.5rem, 48vw);
+}
+
+/* Step 4 uses the landing achievement shelf as its single visual source. */
 .native-welcome-visual-shell--step-4 {
   contain: paint;
   overflow: hidden;
@@ -17,15 +57,14 @@
 }
 
 /* Center the unscaled landing scene with physical insets instead of left: 50%.
- * The global landing adapter also owns `transform`; using left: 50% made the
- * scene jump right whenever that shared transform won the cascade in a WebView.
  * Auto inline margins remain stable in both WKWebView and Android WebView even
- * when the shared translateY/scale transform is applied later.
+ * when the shared translateY/scale transform is applied later. A small top
+ * offset separates the internal "Habit shelf" label from the native Step copy.
  */
 .native-welcome-visual-shell--step-4 .v3-method-logros__scene {
   position: absolute;
   inset-inline: 0;
-  top: 0;
+  top: 12px;
   width: min(116%, 530px);
   max-width: none;
   margin-inline: auto;
@@ -44,6 +83,6 @@
 
 @media (max-height: 820px) {
   .native-welcome-visual-shell--step-4 .v3-method-logros__scene {
-    top: 1px;
+    top: 8px;
   }
 }
