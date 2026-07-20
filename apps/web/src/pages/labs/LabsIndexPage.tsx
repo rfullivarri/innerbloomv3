@@ -4,6 +4,11 @@ import { OFFICIAL_DESIGN_TOKENS } from '../../content/officialDesignTokens';
 
 const LAB_EXPERIMENTS = [
   {
+    title: 'Onboarding Foundations Tasks',
+    description: 'Static lab for the Body, Mind, and Soul foundations task selection UI with editable quantities.',
+    href: '/labs/onboarding-foundations/',
+  },
+  {
     title: 'Onboarding Rhythm Selector',
     description: 'Prototype for the new onboarding rhythm selector with sine-wave weekly intensity.',
     href: '/labs/onboarding-rhythm-selector',
