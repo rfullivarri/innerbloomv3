@@ -19,11 +19,14 @@ describe('native welcome Step 4 architecture', () => {
     expect(entrySource).toContain('logrosCycleMs={activeIndex === 3 ? NATIVE_LOGROS_SLIDE_MS : undefined}');
   });
 
-  it('centers and scales the shared shelf inside one bounded native shell', () => {
+  it('centers and scales the shared shelf without depending on transform cascade order', () => {
     expect(entryStyles).toContain('.native-welcome-visual-shell--step-4 .v3-method-logros__scene');
     expect(entryStyles).toContain('position: absolute');
-    expect(entryStyles).toContain('left: 50%');
+    expect(entryStyles).toContain('inset-inline: 0');
+    expect(entryStyles).toContain('margin-inline: auto');
     expect(entryStyles).toContain('scale(var(--native-welcome-visual-scale))');
+    expect(entryStyles).not.toContain('left: 50%');
+    expect(entryStyles).not.toContain('translate3d(-50%');
     expect(entryStyles).not.toContain('.native-welcome-logros__card');
   });
 });

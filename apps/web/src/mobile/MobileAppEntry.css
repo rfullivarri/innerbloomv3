@@ -16,13 +16,20 @@
   overflow: visible;
 }
 
+/* Center the unscaled landing scene with physical insets instead of left: 50%.
+ * The global landing adapter also owns `transform`; using left: 50% made the
+ * scene jump right whenever that shared transform won the cascade in a WebView.
+ * Auto inline margins remain stable in both WKWebView and Android WebView even
+ * when the shared translateY/scale transform is applied later.
+ */
 .native-welcome-visual-shell--step-4 .v3-method-logros__scene {
   position: absolute;
+  inset-inline: 0;
   top: 0;
-  left: 50%;
   width: min(116%, 530px);
-  margin: 0;
-  transform: translate3d(-50%, var(--native-welcome-visual-y), 0)
+  max-width: none;
+  margin-inline: auto;
+  transform: translate3d(0, var(--native-welcome-visual-y), 0)
     scale(var(--native-welcome-visual-scale));
   transform-origin: center top;
 }
