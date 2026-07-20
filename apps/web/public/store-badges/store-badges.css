@@ -47,13 +47,16 @@
   object-fit: contain;
 }
 
+/* Google Play's official PNG includes more transparent/internal padding than
+   Apple's badge. These language-specific scales equalize the visible badge
+   height while preserving the same 160x48 (145x44 on mobile) layout box. */
 .ib-store-badge--google-play .ib-store-badge-image {
-  transform: scale(1.16);
+  transform: scale(1.21);
   transform-origin: center;
 }
 
 .ib-store-badges[data-language="en"] .ib-store-badge--google-play .ib-store-badge-image {
-  transform: scale(1.29);
+  transform: scale(1.31);
 }
 
 .ib-store-badge-coming-soon {
