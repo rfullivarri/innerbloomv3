@@ -9,7 +9,7 @@ on:
         type: string
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: marketing-render-${{ inputs.period_key }}
@@ -22,7 +22,6 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-      MARKETING_DRIVE_STAGING_FOLDER_ID: ${{ secrets.MARKETING_DRIVE_STAGING_FOLDER_ID }}
 
     steps:
       - uses: actions/checkout@v4
@@ -37,7 +36,7 @@ jobs:
       - name: Check configuration
         run: |
           set -euo pipefail
-          for key in DATABASE_URL GOOGLE_SERVICE_ACCOUNT_JSON MARKETING_DRIVE_STAGING_FOLDER_ID; do
+          for key in DATABASE_URL GOOGLE_SERVICE_ACCOUNT_JSON; do
             if [[ -z "${!key:-}" ]]; then
               echo "Missing required GitHub secret: ${key}" >&2
               exit 1
@@ -67,17 +66,38 @@ jobs:
           --asset-dir marketing/generated/${{ inputs.period_key }}/source-assets
           --out marketing/generated/${{ inputs.period_key }}/rendered
 
-      - name: Upload review PNGs to Drive staging
+      - name: Store review PNGs on the monthly branch
+        id: review_commit
+        shell: bash
+        env:
+          PERIOD_KEY: ${{ inputs.period_key }}
+          CYCLE_BRANCH: automation/marketing-cycle-${{ inputs.period_key }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f -- "marketing/generated/${PERIOD_KEY}/rendered"
+          if git diff --cached --quiet; then
+            echo "Rendered review assets are unchanged."
+          else
+            git commit -m "chore(marketing): stage review renders for ${PERIOD_KEY}"
+            git push origin "HEAD:${CYCLE_BRANCH}"
+          fi
+          echo "commit_sha=$(git rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
+
+      - name: Build public review manifest
         run: >-
-          npm -w @innerbloom/api exec tsx scripts/upload-marketing-rendered-assets.ts
+          npm -w @innerbloom/api exec tsx scripts/create-marketing-github-staging-manifest.ts
           ../../marketing/generated/${{ inputs.period_key }}/rendered
-          ../../marketing/generated/${{ inputs.period_key }}/drive-staging-manifest.json
+          ../../marketing/generated/${{ inputs.period_key }}/review-staging-manifest.json
+          ${{ github.repository }}
+          ${{ steps.review_commit.outputs.commit_sha }}
 
       - name: Import campaign into Admin review
         run: >-
           npm -w @innerbloom/api exec tsx scripts/import-marketing-campaign.ts
           ../../marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
-          ../../marketing/generated/${{ inputs.period_key }}/drive-staging-manifest.json
+          ../../marketing/generated/${{ inputs.period_key }}/review-staging-manifest.json
 
       - name: Keep output as a build artifact
         uses: actions/upload-artifact@v4
@@ -91,7 +111,7 @@ jobs:
           {
             echo "## Campaign ready for human review"
             echo "- Period: ${{ inputs.period_key }}"
-            echo "- Result: rendered PNGs are in Drive staging and imported to Admin."
+            echo "- Result: rendered PNGs are staged on the monthly GitHub branch and imported to Admin."
             echo "- Next: open Admin > Marketing, approve or reject each post."
             echo "- After approval: use Upload approved assets to R2, then Download Metricool CSV."
           } >> "${GITHUB_STEP_SUMMARY}"
