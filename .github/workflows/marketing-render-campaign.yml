@@ -54,6 +54,15 @@ jobs:
       - name: Install Chromium for the deterministic renderer
         run: npm -w @innerbloom/web exec playwright install --with-deps chromium
 
+      - name: Choose isolated render output
+        shell: bash
+        run: |
+          if [[ "${{ inputs.preview_limit }}" == "0" ]]; then
+            echo "RENDER_OUTPUT_DIR=marketing/generated/${{ inputs.period_key }}/rendered" >> "${GITHUB_ENV}"
+          else
+            echo "RENDER_OUTPUT_DIR=marketing/generated/${{ inputs.period_key }}/renderer-v3-pilot" >> "${GITHUB_ENV}"
+          fi
+
       - name: Validate creative contract
         run: node scripts/marketing/validate-creative-direction-v3.mjs marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
 
@@ -69,7 +78,7 @@ jobs:
           node scripts/marketing/render-campaign-v3.mjs
           marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
           --asset-dir marketing/generated/${{ inputs.period_key }}/source-assets
-          --out marketing/generated/${{ inputs.period_key }}/rendered
+          --out ${{ env.RENDER_OUTPUT_DIR }}
           --limit ${{ inputs.preview_limit }}
 
       - name: Store review PNGs on the monthly branch
@@ -82,7 +91,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f -- "marketing/generated/${PERIOD_KEY}/rendered"
+          git add -f -- "${RENDER_OUTPUT_DIR}"
           if git diff --cached --quiet; then
             echo "Rendered review assets are unchanged."
           else
@@ -111,7 +120,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: innerbloom-marketing-${{ inputs.period_key }}
-          path: marketing/generated/${{ inputs.period_key }}
+          path: ${{ env.RENDER_OUTPUT_DIR }}
           retention-days: 30
 
       - name: Report next step
