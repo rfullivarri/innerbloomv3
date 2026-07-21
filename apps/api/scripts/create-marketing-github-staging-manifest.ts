@@ -16,17 +16,17 @@ const files = (await fs.readdir(renderDir)).filter((file) => /\.png$/i.test(file
 if (!files.length) throw new Error(`No PNG files found in ${renderDir}`);
 
 const relativeRenderDir = path.relative(process.cwd(), path.resolve(renderDir)).split(path.sep).join('/');
-const assets = files.map((file) => {
+const assets = await Promise.all(files.map(async (file) => {
   const repositoryPath = `${relativeRenderDir}/${file}`;
-  const encodedPath = repositoryPath.split('/').map(encodeURIComponent).join('/');
+  const bytes = await fs.readFile(path.join(renderDir, file));
   return {
     file,
-    source_url: `https://raw.githubusercontent.com/${repository}/${commitSha}/${encodedPath}`,
-    preview_url: `https://raw.githubusercontent.com/${repository}/${commitSha}/${encodedPath}`,
-    web_view_url: `https://github.com/${repository}/blob/${commitSha}/${encodedPath}`,
-    staging_provider: 'github_monthly_branch',
+    source_url: `data:image/png;base64,${bytes.toString('base64')}`,
+    repository_path: repositoryPath,
+    web_view_url: `https://github.com/${repository}/blob/${commitSha}/${repositoryPath.split('/').map(encodeURIComponent).join('/')}`,
+    staging_provider: 'neon_inline_review',
   };
-});
+}));
 
 await fs.mkdir(path.dirname(outputPath), { recursive: true });
 await fs.writeFile(outputPath, JSON.stringify({
@@ -36,4 +36,4 @@ await fs.writeFile(outputPath, JSON.stringify({
   assets,
 }, null, 2) + '\n');
 
-console.log(`Created review manifest for ${assets.length} GitHub-staged PNGs.`);
+console.log(`Created inline review manifest for ${assets.length} PNGs backed by the monthly branch.`);
