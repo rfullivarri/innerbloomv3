@@ -50,7 +50,7 @@ h1{margin:0;font:700 64px/1.02 Sora,sans-serif;letter-spacing:-.057em;text-wrap:
 .rule{position:absolute;height:1px;background:var(--line);left:68px;right:68px;bottom:84px}
 .device{position:absolute;z-index:8;width:332px;height:686px;padding:16px;border-radius:58px;background:linear-gradient(145deg,#77727d 0%,#252329 19%,#050507 52%,#5d5963 100%);box-shadow:0 48px 110px rgba(18,10,35,.35),inset 0 0 0 1px rgba(255,255,255,.5)}
 .device:before{content:"";position:absolute;left:-4px;top:155px;width:4px;height:94px;border-radius:5px 0 0 5px;background:#39363d;box-shadow:0 115px 0 #39363d}.device:after{content:"";position:absolute;right:-4px;top:190px;width:4px;height:126px;border-radius:0 5px 5px 0;background:#39363d}
-.screen{position:relative;width:100%;height:100%;overflow:hidden;padding:5px;border:1px solid rgba(255,255,255,.16);border-radius:45px;background:#09090d}.screen img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center;border-radius:39px}.island{position:absolute;z-index:4;top:18px;left:50%;transform:translateX(-50%);width:105px;height:28px;border-radius:20px;background:#020204;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 1px 2px rgba(255,255,255,.08)}.shine{position:absolute;z-index:3;inset:3px;border-radius:54px;background:linear-gradient(112deg,rgba(255,255,255,.19),transparent 20%,transparent 72%,rgba(255,255,255,.07));pointer-events:none}
+.screen{position:relative;width:100%;height:100%;overflow:hidden;padding:7px;border:1px solid rgba(255,255,255,.16);border-radius:45px;background:#09090d}.screen.light{background:#f4ede5}.screen.dark{background:#07070a}.screen img{display:block;width:100%;height:100%;object-fit:contain;object-position:center center;border-radius:37px}.island{position:absolute;z-index:4;top:20px;left:50%;transform:translateX(-50%);width:105px;height:28px;border-radius:20px;background:#020204;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 1px 2px rgba(255,255,255,.08)}.shine{position:absolute;z-index:3;inset:3px;border-radius:54px;background:linear-gradient(112deg,rgba(255,255,255,.19),transparent 20%,transparent 72%,rgba(255,255,255,.07));pointer-events:none}
 .device.small{width:270px;height:558px;padding:13px;border-radius:48px}.device.small .screen{border-radius:38px}.device.small .screen img{border-radius:33px}.device.small .island{width:82px;height:22px;top:16px}
 .product-card{position:absolute;overflow:hidden;border-radius:34px;background:#ece4da;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.3)}.product-card img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}.product-card.landscape img{object-fit:contain;background:#f5eee6}
 .glass{position:absolute;z-index:4;border:1px solid rgba(255,255,255,.42);background:rgba(255,255,255,.13);backdrop-filter:blur(15px);border-radius:30px;box-shadow:0 24px 64px rgba(28,15,48,.16)}
@@ -82,7 +82,7 @@ h1{margin:0;font:700 64px/1.02 Sora,sans-serif;letter-spacing:-.057em;text-wrap:
 .cta-close .copy{left:68px;top:210px;width:680px}.cta-close h1{font-size:74px}.cta-close .product-card{right:-20px;bottom:-10px;width:500px;height:350px;transform:rotate(-5deg)}.cta-close .device{right:90px;bottom:70px;top:auto}
 `;
 
-function device(src, classes = "") { return `<div class="device ${classes}"><div class="shine"></div><div class="screen"><span class="island"></span><img src="${src}" alt=""/></div></div>`; }
+function device(src, classes = "", tone = "dark") { return `<div class="device ${classes}"><div class="shine"></div><div class="screen ${tone}"><span class="island"></span><img src="${src}" alt=""/></div></div>`; }
 function card(src, classes = "") { return `<div class="product-card ${classes}"><img src="${src}" alt=""/></div>`; }
 function feature(src, focus = 42) { return `<div class="feature-crop" style="--focus:-${Math.max(0,Math.min(80,focus))*10}px"><img src="${src}" alt=""/></div>`; }
 function copy(job) {
@@ -96,26 +96,30 @@ function chrome(job, logo, index, total) {
 function composition(job, sources) {
   const variant = job.creative_direction?.layout_variant || "split_device_right";
   const a = sources[0], b = sources[1] || sources[0];
-  const mobile = (job.creative_direction?.selected_asset_keys?.[0] || "").startsWith("mobile_");
+  const keyA = job.creative_direction?.selected_asset_keys?.[0] || "";
+  const keyB = job.creative_direction?.selected_asset_keys?.[1] || keyA;
+  const mobile = keyA.startsWith("mobile_");
+  const toneA = keyA.includes("_light_") || keyA.includes("dquest_light") || keyA.includes("rhythm_light") ? "light" : "dark";
+  const toneB = keyB.includes("_light_") || keyB.includes("dquest_light") || keyB.includes("rhythm_light") ? "light" : "dark";
   const labels = job.creative_direction?.sequence_labels || ["Notice the signal","Read the context","Choose the next step"];
   const contrast = job.creative_direction?.contrast_pair || ["One setback","The whole story"];
   switch (variant) {
-    case "split_device_left": return { cls:"split-left", body:copy(job)+device(a) };
-    case "cinematic_device_center": return { cls:"center-stage", body:copy(job)+`<div class="orbit o1"></div><div class="orbit o2"></div>`+device(a) };
-    case "device_diagonal_crop": return { cls:"diagonal-crop", body:copy(job)+device(a) };
-    case "layered_product_depth": return { cls:"layered-depth", body:copy(job)+`<div class="glass"></div>`+device(b,"small back")+device(a,"main") };
-    case "floating_device_orbit": return { cls:"floating-orbit", body:copy(job)+`<div class="orbit"></div><div class="orb a"></div><div class="orb b"></div>`+device(a,"small") };
+    case "split_device_left": return { cls:"split-left", body:copy(job)+device(a,"",toneA) };
+    case "cinematic_device_center": return { cls:"center-stage", body:copy(job)+`<div class="orbit o1"></div><div class="orbit o2"></div>`+device(a,"",toneA) };
+    case "device_diagonal_crop": return { cls:"diagonal-crop", body:copy(job)+device(a,"",toneA) };
+    case "layered_product_depth": return { cls:"layered-depth", body:copy(job)+`<div class="glass"></div>`+device(b,"small back",toneB)+device(a,"main",toneA) };
+    case "floating_device_orbit": return { cls:"floating-orbit", body:copy(job)+`<div class="orbit"></div><div class="orb a"></div><div class="orb b"></div>`+device(a,"small",toneA) };
     case "module_macro_crop": return { cls:"macro", body:copy(job)+feature(a,job.creative_direction?.focus_y || 42) };
-    case "bento_product_proof": return { cls:"bento", body:copy(job)+card(b,"a")+card(a,"b")+device(a) };
+    case "bento_product_proof": return { cls:"bento", body:copy(job)+card(b,"a")+card(a,"b")+device(a,"",toneA) };
     case "editorial_type_monument": return { cls:"type-monument", body:copy(job)+`<div class="number">${String(job.slide_number || "01").padStart(2,"0")}</div>` };
     case "editorial_signal_line": return { cls:"signal-line", body:copy(job)+`<div class="signal"><i></i><i></i><i></i><i></i><i></i><i></i></div>` };
     case "editorial_numbered_steps": return { cls:"steps", body:copy(job)+`<div class="step-row"><div class="step"><b>01</b><span>${esc(labels[0])}</span></div><div class="step"><b>02</b><span>${esc(labels[1])}</span></div><div class="step"><b>03</b><span>${esc(labels[2])}</span></div></div>` };
     case "editorial_quote_frame": return { cls:"quote-frame", body:copy(job)+`<div class="quote">“</div>` };
-    case "carousel_chapter_cover": return { cls:"chapter", body:copy(job)+`<div class="chapter-no">${String(job.slide_number || 1).padStart(2,"0")}</div>`+(mobile?device(a,"small"):card(a)) };
-    case "carousel_proof_focus": return { cls:"proof-focus", body:copy(job)+device(a) };
+    case "carousel_chapter_cover": return { cls:"chapter", body:copy(job)+`<div class="chapter-no">${String(job.slide_number || 1).padStart(2,"0")}</div>`+(mobile?device(a,"small",toneA):card(a)) };
+    case "carousel_proof_focus": return { cls:"proof-focus", body:copy(job)+device(a,"",toneA) };
     case "carousel_transition": return { cls:"transition", body:copy(job)+`<div class="orbit"></div><div class="contrast"><span>${esc(contrast[0])}</span><b>≠</b><span>${esc(contrast[1])}</span></div>` };
-    case "carousel_cta_close": return { cls:"cta-close", body:copy(job)+(mobile?device(a,"small"):card(a,"landscape")) };
-    default: return { cls:"split-right", body:`<div class="halo"></div>`+copy(job)+device(a) };
+    case "carousel_cta_close": return { cls:"cta-close", body:copy(job)+(mobile?device(a,"small",toneA):card(a,"landscape")) };
+    default: return { cls:"split-right", body:`<div class="halo"></div>`+copy(job)+device(a,"",toneA) };
   }
 }
 
