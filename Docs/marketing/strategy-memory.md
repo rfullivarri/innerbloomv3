@@ -1,6 +1,11 @@
 # Innerbloom Marketing Strategy Memory
 
-Last updated: 2026-06-29
+> Canonical strategy memory for the monthly marketing cycle.
+>
+> **This is the only strategy-memory file read or updated by the marketing workflow.**
+> It is intentionally a living record: keep current operating rules near the top and append validated learnings to the changelog below.
+
+Last updated: 2026-07-21
 
 ## Purpose
 
@@ -8,7 +13,7 @@ This file is the first read for every monthly marketing generation run. The run 
 
 ## Current Objective
 
-Acquire early adopter users for Innerbloom 2.0 with lightweight, measurable social content. The system should minimize manual marketing operations while keeping final approval under human control.
+Acquire early adopter users for Innerbloom 2.0 with lightweight, measurable Instagram content. The system should minimize manual marketing operations while keeping final approval under human control.
 
 ## Current Positioning
 
@@ -36,7 +41,7 @@ Minimum funnel to monitor:
 
 `page_view -> landing_cta_clicked -> auth_started -> auth_completed -> dashboard_view`
 
-Every post must include:
+Every traffic-oriented post must include:
 
 - `utm_source`
 - `utm_medium`
@@ -46,23 +51,22 @@ Every post must include:
 
 ## Current Operating Flow
 
-1. Read this strategy memory.
-2. Read the latest GA4/Search Console/Metricool data available.
-3. Summarize what changed since the last run.
-4. Update this strategy memory with the new learning.
-5. Generate campaign drafts.
-6. Save draft copy, assets, tracking URLs, and scheduling metadata.
-7. Show drafts in `/admin/marketing`.
-8. Wait for human approval or regeneration requests.
-9. Export a Metricool CSV only for approved posts.
+1. Code collects and persists analytics context.
+2. CMO reads this memory plus the validated context and writes strategy.
+3. A human approves strategy.
+4. Head of Content writes one final `campaign.json`.
+5. Asset production reads only that `campaign.json`.
+6. Code renders, stores, and imports produced files.
+7. Human review happens in Admin Marketing.
+8. Code uploads approved assets to R2 and exports Metricool CSV.
 
 ## Campaign Defaults
 
 - Default platform: Instagram
 - Default language: English
 - Default monthly post count: 20
-- Current MVP campaign code: `ib20_mvp`
-- Current tested format: square static + square carousel
+- Current campaign contract: `marketing/agent-outputs/<YYYY-MM>/campaign.json`, schema v2
+- Current tested formats: static + carousel
 
 ## Baseline: 2026-06 MVP
 
@@ -71,11 +75,11 @@ The first operational MVP proved that:
 - Metricool CSV import works.
 - Metricool can ingest image URLs from Cloudflare R2 URLs.
 - Instagram posts published successfully from the generated CSV.
-- Cloudflare R2 is now the publishing asset store for CSV exports.
+- Cloudflare R2 is the publishing asset store for CSV exports.
 - Google Drive remains the human-readable marketing library.
 - GA4 and Search Console snapshots can be synced into Neon and shown in `/admin/marketing`.
 
-The first content batch was only a technical proof. Its performance should not be treated as a strategic signal yet.
+The first content batch was a technical proof. Its performance should not be treated as a strategic signal yet.
 
 ## Data Interpretation Rules
 
@@ -89,60 +93,46 @@ For marketing decisions:
 - Exclude internal/admin emails before reading registered-user growth.
 - Search Console is sparse until Google has more impressions.
 
-## First 20-Post Strategy Proposal
+## Creative Rules
 
-This is the first real monthly plan once draft generation is wired.
-
-Planned mix:
-
-- 8 pain/friction posts: streak pressure, perfect-day planning, restarting from zero, habits collapsing during messy weeks.
-- 5 product mechanism/demo posts: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum.
-- 4 belief/differentiation posts: real weeks over perfect calendars, progress without shame, sustainable habit design, anti-all-or-nothing routines.
-- 3 early-adopter CTA posts: try the early version, help shape the product, give feedback after using the dashboard.
-
-Creative rules:
-
-- Prefer real Innerbloom 2.0 screenshots over generic lifestyle imagery.
+- Prefer real current Innerbloom screenshots over generic lifestyle imagery.
 - Use both dark-mode and light-mode product assets when available.
 - Keep carousel slides readable on mobile.
 - Use R2 URLs in Metricool CSV output.
-- Store source assets and planning context in Google Drive for browsing.
-
-Measurement:
-
-- Primary acquisition: landing views and CTA events from UTM-tagged links.
-- Primary activation: `auth_started -> auth_completed -> dashboard_view`.
-- Product-interest proxy: views of `/innerbloom2/dashboard`, `/innerbloom2/tareas`, `/innerbloom2/task-detail`, and `/innerbloom2/logros`.
+- Store source assets and planning context in the current `Innerbloom Marketing` Drive root.
+- Generate a net-new visual only when the asset registry cannot support the post.
 
 ## Known Gaps
 
-- Monthly draft generation is not automated yet.
-- The scheduled Codex prompt still needs to be created and tested.
+- Monthly agent execution is not automated yet.
 - Metricool performance data is manual export for now.
-- The admin marketing approval board is still seeded/local-storage based until backend post persistence is added.
-- Image generation is template-based; new visual assets should be generated only when needed.
-
-## Scheduled Codex Prompt Draft
-
-When the monthly scheduled task runs, use this operating prompt:
-
-1. Read `Docs/marketing/strategy-memory.md`.
-2. Read the latest Neon marketing analytics snapshot and the `/admin/marketing` campaign state.
-3. Separate acquisition evidence from product-usage evidence.
-4. Ignore internal/admin users and auth/referral noise already configured in analytics settings.
-5. Update this file with what changed, what was learned, and what will be attempted next.
-6. Generate the configured number of post drafts for the next month.
-7. For every post, include platform, format, scheduled date/time, hypothesis, metric, UTM tracking URL, caption, and required visual assets.
-8. Reuse existing assets when they are sufficient. Generate new assets only when the current library does not support the post.
-9. Save the drafts so `/admin/marketing` can render them for approval.
-10. Do not export the Metricool CSV until posts are approved.
+- The renderer/layout system is not implemented yet.
+- The current 2026-07 campaign must be reviewed before production.
 
 ## Next Run Instructions
-
-For the next monthly run:
 
 1. Keep the number of configurable knobs small.
 2. Prefer strong hooks and measurable hypotheses over generic motivational posts.
 3. Reuse visual patterns that remain readable on mobile.
-4. Generate only new visuals when the existing asset library cannot support the post.
-5. Preserve every decision and result in this strategy memory.
+4. Generate new visual material only when the current asset library cannot support the post.
+5. Preserve every decision and result in the changelog below.
+
+## Strategic Changelog
+
+### 2026-06-29 | 2026-06 MVP baseline
+
+- **Period analyzed:** 2026-06-01 -> 2026-06-28
+- **Insights detected:** Instagram/social is the top acquisition source after hygiene filters; product dashboard pages are receiving more views than the landing page; Search Console has very low click volume and should not drive messaging decisions yet.
+- **Hypotheses:** Adaptive rhythm and real-week positioning can differentiate Innerbloom from rigid streak-based habit apps; product screenshots should make the promise more concrete.
+- **Decisions taken:** Keep the 2026-06 MVP campaign as a small validation loop; export only approved posts to Metricool; separate post approval work from analytics and source configuration.
+- **What worked:** Clear anti-perfect-days hook; explicit tracking URLs per post; reusable campaign assets.
+- **What did not work:** Ambiguous internal shorthand such as “Cost of Safe”; stacking GA4 and Search Console in one low-hierarchy column.
+- **Learnings:** Keep post operations, strategic interpretation, and data-source health in separate views; every post should map to a measurable funnel event.
+- **Next experiments:** Test dashboard walkthrough carousel; compare product-mechanism hooks against general habit advice; add Metricool results after publishing.
+
+### 2026-07-21 | Canonicalization before visual-production rebuild
+
+- **Decision:** One strategy memory only: this file.
+- **Decision:** The final campaign contract is one schema-v2 `campaign.json` per period.
+- **Decision:** Asset production must select from the current Drive registry first; code handles file movement and rendering, while agents make only strategic or creative decisions.
+- **Open work:** Build the asset registry and review four renderer-produced pilot posts before scaling to the full 20-post monthly batch.
