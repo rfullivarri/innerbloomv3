@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Visual and renderer validation before the 20-post monthly batch.",
+  "campaign_source": "marketing/agent-outputs/2026-07/campaign.json",
+  "asset_registry": "marketing/asset-registry/innerbloom-drive-assets-v1.json",
+  "output_root": "marketing/generated/2026-07/pilot",
+  "review_rule": "Do not scale to the full campaign until all four pilot posts are reviewed in Admin Marketing.",
+  "posts": [
+    {
+      "post_code": "ib202607_post_08",
+      "hook": "Progress needs a memory.",
+      "format": "static",
+      "mode": "light",
+      "layout_key": "editorial_product_split",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_02"
+      ],
+      "focal_instruction": "Keep the visible dashboard progress area intact; crop only surrounding non-essential chrome.",
+      "reason": "Tests a clean light-mode product-proof post using the dashboard.",
+      "renderer_fields": {
+        "eyebrow": "VISIBLE PROGRESS",
+        "headline": "Progress needs a memory.",
+        "supporting_text": "See what moved, even when the week was not perfect.",
+        "cta": "See how Innerbloom works"
+      }
+    },
+    {
+      "post_code": "ib202607_post_10",
+      "hook": "Rhythm means intended frequency.",
+      "format": "static",
+      "mode": "light",
+      "layout_key": "module_spotlight",
+      "selected_asset_keys": [
+        "mobile_rhythm_light_01"
+      ],
+      "focal_instruction": "Keep the rhythm-selection control fully legible and centered.",
+      "reason": "Tests a concise educational module post without inventing a feature.",
+      "renderer_fields": {
+        "headline": "Rhythm means intended frequency.",
+        "supporting_text": "Choose a pace you can actually keep.",
+        "callout": "Choose your rhythm"
+      }
+    },
+    {
+      "post_code": "ib202607_post_11",
+      "hook": "Growth Calibration is monthly.",
+      "format": "carousel",
+      "mode": "light",
+      "layout_key": "proof_sequence",
+      "selected_asset_keys": [
+        "mobile_calibration_light_01",
+        "mobile_calibration_light_02"
+      ],
+      "reason": "Tests a real product-led carousel with varied slides and two distinct calibration states.",
+      "slides": [
+        {
+          "slide": 1,
+          "layout_key": "editorial_product_split",
+          "source_asset_key": "mobile_calibration_light_01",
+          "focal_instruction": "Keep the calibration state readable.",
+          "headline": "Growth Calibration is monthly.",
+          "supporting_text": "Review the month. Adjust the next one.",
+          "cta": null
+        },
+        {
+          "slide": 2,
+          "layout_key": "editorial_statement",
+          "source_asset_key": null,
+          "headline": "A rough month is not a reset.",
+          "supporting_text": "It is information for the next step.",
+          "cta": null
+        },
+        {
+          "slide": 3,
+          "layout_key": "module_spotlight",
+          "source_asset_key": "mobile_calibration_light_02",
+          "focal_instruction": "Keep the adjustment controls and progress context visible.",
+          "headline": "Use the month to recalibrate.",
+          "supporting_text": "Keep direction. Change the intensity.",
+          "callout": "Growth Calibration"
+        },
+        {
+          "slide": 4,
+          "layout_key": "editorial_statement",
+          "source_asset_key": null,
+          "headline": "Build a rhythm that survives real weeks.",
+          "supporting_text": null,
+          "cta": "See how Innerbloom works"
+        }
+      ]
+    },
+    {
+      "post_code": "ib202607_post_12",
+      "hook": "Daily Energy shows momentum.",
+      "format": "static",
+      "mode": "dark",
+      "layout_key": "module_spotlight",
+      "selected_asset_keys": [
+        "mobile_dashboard_dark_energy_balance_02"
+      ],
+      "focal_instruction": "Keep the energy/balance visualization large, clear and semantically unchanged.",
+      "reason": "Tests a controlled dark-mode module spotlight using real data visualization.",
+      "renderer_fields": {
+        "headline": "Daily Energy shows momentum.",
+        "supporting_text": "A clearer view of the week you actually lived.",
+        "callout": "Daily Energy"
+      }
+    }
+  ]
+}
