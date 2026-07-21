@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "canonical_brand": {
+    "logo_asset_key": "brand_logo_512",
+    "wordmark_source": "apps/web landing header and brand font tokens",
+    "wordmark_rule": "Render the established Innerbloom lockup; do not approximate it with arbitrary system typography."
+  },
+  "renderer_rules": [
+    "All visible text is code-rendered from campaign.json.",
+    "All product UI comes from registered real assets.",
+    "Device perspective and layered product depth are deterministic renderer treatments, not generated UI.",
+    "A supporting generated visual may never include readable text, a wordmark, product UI or a fake device."
+  ],
+  "families": [
+    {
+      "key": "product_hero_scene",
+      "device_presentation": "front",
+      "source_assets": {
+        "min": 1,
+        "max": 3
+      },
+      "best_for": [
+        "acquisition",
+        "product promise"
+      ],
+      "description": "Dominant real device with restrained depth from real screens/cards."
+    },
+    {
+      "key": "product_angle",
+      "device_presentation": "angled",
+      "source_assets": {
+        "min": 1,
+        "max": 1
+      },
+      "best_for": [
+        "feature impact",
+        "consideration"
+      ],
+      "description": "Real screenshot within an angled device shell; copy remains clear and separate."
+    },
+    {
+      "key": "product_depth",
+      "device_presentation": "layered_cards",
+      "source_assets": {
+        "min": 2,
+        "max": 3
+      },
+      "best_for": [
+        "system explanation",
+        "feature relationship"
+      ],
+      "description": "Front device plus two truthful secondary panels."
+    },
+    {
+      "key": "module_spotlight",
+      "device_presentation": "front",
+      "source_assets": {
+        "min": 1,
+        "max": 1
+      },
+      "best_for": [
+        "feature explanation"
+      ],
+      "description": "One module, one concise callout, no invented UI."
+    },
+    {
+      "key": "editorial_statement",
+      "device_presentation": "none",
+      "source_assets": {
+        "min": 1,
+        "max": 1
+      },
+      "best_for": [
+        "belief slide",
+        "carousel bridge"
+      ],
+      "description": "Text-led progression with real logo; product appears only if it adds evidence."
+    },
+    {
+      "key": "proof_sequence",
+      "device_presentation": "layered_cards",
+      "source_assets": {
+        "min": 2,
+        "max": 3
+      },
+      "best_for": [
+        "carousel"
+      ],
+      "description": "Hook, reframe, proof, CTA; varies visual treatment across slides."
+    },
+    {
+      "key": "supporting_visual_scene",
+      "device_presentation": "none",
+      "source_assets": {
+        "min": 1,
+        "max": 2
+      },
+      "best_for": [
+        "brand context"
+      ],
+      "description": "Code-composed post with an optional generated non-UI atmospheric layer."
+    }
+  ]
+}

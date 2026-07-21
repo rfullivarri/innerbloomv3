@@ -27,7 +27,9 @@
     "lint": "npm --workspace apps/api run lint",
     "test": "npm --workspace apps/api run test",
     "routes:print": "npm --workspace apps/api run routes:print",
-    "marketing:generate": "node scripts/marketing/generate-campaign-assets.mjs"
+    "marketing:generate": "node scripts/marketing/generate-campaign-assets.mjs",
+    "marketing:render-v2": "node scripts/marketing/render-campaign-v2.mjs",
+    "marketing:validate-creative": "node scripts/marketing/validate-creative-direction.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.6.2",
