@@ -1,0 +1,1302 @@
+[
+  {
+    "asset_code": "asset_post_001",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_001.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_hero_scene",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_002_01",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_002_01.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_depth",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_002_02",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_002_02.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_angle",
+      "mode": "light",
+      "device_presentation": "angled",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_task_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_002_03",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_002_03.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_depth",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_002_04",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_002_04.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_hero_scene",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_002_05",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_002_05.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_depth",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_003",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_003.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "editorial_statement",
+      "mode": "light",
+      "device_presentation": "none",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Use a decisive editorial statement with generous negative space; the canonical lockup anchors the composition and no fake product interface is introduced.",
+      "selected_asset_keys": [
+        "landing_light_hero_desktop_product_composite_01"
+      ],
+      "focal_instruction": "Prioritize the headline at grid-preview size; use only restrained brand atmosphere behind it.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "No invented product UI is present."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_004_01",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_004_01.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_angle",
+      "mode": "light",
+      "device_presentation": "angled",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dquest_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_004_02",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_004_02.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_angle",
+      "mode": "light",
+      "device_presentation": "angled",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dquest_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_004_03",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_004_03.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "proof_sequence",
+      "mode": "light",
+      "device_presentation": "angled",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dquest_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_004_04",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_004_04.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_angle",
+      "mode": "light",
+      "device_presentation": "angled",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dquest_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_004_05",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_004_05.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_angle",
+      "mode": "light",
+      "device_presentation": "angled",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dquest_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_005",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_005.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_hero_scene",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_006",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_006.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "editorial_statement",
+      "mode": "light",
+      "device_presentation": "none",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Use a decisive editorial statement with generous negative space; the canonical lockup anchors the composition and no fake product interface is introduced.",
+      "selected_asset_keys": [
+        "landing_light_hero_desktop_product_composite_01"
+      ],
+      "focal_instruction": "Prioritize the headline at grid-preview size; use only restrained brand atmosphere behind it.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "No invented product UI is present."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_007",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_007.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_hero_scene",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_008_01",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_008_01.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "editorial_statement",
+      "mode": "light",
+      "device_presentation": "none",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Use a decisive editorial statement with generous negative space; the canonical lockup anchors the composition and no fake product interface is introduced.",
+      "selected_asset_keys": [
+        "landing_light_hero_desktop_product_composite_01"
+      ],
+      "focal_instruction": "Prioritize the headline at grid-preview size; use only restrained brand atmosphere behind it.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "No invented product UI is present."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_008_02",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_008_02.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "editorial_statement",
+      "mode": "light",
+      "device_presentation": "none",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Use a decisive editorial statement with generous negative space; the canonical lockup anchors the composition and no fake product interface is introduced.",
+      "selected_asset_keys": [
+        "landing_light_hero_desktop_product_composite_01"
+      ],
+      "focal_instruction": "Prioritize the headline at grid-preview size; use only restrained brand atmosphere behind it.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "No invented product UI is present."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_008_03",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_008_03.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "editorial_statement",
+      "mode": "light",
+      "device_presentation": "none",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Use a decisive editorial statement with generous negative space; the canonical lockup anchors the composition and no fake product interface is introduced.",
+      "selected_asset_keys": [
+        "landing_light_hero_desktop_product_composite_01"
+      ],
+      "focal_instruction": "Prioritize the headline at grid-preview size; use only restrained brand atmosphere behind it.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "No invented product UI is present."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_008_04",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_008_04.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "editorial_statement",
+      "mode": "light",
+      "device_presentation": "none",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Use a decisive editorial statement with generous negative space; the canonical lockup anchors the composition and no fake product interface is introduced.",
+      "selected_asset_keys": [
+        "landing_light_hero_desktop_product_composite_01"
+      ],
+      "focal_instruction": "Prioritize the headline at grid-preview size; use only restrained brand atmosphere behind it.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "No invented product UI is present."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_008_05",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_008_05.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "editorial_statement",
+      "mode": "light",
+      "device_presentation": "none",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Use a decisive editorial statement with generous negative space; the canonical lockup anchors the composition and no fake product interface is introduced.",
+      "selected_asset_keys": [
+        "landing_light_hero_desktop_product_composite_01"
+      ],
+      "focal_instruction": "Prioritize the headline at grid-preview size; use only restrained brand atmosphere behind it.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "No invented product UI is present."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_009",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_009.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_angle",
+      "mode": "light",
+      "device_presentation": "angled",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_task_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_010_01",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_010_01.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "module_spotlight",
+      "mode": "light",
+      "device_presentation": "close_crop",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_task_detail_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_010_02",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_010_02.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "module_spotlight",
+      "mode": "light",
+      "device_presentation": "close_crop",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_task_detail_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_010_03",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_010_03.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "module_spotlight",
+      "mode": "light",
+      "device_presentation": "close_crop",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_task_detail_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_010_04",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_010_04.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "module_spotlight",
+      "mode": "light",
+      "device_presentation": "close_crop",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_task_detail_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_010_05",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_010_05.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "module_spotlight",
+      "mode": "light",
+      "device_presentation": "close_crop",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_task_detail_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_011",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_011.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_hero_scene",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_012_01",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_012_01.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_depth",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_012_02",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_012_02.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_hero_scene",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_012_03",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_012_03.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_depth",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_012_04",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_012_04.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "proof_sequence",
+      "mode": "light",
+      "device_presentation": "angled",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_task_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_012_05",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_012_05.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_depth",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_013",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_013.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "editorial_statement",
+      "mode": "light",
+      "device_presentation": "none",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Use a decisive editorial statement with generous negative space; the canonical lockup anchors the composition and no fake product interface is introduced.",
+      "selected_asset_keys": [
+        "landing_light_hero_desktop_product_composite_01"
+      ],
+      "focal_instruction": "Prioritize the headline at grid-preview size; use only restrained brand atmosphere behind it.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "No invented product UI is present."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_014_01",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_014_01.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_hero_scene",
+      "mode": "light",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_rhythm_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_014_02",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_014_02.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_hero_scene",
+      "mode": "light",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_rhythm_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_014_03",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_014_03.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_hero_scene",
+      "mode": "light",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_rhythm_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_014_04",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_014_04.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "proof_sequence",
+      "mode": "light",
+      "device_presentation": "angled",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_task_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_014_05",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_014_05.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_hero_scene",
+      "mode": "light",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_rhythm_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_015",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_015.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_angle",
+      "mode": "light",
+      "device_presentation": "angled",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dquest_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_016",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_016.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "editorial_statement",
+      "mode": "light",
+      "device_presentation": "none",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Use a decisive editorial statement with generous negative space; the canonical lockup anchors the composition and no fake product interface is introduced.",
+      "selected_asset_keys": [
+        "landing_light_hero_desktop_product_composite_01"
+      ],
+      "focal_instruction": "Prioritize the headline at grid-preview size; use only restrained brand atmosphere behind it.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "No invented product UI is present."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_017_01",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_017_01.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "editorial_statement",
+      "mode": "light",
+      "device_presentation": "none",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Use a decisive editorial statement with generous negative space; the canonical lockup anchors the composition and no fake product interface is introduced.",
+      "selected_asset_keys": [
+        "landing_light_hero_desktop_product_composite_01"
+      ],
+      "focal_instruction": "Prioritize the headline at grid-preview size; use only restrained brand atmosphere behind it.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "No invented product UI is present."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_017_02",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_017_02.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_depth",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_017_03",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_017_03.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_hero_scene",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_017_04",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_017_04.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_depth",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_017_05",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_017_05.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "editorial_statement",
+      "mode": "light",
+      "device_presentation": "none",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Use a decisive editorial statement with generous negative space; the canonical lockup anchors the composition and no fake product interface is introduced.",
+      "selected_asset_keys": [
+        "landing_light_hero_desktop_product_composite_01"
+      ],
+      "focal_instruction": "Prioritize the headline at grid-preview size; use only restrained brand atmosphere behind it.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "No invented product UI is present."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_018_01",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_018_01.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_depth",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_018_02",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_018_02.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_angle",
+      "mode": "light",
+      "device_presentation": "angled",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_task_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_018_03",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_018_03.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_depth",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_018_04",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_018_04.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "proof_sequence",
+      "mode": "light",
+      "device_presentation": "angled",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_task_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_018_05",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_018_05.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_depth",
+      "mode": "dark",
+      "device_presentation": "layered_cards",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_dashboard_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_019",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_019.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "product_angle",
+      "mode": "light",
+      "device_presentation": "angled",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Make the registered product screen the proof focal point inside a premium device composition; copy remains the first read and the exact UI remains intact.",
+      "selected_asset_keys": [
+        "mobile_task_light_01"
+      ],
+      "focal_instruction": "Position the real registered product screen as the visual focal point with sufficient scale to read as a product, not a pasted screenshot.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "The selected registered UI is preserved without fabricated controls, metrics, or labels."
+      ]
+    }
+  },
+  {
+    "asset_code": "asset_post_020",
+    "status": "rendered",
+    "file": "marketing/generated/2026-07/rendered/asset_post_020.png",
+    "creative_direction": {
+      "status": "ready_for_render",
+      "visual_family": "editorial_statement",
+      "mode": "light",
+      "device_presentation": "none",
+      "wordmark_treatment": "canonical_innerbloom_lockup",
+      "composition_intent": "Use a decisive editorial statement with generous negative space; the canonical lockup anchors the composition and no fake product interface is introduced.",
+      "selected_asset_keys": [
+        "landing_light_hero_desktop_product_composite_01"
+      ],
+      "focal_instruction": "Prioritize the headline at grid-preview size; use only restrained brand atmosphere behind it.",
+      "supporting_visual": {
+        "required": false
+      },
+      "acceptance_criteria": [
+        "The canonical full Innerbloom lockup is present and not recreated with substitute type.",
+        "The headline remains legible at Instagram grid-preview size.",
+        "No invented product UI is present."
+      ]
+    }
+  }
+]
