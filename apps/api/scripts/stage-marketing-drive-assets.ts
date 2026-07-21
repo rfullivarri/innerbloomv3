@@ -14,7 +14,7 @@ const [campaign, registry] = await Promise.all([
   readJson<{ image_generation?: { jobs?: Job[] } }>(campaignPath),
   readJson<{ assets?: RegistryAsset[] }>(registryPath),
 ]);
-const requiredKeys = new Set<string>(['brand_logo_512']);
+const requiredKeys = new Set<string>(['brand_logo_512', 'brand_logo_full']);
 for (const job of campaign.image_generation?.jobs ?? []) {
   for (const key of job.selected_asset_keys ?? []) requiredKeys.add(key);
 }
