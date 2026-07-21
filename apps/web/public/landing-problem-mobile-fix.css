@@ -1,0 +1,94 @@
+/* Mobile refinements for the adaptive journey graphic. */
+
+/* Remove the enclosing graph card and the heavy center separator. */
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic svg rect[x="18"][y="18"][width="864"][height="484"],
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic svg path[d="M56 260 H844"],
+.landing.landing--v3-conversion .truth-problem-adaptive-graphic svg path[d="M54 260 H846"] {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  /* Keep the same left-to-right process used on desktop. */
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process {
+    grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) 18px minmax(0, 1fr) !important;
+    align-items: start;
+    gap: 4px;
+    width: min(100%, 560px) !important;
+    margin: 2px auto 0 !important;
+    padding: 10px 4px 0 !important;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__step {
+    align-content: start;
+    gap: 5px;
+    transform: translateY(4px);
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__step strong {
+    font-size: clamp(0.58rem, 2.45vw, 0.72rem);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__step p {
+    max-width: 14ch;
+    font-size: clamp(0.55rem, 2.1vw, 0.66rem);
+    line-height: 1.22;
+  }
+
+  /* Horizontal connectors between the three stages. */
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__connector {
+    align-self: start;
+    width: 100% !important;
+    height: 1px !important;
+    margin: 18px 0 0 !important;
+    background: linear-gradient(90deg, rgba(167, 139, 250, 0.08), rgba(167, 139, 250, 0.58)) !important;
+    transform: scaleX(0.32) !important;
+    transform-origin: left center !important;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__connector--green {
+    background: linear-gradient(90deg, rgba(95, 167, 255, 0.08), rgba(56, 240, 165, 0.58)) !important;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__connector::after {
+    top: 50% !important;
+    right: -1px !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: translateY(-50%) rotate(45deg) !important;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-phase="recovery"] .ib-problem-process__connector:first-of-type,
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-phase="outcome"] .ib-problem-process__connector,
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-reduced-motion="true"] .ib-problem-process__connector {
+    transform: scaleX(1) !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process {
+    grid-template-columns: minmax(0, 1fr) 14px minmax(0, 1fr) 14px minmax(0, 1fr) !important;
+    gap: 2px;
+    padding-inline: 0 !important;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__step p {
+    display: none;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__connector {
+    margin-top: 17px !important;
+  }
+}
