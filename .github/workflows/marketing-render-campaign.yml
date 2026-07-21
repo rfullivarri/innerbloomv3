@@ -1,0 +1,95 @@
+name: Render campaign and send it to Admin
+
+on:
+  workflow_dispatch:
+    inputs:
+      period_key:
+        description: Target campaign period in YYYY-MM format
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: marketing-render-${{ inputs.period_key }}
+  cancel-in-progress: false
+
+jobs:
+  render-and-import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      GOOGLE_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 }}
+      MARKETING_DRIVE_STAGING_FOLDER_ID: ${{ secrets.MARKETING_DRIVE_STAGING_FOLDER_ID }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: automation/marketing-cycle-${{ inputs.period_key }}
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Check configuration
+        run: |
+          set -euo pipefail
+          for key in DATABASE_URL GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 MARKETING_DRIVE_STAGING_FOLDER_ID; do
+            if [[ -z "${!key:-}" ]]; then
+              echo "Missing required GitHub secret: ${key}" >&2
+              exit 1
+            fi
+          done
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Validate creative contract
+        run: node scripts/marketing/validate-creative-direction.mjs marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
+
+      - name: Stage approved source assets from Drive
+        run: >-
+          npm -w @innerbloom/api exec tsx scripts/stage-marketing-drive-assets.ts
+          ../../marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
+          ../../marketing/asset-registry/innerbloom-drive-assets-v1.json
+          ../../marketing/generated/${{ inputs.period_key }}/source-assets
+
+      - name: Render deterministic campaign PNGs
+        run: >-
+          node scripts/marketing/render-campaign-v2.mjs
+          marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
+          --asset-dir marketing/generated/${{ inputs.period_key }}/source-assets
+          --out marketing/generated/${{ inputs.period_key }}/rendered
+
+      - name: Upload review PNGs to Drive staging
+        run: >-
+          npm -w @innerbloom/api exec tsx scripts/upload-marketing-rendered-assets.ts
+          ../../marketing/generated/${{ inputs.period_key }}/rendered
+          ../../marketing/generated/${{ inputs.period_key }}/drive-staging-manifest.json
+
+      - name: Import campaign into Admin review
+        run: >-
+          npm -w @innerbloom/api exec tsx scripts/import-marketing-campaign.ts
+          ../../marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
+          ../../marketing/generated/${{ inputs.period_key }}/drive-staging-manifest.json
+
+      - name: Keep output as a build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: innerbloom-marketing-${{ inputs.period_key }}
+          path: marketing/generated/${{ inputs.period_key }}
+          retention-days: 30
+
+      - name: Report next step
+        run: |
+          {
+            echo "## Campaign ready for human review"
+            echo "- Period: ${{ inputs.period_key }}"
+            echo "- Result: rendered PNGs are in Drive staging and imported to Admin."
+            echo "- Next: open Admin > Marketing, approve or reject each post."
+            echo "- After approval: use Upload approved assets to R2, then Download Metricool CSV."
+          } >> "${GITHUB_STEP_SUMMARY}"
