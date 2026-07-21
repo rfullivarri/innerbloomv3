@@ -72,16 +72,17 @@ export async function uploadDriveImage(input: {
 }
 
 async function getAccessToken() {
-  const raw = String(process.env.GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 ?? '').trim();
-  if (!raw) {
-    throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 is required for the Drive staging step.');
+  const rawJson = String(process.env.GOOGLE_SERVICE_ACCOUNT_JSON ?? '').trim();
+  const legacyBase64 = String(process.env.GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 ?? '').trim();
+  if (!rawJson && !legacyBase64) {
+    throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON is required for the Drive staging step.');
   }
 
   let serviceAccount: ServiceAccount;
   try {
-    serviceAccount = JSON.parse(Buffer.from(raw, 'base64').toString('utf8')) as ServiceAccount;
+    serviceAccount = JSON.parse(rawJson || Buffer.from(legacyBase64, 'base64').toString('utf8')) as ServiceAccount;
   } catch {
-    throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 is not valid base64 JSON.');
+    throw new Error('The Google service account secret is not valid JSON.');
   }
 
   if (!serviceAccount.client_email || !serviceAccount.private_key) {
