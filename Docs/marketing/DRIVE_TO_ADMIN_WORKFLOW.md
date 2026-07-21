@@ -13,7 +13,7 @@ El workflow requiere estos secretos de GitHub:
 
 | Secreto | Qué contiene |
 | --- | --- |
-| `GOOGLE_SERVICE_ACCOUNT_JSON_BASE64` | El JSON de la cuenta de servicio de Google, codificado en base64. |
+| `GOOGLE_SERVICE_ACCOUNT_JSON` | El contenido completo del archivo JSON de la cuenta de servicio de Google (sin convertirlo). |
 | `MARKETING_DRIVE_STAGING_FOLDER_ID` | ID de la carpeta de Drive donde se guardarán los PNGs de revisión: `1x1hkC8VZclb6zvCVnNb3mNh7TLk76CWo` (`Generated Marketing Reviews`). |
 | `DATABASE_URL` | Ya se usa para crear los posts dentro del Admin. |
 
