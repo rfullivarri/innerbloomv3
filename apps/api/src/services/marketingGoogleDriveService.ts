@@ -52,7 +52,7 @@ export async function uploadDriveImage(input: {
     Buffer.from(`\r\n--${boundary}--\r\n`),
   ]);
   const response = await fetch(
-    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,webViewLink,thumbnailLink',
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true&fields=id,name,mimeType,webViewLink,thumbnailLink',
     {
       method: 'POST',
       headers: {
