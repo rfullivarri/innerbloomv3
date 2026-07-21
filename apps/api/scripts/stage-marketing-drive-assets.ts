@@ -2,8 +2,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { downloadDriveFile } from '../src/services/marketingGoogleDriveService.js';
 
-type RegistryAsset = { asset_key: string; drive_file_id: string; file_name?: string };
-type Job = { selected_asset_keys?: string[] };
+type RegistryAsset = { asset_key: string; drive_file_id: string; original_file_name?: string; mime_type?: string };
+type Job = { creative_direction?: { selected_asset_keys?: string[] } };
 
 const [campaignPath, registryPath, outputDir] = process.argv.slice(2);
 if (!campaignPath || !registryPath || !outputDir) {
@@ -16,9 +16,9 @@ const [campaign, registry] = await Promise.all([
 ]);
 const requiredKeys = new Set<string>(['brand_logo_512', 'brand_logo_full']);
 for (const job of campaign.image_generation?.jobs ?? []) {
-  for (const key of job.selected_asset_keys ?? []) requiredKeys.add(key);
+  for (const key of job.creative_direction?.selected_asset_keys ?? []) requiredKeys.add(key);
 }
-if (requiredKeys.size === 1) {
+if (requiredKeys.size <= 2) {
   throw new Error('No creative selected_asset_keys were found. Run the Creative Director before staging.');
 }
 
@@ -31,7 +31,7 @@ const staged: Array<{ asset_key: string; file: string; drive_file_id: string; co
 for (const key of [...requiredKeys].sort()) {
   const asset = byKey.get(key)!;
   const result = await downloadDriveFile(asset.drive_file_id);
-  const extension = extensionFor(asset.file_name ?? key, result.contentType);
+  const extension = extensionFor(asset.original_file_name ?? key, asset.mime_type ?? result.contentType);
   const file = `${safeName(key)}${extension}`;
   await fs.writeFile(path.join(outputDir, file), result.bytes);
   staged.push({ asset_key: key, file, drive_file_id: asset.drive_file_id, content_type: result.contentType });
