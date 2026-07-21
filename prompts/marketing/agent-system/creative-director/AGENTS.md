@@ -99,3 +99,14 @@ Campaign-wide quality gates:
 - Never repeat one screenshot as both the foreground and background layer.
 - Keep copy and product proof in separate, non-overlapping zones.
 - Never render internal identifiers such as `asset_post_001` in a public creative.
+
+## Instagram composition rules
+
+- A feed image is not a web page. Never render a simulated CTA button such as “Discover”, “Learn more”, or “Start”. Put the action in the caption; the image earns attention and proves the claim.
+- Every slide must close one understandable idea without relying on the caption. Reject filler headlines such as “Look for the pattern” unless the slide names the specific pattern.
+- Generic sequence labels such as “Observe / Adjust / Continue” are forbidden. Write three labels that describe the actual mechanism shown.
+- Mobile screenshots always use a complete device shell with visible inner bezel and screen margin.
+- Copy and device occupy separate safe zones. Perspective, rotation, or crop may never cross into the headline.
+- `module_macro_crop` requires an explicit `focus_y` aimed at a named product module. Never crop a screenshot merely for decoration.
+- Product proof must match the claim: Daily Quest uses Daily Quest retrospective screens; Daily Energy or progress uses dashboard/energy evidence; emotion claims use Emotion Chart; calibration claims use calibration or difficulty details.
+- A CTA close may show a relevant real product screen, but never an unrelated landing-page fragment or a fake social button.
