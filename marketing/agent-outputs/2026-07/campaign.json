@@ -2234,14 +2234,14 @@
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "mobile_rhythm_light_01",
-            "drive_file_id": "1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp",
-            "drive_url": "https://drive.google.com/file/d/1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_rythm_light_01.png",
+            "asset_key": "mobile_dashboard_dark_overview_streaks_04",
+            "drive_file_id": "1luPOy4_TlBldDH-w1akx-_HU36JnABa-",
+            "drive_url": "https://drive.google.com/file/d/1luPOy4_TlBldDH-w1akx-_HU36JnABa-/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dashboard_dark_overview_streaks_04.png",
             "mime_type": "image/png",
             "kind": "product_screenshot",
-            "module": "brand_or_product_support",
-            "mode": "light",
+            "module": "dashboard",
+            "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
@@ -2251,14 +2251,14 @@
             ]
           },
           {
-            "asset_key": "mobile_settings_dark_rhythm_selector_15",
-            "drive_file_id": "1f_tngCBJHJmeLr-t_7JWdoyvUPgL5N3A",
-            "drive_url": "https://drive.google.com/file/d/1f_tngCBJHJmeLr-t_7JWdoyvUPgL5N3A/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_settings_dark_rhythm_selector_15.png",
+            "asset_key": "mobile_dashboard_light_01",
+            "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+            "drive_url": "https://drive.google.com/file/d/1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dashboard_light_01.png",
             "mime_type": "image/png",
             "kind": "product_screenshot",
-            "module": "rhythm_selection",
-            "mode": "dark",
+            "module": "dashboard",
+            "mode": "light",
             "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
@@ -2315,18 +2315,19 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render split_device_right with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "mobile_rhythm_light_01",
-            "mobile_settings_dark_rhythm_selector_15"
+            "mobile_dashboard_dark_overview_streaks_04",
+            "mobile_dashboard_light_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "split_device_right",
           "palette": "light"
@@ -2426,10 +2427,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_type_monument",
           "palette": "warm"
@@ -2529,13 +2531,18 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_transition",
-          "palette": "ink"
+          "palette": "ink",
+          "contrast_pair": [
+            "Missed day",
+            "Failed plan"
+          ]
         }
       },
       {
@@ -2561,14 +2568,14 @@
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "mobile_dashboard_light_02",
-            "drive_file_id": "1axbJGjHorYCpG74j4BY6Hcnfoq6iqZyc",
-            "drive_url": "https://drive.google.com/file/d/1axbJGjHorYCpG74j4BY6Hcnfoq6iqZyc/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_dashboard_light_02.png",
+            "asset_key": "mobile_dashboard_dark_energy_balance_02",
+            "drive_file_id": "1dLcNjKkBfVvTvFjWK-BFIJ8919BMo_Bj",
+            "drive_url": "https://drive.google.com/file/d/1dLcNjKkBfVvTvFjWK-BFIJ8919BMo_Bj/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dashboard_dark_energy_balance_02.png",
             "mime_type": "image/png",
             "kind": "product_screenshot",
-            "module": "dashboard",
-            "mode": "light",
+            "module": "balance",
+            "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
@@ -2578,14 +2585,14 @@
             ]
           },
           {
-            "asset_key": "mobile_analytics_dark_balance_radar_12",
-            "drive_file_id": "1_AJeGzenI1OaGwT11RGQeTt4vyRXji0b",
-            "drive_url": "https://drive.google.com/file/d/1_AJeGzenI1OaGwT11RGQeTt4vyRXji0b/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_analytics_dark_balance_radar_12.png",
+            "asset_key": "mobile_dashboard_light_02",
+            "drive_file_id": "1axbJGjHorYCpG74j4BY6Hcnfoq6iqZyc",
+            "drive_url": "https://drive.google.com/file/d/1axbJGjHorYCpG74j4BY6Hcnfoq6iqZyc/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dashboard_light_02.png",
             "mime_type": "image/png",
             "kind": "product_screenshot",
-            "module": "balance",
-            "mode": "dark",
+            "module": "dashboard",
+            "mode": "light",
             "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
@@ -2642,21 +2649,23 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render module_macro_crop with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "mobile_dashboard_light_02",
-            "mobile_analytics_dark_balance_radar_12"
+            "mobile_dashboard_dark_energy_balance_02",
+            "mobile_dashboard_light_02"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "module_macro_crop",
-          "palette": "lilac"
+          "palette": "lilac",
+          "focus_y": 52
         }
       },
       {
@@ -2675,8 +2684,8 @@
           "safe_area": "Keep essential copy and logo inside central 940x940 safe area."
         },
         "visible_copy": {
-          "headline": "Look for the pattern.",
-          "supporting_text": "Look for the pattern, not the shame."
+          "headline": "One day is data. The week is the pattern.",
+          "supporting_text": "Daily Energy keeps recent momentum visible."
         },
         "product_truth_anchor": "Daily Energy shows accumulated momentum across Body, Mind, and Soul based on recent actions and decay over time.",
         "funnel_stage": "acquisition",
@@ -2753,13 +2762,19 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_numbered_steps",
-          "palette": "light"
+          "palette": "light",
+          "sequence_labels": [
+            "See the week",
+            "Read the change",
+            "Choose the return"
+          ]
         }
       },
       {
@@ -2778,22 +2793,22 @@
           "safe_area": "Keep essential copy and logo inside central 940x940 safe area."
         },
         "visible_copy": {
-          "headline": "Try the early version.",
-          "supporting_text": "Try a rhythm that can bend."
+          "headline": "Try a rhythm that can bend.",
+          "supporting_text": "Start with a pace you can actually keep."
         },
         "product_truth_anchor": "Daily Energy shows accumulated momentum across Body, Mind, and Soul based on recent actions and decay over time.",
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "landing_light_problem_desktop_product_composite_01",
-            "drive_file_id": "13HsTw4IXLNDZ-_F2jh2PLoNbdKuhiyW4",
-            "drive_url": "https://drive.google.com/file/d/13HsTw4IXLNDZ-_F2jh2PLoNbdKuhiyW4/view?usp=drivesdk",
-            "original_file_name": "innerbloom_landing_light_problem_desktop_product_composite_01.png",
+            "asset_key": "mobile_rhythm_light_01",
+            "drive_file_id": "1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp",
+            "drive_url": "https://drive.google.com/file/d/1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_rythm_light_01.png",
             "mime_type": "image/png",
-            "kind": "landing_composite",
-            "module": "landing",
+            "kind": "product_screenshot",
+            "module": "brand_or_product_support",
             "mode": "light",
-            "surface": "desktop",
+            "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
               "reuse_existing_asset",
@@ -2849,17 +2864,18 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render carousel_cta_close with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "landing_light_problem_desktop_product_composite_01"
+            "mobile_rhythm_light_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
           "palette": "dark"
@@ -2894,23 +2910,6 @@
             "mime_type": "image/png",
             "kind": "product_screenshot",
             "module": "task_detail",
-            "mode": "dark",
-            "surface": "mobile",
-            "status": "approved_current",
-            "allowed_operations": [
-              "reuse_existing_asset",
-              "compose_existing_assets",
-              "crop_or_reframe"
-            ]
-          },
-          {
-            "asset_key": "mobile_achievements_dark_habit_card_front_16",
-            "drive_file_id": "1lEHdHoxe9oPKUvNxikTLWnYlkW_h_FsQ",
-            "drive_url": "https://drive.google.com/file/d/1lEHdHoxe9oPKUvNxikTLWnYlkW_h_FsQ/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_achievements_dark_habit_card_front_16.png",
-            "mime_type": "image/png",
-            "kind": "product_screenshot",
-            "module": "achievements",
             "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
@@ -2968,18 +2967,18 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render floating_device_orbit with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "mobile_task_detail_dark_activity_streaks_07",
-            "mobile_achievements_dark_habit_card_front_16"
+            "mobile_task_detail_dark_activity_streaks_07"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "floating_device_orbit",
           "palette": "warm"
@@ -3008,14 +3007,14 @@
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "mobile_dquest_light_01",
-            "drive_file_id": "1yC0Vlj-NbpnWJcobmE3stl7QVdFNQSoW",
-            "drive_url": "https://drive.google.com/file/d/1yC0Vlj-NbpnWJcobmE3stl7QVdFNQSoW/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_dquest_light_01.png",
+            "asset_key": "mobile_dailyquest_dark_emotion_moderation",
+            "drive_file_id": "1eFwklCONkoIEPZqCjReGdhifw9ox7Hr0",
+            "drive_url": "https://drive.google.com/file/d/1eFwklCONkoIEPZqCjReGdhifw9ox7Hr0/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dailyquest_dark_emotion_moderation.png",
             "mime_type": "image/png",
             "kind": "product_screenshot",
-            "module": "daily_quest",
-            "mode": "light",
+            "module": "emotion_chart",
+            "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
@@ -3066,25 +3065,26 @@
         },
         "creative_direction": {
           "status": "ready_for_render",
-          "visual_family": "editorial_statement",
+          "visual_family": "product_hero_scene",
           "mode": "light",
           "device_presentation": "none",
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render editorial_quote_frame with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "mobile_dquest_light_01"
+            "mobile_dailyquest_dark_emotion_moderation"
           ],
           "focal_instruction": "Headline is the focal point; abstract decoration remains secondary.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
-          "layout_variant": "editorial_quote_frame",
+          "layout_variant": "split_device_right",
           "palette": "lilac"
         }
       },
@@ -3110,23 +3110,6 @@
         "product_truth_anchor": "Daily Quest reviews yesterday; it is not a planner, generator, or prediction engine.",
         "funnel_stage": "acquisition",
         "source_assets": [
-          {
-            "asset_key": "mobile_dquest_light_02",
-            "drive_file_id": "1b6SOXAV6I5gk9NDgdhxRKM59IT-oUwJh",
-            "drive_url": "https://drive.google.com/file/d/1b6SOXAV6I5gk9NDgdhxRKM59IT-oUwJh/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_dquest_light_02.png",
-            "mime_type": "image/png",
-            "kind": "product_screenshot",
-            "module": "daily_quest",
-            "mode": "light",
-            "surface": "mobile",
-            "status": "approved_current",
-            "allowed_operations": [
-              "reuse_existing_asset",
-              "compose_existing_assets",
-              "crop_or_reframe"
-            ]
-          },
           {
             "asset_key": "mobile_dailyquest_dark_emotion_moderation",
             "drive_file_id": "1eFwklCONkoIEPZqCjReGdhifw9ox7Hr0",
@@ -3186,13 +3169,12 @@
         },
         "creative_direction": {
           "status": "ready_for_render",
-          "visual_family": "product_angle",
+          "visual_family": "product_hero_scene",
           "mode": "light",
           "device_presentation": "angled",
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render device_diagonal_crop with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "mobile_dquest_light_02",
             "mobile_dailyquest_dark_emotion_moderation"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
@@ -3200,12 +3182,13 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
-          "layout_variant": "device_diagonal_crop",
+          "layout_variant": "split_device_left",
           "palette": "light"
         }
       },
@@ -3239,23 +3222,6 @@
             "mime_type": "image/png",
             "kind": "product_screenshot",
             "module": "emotion_chart",
-            "mode": "dark",
-            "surface": "mobile",
-            "status": "approved_current",
-            "allowed_operations": [
-              "reuse_existing_asset",
-              "compose_existing_assets",
-              "crop_or_reframe"
-            ]
-          },
-          {
-            "asset_key": "mobile_dailyquest_dark_feedback_done",
-            "drive_file_id": "13xE-fpmEQyFl7JO4Q3B3TC2rSmyTF-YI",
-            "drive_url": "https://drive.google.com/file/d/13xE-fpmEQyFl7JO4Q3B3TC2rSmyTF-YI/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_dailyquest_dark_feedback_done.png",
-            "mime_type": "image/png",
-            "kind": "product_screenshot",
-            "module": "brand_or_product_support",
             "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
@@ -3313,18 +3279,18 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render carousel_proof_focus with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "mobile_dailyquest_dark_emotion_moderation",
-            "mobile_dailyquest_dark_feedback_done"
+            "mobile_dailyquest_dark_emotion_moderation"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_proof_focus",
           "palette": "dark"
@@ -3346,17 +3312,17 @@
           "safe_area": "Keep essential copy and logo inside central 940x940 safe area."
         },
         "visible_copy": {
-          "headline": "Look for the pattern.",
-          "supporting_text": "Yesterday can hold useful context."
+          "headline": "Yesterday gives today useful context.",
+          "supporting_text": "Daily Quest turns reflection into a clearer next step."
         },
         "product_truth_anchor": "Daily Quest reviews yesterday; it is not a planner, generator, or prediction engine.",
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "mobile_dailyquest_dark_feedback_done",
-            "drive_file_id": "13xE-fpmEQyFl7JO4Q3B3TC2rSmyTF-YI",
-            "drive_url": "https://drive.google.com/file/d/13xE-fpmEQyFl7JO4Q3B3TC2rSmyTF-YI/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_dailyquest_dark_feedback_done.png",
+            "asset_key": "mobile_dailyquest_dark_feedback_summary",
+            "drive_file_id": "1TTki6LIjb-2D1buv74BPFdcEjXME5-qX",
+            "drive_url": "https://drive.google.com/file/d/1TTki6LIjb-2D1buv74BPFdcEjXME5-qX/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dailyquest_dark_feedback_summary .png",
             "mime_type": "image/png",
             "kind": "product_screenshot",
             "module": "brand_or_product_support",
@@ -3411,26 +3377,28 @@
         },
         "creative_direction": {
           "status": "ready_for_render",
-          "visual_family": "editorial_statement",
+          "visual_family": "module_spotlight",
           "mode": "dark",
           "device_presentation": "none",
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render editorial_signal_line with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "mobile_dailyquest_dark_feedback_done"
+            "mobile_dailyquest_dark_feedback_summary"
           ],
           "focal_instruction": "Headline is the focal point; abstract decoration remains secondary.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
-          "layout_variant": "editorial_signal_line",
-          "palette": "warm"
+          "layout_variant": "module_macro_crop",
+          "palette": "warm",
+          "focus_y": 28
         }
       },
       {
@@ -3449,22 +3417,22 @@
           "safe_area": "Keep essential copy and logo inside central 940x940 safe area."
         },
         "visible_copy": {
-          "headline": "Try the early version.",
-          "supporting_text": "Try the early Daily Quest flow."
+          "headline": "Try Daily Quest with yesterday in view.",
+          "supporting_text": "Reflect first. Choose the next step second."
         },
         "product_truth_anchor": "Daily Quest reviews yesterday; it is not a planner, generator, or prediction engine.",
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "landing_light_hero_desktop_product_composite_01",
-            "drive_file_id": "1TTq7Bxbc4eTTZ3gZfI4cPAakayaim2sS",
-            "drive_url": "https://drive.google.com/file/d/1TTq7Bxbc4eTTZ3gZfI4cPAakayaim2sS/view?usp=drivesdk",
-            "original_file_name": "innerbloom_landing_light_hero_desktop_product_composite_01.png",
+            "asset_key": "mobile_dquest_light_01",
+            "drive_file_id": "1yC0Vlj-NbpnWJcobmE3stl7QVdFNQSoW",
+            "drive_url": "https://drive.google.com/file/d/1yC0Vlj-NbpnWJcobmE3stl7QVdFNQSoW/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dquest_light_01.png",
             "mime_type": "image/png",
-            "kind": "landing_composite",
-            "module": "landing",
+            "kind": "product_screenshot",
+            "module": "daily_quest",
             "mode": "light",
-            "surface": "desktop",
+            "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
               "reuse_existing_asset",
@@ -3520,17 +3488,18 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render carousel_cta_close with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "landing_light_hero_desktop_product_composite_01"
+            "mobile_dquest_light_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
           "palette": "ink"
@@ -3558,14 +3527,14 @@
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "mobile_rhythm_light_01",
-            "drive_file_id": "1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp",
-            "drive_url": "https://drive.google.com/file/d/1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_rythm_light_01.png",
+            "asset_key": "mobile_dashboard_dark_overview_streaks_04",
+            "drive_file_id": "1luPOy4_TlBldDH-w1akx-_HU36JnABa-",
+            "drive_url": "https://drive.google.com/file/d/1luPOy4_TlBldDH-w1akx-_HU36JnABa-/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dashboard_dark_overview_streaks_04.png",
             "mime_type": "image/png",
             "kind": "product_screenshot",
-            "module": "brand_or_product_support",
-            "mode": "light",
+            "module": "dashboard",
+            "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
@@ -3616,25 +3585,26 @@
         },
         "creative_direction": {
           "status": "ready_for_render",
-          "visual_family": "editorial_statement",
+          "visual_family": "product_hero_scene",
           "mode": "light",
           "device_presentation": "none",
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render editorial_type_monument with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "mobile_rhythm_light_01"
+            "mobile_dashboard_dark_overview_streaks_04"
           ],
           "focal_instruction": "Headline is the focal point; abstract decoration remains secondary.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
-          "layout_variant": "editorial_type_monument",
+          "layout_variant": "split_device_right",
           "palette": "lilac"
         }
       },
@@ -3653,38 +3623,21 @@
           "safe_area": "Keep essential copy and logo inside central 940x940 safe area."
         },
         "visible_copy": {
-          "headline": "Try the early version and tell us what is missing.",
-          "supporting_text": "Try the early version, then tell us what felt unclear."
+          "headline": "Help us shape the early version.",
+          "supporting_text": "Try Innerbloom and tell us what still feels unclear."
         },
         "product_truth_anchor": "The product is early and reviewable; feedback CTA should not overstate maturity.",
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "mobile_dquest_light_02",
-            "drive_file_id": "1b6SOXAV6I5gk9NDgdhxRKM59IT-oUwJh",
-            "drive_url": "https://drive.google.com/file/d/1b6SOXAV6I5gk9NDgdhxRKM59IT-oUwJh/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_dquest_light_02.png",
+            "asset_key": "mobile_dashboard_light_01",
+            "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+            "drive_url": "https://drive.google.com/file/d/1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dashboard_light_01.png",
             "mime_type": "image/png",
             "kind": "product_screenshot",
-            "module": "daily_quest",
+            "module": "dashboard",
             "mode": "light",
-            "surface": "mobile",
-            "status": "approved_current",
-            "allowed_operations": [
-              "reuse_existing_asset",
-              "compose_existing_assets",
-              "crop_or_reframe"
-            ]
-          },
-          {
-            "asset_key": "mobile_dailyquest_dark_emotion_moderation",
-            "drive_file_id": "1eFwklCONkoIEPZqCjReGdhifw9ox7Hr0",
-            "drive_url": "https://drive.google.com/file/d/1eFwklCONkoIEPZqCjReGdhifw9ox7Hr0/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_dailyquest_dark_emotion_moderation.png",
-            "mime_type": "image/png",
-            "kind": "product_screenshot",
-            "module": "emotion_chart",
-            "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
@@ -3735,26 +3688,26 @@
         },
         "creative_direction": {
           "status": "ready_for_render",
-          "visual_family": "product_depth",
+          "visual_family": "product_hero_scene",
           "mode": "light",
           "device_presentation": "front",
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render bento_product_proof with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "mobile_dquest_light_02",
-            "mobile_dailyquest_dark_emotion_moderation"
+            "mobile_dashboard_light_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
-          "layout_variant": "bento_product_proof",
+          "layout_variant": "split_device_left",
           "palette": "light"
         }
       },
@@ -3869,10 +3822,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "device_diagonal_crop",
           "palette": "dark"
@@ -3959,7 +3913,7 @@
         },
         "creative_direction": {
           "status": "ready_for_render",
-          "visual_family": "editorial_statement",
+          "visual_family": "product_hero_scene",
           "mode": "dark",
           "device_presentation": "none",
           "wordmark_treatment": "canonical_innerbloom_lockup",
@@ -3972,12 +3926,13 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
-          "layout_variant": "editorial_quote_frame",
+          "layout_variant": "split_device_right",
           "palette": "ink"
         }
       },
@@ -4093,10 +4048,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "device_diagonal_crop",
           "palette": "lilac"
@@ -4214,10 +4170,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_proof_focus",
           "palette": "light"
@@ -4239,8 +4196,8 @@
           "safe_area": "Keep essential copy and logo inside central 940x940 safe area."
         },
         "visible_copy": {
-          "headline": "Look for the pattern.",
-          "supporting_text": "Different weeks need different margins."
+          "headline": "One day is data. The week is the pattern.",
+          "supporting_text": "Recent momentum tells a fuller story."
         },
         "product_truth_anchor": "Emotion Chart shows a calendar-like history of predominant emotions and supports pattern recognition.",
         "funnel_stage": "acquisition",
@@ -4317,10 +4274,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_signal_line",
           "palette": "dark"
@@ -4349,15 +4307,15 @@
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "landing_light_problem_desktop_product_composite_01",
-            "drive_file_id": "13HsTw4IXLNDZ-_F2jh2PLoNbdKuhiyW4",
-            "drive_url": "https://drive.google.com/file/d/13HsTw4IXLNDZ-_F2jh2PLoNbdKuhiyW4/view?usp=drivesdk",
-            "original_file_name": "innerbloom_landing_light_problem_desktop_product_composite_01.png",
+            "asset_key": "mobile_analytics_dark_emotion_chart_11",
+            "drive_file_id": "1ajkM1kCdUYKrMVKSsfUv98vJa9uFM9AT",
+            "drive_url": "https://drive.google.com/file/d/1ajkM1kCdUYKrMVKSsfUv98vJa9uFM9AT/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_analytics_dark_emotion_chart_11.png",
             "mime_type": "image/png",
-            "kind": "landing_composite",
-            "module": "landing",
-            "mode": "light",
-            "surface": "desktop",
+            "kind": "product_screenshot",
+            "module": "emotion_chart",
+            "mode": "dark",
+            "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
               "reuse_existing_asset",
@@ -4413,17 +4371,18 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render carousel_cta_close with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "landing_light_problem_desktop_product_composite_01"
+            "mobile_analytics_dark_emotion_chart_11"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
           "palette": "warm"
@@ -4522,10 +4481,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_quote_frame",
           "palette": "ink"
@@ -4625,10 +4585,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_type_monument",
           "palette": "light"
@@ -4728,13 +4689,18 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_transition",
-          "palette": "dark"
+          "palette": "dark",
+          "contrast_pair": [
+            "Missed day",
+            "Failed plan"
+          ]
         }
       },
       {
@@ -4849,10 +4815,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "module_macro_crop",
           "palette": "warm"
@@ -4874,8 +4841,8 @@
           "safe_area": "Keep essential copy and logo inside central 940x940 safe area."
         },
         "visible_copy": {
-          "headline": "Look for the pattern.",
-          "supporting_text": "Adjustment should stay honest and visible."
+          "headline": "One day is data. The week is the pattern.",
+          "supporting_text": "Recent momentum tells a fuller story."
         },
         "product_truth_anchor": "Growth Calibration recalibrates monthly by task; user edits can reset habit tracking if history exists.",
         "funnel_stage": "acquisition",
@@ -4952,13 +4919,19 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_numbered_steps",
-          "palette": "ink"
+          "palette": "ink",
+          "sequence_labels": [
+            "See the week",
+            "Read the change",
+            "Choose the return"
+          ]
         }
       },
       {
@@ -4984,15 +4957,15 @@
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "landing_light_hero_desktop_product_composite_01",
-            "drive_file_id": "1TTq7Bxbc4eTTZ3gZfI4cPAakayaim2sS",
-            "drive_url": "https://drive.google.com/file/d/1TTq7Bxbc4eTTZ3gZfI4cPAakayaim2sS/view?usp=drivesdk",
-            "original_file_name": "innerbloom_landing_light_hero_desktop_product_composite_01.png",
+            "asset_key": "mobile_calibration_light_01",
+            "drive_file_id": "1IdlvuqT2rS4NPejWjNNaDEQo5cPTjkwi",
+            "drive_url": "https://drive.google.com/file/d/1IdlvuqT2rS4NPejWjNNaDEQo5cPTjkwi/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_calibration_light_01.png",
             "mime_type": "image/png",
-            "kind": "landing_composite",
-            "module": "landing",
+            "kind": "product_screenshot",
+            "module": "growth_calibration",
             "mode": "light",
-            "surface": "desktop",
+            "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
               "reuse_existing_asset",
@@ -5048,17 +5021,18 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render carousel_cta_close with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "landing_light_hero_desktop_product_composite_01"
+            "mobile_calibration_light_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
           "palette": "lilac"
@@ -5175,10 +5149,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "cinematic_device_center",
           "palette": "light"
@@ -5278,10 +5253,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_quote_frame",
           "palette": "warm"
@@ -5399,10 +5375,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "device_diagonal_crop",
           "palette": "ink"
@@ -5520,10 +5497,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_proof_focus",
           "palette": "lilac"
@@ -5545,8 +5523,8 @@
           "safe_area": "Keep essential copy and logo inside central 940x940 safe area."
         },
         "visible_copy": {
-          "headline": "Look for the pattern.",
-          "supporting_text": "Your friction is useful signal."
+          "headline": "One day is data. The week is the pattern.",
+          "supporting_text": "Recent momentum tells a fuller story."
         },
         "product_truth_anchor": "Early-adopter feedback is a transparent CTA; dashboard can show the area users can react to.",
         "funnel_stage": "acquisition",
@@ -5623,10 +5601,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_signal_line",
           "palette": "light"
@@ -5655,15 +5634,15 @@
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "landing_light_hero_desktop_product_composite_03",
-            "drive_file_id": "1EMTwZr8kiR7uoG4tsY8gbkzX0L_xqwV4",
-            "drive_url": "https://drive.google.com/file/d/1EMTwZr8kiR7uoG4tsY8gbkzX0L_xqwV4/view?usp=drivesdk",
-            "original_file_name": "innerbloom_landing_light_hero_desktop_product_composite_03.png",
+            "asset_key": "mobile_dashboard_dark_overview_top_01",
+            "drive_file_id": "1Fn6Y-Mlz4fw0C5OB1r3fpTxcHJoi2Yya",
+            "drive_url": "https://drive.google.com/file/d/1Fn6Y-Mlz4fw0C5OB1r3fpTxcHJoi2Yya/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dashboard_dark_overview_top_01.png",
             "mime_type": "image/png",
-            "kind": "landing_composite",
-            "module": "landing",
-            "mode": "light",
-            "surface": "desktop",
+            "kind": "product_screenshot",
+            "module": "dashboard",
+            "mode": "dark",
+            "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
               "reuse_existing_asset",
@@ -5719,17 +5698,18 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render carousel_cta_close with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "landing_light_hero_desktop_product_composite_03"
+            "mobile_dashboard_dark_overview_top_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
           "palette": "dark"
@@ -5846,10 +5826,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "module_macro_crop",
           "palette": "warm"
@@ -5949,10 +5930,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_type_monument",
           "palette": "lilac"
@@ -6052,13 +6034,18 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_transition",
-          "palette": "light"
+          "palette": "light",
+          "contrast_pair": [
+            "Missed day",
+            "Failed plan"
+          ]
         }
       },
       {
@@ -6173,10 +6160,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "module_macro_crop",
           "palette": "dark"
@@ -6198,8 +6186,8 @@
           "safe_area": "Keep essential copy and logo inside central 940x940 safe area."
         },
         "visible_copy": {
-          "headline": "Look for the pattern.",
-          "supporting_text": "Margin helps you return without starting over."
+          "headline": "Check the rhythm before changing the goal.",
+          "supporting_text": "The chosen pace gives progress its context."
         },
         "product_truth_anchor": "Rhythm selection sets intended weekly frequency; later recommendations are optional and never automatic.",
         "funnel_stage": "registration",
@@ -6276,13 +6264,19 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_numbered_steps",
-          "palette": "warm"
+          "palette": "warm",
+          "sequence_labels": [
+            "Check the pace",
+            "Read the load",
+            "Adjust the ask"
+          ]
         }
       },
       {
@@ -6308,15 +6302,15 @@
         "funnel_stage": "registration",
         "source_assets": [
           {
-            "asset_key": "landing_light_problem_desktop_product_composite_01",
-            "drive_file_id": "13HsTw4IXLNDZ-_F2jh2PLoNbdKuhiyW4",
-            "drive_url": "https://drive.google.com/file/d/13HsTw4IXLNDZ-_F2jh2PLoNbdKuhiyW4/view?usp=drivesdk",
-            "original_file_name": "innerbloom_landing_light_problem_desktop_product_composite_01.png",
+            "asset_key": "mobile_rhythm_light_01",
+            "drive_file_id": "1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp",
+            "drive_url": "https://drive.google.com/file/d/1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_rythm_light_01.png",
             "mime_type": "image/png",
-            "kind": "landing_composite",
-            "module": "landing",
+            "kind": "product_screenshot",
+            "module": "brand_or_product_support",
             "mode": "light",
-            "surface": "desktop",
+            "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
               "reuse_existing_asset",
@@ -6372,17 +6366,18 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render carousel_cta_close with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "landing_light_problem_desktop_product_composite_01"
+            "mobile_rhythm_light_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
           "palette": "ink"
@@ -6481,10 +6476,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_signal_line",
           "palette": "lilac"
@@ -6601,10 +6597,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "layered_product_depth",
           "palette": "light"
@@ -6722,10 +6719,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_chapter_cover",
           "palette": "warm"
@@ -6825,10 +6823,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_quote_frame",
           "palette": "ink"
@@ -6946,10 +6945,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_proof_focus",
           "palette": "lilac"
@@ -6971,8 +6971,8 @@
           "safe_area": "Keep essential copy and logo inside central 940x940 safe area."
         },
         "visible_copy": {
-          "headline": "Look for the pattern.",
-          "supporting_text": "Review, recalibrate, keep the thread."
+          "headline": "One day is data. The week is the pattern.",
+          "supporting_text": "Recent momentum tells a fuller story."
         },
         "product_truth_anchor": "Core promise: see progress, adjust challenge, and build habits sustainably.",
         "funnel_stage": "activation",
@@ -7049,10 +7049,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_signal_line",
           "palette": "light"
@@ -7081,15 +7082,15 @@
         "funnel_stage": "activation",
         "source_assets": [
           {
-            "asset_key": "landing_light_hero_desktop_product_composite_02",
-            "drive_file_id": "1KHqfkUipRXWKA0rF8M8B8mfm3e3Aj_M0",
-            "drive_url": "https://drive.google.com/file/d/1KHqfkUipRXWKA0rF8M8B8mfm3e3Aj_M0/view?usp=drivesdk",
-            "original_file_name": "innerbloom_landing_light_hero_desktop_product_composite_02.png",
+            "asset_key": "mobile_calibration_light_01",
+            "drive_file_id": "1IdlvuqT2rS4NPejWjNNaDEQo5cPTjkwi",
+            "drive_url": "https://drive.google.com/file/d/1IdlvuqT2rS4NPejWjNNaDEQo5cPTjkwi/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_calibration_light_01.png",
             "mime_type": "image/png",
-            "kind": "landing_composite",
-            "module": "landing",
+            "kind": "product_screenshot",
+            "module": "growth_calibration",
             "mode": "light",
-            "surface": "desktop",
+            "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
               "reuse_existing_asset",
@@ -7145,17 +7146,18 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render carousel_cta_close with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "landing_light_hero_desktop_product_composite_02"
+            "mobile_calibration_light_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
           "palette": "dark"
@@ -7255,10 +7257,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_type_monument",
           "palette": "ink"
@@ -7358,13 +7361,18 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_transition",
-          "palette": "lilac"
+          "palette": "lilac",
+          "contrast_pair": [
+            "Missed day",
+            "Failed plan"
+          ]
         }
       },
       {
@@ -7479,10 +7487,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "module_macro_crop",
           "palette": "light"
@@ -7504,8 +7513,8 @@
           "safe_area": "Keep essential copy and logo inside central 940x940 safe area."
         },
         "visible_copy": {
-          "headline": "Look for the pattern.",
-          "supporting_text": "Review the pattern before changing the ask."
+          "headline": "Check the rhythm before changing the goal.",
+          "supporting_text": "The chosen pace gives progress its context."
         },
         "product_truth_anchor": "Rhythm and progress should be interpreted together; recommendations are optional, not automatic.",
         "funnel_stage": "activation",
@@ -7582,13 +7591,19 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_numbered_steps",
-          "palette": "dark"
+          "palette": "dark",
+          "sequence_labels": [
+            "Check the pace",
+            "Read the load",
+            "Adjust the ask"
+          ]
         }
       },
       {
@@ -7614,15 +7629,15 @@
         "funnel_stage": "activation",
         "source_assets": [
           {
-            "asset_key": "landing_light_hero_desktop_product_composite_03",
-            "drive_file_id": "1EMTwZr8kiR7uoG4tsY8gbkzX0L_xqwV4",
-            "drive_url": "https://drive.google.com/file/d/1EMTwZr8kiR7uoG4tsY8gbkzX0L_xqwV4/view?usp=drivesdk",
-            "original_file_name": "innerbloom_landing_light_hero_desktop_product_composite_03.png",
+            "asset_key": "mobile_rhythm_light_01",
+            "drive_file_id": "1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp",
+            "drive_url": "https://drive.google.com/file/d/1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_rythm_light_01.png",
             "mime_type": "image/png",
-            "kind": "landing_composite",
-            "module": "landing",
+            "kind": "product_screenshot",
+            "module": "brand_or_product_support",
             "mode": "light",
-            "surface": "desktop",
+            "surface": "mobile",
             "status": "approved_current",
             "allowed_operations": [
               "reuse_existing_asset",
@@ -7678,17 +7693,18 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render carousel_cta_close with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "landing_light_hero_desktop_product_composite_03"
+            "mobile_rhythm_light_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
           "palette": "warm"
@@ -7787,13 +7803,19 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_numbered_steps",
-          "palette": "ink"
+          "palette": "ink",
+          "sequence_labels": [
+            "See the week",
+            "Read the change",
+            "Choose the return"
+          ]
         }
       },
       {
@@ -7907,10 +7929,11 @@
             "required": false
           },
           "acceptance_criteria": [
-            "Canonical Innerbloom lockup is visible and uses the registered logo asset.",
-            "Headline and product proof never overlap and remain readable at grid size.",
-            "Only registered product UI is shown; no interface, metric or control is invented.",
-            "No internal asset filename or debug label appears in the final creative."
+            "The canonical Innerbloom lockup is visible.",
+            "Copy and device occupy separate non-overlapping safe zones.",
+            "Every mobile screenshot has a visible inner bezel and screen margin.",
+            "The selected registered screen directly proves the slide claim.",
+            "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "split_device_right",
           "palette": "lilac"
