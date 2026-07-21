@@ -55,7 +55,7 @@ const css = `
 :root{--ink:#17151b;--muted:#605b69;--accent:#8b63f6;--lilac:#eee9ff;--line:#e8e3ee}
 .frame{position:relative;width:1080px;height:1080px;overflow:hidden;padding:70px;background:#fbfafc;color:var(--ink)}
 .frame.dark{background:#121116;color:#faf9ff;--ink:#faf9ff;--muted:#c8c2d0;--lilac:#211d2c;--line:#37333f}
-.brand{display:flex;align-items:center;gap:12px;position:relative;z-index:4}.brand img{width:36px;height:36px;object-fit:contain}.brand span{font-family:Sora,sans-serif;font-size:21px;font-weight:700;letter-spacing:.24em}
+.brand{position:relative;z-index:4}.brand img{width:248px;height:44px;object-fit:contain;object-position:left center}
 .eyebrow{margin:48px 0 15px;font-family:Sora,sans-serif;font-size:18px;font-weight:700;letter-spacing:.15em;color:var(--accent);text-transform:uppercase}
 h1{margin:0;font-family:Sora,sans-serif;font-size:68px;line-height:1.02;letter-spacing:-.055em;max-width:590px} .support{margin:26px 0 0;font-size:27px;line-height:1.35;color:var(--muted);max-width:510px}
 .cta{display:inline-flex;margin-top:34px;padding:16px 24px;border-radius:999px;background:var(--accent);color:white;font-size:19px;font-weight:800}.footer{position:absolute;left:70px;right:70px;bottom:58px;padding-top:20px;border-top:1px solid var(--line);font-size:15px;color:var(--muted);letter-spacing:.07em}
@@ -65,7 +65,7 @@ h1{margin:0;font-family:Sora,sans-serif;font-size:68px;line-height:1.02;letter-s
 .spotlight .phone{left:50%;top:300px;width:370px;height:480px;transform:translateX(-50%);border-radius:34px}.spotlight .phone img{border-radius:26px}.spotlight h1{max-width:720px;font-size:60px}.statement h1{max-width:790px;font-size:82px}.statement .logic{display:flex;gap:16px;margin-top:54px}.statement .logic span{padding:16px 22px;border-radius:16px;background:var(--lilac);font-weight:800;color:#55459a}
 `;
 
-function brand(logo) { return '<div class="brand"><img src="'+logo+'" alt=""><span>INNERBLOOM</span></div>'; }
+function brand(logo) { return '<div class="brand"><img src="'+logo+'" alt="Innerbloom"></div>'; }
 function footer(job) { return '<div class="footer">INNERBLOOM · '+esc(job.asset_code)+'</div>'; }
 function copy(job) {
   const c=job.visible_copy || {};
@@ -87,7 +87,7 @@ function html(job, logo, sources) {
 
 async function main() {
   const campaign=JSON.parse(await fs.readFile(campaignPath,"utf8"));
-  const logo=await sourceUri("brand_logo_512");
+  const logo=await sourceUri("brand_logo_full");
   const jobs=campaign.image_generation?.jobs || [];
   if (!jobs.length) throw new Error("campaign.json has no image_generation.jobs");
   await fs.mkdir(outputDir,{recursive:true});
