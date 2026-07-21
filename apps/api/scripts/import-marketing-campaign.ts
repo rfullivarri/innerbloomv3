@@ -57,7 +57,7 @@ try {
         type: planned.asset_kind ?? post.format,
         url: staged.source_url,
         previewUrl: staged.preview_url,
-        sourceUrl: staged.web_view_url,
+        sourceUrl: staged.source_url.startsWith('data:') ? staged.source_url : staged.web_view_url,
         selected: true,
       };
     });
