@@ -86,7 +86,7 @@ jobs:
         shell: bash
         env:
           PERIOD_KEY: ${{ inputs.period_key }}
-          CYCLE_BRANCH: automation/marketing-cycle-${{ inputs.period_key }}
+          CYCLE_BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
