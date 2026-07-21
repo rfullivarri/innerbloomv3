@@ -1,0 +1,1056 @@
+{
+  "schema_version": "1.0",
+  "registry_name": "Innerbloom current Drive asset registry",
+  "generated_at": "2026-07-21",
+  "source": {
+    "drive_root_name": "Innerbloom Marketing",
+    "drive_root_id": "1OMs5zzPQcx9Db9RjpA7J-xL5h1b5V9cZ",
+    "asset_folder_name": "02 Assets",
+    "asset_folder_id": "1FplCAOvdgLA9p73fA7-piQH16d0nSuEg",
+    "rule": "This registry is the machine-readable source for current marketing visuals. Historical Drive folders are excluded."
+  },
+  "selection_rules": [
+    "Select by asset_key, never by guessed filename.",
+    "Use a source whose mode matches the post mode unless an approved contrast is intentional.",
+    "Prefer product proof for product claims and landing composites for brand or acquisition claims.",
+    "The real logo must be selected through an approved brand_logo asset.",
+    "This registry does not rename or move any Drive file."
+  ],
+  "assets": [
+    {
+      "asset_key": "landing_hero_desktop_phone_dashboard",
+      "drive_file_id": "1bdDZXMayTnF953jxbDdRDR30mTV5EgcA",
+      "drive_url": "https://drive.google.com/file/d/1bdDZXMayTnF953jxbDdRDR30mTV5EgcA/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_hero_desktop_phone_dashboard_03.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "neutral",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_hero_desktop_phone_splash",
+      "drive_file_id": "1TTg-cc2etAHnb-UBMQHtukho9w2Hv6gl",
+      "drive_url": "https://drive.google.com/file/d/1TTg-cc2etAHnb-UBMQHtukho9w2Hv6gl/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_hero_desktop_phone_splash_02.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "neutral",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_hero_desktop_product_composite",
+      "drive_file_id": "1onxU2RHosmChfOs2xSKg3UmZJXDH0dFJ",
+      "drive_url": "https://drive.google.com/file/d/1onxU2RHosmChfOs2xSKg3UmZJXDH0dFJ/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_hero_desktop_product_composite_01.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "neutral",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_journey_desktop_step_01_rhythm_selector",
+      "drive_file_id": "1bfYdPxqer7Q2z5kAjl3rGOysiPZSPQet",
+      "drive_url": "https://drive.google.com/file/d/1bfYdPxqer7Q2z5kAjl3rGOysiPZSPQet/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_journey_desktop_step_01_rhythm_selector_06.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "neutral",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_journey_desktop_step_01_rhythm_selector_closeup",
+      "drive_file_id": "1-OSOoqX5efUpRL3tV3xhMHbKy0LoUhiI",
+      "drive_url": "https://drive.google.com/file/d/1-OSOoqX5efUpRL3tV3xhMHbKy0LoUhiI/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_journey_desktop_step_01_rhythm_selector_closeup_07.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "neutral",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_journey_desktop_step_02_action_signal_blur",
+      "drive_file_id": "1KThYcZsiXQ4OXX98V6SGroPoL8R4pREa",
+      "drive_url": "https://drive.google.com/file/d/1KThYcZsiXQ4OXX98V6SGroPoL8R4pREa/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_journey_desktop_step_02_action_signal_blur_08.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "neutral",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_journey_desktop_step_02_action_signal_tasks",
+      "drive_file_id": "1rS3-OIiH5EGYKDAcSLCOKJWfU5cj4YVx",
+      "drive_url": "https://drive.google.com/file/d/1rS3-OIiH5EGYKDAcSLCOKJWfU5cj4YVx/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_journey_desktop_step_02_action_signal_tasks_09.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "neutral",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_journey_desktop_step_03_adaptive_difficulty",
+      "drive_file_id": "19a_RHj9bJZtXe5Og77bCapscC7XLEG7V",
+      "drive_url": "https://drive.google.com/file/d/19a_RHj9bJZtXe5Og77bCapscC7XLEG7V/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_journey_desktop_step_03_adaptive_difficulty_10.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "neutral",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_journey_desktop_step_04_habit_shelf",
+      "drive_file_id": "1t56ZfVzlNihM1KE5Dol7A_wqDx7k47KP",
+      "drive_url": "https://drive.google.com/file/d/1t56ZfVzlNihM1KE5Dol7A_wqDx7k47KP/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_journey_desktop_step_04_habit_shelf_11.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "neutral",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_light_hero_desktop_product_composite",
+      "drive_file_id": "1EMTwZr8kiR7uoG4tsY8gbkzX0L_xqwV4",
+      "drive_url": "https://drive.google.com/file/d/1EMTwZr8kiR7uoG4tsY8gbkzX0L_xqwV4/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_light_hero_desktop_product_composite_03.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "light",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_light_hero_desktop_product_composite",
+      "drive_file_id": "1KHqfkUipRXWKA0rF8M8B8mfm3e3Aj_M0",
+      "drive_url": "https://drive.google.com/file/d/1KHqfkUipRXWKA0rF8M8B8mfm3e3Aj_M0/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_light_hero_desktop_product_composite_02.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "light",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_light_hero_desktop_product_composite",
+      "drive_file_id": "1TTq7Bxbc4eTTZ3gZfI4cPAakayaim2sS",
+      "drive_url": "https://drive.google.com/file/d/1TTq7Bxbc4eTTZ3gZfI4cPAakayaim2sS/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_light_hero_desktop_product_composite_01.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "light",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_light_metod_desktop_product_composite",
+      "drive_file_id": "1tpDmoY2zzSHpYl0iBXkVDgIcOKKEgi8d",
+      "drive_url": "https://drive.google.com/file/d/1tpDmoY2zzSHpYl0iBXkVDgIcOKKEgi8d/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_light_metod_desktop_product_composite_07.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "light",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_light_metod_desktop_product_composite",
+      "drive_file_id": "11pgLl692-PG0FvBzhyYsV1SXojzhVjOI",
+      "drive_url": "https://drive.google.com/file/d/11pgLl692-PG0FvBzhyYsV1SXojzhVjOI/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_light_metod_desktop_product_composite_06.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "light",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_light_metod_desktop_product_composite",
+      "drive_file_id": "16nPv6ceffweGxePvf9j22ORYaCWW0nu2",
+      "drive_url": "https://drive.google.com/file/d/16nPv6ceffweGxePvf9j22ORYaCWW0nu2/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_light_metod_desktop_product_composite_05.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "light",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_light_metod_desktop_product_composite",
+      "drive_file_id": "1pKf9gKh3nep_8tayUlq_CcvhKE6fi2vX",
+      "drive_url": "https://drive.google.com/file/d/1pKf9gKh3nep_8tayUlq_CcvhKE6fi2vX/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_light_metod_desktop_product_composite_04.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "light",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_light_metod_desktop_product_composite",
+      "drive_file_id": "1N3RDnAZSGw5kxTrCl1Rsbamdviu5syMH",
+      "drive_url": "https://drive.google.com/file/d/1N3RDnAZSGw5kxTrCl1Rsbamdviu5syMH/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_light_metod_desktop_product_composite_03.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "light",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_light_metod_desktop_product_composite",
+      "drive_file_id": "1lNuWdQTBR-rOcCROINyOhuYdU0HWzZje",
+      "drive_url": "https://drive.google.com/file/d/1lNuWdQTBR-rOcCROINyOhuYdU0HWzZje/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_light_metod_desktop_product_composite_02.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "light",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_light_metod_desktop_product_composite",
+      "drive_file_id": "1OlKUtBa90_OnEzKc2qG1qKnW-K4JC4E_",
+      "drive_url": "https://drive.google.com/file/d/1OlKUtBa90_OnEzKc2qG1qKnW-K4JC4E_/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_light_metod_desktop_product_composite_01.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "light",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_light_problem_desktop_product_composite",
+      "drive_file_id": "13HsTw4IXLNDZ-_F2jh2PLoNbdKuhiyW4",
+      "drive_url": "https://drive.google.com/file/d/13HsTw4IXLNDZ-_F2jh2PLoNbdKuhiyW4/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_light_problem_desktop_product_composite_01.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "light",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_problem_desktop_adaptive_system",
+      "drive_file_id": "1fviz9SXik12es2nFZ1kVh-Bkmd_rHpC2",
+      "drive_url": "https://drive.google.com/file/d/1fviz9SXik12es2nFZ1kVh-Bkmd_rHpC2/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_problem_desktop_adaptive_system_04.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "neutral",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "landing_system_desktop_intro_copy",
+      "drive_file_id": "19cQ_-GpJLiV0FeiZeymIZlp316UnVOrs",
+      "drive_url": "https://drive.google.com/file/d/19cQ_-GpJLiV0FeiZeymIZlp316UnVOrs/view?usp=drivesdk",
+      "original_file_name": "innerbloom_landing_system_desktop_intro_copy_05.png",
+      "mime_type": "image/png",
+      "kind": "landing_composite",
+      "module": "landing",
+      "mode": "neutral",
+      "surface": "desktop",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "logo",
+      "drive_file_id": "1g33pJFN6hdyZGUFTe8P9IVhzjBBL-ICc",
+      "drive_url": "https://drive.google.com/file/d/1g33pJFN6hdyZGUFTe8P9IVhzjBBL-ICc/view?usp=drivesdk",
+      "original_file_name": "IB_NEW_LOGO1 512.png",
+      "mime_type": "image/png",
+      "kind": "brand_logo",
+      "module": "brand_logo",
+      "mode": "neutral",
+      "surface": "brand",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets"
+      ]
+    },
+    {
+      "asset_key": "logo",
+      "drive_file_id": "1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0",
+      "drive_url": "https://drive.google.com/file/d/1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0/view?usp=drivesdk",
+      "original_file_name": "IB_NEW_LOGO1.png",
+      "mime_type": "image/png",
+      "kind": "brand_logo",
+      "module": "brand_logo",
+      "mode": "neutral",
+      "surface": "brand",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets"
+      ]
+    },
+    {
+      "asset_key": "mobile_achievements_card_light",
+      "drive_file_id": "1akf7Sc_mWq2Tj6xp4zPONmWfHtf00Mba",
+      "drive_url": "https://drive.google.com/file/d/1akf7Sc_mWq2Tj6xp4zPONmWfHtf00Mba/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_achivements_card_light_02.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "brand_or_product_support",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_achievements_card_light",
+      "drive_file_id": "1gX3kD1CRVRfkgz_4UHkl3HP1gQpOhneP",
+      "drive_url": "https://drive.google.com/file/d/1gX3kD1CRVRfkgz_4UHkl3HP1gQpOhneP/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_achivements_card_light_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "brand_or_product_support",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_achievements_dark_calibration_detail",
+      "drive_file_id": "1kfxlxwdm2neCcIyyFJIHDdLqmVl_z6-f",
+      "drive_url": "https://drive.google.com/file/d/1kfxlxwdm2neCcIyyFJIHDdLqmVl_z6-f/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_achievements_dark_calibration_detail_10.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "growth_calibration",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_achievements_dark_habit_card_back",
+      "drive_file_id": "1RVoT6GNw4QsArCCZbMwCSEZ8AewHTqX2",
+      "drive_url": "https://drive.google.com/file/d/1RVoT6GNw4QsArCCZbMwCSEZ8AewHTqX2/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_achievements_dark_habit_card_back_17.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "achievements",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_achievements_dark_habit_card_front",
+      "drive_file_id": "1lEHdHoxe9oPKUvNxikTLWnYlkW_h_FsQ",
+      "drive_url": "https://drive.google.com/file/d/1lEHdHoxe9oPKUvNxikTLWnYlkW_h_FsQ/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_achievements_dark_habit_card_front_16.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "achievements",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_achievements_dark_mind_habit_score",
+      "drive_file_id": "1Ht7kqxnzIk1dVZI_DIQawrC3EJqtTUro",
+      "drive_url": "https://drive.google.com/file/d/1Ht7kqxnzIk1dVZI_DIQawrC3EJqtTUro/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_achievements_dark_mind_habit_score_18.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "achievements",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_achievements_dark_wrapped_summary",
+      "drive_file_id": "1tMjbWgjx86jD2Sa4ZNVfltqpceAKDLvB",
+      "drive_url": "https://drive.google.com/file/d/1tMjbWgjx86jD2Sa4ZNVfltqpceAKDLvB/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_achievements_dark_wrapped_summary_09.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "achievements",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_achievements_light",
+      "drive_file_id": "1CkAic7XvLMwQbXi52TGcg66l4YuJHx7b",
+      "drive_url": "https://drive.google.com/file/d/1CkAic7XvLMwQbXi52TGcg66l4YuJHx7b/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_achivements_light_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "brand_or_product_support",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_achievements_light",
+      "drive_file_id": "1IqPq7fR85NuQuFueFKjK2SW5CoUUEoGz",
+      "drive_url": "https://drive.google.com/file/d/1IqPq7fR85NuQuFueFKjK2SW5CoUUEoGz/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_achivements_light_02.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "brand_or_product_support",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_analytics_dark_balance_radar",
+      "drive_file_id": "1_AJeGzenI1OaGwT11RGQeTt4vyRXji0b",
+      "drive_url": "https://drive.google.com/file/d/1_AJeGzenI1OaGwT11RGQeTt4vyRXji0b/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_analytics_dark_balance_radar_12.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "balance",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_analytics_dark_emotion_chart",
+      "drive_file_id": "1ajkM1kCdUYKrMVKSsfUv98vJa9uFM9AT",
+      "drive_url": "https://drive.google.com/file/d/1ajkM1kCdUYKrMVKSsfUv98vJa9uFM9AT/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_analytics_dark_emotion_chart_11.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "emotion_chart",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_calibration_light",
+      "drive_file_id": "1JsjDi0-tTFaHpJSfHfJuCtB15rQjVdGa",
+      "drive_url": "https://drive.google.com/file/d/1JsjDi0-tTFaHpJSfHfJuCtB15rQjVdGa/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_calibration_light_02.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "growth_calibration",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_calibration_light",
+      "drive_file_id": "1IdlvuqT2rS4NPejWjNNaDEQo5cPTjkwi",
+      "drive_url": "https://drive.google.com/file/d/1IdlvuqT2rS4NPejWjNNaDEQo5cPTjkwi/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_calibration_light_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "growth_calibration",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_dailyquest_dark_emotion_moderation",
+      "drive_file_id": "1eFwklCONkoIEPZqCjReGdhifw9ox7Hr0",
+      "drive_url": "https://drive.google.com/file/d/1eFwklCONkoIEPZqCjReGdhifw9ox7Hr0/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_dailyquest_dark_emotion_moderation.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "emotion_chart",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_dailyquest_dark_feedback_done",
+      "drive_file_id": "13xE-fpmEQyFl7JO4Q3B3TC2rSmyTF-YI",
+      "drive_url": "https://drive.google.com/file/d/13xE-fpmEQyFl7JO4Q3B3TC2rSmyTF-YI/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_dailyquest_dark_feedback_done.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "brand_or_product_support",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_dailyquest_dark_feedback_summary",
+      "drive_file_id": "1TTki6LIjb-2D1buv74BPFdcEjXME5-qX",
+      "drive_url": "https://drive.google.com/file/d/1TTki6LIjb-2D1buv74BPFdcEjXME5-qX/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_dailyquest_dark_feedback_summary .png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "brand_or_product_support",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_dailyquest_dark_tasks_selection",
+      "drive_file_id": "1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA",
+      "drive_url": "https://drive.google.com/file/d/1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_dailyquest_dark_tasks_selection.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "tasks",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_dashboard_dark_energy_balance",
+      "drive_file_id": "1dLcNjKkBfVvTvFjWK-BFIJ8919BMo_Bj",
+      "drive_url": "https://drive.google.com/file/d/1dLcNjKkBfVvTvFjWK-BFIJ8919BMo_Bj/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_dashboard_dark_energy_balance_02.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "balance",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_dashboard_dark_overview_list",
+      "drive_file_id": "1QNKZqzl1XwPhOEuFzl81H1-jMBjta_2-",
+      "drive_url": "https://drive.google.com/file/d/1QNKZqzl1XwPhOEuFzl81H1-jMBjta_2-/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_dashboard_dark_overview_list_03.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "dashboard",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_dashboard_dark_overview_streaks",
+      "drive_file_id": "1luPOy4_TlBldDH-w1akx-_HU36JnABa-",
+      "drive_url": "https://drive.google.com/file/d/1luPOy4_TlBldDH-w1akx-_HU36JnABa-/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_dashboard_dark_overview_streaks_04.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "dashboard",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_dashboard_dark_overview_top",
+      "drive_file_id": "1Fn6Y-Mlz4fw0C5OB1r3fpTxcHJoi2Yya",
+      "drive_url": "https://drive.google.com/file/d/1Fn6Y-Mlz4fw0C5OB1r3fpTxcHJoi2Yya/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_dashboard_dark_overview_top_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "dashboard",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_dashboard_light",
+      "drive_file_id": "1axbJGjHorYCpG74j4BY6Hcnfoq6iqZyc",
+      "drive_url": "https://drive.google.com/file/d/1axbJGjHorYCpG74j4BY6Hcnfoq6iqZyc/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_dashboard_light_02.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "dashboard",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_dashboard_light",
+      "drive_file_id": "1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg",
+      "drive_url": "https://drive.google.com/file/d/1dreRTEcMQU0e-Lfn9zuCML40TtCqdjeg/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_dashboard_light_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "dashboard",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_dquest_light",
+      "drive_file_id": "1b6SOXAV6I5gk9NDgdhxRKM59IT-oUwJh",
+      "drive_url": "https://drive.google.com/file/d/1b6SOXAV6I5gk9NDgdhxRKM59IT-oUwJh/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_dquest_light_02.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "daily_quest",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_dquest_light",
+      "drive_file_id": "1yC0Vlj-NbpnWJcobmE3stl7QVdFNQSoW",
+      "drive_url": "https://drive.google.com/file/d/1yC0Vlj-NbpnWJcobmE3stl7QVdFNQSoW/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_dquest_light_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "daily_quest",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_menu_dark_personal_space",
+      "drive_file_id": "1YRdOwbso7rqtWV14ZmPDlRgyHLsUPPwf",
+      "drive_url": "https://drive.google.com/file/d/1YRdOwbso7rqtWV14ZmPDlRgyHLsUPPwf/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_menu_dark_personal_space_13.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "menu",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_menu_light",
+      "drive_file_id": "1zFdxFdtLUhCkQ8a3tG21z_H144rZ0BWI",
+      "drive_url": "https://drive.google.com/file/d/1zFdxFdtLUhCkQ8a3tG21z_H144rZ0BWI/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_menu_light_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "menu",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_new_task_ai_category_dark",
+      "drive_file_id": "1QBFAu3hQcF6EBiHEEH4B5n_ZQAia425G",
+      "drive_url": "https://drive.google.com/file/d/1QBFAu3hQcF6EBiHEEH4B5n_ZQAia425G/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_new_task_ai_category_dark_08.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "tasks",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_profile_dark_account_settings",
+      "drive_file_id": "1tz_NfVXXdWL246cIE_7-5Q_OlSZQUf-D",
+      "drive_url": "https://drive.google.com/file/d/1tz_NfVXXdWL246cIE_7-5Q_OlSZQUf-D/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_profile_dark_account_settings_14.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "profile",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_rhythm_light",
+      "drive_file_id": "1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp",
+      "drive_url": "https://drive.google.com/file/d/1HA7oTs9uRzOGvoAD8PntLlIfoe80ztYp/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_rythm_light_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "brand_or_product_support",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_settings_dark_rhythm_selector",
+      "drive_file_id": "1f_tngCBJHJmeLr-t_7JWdoyvUPgL5N3A",
+      "drive_url": "https://drive.google.com/file/d/1f_tngCBJHJmeLr-t_7JWdoyvUPgL5N3A/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_settings_dark_rhythm_selector_15.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "rhythm_selection",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_task_detail_dark_activity_streaks",
+      "drive_file_id": "1QbrMSYoygqTPT4fpYqVbYSUyIqI5Ki7O",
+      "drive_url": "https://drive.google.com/file/d/1QbrMSYoygqTPT4fpYqVbYSUyIqI5Ki7O/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_task_detail_dark_activity_streaks_07.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "task_detail",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_task_detail_dark_habit_score",
+      "drive_file_id": "1KJie-5xlq3okx9aE88WmOConrz3mq2re",
+      "drive_url": "https://drive.google.com/file/d/1KJie-5xlq3okx9aE88WmOConrz3mq2re/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_task_detail_dark_habit_score_06.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "task_detail",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_task_detail_light",
+      "drive_file_id": "1aCYq8x7cbVKzSGrhRvwyvKx5WrIa9gUc",
+      "drive_url": "https://drive.google.com/file/d/1aCYq8x7cbVKzSGrhRvwyvKx5WrIa9gUc/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_task_detail_light_02.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "task_detail",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_task_detail_light",
+      "drive_file_id": "1Qeux1VU8gRASYVE7IjH62EyeBTkKY5ce",
+      "drive_url": "https://drive.google.com/file/d/1Qeux1VU8gRASYVE7IjH62EyeBTkKY5ce/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_task_detail_light_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "task_detail",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_task_light",
+      "drive_file_id": "1UKc1FKisqoAnrWpzKp1lkoaZMwhXMS93",
+      "drive_url": "https://drive.google.com/file/d/1UKc1FKisqoAnrWpzKp1lkoaZMwhXMS93/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_task_light_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "tasks",
+      "mode": "light",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_tasks_dark_list",
+      "drive_file_id": "1TW89BafCJ-HBZL-3vPdiVEWuIipIfwR-",
+      "drive_url": "https://drive.google.com/file/d/1TW89BafCJ-HBZL-3vPdiVEWuIipIfwR-/view?usp=drivesdk",
+      "original_file_name": "innerbloom_mobile_tasks_dark_list_05.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "tasks",
+      "mode": "dark",
+      "surface": "mobile",
+      "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    }
+  ]
+}
