@@ -7,6 +7,11 @@ on:
         description: Target campaign period in YYYY-MM format
         required: true
         type: string
+      preview_limit:
+        description: Render only the first N image jobs and do not import to Admin (0 renders the full campaign)
+        required: false
+        default: "0"
+        type: string
 
 permissions:
   contents: write
@@ -50,7 +55,7 @@ jobs:
         run: npm -w @innerbloom/web exec playwright install --with-deps chromium
 
       - name: Validate creative contract
-        run: node scripts/marketing/validate-creative-direction.mjs marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
+        run: node scripts/marketing/validate-creative-direction-v3.mjs marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
 
       - name: Stage approved source assets from Drive
         run: >-
@@ -61,10 +66,11 @@ jobs:
 
       - name: Render deterministic campaign PNGs
         run: >-
-          node scripts/marketing/render-campaign-v2.mjs
+          node scripts/marketing/render-campaign-v3.mjs
           marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
           --asset-dir marketing/generated/${{ inputs.period_key }}/source-assets
           --out marketing/generated/${{ inputs.period_key }}/rendered
+          --limit ${{ inputs.preview_limit }}
 
       - name: Store review PNGs on the monthly branch
         id: review_commit
@@ -86,6 +92,7 @@ jobs:
           echo "commit_sha=$(git rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
 
       - name: Build public review manifest
+        if: ${{ inputs.preview_limit == '0' }}
         run: >-
           npm -w @innerbloom/api exec tsx scripts/create-marketing-github-staging-manifest.ts
           ../../marketing/generated/${{ inputs.period_key }}/rendered
@@ -94,6 +101,7 @@ jobs:
           ${{ steps.review_commit.outputs.commit_sha }}
 
       - name: Import campaign into Admin review
+        if: ${{ inputs.preview_limit == '0' }}
         run: >-
           npm -w @innerbloom/api exec tsx scripts/import-marketing-campaign.ts
           ../../marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
@@ -111,7 +119,11 @@ jobs:
           {
             echo "## Campaign ready for human review"
             echo "- Period: ${{ inputs.period_key }}"
-            echo "- Result: rendered PNGs are staged on the monthly GitHub branch and imported to Admin."
+            if [[ "${{ inputs.preview_limit }}" == "0" ]]; then
+              echo "- Result: renderer v3 PNGs are staged and imported to Admin."
+            else
+              echo "- Result: renderer v3 pilot (${{ inputs.preview_limit }} jobs) is staged as an artifact; Admin was not changed."
+            fi
             echo "- Next: open Admin > Marketing, approve or reject each post."
             echo "- After approval: use Upload approved assets to R2, then Download Metricool CSV."
           } >> "${GITHUB_STEP_SUMMARY}"
