@@ -138,6 +138,8 @@ async function main() {
       const palette=d.palette || (d.mode === "dark" ? "dark" : "light");
       const html=`<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body><main class="frame ${esc(palette)} ${comp.cls}">${chrome(job,logo,i,all.length)}${comp.body}</main></body></html>`;
       await page.setContent(html,{waitUntil:"networkidle"}); await page.evaluate(()=>document.fonts.ready);
+      const deviceScreensAreContained = await page.$$eval(".screen img", images => images.every(image => getComputedStyle(image).objectFit === "contain"));
+      if (!deviceScreensAreContained) throw new Error(`${job.asset_code}: a device screenshot would be cropped; device screens must use object-fit contain`);
       await page.screenshot({path:path.join(outputDir,`${job.asset_code}.png`),type:"png"});
     }
   } finally { await browser.close(); }
