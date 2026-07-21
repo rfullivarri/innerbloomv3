@@ -4822,7 +4822,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "module_macro_crop",
-          "palette": "warm"
+          "palette": "warm",
+          "focus_y": 42
         }
       },
       {
@@ -5833,7 +5834,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "module_macro_crop",
-          "palette": "warm"
+          "palette": "warm",
+          "focus_y": 42
         }
       },
       {
@@ -6167,7 +6169,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "module_macro_crop",
-          "palette": "dark"
+          "palette": "dark",
+          "focus_y": 34
         }
       },
       {
@@ -7494,7 +7497,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "module_macro_crop",
-          "palette": "light"
+          "palette": "light",
+          "focus_y": 34
         }
       },
       {
