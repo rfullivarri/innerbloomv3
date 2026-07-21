@@ -70,6 +70,23 @@
   .landing.landing--v3-conversion .truth-problem-adaptive-graphic [data-reduced-motion="true"] .ib-problem-process__connector {
     transform: scaleX(1) !important;
   }
+
+  /* Restore the existing back-to-top control on mobile. */
+  .landing-back-to-top {
+    display: inline-flex !important;
+    position: fixed !important;
+    right: max(16px, env(safe-area-inset-right)) !important;
+    bottom: max(18px, calc(env(safe-area-inset-bottom) + 12px)) !important;
+    z-index: 1200 !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 92px;
+    min-height: 48px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    touch-action: manipulation;
+  }
 }
 
 @media (max-width: 520px) {
@@ -90,5 +107,12 @@
 
   .landing.landing--v3-conversion .truth-problem-adaptive-graphic .ib-problem-process__connector {
     margin-top: 17px !important;
+  }
+
+  .landing-back-to-top {
+    right: max(12px, env(safe-area-inset-right)) !important;
+    min-width: 84px;
+    min-height: 46px;
+    padding: 9px 14px;
   }
 }
