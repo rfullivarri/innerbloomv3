@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: automation/marketing-cycle-${{ inputs.period_key }}
+          ref: ${{ github.ref_name }}
           fetch-depth: 1
 
       - uses: actions/setup-node@v4
