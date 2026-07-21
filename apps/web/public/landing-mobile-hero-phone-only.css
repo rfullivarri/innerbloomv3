@@ -1,0 +1,49 @@
+/* Mobile-only hero adaptation: keep the animated phone, remove desktop expansion cards. */
+@media (max-width: 767px) {
+  .landing.landing--v3-conversion .hero {
+    min-height: auto !important;
+  }
+
+  .landing.landing--v3-conversion .hero-grid {
+    min-height: 0 !important;
+    padding-bottom: 52px !important;
+  }
+
+  .landing.landing--v3-conversion .hero-media {
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    align-items: flex-start !important;
+  }
+
+  /* The rhythm, task-summary and task-detail panels are desktop expansion elements. */
+  .landing.landing--v3-conversion .hero-media [class*="HeroProductScene_sceneLayer"] {
+    display: none !important;
+  }
+
+  .landing.landing--v3-conversion .hero-media [class*="HeroProductScene_scene_"] {
+    display: block !important;
+    width: min(100%, 342px) !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 auto !important;
+  }
+
+  .landing.landing--v3-conversion .hero-media [class*="HeroProductScene_phoneLayer"] {
+    position: relative !important;
+    inset: auto !important;
+    width: min(88vw, 342px) !important;
+    margin: 0 auto !important;
+    transform: none !important;
+  }
+
+  /* Do not reserve the desktop animation canvas below the phone. */
+  .landing.landing--v3-conversion .hero-media [class*="HeroProductScene_sceneGlow"] {
+    inset: 8% 3% 4% !important;
+  }
+
+  .landing.landing--v3-conversion .hero + section,
+  .landing.landing--v3-conversion .hero + .truth-problem {
+    margin-top: 0 !important;
+  }
+}
