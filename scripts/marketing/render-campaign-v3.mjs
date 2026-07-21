@@ -78,7 +78,7 @@ h1{margin:0;font:700 64px/1.02 Sora,sans-serif;letter-spacing:-.057em;text-wrap:
 /* Carousel chapters */
 .chapter .brand{top:58px}.chapter .copy{left:68px;top:190px;width:720px}.chapter h1{font-size:74px}.chapter .chapter-no{position:absolute;right:58px;top:56px;font:800 170px/.8 Sora;color:rgba(139,99,246,.15)}.chapter .product-card{right:68px;bottom:118px;width:390px;height:270px;transform:rotate(-3deg)}.chapter .device{right:92px;bottom:90px;top:auto}
 .proof-focus .copy{left:68px;top:170px;width:465px}.proof-focus h1{font-size:59px}.proof-focus .device{right:78px;top:155px}.proof-focus .badge{position:absolute;left:68px;bottom:180px;padding:15px 20px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-weight:700}
-.transition .copy{left:250px;top:260px;width:580px;text-align:center}.transition h1{font-size:75px}.transition .support{margin:25px auto}.transition .orbit{width:760px;height:760px;left:160px;top:140px}.transition .orb{left:505px;top:735px;width:64px;height:64px}
+.transition .copy{left:180px;top:170px;width:720px;text-align:center}.transition h1{font-size:68px}.transition .support{margin:22px auto}.transition .orbit{width:760px;height:760px;left:160px;top:140px}.transition .orb{left:505px;top:735px;width:64px;height:64px}.contrast{position:absolute;left:170px;right:170px;bottom:230px;display:grid;grid-template-columns:1fr 80px 1fr;align-items:center;gap:14px}.contrast span{display:flex;min-height:112px;padding:20px;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:26px;background:rgba(255,255,255,.08);font:700 22px/1.15 Sora;text-align:center}.contrast b{font:700 58px Sora;color:var(--violet)}
 .cta-close .copy{left:68px;top:210px;width:680px}.cta-close h1{font-size:74px}.cta-close .product-card{right:-20px;bottom:-10px;width:500px;height:350px;transform:rotate(-5deg)}.cta-close .device{right:90px;bottom:70px;top:auto}
 `;
 
@@ -98,6 +98,7 @@ function composition(job, sources) {
   const a = sources[0], b = sources[1] || sources[0];
   const mobile = (job.creative_direction?.selected_asset_keys?.[0] || "").startsWith("mobile_");
   const labels = job.creative_direction?.sequence_labels || ["Notice the signal","Read the context","Choose the next step"];
+  const contrast = job.creative_direction?.contrast_pair || ["One setback","The whole story"];
   switch (variant) {
     case "split_device_left": return { cls:"split-left", body:copy(job)+device(a) };
     case "cinematic_device_center": return { cls:"center-stage", body:copy(job)+`<div class="orbit o1"></div><div class="orbit o2"></div>`+device(a) };
@@ -112,7 +113,7 @@ function composition(job, sources) {
     case "editorial_quote_frame": return { cls:"quote-frame", body:copy(job)+`<div class="quote">“</div>` };
     case "carousel_chapter_cover": return { cls:"chapter", body:copy(job)+`<div class="chapter-no">${String(job.slide_number || 1).padStart(2,"0")}</div>`+(mobile?device(a,"small"):card(a)) };
     case "carousel_proof_focus": return { cls:"proof-focus", body:copy(job)+device(a) };
-    case "carousel_transition": return { cls:"transition", body:copy(job)+`<div class="orbit"></div><div class="orb"></div>` };
+    case "carousel_transition": return { cls:"transition", body:copy(job)+`<div class="orbit"></div><div class="contrast"><span>${esc(contrast[0])}</span><b>≠</b><span>${esc(contrast[1])}</span></div>` };
     case "carousel_cta_close": return { cls:"cta-close", body:copy(job)+(mobile?device(a,"small"):card(a,"landscape")) };
     default: return { cls:"split-right", body:`<div class="halo"></div>`+copy(job)+device(a) };
   }
