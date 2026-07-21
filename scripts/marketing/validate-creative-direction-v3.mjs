@@ -10,6 +10,8 @@ const palettes=new Set(["light","dark","lilac","warm","ink"]),modes=new Set(["li
 const jobs=campaign.image_generation?.jobs||[],layoutCounts=new Map(),assetKeys=new Set(),postLayouts=new Map();
 for(const job of jobs){
  const d=job.creative_direction;
+ const headline=job.visible_copy?.headline?.trim();
+ if(headline==="Look for the pattern.")errors.push(`${job.asset_code}: vague headline is not allowed; name the actual product insight`);
  if(!d){errors.push(`${job.asset_code}: missing creative_direction`);continue}
  if(!families.has(d.visual_family))errors.push(`${job.asset_code}: unknown visual_family`);
  if(!layouts.has(d.layout_variant))errors.push(`${job.asset_code}: unknown layout_variant`);
@@ -19,7 +21,14 @@ for(const job of jobs){
  const allowed=new Set((job.source_assets||[]).map(a=>a.asset_key));
  if(!d.selected_asset_keys?.length)errors.push(`${job.asset_code}: selected_asset_keys is empty`);
  for(const key of d.selected_asset_keys||[]){assetKeys.add(key);if(!allowed.has(key))errors.push(`${job.asset_code}: ${key} is not an approved source asset`) }
- if(!Array.isArray(d.acceptance_criteria)||d.acceptance_criteria.length<4)errors.push(`${job.asset_code}: needs four acceptance criteria`);
+ if(!Array.isArray(d.acceptance_criteria)||d.acceptance_criteria.length<5)errors.push(`${job.asset_code}: needs five acceptance criteria`);
+ if(d.layout_variant==="editorial_numbered_steps"){
+  const labels=d.sequence_labels||[];
+  if(labels.length!==3)errors.push(`${job.asset_code}: numbered steps need three semantic labels`);
+  if(labels.join("|").toLowerCase()==="observe|adjust|continue")errors.push(`${job.asset_code}: generic Observe/Adjust/Continue labels are not allowed`);
+ }
+ if(d.layout_variant==="module_macro_crop"&&typeof d.focus_y!=="number")errors.push(`${job.asset_code}: macro crops require an explicit focus_y`);
+ if(d.layout_variant==="carousel_transition"&&d.contrast_pair?.length!==2)errors.push(`${job.asset_code}: transition needs a two-part contrast_pair`);
  layoutCounts.set(d.layout_variant,(layoutCounts.get(d.layout_variant)||0)+1);
  const list=postLayouts.get(job.post_code)||[];list.push(d.layout_variant);postLayouts.set(job.post_code,list);
 }
