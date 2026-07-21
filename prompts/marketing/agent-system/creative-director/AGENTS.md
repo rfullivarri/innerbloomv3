@@ -110,3 +110,7 @@ Campaign-wide quality gates:
 - `module_macro_crop` requires an explicit `focus_y` aimed at a named product module. Never crop a screenshot merely for decoration.
 - Product proof must match the claim: Daily Quest uses Daily Quest retrospective screens; Daily Energy or progress uses dashboard/energy evidence; emotion claims use Emotion Chart; calibration claims use calibration or difficulty details.
 - A CTA close may show a relevant real product screen, but never an unrelated landing-page fragment or a fake social button.
+
+## Device screen fitting
+
+For every job that selects a `mobile_*` asset, set `screen_fit: "contain"`. Device layouts may scale a complete screenshot down, but may never use cover, zoom, horizontal clipping, or off-center object positioning. The app title, brand mark, navigation and visible controls must remain inside the screen. Only `module_macro_crop` may crop, and it must not be rendered as a phone.
