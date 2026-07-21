@@ -773,6 +773,33 @@ export function MarketingPage() {
         ) : null}
       </header>
 
+      <section className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">Monthly pipeline</p>
+            <h3 className="mt-1 text-lg font-semibold tracking-tight text-[color:var(--admin-text)]">Where this campaign is</h3>
+          </div>
+          <p className="text-xs text-[color:var(--admin-muted)]">{selectedCampaign.periodLabel}</p>
+        </div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+          {[
+            { label: '1. Data + strategy', detail: 'Campaign JSON exists', done: true },
+            { label: '2. Creative direction', detail: 'Resolved before rendering', done: posts.length > 0 },
+            { label: '3. Images in Admin', detail: `${posts.reduce((total, post) => total + post.assets.length, 0)} assets ready to review`, done: posts.some((post) => post.assets.length > 0) },
+            { label: '4. Your review', detail: needsReviewCount ? `${needsReviewCount} posts awaiting a decision` : 'Review complete', done: needsReviewCount === 0 },
+            { label: '5. R2 + Metricool', detail: canDownloadApprovedCsv ? 'CSV ready to download' : approvedPosts.length ? 'Upload approved assets to R2' : 'Approve at least one post', done: canDownloadApprovedCsv },
+          ].map((step) => (
+            <div key={step.label} className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] p-3">
+              <p className="text-xs font-semibold text-[color:var(--admin-text)]">{step.label}</p>
+              <p className="mt-1 text-xs text-[color:var(--admin-muted)]">{step.detail}</p>
+              <span className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${step.done ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-200' : 'bg-amber-500/15 text-amber-700 dark:text-amber-200'}`}>
+                {step.done ? 'Ready' : 'Waiting'}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="grid gap-4 md:grid-cols-5">
         <div className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Configured posts</p>
