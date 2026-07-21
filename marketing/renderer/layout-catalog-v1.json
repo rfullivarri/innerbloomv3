@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "canvas": {
+    "width": 1080,
+    "height": 1080,
+    "ratio": "1:1",
+    "platform": "instagram"
+  },
+  "typography": {
+    "headline": "Sora",
+    "body": "Manrope"
+  },
+  "design_principles": [
+    "Real product UI is proof; never recreate it.",
+    "Exact copy and real logo are rendered by code.",
+    "Dark uses near-black surfaces with restrained violet; light is clean, high-contrast and not hazy.",
+    "One dominant focal point per slide.",
+    "No generic quote-card or fake-dashboard composition."
+  ],
+  "layouts": [
+    {
+      "layout_key": "editorial_product_split",
+      "purpose": "Acquisition or product-proof static.",
+      "structure": "Headline and supporting copy occupy the left two-fifths. One real mobile screenshot is dominant on the right. Small logo header and compact CTA footer.",
+      "supports": [
+        "static",
+        "carousel_cover"
+      ],
+      "preferred_modes": [
+        "light",
+        "dark"
+      ],
+      "source_count": {
+        "min": 1,
+        "max": 1
+      },
+      "code_fields": [
+        "eyebrow",
+        "headline",
+        "supporting_text",
+        "cta",
+        "source_asset_key",
+        "crop_or_focal_instruction"
+      ],
+      "constraints": [
+        "The screenshot must remain readable.",
+        "The headline may not overlap the screenshot.",
+        "No generated UI."
+      ]
+    },
+    {
+      "layout_key": "module_spotlight",
+      "purpose": "Explain one concrete Innerbloom module.",
+      "structure": "A large, truthful screenshot crop is centered inside a restrained frame. A short headline is above it; one single callout may name the visible module.",
+      "supports": [
+        "static",
+        "carousel_detail"
+      ],
+      "preferred_modes": [
+        "light",
+        "dark"
+      ],
+      "source_count": {
+        "min": 1,
+        "max": 1
+      },
+      "code_fields": [
+        "headline",
+        "supporting_text",
+        "callout",
+        "source_asset_key",
+        "crop_or_focal_instruction"
+      ],
+      "constraints": [
+        "Callout must describe visible UI truthfully.",
+        "No more than one callout.",
+        "No heavy glow or decorative device mockup."
+      ]
+    },
+    {
+      "layout_key": "editorial_statement",
+      "purpose": "Belief/pain slide or bridge slide when no screenshot is needed.",
+      "structure": "Large product-led headline with deliberate negative space, real logo, and one restrained brand shape or approved supporting visual. No fake product UI.",
+      "supports": [
+        "static",
+        "carousel_bridge",
+        "carousel_cta"
+      ],
+      "preferred_modes": [
+        "light",
+        "dark"
+      ],
+      "source_count": {
+        "min": 0,
+        "max": 1
+      },
+      "code_fields": [
+        "eyebrow",
+        "headline",
+        "supporting_text",
+        "cta",
+        "supporting_visual_key"
+      ],
+      "constraints": [
+        "This is not a generic motivational quote card.",
+        "Use a supporting visual only when it adds meaning.",
+        "Text stays exact and code-rendered."
+      ]
+    },
+    {
+      "layout_key": "proof_sequence",
+      "purpose": "Educational carousel sequence with a clear story.",
+      "structure": "Four related but non-duplicate slides: hook, concept, product proof, CTA. Use at least two distinct real states where product proof is required.",
+      "supports": [
+        "carousel"
+      ],
+      "preferred_modes": [
+        "light",
+        "dark"
+      ],
+      "source_count": {
+        "min": 2,
+        "max": 3
+      },
+      "code_fields": [
+        "slides"
+      ],
+      "constraints": [
+        "Every slide has one job.",
+        "Do not repeat the same screenshot as dominant hero on all slides.",
+        "Use editorial_statement for a bridge rather than inventing UI."
+      ]
+    }
+  ]
+}
