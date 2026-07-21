@@ -2330,7 +2330,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "split_device_right",
-          "palette": "light"
+          "palette": "light",
+          "screen_fit": "contain"
         }
       },
       {
@@ -2434,7 +2435,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_type_monument",
-          "palette": "warm"
+          "palette": "warm",
+          "screen_fit": "contain"
         }
       },
       {
@@ -2542,7 +2544,8 @@
           "contrast_pair": [
             "Missed day",
             "Failed plan"
-          ]
+          ],
+          "screen_fit": "contain"
         }
       },
       {
@@ -2665,7 +2668,8 @@
           ],
           "layout_variant": "module_macro_crop",
           "palette": "lilac",
-          "focus_y": 52
+          "focus_y": 52,
+          "screen_fit": "contain"
         }
       },
       {
@@ -2774,7 +2778,8 @@
             "See the week",
             "Read the change",
             "Choose the return"
-          ]
+          ],
+          "screen_fit": "contain"
         }
       },
       {
@@ -2878,7 +2883,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
-          "palette": "dark"
+          "palette": "dark",
+          "screen_fit": "contain"
         }
       },
       {
@@ -2981,7 +2987,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "floating_device_orbit",
-          "palette": "warm"
+          "palette": "warm",
+          "screen_fit": "contain"
         }
       },
       {
@@ -3085,7 +3092,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "split_device_right",
-          "palette": "lilac"
+          "palette": "lilac",
+          "screen_fit": "contain"
         }
       },
       {
@@ -3189,7 +3197,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "split_device_left",
-          "palette": "light"
+          "palette": "light",
+          "screen_fit": "contain"
         }
       },
       {
@@ -3293,7 +3302,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_proof_focus",
-          "palette": "dark"
+          "palette": "dark",
+          "screen_fit": "contain"
         }
       },
       {
@@ -3312,20 +3322,20 @@
           "safe_area": "Keep essential copy and logo inside central 940x940 safe area."
         },
         "visible_copy": {
-          "headline": "Yesterday gives today useful context.",
-          "supporting_text": "Daily Quest turns reflection into a clearer next step."
+          "headline": "Yesterday becomes a clearer next step.",
+          "supporting_text": "Daily Quest connects reflection with what you choose next."
         },
         "product_truth_anchor": "Daily Quest reviews yesterday; it is not a planner, generator, or prediction engine.",
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "mobile_dailyquest_dark_feedback_summary",
-            "drive_file_id": "1TTki6LIjb-2D1buv74BPFdcEjXME5-qX",
-            "drive_url": "https://drive.google.com/file/d/1TTki6LIjb-2D1buv74BPFdcEjXME5-qX/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_dailyquest_dark_feedback_summary .png",
+            "asset_key": "mobile_dailyquest_dark_tasks_selection",
+            "drive_file_id": "1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA",
+            "drive_url": "https://drive.google.com/file/d/1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dailyquest_dark_tasks_selection.png",
             "mime_type": "image/png",
             "kind": "product_screenshot",
-            "module": "brand_or_product_support",
+            "module": "tasks",
             "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
@@ -3377,13 +3387,13 @@
         },
         "creative_direction": {
           "status": "ready_for_render",
-          "visual_family": "module_spotlight",
+          "visual_family": "product_angle",
           "mode": "dark",
-          "device_presentation": "none",
+          "device_presentation": "front",
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render editorial_signal_line with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "mobile_dailyquest_dark_feedback_summary"
+            "mobile_dailyquest_dark_tasks_selection"
           ],
           "focal_instruction": "Headline is the focal point; abstract decoration remains secondary.",
           "supporting_visual": {
@@ -3396,9 +3406,10 @@
             "The selected registered screen directly proves the slide claim.",
             "No simulated website button, debug label or internal asset identifier appears."
           ],
-          "layout_variant": "module_macro_crop",
+          "layout_variant": "floating_device_orbit",
           "palette": "warm",
-          "focus_y": 28
+          "focus_y": 28,
+          "screen_fit": "contain"
         }
       },
       {
@@ -3502,7 +3513,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
-          "palette": "ink"
+          "palette": "ink",
+          "screen_fit": "contain"
         }
       },
       {
@@ -3527,13 +3539,13 @@
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "mobile_dashboard_dark_overview_streaks_04",
-            "drive_file_id": "1luPOy4_TlBldDH-w1akx-_HU36JnABa-",
-            "drive_url": "https://drive.google.com/file/d/1luPOy4_TlBldDH-w1akx-_HU36JnABa-/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_dashboard_dark_overview_streaks_04.png",
+            "asset_key": "mobile_dashboard_dark_energy_balance_02",
+            "drive_file_id": "1dLcNjKkBfVvTvFjWK-BFIJ8919BMo_Bj",
+            "drive_url": "https://drive.google.com/file/d/1dLcNjKkBfVvTvFjWK-BFIJ8919BMo_Bj/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dashboard_dark_energy_balance_02.png",
             "mime_type": "image/png",
             "kind": "product_screenshot",
-            "module": "dashboard",
+            "module": "balance",
             "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
@@ -3591,7 +3603,7 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render editorial_type_monument with an explicit copy zone and authentic product proof; never overlap the headline and product.",
           "selected_asset_keys": [
-            "mobile_dashboard_dark_overview_streaks_04"
+            "mobile_dashboard_dark_energy_balance_02"
           ],
           "focal_instruction": "Headline is the focal point; abstract decoration remains secondary.",
           "supporting_visual": {
@@ -3605,7 +3617,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "split_device_right",
-          "palette": "lilac"
+          "palette": "lilac",
+          "screen_fit": "contain"
         }
       },
       {
@@ -3708,7 +3721,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "split_device_left",
-          "palette": "light"
+          "palette": "light",
+          "screen_fit": "contain"
         }
       },
       {
@@ -3829,7 +3843,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "device_diagonal_crop",
-          "palette": "dark"
+          "palette": "dark",
+          "screen_fit": "contain"
         }
       },
       {
@@ -3933,7 +3948,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "split_device_right",
-          "palette": "ink"
+          "palette": "ink",
+          "screen_fit": "contain"
         }
       },
       {
@@ -4055,7 +4071,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "device_diagonal_crop",
-          "palette": "lilac"
+          "palette": "lilac",
+          "screen_fit": "contain"
         }
       },
       {
@@ -4177,7 +4194,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_proof_focus",
-          "palette": "light"
+          "palette": "light",
+          "screen_fit": "contain"
         }
       },
       {
@@ -4281,7 +4299,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_signal_line",
-          "palette": "dark"
+          "palette": "dark",
+          "screen_fit": "contain"
         }
       },
       {
@@ -4385,7 +4404,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
-          "palette": "warm"
+          "palette": "warm",
+          "screen_fit": "contain"
         }
       },
       {
@@ -4488,7 +4508,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_quote_frame",
-          "palette": "ink"
+          "palette": "ink",
+          "screen_fit": "contain"
         }
       },
       {
@@ -4592,7 +4613,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_type_monument",
-          "palette": "light"
+          "palette": "light",
+          "screen_fit": "contain"
         }
       },
       {
@@ -4823,7 +4845,8 @@
           ],
           "layout_variant": "module_macro_crop",
           "palette": "warm",
-          "focus_y": 42
+          "focus_y": 42,
+          "screen_fit": "contain"
         }
       },
       {
@@ -4932,7 +4955,8 @@
             "See the week",
             "Read the change",
             "Choose the return"
-          ]
+          ],
+          "screen_fit": "contain"
         }
       },
       {
@@ -5036,7 +5060,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
-          "palette": "lilac"
+          "palette": "lilac",
+          "screen_fit": "contain"
         }
       },
       {
@@ -5157,7 +5182,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "cinematic_device_center",
-          "palette": "light"
+          "palette": "light",
+          "screen_fit": "contain"
         }
       },
       {
@@ -5261,7 +5287,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_quote_frame",
-          "palette": "warm"
+          "palette": "warm",
+          "screen_fit": "contain"
         }
       },
       {
@@ -5383,7 +5410,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "device_diagonal_crop",
-          "palette": "ink"
+          "palette": "ink",
+          "screen_fit": "contain"
         }
       },
       {
@@ -5609,7 +5637,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_signal_line",
-          "palette": "light"
+          "palette": "light",
+          "screen_fit": "contain"
         }
       },
       {
@@ -5713,7 +5742,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
-          "palette": "dark"
+          "palette": "dark",
+          "screen_fit": "contain"
         }
       },
       {
@@ -5835,7 +5865,8 @@
           ],
           "layout_variant": "module_macro_crop",
           "palette": "warm",
-          "focus_y": 42
+          "focus_y": 42,
+          "screen_fit": "contain"
         }
       },
       {
@@ -6170,7 +6201,8 @@
           ],
           "layout_variant": "module_macro_crop",
           "palette": "dark",
-          "focus_y": 34
+          "focus_y": 34,
+          "screen_fit": "contain"
         }
       },
       {
@@ -6279,7 +6311,8 @@
             "Check the pace",
             "Read the load",
             "Adjust the ask"
-          ]
+          ],
+          "screen_fit": "contain"
         }
       },
       {
@@ -6383,7 +6416,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
-          "palette": "ink"
+          "palette": "ink",
+          "screen_fit": "contain"
         }
       },
       {
@@ -6486,7 +6520,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_signal_line",
-          "palette": "lilac"
+          "palette": "lilac",
+          "screen_fit": "contain"
         }
       },
       {
@@ -6607,7 +6642,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "layered_product_depth",
-          "palette": "light"
+          "palette": "light",
+          "screen_fit": "contain"
         }
       },
       {
@@ -6729,7 +6765,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_chapter_cover",
-          "palette": "warm"
+          "palette": "warm",
+          "screen_fit": "contain"
         }
       },
       {
@@ -6833,7 +6870,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_quote_frame",
-          "palette": "ink"
+          "palette": "ink",
+          "screen_fit": "contain"
         }
       },
       {
@@ -6955,7 +6993,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_proof_focus",
-          "palette": "lilac"
+          "palette": "lilac",
+          "screen_fit": "contain"
         }
       },
       {
@@ -7059,7 +7098,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "editorial_signal_line",
-          "palette": "light"
+          "palette": "light",
+          "screen_fit": "contain"
         }
       },
       {
@@ -7163,7 +7203,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
-          "palette": "dark"
+          "palette": "dark",
+          "screen_fit": "contain"
         }
       },
       {
@@ -7498,7 +7539,8 @@
           ],
           "layout_variant": "module_macro_crop",
           "palette": "light",
-          "focus_y": 34
+          "focus_y": 34,
+          "screen_fit": "contain"
         }
       },
       {
@@ -7607,7 +7649,8 @@
             "Check the pace",
             "Read the load",
             "Adjust the ask"
-          ]
+          ],
+          "screen_fit": "contain"
         }
       },
       {
@@ -7711,7 +7754,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "carousel_cta_close",
-          "palette": "warm"
+          "palette": "warm",
+          "screen_fit": "contain"
         }
       },
       {
@@ -7819,7 +7863,8 @@
             "See the week",
             "Read the change",
             "Choose the return"
-          ]
+          ],
+          "screen_fit": "contain"
         }
       },
       {
@@ -7940,7 +7985,8 @@
             "No simulated website button, debug label or internal asset identifier appears."
           ],
           "layout_variant": "split_device_right",
-          "palette": "lilac"
+          "palette": "lilac",
+          "screen_fit": "contain"
         }
       }
     ]
