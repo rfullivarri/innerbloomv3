@@ -48,7 +48,7 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Install Chromium for the deterministic renderer
-        run: npx playwright install --with-deps chromium
+        run: npm -w @innerbloom/web exec playwright install --with-deps chromium
 
       - name: Validate creative contract
         run: node scripts/marketing/validate-creative-direction.mjs marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
