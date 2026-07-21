@@ -21,6 +21,8 @@ for(const job of jobs){
  const allowed=new Set((job.source_assets||[]).map(a=>a.asset_key));
  if(!d.selected_asset_keys?.length)errors.push(`${job.asset_code}: selected_asset_keys is empty`);
  for(const key of d.selected_asset_keys||[]){assetKeys.add(key);if(!allowed.has(key))errors.push(`${job.asset_code}: ${key} is not an approved source asset`) }
+ const usesMobile=(d.selected_asset_keys||[]).some(key=>key.startsWith("mobile_"));
+ if(usesMobile&&d.screen_fit!=="contain")errors.push(`${job.asset_code}: mobile screenshots must use screen_fit=contain`);
  if(!Array.isArray(d.acceptance_criteria)||d.acceptance_criteria.length<5)errors.push(`${job.asset_code}: needs five acceptance criteria`);
  if(d.layout_variant==="editorial_numbered_steps"){
   const labels=d.sequence_labels||[];
