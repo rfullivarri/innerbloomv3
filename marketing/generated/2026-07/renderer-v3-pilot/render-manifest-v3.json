@@ -1,0 +1,102 @@
+{
+  "schema_version": "3.0",
+  "campaign_path": "/home/runner/work/innerbloomv3/innerbloomv3/marketing/agent-outputs/2026-07/campaign.json",
+  "rendered_at": "2026-07-22T18:05:34.371Z",
+  "assets": [
+    {
+      "asset_code": "asset_post_001",
+      "post_code": "post_001",
+      "filename": "asset_post_001.png",
+      "layout_variant": "editorial_material_scene",
+      "visual_family": "supporting_visual_scene",
+      "scene_asset_key": "scene_material_warm_textile_lavender_01",
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true
+      }
+    },
+    {
+      "asset_code": "asset_post_002_01",
+      "post_code": "post_002",
+      "filename": "asset_post_002_01.png",
+      "layout_variant": "editorial_type_monument",
+      "visual_family": "editorial_statement",
+      "scene_asset_key": null,
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true
+      }
+    },
+    {
+      "asset_code": "asset_post_002_02",
+      "post_code": "post_002",
+      "filename": "asset_post_002_02.png",
+      "layout_variant": "carousel_transition",
+      "visual_family": "proof_sequence",
+      "scene_asset_key": null,
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true
+      }
+    },
+    {
+      "asset_code": "asset_post_002_03",
+      "post_code": "post_002",
+      "filename": "asset_post_002_03.png",
+      "layout_variant": "storefront_module_spotlight",
+      "visual_family": "module_spotlight",
+      "scene_asset_key": null,
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true
+      }
+    },
+    {
+      "asset_code": "asset_post_002_04",
+      "post_code": "post_002",
+      "filename": "asset_post_002_04.png",
+      "layout_variant": "editorial_numbered_steps",
+      "visual_family": "editorial_statement",
+      "scene_asset_key": null,
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true
+      }
+    }
+  ]
+}

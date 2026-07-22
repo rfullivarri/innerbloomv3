@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "gate": "rendered_creative_v3",
+  "passed": true,
+  "asset_count": 5,
+  "checks": [
+    {
+      "asset_code": "asset_post_001",
+      "png": "asset_post_001.png",
+      "bytes": 956300,
+      "width": 1080,
+      "height": 1080,
+      "sha256": "d1a71f38f011fcd5eac776da666cd4a88bf7d14bfa17b795fb1e9f9072087eb9",
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true
+      },
+      "passed": true
+    },
+    {
+      "asset_code": "asset_post_002_01",
+      "png": "asset_post_002_01.png",
+      "bytes": 816126,
+      "width": 1080,
+      "height": 1080,
+      "sha256": "fbaa9fcd2dd15ff15057a7765ec98ad954424881ecffe57fd0fefe1d2ba386e5",
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true
+      },
+      "passed": true
+    },
+    {
+      "asset_code": "asset_post_002_02",
+      "png": "asset_post_002_02.png",
+      "bytes": 779396,
+      "width": 1080,
+      "height": 1080,
+      "sha256": "814892ed8f8f2ff8fdb57ddd727bc91e3721fb666148ad65e7f3fbde39e4f894",
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true
+      },
+      "passed": true
+    },
+    {
+      "asset_code": "asset_post_002_03",
+      "png": "asset_post_002_03.png",
+      "bytes": 857043,
+      "width": 1080,
+      "height": 1080,
+      "sha256": "86e0f593320f4cb5f31ba74418116c85b45840602424bb35571619bcbcc16e76",
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true
+      },
+      "passed": true
+    },
+    {
+      "asset_code": "asset_post_002_04",
+      "png": "asset_post_002_04.png",
+      "bytes": 819382,
+      "width": 1080,
+      "height": 1080,
+      "sha256": "6a98dd99375cbb61fff6a82742ec9f90b08fcead160575dcd5489ef81c8b3f55",
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true
+      },
+      "passed": true
+    }
+  ],
+  "errors": []
+}
