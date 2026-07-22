@@ -153,3 +153,32 @@ When a composition needs a floating overlay over a phone, it is a product zoomâ€
 - Do not create a fake CTA, button, notification, or explanatory text card on top of an Instagram image.
 - Keep the headline unobstructed and keep enough of the main phone visible to preserve context.
 - Respect the asset language metadata. An English campaign uses `en` assets unless localization is deliberate.
+
+
+## Premium finish contract
+
+Choose `creative_direction.supporting_treatment` deliberately for every product-led asset. Allowed values are `focus_crop`, `insight_callout`, `metric_badge`, and `none`. A zoom is evidence, not decoration, and must never be the automatic default.
+
+- `focus_crop`: use exactly one registered `module_*` asset that is a truthful detail of the selected `mobile_*` context screen. Preserve its natural aspect ratio. Render it borderless, padding-free and transparent, with only a restrained contact shadow. Never wrap it in a phone-like frame, generic card, white seam or black letterbox.
+- `insight_callout`: use one concise editorial annotation that explains the proof already visible on the device. It is not a button, CTA, pill control or invented product UI.
+- `metric_badge`: use one verified value and one short label. Never invent a number and never download an unused module crop for it.
+- `none`: valid and often preferable. Allow the device, typography or editorial composition to breathe.
+
+Semantic proof is mandatory:
+- General progress, continuity and restart messages use Dashboard or Overview context.
+- Momentum, weekly change and pattern messages use Daily Energy, task activity or weekly data.
+- Reflection and emotion-selection messages use the Daily Quest retrospective and emotion selector.
+- Emotional-history messages use Emotion Chart.
+- Calibration and difficulty messages use calibration or task-development evidence.
+The selected visual must prove the claim at a glance. Do not pair emotion chips with a momentum claim or a task list with a generic reflection claim.
+
+Premium finish rules:
+- Preserve a 24 px export-safe area and the renderer's copy safe zone.
+- Never cover the headline, supporting copy, brand lockup, footer or carousel counter.
+- Device screens use `object-fit: contain`, a visible inner bezel and a complete premium chassis; no clipped logos, titles, tabs or controls.
+- Use restrained shadows, consistent corner radii, optical alignment and purposeful overlap. Avoid stacked outlines, double frames, harsh glow, white seams, black padding and floating rectangles that resemble a second phone.
+- A supporting crop must respect its real orientation. Portrait evidence stays portrait or becomes a deliberate editorial crop; it is not forced into a wide empty container.
+- Prefer one clear focal point. Remove any element that does not add proof, hierarchy or conversion value.
+- Across a 20-post campaign, vary treatments and composition families. Repetition is a quality defect even when each individual asset is technically valid.
+
+Before returning the campaign, review every asset at 100% and thumbnail scale. Reject any output with collision, illegible UI, mismatched evidence, awkward tangencies, uneven margins, inconsistent shadows or unfinished edges.
