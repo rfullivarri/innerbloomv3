@@ -189,7 +189,7 @@ async function main() {
       const palette=d.palette || (d.mode === "dark" ? "dark" : "light");
       const html=`<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body><main class="frame ${esc(palette)} ${comp.cls}">${chrome(job,logo,i,all.length)}${comp.body}</main></body></html>`;
       await page.setContent(html,{waitUntil:"networkidle"}); await page.evaluate(()=>document.fonts.ready);
-      await page.$eval(".focus-crop", crops => crops.forEach(crop => {
+      await page.$$eval(".focus-crop", crops => crops.forEach(crop => {
         const image=crop.querySelector("img");
         if(!image?.naturalWidth || !image?.naturalHeight) return;
         const ratio=image.naturalWidth/image.naturalHeight;
@@ -202,7 +202,7 @@ async function main() {
         crop.style.width=`${Math.round(width)}px`;
         crop.style.height=`${Math.round(height)}px`;
       }));
-      await page.$eval(".device", devices => devices.forEach(device => {
+      await page.$$eval(".device", devices => devices.forEach(device => {
         const image = device.querySelector(".screen img");
         if (!image?.naturalWidth || !image?.naturalHeight) return;
         const width = device.getBoundingClientRect().width;
