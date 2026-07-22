@@ -20,6 +20,14 @@ for(const job of jobs){
  if(!d.selected_asset_keys?.length)errors.push(`${job.asset_code}: selected_asset_keys is empty`);
  for(const key of d.selected_asset_keys||[]){assetKeys.add(key);if(!allowed.has(key))errors.push(`${job.asset_code}: ${key} is not an approved source asset`) }
  if(!Array.isArray(d.acceptance_criteria)||d.acceptance_criteria.length<4)errors.push(`${job.asset_code}: needs four acceptance criteria`);
+ if(d.zoom_relationship){
+   const [contextKey,detailKey]=d.selected_asset_keys||[];
+   if(!contextKey?.startsWith("mobile_"))errors.push(`${job.asset_code}: zoom context must be a mobile_* screen`);
+   if(!detailKey?.startsWith("module_"))errors.push(`${job.asset_code}: zoom detail must be a module_* crop`);
+   if(d.zoom_relationship.context_asset_key!==contextKey||d.zoom_relationship.detail_asset_key!==detailKey)errors.push(`${job.asset_code}: zoom_relationship must match selected_asset_keys order`);
+   const zoomLayouts=new Set(["storefront_feature_stage","storefront_dual_device","storefront_metric_overlay","storefront_product_cards","storefront_dark_monolith","storefront_module_spotlight"]);
+   if(!zoomLayouts.has(d.layout_variant))errors.push(`${job.asset_code}: ${d.layout_variant} cannot render a real module zoom`);
+ }
  layoutCounts.set(d.layout_variant,(layoutCounts.get(d.layout_variant)||0)+1);
  const list=postLayouts.get(job.post_code)||[];list.push(d.layout_variant);postLayouts.set(job.post_code,list);
 }
