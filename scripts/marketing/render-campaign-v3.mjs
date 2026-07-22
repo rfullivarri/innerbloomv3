@@ -159,6 +159,16 @@ async function main() {
       const palette=d.palette || (d.mode === "dark" ? "dark" : "light");
       const html=`<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body><main class="frame ${esc(palette)} ${comp.cls}">${chrome(job,logo,i,all.length)}${comp.body}</main></body></html>`;
       await page.setContent(html,{waitUntil:"networkidle"}); await page.evaluate(()=>document.fonts.ready);
+      await page.$$eval(".device", devices => devices.forEach(device => {
+        const image = device.querySelector(".screen img");
+        if (!image?.naturalWidth || !image?.naturalHeight) return;
+        const width = device.getBoundingClientRect().width;
+        const screenRatio = image.naturalWidth / image.naturalHeight;
+        // Build the physical chassis around the real registered screen ratio.
+        // This avoids both screenshot cropping and oversized blank bands.
+        const desiredRatio = Math.max(1.72, Math.min(2.15, 1 / screenRatio));
+        device.style.height = `${Math.round(width * desiredRatio)}px`;
+      }));
       const deviceScreensAreContained = await page.$$eval(".screen img", images => images.every(image => getComputedStyle(image).objectFit === "contain"));
       if (!deviceScreensAreContained) throw new Error(`${job.asset_code}: a device screenshot would be cropped; device screens must use object-fit contain`);
       await page.screenshot({path:path.join(outputDir,`${job.asset_code}.png`),type:"png"});
