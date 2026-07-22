@@ -129,6 +129,21 @@ function supportVisual(job, src, key = "") {
   if(treatment==="none") return "";
   return focusCrop(src,key);
 }
+function visualFamily(key = "") {
+  const normalized = key.toLowerCase();
+  if (normalized.includes("emotion_balance")) return "emotion-balance";
+  if (normalized.includes("daily_energy") || normalized.includes("energy_balance")) return "daily-energy";
+  if (normalized.includes("emotion_chart") || normalized.includes("grid_dominant")) return "emotion-chart";
+  if (normalized.includes("dailyquest") || normalized.includes("dquest") || normalized.includes("emotion_moderation")) return "daily-quest";
+  if (normalized.includes("overview_streaks")) return "overview-streaks";
+  return normalized;
+}
+function assertDistinctSupportVisual(job, keyA, keyB) {
+  const treatment = job.creative_direction?.supporting_treatment;
+  if (treatment === "focus_crop" && keyA && keyB && visualFamily(keyA) === visualFamily(keyB)) {
+    throw new Error(`Duplicate primary/detail visual family in ${job.asset_code || job.post_code}: ${keyA} and ${keyB}`);
+  }
+}
 function copy(job) {
   const headline = job.visible_copy?.headline || ""; const support = job.visible_copy?.supporting_text || "";
   return `<div class="copy"><div class="eyebrow">${esc(job.post_code?.replace("post_", "Innerbloom · ") || "Innerbloom")}</div><h1>${esc(headline)}</h1>${support ? `<p class="support">${esc(support)}</p>` : ""}</div>`;
@@ -142,6 +157,7 @@ function composition(job, sources) {
   const a = sources[0], b = sources[1] || sources[0];
   const keyA = job.creative_direction?.selected_asset_keys?.[0] || "";
   const keyB = job.creative_direction?.selected_asset_keys?.[1] || keyA;
+  assertDistinctSupportVisual(job, keyA, keyB);
   const mobile = keyA.startsWith("mobile_");
   const toneA = keyA.includes("_light_") || keyA.includes("dquest_light") || keyA.includes("rhythm_light") ? "light" : "dark";
   const toneB = keyB.includes("_light_") || keyB.includes("dquest_light") || keyB.includes("rhythm_light") ? "light" : "dark";
@@ -155,13 +171,13 @@ function composition(job, sources) {
     case "floating_device_orbit": return { cls:"floating-orbit", body:copy(job)+`<div class="orbit"></div><div class="orb a"></div><div class="orb b"></div>`+device(a,"small",toneA) };
     case "module_macro_crop": return { cls:"macro", body:copy(job)+feature(a,job.creative_direction?.focus_y || 42) };
     case "bento_product_proof": return { cls:"bento", body:copy(job)+card(b,`a ${mobile?"mobile":""}`)+card(a,`b ${mobile?"mobile":""}`)+device(a,"",toneA) };
-    case "storefront_feature_stage": return { cls:"storefront-stage", body:copy(job)+device(a,"",toneA)+supportVisual(job,b,keyB)+`<div class="product-fade"></div>` };
+    case "storefront_feature_stage": return { cls:"storefront-stage", body:copy(job)+device(a,"",toneA)+supportVisual(job,b,keyB) };
     case "storefront_dual_device": return { cls:"storefront-dual", body:copy(job)+(keyB.startsWith("module_")?device(a,"front",toneA)+supportVisual(job,b,keyB):device(b,"small back",toneB)+device(a,"front",toneA)) };
     case "storefront_metric_overlay": return { cls:"storefront-overlay", body:`<div class="halo"></div>`+copy(job)+device(a,"",toneA)+supportVisual(job,b,keyB) };
     case "storefront_edge_editorial": return { cls:"storefront-edge", body:copy(job)+`<div class="orbit"></div><div class="orb a"></div><div class="orb b"></div>`+device(a,"",toneA) };
     case "storefront_product_cards": return { cls:"storefront-cards", body:copy(job)+device(a,"",toneA)+(keyB.startsWith("module_")?supportVisual(job,b,keyB):card(a,`a ${mobile?"mobile":""}`)+card(b,`b ${keyB.startsWith("mobile_")?"mobile":""}`)) };
     case "storefront_dark_monolith": return { cls:"storefront-monolith", body:copy(job)+device(a,"",toneA)+supportVisual(job,b,keyB) };
-    case "storefront_module_spotlight": return { cls:"storefront-module", body:copy(job)+device(a,"",toneA)+supportVisual(job,b,keyB)+`<div class="product-fade"></div>` };
+    case "storefront_module_spotlight": return { cls:"storefront-module", body:copy(job)+device(a,"",toneA)+supportVisual(job,b,keyB) };
     case "editorial_type_monument": return { cls:"type-monument", body:copy(job)+`<div class="number">${String(job.slide_number || "01").padStart(2,"0")}</div>` };
     case "editorial_signal_line": return { cls:"signal-line", body:copy(job)+`<div class="signal"><i></i><i></i><i></i><i></i><i></i><i></i></div>` };
     case "editorial_numbered_steps": return { cls:"steps", body:copy(job)+`<div class="step-row"><div class="step"><b>01</b><span>${esc(labels[0])}</span></div><div class="step"><b>02</b><span>${esc(labels[1])}</span></div><div class="step"><b>03</b><span>${esc(labels[2])}</span></div></div>` };
