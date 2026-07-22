@@ -81,6 +81,16 @@ h1{margin:0;font:700 64px/1.02 Sora,sans-serif;letter-spacing:-.057em;text-wrap:
 .storefront-cards .copy{left:68px;top:145px;width:560px}.storefront-cards h1{font-size:60px}.storefront-cards .device{right:76px;top:205px}.storefront-cards .product-card.a{left:68px;bottom:128px;width:330px;height:215px;transform:rotate(-3deg)}.storefront-cards .product-card.b{left:370px;bottom:90px;width:330px;height:215px;transform:rotate(4deg)}.storefront-cards .proof-chip{right:55px;top:600px;width:430px}
 .storefront-monolith .copy{left:68px;top:160px;width:480px}.storefront-monolith h1{font-size:65px}.storefront-monolith .device{right:64px;top:135px;width:405px;height:836px}.storefront-monolith .proof-chip{left:68px;bottom:165px;width:445px}.storefront-monolith:after{content:"";position:absolute;right:-110px;top:80px;width:680px;height:820px;border-radius:50%;background:radial-gradient(circle,rgba(139,99,246,.25),transparent 68%);z-index:-1}
 .storefront-module .copy{left:68px;top:680px;width:840px}.storefront-module h1{font-size:61px}.storefront-module .device{left:50%;top:50px;transform:translateX(-50%);width:390px;height:805px}.storefront-module .proof-chip{left:50%;top:430px;transform:translateX(-50%);width:520px}.storefront-module .product-fade{bottom:310px}
+.zoom-card{position:absolute;z-index:14;overflow:hidden;border-radius:30px;padding:10px;background:linear-gradient(145deg,rgba(255,255,255,.92),rgba(225,219,238,.78));border:1px solid rgba(255,255,255,.88);box-shadow:0 28px 70px rgba(20,14,34,.3),inset 0 0 0 1px rgba(87,73,112,.12);backdrop-filter:blur(20px)}
+.zoom-card.dark{background:linear-gradient(145deg,rgba(31,29,36,.96),rgba(12,11,16,.94));border-color:rgba(255,255,255,.15)}
+.zoom-card img{display:block;width:100%;height:100%;object-fit:contain;border-radius:21px;background:#09090b}
+.storefront-stage .zoom-card{left:50%;top:615px;transform:translateX(-50%);width:560px;height:265px}
+.storefront-overlay .zoom-card{right:50px;top:535px;width:505px;height:275px}
+.storefront-cards .zoom-card{left:64px;bottom:112px;width:420px;height:245px;transform:rotate(-2deg)}
+.storefront-monolith .zoom-card{left:68px;bottom:160px;width:455px;height:255px}
+.storefront-module .zoom-card{left:50%;top:420px;transform:translateX(-50%);width:565px;height:285px}
+.storefront-dual .zoom-card{left:245px;top:605px;width:475px;height:260px;transform:rotate(-2deg)}
+
 
 /* Editorial compositions */
 .type-monument .copy{left:68px;top:205px;width:900px}.type-monument h1{font-size:88px;line-height:.98}.type-monument .support{font-size:27px}.type-monument .number{right:40px;bottom:90px}
@@ -98,7 +108,7 @@ h1{margin:0;font:700 64px/1.02 Sora,sans-serif;letter-spacing:-.057em;text-wrap:
 function device(src, classes = "", tone = "dark") { return `<div class="device ${classes}"><div class="metal-rim"></div><div class="shine"></div><div class="screen ${tone}"><span class="island"><i class="camera"></i></span><img src="${src}" alt=""/></div></div>`; }
 function card(src, classes = "") { return `<div class="product-card ${classes}"><img src="${src}" alt=""/></div>`; }
 function feature(src, focus = 42) { return `<div class="feature-crop" style="--focus:-${Math.max(0,Math.min(80,focus))*10}px"><img src="${src}" alt=""/></div>`; }
-function proofChip(job) { return `<div class="proof-chip">${esc(job.creative_direction?.feature_callout || "Real product proof from Innerbloom")}</div>`; }
+function zoomCard(src, key = "") { if (!key.startsWith("module_")) return ""; const tone = key.includes("_dark_") ? " dark" : ""; return `<div class="zoom-card${tone}"><img src="${src}" alt="Innerbloom product detail zoom"/></div>`; }
 function copy(job) {
   const headline = job.visible_copy?.headline || ""; const support = job.visible_copy?.supporting_text || "";
   return `<div class="copy"><div class="eyebrow">${esc(job.post_code?.replace("post_", "Innerbloom · ") || "Innerbloom")}</div><h1>${esc(headline)}</h1>${support ? `<p class="support">${esc(support)}</p>` : ""}</div>`;
@@ -125,13 +135,13 @@ function composition(job, sources) {
     case "floating_device_orbit": return { cls:"floating-orbit", body:copy(job)+`<div class="orbit"></div><div class="orb a"></div><div class="orb b"></div>`+device(a,"small",toneA) };
     case "module_macro_crop": return { cls:"macro", body:copy(job)+feature(a,job.creative_direction?.focus_y || 42) };
     case "bento_product_proof": return { cls:"bento", body:copy(job)+card(b,`a ${mobile?"mobile":""}`)+card(a,`b ${mobile?"mobile":""}`)+device(a,"",toneA) };
-    case "storefront_feature_stage": return { cls:"storefront-stage", body:copy(job)+device(a,"",toneA)+proofChip(job)+`<div class="product-fade"></div>` };
-    case "storefront_dual_device": return { cls:"storefront-dual", body:copy(job)+device(b,"small back",toneB)+device(a,"front",toneA)+proofChip(job) };
-    case "storefront_metric_overlay": return { cls:"storefront-overlay", body:`<div class="halo"></div>`+copy(job)+device(a,"",toneA)+proofChip(job) };
+    case "storefront_feature_stage": return { cls:"storefront-stage", body:copy(job)+device(a,"",toneA)+zoomCard(b,keyB)+`<div class="product-fade"></div>` };
+    case "storefront_dual_device": return { cls:"storefront-dual", body:copy(job)+(keyB.startsWith("module_")?device(a,"front",toneA)+zoomCard(b,keyB):device(b,"small back",toneB)+device(a,"front",toneA)) };
+    case "storefront_metric_overlay": return { cls:"storefront-overlay", body:`<div class="halo"></div>`+copy(job)+device(a,"",toneA)+zoomCard(b,keyB) };
     case "storefront_edge_editorial": return { cls:"storefront-edge", body:copy(job)+`<div class="orbit"></div><div class="orb a"></div><div class="orb b"></div>`+device(a,"",toneA) };
-    case "storefront_product_cards": return { cls:"storefront-cards", body:copy(job)+card(a,`a ${mobile?"mobile":""}`)+card(b,`b ${keyB.startsWith("mobile_")?"mobile":""}`)+device(a,"",toneA)+proofChip(job) };
-    case "storefront_dark_monolith": return { cls:"storefront-monolith", body:copy(job)+device(a,"",toneA)+proofChip(job) };
-    case "storefront_module_spotlight": return { cls:"storefront-module", body:copy(job)+device(a,"",toneA)+proofChip(job)+`<div class="product-fade"></div>` };
+    case "storefront_product_cards": return { cls:"storefront-cards", body:copy(job)+device(a,"",toneA)+(keyB.startsWith("module_")?zoomCard(b,keyB):card(a,`a ${mobile?"mobile":""}`)+card(b,`b ${keyB.startsWith("mobile_")?"mobile":""}`)) };
+    case "storefront_dark_monolith": return { cls:"storefront-monolith", body:copy(job)+device(a,"",toneA)+zoomCard(b,keyB) };
+    case "storefront_module_spotlight": return { cls:"storefront-module", body:copy(job)+device(a,"",toneA)+zoomCard(b,keyB)+`<div class="product-fade"></div>` };
     case "editorial_type_monument": return { cls:"type-monument", body:copy(job)+`<div class="number">${String(job.slide_number || "01").padStart(2,"0")}</div>` };
     case "editorial_signal_line": return { cls:"signal-line", body:copy(job)+`<div class="signal"><i></i><i></i><i></i><i></i><i></i><i></i></div>` };
     case "editorial_numbered_steps": return { cls:"steps", body:copy(job)+`<div class="step-row"><div class="step"><b>01</b><span>${esc(labels[0])}</span></div><div class="step"><b>02</b><span>${esc(labels[1])}</span></div><div class="step"><b>03</b><span>${esc(labels[2])}</span></div></div>` };
