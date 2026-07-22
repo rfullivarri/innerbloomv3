@@ -232,7 +232,7 @@ async function main() {
       if(!finishQuality.inside) throw new Error(`${job.asset_code}: supporting visual leaves the 24px export safe area`);
       if(finishQuality.copyOverlap>1200) throw new Error(`${job.asset_code}: supporting visual collides with headline safe zone`);
       if(finishQuality.framed) throw new Error(`${job.asset_code}: focus crops must be borderless, padding-free and transparent`);
-      const deviceScreensAreContained = await page.$eval(".screen img", images => images.every(image => getComputedStyle(image).objectFit === "contain"));
+      const deviceScreensAreContained = await page.$$eval(".screen img", images => images.every(image => getComputedStyle(image).objectFit === "contain"));
       if (!deviceScreensAreContained) throw new Error(`${job.asset_code}: a device screenshot would be cropped; device screens must use object-fit contain`);
       await page.screenshot({path:path.join(outputDir,`${job.asset_code}.png`),type:"png"});
     }
