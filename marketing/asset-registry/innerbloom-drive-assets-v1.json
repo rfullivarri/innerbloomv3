@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "registry_name": "Innerbloom current Drive asset registry",
-  "generated_at": "2026-07-21",
+  "generated_at": "2026-07-22",
   "source": {
     "drive_root_name": "Innerbloom Marketing",
     "drive_root_id": "1OMs5zzPQcx9Db9RjpA7J-xL5h1b5V9cZ",
@@ -14,7 +14,8 @@
     "Use a source whose mode matches the post mode unless an approved contrast is intentional.",
     "Prefer product proof for product claims and landing composites for brand or acquisition claims.",
     "The real logo must be selected through an approved brand_logo asset.",
-    "This registry does not rename or move any Drive file."
+    "Use module_* assets only as real detail zooms paired with a coherent mobile_* parent screen.",
+    "The first selected asset is context; the second module_* asset is a truthful zoom, never invented UI or a generic text card."
   ],
   "assets": [
     {
@@ -1046,6 +1047,386 @@
       "mode": "dark",
       "surface": "mobile",
       "status": "approved_current",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_balance_dark_radar_overview_01",
+      "drive_file_id": "1CNVYyyr1Is-3GCZJOS1NAeoAavo7AGPr",
+      "drive_url": "https://drive.google.com/file/d/1CNVYyyr1Is-3GCZJOS1NAeoAavo7AGPr/view?usp=drivesdk",
+      "original_file_name": "balance.png",
+      "canonical_file_name": "module_balance_dark_radar_overview_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "balance",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "mixed",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_balance_dark_radar_dimensions_02",
+      "drive_file_id": "1Rp1pjd11UqyEKJV4ol5OOgALda7LUEdL",
+      "drive_url": "https://drive.google.com/file/d/1Rp1pjd11UqyEKJV4ol5OOgALda7LUEdL/view?usp=drivesdk",
+      "original_file_name": "balance 2.png",
+      "canonical_file_name": "module_balance_dark_radar_dimensions_02.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "balance",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "mixed",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_achievements_dark_habit_achieved_front_01",
+      "drive_file_id": "1uhaxSA_fovydN6L4xcmCTN2P7YbyTSJR",
+      "drive_url": "https://drive.google.com/file/d/1uhaxSA_fovydN6L4xcmCTN2P7YbyTSJR/view?usp=drivesdk",
+      "original_file_name": "achivement habits 1.png",
+      "canonical_file_name": "module_achievements_dark_habit_achieved_front_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "achievements",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "mixed",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_achievements_dark_habit_achieved_detail_02",
+      "drive_file_id": "1dkHSJqVr8GmUlhfASO0T6i4SGoWzV27u",
+      "drive_url": "https://drive.google.com/file/d/1dkHSJqVr8GmUlhfASO0T6i4SGoWzV27u/view?usp=drivesdk",
+      "original_file_name": "achivement habits 2.png",
+      "canonical_file_name": "module_achievements_dark_habit_achieved_detail_02.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "achievements",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "mixed",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_achievements_dark_habit_locked_03",
+      "drive_file_id": "1po0LtXWJVnWBjFb9t2dd3xRZNVzBpFIU",
+      "drive_url": "https://drive.google.com/file/d/1po0LtXWJVnWBjFb9t2dd3xRZNVzBpFIU/view?usp=drivesdk",
+      "original_file_name": "achivement habits 3.png",
+      "canonical_file_name": "module_achievements_dark_habit_locked_03.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "achievements",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "mixed",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_achievements_dark_habit_development_04",
+      "drive_file_id": "12SrP21UI-73YTK50WS95Qd0mLhlcEvvN",
+      "drive_url": "https://drive.google.com/file/d/12SrP21UI-73YTK50WS95Qd0mLhlcEvvN/view?usp=drivesdk",
+      "original_file_name": "achivement habits 4.png",
+      "canonical_file_name": "module_achievements_dark_habit_development_04.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "achievements",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "en",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_achievements_dark_wrapped_hub_01",
+      "drive_file_id": "123SP0kbi-SJpbrHWOvUxX-_MSnUH5BZY",
+      "drive_url": "https://drive.google.com/file/d/123SP0kbi-SJpbrHWOvUxX-_MSnUH5BZY/view?usp=drivesdk",
+      "original_file_name": "achivement montly, weekly, growth.png",
+      "canonical_file_name": "mobile_achievements_dark_wrapped_hub_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "achievements",
+      "mode": "dark",
+      "surface": "mobile",
+      "language": "mixed",
+      "status": "approved_current",
+      "relationship_role": "context_screen",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_task_detail_dark_streaks_01",
+      "drive_file_id": "19OBMBiSar3kLnXnZPP7HFhQLKXG1qzlb",
+      "drive_url": "https://drive.google.com/file/d/19OBMBiSar3kLnXnZPP7HFhQLKXG1qzlb/view?usp=drivesdk",
+      "original_file_name": "task details 1 streaks.png",
+      "canonical_file_name": "module_task_detail_dark_streaks_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "task_detail",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "en",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_task_detail_dark_activity_month_01",
+      "drive_file_id": "1TizqlwW5XP3NTgSntdIANVPIVbrx_SLC",
+      "drive_url": "https://drive.google.com/file/d/1TizqlwW5XP3NTgSntdIANVPIVbrx_SLC/view?usp=drivesdk",
+      "original_file_name": "task details 1 activitiy.png",
+      "canonical_file_name": "module_task_detail_dark_activity_month_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "task_detail",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "en",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_task_detail_dark_habit_development_01",
+      "drive_file_id": "1HHlH2Iilk2RURqpPyCgUiLD0ZDVJ0sWs",
+      "drive_url": "https://drive.google.com/file/d/1HHlH2Iilk2RURqpPyCgUiLD0ZDVJ0sWs/view?usp=drivesdk",
+      "original_file_name": "task details 1 development.png",
+      "canonical_file_name": "module_task_detail_dark_habit_development_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "task_detail",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "mixed",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_calibration_dark_detail_increase_01",
+      "drive_file_id": "1kH7g7ccZ6LfyCsi6jwOMktGCozK0ATc_",
+      "drive_url": "https://drive.google.com/file/d/1kH7g7ccZ6LfyCsi6jwOMktGCozK0ATc_/view?usp=drivesdk",
+      "original_file_name": "growth calibration 3.png",
+      "canonical_file_name": "module_calibration_dark_detail_increase_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "calibration",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "mixed",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_calibration_dark_detail_decrease_02",
+      "drive_file_id": "1CIgo4TOHtjtkKHF6vpNHJESyRFSbwEx3",
+      "drive_url": "https://drive.google.com/file/d/1CIgo4TOHtjtkKHF6vpNHJESyRFSbwEx3/view?usp=drivesdk",
+      "original_file_name": "growth calibration 2.png",
+      "canonical_file_name": "module_calibration_dark_detail_decrease_02.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "calibration",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "mixed",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_calibration_dark_summary_01",
+      "drive_file_id": "1VwLp8-2mnPWjLxjHSuuX2xS0dt_ylJlI",
+      "drive_url": "https://drive.google.com/file/d/1VwLp8-2mnPWjLxjHSuuX2xS0dt_ylJlI/view?usp=drivesdk",
+      "original_file_name": "growth calibration 1.png",
+      "canonical_file_name": "module_calibration_dark_summary_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "calibration",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "en",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_tasks_dark_list_progress_01",
+      "drive_file_id": "1fYNJPMogSDnWC-0gBC_Buk3YANofj1_8",
+      "drive_url": "https://drive.google.com/file/d/1fYNJPMogSDnWC-0gBC_Buk3YANofj1_8/view?usp=drivesdk",
+      "original_file_name": "tasks1.png",
+      "canonical_file_name": "module_tasks_dark_list_progress_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "tasks",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "en",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_dquest_dark_emotion_selector_01",
+      "drive_file_id": "169nLFaRQLSzJxQkfICeF29KBw-UNqJli",
+      "drive_url": "https://drive.google.com/file/d/169nLFaRQLSzJxQkfICeF29KBw-UNqJli/view?usp=drivesdk",
+      "original_file_name": "dquest 1.png",
+      "canonical_file_name": "module_dquest_dark_emotion_selector_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "dquest",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "en",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_emotion_chart_dark_grid_dominant_01",
+      "drive_file_id": "1ob5lvEVJRfWFwJpRuFZVAecH2mh-WOOE",
+      "drive_url": "https://drive.google.com/file/d/1ob5lvEVJRfWFwJpRuFZVAecH2mh-WOOE/view?usp=drivesdk",
+      "original_file_name": "emotion 2.png",
+      "canonical_file_name": "module_emotion_chart_dark_grid_dominant_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "emotion_chart",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "en",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "mobile_emotion_chart_dark_overview_01",
+      "drive_file_id": "1JsDFmyiys9nGCDgy7UodaJwY31vpSDX1",
+      "drive_url": "https://drive.google.com/file/d/1JsDFmyiys9nGCDgy7UodaJwY31vpSDX1/view?usp=drivesdk",
+      "original_file_name": "emotion 1.png",
+      "canonical_file_name": "mobile_emotion_chart_dark_overview_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "emotion_chart",
+      "mode": "dark",
+      "surface": "mobile",
+      "language": "en",
+      "status": "approved_current",
+      "relationship_role": "context_screen",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_dashboard_dark_emotion_balance_01",
+      "drive_file_id": "1r0_M819q4FdFv6LweJiDwAAHRxGpUjrF",
+      "drive_url": "https://drive.google.com/file/d/1r0_M819q4FdFv6LweJiDwAAHRxGpUjrF/view?usp=drivesdk",
+      "original_file_name": "emotion energy + balance.png",
+      "canonical_file_name": "module_dashboard_dark_emotion_balance_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "dashboard",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "en",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
+      "allowed_operations": [
+        "reuse_existing_asset",
+        "compose_existing_assets",
+        "crop_or_reframe"
+      ]
+    },
+    {
+      "asset_key": "module_dashboard_dark_daily_energy_01",
+      "drive_file_id": "1Szn0sopI02HngDe68ClH_332YuJGYGGJ",
+      "drive_url": "https://drive.google.com/file/d/1Szn0sopI02HngDe68ClH_332YuJGYGGJ/view?usp=drivesdk",
+      "original_file_name": "Daily energy.png",
+      "canonical_file_name": "module_dashboard_dark_daily_energy_01.png",
+      "mime_type": "image/png",
+      "kind": "product_screenshot",
+      "module": "dashboard",
+      "mode": "dark",
+      "surface": "module_crop",
+      "language": "en",
+      "status": "approved_current",
+      "relationship_role": "detail_zoom",
       "allowed_operations": [
         "reuse_existing_asset",
         "compose_existing_assets",
