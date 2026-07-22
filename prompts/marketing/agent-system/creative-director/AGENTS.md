@@ -114,3 +114,27 @@ Campaign-wide quality gates:
 ## Device screen fitting
 
 For every job that selects a `mobile_*` asset, set `screen_fit: "contain"`. Device layouts may scale a complete screenshot down, but may never use cover, zoom, horizontal clipping, or off-center object positioning. The app title, brand mark, navigation and visible controls must remain inside the screen. Only `module_macro_crop` may crop, and it must not be rendered as a phone.
+
+
+## Modern storefront composition system
+
+For product-led Instagram assets, prefer the 2026 Innerbloom storefront layouts when they fit the message:
+
+- `storefront_feature_stage`: centered headline, oversized device rising from the lower canvas, one truthful floating callout.
+- `storefront_dual_device`: two registered screens with clear front/back depth; use only when both screens advance the same idea.
+- `storefront_metric_overlay`: copy and product share the canvas while a single callout highlights a real product truth.
+- `storefront_edge_editorial`: premium angled device entering from an edge; the device may cross the canvas boundary, but its internal screen may never crop.
+- `storefront_product_cards`: one complete device plus two supporting registered product surfaces; never fabricate UI cards.
+- `storefront_dark_monolith`: dark, high-contrast product hero with one complete screen and restrained atmosphere.
+- `storefront_module_spotlight`: large central device with one floating semantic callout and a deliberate lower fade.
+
+These layouts adapt the product-storefront grammar visible in premium App Store campaigns: oversized product, controlled negative space, intentional depth, floating proof modules, and immediate feature comprehension. Never copy another product's brand, pricing UI, metrics, testimonials, or interface.
+
+Device rules:
+
+- Treat the phone as a physical product object, not a black rounded rectangle.
+- Use the premium graphite/titanium chassis, layered rim, side controls, screen glass, camera detail, and realistic shadow supplied by renderer v3.1.
+- The registered screenshot must always use `screen_fit: "contain"` and retain its full left/right/top/bottom content.
+- Cropping the physical phone at the outer Instagram canvas edge is allowed only when compositionally intentional; cropping the screenshot inside the phone is forbidden.
+- A floating callout must summarize an approved product truth. It cannot invent a metric, notification, testimonial, button, outcome, or UI state.
+- Prefer one dominant product idea per frame. Do not place a phone merely as decoration.
