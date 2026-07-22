@@ -6,7 +6,7 @@ if(!input)throw new Error("Usage: validate-creative-direction-v3 <campaign.json>
 const campaign=JSON.parse(await fs.readFile(input,"utf8"));
 const layouts=new Set(["split_device_right","split_device_left","cinematic_device_center","device_diagonal_crop","layered_product_depth","floating_device_orbit","module_macro_crop","bento_product_proof","editorial_type_monument","editorial_signal_line","editorial_numbered_steps","editorial_quote_frame","carousel_chapter_cover","carousel_proof_focus","carousel_transition","carousel_cta_close","storefront_feature_stage","storefront_dual_device","storefront_metric_overlay","storefront_edge_editorial","storefront_product_cards","storefront_dark_monolith","storefront_module_spotlight"]);
 const families=new Set(["product_hero_scene","product_angle","product_depth","module_spotlight","editorial_statement","proof_sequence","supporting_visual_scene"]);
-const palettes=new Set(["light","dark","lilac","warm","ink"]),modes=new Set(["light","dark"]),errors=[];
+const palettes=new Set(["light","dark","lilac","warm","ink"]),modes=new Set(["light","dark"]),treatments=new Set(["focus_crop","insight_callout","metric_badge","none"]),errors=[];
 const jobs=campaign.image_generation?.jobs||[],layoutCounts=new Map(),assetKeys=new Set(),postLayouts=new Map();
 for(const job of jobs){
  const d=job.creative_direction;
@@ -20,6 +20,11 @@ for(const job of jobs){
  if(!d.selected_asset_keys?.length)errors.push(`${job.asset_code}: selected_asset_keys is empty`);
  for(const key of d.selected_asset_keys||[]){assetKeys.add(key);if(!allowed.has(key))errors.push(`${job.asset_code}: ${key} is not an approved source asset`) }
  if(!Array.isArray(d.acceptance_criteria)||d.acceptance_criteria.length<4)errors.push(`${job.asset_code}: needs four acceptance criteria`);
+ if(d.supporting_treatment&&!treatments.has(d.supporting_treatment))errors.push(`${job.asset_code}: unknown supporting_treatment`);
+ if(d.supporting_treatment==="focus_crop"&&!d.zoom_relationship)errors.push(`${job.asset_code}: focus_crop requires zoom_relationship`);
+ if(d.supporting_treatment==="insight_callout"&&!d.insight_callout?.trim())errors.push(`${job.asset_code}: insight_callout treatment requires copy`);
+ if(d.supporting_treatment==="metric_badge"&&(!d.metric_value?.trim()||!d.metric_label?.trim()))errors.push(`${job.asset_code}: metric_badge requires metric_value and metric_label`);
+ if(d.supporting_treatment!=="focus_crop"&&d.zoom_relationship)errors.push(`${job.asset_code}: zoom_relationship is only valid with focus_crop`);
  if(d.zoom_relationship){
    const [contextKey,detailKey]=d.selected_asset_keys||[];
    if(!contextKey?.startsWith("mobile_"))errors.push(`${job.asset_code}: zoom context must be a mobile_* screen`);
