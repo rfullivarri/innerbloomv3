@@ -138,3 +138,18 @@ Device rules:
 - Cropping the physical phone at the outer Instagram canvas edge is allowed only when compositionally intentional; cropping the screenshot inside the phone is forbidden.
 - A floating callout must summarize an approved product truth. It cannot invent a metric, notification, testimonial, button, outcome, or UI state.
 - Prefer one dominant product idea per frame. Do not place a phone merely as decoration.
+
+
+## Real product zoom contract
+
+When a composition needs a floating overlay over a phone, it is a product zoom—not a generic message card.
+
+- Put the complete contextual screenshot first in `selected_asset_keys`; it must be a `mobile_*` asset.
+- Put the exact detail crop second; it must be a `module_*` asset.
+- Add `zoom_relationship.context_asset_key` and `zoom_relationship.detail_asset_key` matching that order.
+- The two assets must describe the same product area. Examples: Dashboard + Daily Energy; Dashboard + emotion/balance; DQuest + emotion selector; Emotion Chart + emotion grid; task detail + activity or streaks.
+- Never pair unrelated modules merely because their colors match.
+- Render the registered detail crop directly and completely with `object-fit: contain`. Do not redraw, regenerate, or invent UI.
+- Do not create a fake CTA, button, notification, or explanatory text card on top of an Instagram image.
+- Keep the headline unobstructed and keep enough of the main phone visible to preserve context.
+- Respect the asset language metadata. An English campaign uses `en` assets unless localization is deliberate.
