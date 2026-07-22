@@ -98,7 +98,7 @@ h1{margin:0;font:700 64px/1.02 Sora,sans-serif;letter-spacing:-.057em;text-wrap:
 function device(src, classes = "", tone = "dark") { return `<div class="device ${classes}"><div class="metal-rim"></div><div class="shine"></div><div class="screen ${tone}"><span class="island"><i class="camera"></i></span><img src="${src}" alt=""/></div></div>`; }
 function card(src, classes = "") { return `<div class="product-card ${classes}"><img src="${src}" alt=""/></div>`; }
 function feature(src, focus = 42) { return `<div class="feature-crop" style="--focus:-${Math.max(0,Math.min(80,focus))*10}px"><img src="${src}" alt=""/></div>`; }
-function proofChip(job) { return `<div class="proof-chip">${esc(job.visible_copy?.supporting_text || job.visible_copy?.headline || "Real product proof")}</div>`; }
+function proofChip(job) { return `<div class="proof-chip">${esc(job.creative_direction?.feature_callout || "Real product proof from Innerbloom")}</div>`; }
 function copy(job) {
   const headline = job.visible_copy?.headline || ""; const support = job.visible_copy?.supporting_text || "";
   return `<div class="copy"><div class="eyebrow">${esc(job.post_code?.replace("post_", "Innerbloom · ") || "Innerbloom")}</div><h1>${esc(headline)}</h1>${support ? `<p class="support">${esc(support)}</p>` : ""}</div>`;
