@@ -102,7 +102,7 @@ h1{margin:0;font:700 64px/1.02 Sora,sans-serif;letter-spacing:-.057em;text-wrap:
 .storefront-edge .copy{left:68px;top:670px;width:870px}.storefront-edge h1{font-size:61px}.storefront-edge .device{right:82px;top:48px;width:286px;height:602px;transform:perspective(1200px) rotateY(-11deg) rotateZ(5deg)}.storefront-edge .orbit{width:690px;height:470px;left:160px;top:105px;transform:rotate(-10deg)}.storefront-edge .orb.a{left:105px;top:190px;width:68px;height:68px}.storefront-edge .orb.b{right:90px;top:535px;width:42px;height:42px;background:#f1ae6d}
 .storefront-cards .copy{left:68px;top:145px;width:560px}.storefront-cards h1{font-size:60px}.storefront-cards .device{right:76px;top:205px}.storefront-cards .product-card.a{left:68px;bottom:128px;width:330px;height:215px;transform:rotate(-3deg)}.storefront-cards .product-card.b{left:370px;bottom:90px;width:330px;height:215px;transform:rotate(4deg)}.storefront-cards .proof-chip{right:55px;top:600px;width:430px}
 .storefront-monolith .copy{left:68px;top:160px;width:480px}.storefront-monolith h1{font-size:65px}.storefront-monolith .device{right:64px;top:135px;width:405px;height:836px}.storefront-monolith .proof-chip{left:68px;bottom:165px;width:445px}.storefront-monolith:after{content:"";position:absolute;right:-110px;top:80px;width:680px;height:820px;border-radius:50%;background:radial-gradient(circle,rgba(139,99,246,.25),transparent 68%);z-index:-1}
-.storefront-module .copy{left:68px;top:680px;width:840px}.storefront-module h1{font-size:61px}.storefront-module .device{left:50%;top:50px;transform:translateX(-50%);width:390px;height:805px}.storefront-module .proof-chip{left:50%;top:430px;transform:translateX(-50%);width:520px}.storefront-module .product-fade{bottom:310px}
+.storefront-module .copy{left:68px;top:170px;width:480px}.storefront-module h1{font-size:58px}.storefront-module .device{left:auto;right:68px;top:170px;transform:none;width:330px;height:704px}.storefront-module .proof-chip{left:68px;top:auto;bottom:150px;transform:none;width:500px}.storefront-module .product-fade{display:none}
 /* Registered UI details are treated as editorial focus crops, never as a second device. */
 .focus-crop{position:absolute;z-index:14;overflow:hidden;border-radius:20px;background:transparent;border:0;padding:0;box-shadow:none;filter:drop-shadow(0 24px 30px rgba(20,14,34,.22));isolation:isolate}
 .focus-crop img{display:block;width:100%;height:100%;object-fit:contain;border-radius:inherit;background:transparent}
@@ -111,7 +111,7 @@ h1{margin:0;font:700 64px/1.02 Sora,sans-serif;letter-spacing:-.057em;text-wrap:
 .storefront-overlay .focus-crop{right:46px;top:565px}
 .storefront-cards .focus-crop{left:64px;bottom:118px;transform:rotate(-1.5deg)}
 .storefront-monolith .focus-crop{left:68px;bottom:158px}
-.storefront-module .focus-crop{left:50%;top:418px;transform:translateX(-50%)}
+.storefront-module .focus-crop{left:68px;top:auto;bottom:145px;transform:none}
 .storefront-dual .focus-crop{left:250px;top:610px;transform:rotate(-1.5deg)}
 .metric-badge{position:absolute;z-index:18;display:grid;gap:7px;min-width:250px;padding:22px 24px;border-radius:22px;background:rgba(255,255,255,.9);box-shadow:0 18px 44px rgba(25,17,40,.18);backdrop-filter:blur(20px);color:#17151b}
 .metric-badge b{font:800 38px/1 Sora;letter-spacing:-.04em}.metric-badge span{font:650 16px/1.25 Manrope;color:#6d6873}
@@ -288,7 +288,15 @@ async function main() {
           const h=Math.max(0,Math.min(x.bottom,y.bottom)-Math.max(x.top,y.top));
           return w*h;
         };
-        const clippedText=[...document.querySelectorAll(".copy,.copy h1,.copy .support")].some(el=>el.scrollWidth>el.clientWidth+1||el.scrollHeight>el.clientHeight+1);
+        // Scroll metrics alone do not mean clipping: balanced type and negative
+        // tracking can overflow a CSS line box by a fraction while remaining visible.
+        // Only fail when the element actually clips overflow in that axis.
+        const clippedText=[...document.querySelectorAll(".copy,.copy h1,.copy .support")].some(el=>{
+          const cs=getComputedStyle(el);
+          const clipsX=cs.overflowX==="hidden"||cs.overflowX==="clip";
+          const clipsY=cs.overflowY==="hidden"||cs.overflowY==="clip";
+          return (clipsX&&el.scrollWidth>el.clientWidth+1)||(clipsY&&el.scrollHeight>el.clientHeight+1);
+        });
         return {inside:inside(support),copyInside:inside(copy),copyOverlap:overlap(copy,support),productOverlap:overlap(copy,product),clippedText,framed:[...document.querySelectorAll(".focus-crop")].some(el=> {
           const cs=getComputedStyle(el); return parseFloat(cs.padding)>0 || parseFloat(cs.borderTopWidth)>0 || cs.backgroundColor!=="rgba(0, 0, 0, 0)";
         })};

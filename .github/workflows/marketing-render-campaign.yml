@@ -122,6 +122,7 @@ jobs:
           ../../marketing/generated/${{ inputs.period_key }}/review-staging-manifest.json
 
       - name: Keep output as a build artifact
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: innerbloom-marketing-${{ inputs.period_key }}
