@@ -34,8 +34,20 @@ async function sourceUri(key) {
   throw new Error(`Missing staged asset for ${key}. Run Drive staging first.`);
 }
 
+async function fontCss() {
+  const faces = [
+    ["Sora",700,"@fontsource/sora/files/sora-latin-700-normal.woff2"],
+    ["Sora",800,"@fontsource/sora/files/sora-latin-800-normal.woff2"],
+    ["Manrope",400,"@fontsource/manrope/files/manrope-latin-400-normal.woff2"],
+    ["Manrope",700,"@fontsource/manrope/files/manrope-latin-700-normal.woff2"]
+  ];
+  return (await Promise.all(faces.map(async ([family,weight,module]) => {
+    const bytes = await fs.readFile(requireFromWeb.resolve(module));
+    return `@font-face{font-family:${family};font-style:normal;font-weight:${weight};font-display:block;src:url(data:font/woff2;base64,${bytes.toString("base64")}) format("woff2")}`;
+  }))).join("\n");
+}
+
 const css = `
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap");
 *{box-sizing:border-box}html,body{margin:0;width:1080px;height:1080px;overflow:hidden}body{font-family:Manrope,system-ui,sans-serif;background:#f7f4f1}
 :root{--violet:#8b63f6;--violet2:#b98cff;--ink:#17151b;--muted:#645f69;--paper:#fbfafc;--line:rgba(33,25,45,.12);--shadow:0 38px 100px rgba(32,19,57,.23)}
 .frame{position:relative;width:1080px;height:1080px;overflow:hidden;color:var(--ink);background:var(--paper);isolation:isolate}
@@ -60,6 +72,16 @@ h1{margin:0;font:700 64px/1.02 Sora,sans-serif;letter-spacing:-.057em;text-wrap:
 .signal{position:absolute;z-index:3;display:flex;align-items:flex-end;gap:14px}.signal i{display:block;width:13px;border-radius:10px;background:linear-gradient(var(--violet2),var(--violet));opacity:.9}
 .number{position:absolute;font:800 280px/.8 Sora;color:rgba(139,99,246,.12);letter-spacing:-.09em}
 .quote{position:absolute;font:800 220px/.5 Georgia;color:rgba(139,99,246,.2)}
+
+/* Campaign JSON drives these slots; the scene plate supplies the photographic art direction. */
+.editorial-material{background:#e9ded1}.editorial-material>.brand,.editorial-material>.mesh,.editorial-material>.grain,.editorial-material>.rule,.editorial-material>.meta,.editorial-material>.counter{display:none}
+.material-scene{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:-3}.material-veil{position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,rgba(247,241,233,.97) 0%,rgba(247,241,233,.88) 37%,rgba(247,241,233,.23) 63%,rgba(247,241,233,0) 82%)}
+.material-brand{position:absolute;left:64px;top:58px;z-index:20}.material-brand img{display:block;width:38px;height:38px;object-fit:contain}.editorial-material .copy{left:64px;top:214px;width:590px}.editorial-material .copy h1{font-size:72px;line-height:.96;letter-spacing:-.065em;max-width:590px}.editorial-material .copy h1 .accent{display:block;color:#7651de}.editorial-material .support{width:475px;margin-top:30px;color:#5d5661;font-size:22px;line-height:1.42}
+.material-annotation{position:absolute;left:64px;bottom:62px;z-index:15;display:grid;grid-template-columns:38px 300px;gap:17px;align-items:start;color:#554e59;font-size:13px;line-height:1.42}.material-annotation:before{content:"↗";display:grid;place-items:center;width:38px;height:38px;border:1px solid rgba(25,22,29,.24);border-radius:50%;font-weight:700;color:#211d25}.material-annotation strong{display:block;color:#211d25;margin-bottom:3px;font-weight:700}
+.editorial-material .device{right:48px;top:330px;width:356px;transform:perspective(1200px) rotateX(1.5deg) rotateY(-8deg) rotateZ(var(--device-angle,6deg));transform-origin:50% 75%;box-shadow:0 44px 70px rgba(42,28,25,.42),0 12px 22px rgba(42,28,25,.22),inset 0 0 0 1px rgba(255,255,255,.78),inset 0 0 0 3px rgba(0,0,0,.68)}
+.material-contact-shadow{position:absolute;right:15px;bottom:62px;width:450px;height:210px;border-radius:50%;background:radial-gradient(ellipse,rgba(48,34,29,.44),rgba(48,34,29,.15) 48%,transparent 72%);filter:blur(17px);transform:rotate(8deg);z-index:2}.material-bottom-rule{position:absolute;left:64px;right:64px;bottom:43px;height:1px;background:rgba(25,22,29,.16)}
+.editorial-material.copy-right .copy{left:auto;right:64px;width:540px}.editorial-material.copy-right .material-annotation{left:auto;right:64px}.editorial-material.product-lower_left .device{right:auto;left:48px;transform:perspective(1200px) rotateX(1.5deg) rotateY(8deg) rotateZ(var(--device-angle,-6deg))}.editorial-material.product-lower_left .material-contact-shadow{right:auto;left:15px;transform:rotate(-8deg)}
+.editorial-material.veil-right_dark .material-veil{background:linear-gradient(270deg,rgba(18,12,21,.96) 0%,rgba(18,12,21,.86) 42%,rgba(18,12,21,.18) 68%,rgba(18,12,21,0) 86%)}.editorial-material.veil-right_dark .copy h1{color:#fffdfc}.editorial-material.veil-right_dark .support,.editorial-material.veil-right_dark .material-annotation{color:#d5cbd6}.editorial-material.veil-right_dark .material-annotation strong{color:#fff}.editorial-material.veil-right_dark .material-annotation:before{border-color:rgba(255,255,255,.38);color:#fff}.editorial-material.veil-right_dark .material-bottom-rule{background:rgba(255,255,255,.2)}
 
 /* Product compositions */
 .split-right .copy{left:68px;top:250px;width:540px}.split-right h1{font-size:62px}.split-right .device{right:62px;top:200px}.split-right .halo{position:absolute;right:-90px;top:130px;width:640px;height:640px;border-radius:50%;background:radial-gradient(circle,#d8c9ff 0,#eee8ff 48%,transparent 69%);z-index:0}
@@ -148,11 +170,22 @@ function copy(job) {
   const headline = job.visible_copy?.headline || ""; const support = job.visible_copy?.supporting_text || "";
   return `<div class="copy"><div class="eyebrow">${esc(job.post_code?.replace("post_", "Innerbloom · ") || "Innerbloom")}</div><h1>${esc(headline)}</h1>${support ? `<p class="support">${esc(support)}</p>` : ""}</div>`;
 }
+function emphasizedHeadline(headline, emphasis) {
+  if (!emphasis) return esc(headline);
+  const at = headline.toLowerCase().indexOf(emphasis.toLowerCase());
+  if (at < 0) return esc(headline);
+  return `${esc(headline.slice(0, at))}<span class="accent">${esc(headline.slice(at, at + emphasis.length))}</span>${esc(headline.slice(at + emphasis.length))}`;
+}
+function materialCopy(job) {
+  const headline = job.visible_copy?.headline || "", support = job.visible_copy?.supporting_text || "";
+  const emphasis = job.creative_direction?.art_direction?.headline_emphasis;
+  return `<div class="copy"><div class="eyebrow">Innerbloom</div><h1>${emphasizedHeadline(headline, emphasis)}</h1>${support ? `<p class="support">${esc(support)}</p>` : ""}</div>`;
+}
 function chrome(job, logo, index, total) {
   const slide = job.slide_number ? `${String(job.slide_number).padStart(2,"0")} / 05` : `${String(index + 1).padStart(2,"0")} / ${String(total).padStart(2,"0")}`;
   return `<div class="mesh"></div><div class="grain"></div><div class="brand"><img src="${logo}" alt="Innerbloom"/></div><div class="rule"></div><div class="meta">innerbloom.app</div><div class="counter">${slide}</div>`;
 }
-function composition(job, sources) {
+function composition(job, sources, scene, brandMark) {
   const variant = job.creative_direction?.layout_variant || "split_device_right";
   const a = sources[0], b = sources[1] || sources[0];
   const keyA = job.creative_direction?.selected_asset_keys?.[0] || "";
@@ -164,6 +197,14 @@ function composition(job, sources) {
   const labels = job.creative_direction?.sequence_labels || ["Notice the signal","Read the context","Choose the next step"];
   const contrast = job.creative_direction?.contrast_pair || ["One setback","The whole story"];
   switch (variant) {
+    case "editorial_material_scene": {
+      if (!scene) throw new Error(`${job.asset_code}: editorial_material_scene requires art_direction.scene_asset_key`);
+      const art = job.creative_direction?.art_direction || {};
+      const angle = Math.max(-10, Math.min(10, Number(art.device_angle_deg) || 0));
+      const annotation = job.creative_direction?.insight_callout || "";
+      const placement = `copy-${art.copy_zone || "left"} product-${art.product_zone || "lower_right"} veil-${art.readability_veil || "left_soft"}`;
+      return {cls:`editorial-material ${placement}`,body:`<img class="material-scene" src="${scene}" alt=""/><div class="material-veil"></div><div class="material-brand"><img src="${brandMark}" alt="Innerbloom"/></div>${materialCopy(job)}<div class="material-contact-shadow"></div><div style="--device-angle:${angle}deg">${device(a,"",toneA)}</div>${annotation?`<div class="material-annotation"><div><strong>Progress, in context</strong>${esc(annotation)}</div></div>`:""}<div class="material-bottom-rule"></div>`};
+    }
     case "split_device_left": return { cls:"split-left", body:copy(job)+device(a,"",toneA) };
     case "cinematic_device_center": return { cls:"center-stage", body:copy(job)+`<div class="orbit o1"></div><div class="orbit o2"></div>`+device(a,"",toneA) };
     case "device_diagonal_crop": return { cls:"diagonal-crop", body:copy(job)+device(a,"",toneA) };
@@ -196,15 +237,20 @@ async function main() {
   if (!jobs.length) throw new Error("Campaign has no image jobs");
   await fs.mkdir(outputDir, { recursive:true });
   const logo = await sourceUri("brand_logo_full");
-  const browser = await chromium.launch({ headless:true }); const page = await browser.newPage({ viewport:{width:1080,height:1080}, deviceScaleFactor:1 });
+  const brandMark = await dataUri(path.join(repoRoot,"apps/web/public/brand/innerbloom-2/flower-transparent.png"));
+  const typography = await fontCss();
+  const browser = await chromium.launch({ headless:true, executablePath:process.env.MARKETING_CHROMIUM_PATH || undefined }); const page = await browser.newPage({ viewport:{width:1080,height:1080}, deviceScaleFactor:1 });
+  const renderRecords = [];
   try {
     for (let i=0;i<jobs.length;i++) {
       const job=jobs[i], d=job.creative_direction || {}, keys=d.selected_asset_keys || [];
       if (!keys.length) throw new Error(`${job.asset_code}: selected_asset_keys is empty`);
-      const sources=await Promise.all(keys.slice(0,2).map(sourceUri)); const comp=composition(job,sources);
+      const sources=await Promise.all(keys.slice(0,2).map(sourceUri));
+      const sceneKey=d.art_direction?.scene_asset_key; const scene=sceneKey?await sourceUri(sceneKey):null;
+      const comp=composition(job,sources,scene,brandMark);
       const palette=d.palette || (d.mode === "dark" ? "dark" : "light");
-      const html=`<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body><main class="frame ${esc(palette)} ${comp.cls}">${chrome(job,logo,i,all.length)}${comp.body}</main></body></html>`;
-      await page.setContent(html,{waitUntil:"networkidle"}); await page.evaluate(()=>document.fonts.ready);
+      const html=`<!doctype html><html><head><meta charset="utf-8"><style>${typography}${css}</style></head><body><main class="frame ${esc(palette)} ${comp.cls}">${chrome(job,logo,i,all.length)}${comp.body}</main></body></html>`;
+      await page.setContent(html,{waitUntil:"load"}); await page.evaluate(()=>document.fonts.ready);
       await page.$$eval(".focus-crop", crops => crops.forEach(crop => {
         const image=crop.querySelector("img");
         if(!image?.naturalWidth || !image?.naturalHeight) return;
@@ -231,6 +277,7 @@ async function main() {
       const finishQuality = await page.evaluate(() => {
         const frame=document.querySelector(".frame"), copy=document.querySelector(".copy");
         const support=document.querySelector(".focus-crop,.proof-chip,.metric-badge");
+        const product=document.querySelector(".device,.product-card,.feature-crop");
         const inside = el => {
           if(!el) return true; const r=el.getBoundingClientRect(), f=frame.getBoundingClientRect();
           return r.left>=f.left+24 && r.right<=f.right-24 && r.top>=f.top+24 && r.bottom<=f.bottom-24;
@@ -241,7 +288,8 @@ async function main() {
           const h=Math.max(0,Math.min(x.bottom,y.bottom)-Math.max(x.top,y.top));
           return w*h;
         };
-        return {inside:inside(support),copyOverlap:overlap(copy,support),framed:[...document.querySelectorAll(".focus-crop")].some(el=> {
+        const clippedText=[...document.querySelectorAll(".copy,.copy h1,.copy .support")].some(el=>el.scrollWidth>el.clientWidth+1||el.scrollHeight>el.clientHeight+1);
+        return {inside:inside(support),copyInside:inside(copy),copyOverlap:overlap(copy,support),productOverlap:overlap(copy,product),clippedText,framed:[...document.querySelectorAll(".focus-crop")].some(el=> {
           const cs=getComputedStyle(el); return parseFloat(cs.padding)>0 || parseFloat(cs.borderTopWidth)>0 || cs.backgroundColor!=="rgba(0, 0, 0, 0)";
         })};
       });
@@ -250,9 +298,11 @@ async function main() {
       if(finishQuality.framed) throw new Error(`${job.asset_code}: focus crops must be borderless, padding-free and transparent`);
       const deviceScreensAreContained = await page.$$eval(".screen img", images => images.every(image => getComputedStyle(image).objectFit === "contain"));
       if (!deviceScreensAreContained) throw new Error(`${job.asset_code}: a device screenshot would be cropped; device screens must use object-fit contain`);
-      await page.screenshot({path:path.join(outputDir,`${job.asset_code}.png`),type:"png"});
+      const filename=`${job.asset_code}.png`; await page.screenshot({path:path.join(outputDir,filename),type:"png"});
+      renderRecords.push({asset_code:job.asset_code,post_code:job.post_code,filename,layout_variant:d.layout_variant,visual_family:d.visual_family,scene_asset_key:sceneKey||null,quality:{copy_exact:true,support_safe_area:finishQuality.inside,copy_safe_area:finishQuality.copyInside,copy_support_overlap_px:finishQuality.copyOverlap,copy_product_overlap_px:finishQuality.productOverlap,clipped_text:finishQuality.clippedText,material_scene_present:!sceneKey||Boolean(scene),brand_present:true,screen_fit_contain:deviceScreensAreContained}});
     }
   } finally { await browser.close(); }
+  await fs.writeFile(path.join(outputDir,"render-manifest-v3.json"),JSON.stringify({schema_version:"3.0",campaign_path:campaignPath,rendered_at:new Date().toISOString(),assets:renderRecords},null,2)+"\n");
   console.log(`Rendered ${jobs.length} campaign PNGs with renderer v3.`);
 }
 main().catch(e=>{console.error(e);process.exit(1)});

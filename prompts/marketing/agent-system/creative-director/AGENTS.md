@@ -89,6 +89,21 @@ Every ready job must also set:
 - `layout_variant`: one of `split_device_right`, `split_device_left`, `cinematic_device_center`, `device_diagonal_crop`, `layered_product_depth`, `floating_device_orbit`, `module_macro_crop`, `bento_product_proof`, `editorial_type_monument`, `editorial_signal_line`, `editorial_numbered_steps`, `editorial_quote_frame`, `carousel_chapter_cover`, `carousel_proof_focus`, `carousel_transition`, or `carousel_cta_close`.
 - `palette`: `light`, `dark`, `lilac`, `warm`, or `ink`.
 
+For registered photographic scene plates use `visual_family: supporting_visual_scene`, `layout_variant: editorial_material_scene`, and an executable `art_direction` object:
+
+- `art_direction.profile`: `material_editorial_v1`.
+- `art_direction.scene_asset_key`: an approved `scene_*` key also present in `source_assets`.
+- `art_direction.copy_zone`: `left` or `right`.
+- `art_direction.product_zone`: the opposite lower zone, `lower_left` or `lower_right`.
+- `art_direction.device_grounding`: `resting` or `leaning`; never floating.
+- `art_direction.device_angle_deg`: a restrained angle between -10 and 10.
+- `art_direction.headline_emphasis`: an exact substring of `visible_copy.headline`; never rewritten copy.
+- `art_direction.scene_crop`: `center` in profile v1.
+- `art_direction.readability_veil`: `left_soft` for left copy or `right_dark` for right copy.
+- Select `copy_zone`, `product_zone`, `scene_crop`, `readability_veil`, and `device_grounding` from the registered scene plate's `composition_slots`; never guess different slots.
+
+This is executable direction, not a mood description. The renderer must be able to reproduce it without new creative judgment.
+
 Campaign-wide quality gates:
 
 - Use at least 12 different layout variants and 14 different registered source assets per 20-post month.

@@ -2233,8 +2233,8 @@
         "product_truth_anchor": "Progress is visible evidence against the selected rhythm; a broken streak is not the only definition of progress.",
         "funnel_stage": "acquisition",
         "source_assets": [
-          {
-            "asset_key": "mobile_dashboard_dark_overview_streaks_04",
+      {
+        "asset_key": "mobile_dashboard_dark_overview_streaks_04",
             "drive_file_id": "1luPOy4_TlBldDH-w1akx-_HU36JnABa-",
             "drive_url": "https://drive.google.com/file/d/1luPOy4_TlBldDH-w1akx-_HU36JnABa-/view?usp=drivesdk",
             "original_file_name": "innerbloom_mobile_dashboard_dark_overview_streaks_04.png",
@@ -2244,12 +2244,25 @@
             "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
-            "allowed_operations": [
-              "reuse_existing_asset",
-              "compose_existing_assets",
-              "crop_or_reframe"
-            ]
-          }
+        "allowed_operations": [
+          "reuse_existing_asset",
+          "compose_existing_assets",
+          "crop_or_reframe"
+        ]
+      },
+      {
+        "asset_key": "scene_material_warm_textile_lavender_01",
+        "drive_file_id": "11A2RZVDc73WP4gRo_RrS2wUHwTKW4zUU",
+        "drive_url": "https://drive.google.com/file/d/11A2RZVDc73WP4gRo_RrS2wUHwTKW4zUU/view?usp=drivesdk",
+        "original_file_name": "innerbloom_scene_warm_textile_lavender_01.png",
+        "mime_type": "image/png",
+        "kind": "scene_plate",
+        "module": "editorial_scene",
+        "mode": "light",
+        "surface": "photographic_background",
+        "status": "approved_current",
+        "allowed_operations": ["reuse_existing_asset", "compose_existing_assets", "crop_or_reframe"]
+      }
         ],
         "visual_concept": "editorial type-led brand visual",
         "composition_spec": {
@@ -2292,18 +2305,20 @@
         },
         "creative_direction": {
           "status": "ready_for_render",
-          "visual_family": "product_hero_scene",
+    "visual_family": "supporting_visual_scene",
           "mode": "light",
           "device_presentation": "front",
           "wordmark_treatment": "canonical_innerbloom_lockup",
-          "composition_intent": "Render storefront_metric_overlay as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
+    "composition_intent": "Use the registered warm textile scene as a tactile editorial environment. Ground one large real device on the lower-right material plane and preserve a quiet left copy field.",
           "selected_asset_keys": [
             "mobile_dashboard_dark_overview_streaks_04"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
-          "supporting_visual": {
-            "required": false
-          },
+    "supporting_visual": {
+      "required": true,
+      "asset_key": "scene_material_warm_textile_lavender_01",
+      "role": "registered_editorial_scene_plate"
+    },
           "acceptance_criteria": [
             "The canonical Innerbloom lockup is visible.",
             "Copy and device occupy separate non-overlapping safe zones.",
@@ -2313,12 +2328,23 @@
             "The complete context screenshot remains contained inside the premium device shell.",
             "The selected supporting treatment adds meaning without imitating a second device or interface."
           ],
-          "layout_variant": "storefront_metric_overlay",
-          "palette": "light",
+    "layout_variant": "editorial_material_scene",
+    "palette": "warm",
           "screen_fit": "contain",
-          "feature_callout": "Use one editorial proof chip only; it must read as annotation, never as a button.",
+    "feature_callout": "Use the approved insight as a quiet editorial footer, never as a card, pill or button.",
           "supporting_treatment": "insight_callout",
-          "insight_callout": "See the week without erasing the hard day."
+    "insight_callout": "See the week without erasing the hard day.",
+    "art_direction": {
+      "profile": "material_editorial_v1",
+      "scene_asset_key": "scene_material_warm_textile_lavender_01",
+      "scene_crop": "center",
+      "copy_zone": "left",
+      "product_zone": "lower_right",
+      "readability_veil": "left_soft",
+      "device_grounding": "resting",
+      "device_angle_deg": 6,
+      "headline_emphasis": "you are not the problem."
+    }
         }
       },
       {
@@ -2610,6 +2636,15 @@
               "compose_existing_assets",
               "crop_or_reframe"
             ]
+          },
+          {
+            "asset_key": "module_dashboard_dark_emotion_balance_01",
+            "drive_file_id": "1r0_M819q4FdFv6LweJiDwAAHRxGpUjrF",
+            "drive_url": "https://drive.google.com/file/d/1r0_M819q4FdFv6LweJiDwAAHRxGpUjrF/view?usp=drivesdk",
+            "original_file_name": "emotion energy + balance.png",
+            "canonical_file_name": "module_dashboard_dark_emotion_balance_01.png",
+            "mime_type": "image/png", "kind": "product_screenshot", "module": "dashboard", "mode": "dark", "surface": "module_crop", "language": "en", "status": "approved_current", "relationship_role": "detail_zoom",
+            "allowed_operations": ["reuse_existing_asset", "compose_existing_assets", "crop_or_reframe"]
           }
         ],
         "visual_concept": "abstract rhythm/progress system visual",
@@ -3286,6 +3321,15 @@
               "compose_existing_assets",
               "crop_or_reframe"
             ]
+          },
+          {
+            "asset_key": "module_dashboard_dark_emotion_balance_01",
+            "drive_file_id": "1r0_M819q4FdFv6LweJiDwAAHRxGpUjrF",
+            "drive_url": "https://drive.google.com/file/d/1r0_M819q4FdFv6LweJiDwAAHRxGpUjrF/view?usp=drivesdk",
+            "original_file_name": "emotion energy + balance.png",
+            "canonical_file_name": "module_dashboard_dark_emotion_balance_01.png",
+            "mime_type": "image/png", "kind": "product_screenshot", "module": "dashboard", "mode": "dark", "surface": "module_crop", "language": "en", "status": "approved_current", "relationship_role": "detail_zoom",
+            "allowed_operations": ["reuse_existing_asset", "compose_existing_assets", "crop_or_reframe"]
           }
         ],
         "visual_concept": "screenshot detail crop with callout labels",
@@ -4021,6 +4065,14 @@
               "compose_existing_assets",
               "crop_or_reframe"
             ]
+          },
+          {
+            "asset_key": "mobile_dailyquest_dark_emotion_moderation",
+            "drive_file_id": "1eFwklCONkoIEPZqCjReGdhifw9ox7Hr0",
+            "drive_url": "https://drive.google.com/file/d/1eFwklCONkoIEPZqCjReGdhifw9ox7Hr0/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dailyquest_dark_emotion_moderation.png",
+            "mime_type": "image/png", "kind": "product_screenshot", "module": "emotion_chart", "mode": "dark", "surface": "mobile", "status": "approved_current",
+            "allowed_operations": ["reuse_existing_asset", "compose_existing_assets", "crop_or_reframe"]
           }
         ],
         "visual_concept": "product screenshot inside premium phone mockup",

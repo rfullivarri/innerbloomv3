@@ -19,6 +19,54 @@
   ],
   "assets": [
     {
+      "asset_key": "scene_material_warm_textile_lavender_01",
+      "drive_file_id": "11A2RZVDc73WP4gRo_RrS2wUHwTKW4zUU",
+      "drive_url": "https://drive.google.com/file/d/11A2RZVDc73WP4gRo_RrS2wUHwTKW4zUU/view?usp=drivesdk",
+      "original_file_name": "innerbloom_scene_warm_textile_lavender_01.png",
+      "mime_type": "image/png",
+      "kind": "scene_plate",
+      "module": "editorial_scene",
+      "mode": "light",
+      "surface": "photographic_background",
+      "status": "approved_current",
+      "origin": "generated_for_innerbloom",
+      "license": "Innerbloom commercial campaign use",
+      "language_neutral": true,
+      "composition_profile": "material_editorial_v1",
+      "composition_slots": {"copy_zone":"left","product_zone":"lower_right","scene_crop":"center","readability_veil":"left_soft","device_grounding":"resting"},
+      "allowed_operations": ["reuse_existing_asset","compose_existing_assets","crop_or_reframe"]
+    },
+    {
+      "asset_key": "scene_ivory_plaster_steps_01",
+      "drive_file_id": "19O_f67cE1jU9dqb_tD3wnyy0JcDGT2U9",
+      "drive_url": "https://drive.google.com/file/d/19O_f67cE1jU9dqb_tD3wnyy0JcDGT2U9/view?usp=drivesdk",
+      "original_file_name": "innerbloom_scene_ivory_plaster_steps_01.png",
+      "mime_type": "image/png", "kind": "scene_plate", "module": "editorial_scene", "mode": "light", "surface": "photographic_background", "status": "approved_current",
+      "origin": "generated_for_innerbloom", "license": "Innerbloom commercial campaign use", "language_neutral": true, "composition_profile": "material_editorial_v1",
+      "composition_slots": {"copy_zone":"left","product_zone":"lower_right","scene_crop":"center","readability_veil":"left_soft","device_grounding":"resting"},
+      "allowed_operations": ["reuse_existing_asset","compose_existing_assets","crop_or_reframe"]
+    },
+    {
+      "asset_key": "scene_aubergine_pedestal_01",
+      "drive_file_id": "1vfnarAolgsYOSthAn7e0S7I0hEvTTGQr",
+      "drive_url": "https://drive.google.com/file/d/1vfnarAolgsYOSthAn7e0S7I0hEvTTGQr/view?usp=drivesdk",
+      "original_file_name": "innerbloom_scene_aubergine_pedestal_01.png",
+      "mime_type": "image/png", "kind": "scene_plate", "module": "editorial_scene", "mode": "dark", "surface": "photographic_background", "status": "approved_current",
+      "origin": "generated_for_innerbloom", "license": "Innerbloom commercial campaign use", "language_neutral": true, "composition_profile": "material_editorial_v1",
+      "composition_slots": {"copy_zone":"right","product_zone":"lower_left","scene_crop":"center","readability_veil":"right_dark","device_grounding":"resting"},
+      "allowed_operations": ["reuse_existing_asset","compose_existing_assets","crop_or_reframe"]
+    },
+    {
+      "asset_key": "scene_frosted_glass_mist_01",
+      "drive_file_id": "12FhqtFSUVp0iU6UpDFCQFriWoHkt5jVP",
+      "drive_url": "https://drive.google.com/file/d/12FhqtFSUVp0iU6UpDFCQFriWoHkt5jVP/view?usp=drivesdk",
+      "original_file_name": "innerbloom_scene_frosted_glass_mist_01.png",
+      "mime_type": "image/png", "kind": "scene_plate", "module": "editorial_scene", "mode": "light", "surface": "photographic_background", "status": "approved_current",
+      "origin": "generated_for_innerbloom", "license": "Innerbloom commercial campaign use", "language_neutral": true, "composition_profile": "material_editorial_v1",
+      "composition_slots": {"copy_zone":"left","product_zone":"lower_right","scene_crop":"center","readability_veil":"left_soft","device_grounding":"leaning"},
+      "allowed_operations": ["reuse_existing_asset","compose_existing_assets","crop_or_reframe"]
+    },
+    {
       "asset_key": "brand_logo_512",
       "drive_file_id": "1g33pJFN6hdyZGUFTe8P9IVhzjBBL-ICc",
       "drive_url": "https://drive.google.com/file/d/1g33pJFN6hdyZGUFTe8P9IVhzjBBL-ICc/view?usp=drivesdk",

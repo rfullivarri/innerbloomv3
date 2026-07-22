@@ -10,7 +10,7 @@ on:
       preview_limit:
         description: Render only the first N image jobs and do not import to Admin (0 renders the full campaign)
         required: false
-        default: "0"
+        default: "5"
         type: string
 
 permissions:
@@ -80,6 +80,11 @@ jobs:
           --asset-dir marketing/generated/${{ inputs.period_key }}/source-assets
           --out ${{ env.RENDER_OUTPUT_DIR }}
           --limit ${{ inputs.preview_limit }}
+
+      - name: Enforce rendered creative quality
+        run: >-
+          node scripts/marketing/quality-gate-rendered-v3.mjs
+          ${{ env.RENDER_OUTPUT_DIR }}/render-manifest-v3.json
 
       - name: Store review PNGs on the monthly branch
         id: review_commit

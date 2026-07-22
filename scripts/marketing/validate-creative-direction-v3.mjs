@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 const input=process.argv[2];
 if(!input)throw new Error("Usage: validate-creative-direction-v3 <campaign.json>");
 const campaign=JSON.parse(await fs.readFile(input,"utf8"));
-const layouts=new Set(["split_device_right","split_device_left","cinematic_device_center","device_diagonal_crop","layered_product_depth","floating_device_orbit","module_macro_crop","bento_product_proof","editorial_type_monument","editorial_signal_line","editorial_numbered_steps","editorial_quote_frame","carousel_chapter_cover","carousel_proof_focus","carousel_transition","carousel_cta_close","storefront_feature_stage","storefront_dual_device","storefront_metric_overlay","storefront_edge_editorial","storefront_product_cards","storefront_dark_monolith","storefront_module_spotlight"]);
+const layouts=new Set(["split_device_right","split_device_left","cinematic_device_center","device_diagonal_crop","layered_product_depth","floating_device_orbit","module_macro_crop","bento_product_proof","editorial_type_monument","editorial_signal_line","editorial_numbered_steps","editorial_quote_frame","carousel_chapter_cover","carousel_proof_focus","carousel_transition","carousel_cta_close","storefront_feature_stage","storefront_dual_device","storefront_metric_overlay","storefront_edge_editorial","storefront_product_cards","storefront_dark_monolith","storefront_module_spotlight","editorial_material_scene"]);
 const families=new Set(["product_hero_scene","product_angle","product_depth","module_spotlight","editorial_statement","proof_sequence","supporting_visual_scene"]);
 const palettes=new Set(["light","dark","lilac","warm","ink"]),modes=new Set(["light","dark"]),treatments=new Set(["focus_crop","insight_callout","metric_badge","none"]),errors=[];
 const jobs=campaign.image_generation?.jobs||[],layoutCounts=new Map(),assetKeys=new Set(),postLayouts=new Map();
@@ -25,6 +25,22 @@ for(const job of jobs){
  if(d.supporting_treatment==="insight_callout"&&!d.insight_callout?.trim())errors.push(`${job.asset_code}: insight_callout treatment requires copy`);
  if(d.supporting_treatment==="metric_badge"&&(!d.metric_value?.trim()||!d.metric_label?.trim()))errors.push(`${job.asset_code}: metric_badge requires metric_value and metric_label`);
  if(d.supporting_treatment!=="focus_crop"&&d.zoom_relationship)errors.push(`${job.asset_code}: zoom_relationship is only valid with focus_crop`);
+ if(d.layout_variant==="editorial_material_scene"){
+   const art=d.art_direction;
+   if(!art)errors.push(`${job.asset_code}: editorial_material_scene requires art_direction`);
+   else{
+     if(art.profile!=="material_editorial_v1")errors.push(`${job.asset_code}: unsupported art_direction.profile`);
+     if(!art.scene_asset_key?.startsWith("scene_"))errors.push(`${job.asset_code}: material scene requires a registered scene_asset_key`);
+     if(!allowed.has(art.scene_asset_key))errors.push(`${job.asset_code}: scene_asset_key is not approved in source_assets`);
+     if(!["left","right"].includes(art.copy_zone))errors.push(`${job.asset_code}: art_direction.copy_zone must be left or right`);
+     if(!["lower_left","lower_right"].includes(art.product_zone))errors.push(`${job.asset_code}: art_direction.product_zone must be lower_left or lower_right`);
+     if(!["resting","leaning"].includes(art.device_grounding))errors.push(`${job.asset_code}: art_direction.device_grounding must be resting or leaning`);
+     if(art.scene_crop!=="center")errors.push(`${job.asset_code}: unsupported art_direction.scene_crop`);
+     if(!["left_soft","right_dark"].includes(art.readability_veil))errors.push(`${job.asset_code}: unsupported art_direction.readability_veil`);
+     if(!Number.isFinite(art.device_angle_deg)||Math.abs(art.device_angle_deg)>10)errors.push(`${job.asset_code}: device angle must stay within 10 degrees`);
+     if(art.headline_emphasis&&!job.visible_copy?.headline?.toLowerCase().includes(art.headline_emphasis.toLowerCase()))errors.push(`${job.asset_code}: headline_emphasis must be exact campaign copy`);
+   }
+ }
  if(d.zoom_relationship){
    const [contextKey,detailKey]=d.selected_asset_keys||[];
    if(!contextKey?.startsWith("mobile_"))errors.push(`${job.asset_code}: zoom context must be a mobile_* screen`);

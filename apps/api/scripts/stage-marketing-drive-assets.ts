@@ -3,7 +3,7 @@ import path from 'node:path';
 import { downloadDriveFile } from '../src/services/marketingGoogleDriveService.js';
 
 type RegistryAsset = { asset_key: string; drive_file_id: string; original_file_name?: string; mime_type?: string };
-type Job = { creative_direction?: { selected_asset_keys?: string[] } };
+type Job = { creative_direction?: { selected_asset_keys?: string[]; art_direction?: { scene_asset_key?: string } } };
 
 const [campaignPath, registryPath, outputDir] = process.argv.slice(2);
 if (!campaignPath || !registryPath || !outputDir) {
@@ -17,6 +17,8 @@ const [campaign, registry] = await Promise.all([
 const requiredKeys = new Set<string>(['brand_logo_512', 'brand_logo_full']);
 for (const job of campaign.image_generation?.jobs ?? []) {
   for (const key of job.creative_direction?.selected_asset_keys ?? []) requiredKeys.add(key);
+  const sceneKey = job.creative_direction?.art_direction?.scene_asset_key;
+  if (sceneKey) requiredKeys.add(sceneKey);
 }
 if (requiredKeys.size <= 2) {
   throw new Error('No creative selected_asset_keys were found. Run the Creative Director before staging.');
