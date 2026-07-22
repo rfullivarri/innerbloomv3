@@ -2266,6 +2266,26 @@
               "compose_existing_assets",
               "crop_or_reframe"
             ]
+          },
+          {
+            "asset_key": "module_task_detail_dark_streaks_01",
+            "drive_file_id": "19OBMBiSar3kLnXnZPP7HFhQLKXG1qzlb",
+            "drive_url": "https://drive.google.com/file/d/19OBMBiSar3kLnXnZPP7HFhQLKXG1qzlb/view?usp=drivesdk",
+            "original_file_name": "task details 1 streaks.png",
+            "canonical_file_name": "module_task_detail_dark_streaks_01.png",
+            "mime_type": "image/png",
+            "kind": "product_screenshot",
+            "module": "task_detail",
+            "mode": "dark",
+            "surface": "module_crop",
+            "language": "en",
+            "status": "approved_current",
+            "relationship_role": "detail_zoom",
+            "allowed_operations": [
+              "reuse_existing_asset",
+              "compose_existing_assets",
+              "crop_or_reframe"
+            ]
           }
         ],
         "visual_concept": "editorial type-led brand visual",
@@ -2316,7 +2336,7 @@
           "composition_intent": "Render storefront_metric_overlay as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
             "mobile_dashboard_dark_overview_streaks_04",
-            "mobile_dashboard_light_01"
+            "module_task_detail_dark_streaks_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
@@ -2327,12 +2347,20 @@
             "Copy and device occupy separate non-overlapping safe zones.",
             "Every mobile screenshot has a visible inner bezel and screen margin.",
             "The selected registered screen directly proves the slide claim.",
-            "No simulated website button, debug label or internal asset identifier appears."
+            "No simulated website button, debug label or internal asset identifier appears.",
+            "The complete context screenshot remains contained inside the premium device shell.",
+            "The floating overlay uses the registered module crop, not invented UI and not a generic text card.",
+            "The zoom does not cover the headline or supporting copy."
           ],
           "layout_variant": "storefront_metric_overlay",
           "palette": "light",
           "screen_fit": "contain",
-          "feature_callout": "See the week without erasing the hard day."
+          "feature_callout": "Use the registered module crop as a real visual zoom. Do not render this sentence.",
+          "zoom_relationship": {
+            "context_asset_key": "mobile_dashboard_dark_overview_streaks_04",
+            "detail_asset_key": "module_task_detail_dark_streaks_01",
+            "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
+          }
         }
       },
       {
@@ -2604,6 +2632,26 @@
               "compose_existing_assets",
               "crop_or_reframe"
             ]
+          },
+          {
+            "asset_key": "module_dashboard_dark_daily_energy_01",
+            "drive_file_id": "1Szn0sopI02HngDe68ClH_332YuJGYGGJ",
+            "drive_url": "https://drive.google.com/file/d/1Szn0sopI02HngDe68ClH_332YuJGYGGJ/view?usp=drivesdk",
+            "original_file_name": "Daily energy.png",
+            "canonical_file_name": "module_dashboard_dark_daily_energy_01.png",
+            "mime_type": "image/png",
+            "kind": "product_screenshot",
+            "module": "dashboard",
+            "mode": "dark",
+            "surface": "module_crop",
+            "language": "en",
+            "status": "approved_current",
+            "relationship_role": "detail_zoom",
+            "allowed_operations": [
+              "reuse_existing_asset",
+              "compose_existing_assets",
+              "crop_or_reframe"
+            ]
           }
         ],
         "visual_concept": "abstract rhythm/progress system visual",
@@ -2654,7 +2702,7 @@
           "composition_intent": "Render storefront_module_spotlight as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
             "mobile_dashboard_dark_energy_balance_02",
-            "mobile_dashboard_light_02"
+            "module_dashboard_dark_daily_energy_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
@@ -2665,13 +2713,21 @@
             "Copy and device occupy separate non-overlapping safe zones.",
             "Every mobile screenshot has a visible inner bezel and screen margin.",
             "The selected registered screen directly proves the slide claim.",
-            "No simulated website button, debug label or internal asset identifier appears."
+            "No simulated website button, debug label or internal asset identifier appears.",
+            "The complete context screenshot remains contained inside the premium device shell.",
+            "The floating overlay uses the registered module crop, not invented UI and not a generic text card.",
+            "The zoom does not cover the headline or supporting copy."
           ],
           "layout_variant": "storefront_module_spotlight",
           "palette": "lilac",
           "focus_y": 52,
           "screen_fit": "contain",
-          "feature_callout": "Seven days of momentum, not one perfect score."
+          "feature_callout": "Use the registered module crop as a real visual zoom. Do not render this sentence.",
+          "zoom_relationship": {
+            "context_asset_key": "mobile_dashboard_dark_energy_balance_02",
+            "detail_asset_key": "module_dashboard_dark_daily_energy_01",
+            "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
+          }
         }
       },
       {
@@ -3032,6 +3088,26 @@
               "compose_existing_assets",
               "crop_or_reframe"
             ]
+          },
+          {
+            "asset_key": "module_dquest_dark_emotion_selector_01",
+            "drive_file_id": "169nLFaRQLSzJxQkfICeF29KBw-UNqJli",
+            "drive_url": "https://drive.google.com/file/d/169nLFaRQLSzJxQkfICeF29KBw-UNqJli/view?usp=drivesdk",
+            "original_file_name": "dquest 1.png",
+            "canonical_file_name": "module_dquest_dark_emotion_selector_01.png",
+            "mime_type": "image/png",
+            "kind": "product_screenshot",
+            "module": "dquest",
+            "mode": "dark",
+            "surface": "module_crop",
+            "language": "en",
+            "status": "approved_current",
+            "relationship_role": "detail_zoom",
+            "allowed_operations": [
+              "reuse_existing_asset",
+              "compose_existing_assets",
+              "crop_or_reframe"
+            ]
           }
         ],
         "visual_concept": "editorial type-led brand visual",
@@ -3081,7 +3157,8 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render storefront_metric_overlay as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
-            "mobile_dailyquest_dark_emotion_moderation"
+            "mobile_dailyquest_dark_emotion_moderation",
+            "module_dquest_dark_emotion_selector_01"
           ],
           "focal_instruction": "Headline is the focal point; abstract decoration remains secondary.",
           "supporting_visual": {
@@ -3092,12 +3169,20 @@
             "Copy and device occupy separate non-overlapping safe zones.",
             "Every mobile screenshot has a visible inner bezel and screen margin.",
             "The selected registered screen directly proves the slide claim.",
-            "No simulated website button, debug label or internal asset identifier appears."
+            "No simulated website button, debug label or internal asset identifier appears.",
+            "The complete context screenshot remains contained inside the premium device shell.",
+            "The floating overlay uses the registered module crop, not invented UI and not a generic text card.",
+            "The zoom does not cover the headline or supporting copy."
           ],
           "layout_variant": "storefront_metric_overlay",
           "palette": "lilac",
           "screen_fit": "contain",
-          "feature_callout": "Review yesterday before choosing today."
+          "feature_callout": "Use the registered module crop as a real visual zoom. Do not render this sentence.",
+          "zoom_relationship": {
+            "context_asset_key": "mobile_dailyquest_dark_emotion_moderation",
+            "detail_asset_key": "module_dquest_dark_emotion_selector_01",
+            "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
+          }
         }
       },
       {
@@ -3133,6 +3218,26 @@
             "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
+            "allowed_operations": [
+              "reuse_existing_asset",
+              "compose_existing_assets",
+              "crop_or_reframe"
+            ]
+          },
+          {
+            "asset_key": "module_dquest_dark_emotion_selector_01",
+            "drive_file_id": "169nLFaRQLSzJxQkfICeF29KBw-UNqJli",
+            "drive_url": "https://drive.google.com/file/d/169nLFaRQLSzJxQkfICeF29KBw-UNqJli/view?usp=drivesdk",
+            "original_file_name": "dquest 1.png",
+            "canonical_file_name": "module_dquest_dark_emotion_selector_01.png",
+            "mime_type": "image/png",
+            "kind": "product_screenshot",
+            "module": "dquest",
+            "mode": "dark",
+            "surface": "module_crop",
+            "language": "en",
+            "status": "approved_current",
+            "relationship_role": "detail_zoom",
             "allowed_operations": [
               "reuse_existing_asset",
               "compose_existing_assets",
@@ -3187,7 +3292,8 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render storefront_dual_device as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
-            "mobile_dailyquest_dark_emotion_moderation"
+            "mobile_dailyquest_dark_emotion_moderation",
+            "module_dquest_dark_emotion_selector_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
@@ -3198,12 +3304,20 @@
             "Copy and device occupy separate non-overlapping safe zones.",
             "Every mobile screenshot has a visible inner bezel and screen margin.",
             "The selected registered screen directly proves the slide claim.",
-            "No simulated website button, debug label or internal asset identifier appears."
+            "No simulated website button, debug label or internal asset identifier appears.",
+            "The complete context screenshot remains contained inside the premium device shell.",
+            "The floating overlay uses the registered module crop, not invented UI and not a generic text card.",
+            "The zoom does not cover the headline or supporting copy."
           ],
           "layout_variant": "storefront_dual_device",
           "palette": "light",
           "screen_fit": "contain",
-          "feature_callout": "Reflection and task review stay separate."
+          "feature_callout": "Use the registered module crop as a real visual zoom. Do not render this sentence.",
+          "zoom_relationship": {
+            "context_asset_key": "mobile_dailyquest_dark_emotion_moderation",
+            "detail_asset_key": "module_dquest_dark_emotion_selector_01",
+            "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
+          }
         }
       },
       {
@@ -3239,6 +3353,26 @@
             "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
+            "allowed_operations": [
+              "reuse_existing_asset",
+              "compose_existing_assets",
+              "crop_or_reframe"
+            ]
+          },
+          {
+            "asset_key": "module_dquest_dark_emotion_selector_01",
+            "drive_file_id": "169nLFaRQLSzJxQkfICeF29KBw-UNqJli",
+            "drive_url": "https://drive.google.com/file/d/169nLFaRQLSzJxQkfICeF29KBw-UNqJli/view?usp=drivesdk",
+            "original_file_name": "dquest 1.png",
+            "canonical_file_name": "module_dquest_dark_emotion_selector_01.png",
+            "mime_type": "image/png",
+            "kind": "product_screenshot",
+            "module": "dquest",
+            "mode": "dark",
+            "surface": "module_crop",
+            "language": "en",
+            "status": "approved_current",
+            "relationship_role": "detail_zoom",
             "allowed_operations": [
               "reuse_existing_asset",
               "compose_existing_assets",
@@ -3293,7 +3427,8 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render storefront_dark_monolith as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
-            "mobile_dailyquest_dark_emotion_moderation"
+            "mobile_dailyquest_dark_emotion_moderation",
+            "module_dquest_dark_emotion_selector_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
@@ -3304,12 +3439,20 @@
             "Copy and device occupy separate non-overlapping safe zones.",
             "Every mobile screenshot has a visible inner bezel and screen margin.",
             "The selected registered screen directly proves the slide claim.",
-            "No simulated website button, debug label or internal asset identifier appears."
+            "No simulated website button, debug label or internal asset identifier appears.",
+            "The complete context screenshot remains contained inside the premium device shell.",
+            "The floating overlay uses the registered module crop, not invented UI and not a generic text card.",
+            "The zoom does not cover the headline or supporting copy."
           ],
           "layout_variant": "storefront_dark_monolith",
           "palette": "dark",
           "screen_fit": "contain",
-          "feature_callout": "Name the signal. Keep the context."
+          "feature_callout": "Use the registered module crop as a real visual zoom. Do not render this sentence.",
+          "zoom_relationship": {
+            "context_asset_key": "mobile_dailyquest_dark_emotion_moderation",
+            "detail_asset_key": "module_dquest_dark_emotion_selector_01",
+            "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
+          }
         }
       },
       {
@@ -3345,6 +3488,26 @@
             "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
+            "allowed_operations": [
+              "reuse_existing_asset",
+              "compose_existing_assets",
+              "crop_or_reframe"
+            ]
+          },
+          {
+            "asset_key": "module_tasks_dark_list_progress_01",
+            "drive_file_id": "1fYNJPMogSDnWC-0gBC_Buk3YANofj1_8",
+            "drive_url": "https://drive.google.com/file/d/1fYNJPMogSDnWC-0gBC_Buk3YANofj1_8/view?usp=drivesdk",
+            "original_file_name": "tasks1.png",
+            "canonical_file_name": "module_tasks_dark_list_progress_01.png",
+            "mime_type": "image/png",
+            "kind": "product_screenshot",
+            "module": "tasks",
+            "mode": "dark",
+            "surface": "module_crop",
+            "language": "en",
+            "status": "approved_current",
+            "relationship_role": "detail_zoom",
             "allowed_operations": [
               "reuse_existing_asset",
               "compose_existing_assets",
@@ -3399,7 +3562,8 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render storefront_edge_editorial as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
-            "mobile_dailyquest_dark_tasks_selection"
+            "mobile_dailyquest_dark_tasks_selection",
+            "module_tasks_dark_list_progress_01"
           ],
           "focal_instruction": "Headline is the focal point; abstract decoration remains secondary.",
           "supporting_visual": {
@@ -3410,12 +3574,21 @@
             "Copy and device occupy separate non-overlapping safe zones.",
             "Every mobile screenshot has a visible inner bezel and screen margin.",
             "The selected registered screen directly proves the slide claim.",
-            "No simulated website button, debug label or internal asset identifier appears."
+            "No simulated website button, debug label or internal asset identifier appears.",
+            "The complete context screenshot remains contained inside the premium device shell.",
+            "The floating overlay uses the registered module crop, not invented UI and not a generic text card.",
+            "The zoom does not cover the headline or supporting copy."
           ],
-          "layout_variant": "storefront_edge_editorial",
+          "layout_variant": "storefront_module_spotlight",
           "palette": "warm",
           "focus_y": 28,
-          "screen_fit": "contain"
+          "screen_fit": "contain",
+          "zoom_relationship": {
+            "context_asset_key": "mobile_dailyquest_dark_tasks_selection",
+            "detail_asset_key": "module_tasks_dark_list_progress_01",
+            "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
+          },
+          "feature_callout": "Use the registered module crop as a real visual zoom. Do not render this sentence."
         }
       },
       {
@@ -3561,6 +3734,43 @@
               "compose_existing_assets",
               "crop_or_reframe"
             ]
+          },
+          {
+            "asset_key": "mobile_dashboard_dark_overview_streaks_04",
+            "drive_file_id": "1luPOy4_TlBldDH-w1akx-_HU36JnABa-",
+            "drive_url": "https://drive.google.com/file/d/1luPOy4_TlBldDH-w1akx-_HU36JnABa-/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dashboard_dark_overview_streaks_04.png",
+            "mime_type": "image/png",
+            "kind": "product_screenshot",
+            "module": "dashboard",
+            "mode": "dark",
+            "surface": "mobile",
+            "status": "approved_current",
+            "allowed_operations": [
+              "reuse_existing_asset",
+              "compose_existing_assets",
+              "crop_or_reframe"
+            ]
+          },
+          {
+            "asset_key": "module_task_detail_dark_activity_month_01",
+            "drive_file_id": "1TizqlwW5XP3NTgSntdIANVPIVbrx_SLC",
+            "drive_url": "https://drive.google.com/file/d/1TizqlwW5XP3NTgSntdIANVPIVbrx_SLC/view?usp=drivesdk",
+            "original_file_name": "task details 1 activitiy.png",
+            "canonical_file_name": "module_task_detail_dark_activity_month_01.png",
+            "mime_type": "image/png",
+            "kind": "product_screenshot",
+            "module": "task_detail",
+            "mode": "dark",
+            "surface": "module_crop",
+            "language": "en",
+            "status": "approved_current",
+            "relationship_role": "detail_zoom",
+            "allowed_operations": [
+              "reuse_existing_asset",
+              "compose_existing_assets",
+              "crop_or_reframe"
+            ]
           }
         ],
         "visual_concept": "carousel narrative slide with one dominant visual metaphor",
@@ -3610,7 +3820,8 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render storefront_metric_overlay as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
-            "mobile_dashboard_dark_energy_balance_02"
+            "mobile_dashboard_dark_overview_streaks_04",
+            "module_task_detail_dark_activity_month_01"
           ],
           "focal_instruction": "Headline is the focal point; abstract decoration remains secondary.",
           "supporting_visual": {
@@ -3621,12 +3832,20 @@
             "Copy and device occupy separate non-overlapping safe zones.",
             "Every mobile screenshot has a visible inner bezel and screen margin.",
             "The selected registered screen directly proves the slide claim.",
-            "No simulated website button, debug label or internal asset identifier appears."
+            "No simulated website button, debug label or internal asset identifier appears.",
+            "The complete context screenshot remains contained inside the premium device shell.",
+            "The floating overlay uses the registered module crop, not invented UI and not a generic text card.",
+            "The zoom does not cover the headline or supporting copy."
           ],
           "layout_variant": "storefront_metric_overlay",
           "palette": "lilac",
           "screen_fit": "contain",
-          "feature_callout": "See what needs attention without calling the week a failure."
+          "feature_callout": "Use the registered module crop as a real visual zoom. Do not render this sentence.",
+          "zoom_relationship": {
+            "context_asset_key": "mobile_dashboard_dark_overview_streaks_04",
+            "detail_asset_key": "module_task_detail_dark_activity_month_01",
+            "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
+          }
         }
       },
       {
@@ -3788,6 +4007,26 @@
               "compose_existing_assets",
               "crop_or_reframe"
             ]
+          },
+          {
+            "asset_key": "module_dashboard_dark_daily_energy_01",
+            "drive_file_id": "1Szn0sopI02HngDe68ClH_332YuJGYGGJ",
+            "drive_url": "https://drive.google.com/file/d/1Szn0sopI02HngDe68ClH_332YuJGYGGJ/view?usp=drivesdk",
+            "original_file_name": "Daily energy.png",
+            "canonical_file_name": "module_dashboard_dark_daily_energy_01.png",
+            "mime_type": "image/png",
+            "kind": "product_screenshot",
+            "module": "dashboard",
+            "mode": "dark",
+            "surface": "module_crop",
+            "language": "en",
+            "status": "approved_current",
+            "relationship_role": "detail_zoom",
+            "allowed_operations": [
+              "reuse_existing_asset",
+              "compose_existing_assets",
+              "crop_or_reframe"
+            ]
           }
         ],
         "visual_concept": "editorial type-led brand visual",
@@ -3838,7 +4077,7 @@
           "composition_intent": "Render storefront_dark_monolith as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
             "mobile_dashboard_dark_energy_balance_02",
-            "mobile_dashboard_dark_overview_streaks_04"
+            "module_dashboard_dark_daily_energy_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
@@ -3849,12 +4088,20 @@
             "Copy and device occupy separate non-overlapping safe zones.",
             "Every mobile screenshot has a visible inner bezel and screen margin.",
             "The selected registered screen directly proves the slide claim.",
-            "No simulated website button, debug label or internal asset identifier appears."
+            "No simulated website button, debug label or internal asset identifier appears.",
+            "The complete context screenshot remains contained inside the premium device shell.",
+            "The floating overlay uses the registered module crop, not invented UI and not a generic text card.",
+            "The zoom does not cover the headline or supporting copy."
           ],
           "layout_variant": "storefront_dark_monolith",
           "palette": "dark",
           "screen_fit": "contain",
-          "feature_callout": "The pattern stays legible across an imperfect week."
+          "feature_callout": "Use the registered module crop as a real visual zoom. Do not render this sentence.",
+          "zoom_relationship": {
+            "context_asset_key": "mobile_dashboard_dark_energy_balance_02",
+            "detail_asset_key": "module_dashboard_dark_daily_energy_01",
+            "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
+          }
         }
       },
       {
@@ -3890,6 +4137,46 @@
             "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
+            "allowed_operations": [
+              "reuse_existing_asset",
+              "compose_existing_assets",
+              "crop_or_reframe"
+            ]
+          },
+          {
+            "asset_key": "mobile_emotion_chart_dark_overview_01",
+            "drive_file_id": "1JsDFmyiys9nGCDgy7UodaJwY31vpSDX1",
+            "drive_url": "https://drive.google.com/file/d/1JsDFmyiys9nGCDgy7UodaJwY31vpSDX1/view?usp=drivesdk",
+            "original_file_name": "emotion 1.png",
+            "canonical_file_name": "mobile_emotion_chart_dark_overview_01.png",
+            "mime_type": "image/png",
+            "kind": "product_screenshot",
+            "module": "emotion_chart",
+            "mode": "dark",
+            "surface": "mobile",
+            "language": "en",
+            "status": "approved_current",
+            "relationship_role": "context_screen",
+            "allowed_operations": [
+              "reuse_existing_asset",
+              "compose_existing_assets",
+              "crop_or_reframe"
+            ]
+          },
+          {
+            "asset_key": "module_emotion_chart_dark_grid_dominant_01",
+            "drive_file_id": "1ob5lvEVJRfWFwJpRuFZVAecH2mh-WOOE",
+            "drive_url": "https://drive.google.com/file/d/1ob5lvEVJRfWFwJpRuFZVAecH2mh-WOOE/view?usp=drivesdk",
+            "original_file_name": "emotion 2.png",
+            "canonical_file_name": "module_emotion_chart_dark_grid_dominant_01.png",
+            "mime_type": "image/png",
+            "kind": "product_screenshot",
+            "module": "emotion_chart",
+            "mode": "dark",
+            "surface": "module_crop",
+            "language": "en",
+            "status": "approved_current",
+            "relationship_role": "detail_zoom",
             "allowed_operations": [
               "reuse_existing_asset",
               "compose_existing_assets",
@@ -3944,7 +4231,8 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render storefront_metric_overlay as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
-            "mobile_analytics_dark_emotion_chart_11"
+            "mobile_emotion_chart_dark_overview_01",
+            "module_emotion_chart_dark_grid_dominant_01"
           ],
           "focal_instruction": "Headline is the focal point; abstract decoration remains secondary.",
           "supporting_visual": {
@@ -3955,12 +4243,20 @@
             "Copy and device occupy separate non-overlapping safe zones.",
             "Every mobile screenshot has a visible inner bezel and screen margin.",
             "The selected registered screen directly proves the slide claim.",
-            "No simulated website button, debug label or internal asset identifier appears."
+            "No simulated website button, debug label or internal asset identifier appears.",
+            "The complete context screenshot remains contained inside the premium device shell.",
+            "The floating overlay uses the registered module crop, not invented UI and not a generic text card.",
+            "The zoom does not cover the headline or supporting copy."
           ],
           "layout_variant": "storefront_metric_overlay",
           "palette": "ink",
           "screen_fit": "contain",
-          "feature_callout": "Six months of emotion context in one view."
+          "feature_callout": "Use the registered module crop as a real visual zoom. Do not render this sentence.",
+          "zoom_relationship": {
+            "context_asset_key": "mobile_emotion_chart_dark_overview_01",
+            "detail_asset_key": "module_emotion_chart_dark_grid_dominant_01",
+            "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
+          }
         }
       },
       {
