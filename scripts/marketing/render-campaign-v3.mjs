@@ -77,19 +77,24 @@ h1{margin:0;font:700 64px/1.02 Sora,sans-serif;letter-spacing:-.057em;text-wrap:
 .storefront-stage .copy{left:92px;right:92px;top:116px;text-align:center}.storefront-stage h1{font-size:58px}.storefront-stage .support{margin:18px auto 0}.storefront-stage .device{left:50%;top:350px;transform:translateX(-50%);width:410px;height:846px}.storefront-stage .proof-chip{left:50%;top:625px;transform:translateX(-50%);width:520px}.storefront-stage .product-fade{bottom:0}.storefront-stage .meta,.storefront-stage .rule,.storefront-stage .counter{z-index:20}
 .storefront-dual .copy{left:68px;top:145px;width:610px}.storefront-dual h1{font-size:60px}.storefront-dual .device.front{right:98px;top:265px;transform:rotate(2deg)}.storefront-dual .device.back{right:372px;top:385px;transform:rotate(-7deg);opacity:.78;filter:saturate(.82);z-index:5}.storefront-dual .proof-chip{left:285px;top:640px;width:430px}
 .storefront-overlay .copy{left:68px;top:150px;width:490px}.storefront-overlay h1{font-size:61px}.storefront-overlay .device{right:92px;top:185px;width:390px;height:806px}.storefront-overlay .proof-chip{right:55px;top:555px;width:485px}.storefront-overlay .halo{position:absolute;right:-110px;top:80px;width:650px;height:770px;border-radius:48%;background:radial-gradient(circle,rgba(185,140,255,.3),transparent 68%)}
-.storefront-edge .copy{left:68px;top:670px;width:870px}.storefront-edge h1{font-size:61px}.storefront-edge .device{right:82px;top:42px;width:322px;height:665px;transform:perspective(1200px) rotateY(-11deg) rotateZ(5deg)}.storefront-edge .orbit{width:690px;height:470px;left:160px;top:105px;transform:rotate(-10deg)}.storefront-edge .orb.a{left:105px;top:190px;width:68px;height:68px}.storefront-edge .orb.b{right:90px;top:535px;width:42px;height:42px;background:#f1ae6d}
+.storefront-edge .copy{left:68px;top:670px;width:870px}.storefront-edge h1{font-size:61px}.storefront-edge .device{right:82px;top:48px;width:286px;height:602px;transform:perspective(1200px) rotateY(-11deg) rotateZ(5deg)}.storefront-edge .orbit{width:690px;height:470px;left:160px;top:105px;transform:rotate(-10deg)}.storefront-edge .orb.a{left:105px;top:190px;width:68px;height:68px}.storefront-edge .orb.b{right:90px;top:535px;width:42px;height:42px;background:#f1ae6d}
 .storefront-cards .copy{left:68px;top:145px;width:560px}.storefront-cards h1{font-size:60px}.storefront-cards .device{right:76px;top:205px}.storefront-cards .product-card.a{left:68px;bottom:128px;width:330px;height:215px;transform:rotate(-3deg)}.storefront-cards .product-card.b{left:370px;bottom:90px;width:330px;height:215px;transform:rotate(4deg)}.storefront-cards .proof-chip{right:55px;top:600px;width:430px}
 .storefront-monolith .copy{left:68px;top:160px;width:480px}.storefront-monolith h1{font-size:65px}.storefront-monolith .device{right:64px;top:135px;width:405px;height:836px}.storefront-monolith .proof-chip{left:68px;bottom:165px;width:445px}.storefront-monolith:after{content:"";position:absolute;right:-110px;top:80px;width:680px;height:820px;border-radius:50%;background:radial-gradient(circle,rgba(139,99,246,.25),transparent 68%);z-index:-1}
 .storefront-module .copy{left:68px;top:680px;width:840px}.storefront-module h1{font-size:61px}.storefront-module .device{left:50%;top:50px;transform:translateX(-50%);width:390px;height:805px}.storefront-module .proof-chip{left:50%;top:430px;transform:translateX(-50%);width:520px}.storefront-module .product-fade{bottom:310px}
-.zoom-card{position:absolute;z-index:14;overflow:hidden;border-radius:30px;padding:10px;background:linear-gradient(145deg,rgba(255,255,255,.92),rgba(225,219,238,.78));border:1px solid rgba(255,255,255,.88);box-shadow:0 28px 70px rgba(20,14,34,.3),inset 0 0 0 1px rgba(87,73,112,.12);backdrop-filter:blur(20px)}
-.zoom-card.dark{background:linear-gradient(145deg,rgba(31,29,36,.96),rgba(12,11,16,.94));border-color:rgba(255,255,255,.15)}
-.zoom-card img{display:block;width:100%;height:100%;object-fit:contain;border-radius:21px;background:#09090b}
-.storefront-stage .zoom-card{left:50%;top:615px;transform:translateX(-50%);width:560px;height:265px}
-.storefront-overlay .zoom-card{right:50px;top:535px;width:505px;height:275px}
-.storefront-cards .zoom-card{left:64px;bottom:112px;width:420px;height:245px;transform:rotate(-2deg)}
-.storefront-monolith .zoom-card{left:68px;bottom:160px;width:455px;height:255px}
-.storefront-module .zoom-card{left:50%;top:420px;transform:translateX(-50%);width:565px;height:285px}
-.storefront-dual .zoom-card{left:245px;top:605px;width:475px;height:260px;transform:rotate(-2deg)}
+/* Registered UI details are treated as editorial focus crops, never as a second device. */
+.focus-crop{position:absolute;z-index:14;overflow:hidden;border-radius:20px;background:transparent;border:0;padding:0;box-shadow:none;filter:drop-shadow(0 24px 30px rgba(20,14,34,.22));isolation:isolate}
+.focus-crop img{display:block;width:100%;height:100%;object-fit:contain;border-radius:inherit;background:transparent}
+.focus-crop.landscape{border-radius:18px}.focus-crop.portrait{border-radius:24px}.focus-crop.square{border-radius:22px}
+.storefront-stage .focus-crop{left:50%;top:610px;transform:translateX(-50%)}
+.storefront-overlay .focus-crop{right:46px;top:565px}
+.storefront-cards .focus-crop{left:64px;bottom:118px;transform:rotate(-1.5deg)}
+.storefront-monolith .focus-crop{left:68px;bottom:158px}
+.storefront-module .focus-crop{left:50%;top:418px;transform:translateX(-50%)}
+.storefront-dual .focus-crop{left:250px;top:610px;transform:rotate(-1.5deg)}
+.metric-badge{position:absolute;z-index:18;display:grid;gap:7px;min-width:250px;padding:22px 24px;border-radius:22px;background:rgba(255,255,255,.9);box-shadow:0 18px 44px rgba(25,17,40,.18);backdrop-filter:blur(20px);color:#17151b}
+.metric-badge b{font:800 38px/1 Sora;letter-spacing:-.04em}.metric-badge span{font:650 16px/1.25 Manrope;color:#6d6873}
+.dark .metric-badge,.ink .metric-badge{background:rgba(24,22,29,.9);color:#fff}.dark .metric-badge span,.ink .metric-badge span{color:#c5becb}
+.storefront-overlay .metric-badge{right:62px;top:595px}.storefront-monolith .metric-badge{left:68px;bottom:170px}
 
 
 /* Editorial compositions */
@@ -108,7 +113,22 @@ h1{margin:0;font:700 64px/1.02 Sora,sans-serif;letter-spacing:-.057em;text-wrap:
 function device(src, classes = "", tone = "dark") { return `<div class="device ${classes}"><div class="metal-rim"></div><div class="shine"></div><div class="screen ${tone}"><span class="island"><i class="camera"></i></span><img src="${src}" alt=""/></div></div>`; }
 function card(src, classes = "") { return `<div class="product-card ${classes}"><img src="${src}" alt=""/></div>`; }
 function feature(src, focus = 42) { return `<div class="feature-crop" style="--focus:-${Math.max(0,Math.min(80,focus))*10}px"><img src="${src}" alt=""/></div>`; }
-function zoomCard(src, key = "") { if (!key.startsWith("module_")) return ""; const tone = key.includes("_dark_") ? " dark" : ""; return `<div class="zoom-card${tone}"><img src="${src}" alt="Innerbloom product detail zoom"/></div>`; }
+function focusCrop(src, key = "") { if (!key.startsWith("module_")) return ""; return `<div class="focus-crop" data-asset-key="${esc(key)}"><img src="${src}" alt="Registered Innerbloom product detail"/></div>`; }
+function proofChip(job) {
+  const text = job.creative_direction?.insight_callout || job.creative_direction?.feature_callout || "";
+  return text && !text.startsWith("Use the registered") ? `<div class="proof-chip">${esc(text)}</div>` : "";
+}
+function metricBadge(job) {
+  const value=job.creative_direction?.metric_value || ""; const label=job.creative_direction?.metric_label || "";
+  return value && label ? `<div class="metric-badge"><b>${esc(value)}</b><span>${esc(label)}</span></div>` : "";
+}
+function supportVisual(job, src, key = "") {
+  const treatment=job.creative_direction?.supporting_treatment || (key.startsWith("module_") ? "focus_crop" : "none");
+  if(treatment==="insight_callout") return proofChip(job);
+  if(treatment==="metric_badge") return metricBadge(job);
+  if(treatment==="none") return "";
+  return focusCrop(src,key);
+}
 function copy(job) {
   const headline = job.visible_copy?.headline || ""; const support = job.visible_copy?.supporting_text || "";
   return `<div class="copy"><div class="eyebrow">${esc(job.post_code?.replace("post_", "Innerbloom · ") || "Innerbloom")}</div><h1>${esc(headline)}</h1>${support ? `<p class="support">${esc(support)}</p>` : ""}</div>`;
@@ -135,13 +155,13 @@ function composition(job, sources) {
     case "floating_device_orbit": return { cls:"floating-orbit", body:copy(job)+`<div class="orbit"></div><div class="orb a"></div><div class="orb b"></div>`+device(a,"small",toneA) };
     case "module_macro_crop": return { cls:"macro", body:copy(job)+feature(a,job.creative_direction?.focus_y || 42) };
     case "bento_product_proof": return { cls:"bento", body:copy(job)+card(b,`a ${mobile?"mobile":""}`)+card(a,`b ${mobile?"mobile":""}`)+device(a,"",toneA) };
-    case "storefront_feature_stage": return { cls:"storefront-stage", body:copy(job)+device(a,"",toneA)+zoomCard(b,keyB)+`<div class="product-fade"></div>` };
-    case "storefront_dual_device": return { cls:"storefront-dual", body:copy(job)+(keyB.startsWith("module_")?device(a,"front",toneA)+zoomCard(b,keyB):device(b,"small back",toneB)+device(a,"front",toneA)) };
-    case "storefront_metric_overlay": return { cls:"storefront-overlay", body:`<div class="halo"></div>`+copy(job)+device(a,"",toneA)+zoomCard(b,keyB) };
+    case "storefront_feature_stage": return { cls:"storefront-stage", body:copy(job)+device(a,"",toneA)+supportVisual(job,b,keyB)+`<div class="product-fade"></div>` };
+    case "storefront_dual_device": return { cls:"storefront-dual", body:copy(job)+(keyB.startsWith("module_")?device(a,"front",toneA)+supportVisual(job,b,keyB):device(b,"small back",toneB)+device(a,"front",toneA)) };
+    case "storefront_metric_overlay": return { cls:"storefront-overlay", body:`<div class="halo"></div>`+copy(job)+device(a,"",toneA)+supportVisual(job,b,keyB) };
     case "storefront_edge_editorial": return { cls:"storefront-edge", body:copy(job)+`<div class="orbit"></div><div class="orb a"></div><div class="orb b"></div>`+device(a,"",toneA) };
-    case "storefront_product_cards": return { cls:"storefront-cards", body:copy(job)+device(a,"",toneA)+(keyB.startsWith("module_")?zoomCard(b,keyB):card(a,`a ${mobile?"mobile":""}`)+card(b,`b ${keyB.startsWith("mobile_")?"mobile":""}`)) };
-    case "storefront_dark_monolith": return { cls:"storefront-monolith", body:copy(job)+device(a,"",toneA)+zoomCard(b,keyB) };
-    case "storefront_module_spotlight": return { cls:"storefront-module", body:copy(job)+device(a,"",toneA)+zoomCard(b,keyB)+`<div class="product-fade"></div>` };
+    case "storefront_product_cards": return { cls:"storefront-cards", body:copy(job)+device(a,"",toneA)+(keyB.startsWith("module_")?supportVisual(job,b,keyB):card(a,`a ${mobile?"mobile":""}`)+card(b,`b ${keyB.startsWith("mobile_")?"mobile":""}`)) };
+    case "storefront_dark_monolith": return { cls:"storefront-monolith", body:copy(job)+device(a,"",toneA)+supportVisual(job,b,keyB) };
+    case "storefront_module_spotlight": return { cls:"storefront-module", body:copy(job)+device(a,"",toneA)+supportVisual(job,b,keyB)+`<div class="product-fade"></div>` };
     case "editorial_type_monument": return { cls:"type-monument", body:copy(job)+`<div class="number">${String(job.slide_number || "01").padStart(2,"0")}</div>` };
     case "editorial_signal_line": return { cls:"signal-line", body:copy(job)+`<div class="signal"><i></i><i></i><i></i><i></i><i></i><i></i></div>` };
     case "editorial_numbered_steps": return { cls:"steps", body:copy(job)+`<div class="step-row"><div class="step"><b>01</b><span>${esc(labels[0])}</span></div><div class="step"><b>02</b><span>${esc(labels[1])}</span></div><div class="step"><b>03</b><span>${esc(labels[2])}</span></div></div>` };
@@ -169,7 +189,20 @@ async function main() {
       const palette=d.palette || (d.mode === "dark" ? "dark" : "light");
       const html=`<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body><main class="frame ${esc(palette)} ${comp.cls}">${chrome(job,logo,i,all.length)}${comp.body}</main></body></html>`;
       await page.setContent(html,{waitUntil:"networkidle"}); await page.evaluate(()=>document.fonts.ready);
-      await page.$$eval(".device", devices => devices.forEach(device => {
+      await page.$eval(".focus-crop", crops => crops.forEach(crop => {
+        const image=crop.querySelector("img");
+        if(!image?.naturalWidth || !image?.naturalHeight) return;
+        const ratio=image.naturalWidth/image.naturalHeight;
+        const kind=ratio>1.22?"landscape":ratio<.82?"portrait":"square";
+        crop.classList.add(kind);
+        let width,height;
+        if(kind==="landscape"){width=500;height=Math.min(238,width/ratio);}
+        else if(kind==="portrait"){height=330;width=Math.min(285,height*ratio);}
+        else{width=330;height=width/ratio;}
+        crop.style.width=`${Math.round(width)}px`;
+        crop.style.height=`${Math.round(height)}px`;
+      }));
+      await page.$eval(".device", devices => devices.forEach(device => {
         const image = device.querySelector(".screen img");
         if (!image?.naturalWidth || !image?.naturalHeight) return;
         const width = device.getBoundingClientRect().width;
@@ -179,7 +212,27 @@ async function main() {
         const desiredRatio = Math.max(1.72, Math.min(2.15, 1 / screenRatio));
         device.style.height = `${Math.round(width * desiredRatio)}px`;
       }));
-      const deviceScreensAreContained = await page.$$eval(".screen img", images => images.every(image => getComputedStyle(image).objectFit === "contain"));
+      const finishQuality = await page.evaluate(() => {
+        const frame=document.querySelector(".frame"), copy=document.querySelector(".copy");
+        const support=document.querySelector(".focus-crop,.proof-chip,.metric-badge");
+        const inside = el => {
+          if(!el) return true; const r=el.getBoundingClientRect(), f=frame.getBoundingClientRect();
+          return r.left>=f.left+24 && r.right<=f.right-24 && r.top>=f.top+24 && r.bottom<=f.bottom-24;
+        };
+        const overlap = (a,b) => {
+          if(!a||!b) return 0; const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();
+          const w=Math.max(0,Math.min(x.right,y.right)-Math.max(x.left,y.left));
+          const h=Math.max(0,Math.min(x.bottom,y.bottom)-Math.max(x.top,y.top));
+          return w*h;
+        };
+        return {inside:inside(support),copyOverlap:overlap(copy,support),framed:[...document.querySelectorAll(".focus-crop")].some(el=> {
+          const cs=getComputedStyle(el); return parseFloat(cs.padding)>0 || parseFloat(cs.borderTopWidth)>0 || cs.backgroundColor!=="rgba(0, 0, 0, 0)";
+        })};
+      });
+      if(!finishQuality.inside) throw new Error(`${job.asset_code}: supporting visual leaves the 24px export safe area`);
+      if(finishQuality.copyOverlap>1200) throw new Error(`${job.asset_code}: supporting visual collides with headline safe zone`);
+      if(finishQuality.framed) throw new Error(`${job.asset_code}: focus crops must be borderless, padding-free and transparent`);
+      const deviceScreensAreContained = await page.$eval(".screen img", images => images.every(image => getComputedStyle(image).objectFit === "contain"));
       if (!deviceScreensAreContained) throw new Error(`${job.asset_code}: a device screenshot would be cropped; device screens must use object-fit contain`);
       await page.screenshot({path:path.join(outputDir,`${job.asset_code}.png`),type:"png"});
     }
