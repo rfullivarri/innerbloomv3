@@ -2660,7 +2660,7 @@
           "composition_intent": "Render storefront_module_spotlight as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
             "mobile_dashboard_dark_energy_balance_02",
-            "module_dashboard_dark_daily_energy_01"
+            "module_dashboard_dark_emotion_balance_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
@@ -2680,11 +2680,11 @@
           "palette": "lilac",
           "focus_y": 52,
           "screen_fit": "contain",
-          "feature_callout": "Use the registered module crop as a real visual zoom. Do not render this sentence.",
+          "feature_callout": "Use Dominant emotion and Balance as the complementary signal interpretation.",
           "zoom_relationship": {
             "context_asset_key": "mobile_dashboard_dark_energy_balance_02",
-            "detail_asset_key": "module_dashboard_dark_daily_energy_01",
-            "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
+            "detail_asset_key": "module_dashboard_dark_emotion_balance_01",
+            "rule": "The primary device establishes the seven-day dashboard context; the borderless detail explains the complementary emotion and balance signal without repeating Daily Energy."
           },
           "supporting_treatment": "focus_crop"
         }
@@ -3336,7 +3336,7 @@
           "composition_intent": "Render storefront_dark_monolith as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
             "mobile_dashboard_dark_energy_balance_02",
-            "module_dashboard_dark_daily_energy_01"
+            "module_dashboard_dark_emotion_balance_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
@@ -3355,11 +3355,11 @@
           "layout_variant": "storefront_dark_monolith",
           "palette": "dark",
           "screen_fit": "contain",
-          "feature_callout": "Use Daily Energy as the evidence for one useful signal becoming visible.",
+          "feature_callout": "Use Dominant emotion and Balance as the useful signal that clarifies the next step.",
           "zoom_relationship": {
             "context_asset_key": "mobile_dashboard_dark_energy_balance_02",
-            "detail_asset_key": "module_dashboard_dark_daily_energy_01",
-            "rule": "The detail is a truthful crop from Daily Energy on the same dashboard; show it borderless and away from copy."
+            "detail_asset_key": "module_dashboard_dark_emotion_balance_01",
+            "rule": "The dashboard supplies context; the borderless Dominant emotion and Balance crop supplies interpretation. Never duplicate Daily Energy."
           },
           "supporting_treatment": "focus_crop"
         }
@@ -3920,8 +3920,7 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render storefront_dark_monolith as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
-            "mobile_dashboard_dark_energy_balance_02",
-            "module_dashboard_dark_daily_energy_01"
+            "mobile_dashboard_dark_energy_balance_02"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
@@ -3934,19 +3933,14 @@
             "The selected registered screen directly proves the slide claim.",
             "No simulated website button, debug label or internal asset identifier appears.",
             "The complete context screenshot remains contained inside the premium device shell.",
-            "The floating overlay uses the registered module crop, not invented UI and not a generic text card.",
-            "The zoom does not cover the headline or supporting copy."
+            "The supporting callout adds interpretation and does not repeat visible product UI."
           ],
           "layout_variant": "storefront_dark_monolith",
           "palette": "dark",
           "screen_fit": "contain",
-          "feature_callout": "Use the registered module crop as a real visual zoom. Do not render this sentence.",
-          "zoom_relationship": {
-            "context_asset_key": "mobile_dashboard_dark_energy_balance_02",
-            "detail_asset_key": "module_dashboard_dark_daily_energy_01",
-            "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
-          },
-          "supporting_treatment": "focus_crop"
+          "feature_callout": "Use one concise proof callout instead of repeating a dashboard module.",
+          "supporting_treatment": "insight_callout",
+          "insight_callout": "Seven days of direction, not one perfect day."
         }
       },
       {
@@ -4076,7 +4070,7 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render storefront_metric_overlay as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
-            "mobile_emotion_chart_dark_overview_01",
+            "mobile_dailyquest_dark_emotion_moderation",
             "module_emotion_chart_dark_grid_dominant_01"
           ],
           "focal_instruction": "Headline is the focal point; abstract decoration remains secondary.",
@@ -4096,11 +4090,11 @@
           "layout_variant": "storefront_metric_overlay",
           "palette": "ink",
           "screen_fit": "contain",
-          "feature_callout": "Use the registered module crop as a real visual zoom. Do not render this sentence.",
+          "feature_callout": "Show emotion input as context and the Emotion Chart grid as the resulting pattern.",
           "zoom_relationship": {
-            "context_asset_key": "mobile_emotion_chart_dark_overview_01",
+            "context_asset_key": "mobile_dailyquest_dark_emotion_moderation",
             "detail_asset_key": "module_emotion_chart_dark_grid_dominant_01",
-            "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
+            "rule": "Use an input-to-pattern relationship: Daily Quest emotion selection is the context and the borderless Emotion Chart crop is the result. Never show the full Emotion Chart behind its own crop."
           },
           "supporting_treatment": "focus_crop"
         }
