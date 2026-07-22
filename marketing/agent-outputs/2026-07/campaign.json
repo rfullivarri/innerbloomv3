@@ -2360,7 +2360,9 @@
             "context_asset_key": "mobile_dashboard_dark_overview_streaks_04",
             "detail_asset_key": "module_task_detail_dark_streaks_01",
             "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
-          }
+          },
+          "supporting_treatment": "insight_callout",
+          "insight_callout": "See the week without erasing the hard day."
         }
       },
       {
@@ -2727,7 +2729,8 @@
             "context_asset_key": "mobile_dashboard_dark_energy_balance_02",
             "detail_asset_key": "module_dashboard_dark_daily_energy_01",
             "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
-          }
+          },
+          "supporting_treatment": "focus_crop"
         }
       },
       {
@@ -3182,7 +3185,9 @@
             "context_asset_key": "mobile_dailyquest_dark_emotion_moderation",
             "detail_asset_key": "module_dquest_dark_emotion_selector_01",
             "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
-          }
+          },
+          "supporting_treatment": "insight_callout",
+          "insight_callout": "Review yesterday before choosing today."
         }
       },
       {
@@ -3317,7 +3322,8 @@
             "context_asset_key": "mobile_dailyquest_dark_emotion_moderation",
             "detail_asset_key": "module_dquest_dark_emotion_selector_01",
             "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
-          }
+          },
+          "supporting_treatment": "none"
         }
       },
       {
@@ -3343,13 +3349,13 @@
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "mobile_dailyquest_dark_emotion_moderation",
-            "drive_file_id": "1eFwklCONkoIEPZqCjReGdhifw9ox7Hr0",
-            "drive_url": "https://drive.google.com/file/d/1eFwklCONkoIEPZqCjReGdhifw9ox7Hr0/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_dailyquest_dark_emotion_moderation.png",
+            "asset_key": "mobile_dashboard_dark_energy_balance_02",
+            "drive_file_id": "1dLcNjKkBfVvTvFjWK-BFIJ8919BMo_Bj",
+            "drive_url": "https://drive.google.com/file/d/1dLcNjKkBfVvTvFjWK-BFIJ8919BMo_Bj/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dashboard_dark_energy_balance_02.png",
             "mime_type": "image/png",
             "kind": "product_screenshot",
-            "module": "emotion_chart",
+            "module": "balance",
             "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
@@ -3360,14 +3366,14 @@
             ]
           },
           {
-            "asset_key": "module_dquest_dark_emotion_selector_01",
-            "drive_file_id": "169nLFaRQLSzJxQkfICeF29KBw-UNqJli",
-            "drive_url": "https://drive.google.com/file/d/169nLFaRQLSzJxQkfICeF29KBw-UNqJli/view?usp=drivesdk",
-            "original_file_name": "dquest 1.png",
-            "canonical_file_name": "module_dquest_dark_emotion_selector_01.png",
+            "asset_key": "module_dashboard_dark_daily_energy_01",
+            "drive_file_id": "1Szn0sopI02HngDe68ClH_332YuJGYGGJ",
+            "drive_url": "https://drive.google.com/file/d/1Szn0sopI02HngDe68ClH_332YuJGYGGJ/view?usp=drivesdk",
+            "original_file_name": "Daily energy.png",
+            "canonical_file_name": "module_dashboard_dark_daily_energy_01.png",
             "mime_type": "image/png",
             "kind": "product_screenshot",
-            "module": "dquest",
+            "module": "dashboard",
             "mode": "dark",
             "surface": "module_crop",
             "language": "en",
@@ -3427,8 +3433,8 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render storefront_dark_monolith as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
-            "mobile_dailyquest_dark_emotion_moderation",
-            "module_dquest_dark_emotion_selector_01"
+            "mobile_dashboard_dark_energy_balance_02",
+            "module_dashboard_dark_daily_energy_01"
           ],
           "focal_instruction": "Keep the selected real UI legible inside a complete premium device or product surface.",
           "supporting_visual": {
@@ -3447,12 +3453,13 @@
           "layout_variant": "storefront_dark_monolith",
           "palette": "dark",
           "screen_fit": "contain",
-          "feature_callout": "Use the registered module crop as a real visual zoom. Do not render this sentence.",
+          "feature_callout": "Use Daily Energy as the evidence for one useful signal becoming visible.",
           "zoom_relationship": {
-            "context_asset_key": "mobile_dailyquest_dark_emotion_moderation",
-            "detail_asset_key": "module_dquest_dark_emotion_selector_01",
-            "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
-          }
+            "context_asset_key": "mobile_dashboard_dark_energy_balance_02",
+            "detail_asset_key": "module_dashboard_dark_daily_energy_01",
+            "rule": "The detail is a truthful crop from Daily Energy on the same dashboard; show it borderless and away from copy."
+          },
+          "supporting_treatment": "focus_crop"
         }
       },
       {
@@ -3478,36 +3485,16 @@
         "funnel_stage": "acquisition",
         "source_assets": [
           {
-            "asset_key": "mobile_dailyquest_dark_tasks_selection",
-            "drive_file_id": "1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA",
-            "drive_url": "https://drive.google.com/file/d/1gCF5MqvQduPvc6s4t5FJg6WszFgjNSSA/view?usp=drivesdk",
-            "original_file_name": "innerbloom_mobile_dailyquest_dark_tasks_selection.png",
+            "asset_key": "mobile_dashboard_dark_overview_streaks_04",
+            "drive_file_id": "1luPOy4_TlBldDH-w1akx-_HU36JnABa-",
+            "drive_url": "https://drive.google.com/file/d/1luPOy4_TlBldDH-w1akx-_HU36JnABa-/view?usp=drivesdk",
+            "original_file_name": "innerbloom_mobile_dashboard_dark_overview_streaks_04.png",
             "mime_type": "image/png",
             "kind": "product_screenshot",
-            "module": "tasks",
+            "module": "dashboard",
             "mode": "dark",
             "surface": "mobile",
             "status": "approved_current",
-            "allowed_operations": [
-              "reuse_existing_asset",
-              "compose_existing_assets",
-              "crop_or_reframe"
-            ]
-          },
-          {
-            "asset_key": "module_tasks_dark_list_progress_01",
-            "drive_file_id": "1fYNJPMogSDnWC-0gBC_Buk3YANofj1_8",
-            "drive_url": "https://drive.google.com/file/d/1fYNJPMogSDnWC-0gBC_Buk3YANofj1_8/view?usp=drivesdk",
-            "original_file_name": "tasks1.png",
-            "canonical_file_name": "module_tasks_dark_list_progress_01.png",
-            "mime_type": "image/png",
-            "kind": "product_screenshot",
-            "module": "tasks",
-            "mode": "dark",
-            "surface": "module_crop",
-            "language": "en",
-            "status": "approved_current",
-            "relationship_role": "detail_zoom",
             "allowed_operations": [
               "reuse_existing_asset",
               "compose_existing_assets",
@@ -3562,8 +3549,7 @@
           "wordmark_treatment": "canonical_innerbloom_lockup",
           "composition_intent": "Render storefront_edge_editorial as a modern product storefront composition with a premium physical device, clear copy/product hierarchy, and contained registered UI.",
           "selected_asset_keys": [
-            "mobile_dailyquest_dark_tasks_selection",
-            "module_tasks_dark_list_progress_01"
+            "mobile_dashboard_dark_overview_streaks_04"
           ],
           "focal_instruction": "Headline is the focal point; abstract decoration remains secondary.",
           "supporting_visual": {
@@ -3579,16 +3565,13 @@
             "The floating overlay uses the registered module crop, not invented UI and not a generic text card.",
             "The zoom does not cover the headline or supporting copy."
           ],
-          "layout_variant": "storefront_module_spotlight",
+          "layout_variant": "storefront_edge_editorial",
           "palette": "warm",
           "focus_y": 28,
           "screen_fit": "contain",
-          "zoom_relationship": {
-            "context_asset_key": "mobile_dailyquest_dark_tasks_selection",
-            "detail_asset_key": "module_tasks_dark_list_progress_01",
-            "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
-          },
-          "feature_callout": "Use the registered module crop as a real visual zoom. Do not render this sentence."
+          "feature_callout": "Yesterday informs what you choose next.",
+          "supporting_treatment": "insight_callout",
+          "insight_callout": "Yesterday informs what you choose next."
         }
       },
       {
@@ -3845,7 +3828,10 @@
             "context_asset_key": "mobile_dashboard_dark_overview_streaks_04",
             "detail_asset_key": "module_task_detail_dark_activity_month_01",
             "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
-          }
+          },
+          "supporting_treatment": "metric_badge",
+          "metric_value": "5 weeks",
+          "metric_label": "Read the pattern before resetting the plan."
         }
       },
       {
@@ -4101,7 +4087,8 @@
             "context_asset_key": "mobile_dashboard_dark_energy_balance_02",
             "detail_asset_key": "module_dashboard_dark_daily_energy_01",
             "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
-          }
+          },
+          "supporting_treatment": "focus_crop"
         }
       },
       {
@@ -4256,7 +4243,8 @@
             "context_asset_key": "mobile_emotion_chart_dark_overview_01",
             "detail_asset_key": "module_emotion_chart_dark_grid_dominant_01",
             "rule": "The detail is a truthful crop from the same product area; show it as the only floating zoom card."
-          }
+          },
+          "supporting_treatment": "focus_crop"
         }
       },
       {
@@ -8340,8 +8328,8 @@
     "generated_at": "2026-07-21T16:03:57.831Z",
     "status": "ready_for_render",
     "note": "Creative decisions are explicit; rendering remains deterministic.",
-    "renderer_version": "3.1",
-    "layout_catalog_version": "innerbloom-premium-storefront-23",
+    "renderer_version": "3.2",
+    "layout_catalog_version": "innerbloom-premium-storefront-24",
     "unique_layouts": 19,
     "distinct_selected_assets": 31,
     "diversity_rules": {
@@ -8349,6 +8337,18 @@
       "minimum_distinct_assets": 14,
       "maximum_layout_share": 0.2,
       "carousel_minimum_unique_layouts": 4
+    },
+    "finish_quality": {
+      "focus_crops": "borderless, transparent, ratio-adaptive",
+      "safe_area_px": 24,
+      "copy_collision_policy": "hard fail",
+      "device_finish": "complete chassis, contained screen, restrained shadow",
+      "treatment_mix": [
+        "focus_crop",
+        "insight_callout",
+        "metric_badge",
+        "none"
+      ]
     }
   }
 }
