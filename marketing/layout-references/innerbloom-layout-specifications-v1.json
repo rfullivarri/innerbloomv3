@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "spec_key": "innerbloom_layout_specifications_v1",
   "reference_pack_key": "innerbloom_layout_reference_pack_v1",
   "policy": {
@@ -8,186 +8,27 @@
     "reference_images_are_publishable": false,
     "reference_images_are_ui_truth": false,
     "renderer_owns_geometry": true,
-    "allow_layout_fallback": true
+    "allow_layout_fallback": true,
+    "hand_hero_requires_approved_composite_asset": true
   },
   "device_pose_presets": {
-    "three_quarter_resting": {
-      "rotation_deg": [2, 7],
-      "perspective": "soft_three_quarter",
-      "scale": [0.68, 0.82],
-      "crop": "full_or_soft_edge",
-      "grounding": "resting",
-      "preferred_product_zones": ["lower_right", "right_center"]
-    },
-    "diagonal_flat_lay": {
-      "rotation_deg": [-32, -18],
-      "perspective": "top_down_shallow",
-      "scale": [0.78, 0.98],
-      "crop": "large_diagonal",
-      "grounding": "surface_contact",
-      "preferred_product_zones": ["center", "upper_right"]
-    },
-    "front_grid_mixed_scale": {
-      "rotation_deg": [-3, 3],
-      "perspective": "front",
-      "scale": [0.34, 0.63],
-      "device_count": [4, 5],
-      "hierarchy": "one_primary_rest_secondary",
-      "preferred_product_zones": ["right_grid", "full_canvas_grid"]
-    },
-    "handheld_dark_three_quarter": {
-      "rotation_deg": [-8, 8],
-      "perspective": "handheld_three_quarter",
-      "scale": [0.64, 0.84],
-      "crop": "hand_and_device",
-      "grounding": "handheld",
-      "preferred_product_zones": ["center", "lower_center"]
-    },
-    "handheld_warm_three_quarter": {
-      "rotation_deg": [-6, 9],
-      "perspective": "handheld_three_quarter",
-      "scale": [0.68, 0.88],
-      "crop": "hand_and_device",
-      "grounding": "handheld",
-      "preferred_product_zones": ["right_center"]
-    },
-    "front_right": {
-      "rotation_deg": [-2, 2],
-      "perspective": "front",
-      "scale": [0.62, 0.78],
-      "crop": "full",
-      "grounding": "floating_soft_shadow",
-      "preferred_product_zones": ["right_center"]
-    },
-    "front_centered": {
-      "rotation_deg": [0, 0],
-      "perspective": "front",
-      "scale": [0.55, 0.72],
-      "crop": "full_or_bottom_edge",
-      "grounding": "centered_soft_shadow",
-      "preferred_product_zones": ["center", "lower_center"]
-    },
-    "edge_crop_right": {
-      "rotation_deg": [-2, 4],
-      "perspective": "near_front",
-      "scale": [0.82, 1.08],
-      "crop": "right_edge",
-      "grounding": "surface_or_soft_shadow",
-      "preferred_product_zones": ["right_edge"]
-    }
+    "three_quarter_resting": {"rotation_deg":[2,7],"perspective":"soft_three_quarter","scale":[0.68,0.82],"crop":"full_or_soft_edge","grounding":"resting","preferred_product_zones":["lower_right","right_center"]},
+    "diagonal_flat_lay": {"rotation_deg":[-32,-18],"perspective":"top_down_shallow","scale":[0.78,0.98],"crop":"large_diagonal","grounding":"surface_contact","preferred_product_zones":["center","upper_right"]},
+    "front_grid_mixed_scale": {"rotation_deg":[-3,3],"perspective":"front","scale":[0.34,0.63],"device_count":[4,5],"hierarchy":"one_primary_rest_secondary","preferred_product_zones":["right_grid","full_canvas_grid"]},
+    "handheld_dark_three_quarter": {"rotation_deg":[-8,8],"perspective":"handheld_three_quarter","scale":[0.64,0.84],"crop":"hand_and_device","grounding":"handheld","preferred_product_zones":["center","lower_center"]},
+    "handheld_warm_three_quarter": {"rotation_deg":[-6,9],"perspective":"handheld_three_quarter","scale":[0.68,0.88],"crop":"hand_and_device","grounding":"handheld","preferred_product_zones":["right_center"]},
+    "front_right": {"rotation_deg":[-2,2],"perspective":"front","scale":[0.62,0.78],"crop":"full","grounding":"floating_soft_shadow","preferred_product_zones":["right_center"]},
+    "front_centered": {"rotation_deg":[0,0],"perspective":"front","scale":[0.55,0.72],"crop":"full_or_bottom_edge","grounding":"centered_soft_shadow","preferred_product_zones":["center","lower_center"]},
+    "edge_crop_right": {"rotation_deg":[-2,4],"perspective":"near_front","scale":[0.82,1.08],"crop":"right_edge","grounding":"surface_or_soft_shadow","preferred_product_zones":["right_edge"]}
   },
   "layouts": [
-    {
-      "layout_key": "editorial_scene_3q",
-      "reference_key": "layout_ref_editorial_scene_3q_v1",
-      "status": "executable",
-      "renderer_layout": "editorial_material_scene",
-      "copy_role": "copy_led",
-      "copy_zone": "left",
-      "product_zone": "lower_right",
-      "device_pose": "three_quarter_resting",
-      "min_mobile_assets": 1,
-      "max_mobile_assets": 1,
-      "allowed_backgrounds": ["scene_material_warm_textile_lavender_01", "scene_ivory_plaster_steps_01", "scene_aubergine_pedestal_01", "scene_frosted_glass_mist_01"],
-      "fallback_layouts": ["split_device_right", "split_device_left"]
-    },
-    {
-      "layout_key": "flat_lay_patterns",
-      "reference_key": "layout_ref_flat_lay_patterns_v1",
-      "status": "executable_with_approximation",
-      "renderer_layout": "editorial_material_scene",
-      "copy_role": "product_led",
-      "copy_zone": "lower_left",
-      "product_zone": "center",
-      "device_pose": "diagonal_flat_lay",
-      "min_mobile_assets": 1,
-      "max_mobile_assets": 1,
-      "allowed_backgrounds": ["scene_ivory_plaster_steps_01"],
-      "fallback_layouts": ["storefront_feature_stage"]
-    },
-    {
-      "layout_key": "multi_device_mood_grid",
-      "reference_key": "layout_ref_multi_device_mood_grid_v1",
-      "status": "requires_renderer_family",
-      "renderer_layout": "multi_device_grid",
-      "copy_role": "system_led",
-      "copy_zone": "left",
-      "product_zone": "right_grid",
-      "device_pose": "front_grid_mixed_scale",
-      "min_mobile_assets": 4,
-      "max_mobile_assets": 5,
-      "asset_selection_rule": "related_real_screens_only",
-      "fallback_layouts": ["storefront_feature_stage", "carousel_proof_focus"]
-    },
-    {
-      "layout_key": "hand_hero_dark",
-      "reference_key": "layout_ref_hand_hero_dark_v1",
-      "status": "requires_hand_asset",
-      "renderer_layout": "hand_hero",
-      "copy_role": "balanced",
-      "copy_zone": "top",
-      "product_zone": "center",
-      "device_pose": "handheld_dark_three_quarter",
-      "min_mobile_assets": 1,
-      "max_mobile_assets": 1,
-      "required_support_assets": ["hand_mask_dark_v1"],
-      "fallback_layouts": ["editorial_material_scene", "centered_product_hero"]
-    },
-    {
-      "layout_key": "hand_hero_warm",
-      "reference_key": "layout_ref_hand_hero_warm_v1",
-      "status": "requires_hand_asset",
-      "renderer_layout": "hand_hero",
-      "copy_role": "balanced",
-      "copy_zone": "left",
-      "product_zone": "right_center",
-      "device_pose": "handheld_warm_three_quarter",
-      "min_mobile_assets": 1,
-      "max_mobile_assets": 1,
-      "required_support_assets": ["hand_mask_warm_v1"],
-      "fallback_layouts": ["edge_crop_storefront_ad", "split_device_right"]
-    },
-    {
-      "layout_key": "feature_callout_card",
-      "reference_key": "layout_ref_feature_callout_card_v1",
-      "status": "executable",
-      "renderer_layout": "storefront_metric_overlay",
-      "copy_role": "highlight_led",
-      "copy_zone": "left",
-      "product_zone": "right_center",
-      "device_pose": "front_right",
-      "min_mobile_assets": 1,
-      "max_mobile_assets": 1,
-      "min_module_assets": 1,
-      "callout_source": "structured_campaign_supporting_data_only",
-      "fallback_layouts": ["split_device_right"]
-    },
-    {
-      "layout_key": "centered_product_hero",
-      "reference_key": "layout_ref_centered_product_hero_v1",
-      "status": "executable",
-      "renderer_layout": "storefront_feature_stage",
-      "copy_role": "balanced",
-      "copy_zone": "top_center",
-      "product_zone": "lower_center",
-      "device_pose": "front_centered",
-      "min_mobile_assets": 1,
-      "max_mobile_assets": 1,
-      "fallback_layouts": ["carousel_proof_focus"]
-    },
-    {
-      "layout_key": "edge_crop_storefront_ad",
-      "reference_key": "layout_ref_edge_crop_storefront_ad_v1",
-      "status": "executable",
-      "renderer_layout": "split_device_right",
-      "copy_role": "copy_led",
-      "copy_zone": "left",
-      "product_zone": "right_edge",
-      "device_pose": "edge_crop_right",
-      "min_mobile_assets": 1,
-      "max_mobile_assets": 1,
-      "cta_treatment": "bottom_bar_only_when_campaign_has_cta",
-      "fallback_layouts": ["storefront_feature_stage"]
-    }
+    {"layout_key":"editorial_scene_3q","reference_key":"layout_ref_editorial_scene_3q_v1","status":"executable","renderer_layout":"editorial_material_scene","copy_role":"copy_led","copy_zone":"left","product_zone":"lower_right","device_pose":"three_quarter_resting","min_mobile_assets":1,"max_mobile_assets":1,"allowed_backgrounds":["scene_material_warm_textile_lavender_01","scene_ivory_plaster_steps_01","scene_aubergine_pedestal_01","scene_frosted_glass_mist_01"],"fallback_layouts":["split_device_right","split_device_left"]},
+    {"layout_key":"flat_lay_patterns","reference_key":"layout_ref_flat_lay_patterns_v1","status":"executable","renderer_layout":"flat_lay_product","copy_role":"product_led","copy_zone":"lower_left","product_zone":"center","device_pose":"diagonal_flat_lay","min_mobile_assets":1,"max_mobile_assets":1,"allowed_backgrounds":["scene_ivory_plaster_steps_01"],"fallback_layouts":["storefront_feature_stage"]},
+    {"layout_key":"multi_device_mood_grid","reference_key":"layout_ref_multi_device_mood_grid_v1","status":"executable","renderer_layout":"multi_device_grid","copy_role":"system_led","copy_zone":"left","product_zone":"right_grid","device_pose":"front_grid_mixed_scale","min_mobile_assets":4,"max_mobile_assets":5,"asset_selection_rule":"related_real_screens_only","fallback_layouts":["storefront_feature_stage","carousel_proof_focus"]},
+    {"layout_key":"hand_hero_dark","reference_key":"layout_ref_hand_hero_dark_v1","status":"experimental_requires_asset","renderer_layout":"hand_hero","copy_role":"balanced","copy_zone":"top","product_zone":"center","device_pose":"handheld_dark_three_quarter","min_mobile_assets":1,"max_mobile_assets":1,"required_support_assets":["hand_mask_dark_v1"],"fallback_layouts":["editorial_material_scene","centered_product_hero"]},
+    {"layout_key":"hand_hero_warm","reference_key":"layout_ref_hand_hero_warm_v1","status":"experimental_requires_asset","renderer_layout":"hand_hero","copy_role":"balanced","copy_zone":"left","product_zone":"right_center","device_pose":"handheld_warm_three_quarter","min_mobile_assets":1,"max_mobile_assets":1,"required_support_assets":["hand_mask_warm_v1"],"fallback_layouts":["edge_crop_storefront_ad","split_device_right"]},
+    {"layout_key":"feature_callout_card","reference_key":"layout_ref_feature_callout_card_v1","status":"executable","renderer_layout":"storefront_metric_overlay","copy_role":"highlight_led","copy_zone":"left","product_zone":"right_center","device_pose":"front_right","min_mobile_assets":1,"max_mobile_assets":1,"min_module_assets":1,"callout_source":"structured_campaign_supporting_data_only","fallback_layouts":["split_device_right"]},
+    {"layout_key":"centered_product_hero","reference_key":"layout_ref_centered_product_hero_v1","status":"executable","renderer_layout":"storefront_feature_stage","copy_role":"balanced","copy_zone":"top_center","product_zone":"lower_center","device_pose":"front_centered","min_mobile_assets":1,"max_mobile_assets":1,"fallback_layouts":["carousel_proof_focus"]},
+    {"layout_key":"edge_crop_storefront_ad","reference_key":"layout_ref_edge_crop_storefront_ad_v1","status":"executable","renderer_layout":"edge_crop_storefront_ad","copy_role":"copy_led","copy_zone":"left","product_zone":"right_edge","device_pose":"edge_crop_right","min_mobile_assets":1,"max_mobile_assets":1,"cta_treatment":"bottom_bar_only_when_campaign_has_cta","fallback_layouts":["storefront_feature_stage"]}
   ]
 }
