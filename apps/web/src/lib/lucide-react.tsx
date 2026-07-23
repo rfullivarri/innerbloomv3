@@ -170,6 +170,15 @@ export const RotateCcw = createIcon(
   'RotateCcw',
 );
 
+export const Save = createIcon(
+  [
+    ['path', { d: 'M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z' }],
+    ['path', { d: 'M17 21v-8H7v8' }],
+    ['path', { d: 'M7 3v5h8' }],
+  ],
+  'Save',
+);
+
 export const Trash2 = createIcon(
   [
     ['path', { d: 'M3 6h18' }],
@@ -188,6 +197,14 @@ export const UploadCloud = createIcon(
     ['path', { d: 'M20.4 18.9A5 5 0 0 0 18 9h-1.3A8 8 0 1 0 4 16.3' }],
   ],
   'UploadCloud',
+);
+
+export const X = createIcon(
+  [
+    ['path', { d: 'm18 6-12 12' }],
+    ['path', { d: 'm6 6 12 12' }],
+  ],
+  'X',
 );
 
 export const XCircle = createIcon(
