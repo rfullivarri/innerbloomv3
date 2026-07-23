@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "pack_key": "innerbloom_layout_reference_pack_v1",
+  "title": "Innerbloom Layout Reference Pack v1",
+  "status": "approved_reference",
+  "usage": "Internal composition references for renderer and Creative Director. These are not final publishable campaign assets and must not be used as source-of-truth UI screenshots.",
+  "drive_folder_id": "15y1xYh9lv6nKT0WJNE6pjSG-Mr-Khhda",
+  "drive_folder_url": "https://drive.google.com/drive/folders/15y1xYh9lv6nKT0WJNE6pjSG-Mr-Khhda",
+  "references": [
+    {
+      "reference_key": "layout_ref_editorial_scene_3q_v1",
+      "file_name": "01_editorial_scene_3q.png",
+      "drive_file_id": "18Qgl0B1sAE8BsOutFng_4E151WfA5Exr",
+      "family": "editorial_scene",
+      "device_pose": "three_quarter_resting",
+      "copy_role": "copy_led",
+      "implementation_priority": 1,
+      "notes": "Soft material scene, copy left, product right, grounded device and generous negative space."
+    },
+    {
+      "reference_key": "layout_ref_flat_lay_patterns_v1",
+      "file_name": "02_flat_lay_patterns.png",
+      "drive_file_id": "1TzEuOS79yrCkHNh3Bz9VMEKPHoCqgxo8",
+      "family": "flat_lay_product",
+      "device_pose": "diagonal_flat_lay",
+      "copy_role": "product_led",
+      "implementation_priority": 1,
+      "notes": "Phone resting on a pedestal with a diagonal perspective and oversized background typography."
+    },
+    {
+      "reference_key": "layout_ref_multi_device_mood_grid_v1",
+      "file_name": "03_multi_device_mood_grid.png",
+      "drive_file_id": "1t70FAgAngvbJmI8guvFETNwdtu0vtJ-L",
+      "family": "multi_device_grid",
+      "device_pose": "front_grid_mixed_scale",
+      "copy_role": "system_led",
+      "implementation_priority": 1,
+      "notes": "Four or five devices with one dominant phone; ideal for mood states and related feature variants."
+    },
+    {
+      "reference_key": "layout_ref_hand_hero_dark_v1",
+      "file_name": "04_hand_hero_dark.png",
+      "drive_file_id": "1JG8enLKW9yJCxmCmSHyHekqi9j5TBw0A",
+      "family": "hand_hero",
+      "device_pose": "handheld_dark_three_quarter",
+      "copy_role": "balanced",
+      "implementation_priority": 2,
+      "notes": "Dark cinematic ad with hand-held product and large top headline."
+    },
+    {
+      "reference_key": "layout_ref_hand_hero_warm_v1",
+      "file_name": "05_hand_hero_warm.png",
+      "drive_file_id": "1zezRZusI3FE-gIq6oGlu1_Tff2XeYC9W",
+      "family": "hand_hero",
+      "device_pose": "handheld_warm_three_quarter",
+      "copy_role": "balanced",
+      "implementation_priority": 2,
+      "notes": "Warm editorial paid-ad layout with expressive typography and bottom CTA bar."
+    },
+    {
+      "reference_key": "layout_ref_feature_callout_card_v1",
+      "file_name": "06_feature_callout_card.png",
+      "drive_file_id": "1CrTbaexOje3iSYWx8OOmszk6y8iu9uQL",
+      "family": "feature_callout",
+      "device_pose": "front_right",
+      "copy_role": "highlight_led",
+      "implementation_priority": 1,
+      "notes": "Phone with overlapping metric or feature card; callout must remain independent from campaign copy."
+    },
+    {
+      "reference_key": "layout_ref_centered_product_hero_v1",
+      "file_name": "07_centered_product_hero.png",
+      "drive_file_id": "1lkj_s-up7jkAjTj9uA6IsELnCCUv6UAU",
+      "family": "centered_product_hero",
+      "device_pose": "front_centered",
+      "copy_role": "balanced",
+      "implementation_priority": 1,
+      "notes": "Centered phone, top-aligned message and substantial negative space."
+    },
+    {
+      "reference_key": "layout_ref_edge_crop_storefront_ad_v1",
+      "file_name": "08_edge_crop_storefront_ad.png",
+      "drive_file_id": "1x0mNUQfNGJU_gFESHiAf6v-0UbqEfUT4",
+      "family": "storefront_ad",
+      "device_pose": "edge_crop_right",
+      "copy_role": "copy_led",
+      "implementation_priority": 1,
+      "notes": "Phone enters from the right edge; designed for product announcements and paid-ad CTA treatments."
+    }
+  ]
+}

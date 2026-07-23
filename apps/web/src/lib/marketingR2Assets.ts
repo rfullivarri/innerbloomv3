@@ -1,6 +1,8 @@
 import { apiAuthorizedFetch } from './api';
 import type { MarketingAsset } from '../content/marketingAdminSeed';
 
+const R2_UPLOAD_BATCH_SIZE = 10;
+
 export type MarketingR2Status = {
   ok: boolean;
   configured: boolean;
@@ -24,6 +26,13 @@ type UploadAssetInput = {
 type UploadMarketingAssetsResponse = {
   ok: boolean;
   assets: UploadedMarketingAsset[];
+};
+
+type PreparedMarketingAsset = {
+  key: string;
+  sourceUrl?: string;
+  contentBase64?: string;
+  contentType?: string;
 };
 
 export function buildMarketingAssetKey({
@@ -57,49 +66,45 @@ export async function fetchMarketingR2Status() {
 }
 
 export async function uploadMarketingAssetsToR2(inputs: UploadAssetInput[]) {
-  const assets = await Promise.all(
-    inputs.map(async ({ asset, campaignCode, postId }) => {
-      const basePayload = {
-        key: buildMarketingAssetKey({
-          campaignCode,
-          postId,
-          file: asset.file,
-        }),
-      };
-
-      const sourceUrl = asset.sourceUrl || asset.url;
-
-      if (/^https?:\/\//i.test(sourceUrl)) {
-        return {
-          ...basePayload,
-          sourceUrl,
-        };
-      }
-
-      const fetchedAsset = await fetchAssetAsBase64(sourceUrl);
-      return {
-        ...basePayload,
-        contentBase64: fetchedAsset.contentBase64,
-        contentType: fetchedAsset.contentType,
-      };
-    }),
-  );
-
-  const response = await apiAuthorizedFetch('/admin/marketing/r2/assets', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ assets }),
-  });
-
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`R2 upload failed with HTTP ${response.status}: ${body}`);
+  if (inputs.length === 0) {
+    return { ok: true, assets: [] } satisfies UploadMarketingAssetsResponse;
   }
 
-  return response.json() as Promise<UploadMarketingAssetsResponse>;
+  const uploadedAssets: UploadedMarketingAsset[] = [];
+
+  // The API intentionally accepts at most ten assets per request. Prepare and
+  // upload one batch at a time so a complete campaign (including carousels)
+  // does not create one enormous browser payload or exceed the API limit.
+  for (let start = 0; start < inputs.length; start += R2_UPLOAD_BATCH_SIZE) {
+    const batchInputs = inputs.slice(start, start + R2_UPLOAD_BATCH_SIZE);
+    const assets = await Promise.all(batchInputs.map(prepareMarketingAsset));
+    const batchNumber = Math.floor(start / R2_UPLOAD_BATCH_SIZE) + 1;
+    const batchCount = Math.ceil(inputs.length / R2_UPLOAD_BATCH_SIZE);
+
+    const response = await apiAuthorizedFetch('/admin/marketing/r2/assets', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ assets }),
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(
+        `R2 upload batch ${batchNumber}/${batchCount} failed with HTTP ${response.status}: ${body}`,
+      );
+    }
+
+    const result = await response.json() as UploadMarketingAssetsResponse;
+    uploadedAssets.push(...result.assets);
+  }
+
+  return {
+    ok: true,
+    assets: uploadedAssets,
+  } satisfies UploadMarketingAssetsResponse;
 }
 
 export function isMarketingAssetStoredOnR2(assetUrl: string, publicBaseUrl: string | null | undefined) {
@@ -109,6 +114,32 @@ export function isMarketingAssetStoredOnR2(assetUrl: string, publicBaseUrl: stri
   }
 
   return assetUrl.trim().startsWith(`${normalizedBaseUrl}/`);
+}
+
+async function prepareMarketingAsset({ asset, campaignCode, postId }: UploadAssetInput): Promise<PreparedMarketingAsset> {
+  const basePayload = {
+    key: buildMarketingAssetKey({
+      campaignCode,
+      postId,
+      file: asset.file,
+    }),
+  };
+
+  const sourceUrl = asset.sourceUrl || asset.url;
+
+  if (/^https?:\/\//i.test(sourceUrl)) {
+    return {
+      ...basePayload,
+      sourceUrl,
+    };
+  }
+
+  const fetchedAsset = await fetchAssetAsBase64(sourceUrl);
+  return {
+    ...basePayload,
+    contentBase64: fetchedAsset.contentBase64,
+    contentType: fetchedAsset.contentType,
+  };
 }
 
 async function fetchAssetAsBase64(url: string) {
