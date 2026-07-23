@@ -23,7 +23,7 @@ concurrency:
 jobs:
   render-and-import:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
@@ -63,30 +63,30 @@ jobs:
             echo "RENDER_OUTPUT_DIR=marketing/generated/${{ inputs.period_key }}/renderer-v3-pilot" >> "${GITHUB_ENV}"
           fi
 
-      - name: Validate creative contract
+      - name: Validate semantic creative contract
         run: node scripts/marketing/validate-creative-direction-v3.mjs marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
 
-      - name: Stage approved source assets from Drive
+      - name: Stage approved source assets and scene plates from Drive
         run: >-
           npm -w @innerbloom/api exec tsx scripts/stage-marketing-drive-assets.ts
           ../../marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
           ../../marketing/asset-registry/innerbloom-drive-assets-v1.json
           ../../marketing/generated/${{ inputs.period_key }}/source-assets
 
-      - name: Render deterministic campaign PNGs
+      - name: Render with Phase 1 collision-aware composition
         run: >-
-          node scripts/marketing/render-campaign-v3.mjs
+          node scripts/marketing/render-campaign-phase1.mjs
           marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
           --asset-dir marketing/generated/${{ inputs.period_key }}/source-assets
           --out ${{ env.RENDER_OUTPUT_DIR }}
           --limit ${{ inputs.preview_limit }}
 
-      - name: Enforce rendered creative quality
+      - name: Enforce Phase 1 rendered creative quality
         run: >-
           node scripts/marketing/quality-gate-rendered-v3.mjs
           ${{ env.RENDER_OUTPUT_DIR }}/render-manifest-v3.json
 
-      - name: Store review PNGs on the monthly branch
+      - name: Store review PNGs on the current marketing branch
         id: review_commit
         shell: bash
         env:
@@ -100,7 +100,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "Rendered review assets are unchanged."
           else
-            git commit -m "chore(marketing): stage review renders for ${PERIOD_KEY}"
+            git commit -m "chore(marketing): stage Phase 1 review renders for ${PERIOD_KEY}"
             git push origin "HEAD:${CYCLE_BRANCH}"
           fi
           echo "commit_sha=$(git rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
@@ -132,13 +132,15 @@ jobs:
       - name: Report next step
         run: |
           {
-            echo "## Campaign ready for human review"
+            echo "## Phase 1 campaign ready for human review"
             echo "- Period: ${{ inputs.period_key }}"
+            echo "- Copy: preserved exactly from campaign.json"
+            echo "- Composition: renderer may retry approved layouts to prevent text/product collisions"
+            echo "- Visual system: reduced production layout set and approved registered scene plates"
             if [[ "${{ inputs.preview_limit }}" == "0" ]]; then
-              echo "- Result: renderer v3 PNGs are staged and imported to Admin."
+              echo "- Result: Phase 1 PNGs are staged and imported to Admin."
             else
-              echo "- Result: renderer v3 pilot (${{ inputs.preview_limit }} jobs) is staged as an artifact; Admin was not changed."
+              echo "- Result: Phase 1 pilot (${{ inputs.preview_limit }} jobs) is staged as an artifact; Admin was not changed."
             fi
-            echo "- Next: open Admin > Marketing, approve or reject each post."
-            echo "- After approval: use Upload approved assets to R2, then Download Metricool CSV."
+            echo "- Next: review the pilot as a visual set before expanding production."
           } >> "${GITHUB_STEP_SUMMARY}"
