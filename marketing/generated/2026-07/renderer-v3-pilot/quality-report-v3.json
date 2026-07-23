@@ -1,16 +1,22 @@
 {
-  "schema_version": "1.0",
-  "gate": "rendered_creative_v3",
+  "schema_version": "2.0-phase1",
+  "gate": "rendered_creative_v3_phase1",
   "passed": true,
-  "asset_count": 5,
+  "asset_count": 6,
+  "thresholds": {
+    "copy_product_overlap_px": 240,
+    "copy_support_overlap_px": 240
+  },
   "checks": [
     {
       "asset_code": "asset_post_001",
       "png": "asset_post_001.png",
-      "bytes": 956300,
+      "bytes": 956308,
       "width": 1080,
       "height": 1080,
-      "sha256": "d1a71f38f011fcd5eac776da666cd4a88bf7d14bfa17b795fb1e9f9072087eb9",
+      "sha256": "b2706e4393eb308946659bed94579c13f5165afcd24216a6f99f5e5dfe2ed4f7",
+      "requested_layout_variant": "editorial_material_scene",
+      "effective_layout_variant": "editorial_material_scene",
       "quality": {
         "copy_exact": true,
         "support_safe_area": true,
@@ -20,17 +26,22 @@
         "clipped_text": false,
         "material_scene_present": true,
         "brand_present": true,
-        "screen_fit_contain": true
+        "screen_fit_contain": true,
+        "phase1_collision_pass": true,
+        "max_copy_product_overlap_px": 240,
+        "max_copy_support_overlap_px": 240
       },
       "passed": true
     },
     {
       "asset_code": "asset_post_002_01",
       "png": "asset_post_002_01.png",
-      "bytes": 816126,
+      "bytes": 866335,
       "width": 1080,
       "height": 1080,
-      "sha256": "fbaa9fcd2dd15ff15057a7765ec98ad954424881ecffe57fd0fefe1d2ba386e5",
+      "sha256": "02f9cde7d23b0f5b60f52cd21473be799b573d2ca4cc15f8f0d5037a883c1b7c",
+      "requested_layout_variant": "editorial_type_monument",
+      "effective_layout_variant": "storefront_feature_stage",
       "quality": {
         "copy_exact": true,
         "support_safe_area": true,
@@ -40,17 +51,22 @@
         "clipped_text": false,
         "material_scene_present": true,
         "brand_present": true,
-        "screen_fit_contain": true
+        "screen_fit_contain": true,
+        "phase1_collision_pass": true,
+        "max_copy_product_overlap_px": 240,
+        "max_copy_support_overlap_px": 240
       },
       "passed": true
     },
     {
       "asset_code": "asset_post_002_02",
       "png": "asset_post_002_02.png",
-      "bytes": 779396,
+      "bytes": 844905,
       "width": 1080,
       "height": 1080,
-      "sha256": "814892ed8f8f2ff8fdb57ddd727bc91e3721fb666148ad65e7f3fbde39e4f894",
+      "sha256": "c12f94c7b04b44cfb6fec5ab7a651841adf61db493babcd81cd6842d959311d8",
+      "requested_layout_variant": "carousel_transition",
+      "effective_layout_variant": "carousel_proof_focus",
       "quality": {
         "copy_exact": true,
         "support_safe_area": true,
@@ -60,17 +76,22 @@
         "clipped_text": false,
         "material_scene_present": true,
         "brand_present": true,
-        "screen_fit_contain": true
+        "screen_fit_contain": true,
+        "phase1_collision_pass": true,
+        "max_copy_product_overlap_px": 240,
+        "max_copy_support_overlap_px": 240
       },
       "passed": true
     },
     {
       "asset_code": "asset_post_002_03",
       "png": "asset_post_002_03.png",
-      "bytes": 857043,
+      "bytes": 868431,
       "width": 1080,
       "height": 1080,
-      "sha256": "86e0f593320f4cb5f31ba74418116c85b45840602424bb35571619bcbcc16e76",
+      "sha256": "4467e8fc15337d36a302bcdb7e5ae0ad8fb3395ce244830d4b6d17e76715238a",
+      "requested_layout_variant": "storefront_module_spotlight",
+      "effective_layout_variant": "storefront_metric_overlay",
       "quality": {
         "copy_exact": true,
         "support_safe_area": true,
@@ -80,17 +101,22 @@
         "clipped_text": false,
         "material_scene_present": true,
         "brand_present": true,
-        "screen_fit_contain": true
+        "screen_fit_contain": true,
+        "phase1_collision_pass": true,
+        "max_copy_product_overlap_px": 240,
+        "max_copy_support_overlap_px": 240
       },
       "passed": true
     },
     {
       "asset_code": "asset_post_002_04",
       "png": "asset_post_002_04.png",
-      "bytes": 819382,
+      "bytes": 877432,
       "width": 1080,
       "height": 1080,
-      "sha256": "6a98dd99375cbb61fff6a82742ec9f90b08fcead160575dcd5489ef81c8b3f55",
+      "sha256": "20cf2964c945e8c1c292087ef718f2934e829a3cd9ede952f75875b92e9d7978",
+      "requested_layout_variant": "editorial_numbered_steps",
+      "effective_layout_variant": "carousel_proof_focus",
       "quality": {
         "copy_exact": true,
         "support_safe_area": true,
@@ -100,7 +126,35 @@
         "clipped_text": false,
         "material_scene_present": true,
         "brand_present": true,
-        "screen_fit_contain": true
+        "screen_fit_contain": true,
+        "phase1_collision_pass": true,
+        "max_copy_product_overlap_px": 240,
+        "max_copy_support_overlap_px": 240
+      },
+      "passed": true
+    },
+    {
+      "asset_code": "asset_post_002_05",
+      "png": "asset_post_002_05.png",
+      "bytes": 818033,
+      "width": 1080,
+      "height": 1080,
+      "sha256": "88ccebf429f76f37c62c3b2be10e12fdb0b89209cd485743c86ca27b5ced2568",
+      "requested_layout_variant": "storefront_feature_stage",
+      "effective_layout_variant": "storefront_feature_stage",
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true,
+        "phase1_collision_pass": true,
+        "max_copy_product_overlap_px": 240,
+        "max_copy_support_overlap_px": 240
       },
       "passed": true
     }
