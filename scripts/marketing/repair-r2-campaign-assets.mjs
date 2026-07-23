@@ -1,8 +1,11 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { readdir, readFile } from 'node:fs/promises';
+import path from 'node:path';
 import pg from 'pg';
 
 const { Client } = pg;
 const campaignCode = process.argv[2] || process.env.CAMPAIGN_CODE || 'ib_202607';
+const artifactSourceDir = String(process.argv[3] || process.env.REPAIR_SOURCE_DIR || '').trim();
 
 const required = [
   'DATABASE_URL',
@@ -17,6 +20,11 @@ for (const key of required) {
 }
 
 const publicBaseUrl = String(process.env.R2_PUBLIC_BASE_URL).trim().replace(/\/+$/, '');
+const artifactFiles = artifactSourceDir ? await indexArtifactFiles(artifactSourceDir) : new Map();
+if (artifactSourceDir && artifactFiles.size === 0) {
+  throw new Error(`No PNG/JPEG/WebP files were found in artifact source directory: ${artifactSourceDir}`);
+}
+
 const s3 = new S3Client({
   region: 'auto',
   endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -43,6 +51,7 @@ try {
 
   let repaired = 0;
   let skipped = 0;
+  let restoredFromArtifact = 0;
   const failures = [];
 
   for (const row of result.rows) {
@@ -53,17 +62,26 @@ try {
       const asset = { ...assets[index] };
       try {
         const fileName = chooseFileName(asset, row.post_code, index);
-        const source = chooseSource(asset);
-        if (!source) throw new Error('No recoverable preview/source was found in Neon');
+        const localFile = artifactFiles.get(fileName.toLowerCase());
+        let image;
 
-        const { bytes, contentType } = await readImage(source);
+        if (localFile) {
+          image = validateImage(await readFile(localFile), mimeFromExtension(fileName));
+          restoredFromArtifact += 1;
+        } else {
+          const source = chooseSource(asset);
+          if (!source) {
+            throw new Error(`File ${fileName} was not found in the render artifact and no recoverable source exists in Neon`);
+          }
+          image = await readImage(source);
+        }
+
         const key = `campaigns/${safeSegment(campaignCode)}/${safeSegment(row.post_code)}/${fileName}`;
-
         await s3.send(new PutObjectCommand({
           Bucket: process.env.R2_BUCKET,
           Key: key,
-          Body: bytes,
-          ContentType: contentType,
+          Body: image.bytes,
+          ContentType: image.contentType,
           CacheControl: 'public, max-age=31536000, immutable',
         }));
 
@@ -90,10 +108,37 @@ try {
     );
   }
 
-  console.log(JSON.stringify({ campaignCode, posts: result.rowCount, repaired, skipped, failures }, null, 2));
+  console.log(JSON.stringify({
+    campaignCode,
+    posts: result.rowCount,
+    artifactSourceDir: artifactSourceDir || null,
+    artifactImagesIndexed: artifactFiles.size,
+    restoredFromArtifact,
+    repaired,
+    skipped,
+    failures,
+  }, null, 2));
   if (failures.length) process.exitCode = 1;
 } finally {
   await db.end();
+}
+
+async function indexArtifactFiles(rootDir) {
+  const files = new Map();
+  async function walk(directory) {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const fullPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        await walk(fullPath);
+      } else if (/\.(png|jpe?g|webp)$/i.test(entry.name)) {
+        const key = entry.name.toLowerCase();
+        if (files.has(key)) throw new Error(`Duplicate artifact filename found: ${entry.name}`);
+        files.set(key, fullPath);
+      }
+    }
+  }
+  await walk(rootDir);
+  return files;
 }
 
 function chooseFileName(asset, postCode, index) {
@@ -122,22 +167,19 @@ async function readImage(source) {
   if (value.startsWith('data:')) {
     const match = value.match(/^data:(image\/(?:png|jpeg|jpg|webp));base64,(.+)$/i);
     if (!match) throw new Error('Unsupported data image');
-    const bytes = Buffer.from(match[2], 'base64');
-    return validateImage(bytes, normalizeMime(match[1]));
+    return validateImage(Buffer.from(match[2], 'base64'), normalizeMime(match[1]));
   }
 
   const response = await fetch(value, { redirect: 'follow', signal: AbortSignal.timeout(30_000) });
   if (!response.ok) throw new Error(`Source returned HTTP ${response.status}`);
-  const bytes = Buffer.from(await response.arrayBuffer());
-  return validateImage(bytes, response.headers.get('content-type'));
+  return validateImage(Buffer.from(await response.arrayBuffer()), response.headers.get('content-type'));
 }
 
 function validateImage(bytes, declaredType) {
   if (!bytes.length || bytes.length > 12 * 1024 * 1024) throw new Error(`Invalid image size ${bytes.length}`);
   const detected = detectMime(bytes);
   if (!detected) throw new Error('Content is not PNG, JPEG, or WebP');
-  const declared = normalizeMime(declaredType);
-  return { bytes, contentType: detected || declared };
+  return { bytes, contentType: detected || normalizeMime(declaredType) };
 }
 
 function detectMime(bytes) {
@@ -145,6 +187,14 @@ function detectMime(bytes) {
   if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'image/jpeg';
   if (bytes.length >= 12 && bytes.toString('ascii', 0, 4) === 'RIFF' && bytes.toString('ascii', 8, 12) === 'WEBP') return 'image/webp';
   return null;
+}
+
+function mimeFromExtension(fileName) {
+  const extension = path.extname(fileName).toLowerCase();
+  if (extension === '.png') return 'image/png';
+  if (extension === '.jpg' || extension === '.jpeg') return 'image/jpeg';
+  if (extension === '.webp') return 'image/webp';
+  return '';
 }
 
 function normalizeMime(value) {
