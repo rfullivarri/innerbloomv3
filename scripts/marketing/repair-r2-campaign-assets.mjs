@@ -19,7 +19,26 @@ for (const key of required) {
   if (!String(process.env[key] || '').trim()) throw new Error(`${key} is required`);
 }
 
-const publicBaseUrl = String(process.env.R2_PUBLIC_BASE_URL).trim().replace(/\/+$/, '');
+function cleanR2Value(key) {
+  return String(process.env[key] || '').replace(/[\r\n\u2028\u2029]+/g, '').trim();
+}
+
+const r2AccountId = cleanR2Value('R2_ACCOUNT_ID');
+const r2AccessKeyId = cleanR2Value('R2_ACCESS_KEY_ID');
+const r2SecretAccessKey = cleanR2Value('R2_SECRET_ACCESS_KEY');
+const r2Bucket = cleanR2Value('R2_BUCKET');
+const publicBaseUrl = cleanR2Value('R2_PUBLIC_BASE_URL').replace(/\/+$/, '');
+
+for (const [name, value] of Object.entries({
+  R2_ACCOUNT_ID: r2AccountId,
+  R2_ACCESS_KEY_ID: r2AccessKeyId,
+  R2_SECRET_ACCESS_KEY: r2SecretAccessKey,
+  R2_BUCKET: r2Bucket,
+  R2_PUBLIC_BASE_URL: publicBaseUrl,
+})) {
+  if (!value) throw new Error(`${name} is empty after removing whitespace and line breaks`);
+}
+
 const artifactFiles = artifactSourceDir ? await indexArtifactFiles(artifactSourceDir) : new Map();
 if (artifactSourceDir && artifactFiles.size === 0) {
   throw new Error(`No PNG/JPEG/WebP files were found in artifact source directory: ${artifactSourceDir}`);
@@ -27,11 +46,11 @@ if (artifactSourceDir && artifactFiles.size === 0) {
 
 const s3 = new S3Client({
   region: 'auto',
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  endpoint: `https://${r2AccountId}.r2.cloudflarestorage.com`,
   forcePathStyle: true,
   credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+    accessKeyId: r2AccessKeyId,
+    secretAccessKey: r2SecretAccessKey,
   },
 });
 
@@ -53,6 +72,7 @@ try {
   let skipped = 0;
   let restoredFromArtifact = 0;
   const failures = [];
+  const warnings = [];
 
   for (const row of result.rows) {
     const assets = Array.isArray(row.asset_urls) ? row.asset_urls : [];
@@ -71,14 +91,17 @@ try {
         } else {
           const source = chooseSource(asset);
           if (!source) {
-            throw new Error(`File ${fileName} was not found in the render artifact and no recoverable source exists in Neon`);
+            warnings.push(`${row.post_code}[${index}]: File ${fileName} was not found in the render artifact and no recoverable source exists in Neon. Re-upload or remove this asset in Admin.`);
+            nextAssets.push(asset);
+            skipped += 1;
+            continue;
           }
           image = await readImage(source);
         }
 
         const key = `campaigns/${safeSegment(campaignCode)}/${safeSegment(row.post_code)}/${fileName}`;
         await s3.send(new PutObjectCommand({
-          Bucket: process.env.R2_BUCKET,
+          Bucket: r2Bucket,
           Key: key,
           Body: image.bytes,
           ContentType: image.contentType,
@@ -116,6 +139,7 @@ try {
     restoredFromArtifact,
     repaired,
     skipped,
+    warnings,
     failures,
   }, null, 2));
   if (failures.length) process.exitCode = 1;
