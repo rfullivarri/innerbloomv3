@@ -7,9 +7,18 @@ on:
         description: Campaign code to repair
         required: true
         default: ib_202607
+      period_key:
+        description: Campaign period used by the original render artifact
+        required: true
+        default: 2026-07
+      artifact_run_id:
+        description: Optional render workflow run ID; leave blank to use the newest matching artifact
+        required: false
+        default: ''
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   repair-r2-assets:
@@ -30,6 +39,40 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
+      - name: Download original campaign render artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PERIOD_KEY: ${{ inputs.period_key }}
+          REQUESTED_RUN_ID: ${{ inputs.artifact_run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p marketing-repair-source
+
+          if [[ -n "${REQUESTED_RUN_ID}" ]]; then
+            run_id="${REQUESTED_RUN_ID}"
+            artifact_name=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/artifacts?per_page=100" \
+              --jq ".artifacts[] | select(.expired == false and (.name | startswith(\"innerbloom-marketing-${PERIOD_KEY}-run-\"))) | .name" \
+              | head -n 1)
+          else
+            artifact_row=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" \
+              --jq ".artifacts[] | select(.expired == false and (.name | startswith(\"innerbloom-marketing-${PERIOD_KEY}-run-\"))) | [.created_at, (.workflow_run.id | tostring), .name] | @tsv" \
+              | sort -r | head -n 1)
+            [[ -n "${artifact_row}" ]] || { echo "No unexpired render artifact found for ${PERIOD_KEY}" >&2; exit 1; }
+            IFS=$'\t' read -r _created_at run_id artifact_name <<< "${artifact_row}"
+          fi
+
+          [[ -n "${artifact_name:-}" ]] || { echo "No matching render artifact found in run ${run_id}" >&2; exit 1; }
+          echo "Downloading ${artifact_name} from run ${run_id}"
+          gh run download "${run_id}" --name "${artifact_name}" --dir marketing-repair-source
+
+          image_count=$(find marketing-repair-source -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) | wc -l | tr -d ' ')
+          [[ "${image_count}" -gt 0 ]] || { echo "Artifact contained no image files" >&2; exit 1; }
+          echo "Found ${image_count} source images"
+          echo "REPAIR_SOURCE_DIR=marketing-repair-source" >> "${GITHUB_ENV}"
+          echo "REPAIR_ARTIFACT_NAME=${artifact_name}" >> "${GITHUB_ENV}"
+          echo "REPAIR_ARTIFACT_RUN_ID=${run_id}" >> "${GITHUB_ENV}"
+
       - name: Repair approved campaign assets in R2
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -38,7 +81,7 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
           R2_PUBLIC_BASE_URL: ${{ secrets.R2_PUBLIC_BASE_URL }}
-        run: node scripts/marketing/repair-r2-campaign-assets.mjs "${{ inputs.campaign_code }}"
+        run: node scripts/marketing/repair-r2-campaign-assets.mjs "${{ inputs.campaign_code }}" "${REPAIR_SOURCE_DIR}"
 
       - name: Summary
         if: always()
@@ -47,7 +90,10 @@ jobs:
             echo '## Marketing R2 repair'
             echo ''
             echo '- Campaign: `${{ inputs.campaign_code }}`'
-            echo '- Rewrites approved campaign assets using recoverable previews stored in Neon.'
-            echo '- Restores canonical object keys and image MIME metadata.'
+            echo '- Source artifact: `${REPAIR_ARTIFACT_NAME:-not downloaded}`'
+            echo '- Source run: `${REPAIR_ARTIFACT_RUN_ID:-unknown}`'
+            echo '- Restores only assets still attached to approved posts in Neon.'
+            echo '- Rewrites canonical R2 object keys with real image bytes and MIME metadata.'
+            echo '- Does not overwrite copy, schedule, status, or carousel selection.'
             echo '- After success, return to Admin and run CSV validation again.'
           } >> "$GITHUB_STEP_SUMMARY"
