@@ -3,8 +3,9 @@
  * Phase 1 campaign renderer.
  *
  * Production renders every image job. Preview mode selects one representative
- * job from each of N posts, rotates the approved scene pack, and never mutates
- * campaign.json or visible_copy.
+ * job from each of N posts. It first selects four distinct scene-compatible
+ * posts, then completes the sample with other posts. Existing visible_copy and
+ * campaign.json are never modified.
  */
 import fs from "node:fs/promises";
 import os from "node:os";
@@ -57,22 +58,47 @@ function run(command, commandArgs) {
 function unique(values) { return [...new Set(values.filter(Boolean))]; }
 function isMobileKey(key="") { return key.startsWith("mobile_"); }
 function isModuleKey(key="") { return key.startsWith("module_"); }
+function postKey(job) { return job.post_code || job.asset_code; }
+function primaryKey(job) { return job.creative_direction?.selected_asset_keys?.[0] || ""; }
 function copyWeight(job) {
   return String(job.visible_copy?.headline || "").length * 1.8 + String(job.visible_copy?.supporting_text || "").length;
 }
-function selectRepresentativePosts(jobs, count) {
-  if (!count) return jobs;
-  const selected=[];
+
+function firstJobPerPost(jobs) {
+  const result=[];
   const seen=new Set();
   for (const job of jobs) {
-    const postKey=job.post_code || job.asset_code;
-    if (seen.has(postKey)) continue;
-    seen.add(postKey);
-    selected.push(job);
-    if (selected.length >= count) break;
+    const key=postKey(job);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(job);
   }
+  return result;
+}
+
+function selectRepresentativePosts(jobs, count, requireScenes) {
+  if (!count) return jobs;
+  const representatives=firstJobPerPost(jobs);
+  if (!requireScenes) return representatives.slice(0,count);
+
+  const sceneTarget=Math.min(4,count);
+  const sceneEligible=representatives.filter(job => isMobileKey(primaryKey(job)));
+  if (sceneEligible.length < sceneTarget) {
+    throw new Error(`Phase 1 pilot needs ${sceneTarget} distinct posts with a mobile primary asset for scene plates; found ${sceneEligible.length}`);
+  }
+
+  const selected=sceneEligible.slice(0,sceneTarget);
+  const selectedPosts=new Set(selected.map(postKey));
+  for (const job of representatives) {
+    if (selected.length >= count) break;
+    if (selectedPosts.has(postKey(job))) continue;
+    selected.push(job);
+    selectedPosts.add(postKey(job));
+  }
+  if (selected.length < count) throw new Error(`Phase 1 pilot requested ${count} distinct posts; found ${selected.length}`);
   return selected;
 }
+
 async function availableScenes() {
   const entries = new Set(await fs.readdir(assetDir));
   return CURATED_SCENES.filter(scene => [...entries].some(file => file.startsWith(scene.key + ".")));
@@ -85,9 +111,13 @@ function candidateLayouts(job, previousLayout, forcedScene) {
   const detail=keys[1] || "";
   const heavyCopy=copyWeight(job)>165;
   const slide=Number(job.slide_number || 0);
+
+  // A forced pilot scene is a contract, not a preference. If it cannot render
+  // safely, the pilot must fail instead of silently becoming an old layout.
+  if (forcedScene) return ["editorial_material_scene"];
+
   const candidates=[];
-  if (forcedScene && isMobileKey(primary)) candidates.push("editorial_material_scene");
-  if (!forcedScene && direction.art_direction?.scene_asset_key && isMobileKey(primary)) candidates.push("editorial_material_scene");
+  if (direction.art_direction?.scene_asset_key && isMobileKey(primary)) candidates.push("editorial_material_scene");
   if (preferred) candidates.push(preferred);
   if (slide>=5) candidates.push("carousel_cta_close");
   if (isModuleKey(detail)) candidates.push("storefront_metric_overlay");
@@ -155,7 +185,7 @@ async function renderAttempt(campaign, job, layout, forcedScene, tempRoot, attem
 async function main() {
   const campaign=JSON.parse(await fs.readFile(campaignPath,"utf8"));
   const allJobs=campaign.image_generation?.jobs || [];
-  const jobs=selectRepresentativePosts(allJobs,postLimit);
+  const jobs=selectRepresentativePosts(allJobs,postLimit,pilotScenes);
   if (!jobs.length) throw new Error("Campaign has no image jobs");
   await fs.rm(outputDir,{recursive:true,force:true});
   await fs.mkdir(outputDir,{recursive:true});
@@ -169,7 +199,7 @@ async function main() {
       const job=jobs[jobIndex];
       const keys=job.creative_direction?.selected_asset_keys || [];
       if (!keys.length) throw new Error(`${job.asset_code}: selected_asset_keys is empty`);
-      const forcedScene=pilotScenes && jobIndex<scenes.length && isMobileKey(keys[0]) ? scenes[jobIndex] : null;
+      const forcedScene=pilotScenes && jobIndex<4 ? scenes[jobIndex] : null;
       const attempts=[];
       let accepted=null;
       const candidates=candidateLayouts(job,previousLayout,forcedScene);
@@ -190,7 +220,7 @@ async function main() {
       console.log(`${job.asset_code}: accepted ${accepted.layout}${accepted.forcedScene?` with ${accepted.forcedScene.key}`:""} after ${attempts.length} attempt(s)`);
     }
   } finally { await fs.rm(tempRoot,{recursive:true,force:true}); }
-  const manifest={schema_version:"3.2-phase1",campaign_path:campaignPath,rendered_at:new Date().toISOString(),policy:{approved_layouts:[...APPROVED_LAYOUTS],copy_preserved:true,renderer_owns_geometry:true,collision_retry_enabled:true,preview_selects_one_visual_per_post:Boolean(postLimit),pilot_scene_rotation:pilotScenes},assets:records};
+  const manifest={schema_version:"3.3-phase1",campaign_path:campaignPath,rendered_at:new Date().toISOString(),policy:{approved_layouts:[...APPROVED_LAYOUTS],copy_preserved:true,renderer_owns_geometry:true,collision_retry_enabled:true,preview_selects_one_visual_per_post:Boolean(postLimit),pilot_scene_rotation:pilotScenes,pilot_scene_count:pilotScenes?4:0},assets:records};
   await fs.writeFile(path.join(outputDir,"render-manifest-v3.json"),`${JSON.stringify(manifest,null,2)}\n`);
   console.log(`Rendered ${jobs.length} representative post visuals with the Phase 1 policy.`);
 }
