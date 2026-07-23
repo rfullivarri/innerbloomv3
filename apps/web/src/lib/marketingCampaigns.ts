@@ -69,6 +69,8 @@ export type MarketingPostUpdate = Partial<Pick<
   | 'scheduledAt'
 >>;
 
+const MAX_PERSISTED_ASSET_URL_LENGTH = 2000;
+
 export async function fetchMarketingCampaigns() {
   const response = await apiAuthorizedFetch('/admin/marketing/campaigns', {
     headers: {
@@ -96,7 +98,7 @@ export async function updateMarketingCampaignPost(
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(sanitizeMarketingPostUpdate(payload)),
     },
   );
 
@@ -106,4 +108,37 @@ export async function updateMarketingCampaignPost(
   }
 
   return response.json() as Promise<{ ok: boolean; post: MarketingPostRecord }>;
+}
+
+function sanitizeMarketingPostUpdate(payload: MarketingPostUpdate): MarketingPostUpdate {
+  if (!payload.assetUrls) {
+    return payload;
+  }
+
+  return {
+    ...payload,
+    assetUrls: payload.assetUrls.map((asset) => ({
+      ...asset,
+      url: persistableAssetUrl(asset.url),
+      previewUrl: persistableAssetUrl(asset.previewUrl),
+      sourceUrl: persistableAssetUrl(asset.sourceUrl),
+    })),
+  };
+}
+
+function persistableAssetUrl(value: string | undefined) {
+  const normalized = value?.trim();
+  if (!normalized) {
+    return undefined;
+  }
+
+  if (/^(data|blob):/i.test(normalized)) {
+    return undefined;
+  }
+
+  if (normalized.length > MAX_PERSISTED_ASSET_URL_LENGTH) {
+    return undefined;
+  }
+
+  return normalized;
 }
