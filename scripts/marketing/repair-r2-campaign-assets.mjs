@@ -20,6 +20,7 @@ for (const key of required) {
 }
 
 const publicBaseUrl = String(process.env.R2_PUBLIC_BASE_URL).trim().replace(/\/+$/, '');
+const repairVersion = Date.now();
 const artifactFiles = artifactSourceDir ? await indexArtifactFiles(artifactSourceDir) : new Map();
 if (artifactSourceDir && artifactFiles.size === 0) {
   throw new Error(`No PNG/JPEG/WebP files were found in artifact source directory: ${artifactSourceDir}`);
@@ -82,19 +83,20 @@ try {
           Key: key,
           Body: image.bytes,
           ContentType: image.contentType,
-          CacheControl: 'public, max-age=31536000, immutable',
+          CacheControl: 'public, max-age=300, must-revalidate',
         }));
 
-        const url = `${publicBaseUrl}/${key}`;
+        const canonicalUrl = `${publicBaseUrl}/${key}`;
+        const versionedUrl = `${canonicalUrl}?v=${repairVersion}`;
         nextAssets.push({
           ...asset,
           file: fileName,
-          url,
-          previewUrl: url,
+          url: versionedUrl,
+          previewUrl: versionedUrl,
           selected: asset.selected !== false,
         });
         repaired += 1;
-        console.log(`repaired ${row.post_code} ${index + 1}/${assets.length}: ${url}`);
+        console.log(`repaired ${row.post_code} ${index + 1}/${assets.length}: ${versionedUrl}`);
       } catch (error) {
         failures.push(`${row.post_code}[${index}]: ${error instanceof Error ? error.message : String(error)}`);
         nextAssets.push(asset);
@@ -113,6 +115,7 @@ try {
     posts: result.rowCount,
     artifactSourceDir: artifactSourceDir || null,
     artifactImagesIndexed: artifactFiles.size,
+    repairVersion,
     restoredFromArtifact,
     repaired,
     skipped,
