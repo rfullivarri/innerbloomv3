@@ -170,6 +170,12 @@ importers:
 
   apps/web:
     dependencies:
+      '@fontsource/manrope':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/sora':
+        specifier: 5.3.0
+        version: 5.3.0
       '@clerk/clerk-react':
         specifier: ^5.8.1
         version: 5.59.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -253,6 +259,12 @@ importers:
   packages/missions-v2-contracts: {}
 
 packages:
+
+  '@fontsource/manrope@5.3.0':
+    resolution: {integrity: sha512-obJ1Dv3+uCA6HlHgW8u4BGYxJR9In2HW7gjJhlflEvkrj1X1iSEwu0fToL+JYGC/FEKFfIz1sBuPduvcL2gIAA==}
+
+  '@fontsource/sora@5.3.0':
+    resolution: {integrity: sha512-SqW3OpKxxfKvxDLPlbdrWf2KooPfbd+W3jaYn483o+Y/JrmU87vjFPNptDqwP428c3vY+gnranLhjcbRaXB0Jw==}
 
   '@adobe/css-tools@4.4.4':
     resolution: {integrity: sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==}
@@ -4102,6 +4114,10 @@ packages:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
 snapshots:
+
+  '@fontsource/manrope@5.3.0': {}
+
+  '@fontsource/sora@5.3.0': {}
 
   '@adobe/css-tools@4.4.4': {}
 

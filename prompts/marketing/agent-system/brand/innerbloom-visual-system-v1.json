@@ -42,12 +42,18 @@
   },
   "modes": {
     "default_post_mode": "dark",
-    "supported_modes": ["dark", "light"],
+    "supported_modes": [
+      "dark",
+      "light"
+    ],
     "mode_selection_rule": "Use the explicitly approved post mode. If no mode is approved, default to dark. Match source screenshots and palette to the selected mode."
   },
   "logo_system": {
     "primary_logo": {
-      "components": ["lotus_icon", "wordmark"],
+      "components": [
+        "lotus_icon",
+        "wordmark"
+      ],
       "wordmark_style": "uppercase, widely tracked, refined sans-serif appearance",
       "icon_style": "violet and lilac lotus mark with soft tonal variation",
       "approved_asset_required": true
@@ -116,7 +122,11 @@
         "secondary_violet": "#9B7CFF",
         "lilac": "#C88DFF",
         "peach": "#F2AE9B",
-        "hero_gradient": ["#8E63FF", "#C88DFF", "#F2AE9B"]
+        "hero_gradient": [
+          "#8E63FF",
+          "#C88DFF",
+          "#F2AE9B"
+        ]
       },
       "functional": {
         "green": "#67D98B",
@@ -156,7 +166,11 @@
         "secondary_violet": "#9B7CFF",
         "lilac": "#C88DFF",
         "peach": "#F2AE9B",
-        "hero_gradient": ["#8E63FF", "#C88DFF", "#F2AE9B"]
+        "hero_gradient": [
+          "#8E63FF",
+          "#C88DFF",
+          "#F2AE9B"
+        ]
       },
       "functional": {
         "green": "#65D685",
@@ -192,12 +206,20 @@
     "hero_text_gradient": {
       "allowed": true,
       "usage": "selected emphasis words or short phrases",
-      "stops": ["#8E63FF", "#C88DFF", "#F2AE9B"]
+      "stops": [
+        "#8E63FF",
+        "#C88DFF",
+        "#F2AE9B"
+      ]
     },
     "ambient_background_glow": {
       "allowed": true,
       "usage": "soft radial depth behind product compositions",
-      "recommended_colors": ["#8E63FF", "#4B3DB8", "#173A63"]
+      "recommended_colors": [
+        "#8E63FF",
+        "#4B3DB8",
+        "#173A63"
+      ]
     },
     "prohibitions": [
       "Do not apply the hero gradient to every text element.",
@@ -210,7 +232,9 @@
       "Use real current product screenshots from approved Drive assets.",
       "Preserve truthful UI and visible data.",
       "Screenshots are a primary proof element, not generic decoration.",
-      "Match dark screenshots to dark compositions and light screenshots to light compositions unless an intentional approved contrast is required."
+      "Match dark screenshots to dark compositions and light screenshots to light compositions unless an intentional approved contrast is required.",
+      "A focus crop must reveal a different but causally related product detail; never repeat a module already visible in the primary device.",
+      "Focus crops are borderless product details, not second device frames."
     ],
     "allowed_treatments": [
       "crop",
@@ -234,16 +258,32 @@
     ],
     "module_highlighting": {
       "daily_energy": {
-        "preferred_colors": ["#6FD3F6", "#EBC85E", "#9B7CFF"],
-        "allowed_effects": ["subtle glow", "ring emphasis", "single callout label"],
+        "preferred_colors": [
+          "#6FD3F6",
+          "#EBC85E",
+          "#9B7CFF"
+        ],
+        "allowed_effects": [
+          "subtle glow",
+          "ring emphasis",
+          "single callout label"
+        ],
         "goal": "Make the chart clearly readable and the hero module without changing its data"
       },
       "tasks": {
-        "preferred_effects": ["focused crop", "soft depth", "progress emphasis"],
+        "preferred_effects": [
+          "focused crop",
+          "soft depth",
+          "progress emphasis"
+        ],
         "goal": "Show real task progress and adaptive difficulty clearly"
       },
       "emotion_chart": {
-        "preferred_effects": ["clean crop", "preserve semantic colours", "minimal annotations"],
+        "preferred_effects": [
+          "clean crop",
+          "preserve semantic colours",
+          "minimal annotations"
+        ],
         "goal": "Keep the emotional data legible and truthful"
       }
     }
@@ -255,7 +295,8 @@
       "Every composition must feel unmistakably branded.",
       "Avoid empty layouts that look unfinished.",
       "Use one dominant focal point per asset.",
-      "Use rounded cards, restrained borders, subtle glow, and atmospheric depth."
+      "Use rounded cards, restrained borders, subtle glow, and atmospheric depth.",
+      "Never use a full-width fade, hard seam, or overlay that crosses headline or device boundaries."
     ],
     "static_post": {
       "default_ratio": "1080x1080",
@@ -327,7 +368,8 @@
       "Vary source modules across the campaign.",
       "Do not reuse one screenshot as the hero in more than two produced assets unless explicitly approved.",
       "For carousels, use at least two distinct visual states when relevant.",
-      "Do not duplicate the same template across the entire campaign."
+      "Do not duplicate the same template across the entire campaign.",
+      "Pair contextual screen and detail as input-to-pattern, signal-to-interpretation, or action-to-result; reject same-family duplication."
     ]
   },
   "production_review_policy": {

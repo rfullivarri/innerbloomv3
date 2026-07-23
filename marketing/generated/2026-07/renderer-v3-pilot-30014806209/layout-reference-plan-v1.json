@@ -1,0 +1,16 @@
+{
+  "specification_key": "innerbloom_layout_specifications_v1",
+  "specification_path": "marketing/layout-references/innerbloom-layout-specifications-v1.json",
+  "compiled_at": "2026-07-23T14:15:02.141Z",
+  "copy_preserved": true,
+  "real_innerbloom_assets_only": true,
+  "reference_pilot": true,
+  "selected_layout_counts": {
+    "editorial_scene_3q": 11,
+    "flat_lay_patterns": 11,
+    "centered_product_hero": 12,
+    "feature_callout_card": 3,
+    "multi_device_mood_grid": 1,
+    "edge_crop_storefront_ad": 8
+  }
+}

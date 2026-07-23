@@ -1,0 +1,282 @@
+{
+  "schema_version": "3.3-phase1",
+  "campaign_path": "/home/runner/work/innerbloomv3/innerbloomv3/marketing/agent-outputs/2026-07/campaign.json",
+  "rendered_at": "2026-07-23T09:48:45.602Z",
+  "policy": {
+    "approved_layouts": [
+      "editorial_material_scene",
+      "split_device_right",
+      "split_device_left",
+      "storefront_feature_stage",
+      "storefront_metric_overlay",
+      "carousel_proof_focus",
+      "carousel_cta_close"
+    ],
+    "copy_preserved": true,
+    "renderer_owns_geometry": true,
+    "collision_retry_enabled": true,
+    "preview_selects_one_visual_per_post": true,
+    "pilot_scene_rotation": true,
+    "pilot_scene_count": 4
+  },
+  "assets": [
+    {
+      "asset_code": "asset_post_001",
+      "post_code": "post_001",
+      "filename": "asset_post_001.png",
+      "layout_variant": "editorial_material_scene",
+      "visual_family": "supporting_visual_scene",
+      "scene_asset_key": "scene_material_warm_textile_lavender_01",
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true,
+        "phase1_collision_pass": true,
+        "max_copy_product_overlap_px": 240,
+        "max_copy_support_overlap_px": 240
+      },
+      "requested_layout_variant": "editorial_material_scene",
+      "pilot_scene_asset_key": "scene_material_warm_textile_lavender_01",
+      "phase1_attempts": [
+        {
+          "layout": "editorial_material_scene",
+          "scene_asset_key": "scene_material_warm_textile_lavender_01",
+          "passed": true,
+          "error": null,
+          "quality": {
+            "copy_exact": true,
+            "support_safe_area": true,
+            "copy_safe_area": true,
+            "copy_support_overlap_px": 0,
+            "copy_product_overlap_px": 0,
+            "clipped_text": false,
+            "material_scene_present": true,
+            "brand_present": true,
+            "screen_fit_contain": true
+          }
+        }
+      ]
+    },
+    {
+      "asset_code": "asset_post_002_01",
+      "post_code": "post_002",
+      "filename": "asset_post_002_01.png",
+      "layout_variant": "editorial_material_scene",
+      "visual_family": "supporting_visual_scene",
+      "scene_asset_key": "scene_ivory_plaster_steps_01",
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true,
+        "phase1_collision_pass": true,
+        "max_copy_product_overlap_px": 240,
+        "max_copy_support_overlap_px": 240
+      },
+      "requested_layout_variant": "editorial_type_monument",
+      "pilot_scene_asset_key": "scene_ivory_plaster_steps_01",
+      "phase1_attempts": [
+        {
+          "layout": "editorial_material_scene",
+          "scene_asset_key": "scene_ivory_plaster_steps_01",
+          "passed": true,
+          "error": null,
+          "quality": {
+            "copy_exact": true,
+            "support_safe_area": true,
+            "copy_safe_area": true,
+            "copy_support_overlap_px": 0,
+            "copy_product_overlap_px": 0,
+            "clipped_text": false,
+            "material_scene_present": true,
+            "brand_present": true,
+            "screen_fit_contain": true
+          }
+        }
+      ]
+    },
+    {
+      "asset_code": "asset_post_003",
+      "post_code": "post_003",
+      "filename": "asset_post_003.png",
+      "layout_variant": "editorial_material_scene",
+      "visual_family": "supporting_visual_scene",
+      "scene_asset_key": "scene_aubergine_pedestal_01",
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true,
+        "phase1_collision_pass": true,
+        "max_copy_product_overlap_px": 240,
+        "max_copy_support_overlap_px": 240
+      },
+      "requested_layout_variant": "storefront_edge_editorial",
+      "pilot_scene_asset_key": "scene_aubergine_pedestal_01",
+      "phase1_attempts": [
+        {
+          "layout": "editorial_material_scene",
+          "scene_asset_key": "scene_aubergine_pedestal_01",
+          "passed": true,
+          "error": null,
+          "quality": {
+            "copy_exact": true,
+            "support_safe_area": true,
+            "copy_safe_area": true,
+            "copy_support_overlap_px": 0,
+            "copy_product_overlap_px": 0,
+            "clipped_text": false,
+            "material_scene_present": true,
+            "brand_present": true,
+            "screen_fit_contain": true
+          }
+        }
+      ]
+    },
+    {
+      "asset_code": "asset_post_004_01",
+      "post_code": "post_004",
+      "filename": "asset_post_004_01.png",
+      "layout_variant": "editorial_material_scene",
+      "visual_family": "supporting_visual_scene",
+      "scene_asset_key": "scene_frosted_glass_mist_01",
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true,
+        "phase1_collision_pass": true,
+        "max_copy_product_overlap_px": 240,
+        "max_copy_support_overlap_px": 240
+      },
+      "requested_layout_variant": "storefront_metric_overlay",
+      "pilot_scene_asset_key": "scene_frosted_glass_mist_01",
+      "phase1_attempts": [
+        {
+          "layout": "editorial_material_scene",
+          "scene_asset_key": "scene_frosted_glass_mist_01",
+          "passed": true,
+          "error": null,
+          "quality": {
+            "copy_exact": true,
+            "support_safe_area": true,
+            "copy_safe_area": true,
+            "copy_support_overlap_px": 0,
+            "copy_product_overlap_px": 0,
+            "clipped_text": false,
+            "material_scene_present": true,
+            "brand_present": true,
+            "screen_fit_contain": true
+          }
+        }
+      ]
+    },
+    {
+      "asset_code": "asset_post_005",
+      "post_code": "post_005",
+      "filename": "asset_post_005.png",
+      "layout_variant": "storefront_metric_overlay",
+      "visual_family": "product_hero_scene",
+      "scene_asset_key": null,
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true,
+        "phase1_collision_pass": true,
+        "max_copy_product_overlap_px": 240,
+        "max_copy_support_overlap_px": 240
+      },
+      "requested_layout_variant": "storefront_metric_overlay",
+      "pilot_scene_asset_key": null,
+      "phase1_attempts": [
+        {
+          "layout": "storefront_metric_overlay",
+          "scene_asset_key": null,
+          "passed": true,
+          "error": null,
+          "quality": {
+            "copy_exact": true,
+            "support_safe_area": true,
+            "copy_safe_area": true,
+            "copy_support_overlap_px": 0,
+            "copy_product_overlap_px": 0,
+            "clipped_text": false,
+            "material_scene_present": true,
+            "brand_present": true,
+            "screen_fit_contain": true
+          }
+        }
+      ]
+    },
+    {
+      "asset_code": "asset_post_006",
+      "post_code": "post_006",
+      "filename": "asset_post_006.png",
+      "layout_variant": "storefront_feature_stage",
+      "visual_family": "product_hero_scene",
+      "scene_asset_key": null,
+      "quality": {
+        "copy_exact": true,
+        "support_safe_area": true,
+        "copy_safe_area": true,
+        "copy_support_overlap_px": 0,
+        "copy_product_overlap_px": 0,
+        "clipped_text": false,
+        "material_scene_present": true,
+        "brand_present": true,
+        "screen_fit_contain": true,
+        "phase1_collision_pass": true,
+        "max_copy_product_overlap_px": 240,
+        "max_copy_support_overlap_px": 240
+      },
+      "requested_layout_variant": "storefront_dual_device",
+      "pilot_scene_asset_key": null,
+      "phase1_attempts": [
+        {
+          "layout": "storefront_feature_stage",
+          "scene_asset_key": null,
+          "passed": true,
+          "error": null,
+          "quality": {
+            "copy_exact": true,
+            "support_safe_area": true,
+            "copy_safe_area": true,
+            "copy_support_overlap_px": 0,
+            "copy_product_overlap_px": 0,
+            "clipped_text": false,
+            "material_scene_present": true,
+            "brand_present": true,
+            "screen_fit_contain": true
+          }
+        }
+      ]
+    }
+  ]
+}
