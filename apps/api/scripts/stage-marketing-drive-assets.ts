@@ -2,7 +2,13 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { downloadDriveFile } from '../src/services/marketingGoogleDriveService.js';
 
-type RegistryAsset = { asset_key: string; drive_file_id: string; original_file_name?: string; mime_type?: string };
+type RegistryAsset = {
+  asset_key: string;
+  drive_file_id: string;
+  original_file_name?: string;
+  mime_type?: string;
+  status?: string;
+};
 type Job = { creative_direction?: { selected_asset_keys?: string[]; art_direction?: { scene_asset_key?: string } } };
 
 const [campaignPath, registryPath, outputDir] = process.argv.slice(2);
@@ -20,6 +26,15 @@ for (const job of campaign.image_generation?.jobs ?? []) {
   const sceneKey = job.creative_direction?.art_direction?.scene_asset_key;
   if (sceneKey) requiredKeys.add(sceneKey);
 }
+
+// Phase 1 pilots are allowed to test the complete curated scene pack without
+// rewriting campaign.json. Only approved/current scene plates are staged.
+for (const asset of registry.assets ?? []) {
+  if (asset.asset_key.startsWith('scene_') && (!asset.status || asset.status === 'approved_current')) {
+    requiredKeys.add(asset.asset_key);
+  }
+}
+
 if (requiredKeys.size <= 2) {
   throw new Error('No creative selected_asset_keys were found. Run the Creative Director before staging.');
 }
@@ -28,6 +43,7 @@ const byKey = new Map((registry.assets ?? []).map((asset) => [asset.asset_key, a
 const missing = [...requiredKeys].filter((key) => !byKey.has(key));
 if (missing.length) throw new Error(`Asset registry is missing: ${missing.join(', ')}`);
 
+await fs.rm(outputDir, { recursive: true, force: true });
 await fs.mkdir(outputDir, { recursive: true });
 const staged: Array<{ asset_key: string; file: string; drive_file_id: string; content_type: string }> = [];
 for (const key of [...requiredKeys].sort()) {
