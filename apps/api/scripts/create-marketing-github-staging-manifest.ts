@@ -15,15 +15,14 @@ if (!/^[a-f0-9]{40}$/i.test(commitSha)) {
 const files = (await fs.readdir(renderDir)).filter((file) => /\.png$/i.test(file)).sort();
 if (!files.length) throw new Error(`No PNG files found in ${renderDir}`);
 
-const relativeRenderDir = path.relative(process.cwd(), path.resolve(renderDir)).split(path.sep).join('/');
 const assets = await Promise.all(files.map(async (file) => {
-  const repositoryPath = `${relativeRenderDir}/${file}`;
   const bytes = await fs.readFile(path.join(renderDir, file));
+  const inlineUrl = `data:image/png;base64,${bytes.toString('base64')}`;
   return {
     file,
-    source_url: `data:image/png;base64,${bytes.toString('base64')}`,
-    repository_path: repositoryPath,
-    web_view_url: `https://github.com/${repository}/blob/${commitSha}/${repositoryPath.split('/').map(encodeURIComponent).join('/')}`,
+    source_url: inlineUrl,
+    preview_url: inlineUrl,
+    web_view_url: '',
     staging_provider: 'neon_inline_review',
   };
 }));
@@ -36,4 +35,4 @@ await fs.writeFile(outputPath, JSON.stringify({
   assets,
 }, null, 2) + '\n');
 
-console.log(`Created inline review manifest for ${assets.length} PNGs backed by the monthly branch.`);
+console.log(`Created inline review manifest for ${assets.length} PNGs.`);
