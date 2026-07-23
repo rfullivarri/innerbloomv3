@@ -14,6 +14,15 @@ export type MarketingR2UploadedAsset = {
   url: string;
 };
 
+export type MarketingR2AssetValidation = {
+  url: string;
+  ok: boolean;
+  status: number | null;
+  contentType: string | null;
+  contentLength: number | null;
+  reason: string | null;
+};
+
 type R2Config = {
   accountId: string;
   accessKeyId: string;
@@ -77,6 +86,91 @@ export async function uploadMarketingR2Assets(assets: MarketingR2AssetUpload[]) 
   }
 
   return uploaded;
+}
+
+export async function validateMarketingR2AssetUrls(urls: string[]) {
+  const uniqueUrls = [...new Set(urls.map((value) => String(value || '').trim()).filter(Boolean))];
+  if (uniqueUrls.length === 0 || uniqueUrls.length > 100) {
+    throw new HttpError(400, 'invalid_asset_urls', 'Expected 1-100 asset URLs.');
+  }
+
+  const config = getR2Config();
+  const results: MarketingR2AssetValidation[] = [];
+
+  for (let start = 0; start < uniqueUrls.length; start += 8) {
+    const batch = uniqueUrls.slice(start, start + 8);
+    results.push(...await Promise.all(batch.map((url) => validatePublicAssetUrl(url, config.publicBaseUrl))));
+  }
+
+  return results;
+}
+
+async function validatePublicAssetUrl(urlValue: string, expectedBaseUrl: string): Promise<MarketingR2AssetValidation> {
+  let url: URL;
+  try {
+    url = new URL(urlValue);
+  } catch {
+    return invalidValidation(urlValue, 'invalid_url');
+  }
+
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    return invalidValidation(urlValue, 'unsupported_protocol');
+  }
+
+  if (expectedBaseUrl && !url.toString().startsWith(`${expectedBaseUrl}/`)) {
+    return invalidValidation(urlValue, 'not_r2_public_url');
+  }
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Range: 'bytes=0-1023',
+        Accept: 'image/*',
+        'User-Agent': 'Innerbloom-Metricool-Media-Validator/1.0',
+      },
+      redirect: 'follow',
+      signal: AbortSignal.timeout(15_000),
+    });
+    const contentType = response.headers.get('content-type');
+    const contentLengthHeader = response.headers.get('content-length');
+    const contentLength = contentLengthHeader ? Number(contentLengthHeader) : null;
+    const statusOk = response.status === 200 || response.status === 206;
+    const typeOk = isSupportedImageContentType(contentType ?? undefined);
+    const lengthOk = contentLength === null || (Number.isFinite(contentLength) && contentLength > 0);
+
+    // Consume only the small range response so the connection closes cleanly.
+    await response.arrayBuffer();
+
+    return {
+      url: urlValue,
+      ok: statusOk && typeOk && lengthOk,
+      status: response.status,
+      contentType,
+      contentLength,
+      reason: !statusOk ? `http_${response.status}` : !typeOk ? 'not_an_image' : !lengthOk ? 'empty_asset' : null,
+    };
+  } catch (error) {
+    return {
+      url: urlValue,
+      ok: false,
+      status: null,
+      contentType: null,
+      contentLength: null,
+      reason: error instanceof Error ? error.message : 'asset_fetch_failed',
+    };
+  }
+}
+
+function invalidValidation(url: string, reason: string): MarketingR2AssetValidation {
+  return {
+    url,
+    ok: false,
+    status: null,
+    contentType: null,
+    contentLength: null,
+    reason,
+  };
 }
 
 function getR2Config(): R2Config {
