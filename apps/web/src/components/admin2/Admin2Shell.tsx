@@ -3,7 +3,7 @@ import { OverviewPage } from '../../pages/admin2/OverviewPage';
 import { CoreEnginePage } from '../../pages/admin2/CoreEnginePage';
 import { UserOpsPage } from '../../pages/admin2/UserOpsPage';
 import { NotificationsPage } from '../../pages/admin2/NotificationsPage';
-import { MarketingPage } from '../../pages/admin2/MarketingPage';
+import { MarketingPageV2 } from '../../pages/admin2/MarketingPageV2';
 import { AiTaskgenPage } from '../../pages/admin2/AiTaskgenPage';
 import { AdvancedPage } from '../../pages/admin2/AdvancedPage';
 import { TaskgenUserPage } from '../../pages/admin/TaskgenUserPage';
@@ -28,77 +28,39 @@ export function Admin2Shell() {
         <div className="mb-6">
           <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">
             <span>Innerbloom</span>
-            <img
-              src="/IB-COLOR-LOGO-v2.png"
-              alt="Innerbloom flower"
-              className="h-4 w-4 object-contain"
-              loading="lazy"
-            />
+            <img src="/IB-COLOR-LOGO-v2.png" alt="Innerbloom flower" className="h-4 w-4 object-contain" loading="lazy" />
           </p>
           <h1 className="text-xl font-semibold tracking-tight">Admin</h1>
           <p className="mt-1 text-sm text-[color:var(--admin-muted)]">Panel operativo interno.</p>
         </div>
         <nav className="flex flex-1 flex-col gap-1">
           {NAV_ITEMS.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) => [
-                'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-[color:var(--admin-active-bg)] text-[color:var(--admin-active-text)]'
-                  : 'text-[color:var(--admin-muted)] hover:bg-[color:var(--admin-hover)] hover:text-[color:var(--admin-text)]',
-              ].join(' ')}
-            >
-              {item.label}
-            </NavLink>
+            <NavLink key={item.to} to={item.to} className={({ isActive }) => [
+              'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
+              isActive
+                ? 'bg-[color:var(--admin-active-bg)] text-[color:var(--admin-active-text)]'
+                : 'text-[color:var(--admin-muted)] hover:bg-[color:var(--admin-hover)] hover:text-[color:var(--admin-text)]',
+            ].join(' ')}>{item.label}</NavLink>
           ))}
         </nav>
-        <button
-          type="button"
-          onClick={toggleTheme}
-          className="admin2-btn admin2-btn--ghost mt-4 text-sm"
-        >
-          Tema: {theme === 'dark' ? 'Dark' : 'Light'}
-        </button>
+        <button type="button" onClick={toggleTheme} className="admin2-btn admin2-btn--ghost mt-4 text-sm">Tema: {theme === 'dark' ? 'Dark' : 'Light'}</button>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
         <nav className="border-b border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-3 py-3 lg:hidden">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">
-                <span>Innerbloom</span>
-                <img
-                  src="/IB-COLOR-LOGO-v2.png"
-                  alt="Innerbloom flower"
-                  className="h-4 w-4 object-contain"
-                  loading="lazy"
-                />
-              </p>
+              <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]"><span>Innerbloom</span><img src="/IB-COLOR-LOGO-v2.png" alt="Innerbloom flower" className="h-4 w-4 object-contain" loading="lazy" /></p>
               <p className="text-sm font-semibold tracking-tight">Admin</p>
             </div>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="admin2-btn admin2-btn--ghost"
-            >
-              {theme === 'dark' ? 'Dark' : 'Light'}
-            </button>
+            <button type="button" onClick={toggleTheme} className="admin2-btn admin2-btn--ghost">{theme === 'dark' ? 'Dark' : 'Light'}</button>
           </div>
-
           <div className="flex flex-wrap items-center gap-2">
             {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) => [
-                  'whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold',
-                  isActive ? 'bg-[color:var(--admin-active-bg)] text-[color:var(--admin-active-text)]' : 'bg-[color:var(--admin-hover)] text-[color:var(--admin-text)]',
-                ].join(' ')}
-              >
-                {item.label}
-              </NavLink>
+              <NavLink key={item.to} to={item.to} className={({ isActive }) => [
+                'whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold',
+                isActive ? 'bg-[color:var(--admin-active-bg)] text-[color:var(--admin-active-text)]' : 'bg-[color:var(--admin-hover)] text-[color:var(--admin-text)]',
+              ].join(' ')}>{item.label}</NavLink>
             ))}
           </div>
         </nav>
@@ -110,13 +72,10 @@ export function Admin2Shell() {
             <Route path="core-engine" element={<CoreEnginePage />} />
             <Route path="user-ops" element={<UserOpsPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
-            <Route path="marketing" element={<MarketingPage />} />
+            <Route path="marketing" element={<MarketingPageV2 />} />
             <Route path="ai-taskgen" element={<AiTaskgenPage />} />
             <Route path="advanced" element={<AdvancedPage />} />
-            <Route
-              path="users/:userId/taskgen"
-              element={<TaskgenUserPage baseTaskgenPath="/admin/ai-taskgen" baseUserPath="/admin/users" />}
-            />
+            <Route path="users/:userId/taskgen" element={<TaskgenUserPage baseTaskgenPath="/admin/ai-taskgen" baseUserPath="/admin/users" />} />
             <Route path="*" element={<Navigate to="." replace />} />
           </Routes>
         </main>
