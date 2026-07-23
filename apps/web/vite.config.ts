@@ -24,6 +24,13 @@ export default defineConfig({
     alias: {
       config: fileURLToPath(new URL('./src/config', import.meta.url)),
       'lucide-react': fileURLToPath(new URL('./src/lib/lucide-react.tsx', import.meta.url)),
+      ...(!isNativeBuild
+        ? {
+            '@capacitor/core': fileURLToPath(
+              new URL('./src/mobile/capacitorCoreWebShim.ts', import.meta.url),
+            ),
+          }
+        : {}),
       ...(useMockClerk
         ? {
             '@clerk/clerk-react': fileURLToPath(
