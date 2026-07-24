@@ -46,11 +46,12 @@ const campaign = JSON.parse(await fs.readFile(campaignPath, 'utf8')) as Campaign
 const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8')) as R2Manifest;
 validateManifest(campaign, manifest);
 const assetByFile = new Map(manifest.assets.map((asset) => [asset.file, asset]));
+const client = await pool.connect();
 
 try {
-  await pool.query('BEGIN');
+  await client.query('BEGIN');
 
-  const campaignResult = await pool.query<{ marketing_campaign_id: string }>(
+  const campaignResult = await client.query<{ marketing_campaign_id: string }>(
     `INSERT INTO marketing_campaigns (period_key, campaign_code, title, objective, status, strategy_summary, source_context)
      VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb)
      ON CONFLICT (campaign_code) DO UPDATE SET
@@ -106,7 +107,7 @@ try {
       };
     });
 
-    await pool.query(
+    await client.query(
       `INSERT INTO marketing_posts (
          marketing_campaign_id,post_code,platform,format,status,hook,caption,hypothesis,target_metric,tracking_url,
          asset_urls,agent_notes,scheduled_at
@@ -134,12 +135,13 @@ try {
     );
   }
 
-  await pool.query('COMMIT');
+  await client.query('COMMIT');
   console.log(`Imported ${campaign.posts.length} posts into Admin from ${manifest.assets.length} verified R2 assets for ${campaign.campaign.campaign_code}.`);
 } catch (error) {
-  await pool.query('ROLLBACK');
+  await client.query('ROLLBACK');
   throw error;
 } finally {
+  client.release();
   await endPool();
 }
 
