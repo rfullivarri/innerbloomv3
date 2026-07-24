@@ -1,11 +1,39 @@
 import type { PoolClient } from 'pg';
 import { pool } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
-import type { MarketingPostPayload, MarketingPostStatus, MarketingPostUpdateInput } from './marketingCampaignService.js';
+import type {
+  MarketingAssetPayload,
+  MarketingPostPayload,
+  MarketingPostStatus,
+  MarketingPostUpdateInput,
+} from './marketingCampaignService.js';
 
 export type MarketingCampaignBulkUpdate = {
   postCode: string;
   changes: MarketingPostUpdateInput;
+};
+
+type MarketingPostRow = {
+  marketing_post_id: string;
+  post_code: string;
+  platform: string;
+  format: string;
+  status: MarketingPostStatus;
+  hook: string | null;
+  caption: string | null;
+  hypothesis: string | null;
+  target_metric: string | null;
+  tracking_url: string | null;
+  asset_urls: unknown;
+  agent_notes: string | null;
+  decision_note: string | null;
+  rejection_reason: string | null;
+  scheduled_at: string | Date | null;
+  approved_at: string | Date | null;
+  rejected_at: string | Date | null;
+  published_at: string | Date | null;
+  measured_at: string | Date | null;
+  updated_at: string | Date | null;
 };
 
 export async function updateMarketingCampaignPostsBulk(
@@ -35,7 +63,7 @@ async function updateOne(
   postCode: string,
   input: MarketingPostUpdateInput,
 ): Promise<MarketingPostPayload> {
-  const existing = await client.query<any>(
+  const existing = await client.query<MarketingPostRow>(
     `SELECT mp.*
        FROM marketing_posts mp
        JOIN marketing_campaigns mc ON mc.marketing_campaign_id = mp.marketing_campaign_id
@@ -46,12 +74,12 @@ async function updateOne(
   const current = existing.rows[0];
   if (!current) throw new HttpError(404, 'marketing_post_not_found', `Marketing post ${postCode} not found.`);
 
-  const nextStatus = (input.status ?? current.status) as MarketingPostStatus;
+  const nextStatus = input.status ?? current.status;
   const now = new Date();
   const approvedAt = nextStatus === 'approved' && current.status !== 'approved' ? now : current.approved_at;
   const rejectedAt = nextStatus === 'rejected' && current.status !== 'rejected' ? now : current.rejected_at;
 
-  const result = await client.query<any>(
+  const result = await client.query<MarketingPostRow>(
     `UPDATE marketing_posts
         SET status = $3, hook = $4, caption = $5, hypothesis = $6, target_metric = $7,
             tracking_url = $8, asset_urls = $9::jsonb, agent_notes = $10, decision_note = $11,
@@ -80,12 +108,12 @@ async function updateOne(
   return mapRow(result.rows[0]);
 }
 
-function normalizeAssets(value: unknown) {
-  return Array.isArray(value) ? value : [];
+function normalizeAssets(value: unknown): MarketingAssetPayload[] {
+  return Array.isArray(value) ? value as MarketingAssetPayload[] : [];
 }
 
-function mapRow(row: any): MarketingPostPayload {
-  const iso = (value: unknown) => value ? new Date(value as string | number | Date).toISOString() : null;
+function mapRow(row: MarketingPostRow): MarketingPostPayload {
+  const iso = (value: string | Date | null) => value ? new Date(value).toISOString() : null;
   return {
     postCode: row.post_code,
     platform: row.platform,
