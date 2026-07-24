@@ -104,7 +104,19 @@ async function main(): Promise<void> {
   };
   walk(draft);
 
-  assert(Object.values(draft.campaign_quality_report).slice(0, 7).every((value) => value === true), 'all campaign quality booleans must be true for a successful draft');
+  const requiredQualityChecks = [
+    'schema_ready',
+    'strategy_fidelity',
+    'claim_safety',
+    'tracking_integrity',
+    'calendar_integrity',
+    'editorial_diversity',
+    'visual_brief_completeness',
+  ];
+  for (const check of requiredQualityChecks) {
+    assert(draft.campaign_quality_report[check] === true, `campaign_quality_report.${check} must be true for a successful draft`);
+  }
+
   console.log(`Validated campaign draft business invariants: ${inputPath}`);
 }
 
