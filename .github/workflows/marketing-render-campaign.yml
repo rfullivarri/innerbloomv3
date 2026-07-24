@@ -105,21 +105,12 @@ jobs:
           "${RENDER_OUTPUT_DIR}/r2-manifest.json"
           "${{ github.run_id }}"
 
-      - name: Build inline Admin review manifest
+      - name: Import verified R2 campaign into Admin review
         if: ${{ inputs.preview_limit == '0' }}
         run: >-
-          npm -w @innerbloom/api exec tsx scripts/create-marketing-github-staging-manifest.ts
-          ../../${{ env.RENDER_OUTPUT_DIR }}
-          ../../marketing/generated/${{ inputs.period_key }}/review-staging-manifest-${{ github.run_id }}.json
-          ${{ github.repository }}
-          ${{ github.sha }}
-
-      - name: Import campaign into Admin review
-        if: ${{ inputs.preview_limit == '0' }}
-        run: >-
-          npm -w @innerbloom/api exec tsx scripts/import-marketing-campaign.ts
+          npm -w @innerbloom/api exec tsx scripts/import-marketing-campaign-r2.ts
           ../../marketing/agent-outputs/${{ inputs.period_key }}/campaign.json
-          ../../marketing/generated/${{ inputs.period_key }}/review-staging-manifest-${{ github.run_id }}.json
+          ../../${{ env.RENDER_OUTPUT_DIR }}/r2-manifest.json
 
       - name: Keep output as artifact
         if: ${{ always() }}
@@ -140,9 +131,10 @@ jobs:
             echo "- Every uploaded image verified publicly by MIME type, binary signature and SHA-256 checksum"
             echo "- R2 manifest: ${RENDER_OUTPUT_DIR}/r2-manifest.json"
             if [[ "${{ inputs.preview_limit }}" == "0" ]]; then
-              echo "- Full campaign imported to Admin as needs_review using the current review transport"
-              echo "- Block 2 will switch the Admin import from inline previews to the verified R2 manifest"
+              echo "- Full campaign imported to Admin as needs_review from verified R2 URLs"
+              echo "- Neon stores metadata and public R2 references only; no base64 image payloads"
+              echo "- Next: review, edit, approve and export Metricool CSV"
             else
-              echo "- Pilot only; Admin unchanged"
+              echo "- Pilot only; Admin and Neon unchanged"
             fi
           } >> "${GITHUB_STEP_SUMMARY}"
