@@ -1,17 +1,17 @@
 name: Generate Head of Content context
 
 on:
+  push:
+    branches:
+      - "automation/marketing-cycle-*"
+    paths:
+      - "marketing/agent-outputs/*/cmo-strategy.json"
   workflow_dispatch:
     inputs:
       period_key:
-        description: Approved CMO strategy period in YYYY-MM format
+        description: CMO strategy period in YYYY-MM format
         required: true
         type: string
-      approve_strategy:
-        description: I reviewed and approve the CMO strategy for campaign development
-        required: true
-        default: false
-        type: boolean
       force:
         description: Rebuild content-context.json when it already exists
         required: false
@@ -22,7 +22,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: marketing-content-context-${{ github.event.inputs.period_key }}
+  group: marketing-content-context-${{ github.ref_name }}-${{ github.event.inputs.period_key || github.sha }}
   cancel-in-progress: false
 
 jobs:
@@ -41,47 +41,77 @@ jobs:
         with:
           node-version: 24
 
-      - name: Validate approval and period
+      - name: Resolve and validate period
         id: period
         shell: bash
         env:
-          PERIOD_KEY: ${{ github.event.inputs.period_key }}
-          APPROVED: ${{ github.event.inputs.approve_strategy }}
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_PERIOD_KEY: ${{ github.event.inputs.period_key }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_SHA: ${{ github.sha }}
+          PUSH_BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
+
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            period_key="${MANUAL_PERIOD_KEY}"
+          else
+            mapfile -t strategy_paths < <(
+              git diff --name-only "${PUSH_BEFORE}" "${PUSH_SHA}" -- \
+                'marketing/agent-outputs/*/cmo-strategy.json' \
+              | grep -E '^marketing/agent-outputs/[0-9]{4}-(0[1-9]|1[0-2])/cmo-strategy\.json$' \
+              | sort -u
+            )
+            if [[ "${#strategy_paths[@]}" -ne 1 ]]; then
+              echo "Expected exactly one changed monthly cmo-strategy.json; found ${#strategy_paths[@]}." >&2
+              printf '%s\n' "${strategy_paths[@]:-}" >&2
+              exit 1
+            fi
+            period_key="$(sed -E 's#^marketing/agent-outputs/([^/]+)/cmo-strategy\.json$#\1#' <<< "${strategy_paths[0]}")"
+            expected_branch="automation/marketing-cycle-${period_key}"
+            if [[ "${PUSH_BRANCH}" != "${expected_branch}" ]]; then
+              echo "Strategy period ${period_key} does not match branch ${PUSH_BRANCH}." >&2
+              exit 1
+            fi
+          fi
+
           node -e '
             const value = process.argv[1];
             const match = /^(\d{4})-(\d{2})$/.exec(value);
             if (!match || Number(match[2]) < 1 || Number(match[2]) > 12) process.exit(1);
-          ' "${PERIOD_KEY}"
-          if [[ "${APPROVED}" != "true" ]]; then
-            echo "Strategy approval must be confirmed." >&2
-            exit 1
-          fi
-          echo "branch=automation/marketing-cycle-${PERIOD_KEY}" >> "${GITHUB_OUTPUT}"
-          echo "output_path=marketing/agent-inputs/${PERIOD_KEY}/content-context.json" >> "${GITHUB_OUTPUT}"
+          ' "${period_key}"
+
+          echo "period_key=${period_key}" >> "${GITHUB_OUTPUT}"
+          echo "branch=automation/marketing-cycle-${period_key}" >> "${GITHUB_OUTPUT}"
+          echo "output_path=marketing/agent-inputs/${period_key}/content-context.json" >> "${GITHUB_OUTPUT}"
 
       - name: Check out monthly marketing branch
         shell: bash
         env:
+          EVENT_NAME: ${{ github.event_name }}
           CYCLE_BRANCH: ${{ steps.period.outputs.branch }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main --prune
-          if ! git ls-remote --exit-code --heads origin "${CYCLE_BRANCH}" >/dev/null 2>&1; then
-            echo "Monthly branch ${CYCLE_BRANCH} does not exist." >&2
-            exit 1
-          fi
-          git fetch origin "${CYCLE_BRANCH}:${CYCLE_BRANCH}"
-          git checkout "${CYCLE_BRANCH}"
-          git merge --no-edit origin/main
 
-      - name: Verify approved strategy inputs
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            git fetch origin main --prune
+            if ! git ls-remote --exit-code --heads origin "${CYCLE_BRANCH}" >/dev/null 2>&1; then
+              echo "Monthly branch ${CYCLE_BRANCH} does not exist." >&2
+              exit 1
+            fi
+            git fetch origin "${CYCLE_BRANCH}:${CYCLE_BRANCH}"
+            git checkout "${CYCLE_BRANCH}"
+            git merge --no-edit origin/main
+          else
+            git checkout -B "${CYCLE_BRANCH}" "${GITHUB_SHA}"
+          fi
+
+      - name: Verify strategy inputs
         shell: bash
         env:
-          PERIOD_KEY: ${{ github.event.inputs.period_key }}
+          PERIOD_KEY: ${{ steps.period.outputs.period_key }}
         run: |
           set -euo pipefail
           test -s "marketing/agent-inputs/${PERIOD_KEY}/cmo-context.json"
@@ -93,9 +123,17 @@ jobs:
       - name: Typecheck API
         run: npm -w @innerbloom/api run typecheck
 
+      - name: Validate CMO context
+        env:
+          PERIOD_KEY: ${{ steps.period.outputs.period_key }}
+        run: >-
+          npx tsx apps/api/scripts/validate-marketing-agent-json.ts
+          --schema=prompts/marketing/agent-system/schemas/cmo-input-v1.schema.json
+          --input="marketing/agent-inputs/${PERIOD_KEY}/cmo-context.json"
+
       - name: Validate CMO strategy
         env:
-          PERIOD_KEY: ${{ github.event.inputs.period_key }}
+          PERIOD_KEY: ${{ steps.period.outputs.period_key }}
         run: >-
           npx tsx apps/api/scripts/validate-marketing-agent-json.ts
           --schema=prompts/marketing/agent-system/schemas/cmo-output-v1.schema.json
@@ -104,12 +142,13 @@ jobs:
       - name: Generate Head of Content context
         shell: bash
         env:
-          PERIOD_KEY: ${{ github.event.inputs.period_key }}
+          PERIOD_KEY: ${{ steps.period.outputs.period_key }}
+          EVENT_NAME: ${{ github.event_name }}
           FORCE_INPUT: ${{ github.event.inputs.force }}
         run: |
           set -euo pipefail
-          args=(--period="${PERIOD_KEY}" --approve-strategy)
-          if [[ "${FORCE_INPUT}" == "true" ]]; then args+=(--force); fi
+          args=(--period="${PERIOD_KEY}")
+          if [[ "${EVENT_NAME}" == "push" || "${FORCE_INPUT}" == "true" ]]; then args+=(--force); fi
           npx tsx apps/api/scripts/export-marketing-content-context.ts "${args[@]}"
 
       - name: Validate Head of Content context
@@ -123,7 +162,7 @@ jobs:
       - name: Commit and push monthly branch
         shell: bash
         env:
-          PERIOD_KEY: ${{ github.event.inputs.period_key }}
+          PERIOD_KEY: ${{ steps.period.outputs.period_key }}
           CYCLE_BRANCH: ${{ steps.period.outputs.branch }}
           OUTPUT_PATH: ${{ steps.period.outputs.output_path }}
         run: |
@@ -134,14 +173,14 @@ jobs:
           if git diff --cached --quiet; then
             echo "The validated content context is unchanged."
           else
-            git commit -m "chore(marketing): approve strategy and generate content context for ${PERIOD_KEY}"
+            git commit -m "chore(marketing): generate validated content context for ${PERIOD_KEY}"
+            git push origin "HEAD:${CYCLE_BRANCH}"
           fi
-          git push origin "${CYCLE_BRANCH}"
 
       - name: Upload content context artifact
         uses: actions/upload-artifact@v4
         with:
-          name: marketing-content-context-${{ github.event.inputs.period_key }}
+          name: marketing-content-context-${{ steps.period.outputs.period_key }}
           path: ${{ steps.period.outputs.output_path }}
           if-no-files-found: error
           retention-days: 30
@@ -149,7 +188,7 @@ jobs:
       - name: Report next step
         shell: bash
         env:
-          PERIOD_KEY: ${{ github.event.inputs.period_key }}
+          PERIOD_KEY: ${{ steps.period.outputs.period_key }}
           CYCLE_BRANCH: ${{ steps.period.outputs.branch }}
           OUTPUT_PATH: ${{ steps.period.outputs.output_path }}
         run: |
@@ -158,7 +197,9 @@ jobs:
             echo "- Period: \`${PERIOD_KEY}\`"
             echo "- Branch: \`${CYCLE_BRANCH}\`"
             echo "- Input: \`${OUTPUT_PATH}\`"
-            echo "- CMO strategy approval: confirmed by workflow dispatch"
-            echo "- Validation: passed"
-            echo "- Next step: run the Head of Content agent on the same branch"
+            echo "- Handoff authority: \`automated_marketing_pipeline\`"
+            echo "- CMO context validation: passed"
+            echo "- CMO strategy validation: passed"
+            echo "- Head of Content input validation: passed"
+            echo "- Next step: the scheduled Head of Content agent may process this input"
           } >> "${GITHUB_STEP_SUMMARY}"
