@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The builder converts an approved monthly CMO strategy and its original CMO context into the deterministic input for the Head of Content agent.
+The builder converts a validated monthly CMO strategy and its original CMO context into the deterministic input for the Head of Content agent.
 
 Output:
 
@@ -10,17 +10,19 @@ Output:
 
 It does not execute the Head of Content agent, generate campaign posts, upload assets, write to Neon, or publish content.
 
-## Human approval model
+## Automated handoff model
 
-The CMO strategy remains `review_status: draft` in its source artifact. Human approval is recorded by manually running the `Generate Head of Content context` workflow and checking the approval confirmation input.
+Human approval is not required between the CMO and Head of Content during the routine monthly pipeline.
 
-The generated Head of Content input contains:
+The builder accepts a CMO strategy only after both source artifacts exist, match the same period, and validate against their schemas. The generated Head of Content input records:
 
-- `strategy.review_status: approved`;
+- `strategy.handoff_status: validated`;
+- `strategy.handoff_authority: automated_marketing_pipeline`;
 - the complete original CMO output under `strategy.cmo_output`;
-- a source-manifest entry for the workflow-dispatch approval.
+- SHA-256 checksums for `cmo-context.json` and `cmo-strategy.json`;
+- a source-manifest entry for the automated pipeline handoff.
 
-The source strategy is never modified automatically.
+The immutable source strategy is never rewritten or automatically marked approved. Its original `review_status` is preserved as evidence.
 
 ## CLI
 
@@ -29,7 +31,6 @@ From the repository root:
 ```bash
 npx tsx apps/api/scripts/export-marketing-content-context.ts \
   --period=2026-07 \
-  --approve-strategy \
   --force
 ```
 
@@ -38,7 +39,7 @@ Required inputs:
 - `marketing/agent-inputs/<PERIOD>/cmo-context.json`
 - `marketing/agent-outputs/<PERIOD>/cmo-strategy.json`
 
-The CLI refuses to run without `--approve-strategy`.
+The CLI fails closed when an input is missing, malformed, belongs to another period, or has an ineligible CMO review status.
 
 ## GitHub Actions
 
@@ -46,24 +47,20 @@ Workflow:
 
 `.github/workflows/marketing-content-context.yml`
 
-Manual flow:
+Normal automatic flow:
 
-1. Open **Actions**.
-2. Select **Generate Head of Content context**.
-3. Enter the approved strategy period.
-4. Check the strategy-approval confirmation.
-5. Run the workflow.
+1. Codex commits `marketing/agent-outputs/<PERIOD>/cmo-strategy.json` to `automation/marketing-cycle-<PERIOD>`.
+2. The path-filtered GitHub workflow starts automatically.
+3. It derives the period from the changed path and requires it to match the branch name.
+4. It validates `cmo-context.json` and `cmo-strategy.json`.
+5. It generates and validates `content-context.json`.
+6. It commits and pushes the file to the same monthly branch.
 
-The workflow:
+Manual recovery remains available through `workflow_dispatch` with `period_key` and optional `force`. It does not represent human strategy approval; it only reruns the deterministic handoff.
 
-1. checks out `automation/marketing-cycle-<PERIOD>`;
-2. merges the current `main` into the monthly branch;
-3. validates the CMO strategy;
-4. generates and validates `content-context.json`;
-5. commits and pushes the file to the same monthly branch;
-6. does not open or merge a pull request.
+The workflow does not open or merge a pull request.
 
-The monthly branch is then ready for Codex Head of Content.
+The monthly branch is then ready for the scheduled Codex Head of Content agent.
 
 ## Derived configuration
 
@@ -77,8 +74,11 @@ The monthly branch is then ready for Codex Head of Content.
 
 ## Safety
 
-- The builder does not invent analytics or assets.
+- The builder does not invent analytics, assets, strategy decisions, or approval state.
 - The source strategy and CMO context are read-only.
-- Human approval is mandatory.
+- Both source documents must validate before the handoff.
+- Period and branch identity must agree.
+- Input checksums are recorded for traceability and later idempotency.
 - The output is validated against `head-of-content-input-v1.schema.json` before it is committed.
+- Human review remains mandatory in Admin before publication.
 - No PR to `main` is opened at this stage.
