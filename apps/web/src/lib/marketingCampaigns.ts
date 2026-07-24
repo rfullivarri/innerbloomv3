@@ -72,49 +72,54 @@ export type MarketingPostUpdate = Partial<Pick<
 const MAX_PERSISTED_ASSET_URL_LENGTH = 2000;
 
 export async function fetchMarketingCampaigns() {
-  const response = await apiAuthorizedFetch('/admin/marketing/campaigns', {
-    headers: {
-      Accept: 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Marketing campaigns request failed with HTTP ${response.status}`);
-  }
-
+  const response = await apiAuthorizedFetch('/admin/marketing/campaigns', { headers: { Accept: 'application/json' } });
+  if (!response.ok) throw new Error(`Marketing campaigns request failed with HTTP ${response.status}`);
   return response.json() as Promise<{ ok: boolean; campaigns: MarketingCampaignRecord[] }>;
 }
 
-export async function updateMarketingCampaignPost(
-  campaignCode: string,
-  postCode: string,
-  payload: MarketingPostUpdate,
-) {
+export async function updateMarketingCampaignPost(campaignCode: string, postCode: string, payload: MarketingPostUpdate) {
   const response = await apiAuthorizedFetch(
     `/admin/marketing/campaigns/${encodeURIComponent(campaignCode)}/posts/${encodeURIComponent(postCode)}`,
     {
       method: 'PATCH',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify(sanitizeMarketingPostUpdate(payload)),
     },
   );
-
   if (!response.ok) {
     const body = await response.text();
     throw new Error(`Marketing post update failed with HTTP ${response.status}: ${body}`);
   }
-
   return response.json() as Promise<{ ok: boolean; post: MarketingPostRecord }>;
 }
 
-function sanitizeMarketingPostUpdate(payload: MarketingPostUpdate): MarketingPostUpdate {
-  if (!payload.assetUrls) {
-    return payload;
+export async function saveMarketingCampaignBulk(
+  campaignCode: string,
+  updates: Array<{ postCode: string; changes: MarketingPostUpdate }>,
+) {
+  if (!updates.length) return { ok: true, posts: [] as MarketingPostRecord[] };
+  const response = await apiAuthorizedFetch(
+    `/admin/marketing/campaigns/${encodeURIComponent(campaignCode)}/posts/bulk-save`,
+    {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        updates: updates.map((item) => ({
+          postCode: item.postCode,
+          changes: sanitizeMarketingPostUpdate(item.changes),
+        })),
+      }),
+    },
+  );
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Marketing campaign bulk save failed with HTTP ${response.status}: ${body}`);
   }
+  return response.json() as Promise<{ ok: boolean; posts: MarketingPostRecord[] }>;
+}
 
+function sanitizeMarketingPostUpdate(payload: MarketingPostUpdate): MarketingPostUpdate {
+  if (!payload.assetUrls) return payload;
   return {
     ...payload,
     assetUrls: payload.assetUrls.map((asset) => ({
@@ -128,17 +133,6 @@ function sanitizeMarketingPostUpdate(payload: MarketingPostUpdate): MarketingPos
 
 function persistableAssetUrl(value: string | undefined) {
   const normalized = value?.trim();
-  if (!normalized) {
-    return undefined;
-  }
-
-  if (/^(data|blob):/i.test(normalized)) {
-    return undefined;
-  }
-
-  if (normalized.length > MAX_PERSISTED_ASSET_URL_LENGTH) {
-    return undefined;
-  }
-
+  if (!normalized || /^(data|blob):/i.test(normalized) || normalized.length > MAX_PERSISTED_ASSET_URL_LENGTH) return undefined;
   return normalized;
 }

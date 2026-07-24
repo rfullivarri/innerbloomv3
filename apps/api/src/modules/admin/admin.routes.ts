@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { authMiddleware } from '../../middlewares/auth-middleware.js';
 import { asyncHandler } from '../../lib/async-handler.js';
 import { validateMarketingR2AssetUrls } from '../../services/marketingR2AssetService.js';
+import { updateMarketingCampaignPostsBulk } from '../../services/marketingCampaignBulkUpdateService.js';
 import {
   exportAdminUserLogsCsv,
   getAdminMe,
@@ -55,6 +56,7 @@ import {
   postAdminMarketingR2Assets,
   putAdminMarketingAnalyticsSettings,
 } from './admin.handlers.js';
+import { marketingPostUpdateBodySchema } from './admin.schemas.js';
 import { requireAdmin } from './admin.middleware.js';
 
 const router = Router();
@@ -64,10 +66,23 @@ const marketingMediaValidationBodySchema = z.object({
   urls: z.array(z.string().trim().url().max(2000)).min(1).max(100),
 });
 
+const marketingCampaignBulkSaveSchema = z.object({
+  updates: z.array(z.object({
+    postCode: z.string().trim().min(1).max(120),
+    changes: marketingPostUpdateBodySchema,
+  })).min(1).max(100),
+});
+
 adminRouter.get('/me', getAdminMe);
 adminRouter.get('/users', getAdminUsers);
 adminRouter.get('/marketing/campaigns', getAdminMarketingCampaigns);
 adminRouter.patch('/marketing/campaigns/:campaignCode/posts/:postCode', patchAdminMarketingPost);
+adminRouter.post('/marketing/campaigns/:campaignCode/posts/bulk-save', asyncHandler(async (req, res) => {
+  const campaignCode = z.string().trim().min(1).max(120).parse(req.params.campaignCode);
+  const body = marketingCampaignBulkSaveSchema.parse(req.body ?? {});
+  const posts = await updateMarketingCampaignPostsBulk(campaignCode, body.updates);
+  res.json({ ok: true, posts });
+}));
 adminRouter.post('/marketing/agents/cmo/context', postAdminMarketingCmoContext);
 adminRouter.get('/marketing/agents/cmo/context/status', getAdminMarketingCmoContextStatus);
 adminRouter.get('/marketing/analytics/status', getAdminMarketingAnalyticsStatus);
@@ -79,10 +94,7 @@ adminRouter.post('/marketing/r2/assets', postAdminMarketingR2Assets);
 adminRouter.post('/marketing/r2/validate', asyncHandler(async (req, res) => {
   const body = marketingMediaValidationBodySchema.parse(req.body ?? {});
   const assets = await validateMarketingR2AssetUrls(body.urls);
-  res.json({
-    ok: assets.every((asset) => asset.ok),
-    assets,
-  });
+  res.json({ ok: assets.every((asset) => asset.ok), assets });
 }));
 adminRouter.get('/taskgen/jobs', getTaskgenJobs);
 adminRouter.get('/taskgen/jobs/:jobId/logs', getTaskgenJobLogsHandler);
