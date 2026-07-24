@@ -24,8 +24,7 @@ async function loadJson(path: string): Promise<{ raw: string; value: any }> {
 async function main(): Promise<void> {
   const period = readArg('period');
   const force = hasFlag('force');
-  if (!period || !/^\d{4}-(0[1-9]|1[0-2])$/.test(period)) throw new Error('Usage: --period=YYYY-MM --approve-strategy [--force]');
-  if (!hasFlag('approve-strategy')) throw new Error('Explicit human approval is required');
+  if (!period || !/^\d{4}-(0[1-9]|1[0-2])$/.test(period)) throw new Error('Usage: --period=YYYY-MM [--force]');
 
   const root = process.cwd();
   const contextPath = resolve(root, `marketing/agent-inputs/${period}/cmo-context.json`);
@@ -46,8 +45,10 @@ async function main(): Promise<void> {
   ]);
 
   if (context?.period?.current_period !== period || strategy?.period !== period) throw new Error('Period mismatch');
-  if (!['draft', 'approved'].includes(strategy?.review_status)) throw new Error('Strategy is not eligible for approval');
+  if (!['draft', 'approved'].includes(strategy?.review_status)) throw new Error('CMO strategy is not eligible for the validated pipeline handoff');
 
+  const contextChecksum = sha256(contextRaw);
+  const strategyChecksum = sha256(strategyRaw);
   const campaignCode = `ib_${period.replace('-', '')}`;
   const supported = context.operational_constraints?.supported_formats ?? [];
   const formats = supported.map((value: string) => value.includes('carousel') ? 'carousel' : value.includes('static') ? 'static' : value);
@@ -65,11 +66,14 @@ async function main(): Promise<void> {
       publishing_end_date: monthEnd(period),
     },
     strategy: {
-      review_status: 'approved',
-      approval_authority: 'human_workflow_dispatch',
-      approval_recorded_at: now,
+      handoff_status: 'validated',
+      handoff_authority: 'automated_marketing_pipeline',
+      handoff_recorded_at: now,
       original_cmo_review_status: strategy.review_status,
+      cmo_context_path: `marketing/agent-inputs/${period}/cmo-context.json`,
+      cmo_context_checksum: contextChecksum,
       cmo_output_path: `marketing/agent-outputs/${period}/cmo-strategy.json`,
+      cmo_output_checksum: strategyChecksum,
       cmo_output: strategy,
     },
     brand: {
@@ -77,7 +81,7 @@ async function main(): Promise<void> {
       positioning: context.strategy_memory?.current_positioning ?? [],
       content_rules: context.strategy_memory?.content_rules ?? [],
       language: context.strategy_memory?.campaign_defaults?.default_language ?? 'English',
-      human_approval: true,
+      human_approval: false,
     },
     product_context: {
       stage: context.business_context?.product_stage,
@@ -106,9 +110,9 @@ async function main(): Promise<void> {
     },
     source_manifest: [
       ...(Array.isArray(context.source_manifest) ? context.source_manifest : []),
-      { source_type: 'repo_file', source_path_or_id: `marketing/agent-inputs/${period}/cmo-context.json`, captured_at: now, checksum: sha256(contextRaw) },
-      { source_type: 'approved_strategy', source_path_or_id: `marketing/agent-outputs/${period}/cmo-strategy.json`, captured_at: now, checksum: sha256(strategyRaw) },
-      { source_type: 'human_approval', source_path_or_id: 'workflow_dispatch:approve_strategy', captured_at: now, checksum: sha256(`${period}:${campaignCode}:approved`) },
+      { source_type: 'repo_file', source_path_or_id: `marketing/agent-inputs/${period}/cmo-context.json`, captured_at: now, checksum: contextChecksum },
+      { source_type: 'cmo_strategy', source_path_or_id: `marketing/agent-outputs/${period}/cmo-strategy.json`, captured_at: now, checksum: strategyChecksum },
+      { source_type: 'pipeline_handoff', source_path_or_id: 'automated_marketing_pipeline:cmo_to_head_of_content', captured_at: now, checksum: sha256(`${period}:${campaignCode}:${contextChecksum}:${strategyChecksum}`) },
     ],
   };
 
@@ -116,7 +120,7 @@ async function main(): Promise<void> {
   const tempPath = `${outputPath}.tmp`;
   await writeFile(tempPath, `${JSON.stringify(output, null, 2)}\n`, 'utf8');
   await rename(tempPath, outputPath);
-  console.log(JSON.stringify({ status: 'written', outputPath, period, campaignCode }, null, 2));
+  console.log(JSON.stringify({ status: 'written', outputPath, period, campaignCode, contextChecksum, strategyChecksum }, null, 2));
 }
 
 main().catch((error: unknown) => {
