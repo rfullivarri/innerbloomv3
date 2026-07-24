@@ -1,6 +1,6 @@
 # Marketing automation implementation plan
 
-**Status:** approved planning baseline — implementation not started  
+**Status:** Phase 1 audit and contract freeze completed — awaiting review  
 **Date:** 2026-07-24  
 **Related architecture:** `Docs/marketing/automated-marketing-system.md`
 
@@ -119,203 +119,183 @@ Observability is a release prerequisite, not a later polish item.
 
 ### 6.1 Pipeline state in Admin
 
-Marketing Admin must show the active period and every stage:
+For each period, Admin must display:
+
+- current overall status;
+- all pipeline stages in order;
+- state, start/end time and attempt count;
+- input and output hashes;
+- GitHub workflow run or Codex task reference;
+- concise error message;
+- access to operational logs;
+- recovery action when available.
+
+Required stage states:
 
 ```text
-CMO context
-CMO agent
-Head of Content context
-Head of Content agent
-Creative Director context
-Creative Director agent
-Campaign validation
-Render
-R2 verification
-Neon import
-Ready for review
+not_started
+waiting
+running
+completed
+failed
+blocked
+skipped
 ```
 
-Each stage needs:
+### 6.2 Persistent run model
 
-- status: `not_started`, `waiting`, `running`, `completed`, `failed`, `blocked` or `skipped`;
-- started and completed timestamps;
-- input and output paths;
-- input/output SHA values;
-- GitHub run ID or Codex task reference where available;
-- attempt count;
-- concise error summary;
-- link or reference to detailed logs;
-- recovery action when one exists.
+The implementation should persist at least:
 
-### 6.2 Logs
+- one pipeline run per period and attempt;
+- one stage record per pipeline run;
+- append-only events for transitions, validations, warnings and errors.
 
-Persist structured pipeline events, not only GitHub console text. Recommended entities:
+Do not persist private model reasoning, credentials, complete environment values or unrestricted raw logs.
 
-- `marketing_pipeline_runs` — one row per period/run;
-- `marketing_pipeline_stages` — current status and provenance per stage;
-- `marketing_pipeline_events` — append-only timeline and error records.
+### 6.3 Logs
 
-Do not store credentials, raw secrets or unnecessary model chain-of-thought. Store operational inputs, outputs, validation reports and concise failure evidence.
+Logs must answer:
 
-### 6.3 Notifications
+- what stage failed;
+- which period and branch were involved;
+- which input and output hashes were used;
+- which validator failed;
+- whether the stage can retry safely;
+- what action is required from a human.
 
-Support event notifications for at least:
+### 6.4 Notifications
 
-- monthly pipeline started;
-- agent output completed;
+During rollout, notify for:
+
+- monthly cycle started;
+- each agent artifact completed;
 - stage failed or became blocked;
 - render/import completed;
-- campaign ready for Admin review.
+- campaign ready for review.
 
-During rollout, detailed stage notifications may be enabled. The mature default should avoid noise and notify mainly on failures and `ready_for_review`.
+After stabilization, routine success notifications may be reduced to one final notification while failures remain immediate.
 
-The delivery channel must be selected during implementation according to existing Innerbloom notification infrastructure. Mobile push is preferred when reliable; email or another existing channel may be used as fallback.
+Preferred delivery is the existing Innerbloom mobile push infrastructure if it is suitable. Audit that integration before adding another provider. A fallback channel may be selected during implementation if mobile push cannot deliver operational notifications reliably.
 
-## 7. Production campaign contract
+## 7. Implementation phases
 
-The Head of Content output is renamed conceptually to `campaign-draft.json`. It owns content decisions but must not pretend to know renderer internals.
+### Phase 1 — Audit and contract freeze
 
-The Creative Director converts that draft into the production `campaign.json`, including at least:
+Status: **completed in documentation; awaiting review**.
 
-- exact `image_generation.jobs`;
-- exact `creative_direction` per job;
-- supported `layout_variant`;
-- approved `selected_asset_keys`;
-- palette and device mode;
-- screenshot surface/container compatibility;
-- supporting treatments and annotations;
-- carousel visual progression;
-- truthful source-asset mapping;
-- optional `asset_generation_queue` only when genuinely required.
+Deliverables:
 
-The production document must pass the same or stricter gates that protected the successful July renderer path, including layout diversity, asset validity, carousel diversity and no web screenshot inside a phone carcass.
+- `Docs/marketing/phase-1-audit-and-contracts.md`;
+- `Docs/marketing/contracts/campaign-draft-v1.md`;
+- `Docs/marketing/contracts/creative-director-v1.md`.
 
-## 8. Implementation sequence
+No production behavior changes in this phase.
 
-No Codex schedule should be created until the repository contracts and observability are ready.
+### Phase 2 — Remove intermediate human approval
 
-### Phase 0 — Audit and freeze contracts
+- replace human dispatch approval with validated pipeline authorization;
+- preserve manual dispatch only for recovery;
+- update builder, schema, workflow and Head of Content preconditions;
+- add tests proving invalid strategy still fails closed.
 
-- inventory active and legacy marketing files;
-- trace consumers of Asset Producer, old renderers and inline/base64 import paths;
-- define schemas for `campaign-draft.json`, `creative-context.json` and production `campaign.json`;
-- define per-stage state and event schemas;
-- add contract fixtures based on the successful July campaign;
-- document recovery and idempotency rules.
+### Phase 3 — Head of Content draft artifact
 
-**Exit:** agreed schemas and migration plan; no production behavior changed.
+- introduce `campaign-draft.json` schema;
+- update Head of Content prompt and agent contract;
+- validate preservation of CMO strategy;
+- stop writing production `campaign.json` from this agent.
 
-### Phase 1 — Remove intermediate human approval
+### Phase 4 — Creative Director
 
-- remove `approve_strategy` from the normal path;
-- replace human approval wrapper with pipeline authorization;
-- preserve manual recovery dispatch without making it a routine gate;
-- update Head of Content contract and validators;
-- keep final posts as `needs_review`.
+- create deterministic `creative-context.json` builder;
+- define Creative Director prompt, agent contract and schemas;
+- generate renderer-complete `campaign.json`;
+- add preservation and renderer compatibility validators.
 
-**Exit:** CMO strategy can flow automatically into Head of Content context.
+### Phase 5 — Pipeline persistence and logs
 
-### Phase 2 — Split campaign draft from creative production
+- add Neon run, stage and event records;
+- record transitions from GitHub and agent handoffs;
+- implement idempotency keys, hashes and safe retry behavior;
+- retain bounded operational logs.
 
-- make Head of Content emit `campaign-draft.json`;
-- create Creative Director prompt, AGENTS contract and schemas;
-- build deterministic Creative Director context generator;
-- make Creative Director emit renderer-complete `campaign.json`;
-- add compatibility rules for mobile/web screenshots and supported layouts.
+### Phase 6 — Admin observability
 
-**Exit:** agents can reproduce a renderer-valid campaign without manual enrichment.
+- add pipeline status and timeline to Marketing Admin;
+- show errors and recovery information;
+- link to GitHub or Codex execution details when available;
+- do not expose secrets or private model reasoning.
 
-### Phase 3 — Pipeline state, logs and notifications
+### Phase 7 — Notifications
 
-- add Neon pipeline-run, stage and event persistence;
-- expose pipeline endpoints;
-- add Admin process timeline and error/log views;
-- add notifications for failures and campaign readiness;
-- provide retry/recovery controls with authorization.
+- audit and reuse mobile push infrastructure where possible;
+- add event-based operational notifications;
+- prevent duplicate notifications during retries;
+- support final `ready_for_review` notification.
 
-**Exit:** a user can see where every period is, why it failed and what to do next.
+### Phase 8 — GitHub orchestration
 
-### Phase 4 — GitHub event orchestration
+- add path-aware triggers for agent outputs;
+- build next-agent contexts automatically;
+- trigger renderer from validated production `campaign.json`;
+- retain manual recovery inputs;
+- ensure Actions do not rely on a `GITHUB_TOKEN` push recursively triggering another Action.
 
-- react to Codex output commits by validated path and period;
-- generate the next deterministic context automatically;
-- trigger renderer when production `campaign.json` appears;
-- add locks, SHA provenance, duplicate protection and retries;
-- preserve manual dispatch as recovery only.
+### Phase 9 — Shadow end-to-end run
 
-**Exit:** repository artifacts move automatically between agents and Actions.
+Run one isolated period through:
 
-### Phase 5 — End-to-end shadow run
+```text
+contexts
+→ CMO
+→ Head of Content
+→ Creative Director
+→ campaign validation
+→ preview render
+→ complete render
+→ R2 verification
+→ Neon import
+→ Admin review state
+```
 
-- run a new isolated test period/campaign;
-- exercise all three agents;
-- render a pilot first without Neon import;
-- run full render/import only after all contracts pass;
-- verify Admin state, R2, Neon, CSV and Metricool compatibility;
-- intentionally simulate at least one failure per major boundary.
+First use a limited preview that cannot modify Admin. Only after all contracts pass, run the complete campaign with a unique campaign code.
 
-**Exit:** complete automated flow reaches Admin with useful status and error reporting.
+### Phase 10 — Legacy cleanup
 
-### Phase 6 — Legacy cleanup
+Only after the observable shadow run succeeds:
 
-Only after the shadow run succeeds:
+- remove superseded human approval paths;
+- remove confirmed unused renderer and import paths;
+- update or archive the Asset Producer contract;
+- remove obsolete documentation;
+- retain recovery workflows deliberately.
 
-- remove unused inline/base64 production paths;
-- archive superseded renderer/prompts/configuration;
-- remove obsolete manual-flow documentation;
-- keep R2 repair as an emergency tool;
-- retain Asset Producer as optional unless proven unused;
-- verify no imports, workflows or tests still depend on removed files.
+### Phase 11 — Codex Cloud schedules
 
-**Exit:** one canonical production path with no misleading legacy routes.
+Configure the three scheduled automations only after repository contracts and handoffs are proven:
 
-### Phase 7 — Create Codex Cloud automations
+- CMO;
+- Head of Content;
+- Creative Director.
 
-Create and authorize three scheduled Codex Cloud workers:
+The repository must contain the full prompts and discovery logic before the account-level Codex schedules are created.
 
-1. CMO;
-2. Head of Content;
-3. Creative Director.
+## 8. Release gates
 
-For each automation define:
+No phase may advance merely because its code merged.
 
-- repository and environment;
-- exact versioned prompt/instructions;
-- scheduled monthly window;
-- branch discovery logic;
-- allowed writes;
-- validation command;
-- commit behavior;
-- failure reporting;
-- usage limits.
+Required gates:
 
-This step requires the repository contracts to be merged and the account owner to authorize Codex Cloud repository access.
+- schemas and business validators pass;
+- idempotent retry is demonstrated;
+- failure produces no partial downstream campaign;
+- Admin displays truthful status;
+- notification behavior is tested;
+- no step before Admin requires routine human presence;
+- production render remains compatible with the successful July path.
 
-## 9. Planned PR breakdown
+## 9. Current stopping point
 
-1. **Audit and schema plan** — inventory, contracts, fixtures and state model.
-2. **Automated strategy handoff** — remove intermediate human approval.
-3. **Head of Content campaign draft** — formalize `campaign-draft.json`.
-4. **Creative Director agent** — context, prompt, schema and production `campaign.json`.
-5. **Pipeline persistence and API** — runs, stages and event logs.
-6. **Admin pipeline observability** — timeline, logs, failures and recovery UI.
-7. **Notifications** — failure and ready-for-review delivery.
-8. **GitHub orchestration** — path triggers, locks, SHA provenance and render handoff.
-9. **End-to-end shadow campaign** — full verification and failure drills.
-10. **Legacy cleanup** — remove only what the proven path no longer uses.
-11. **Codex Cloud setup guide** — final prompts, schedules and manual account steps.
+The plan and Phase 1 contracts are now documented. No workflow, prompt, production schema, renderer, Neon model, Admin screen or Codex schedule has been changed yet.
 
-Each PR must update the architecture document and this plan when its decisions or status change.
-
-## 10. Current stopping point
-
-Planning is complete enough to begin Phase 0, but no implementation should start until explicitly authorized.
-
-Current decisions:
-
-- three reasoning agents: CMO, Head of Content and Creative Director;
-- Asset Producer is optional;
-- no routine human approval before Admin;
-- observability and notifications precede legacy cleanup;
-- Codex Cloud scheduling is configured last, after repository support is proven;
-- the successful renderer/R2/Neon/Admin path remains the downstream baseline.
+The next implementation step, after review, is **Phase 2: remove intermediate human approval**.
