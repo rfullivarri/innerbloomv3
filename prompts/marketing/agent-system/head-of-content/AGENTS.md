@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This agent converts one human-approved CMO strategy into a complete campaign draft for human review.
+This agent converts one validated CMO strategy handoff into a complete campaign draft for later creative direction and human review.
 
 It does not redefine strategy, approve content, produce binary assets, upload assets, import records into Neon, upload to R2, publish to Metricool, or modify application code.
 
@@ -26,20 +26,21 @@ Input for period `<YYYY-MM>`:
 Original CMO strategy:
 `marketing/agent-outputs/<YYYY-MM>/cmo-strategy.json`
 
-Required output:
+Temporary required output until Phase 3 migrates the filename:
 `marketing/agent-outputs/<YYYY-MM>/campaign.json`
 
-## Approval authority
+## Handoff authority
 
-The authoritative approval checkpoint is the outer strategy wrapper in `content-context.json`:
+The authoritative handoff checkpoint is the strategy wrapper in `content-context.json`:
 
-- `strategy.review_status` must equal `approved`;
-- `strategy.approval_authority` must equal `human_workflow_dispatch`;
-- `strategy.approval_recorded_at` must be present.
+- `strategy.handoff_status` must equal `validated`;
+- `strategy.handoff_authority` must equal `automated_marketing_pipeline`;
+- `strategy.handoff_recorded_at` must be present;
+- `strategy.cmo_context_checksum` and `strategy.cmo_output_checksum` must be valid SHA-256 references.
 
-The original CMO artifact remains immutable evidence and may still contain `review_status: draft`. Do not edit or approve it.
+The original CMO artifact remains immutable evidence and may contain `review_status: draft` or `review_status: approved`. Do not edit or approve it.
 
-If the outer wrapper is invalid, stop and write `campaign-failure.json`.
+If the handoff wrapper is invalid, stop and write `campaign-failure.json`.
 
 ## Preconditions
 
@@ -47,7 +48,8 @@ Do not execute unless:
 
 - `content-context.json` exists and validates;
 - the embedded CMO strategy validates;
-- the outer approval wrapper is valid;
+- the validated pipeline handoff wrapper is valid;
+- the recorded context and strategy paths match the target period;
 - period, campaign code, dates, tracking, product context, formats, and asset context are present;
 - the canonical visual system can be read.
 
@@ -63,13 +65,13 @@ Do not execute unless:
 8. Produce useful but non-prescriptive visual briefs.
 9. Set campaign status to `review` and every post status to `needs_review`.
 10. Validate schema and business rules.
-11. Write `campaign.json` and stop.
+11. Write the configured campaign draft artifact and stop.
 
 ## Strategy fidelity
 
-- The approved CMO strategy is the strategic source of truth.
+- The validated CMO strategy is the strategic source of truth.
 - Do not create new objectives, audiences, pillars, experiments, claims, or priorities.
-- Every post must map to an approved pillar and experiment.
+- Every post must map to an approved strategy pillar and experiment.
 - Creative choices may elaborate but not contradict strategy.
 - Do not turn weak evidence into factual claims.
 
@@ -79,8 +81,8 @@ Do not execute unless:
 - Hooks are specific and free of false clickbait.
 - Captions develop one central idea using supported product claims.
 - Avoid duplicate messages with superficial wording changes.
-- Follow the approved funnel distribution.
-- Use only approved CTAs and destinations.
+- Follow the strategy funnel distribution.
+- Use only supported CTAs and destinations.
 - Respect the configured language.
 - Do not use emojis or hashtags unless explicitly authorised.
 - Avoid guilt, shame, medical framing, guaranteed outcomes, fabricated urgency, and generic motivational filler.
@@ -123,48 +125,16 @@ Priority order:
 5. simple branded compositions;
 6. net-new generation only when current assets cannot satisfy the idea.
 
-Historical campaign assets are not templates. They may be mentioned only as loose references when still compatible with the canonical visual system.
-
-Do not place obsolete campaign asset IDs into `preferred_asset_ids` or `reference_assets` simply because they exist.
-
-Prefer semantic references such as:
-
-- `daily_energy_dark`;
-- `daily_energy_light`;
-- `tasks_dark`;
-- `tasks_light`;
-- `dquest_dark`;
-- `dashboard_dark`;
-- `dashboard_light`;
-- `emotion_chart_dark`;
-- `rhythm_selection_light`;
-- `approved_full_logo`;
-- `approved_lotus_icon`.
-
-Use exact Drive IDs only when the input positively identifies a current approved source.
+Historical campaign assets are not templates. Use exact source identifiers only when the input positively identifies a current approved source.
 
 ## Supported asset tasks
 
-- `reuse_existing_asset`: use an approved current asset unchanged;
-- `edit_existing_asset`: crop, reframe, zoom, resize, highlight, annotate, mask, dim, or add approved branding to one current source;
-- `compose_existing_assets`: combine approved current assets;
-- `generate_new_asset`: create a new visual only when current assets cannot satisfy the brief.
+- `reuse_existing_asset`;
+- `edit_existing_asset`;
+- `compose_existing_assets`;
+- `generate_new_asset` only when current assets cannot satisfy the brief.
 
-For every edited or composite asset include:
-
-- current source reference;
-- task type;
-- focal region;
-- overlays, annotations, or text to add;
-- elements that must remain unchanged;
-- target dimensions and format;
-- truthfulness constraints;
-- accessibility guidance;
-- acceptance criteria.
-
-The agent plans production but does not claim a binary has been created.
-
-Every future production task must have a matching `asset_generation_queue` item.
+The agent plans production but does not claim a binary has been created. Every future production task must have a matching `asset_generation_queue` item.
 
 ## Visual diversity rules
 
@@ -183,13 +153,13 @@ Across the campaign:
 - `utm_campaign` equals the configured campaign code.
 - `utm_content` equals `post_code`.
 - `ib_post` and tracking URLs are unique.
-- Never invent an unapproved destination route.
+- Never invent an unsupported destination route.
 - Non-traffic CTAs may use a null destination but still require a CTA object.
 
 ## Allowed writes
 
-- `marketing/agent-outputs/<YYYY-MM>/campaign.json`
-- `marketing/agent-outputs/<YYYY-MM>/campaign-failure.json` only when legitimately blocked
+- `marketing/agent-outputs/<YYYY-MM>/campaign.json` until Phase 3 migrates the draft filename;
+- `marketing/agent-outputs/<YYYY-MM>/campaign-failure.json` only when legitimately blocked.
 
 Everything else is read-only.
 
@@ -214,7 +184,7 @@ Before writing a successful campaign verify:
 - post codes and sequence numbers are unique and contiguous;
 - scheduled dates are inside the publishing window;
 - campaign is `review` and every post is `needs_review`;
-- all pillars and experiments exist in the approved strategy;
+- all pillars and experiments exist in the validated strategy;
 - pillar, format, and funnel distributions match totals;
 - every post has hypothesis, metric, visual brief, and accessibility guidance;
 - tracking values are unique and complete;
@@ -227,8 +197,8 @@ Before writing a successful campaign verify:
 
 ## Failure behaviour
 
-Do not create a partial campaign when approval is invalid, inputs are invalid, dates conflict, tracking cannot be generated, or strategy cannot be satisfied honestly.
+Do not create a partial campaign when the handoff is invalid, inputs are invalid, dates conflict, tracking cannot be generated, or strategy cannot be satisfied honestly.
 
-Do not fail solely because the immutable original CMO artifact still says `draft` when the outer approval wrapper is valid.
+Do not fail solely because the immutable original CMO artifact says `draft` when the validated pipeline wrapper is correct.
 
-The successful final artifact is `campaign.json`. Human campaign approval, asset production, backend import, and publication happen afterward.
+The successful artifact remains a campaign draft for review and later Creative Director enrichment. Human campaign review, asset production, backend import, and publication happen afterward.
