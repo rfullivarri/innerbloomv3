@@ -25,6 +25,13 @@ const sourcePeriodKey = source.period_key || '';
 const derived = filterDocument(structuredClone(source));
 derived.period_key = periodKey;
 derived.generated_at = new Date().toISOString();
+derived.validation_profile = {
+  kind: 'derived_test',
+  minimum_unique_layouts: 6,
+  minimum_distinct_assets: 6,
+  carousel_minimum_unique_layouts: 4,
+  maximum_layout_share: 0.34,
+};
 derived.campaign = {
   ...derived.campaign,
   campaign_code: campaignCode,
