@@ -59,6 +59,20 @@ jobs:
       - name: Install Chromium for deterministic rendering
         run: npm -w @innerbloom/web exec playwright install --with-deps chromium
 
+      - name: Prepare configured derived test campaign
+        shell: bash
+        run: |
+          set -euo pipefail
+          config="marketing/agent-outputs/${{ inputs.period_key }}/test-campaign.config.json"
+          campaign="marketing/agent-outputs/${{ inputs.period_key }}/campaign.json"
+          if [[ -f "${config}" ]]; then
+            node scripts/marketing/create-derived-test-campaign.mjs "${config}" "${campaign}"
+          fi
+          if [[ ! -f "${campaign}" ]]; then
+            echo "No campaign.json or test-campaign.config.json found for ${{ inputs.period_key }}" >&2
+            exit 1
+          fi
+
       - name: Choose isolated output
         shell: bash
         run: |
@@ -141,7 +155,6 @@ jobs:
             echo "- R2 manifest: ${RENDER_OUTPUT_DIR}/r2-manifest.json"
             if [[ "${{ inputs.preview_limit }}" == "0" ]]; then
               echo "- Full campaign imported to Admin as needs_review using the current review transport"
-              echo "- Block 2 will switch the Admin import from inline previews to the verified R2 manifest"
             else
               echo "- Pilot only; Admin unchanged"
             fi
