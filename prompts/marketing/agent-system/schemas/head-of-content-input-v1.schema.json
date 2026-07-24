@@ -23,13 +23,16 @@
     "strategy": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["review_status", "approval_authority", "approval_recorded_at", "original_cmo_review_status", "cmo_output_path", "cmo_output"],
+      "required": ["handoff_status", "handoff_authority", "handoff_recorded_at", "original_cmo_review_status", "cmo_context_path", "cmo_context_checksum", "cmo_output_path", "cmo_output_checksum", "cmo_output"],
       "properties": {
-        "review_status": {"const": "approved"},
-        "approval_authority": {"const": "human_workflow_dispatch"},
-        "approval_recorded_at": {"type": "string", "format": "date-time"},
+        "handoff_status": {"const": "validated"},
+        "handoff_authority": {"const": "automated_marketing_pipeline"},
+        "handoff_recorded_at": {"type": "string", "format": "date-time"},
         "original_cmo_review_status": {"enum": ["draft", "approved"]},
+        "cmo_context_path": {"type": "string", "minLength": 1},
+        "cmo_context_checksum": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
         "cmo_output_path": {"type": "string", "minLength": 1},
+        "cmo_output_checksum": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
         "cmo_output": {"type": "object"}
       }
     },
