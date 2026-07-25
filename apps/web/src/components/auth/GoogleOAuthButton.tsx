@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { useClerk, useSignIn, useSignUp } from '@clerk/clerk-react';
+import { useSignIn, useSignUp } from '@clerk/clerk-react';
 
 export type GoogleOAuthMode = 'sign-in' | 'sign-up';
 
@@ -177,7 +177,6 @@ export function GoogleOAuthButton({
   className = '',
   forceAccountSelection = false,
 }: GoogleOAuthButtonProps) {
-  const clerk = useClerk();
   const { isLoaded: isSignInLoaded, signIn } = useSignIn();
   const { isLoaded: isSignUpLoaded, signUp } = useSignUp();
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -230,30 +229,18 @@ export function GoogleOAuthButton({
         if (!signUp) {
           throw new Error('Clerk sign-up resource is not ready');
         }
-        clerk.client.resetSignUp();
-        console.info('[auth] starting interactive Google OAuth', {
-          mode,
-          oauthMode,
-          accountSelection: shouldForceAccountSelection ? 'required' : 'default',
-        });
         await signUp.authenticateWithRedirect(redirectOptions);
       } else {
         if (!signIn) {
           throw new Error('Clerk sign-in resource is not ready');
         }
-        clerk.client.resetSignIn();
-        console.info('[auth] starting interactive Google OAuth', {
-          mode,
-          oauthMode,
-          accountSelection: shouldForceAccountSelection ? 'required' : 'default',
-        });
         await signIn.authenticateWithRedirect(redirectOptions);
       }
     } catch (error) {
       console.error(`[auth] Google OAuth redirect failed ${JSON.stringify(describeClerkOAuthError(error))}`);
       setIsRedirecting(false);
     }
-  }, [clerk.client, isLoaded, isRedirecting, mode, oauthMode, redirectUrlComplete, shouldForceAccountSelection, signIn, signUp]);
+  }, [isLoaded, isRedirecting, mode, oauthMode, redirectUrlComplete, shouldForceAccountSelection, signIn, signUp]);
 
   return (
     <button
