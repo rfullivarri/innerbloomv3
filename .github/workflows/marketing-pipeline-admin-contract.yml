@@ -44,8 +44,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -F "import { MarketingPipelinePage }" apps/web/src/components/admin2/Admin2Shell.tsx
-          grep -F 'path="marketing/pipeline"' apps/web/src/components/admin2/Admin2Shell.tsx
+          shell_file=apps/web/src/components/admin2/Admin2Shell.tsx
+          grep -F "import { MarketingPipelinePage }" "$shell_file"
+          grep -F "{ to: '/admin/marketing-pipeline', label: 'Marketing Pipeline' }" "$shell_file"
+          grep -F 'path="marketing-pipeline" element={<MarketingPipelinePage />}' "$shell_file"
       - name: Validate migration contract
         shell: bash
         run: |
