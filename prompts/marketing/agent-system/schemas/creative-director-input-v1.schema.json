@@ -83,13 +83,14 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["asset_key", "kind", "module", "mode", "surface", "composition_profile", "composition_slots", "allowed_operations"],
+            "required": ["asset_key", "kind", "module", "mode", "surface", "status", "composition_profile", "composition_slots", "allowed_operations"],
             "properties": {
               "asset_key": {"type": "string", "minLength": 1},
               "kind": {"type": "string"},
               "module": {"type": "string"},
               "mode": {"type": "string"},
               "surface": {"type": "string"},
+              "status": {"const": "approved_current"},
               "composition_profile": {"type": ["string", "null"]},
               "composition_slots": {"type": ["object", "null"]},
               "allowed_operations": {"type": "array", "items": {"type": "string"}}
