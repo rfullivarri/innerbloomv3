@@ -13,6 +13,7 @@ import { PostLoginLanguageProvider } from './i18n/postLoginLanguage';
 import { IOSNativeAuthCallbackBridge } from './mobile/IOSNativeAuthCallbackBridge';
 import { NativeInternalNavigationBridge } from './mobile/NativeInternalNavigationBridge';
 import { NativeMobileBridge } from './mobile/NativeMobileBridge';
+import { NativeReliabilityBridge } from './mobile/NativeReliabilityBridge';
 import { isNativeCapacitorPlatform } from './mobile/capacitor';
 import { RuntimeAuthProvider } from './auth/runtimeAuth';
 
@@ -103,6 +104,7 @@ createRoot(rootElement).render(
             <IOSNativeAuthCallbackBridge />
             <NativeInternalNavigationBridge />
             <NativeMobileBridge />
+            <NativeReliabilityBridge />
             <App />
           </ThemePreferenceProvider>
         </PostLoginLanguageProvider>
