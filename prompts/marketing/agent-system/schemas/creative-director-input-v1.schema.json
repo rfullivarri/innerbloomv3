@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "innerbloom://marketing/creative-director-input-v1",
+  "title": "Innerbloom Creative Director Input v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "context_type", "period_key", "generated_at", "provenance", "immutable_editorial_source", "strategic_guardrails", "visual_system", "renderer_capabilities", "current_assets", "production_rules"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "context_type": {"const": "innerbloom_creative_director_input"},
+    "period_key": {"type": "string", "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_branch", "campaign_draft_path", "campaign_draft_sha256", "cmo_strategy_path", "cmo_strategy_sha256", "content_context_path", "content_context_sha256", "visual_system_path", "visual_system_sha256", "asset_registry_path", "asset_registry_sha256", "layout_spec_path", "layout_spec_sha256", "creative_director_contract_version"],
+      "properties": {
+        "source_branch": {"type": "string", "pattern": "^automation/marketing-cycle-\\d{4}-\\d{2}$"},
+        "campaign_draft_path": {"type": "string"},
+        "campaign_draft_sha256": {"$ref": "#/$defs/sha256"},
+        "cmo_strategy_path": {"type": "string"},
+        "cmo_strategy_sha256": {"$ref": "#/$defs/sha256"},
+        "content_context_path": {"type": "string"},
+        "content_context_sha256": {"$ref": "#/$defs/sha256"},
+        "visual_system_path": {"type": "string"},
+        "visual_system_sha256": {"$ref": "#/$defs/sha256"},
+        "asset_registry_path": {"type": "string"},
+        "asset_registry_sha256": {"$ref": "#/$defs/sha256"},
+        "layout_spec_path": {"type": "string"},
+        "layout_spec_sha256": {"$ref": "#/$defs/sha256"},
+        "creative_director_contract_version": {"const": "creative-director-v1"}
+      }
+    },
+    "immutable_editorial_source": {"type": "object"},
+    "strategic_guardrails": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "approved_product_truths", "approved_claim_source"],
+      "properties": {
+        "strategy": {"type": "object"},
+        "approved_product_truths": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+        "approved_claim_source": {"type": "object"}
+      }
+    },
+    "visual_system": {"type": "object"},
+    "renderer_capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy", "device_pose_presets", "layouts", "output_canvas"],
+      "properties": {
+        "policy": {"type": "object"},
+        "device_pose_presets": {"type": "object"},
+        "layouts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["layout_key", "status", "renderer_layout", "copy_role", "copy_zone", "product_zone", "device_pose", "min_mobile_assets", "max_mobile_assets", "min_module_assets", "allowed_backgrounds", "required_support_assets", "fallback_layouts"]
+          }
+        },
+        "output_canvas": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width", "height", "format"],
+          "properties": {
+            "width": {"const": 1080},
+            "height": {"const": 1080},
+            "format": {"const": "png"}
+          }
+        }
+      }
+    },
+    "current_assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["registry_name", "selection_rules", "assets"],
+      "properties": {
+        "registry_name": {"type": "string"},
+        "selection_rules": {"type": "array", "items": {"type": "string"}},
+        "assets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["asset_key", "kind", "module", "mode", "surface", "composition_profile", "composition_slots", "allowed_operations"],
+            "properties": {
+              "asset_key": {"type": "string", "minLength": 1},
+              "kind": {"type": "string"},
+              "module": {"type": "string"},
+              "mode": {"type": "string"},
+              "surface": {"type": "string"},
+              "composition_profile": {"type": ["string", "null"]},
+              "composition_slots": {"type": ["object", "null"]},
+              "allowed_operations": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        }
+      }
+    },
+    "production_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["output_path", "failure_path", "preserve_editorial_fields", "registered_assets_only", "executable_layouts_only", "allow_experimental_layout_only_with_required_support_assets", "campaign_status", "post_status", "renderer_validator", "diversity_rules"],
+      "properties": {
+        "output_path": {"type": "string"},
+        "failure_path": {"type": "string"},
+        "preserve_editorial_fields": {"const": true},
+        "registered_assets_only": {"const": true},
+        "executable_layouts_only": {"const": true},
+        "allow_experimental_layout_only_with_required_support_assets": {"const": true},
+        "campaign_status": {"const": "review"},
+        "post_status": {"const": "needs_review"},
+        "renderer_validator": {"const": "scripts/marketing/validate-creative-direction-v3.mjs"},
+        "diversity_rules": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["minimum_unique_layouts_full_campaign", "minimum_distinct_source_assets_full_campaign", "minimum_unique_layouts_per_carousel", "maximum_layout_share_percent"],
+          "properties": {
+            "minimum_unique_layouts_full_campaign": {"type": "integer", "minimum": 1},
+            "minimum_distinct_source_assets_full_campaign": {"type": "integer", "minimum": 1},
+            "minimum_unique_layouts_per_carousel": {"type": "integer", "minimum": 1},
+            "maximum_layout_share_percent": {"type": "integer", "minimum": 1, "maximum": 100}
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"}
+  }
+}
