@@ -1,0 +1,151 @@
+name: Generate Creative Director context
+
+on:
+  push:
+    branches:
+      - "automation/marketing-cycle-*"
+    paths:
+      - "marketing/agent-outputs/*/campaign-draft.json"
+  workflow_dispatch:
+    inputs:
+      period_key:
+        description: Campaign draft period in YYYY-MM format
+        required: true
+        type: string
+      force:
+        description: Rebuild creative-context.json when it already exists
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: marketing-creative-context-${{ github.ref_name }}-${{ github.event.inputs.period_key || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  generate-creative-context:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Resolve period and monthly branch
+        id: period
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_PERIOD_KEY: ${{ github.event.inputs.period_key }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_SHA: ${{ github.sha }}
+          PUSH_BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            period_key="${MANUAL_PERIOD_KEY}"
+          else
+            mapfile -t paths < <(git diff --name-only "${PUSH_BEFORE}" "${PUSH_SHA}" -- 'marketing/agent-outputs/*/campaign-draft.json' | grep -E '^marketing/agent-outputs/[0-9]{4}-(0[1-9]|1[0-2])/campaign-draft\.json$' | sort -u)
+            if [[ "${#paths[@]}" -ne 1 ]]; then
+              echo "Expected exactly one changed campaign-draft.json; found ${#paths[@]}." >&2
+              exit 1
+            fi
+            period_key="$(sed -E 's#^marketing/agent-outputs/([^/]+)/campaign-draft\.json$#\1#' <<< "${paths[0]}")"
+            [[ "${PUSH_BRANCH}" == "automation/marketing-cycle-${period_key}" ]] || { echo "Period and branch mismatch." >&2; exit 1; }
+          fi
+          [[ "${period_key}" =~ ^[0-9]{4}-(0[1-9]|1[0-2])$ ]] || { echo "Invalid period." >&2; exit 1; }
+          echo "period_key=${period_key}" >> "${GITHUB_OUTPUT}"
+          echo "branch=automation/marketing-cycle-${period_key}" >> "${GITHUB_OUTPUT}"
+          echo "output_path=marketing/agent-inputs/${period_key}/creative-context.json" >> "${GITHUB_OUTPUT}"
+
+      - name: Check out monthly branch
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          CYCLE_BRANCH: ${{ steps.period.outputs.branch }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            git fetch origin main --prune
+            git ls-remote --exit-code --heads origin "${CYCLE_BRANCH}" >/dev/null
+            git fetch origin "${CYCLE_BRANCH}:${CYCLE_BRANCH}"
+            git checkout "${CYCLE_BRANCH}"
+            git merge --no-edit origin/main
+          else
+            git checkout -B "${CYCLE_BRANCH}" "${GITHUB_SHA}"
+          fi
+
+      - name: Verify required sources
+        env:
+          PERIOD_KEY: ${{ steps.period.outputs.period_key }}
+        run: |
+          test -s "marketing/agent-outputs/${PERIOD_KEY}/campaign-draft.json"
+          test -s "marketing/agent-outputs/${PERIOD_KEY}/cmo-strategy.json"
+          test -s "marketing/agent-inputs/${PERIOD_KEY}/content-context.json"
+          test -s prompts/marketing/agent-system/brand/innerbloom-visual-system-v1.json
+          test -s marketing/asset-registry/innerbloom-drive-assets-v1.json
+          test -s marketing/layout-references/innerbloom-layout-specifications-v1.json
+
+      - run: npm install --no-audit --no-fund
+      - name: Typecheck API
+        run: npm -w @innerbloom/api run typecheck
+
+      - name: Validate campaign draft fidelity
+        env:
+          PERIOD_KEY: ${{ steps.period.outputs.period_key }}
+        run: >-
+          npx tsx apps/api/scripts/validate-marketing-campaign-draft.ts
+          --input="marketing/agent-outputs/${PERIOD_KEY}/campaign-draft.json"
+          --content-context="marketing/agent-inputs/${PERIOD_KEY}/content-context.json"
+          --cmo-strategy="marketing/agent-outputs/${PERIOD_KEY}/cmo-strategy.json"
+
+      - name: Generate Creative Director context
+        shell: bash
+        env:
+          PERIOD_KEY: ${{ steps.period.outputs.period_key }}
+          EVENT_NAME: ${{ github.event_name }}
+          FORCE_INPUT: ${{ github.event.inputs.force }}
+        run: |
+          set -euo pipefail
+          args=(--period="${PERIOD_KEY}")
+          if [[ "${EVENT_NAME}" == "push" || "${FORCE_INPUT}" == "true" ]]; then args+=(--force); fi
+          npx tsx apps/api/scripts/export-marketing-creative-context.ts "${args[@]}"
+
+      - name: Validate Creative Director context
+        env:
+          OUTPUT_PATH: ${{ steps.period.outputs.output_path }}
+        run: >-
+          npx tsx apps/api/scripts/validate-marketing-agent-json.ts
+          --schema=prompts/marketing/agent-system/schemas/creative-director-input-v1.schema.json
+          --input="${OUTPUT_PATH}"
+
+      - name: Commit validated creative context
+        shell: bash
+        env:
+          CYCLE_BRANCH: ${{ steps.period.outputs.branch }}
+          OUTPUT_PATH: ${{ steps.period.outputs.output_path }}
+          PERIOD_KEY: ${{ steps.period.outputs.period_key }}
+        run: |
+          set -euo pipefail
+          git add -- "${OUTPUT_PATH}"
+          if git diff --cached --quiet; then
+            echo "Creative context is unchanged."
+          else
+            git commit -m "chore(marketing): generate creative context for ${PERIOD_KEY}"
+            git push origin "HEAD:${CYCLE_BRANCH}"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: marketing-creative-context-${{ steps.period.outputs.period_key }}
+          path: ${{ steps.period.outputs.output_path }}
+          if-no-files-found: error
+          retention-days: 30
