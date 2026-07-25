@@ -8,6 +8,7 @@ on:
       - 'apps/api/src/modules/admin/admin.routes.ts'
       - 'apps/web/src/lib/marketingPipeline.ts'
       - 'apps/web/src/pages/admin2/MarketingPipelinePage.tsx'
+      - 'apps/web/src/pages/admin2/MarketingOperationsPage.tsx'
       - 'apps/web/src/components/admin2/Admin2Shell.tsx'
       - 'Docs/marketing/manual-action-test-plan.md'
       - '.github/workflows/marketing-pipeline-admin-contract.yml'
@@ -40,14 +41,23 @@ jobs:
           --skipLibCheck
           src/lib/marketingPipeline.ts
           src/pages/admin2/MarketingPipelinePage.tsx
-      - name: Verify Admin route registration
+          src/pages/admin2/MarketingOperationsPage.tsx
+      - name: Verify Marketing tab registration
         shell: bash
         run: |
           set -euo pipefail
           shell_file=apps/web/src/components/admin2/Admin2Shell.tsx
-          grep -F "import { MarketingPipelinePage }" "$shell_file"
-          grep -F "{ to: '/admin/marketing-pipeline', label: 'Marketing Pipeline' }" "$shell_file"
-          grep -F 'path="marketing-pipeline" element={<MarketingPipelinePage />}' "$shell_file"
+          operations_file=apps/web/src/pages/admin2/MarketingOperationsPage.tsx
+          grep -F "import { MarketingOperationsPage }" "$shell_file"
+          grep -F 'path="marketing" element={<MarketingOperationsPage />}' "$shell_file"
+          ! grep -F "{ to: '/admin/marketing-pipeline', label: 'Marketing Pipeline' }" "$shell_file"
+          grep -F "<TabButton active={section === 'pipeline'}" "$operations_file"
+          grep -F '<MarketingPipelinePanel/>' "$operations_file"
+      - name: Validate missing-table fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "cause.code === '42P01'" apps/api/src/services/marketingPipelineService.ts
       - name: Validate migration contract
         shell: bash
         run: |
