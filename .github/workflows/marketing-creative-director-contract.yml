@@ -60,12 +60,54 @@ jobs:
           const period = '2026-08';
           const draft = JSON.parse(fs.readFileSync(`marketing/agent-outputs/${period}/campaign-draft.json`, 'utf8'));
           const context = JSON.parse(fs.readFileSync(`marketing/agent-inputs/${period}/creative-context.json`, 'utf8'));
-          const post = draft.posts[0];
-          const slot = post.asset_slots[0];
-          const source = context.current_assets.assets.find((asset) => asset.kind === 'scene_plate' && asset.status === 'approved_current');
-          if (!source) throw new Error('No approved scene asset available for fixture');
-          const rendererLayout = context.renderer_capabilities.layouts.find((layout) => layout.renderer_layout === 'editorial_material_scene');
-          if (!rendererLayout) throw new Error('editorial_material_scene is not declared');
+          const source = context.current_assets.assets.find((asset) => asset.status === 'approved_current' && ['light', 'dark'].includes(asset.mode));
+          if (!source) throw new Error('No approved light/dark asset available for fixture');
+          const rendererLayout = context.renderer_capabilities.layouts.find((layout) => layout.status === 'executable' && layout.renderer_layout === 'storefront_feature_stage');
+          if (!rendererLayout) throw new Error('storefront_feature_stage is not declared as executable');
+
+          const jobs = draft.posts.flatMap((post) => post.asset_slots.map((slot) => {
+            const slide = post.carousel?.slides?.find((item) => item.asset_code === slot.asset_code);
+            return {
+              asset_code: slot.asset_code,
+              post_code: post.post_code,
+              asset_kind: slot.asset_kind,
+              ...(slot.slide_number === undefined ? {} : { slide_number: slot.slide_number }),
+              platform: post.platform,
+              format: post.format,
+              canvas: { width: 1080, height: 1080, aspect_ratio: '1:1', safe_area: 'Keep essential copy and logo inside central 940x940 safe area.' },
+              visible_copy: slide?.visible_copy ?? post.visible_copy_plan,
+              product_truth_anchor: slide?.product_truth_anchor ?? post.product_truth_anchor,
+              funnel_stage: post.funnel_stage,
+              source_assets: [source],
+              expected_output: {
+                filename: `${slot.asset_code}.png`,
+                local_staging_path: `marketing/agent-outputs/${period}/generated-assets/${slot.asset_code}.png`,
+                mime_type: 'image/png', width: 1080, height: 1080
+              },
+              creative_direction: {
+                status: 'ready_for_render',
+                visual_family: 'product_hero_scene',
+                layout_variant: rendererLayout.renderer_layout,
+                mode: source.mode,
+                palette: source.mode === 'dark' ? 'dark' : 'light',
+                device_presentation: 'front',
+                wordmark_treatment: 'canonical_innerbloom_lockup',
+                composition_intent: 'Use one registered source asset with separated copy and product zones.',
+                selected_asset_keys: [source.asset_key],
+                focal_instruction: 'Keep exact visible copy dominant and the registered source legible.',
+                supporting_visual: { required: false },
+                supporting_treatment: 'none',
+                screen_fit: 'contain',
+                acceptance_criteria: [
+                  'Exact visible copy is preserved.',
+                  'Only registered source assets are used.',
+                  'The canonical Innerbloom lockup is present.',
+                  'No invented UI, metrics or product behavior appears.'
+                ]
+              }
+            };
+          }));
+
           const campaign = {
             schema_version: '1.0',
             agent: 'innerbloom_creative_director',
@@ -80,56 +122,7 @@ jobs:
               carousel_minimum_unique_layouts: 1,
               maximum_layout_share: 1
             },
-            image_generation: {
-              jobs: [{
-                asset_code: slot.asset_code,
-                post_code: post.post_code,
-                asset_kind: slot.asset_kind,
-                platform: post.platform,
-                format: post.format,
-                canvas: { width: 1080, height: 1080, aspect_ratio: '1:1', safe_area: 'Keep essential copy and logo inside central 940x940 safe area.' },
-                visible_copy: post.visible_copy_plan,
-                product_truth_anchor: post.product_truth_anchor,
-                funnel_stage: post.funnel_stage,
-                source_assets: [source],
-                expected_output: {
-                  filename: `${slot.asset_code}.png`,
-                  local_staging_path: `marketing/agent-outputs/${period}/generated-assets/${slot.asset_code}.png`,
-                  mime_type: 'image/png', width: 1080, height: 1080
-                },
-                creative_direction: {
-                  status: 'ready_for_render',
-                  visual_family: 'supporting_visual_scene',
-                  layout_variant: rendererLayout.renderer_layout,
-                  mode: source.mode,
-                  palette: source.mode === 'dark' ? 'dark' : 'warm',
-                  device_presentation: 'none',
-                  wordmark_treatment: 'canonical_innerbloom_lockup',
-                  composition_intent: 'Use the registered material scene with separated copy and proof zones.',
-                  selected_asset_keys: [source.asset_key],
-                  focal_instruction: 'Keep the exact headline dominant and the registered scene secondary.',
-                  supporting_visual: { required: true },
-                  supporting_treatment: 'none',
-                  screen_fit: 'contain',
-                  art_direction: {
-                    profile: 'material_editorial_v1',
-                    scene_asset_key: source.asset_key,
-                    copy_zone: source.composition_slots.copy_zone,
-                    product_zone: source.composition_slots.product_zone,
-                    device_grounding: source.composition_slots.device_grounding,
-                    scene_crop: source.composition_slots.scene_crop,
-                    readability_veil: source.composition_slots.readability_veil,
-                    device_angle_deg: 0
-                  },
-                  acceptance_criteria: [
-                    'Exact visible copy is preserved.',
-                    'Only registered source assets are used.',
-                    'The canonical Innerbloom lockup is present.',
-                    'No invented UI, metrics or product behavior appears.'
-                  ]
-                }
-              }]
-            }
+            image_generation: { jobs }
           };
           fs.writeFileSync(`marketing/agent-outputs/${period}/campaign.json`, JSON.stringify(campaign, null, 2));
           NODE
