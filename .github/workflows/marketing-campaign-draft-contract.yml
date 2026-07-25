@@ -1,0 +1,51 @@
+name: Validate marketing campaign draft contract
+
+on:
+  pull_request:
+    paths:
+      - 'prompts/marketing/agent-system/schemas/campaign-draft-v1.schema.json'
+      - 'prompts/marketing/agent-system/head-of-content/AGENTS.md'
+      - 'prompts/marketing/head-of-content-v1.md'
+      - 'apps/api/scripts/validate-marketing-campaign-draft.ts'
+      - 'apps/api/scripts/fixtures/campaign-draft-valid.json'
+      - '.github/workflows/marketing-campaign-draft-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install --no-audit --no-fund
+      - name: Typecheck API
+        run: npm -w @innerbloom/api run typecheck
+      - name: Validate fixture schema
+        run: >-
+          npx tsx apps/api/scripts/validate-marketing-agent-json.ts
+          --schema=prompts/marketing/agent-system/schemas/campaign-draft-v1.schema.json
+          --input=apps/api/scripts/fixtures/campaign-draft-valid.json
+      - name: Validate fixture business rules
+        run: >-
+          npx tsx apps/api/scripts/validate-marketing-campaign-draft.ts
+          --input=apps/api/scripts/fixtures/campaign-draft-valid.json
+      - name: Prove renderer-owned fields fail closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const input = JSON.parse(fs.readFileSync('apps/api/scripts/fixtures/campaign-draft-valid.json', 'utf8'));
+          input.posts[0].visual_strategy.layout_variant = 'forbidden';
+          fs.writeFileSync('/tmp/campaign-draft-invalid.json', JSON.stringify(input));
+          NODE
+          if npx tsx apps/api/scripts/validate-marketing-campaign-draft.ts --input=/tmp/campaign-draft-invalid.json; then
+            echo 'Expected forbidden renderer field validation to fail.' >&2
+            exit 1
+          fi

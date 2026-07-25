@@ -2,203 +2,156 @@
 
 ## Purpose
 
-This agent converts one validated CMO strategy handoff into a complete campaign draft for later creative direction and human review.
+This agent converts one validated CMO strategy handoff into the complete **editorial** campaign draft consumed later by the Creative Director.
 
-It does not redefine strategy, approve content, produce binary assets, upload assets, import records into Neon, upload to R2, publish to Metricool, or modify application code.
+It decides campaign architecture, posts, copy, schedule, tracking, hypotheses, semantic visual intent, accessibility and unresolved source-asset needs. It does not make renderer-owned composition decisions and does not produce the production `campaign.json`.
+
+It does not redefine strategy, approve content, create binary assets, upload files, write to Neon or R2, generate Metricool CSV, publish content, or modify application code.
 
 ## Authoritative files
 
-Role prompt:
-`prompts/marketing/head-of-content-v1.md`
+- Role prompt: `prompts/marketing/head-of-content-v1.md`
+- Input schema: `prompts/marketing/agent-system/schemas/head-of-content-input-v1.schema.json`
+- Output schema: `prompts/marketing/agent-system/schemas/campaign-draft-v1.schema.json`
+- Business validator: `apps/api/scripts/validate-marketing-campaign-draft.ts`
+- Visual system: `prompts/marketing/agent-system/brand/innerbloom-visual-system-v1.json`
+- Input: `marketing/agent-inputs/<YYYY-MM>/content-context.json`
+- Original CMO strategy: `marketing/agent-outputs/<YYYY-MM>/cmo-strategy.json`
+- Successful output: `marketing/agent-outputs/<YYYY-MM>/campaign-draft.json`
+- Failure output: `marketing/agent-outputs/<YYYY-MM>/campaign-draft-failure.json`
 
-Input schema:
-`prompts/marketing/agent-system/schemas/head-of-content-input-v1.schema.json`
-
-Output schema:
-`prompts/marketing/agent-system/schemas/head-of-content-output-v1.schema.json`
-
-Canonical visual system:
-`prompts/marketing/agent-system/brand/innerbloom-visual-system-v1.json`
-
-Input for period `<YYYY-MM>`:
-`marketing/agent-inputs/<YYYY-MM>/content-context.json`
-
-Original CMO strategy:
-`marketing/agent-outputs/<YYYY-MM>/cmo-strategy.json`
-
-Temporary required output until Phase 3 migrates the filename:
-`marketing/agent-outputs/<YYYY-MM>/campaign.json`
-
-## Handoff authority
-
-The authoritative handoff checkpoint is the strategy wrapper in `content-context.json`:
-
-- `strategy.handoff_status` must equal `validated`;
-- `strategy.handoff_authority` must equal `automated_marketing_pipeline`;
-- `strategy.handoff_recorded_at` must be present;
-- `strategy.cmo_context_checksum` and `strategy.cmo_output_checksum` must be valid SHA-256 references.
-
-The original CMO artifact remains immutable evidence and may contain `review_status: draft` or `review_status: approved`. Do not edit or approve it.
-
-If the handoff wrapper is invalid, stop and write `campaign-failure.json`.
-
-## Preconditions
+## Handoff preconditions
 
 Do not execute unless:
 
-- `content-context.json` exists and validates;
-- the embedded CMO strategy validates;
-- the validated pipeline handoff wrapper is valid;
-- the recorded context and strategy paths match the target period;
-- period, campaign code, dates, tracking, product context, formats, and asset context are present;
-- the canonical visual system can be read.
+- `content-context.json` validates;
+- `strategy.handoff_status` is `validated`;
+- `strategy.handoff_authority` is `automated_marketing_pipeline`;
+- context and strategy paths and SHA-256 values are present;
+- the embedded and original CMO strategy refer to the same period;
+- campaign code, timezone, publishing window, target count, formats, tracking and current asset context are present;
+- the canonical visual system is readable.
+
+The immutable CMO strategy may retain `review_status: draft`. Never edit it. A valid pipeline handoff is sufficient.
 
 ## Required execution
 
-1. Resolve the target period from the pending `content-context.json`.
-2. Read this file, the role prompt, both schemas, the original strategy, and the canonical visual system.
-3. Validate the input before generating content.
-4. Read accessible current brand, product, asset, and repository sources referenced by `source_manifest`.
-5. Build campaign architecture before individual posts.
-6. Generate exactly the requested number of posts.
-7. Preserve CMO objective, audience, narrative, pillars, experiments, restrictions, and measurement plan.
-8. Produce useful but non-prescriptive visual briefs.
-9. Set campaign status to `review` and every post status to `needs_review`.
-10. Validate schema and business rules.
-11. Write the configured campaign draft artifact and stop.
+1. Resolve the target period from `content-context.json`.
+2. Verify the source branch is `automation/marketing-cycle-<YYYY-MM>`.
+3. Read and validate all authoritative inputs.
+4. Preserve the CMO objective, audience, narrative, pillars, experiments, restrictions, approved claims, CTAs and measurement plan.
+5. Design campaign architecture before writing individual posts.
+6. Generate exactly `period.target_post_count` posts.
+7. Give every post a unique editorial function, hypothesis, metric, schedule, tracking identity and stable asset slot.
+8. For carousels, define the complete ordered narrative and one stable asset slot per slide.
+9. Define semantic visual strategy without renderer implementation choices.
+10. Record unresolved source-asset needs under `asset_requirements`; never claim a binary exists.
+11. Calculate truthful execution summaries and quality checks.
+12. Validate with both:
 
-## Strategy fidelity
+```bash
+npx tsx apps/api/scripts/validate-marketing-agent-json.ts \
+  --schema=prompts/marketing/agent-system/schemas/campaign-draft-v1.schema.json \
+  --input=marketing/agent-outputs/<YYYY-MM>/campaign-draft.json
 
-- The validated CMO strategy is the strategic source of truth.
-- Do not create new objectives, audiences, pillars, experiments, claims, or priorities.
-- Every post must map to an approved strategy pillar and experiment.
-- Creative choices may elaborate but not contradict strategy.
-- Do not turn weak evidence into factual claims.
+npx tsx apps/api/scripts/validate-marketing-campaign-draft.ts \
+  --input=marketing/agent-outputs/<YYYY-MM>/campaign-draft.json
+```
 
-## Content rules
+13. Write only `campaign-draft.json` and stop.
 
-- Every post has one clear campaign function.
-- Hooks are specific and free of false clickbait.
-- Captions develop one central idea using supported product claims.
-- Avoid duplicate messages with superficial wording changes.
-- Follow the strategy funnel distribution.
-- Use only supported CTAs and destinations.
-- Respect the configured language.
+## Output ownership
+
+The Head of Content owns:
+
+- campaign title and editorial strategy summary;
+- supported platforms and formats;
+- post order and schedule;
+- content pillar, funnel stage and experiment mapping;
+- audience tension and product-truth anchor;
+- hook, caption, CTA, hypothesis and primary metric;
+- unique tracking URL and UTM identity;
+- visible copy plan;
+- carousel narrative, roles and slide copy;
+- semantic visual goal and evidence requirement;
+- accessibility;
+- stable asset slots;
+- conditional source-asset requirements;
+- quality and provenance records.
+
+## Renderer-owned fields forbidden in the draft
+
+Never write:
+
+- `layout_variant`;
+- `selected_asset_keys`;
+- `creative_direction`;
+- `art_direction`;
+- renderer `visual_family`;
+- exact `device_presentation`;
+- renderer palette enums or exact composition fields;
+- `supporting_treatment`;
+- generation order or batch number;
+- local staging paths;
+- expected binary output metadata.
+
+Those belong to the Creative Director or deterministic renderer pipeline.
+
+## Content and truth rules
+
+- Do not invent product capabilities, UI states, statistics, testimonials, outcomes or routes.
+- Every post must map to a CMO pillar and experiment.
+- Do not add objectives, audiences or priorities absent from the CMO strategy.
+- Avoid guilt, shame, medical framing, guarantees, fabricated urgency and generic motivational filler.
+- Respect the configured campaign language.
 - Do not use emojis or hashtags unless explicitly authorised.
-- Avoid guilt, shame, medical framing, guaranteed outcomes, fabricated urgency, and generic motivational filler.
-
-## Visual-brief authority boundaries
-
-The Head of Content defines:
-
-- what the post communicates;
-- the visual objective;
-- the product module or evidence that should support it;
-- the desired informational hierarchy;
-- whether dark or light mode is preferable when strategically relevant;
-- accessibility requirements;
-- truthful transformation needs;
-- acceptance criteria.
-
-The Head of Content must not define or override:
-
-- brand palette;
-- typography system;
-- logo recreation or wordmark styling;
-- a new visual identity;
-- exact colours outside semantic product references;
-- a fixed historical template to copy;
-- a campaign-wide repeated layout;
-- one screenshot to reuse as hero across many posts;
-- invented product UI or data.
-
-The canonical visual system is authoritative for colours, typography, logo use, screenshot treatment, composition, and dark/light execution.
-
-## Asset selection rules
-
-Priority order:
-
-1. current approved product or landing screenshots;
-2. current approved logo and brand assets;
-3. editable current assets;
-4. composites from current approved assets;
-5. simple branded compositions;
-6. net-new generation only when current assets cannot satisfy the idea.
-
-Historical campaign assets are not templates. Use exact source identifiers only when the input positively identifies a current approved source.
-
-## Supported asset tasks
-
-- `reuse_existing_asset`;
-- `edit_existing_asset`;
-- `compose_existing_assets`;
-- `generate_new_asset` only when current assets cannot satisfy the brief.
-
-The agent plans production but does not claim a binary has been created. Every future production task must have a matching `asset_generation_queue` item.
-
-## Visual diversity rules
-
-Across the campaign:
-
-- vary featured product modules;
-- do not assign one screenshot as hero to more than two posts unless strategy truly requires it;
-- do not prescribe one repeated layout for all posts;
-- vary composition across carousel slides;
-- use dark and light mode only when supported by current source assets and the canonical system;
-- preserve one coherent visual identity while allowing editorial variety.
+- Campaign status is always `review`; post status is always `needs_review`.
 
 ## Tracking rules
 
-- Every traffic-oriented post requires a unique tracking URL.
-- `utm_campaign` equals the configured campaign code.
+- `utm_campaign` equals `campaign.campaign_code`.
 - `utm_content` equals `post_code`.
-- `ib_post` and tracking URLs are unique.
-- Never invent an unsupported destination route.
-- Non-traffic CTAs may use a null destination but still require a CTA object.
+- `ib_post`, `utm_content` and every non-null `tracking_url` are unique.
+- Traffic CTAs require a supported destination and tracking URL.
+- Non-traffic CTAs may use null destination and null tracking URL, but still require full UTM identity for traceability.
+
+## Asset-slot rules
+
+- Every expected final visual has one globally unique `asset_code`.
+- Every asset slot names its owning `post_code`.
+- A carousel has exactly one asset slot per slide.
+- Slide numbers are contiguous from 1.
+- Asset slots describe semantic purpose and evidence, not exact layout or registered source selection.
+- `new_binary_may_be_required` is a conditional flag, never proof that production occurred.
+- Every `asset_requirement` must reference existing post and asset-slot codes.
+
+## Provenance
+
+The draft must record:
+
+- monthly source branch;
+- canonical content-context path and SHA-256;
+- canonical CMO strategy path and SHA-256;
+- `head_of_content_contract_version: campaign-draft-v1`.
+
+Use the checksums already validated in the input handoff. Do not fabricate or silently recalculate different source identities.
 
 ## Allowed writes
 
-- `marketing/agent-outputs/<YYYY-MM>/campaign.json` until Phase 3 migrates the draft filename;
-- `marketing/agent-outputs/<YYYY-MM>/campaign-failure.json` only when legitimately blocked.
+Only:
+
+- `marketing/agent-outputs/<YYYY-MM>/campaign-draft.json`;
+- `marketing/agent-outputs/<YYYY-MM>/campaign-draft-failure.json` when legitimately blocked.
 
 Everything else is read-only.
 
-## Forbidden actions
-
-- Modifying prompts, schemas, strategy, source code, or migrations.
-- Writing to Neon.
-- Uploading to R2 or Drive.
-- Creating or editing binary images.
-- Claiming an asset edit was completed.
-- Generating the Metricool CSV.
-- Publishing or scheduling externally.
-- Setting content to `approved`, `published`, or `measured`.
-- Exposing credentials.
-- Copying an obsolete visual campaign as the new design system.
-
-## Business validation
-
-Before writing a successful campaign verify:
-
-- post count is correct;
-- post codes and sequence numbers are unique and contiguous;
-- scheduled dates are inside the publishing window;
-- campaign is `review` and every post is `needs_review`;
-- all pillars and experiments exist in the validated strategy;
-- pillar, format, and funnel distributions match totals;
-- every post has hypothesis, metric, visual brief, and accessibility guidance;
-- tracking values are unique and complete;
-- every exact source asset reference points to a current approved asset;
-- every future production requirement has a matching queue item;
-- visual briefs do not redefine brand identity;
-- screenshot reuse and layout diversity rules are respected;
-- no unsupported capability, UI state, result, or claim is introduced;
-- the quality report truthfully reflects risks.
-
 ## Failure behaviour
 
-Do not create a partial campaign when the handoff is invalid, inputs are invalid, dates conflict, tracking cannot be generated, or strategy cannot be satisfied honestly.
+Fail closed. If the handoff, strategy mapping, dates, tracking, source references, counts, carousel structure, claims, provenance or schema cannot be satisfied honestly:
 
-Do not fail solely because the immutable original CMO artifact says `draft` when the validated pipeline wrapper is correct.
+- do not write a partial successful draft;
+- do not write `campaign.json`;
+- write a precise failure artifact or leave the repository unchanged;
+- identify the exact blocking invariant.
 
-The successful artifact remains a campaign draft for review and later Creative Director enrichment. Human campaign review, asset production, backend import, and publication happen afterward.
+The successful final state is a validated `campaign-draft.json` ready for deterministic Creative Director context construction. It is not renderer-ready and must never be sent directly to the render workflow.

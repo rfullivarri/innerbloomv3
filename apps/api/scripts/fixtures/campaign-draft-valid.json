@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "agent": "innerbloom_head_of_content",
+  "period_key": "2026-08",
+  "generated_at": "2026-07-25T00:00:00Z",
+  "provenance": {
+    "source_branch": "automation/marketing-cycle-2026-08",
+    "content_context_path": "marketing/agent-inputs/2026-08/content-context.json",
+    "content_context_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "cmo_strategy_path": "marketing/agent-outputs/2026-08/cmo-strategy.json",
+    "cmo_strategy_sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "head_of_content_contract_version": "campaign-draft-v1"
+  },
+  "campaign": {
+    "campaign_code": "ib_202608",
+    "title": "Adaptive rhythm",
+    "objective": "new_users",
+    "status": "review",
+    "strategy_summary": "Explain sustainable adaptive habits without guaranteed outcomes.",
+    "language": "English",
+    "platforms": ["instagram"],
+    "formats": ["static"],
+    "target_post_count": 1,
+    "timezone": "Europe/Madrid",
+    "publishing_start_date": "2026-08-01",
+    "publishing_end_date": "2026-08-31"
+  },
+  "campaign_execution_summary": {
+    "post_count": 1,
+    "format_counts": {"static": 1},
+    "pillar_counts": {"Pain and friction": 1},
+    "funnel_counts": {"awareness": 1},
+    "asset_slot_count": 1,
+    "notes": ["Contract fixture only."]
+  },
+  "posts": [
+    {
+      "post_code": "post_001",
+      "sequence_number": 1,
+      "platform": "instagram",
+      "format": "static",
+      "status": "needs_review",
+      "scheduled_at": "2026-08-03T10:00:00+02:00",
+      "content_pillar": "Pain and friction",
+      "funnel_stage": "awareness",
+      "experiment_code": "pain_first_hook",
+      "audience_tension": "Rigid systems collapse during real weeks.",
+      "product_truth_anchor": "Innerbloom presents progress against a selected rhythm without guaranteeing outcomes.",
+      "hook": "Your routine should survive a difficult week.",
+      "caption": "A useful system leaves room for real life. Innerbloom explores visible progress and adjustable challenge without pretending every week is identical.",
+      "cta": {
+        "label": "Explore Innerbloom",
+        "intent": "traffic",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "Invitation to explore only; no guaranteed result."
+      },
+      "hypothesis": "A pain-first message will improve qualified landing visits.",
+      "primary_metric": "Landing page sessions",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608&utm_content=post_001&ib_post=post_001",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_202608",
+        "utm_content": "post_001",
+        "ib_post": "post_001"
+      },
+      "visible_copy_plan": {
+        "headline": "Your routine should survive a difficult week.",
+        "supporting_text": "Progress can remain visible without requiring perfection."
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate resilience without depicting unsupported automation.",
+        "proof_type": "hybrid",
+        "product_evidence": ["dashboard progress overview"],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": ["headline", "product evidence", "supporting text", "brand"],
+        "editorial_character": ["calm", "clear", "human"],
+        "preferred_mode": "either",
+        "truthful_transformations": ["crop", "reframe", "soft dimming outside focal region"],
+        "forbidden_uses": ["invented UI", "fake metrics", "medical claims"],
+        "acceptance_criteria": ["Headline readable on mobile", "Any product evidence remains factual"]
+      },
+      "accessibility": {
+        "alt_text": "Innerbloom post about routines that adapt to difficult weeks.",
+        "readability_note": "Use high contrast and mobile-readable type."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "asset_post_001",
+          "post_code": "post_001",
+          "asset_kind": "static",
+          "semantic_purpose": "Support the resilience message with truthful product evidence.",
+          "product_evidence_requirement": "Optional current dashboard progress evidence.",
+          "existing_sources_preferred": true,
+          "semantic_source_references": ["dashboard_dark", "dashboard_light"],
+          "new_binary_may_be_required": false,
+          "alt_text": "Innerbloom post about routines that adapt to difficult weeks.",
+          "acceptance_criteria": ["No invented UI", "Copy remains legible"]
+        }
+      ]
+    }
+  ],
+  "asset_requirements": [
+    {
+      "requirement_code": "req_post_001_source",
+      "kind": "reuse_existing_source",
+      "related_asset_codes": ["asset_post_001"],
+      "related_post_codes": ["post_001"],
+      "priority": "medium",
+      "semantic_source_references": ["dashboard_dark", "dashboard_light"],
+      "production_brief": "Select current approved dashboard evidence only if it supports the claim.",
+      "truthfulness_constraints": ["Do not alter product labels or values"],
+      "acceptance_criteria": ["Source is current and approved"]
+    }
+  ],
+  "campaign_quality_report": {
+    "schema_ready": true,
+    "strategy_fidelity": true,
+    "claim_safety": true,
+    "tracking_integrity": true,
+    "calendar_integrity": true,
+    "editorial_diversity": true,
+    "visual_brief_completeness": true,
+    "known_risks": ["Creative direction is intentionally unresolved until the next agent stage."]
+  },
+  "source_manifest": [
+    {
+      "source_type": "repo_file",
+      "source_path_or_id": "marketing/agent-inputs/2026-08/content-context.json"
+    }
+  ]
+}
