@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "period": {
+    "period_key": "2026-08",
+    "campaign_code": "ib_202608",
+    "timezone": "Europe/Madrid",
+    "target_post_count": 1,
+    "publishing_start_date": "2026-08-01",
+    "publishing_end_date": "2026-08-31"
+  },
+  "strategy": {
+    "handoff_status": "validated",
+    "handoff_authority": "automated_marketing_pipeline",
+    "handoff_recorded_at": "2026-07-25T00:00:00Z",
+    "original_cmo_review_status": "draft",
+    "cmo_context_path": "marketing/agent-inputs/2026-08/cmo-context.json",
+    "cmo_context_checksum": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "cmo_output_path": "marketing/agent-outputs/2026-08/cmo-strategy.json",
+    "cmo_output_checksum": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "cmo_output": {"period": "2026-08"}
+  },
+  "brand": {
+    "objective": "new_users",
+    "positioning": ["Sustainable habits that adapt to real life."],
+    "content_rules": ["Do not promise guaranteed outcomes."],
+    "language": "English",
+    "human_approval": false
+  },
+  "product_context": {
+    "stage": "early product",
+    "known_product_changes": [],
+    "product_pages": [],
+    "product_totals": {},
+    "approved_claim_source": {},
+    "approved_product_truths": [
+      {
+        "truth_ref": "cmo_proof_point_1",
+        "source_type": "cmo_proof_point",
+        "text": "Innerbloom presents progress against a selected rhythm."
+      }
+    ]
+  },
+  "available_assets": {
+    "product_screenshots": [
+      {"asset_id": "dashboard_dark", "source": "repo", "kind": "product_screenshot", "label": "dashboard_dark"},
+      {"asset_id": "dashboard_light", "source": "repo", "kind": "product_screenshot", "label": "dashboard_light"}
+    ],
+    "brand_assets": [],
+    "reusable_templates": [],
+    "existing_visuals": [],
+    "missing_assets": []
+  },
+  "operational_constraints": {
+    "platforms": ["instagram"],
+    "formats": ["static"],
+    "max_carousel_slides": 10,
+    "max_assets_per_post": 10,
+    "publishing_method": "Metricool CSV after approval",
+    "public_asset_store": "Cloudflare R2",
+    "review_required": true,
+    "calendar_rules": ["Use dates inside the publishing window"]
+  },
+  "tracking": {
+    "base_url": "https://innerbloomjourney.org/",
+    "utm_source": "instagram",
+    "utm_medium": "social",
+    "campaign_code": "ib_202608",
+    "additional_parameters": {"utm_content": "post_code", "ib_post": "sequence_number"}
+  },
+  "source_manifest": [
+    {"source_type": "repo_file", "source_path_or_id": "marketing/agent-inputs/2026-08/cmo-context.json"}
+  ]
+}

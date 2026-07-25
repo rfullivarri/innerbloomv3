@@ -30,6 +30,7 @@ Do not execute unless:
 - context and strategy paths and SHA-256 values are present;
 - the embedded and original CMO strategy refer to the same period;
 - campaign code, timezone, publishing window, target count, formats, tracking and current asset context are present;
+- `product_context.approved_product_truths` contains at least one source-backed truth;
 - the canonical visual system is readable.
 
 The immutable CMO strategy may retain `review_status: draft`. Never edit it. A valid pipeline handoff is sufficient.
@@ -39,15 +40,16 @@ The immutable CMO strategy may retain `review_status: draft`. Never edit it. A v
 1. Resolve the target period from `content-context.json`.
 2. Verify the source branch is `automation/marketing-cycle-<YYYY-MM>`.
 3. Read and validate all authoritative inputs.
-4. Preserve the CMO objective, audience, narrative, pillars, experiments, restrictions, approved claims, CTAs and measurement plan.
+4. Preserve the CMO objective, audience, narrative, pillar codes, experiment codes, restrictions, approved claims, CTAs and measurement plan.
 5. Design campaign architecture before writing individual posts.
 6. Generate exactly `period.target_post_count` posts.
 7. Give every post a unique editorial function, hypothesis, metric, schedule, tracking identity and stable asset slot.
-8. For carousels, define the complete ordered narrative and one stable asset slot per slide.
-9. Define semantic visual strategy without renderer implementation choices.
-10. Record unresolved source-asset needs under `asset_requirements`; never claim a binary exists.
-11. Calculate truthful execution summaries and quality checks.
-12. Validate with both:
+8. Cite at least one valid `approved_product_truths[].truth_ref` for every post through `visual_strategy.product_evidence`.
+9. For carousels, define the complete ordered narrative and one stable asset slot per slide.
+10. Define semantic visual strategy without renderer implementation choices.
+11. Record unresolved source-asset needs under `asset_requirements`; never claim a binary exists.
+12. Calculate truthful execution summaries and quality checks.
+13. Validate with both:
 
 ```bash
 npx tsx apps/api/scripts/validate-marketing-agent-json.ts \
@@ -55,10 +57,34 @@ npx tsx apps/api/scripts/validate-marketing-agent-json.ts \
   --input=marketing/agent-outputs/<YYYY-MM>/campaign-draft.json
 
 npx tsx apps/api/scripts/validate-marketing-campaign-draft.ts \
-  --input=marketing/agent-outputs/<YYYY-MM>/campaign-draft.json
+  --input=marketing/agent-outputs/<YYYY-MM>/campaign-draft.json \
+  --content-context=marketing/agent-inputs/<YYYY-MM>/content-context.json \
+  --cmo-strategy=marketing/agent-outputs/<YYYY-MM>/cmo-strategy.json
 ```
 
-13. Write only `campaign-draft.json` and stop.
+14. Write only `campaign-draft.json` and stop.
+
+## Exact strategy mapping
+
+- `content_pillar` must equal an existing `strategy.content_pillars[].pillar_code`.
+- `experiment_code` must equal an existing `experiments[].experiment_code`.
+- When an experiment declares `content_pillars`, the selected pillar must belong to that list.
+- `primary_metric` must equal the selected experiment's primary metric.
+- Objective, period, campaign code, target count, platforms, formats, timezone and publishing window come from the validated inputs and may not be changed.
+- Never create aliases, subpillars, renamed codes or new experiments.
+
+## Product truth mapping
+
+`product_context.approved_product_truths` is the only product-claim catalog for the draft. Each entry contains a stable `truth_ref` and its approved text.
+
+For every post:
+
+- `visual_strategy.product_evidence` must contain one or more exact existing `truth_ref` values;
+- `product_truth_anchor`, hook, caption and visible copy must remain a prudent explanation or paraphrase of those cited truths;
+- if no truth supports an idea, discard the idea or fail closed;
+- do not use a screenshot or asset as evidence of a capability that its source does not show.
+
+Never invent product capabilities, automatic behavior, UI states, statistics, testimonials, outcomes, routes or medical effects. Obey all CMO `messages_to_avoid` and `claims_to_avoid`.
 
 ## Output ownership
 
@@ -67,8 +93,8 @@ The Head of Content owns:
 - campaign title and editorial strategy summary;
 - supported platforms and formats;
 - post order and schedule;
-- content pillar, funnel stage and experiment mapping;
-- audience tension and product-truth anchor;
+- approved content pillar, funnel stage and experiment mapping;
+- audience tension and source-backed product-truth anchor;
 - hook, caption, CTA, hypothesis and primary metric;
 - unique tracking URL and UTM identity;
 - visible copy plan;
@@ -97,10 +123,8 @@ Never write:
 
 Those belong to the Creative Director or deterministic renderer pipeline.
 
-## Content and truth rules
+## Content rules
 
-- Do not invent product capabilities, UI states, statistics, testimonials, outcomes or routes.
-- Every post must map to a CMO pillar and experiment.
 - Do not add objectives, audiences or priorities absent from the CMO strategy.
 - Avoid guilt, shame, medical framing, guarantees, fabricated urgency and generic motivational filler.
 - Respect the configured campaign language.
@@ -122,6 +146,7 @@ Those belong to the Creative Director or deterministic renderer pipeline.
 - A carousel has exactly one asset slot per slide.
 - Slide numbers are contiguous from 1.
 - Asset slots describe semantic purpose and evidence, not exact layout or registered source selection.
+- Every non-empty `semantic_source_references` value must identify an asset present in `available_assets`.
 - `new_binary_may_be_required` is a conditional flag, never proof that production occurred.
 - Every `asset_requirement` must reference existing post and asset-slot codes.
 
@@ -147,7 +172,7 @@ Everything else is read-only.
 
 ## Failure behaviour
 
-Fail closed. If the handoff, strategy mapping, dates, tracking, source references, counts, carousel structure, claims, provenance or schema cannot be satisfied honestly:
+Fail closed. If the handoff, strategy mapping, product-truth mapping, dates, tracking, source references, counts, carousel structure, claims, provenance or schema cannot be satisfied honestly:
 
 - do not write a partial successful draft;
 - do not write `campaign.json`;

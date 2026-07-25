@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "agent": "innerbloom_cmo",
+  "period": "2026-08",
+  "generated_at": "2026-07-25T00:00:00Z",
+  "review_status": "draft",
+  "executive_summary": "Test adaptive habits messaging without promising outcomes.",
+  "input_assessment": {},
+  "previous_period_analysis": {},
+  "learnings": [
+    {
+      "learning": "Pain-first messages deserve a controlled test.",
+      "evidence": ["Previous campaign observation"],
+      "confidence": "moderate_signal",
+      "implication": "Use one pain-first experiment."
+    }
+  ],
+  "strategic_diagnosis": {},
+  "strategy": {
+    "primary_objective": "new_users",
+    "secondary_objectives": [],
+    "priority_audience": {"description": "People whose routines break during difficult weeks."},
+    "core_value_proposition": "Build sustainable habits that can adapt to real life.",
+    "period_narrative": "Progress without perfection.",
+    "strategic_priorities": ["Explain adaptive habits clearly"],
+    "content_pillars": [
+      {
+        "pillar_code": "pain_and_friction",
+        "name": "Pain and friction",
+        "purpose": "Recognise why rigid routines fail.",
+        "audience_problem": "Rigid systems collapse during real weeks.",
+        "message": "A sustainable routine leaves room for real life.",
+        "proof_or_mechanism": "Progress can be viewed against a selected rhythm.",
+        "recommended_formats": ["static"],
+        "recommended_post_count": 1
+      },
+      {
+        "pillar_code": "adaptive_progress",
+        "name": "Adaptive progress",
+        "purpose": "Explain progress without perfection.",
+        "audience_problem": "People interpret interruption as failure.",
+        "message": "Recalibration is more useful than restarting.",
+        "proof_or_mechanism": "Innerbloom supports visible progress.",
+        "recommended_formats": ["static"],
+        "recommended_post_count": 0
+      },
+      {
+        "pillar_code": "product_clarity",
+        "name": "Product clarity",
+        "purpose": "Show truthful product evidence.",
+        "audience_problem": "The product mechanism is not yet obvious.",
+        "message": "Use current product evidence without invented UI.",
+        "proof_or_mechanism": "Current approved screenshots.",
+        "recommended_formats": ["static"],
+        "recommended_post_count": 0
+      }
+    ],
+    "content_mix": {
+      "total_posts": 1,
+      "by_pillar": {"pain_and_friction": 1},
+      "by_format": {"static": 1},
+      "by_funnel_stage": {"awareness": 1, "consideration": 0, "activation": 0}
+    }
+  },
+  "experiments": [
+    {
+      "experiment_code": "pain_first_hook",
+      "name": "Pain-first hook",
+      "hypothesis": "A pain-first message will improve qualified landing visits.",
+      "variable_being_tested": "Opening framing",
+      "control_or_baseline": "Generic product explanation",
+      "target_audience": "People with inconsistent routines",
+      "content_pillars": ["pain_and_friction"],
+      "primary_metric": "Landing page sessions",
+      "secondary_metrics": [],
+      "success_criteria": "More qualified sessions without misleading claims.",
+      "failure_criteria": "No improvement or low-quality traffic.",
+      "minimum_evidence_needed": "One complete campaign period.",
+      "decision_enabled": "Whether to continue pain-first framing."
+    },
+    {
+      "experiment_code": "product_proof",
+      "name": "Product proof",
+      "hypothesis": "Truthful product evidence improves understanding.",
+      "variable_being_tested": "Presence of product evidence",
+      "control_or_baseline": "Editorial-only creative",
+      "target_audience": "Visitors evaluating Innerbloom",
+      "content_pillars": ["product_clarity"],
+      "primary_metric": "Landing page sessions",
+      "secondary_metrics": [],
+      "success_criteria": "Improved qualified engagement.",
+      "failure_criteria": "No measurable improvement.",
+      "minimum_evidence_needed": "One complete campaign period.",
+      "decision_enabled": "Whether to increase product-led content."
+    }
+  ],
+  "messaging_guidelines": {
+    "core_messages": ["Innerbloom helps people build sustainable habits that adapt to real life."],
+    "supporting_messages": ["Progress does not require perfection."],
+    "proof_points": ["Innerbloom presents progress against a selected rhythm."],
+    "approved_ctas": ["Explore Innerbloom"],
+    "messages_to_avoid": ["Never miss a habit again"],
+    "claims_to_avoid": ["Innerbloom automatically optimizes your whole day"],
+    "tone": ["clear", "human"],
+    "language_rules": ["English"]
+  },
+  "visual_direction": {},
+  "head_of_content_brief": {},
+  "measurement_plan": {},
+  "strategy_memory_update": {},
+  "source_manifest": []
+}
