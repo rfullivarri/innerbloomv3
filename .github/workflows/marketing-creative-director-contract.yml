@@ -1,0 +1,61 @@
+name: Validate marketing Creative Director contract
+
+on:
+  pull_request:
+    paths:
+      - 'apps/api/scripts/export-marketing-creative-context.ts'
+      - 'apps/api/scripts/validate-creative-director-preservation.ts'
+      - 'prompts/marketing/creative-director-v1.md'
+      - 'prompts/marketing/agent-system/creative-director/AGENTS.md'
+      - 'prompts/marketing/agent-system/schemas/creative-director-input-v1.schema.json'
+      - '.github/workflows/marketing-creative-context.yml'
+      - '.github/workflows/marketing-creative-director-contract.yml'
+      - 'Docs/marketing/contracts/creative-director-v1.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-creative-director-foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install --no-audit --no-fund
+      - name: Typecheck API
+        run: npm -w @innerbloom/api run typecheck
+      - name: Prepare representative monthly fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          period=2026-08
+          mkdir -p "marketing/agent-inputs/${period}" "marketing/agent-outputs/${period}"
+          cp apps/api/scripts/fixtures/content-context-valid.json "marketing/agent-inputs/${period}/content-context.json"
+          cp apps/api/scripts/fixtures/cmo-strategy-valid.json "marketing/agent-outputs/${period}/cmo-strategy.json"
+          cp apps/api/scripts/fixtures/campaign-draft-valid.json "marketing/agent-outputs/${period}/campaign-draft.json"
+      - name: Validate campaign draft before handoff
+        run: >-
+          npx tsx apps/api/scripts/validate-marketing-campaign-draft.ts
+          --input=marketing/agent-outputs/2026-08/campaign-draft.json
+          --content-context=marketing/agent-inputs/2026-08/content-context.json
+          --cmo-strategy=marketing/agent-outputs/2026-08/cmo-strategy.json
+      - name: Build Creative Director context
+        run: npx tsx apps/api/scripts/export-marketing-creative-context.ts --period=2026-08 --force
+      - name: Validate Creative Director context schema
+        run: >-
+          npx tsx apps/api/scripts/validate-marketing-agent-json.ts
+          --schema=prompts/marketing/agent-system/schemas/creative-director-input-v1.schema.json
+          --input=marketing/agent-inputs/2026-08/creative-context.json
+      - name: Prove the context contains executable layouts and current assets
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const context = JSON.parse(fs.readFileSync('marketing/agent-inputs/2026-08/creative-context.json', 'utf8'));
+          if (!context.renderer_capabilities.layouts.some((layout) => layout.status === 'executable')) throw new Error('No executable layout');
+          if (!context.current_assets.assets.length) throw new Error('No current assets');
+          if (context.immutable_editorial_source.period_key !== '2026-08') throw new Error('Draft period missing');
+          NODE
