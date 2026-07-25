@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   GoogleOAuthButton,
-  buildGoogleOAuthRedirectOptions,
   describeClerkOAuthError,
+  startGoogleOAuthRedirect,
 } from '../components/auth/GoogleOAuthButton';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { CLERK_TOKEN_TEMPLATE } from '../config/auth';
@@ -387,22 +387,23 @@ export default function MobileBrowserAuthPage() {
     }
 
     googleRedirectStartedRef.current = true;
-    const redirectOptions = buildGoogleOAuthRedirectOptions(handoffUrl, true);
-    void signIn
-      .authenticateWithRedirect(redirectOptions)
-      .catch((cause) => {
-        googleRedirectStartedRef.current = false;
-        console.error(`[mobile-auth-page] google-oauth-start-failed ${JSON.stringify({
-          at: Date.now(),
-          mode,
-          ...describeClerkOAuthError(cause),
-        })}`);
-        setError(
-          language === 'en'
-            ? 'We could not start Google sign-in. Please try again.'
-            : 'No pudimos iniciar sesión con Google. Intentá de nuevo.',
-        );
-      });
+    void startGoogleOAuthRedirect(
+      signIn as unknown as Parameters<typeof startGoogleOAuthRedirect>[0],
+      handoffUrl,
+      true,
+    ).catch((cause) => {
+      googleRedirectStartedRef.current = false;
+      console.error(`[mobile-auth-page] google-oauth-start-failed ${JSON.stringify({
+        at: Date.now(),
+        mode,
+        ...describeClerkOAuthError(cause),
+      })}`);
+      setError(
+        language === 'en'
+          ? 'We could not start Google sign-in. Please try again.'
+          : 'No pudimos iniciar sesión con Google. Intentá de nuevo.',
+      );
+    });
   }, [
     createdSessionId,
     handoffUrl,

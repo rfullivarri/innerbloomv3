@@ -23,6 +23,26 @@ type GoogleOAuthButtonProps = {
   allowCrossModeCompletion?: boolean;
 };
 
+type ExternalVerification = {
+  externalVerificationRedirectURL?: URL | string | null;
+};
+
+type OAuthAttemptResult = {
+  firstFactorVerification?: ExternalVerification | null;
+  verifications?: {
+    externalAccount?: ExternalVerification | null;
+  } | null;
+};
+
+type LegacyOAuthResource = {
+  create(params: {
+    strategy: 'oauth_google';
+    redirectUrl: string;
+    actionCompleteRedirectUrl: string;
+    oidcPrompt?: 'select_account';
+  }): Promise<OAuthAttemptResult>;
+};
+
 const SSO_CALLBACK_PATH = '/sso-callback';
 export const OAUTH_REDIRECT_INTENT_STORAGE_KEY = 'innerbloom:oauth-redirect-intent';
 const OAUTH_REDIRECT_INTENT_TTL_MS = 10 * 60 * 1000;
@@ -45,6 +65,51 @@ export function buildGoogleOAuthRedirectOptions(
     continueSignIn: false,
     continueSignUp: false,
   };
+}
+
+export function forceGoogleAccountChooserUrl(value: URL | string): string {
+  const url = new URL(value.toString());
+  const hostname = url.hostname.toLowerCase();
+  if (hostname !== 'accounts.google.com') {
+    throw new Error(`Unexpected Google OAuth host: ${hostname || 'missing'}`);
+  }
+
+  url.searchParams.set('prompt', 'select_account');
+  url.searchParams.delete('authuser');
+  return url.toString();
+}
+
+function getExternalVerificationUrl(attempt: OAuthAttemptResult): URL | string | null {
+  return attempt.firstFactorVerification?.externalVerificationRedirectURL
+    ?? attempt.verifications?.externalAccount?.externalVerificationRedirectURL
+    ?? null;
+}
+
+export async function startGoogleOAuthRedirect(
+  resource: LegacyOAuthResource,
+  redirectUrlComplete: string,
+  forceAccountSelection: boolean,
+): Promise<void> {
+  const attempt = await resource.create({
+    strategy: 'oauth_google',
+    redirectUrl: SSO_CALLBACK_PATH,
+    actionCompleteRedirectUrl: redirectUrlComplete,
+    oidcPrompt: forceAccountSelection ? 'select_account' : undefined,
+  });
+  const externalVerificationUrl = getExternalVerificationUrl(attempt);
+  if (!externalVerificationUrl) {
+    throw new Error('Clerk did not return an external Google verification URL');
+  }
+
+  const targetUrl = forceAccountSelection
+    ? forceGoogleAccountChooserUrl(externalVerificationUrl)
+    : externalVerificationUrl.toString();
+
+  console.info('[auth] navigating to Google OAuth', {
+    accountSelection: forceAccountSelection ? 'required' : 'default',
+    hasSelectAccountPrompt: new URL(targetUrl).searchParams.get('prompt') === 'select_account',
+  });
+  window.location.assign(targetUrl);
 }
 
 export function describeClerkOAuthError(error: unknown): Record<string, unknown> {
@@ -212,29 +277,32 @@ export function GoogleOAuthButton({
 
     setIsRedirecting(true);
     persistOAuthRedirectIntent({ mode, redirectUrlComplete, createdAt: Date.now() });
-    const redirectOptions = buildGoogleOAuthRedirectOptions(
-      redirectUrlComplete,
-      shouldForceAccountSelection,
-    );
 
     try {
       console.info('[auth] starting interactive Google OAuth', {
         mode,
         oauthMode,
         accountSelection: shouldForceAccountSelection ? 'required' : 'default',
-        freshClerkAttempt: true,
       });
 
       if (oauthMode === 'sign-up') {
         if (!signUp) {
           throw new Error('Clerk sign-up resource is not ready');
         }
-        await signUp.authenticateWithRedirect(redirectOptions);
+        await startGoogleOAuthRedirect(
+          signUp as unknown as LegacyOAuthResource,
+          redirectUrlComplete,
+          shouldForceAccountSelection,
+        );
       } else {
         if (!signIn) {
           throw new Error('Clerk sign-in resource is not ready');
         }
-        await signIn.authenticateWithRedirect(redirectOptions);
+        await startGoogleOAuthRedirect(
+          signIn as unknown as LegacyOAuthResource,
+          redirectUrlComplete,
+          shouldForceAccountSelection,
+        );
       }
     } catch (error) {
       console.error(`[auth] Google OAuth redirect failed ${JSON.stringify(describeClerkOAuthError(error))}`);
