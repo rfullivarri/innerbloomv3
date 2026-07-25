@@ -11,6 +11,7 @@ function assert(condition: unknown, message: string): asserts condition {
 }
 
 const stable = (value: unknown): string => JSON.stringify(value);
+const strings = (value: unknown): string[] => Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
 
 function editorialPost(post: any): Record<string, unknown> {
   return {
@@ -38,22 +39,6 @@ function editorialPost(post: any): Record<string, unknown> {
   };
 }
 
-function assetCodes(campaign: any): Set<string> {
-  const codes = new Set<string>();
-  for (const post of Array.isArray(campaign?.posts) ? campaign.posts : []) {
-    for (const asset of Array.isArray(post?.assets) ? post.assets : []) {
-      if (typeof asset?.asset_code === 'string') codes.add(asset.asset_code);
-    }
-    for (const slot of Array.isArray(post?.asset_slots) ? post.asset_slots : []) {
-      if (typeof slot?.asset_code === 'string') codes.add(slot.asset_code);
-    }
-  }
-  for (const job of Array.isArray(campaign?.image_jobs) ? campaign.image_jobs : []) {
-    if (typeof job?.asset_code === 'string') codes.add(job.asset_code);
-  }
-  return codes;
-}
-
 async function main(): Promise<void> {
   const draftPath = readArg('draft');
   const campaignPath = readArg('campaign');
@@ -68,11 +53,12 @@ async function main(): Promise<void> {
 
   assert(draft.period_key === campaign.period_key, 'campaign period differs from draft');
   assert(context.period_key === draft.period_key, 'creative context period differs from draft');
+  assert(campaign.agent === 'innerbloom_creative_director', 'campaign agent must be innerbloom_creative_director');
   assert(campaign.campaign?.status === 'review', 'campaign must remain review');
 
   const campaignFields = [
     'campaign_code', 'title', 'objective', 'status', 'strategy_summary', 'language', 'platforms', 'formats',
-    'target_post_count', 'publishing_start_date', 'publishing_end_date',
+    'target_post_count', 'timezone', 'publishing_start_date', 'publishing_end_date',
   ];
   for (const field of campaignFields) {
     assert(stable(campaign.campaign?.[field]) === stable(draft.campaign?.[field]), `campaign.${field} differs from draft`);
@@ -87,34 +73,58 @@ async function main(): Promise<void> {
     assert(stable(editorialPost(outputPost)) === stable(editorialPost(draftPost)), `${draftPost.post_code} editorial content differs from draft`);
   }
 
-  const outputAssetCodes = assetCodes(campaign);
-  for (const post of draft.posts) {
-    for (const slot of post.asset_slots) {
-      assert(outputAssetCodes.has(slot.asset_code), `campaign is missing renderer job or asset for ${slot.asset_code}`);
-    }
+  const jobs = campaign?.image_generation?.jobs;
+  assert(Array.isArray(jobs) && jobs.length > 0, 'campaign.image_generation.jobs must be a non-empty array');
+  const draftSlots = draft.posts.flatMap((post: any) => post.asset_slots.map((slot: any) => ({ ...slot, owner_format: post.format })));
+  assert(jobs.length === draftSlots.length, `campaign must contain exactly one image_generation job per asset slot; expected ${draftSlots.length}, found ${jobs.length}`);
+
+  const jobsByAssetCode = new Map<string, any>();
+  for (const job of jobs) {
+    assert(typeof job.asset_code === 'string' && job.asset_code.length > 0, 'renderer job is missing asset_code');
+    assert(!jobsByAssetCode.has(job.asset_code), `duplicate renderer job for ${job.asset_code}`);
+    jobsByAssetCode.set(job.asset_code, job);
   }
 
-  const registeredAssets = new Set(
+  const registeredAssetMap = new Map<string, any>(
     (Array.isArray(context?.current_assets?.assets) ? context.current_assets.assets : [])
-      .map((asset: any) => asset?.asset_key)
-      .filter((value: unknown): value is string => typeof value === 'string'),
+      .filter((asset: any) => typeof asset?.asset_key === 'string')
+      .map((asset: any) => [asset.asset_key, asset]),
   );
-  const selectedKeys: string[] = [];
-  const walk = (value: unknown): void => {
-    if (Array.isArray(value)) return value.forEach(walk);
-    if (!value || typeof value !== 'object') return;
-    for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
-      if (key === 'selected_asset_keys' && Array.isArray(child)) {
-        selectedKeys.push(...child.filter((item): item is string => typeof item === 'string'));
-      }
-      walk(child);
-    }
-  };
-  walk(campaign);
-  assert(selectedKeys.length > 0, 'campaign has no selected_asset_keys');
-  for (const key of selectedKeys) assert(registeredAssets.has(key), `campaign selects unregistered asset ${key}`);
+  const rendererLayouts = new Set(
+    (Array.isArray(context?.renderer_capabilities?.layouts) ? context.renderer_capabilities.layouts : [])
+      .map((layout: any) => layout?.renderer_layout)
+      .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0),
+  );
+  assert(registeredAssetMap.size > 0, 'creative context has no registered assets');
+  assert(rendererLayouts.size > 0, 'creative context has no renderer_layout values');
 
-  console.log(`Validated Creative Director preservation and registered assets: ${campaignPath}`);
+  for (const slot of draftSlots) {
+    const job = jobsByAssetCode.get(slot.asset_code);
+    assert(job, `campaign is missing renderer job for ${slot.asset_code}`);
+    assert(job.post_code === slot.post_code, `${slot.asset_code} renderer job owner differs from draft`);
+    assert(job.asset_kind === slot.asset_kind, `${slot.asset_code} asset_kind differs from draft`);
+    if (slot.slide_number !== undefined) assert(job.slide_number === slot.slide_number, `${slot.asset_code} slide_number differs from draft`);
+    assert(job.format === slot.owner_format, `${slot.asset_code} format differs from owning post`);
+    assert(job.expected_output?.filename === `${slot.asset_code}.png`, `${slot.asset_code} expected_output.filename must be canonical`);
+    assert(job.expected_output?.local_staging_path === `marketing/agent-outputs/${draft.period_key}/generated-assets/${slot.asset_code}.png`, `${slot.asset_code} local_staging_path must be canonical`);
+    assert(job.expected_output?.mime_type === 'image/png' && job.expected_output?.width === 1080 && job.expected_output?.height === 1080, `${slot.asset_code} expected output must be 1080x1080 PNG`);
+
+    const direction = job.creative_direction;
+    assert(direction && rendererLayouts.has(direction.layout_variant), `${slot.asset_code} layout_variant must equal a declared renderer_layout`);
+    const sourceAssets = Array.isArray(job.source_assets) ? job.source_assets : [];
+    const sourceKeys = new Set(sourceAssets.map((asset: any) => asset?.asset_key).filter(Boolean));
+    assert(sourceKeys.size > 0, `${slot.asset_code} source_assets must be non-empty`);
+    for (const source of sourceAssets) {
+      const registered = registeredAssetMap.get(source.asset_key);
+      assert(registered, `${slot.asset_code} includes unregistered source asset ${source.asset_key}`);
+      assert(stable(source) === stable(registered), `${slot.asset_code} source asset ${source.asset_key} metadata differs from registry`);
+    }
+    const selectedKeys = strings(direction.selected_asset_keys);
+    assert(selectedKeys.length > 0, `${slot.asset_code} selected_asset_keys must be non-empty`);
+    for (const key of selectedKeys) assert(sourceKeys.has(key), `${slot.asset_code} selects ${key} outside job.source_assets`);
+  }
+
+  console.log(`Validated renderer-ready Creative Director output: ${jobs.length} exact jobs preserved from ${draftPath}`);
 }
 
 main().catch((error: unknown) => {

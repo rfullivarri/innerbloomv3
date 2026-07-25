@@ -8,6 +8,7 @@ on:
       - 'prompts/marketing/creative-director-v1.md'
       - 'prompts/marketing/agent-system/creative-director/AGENTS.md'
       - 'prompts/marketing/agent-system/schemas/creative-director-input-v1.schema.json'
+      - 'prompts/marketing/agent-system/schemas/creative-director-output-v1.schema.json'
       - '.github/workflows/marketing-creative-context.yml'
       - '.github/workflows/marketing-creative-director-contract.yml'
       - 'Docs/marketing/contracts/creative-director-v1.md'
@@ -50,12 +51,109 @@ jobs:
           npx tsx apps/api/scripts/validate-marketing-agent-json.ts
           --schema=prompts/marketing/agent-system/schemas/creative-director-input-v1.schema.json
           --input=marketing/agent-inputs/2026-08/creative-context.json
-      - name: Prove the context contains executable layouts and current assets
+      - name: Build renderer-compatible Creative Director output fixture
+        shell: bash
         run: |
+          set -euo pipefail
           node - <<'NODE'
           const fs = require('fs');
-          const context = JSON.parse(fs.readFileSync('marketing/agent-inputs/2026-08/creative-context.json', 'utf8'));
-          if (!context.renderer_capabilities.layouts.some((layout) => layout.status === 'executable')) throw new Error('No executable layout');
-          if (!context.current_assets.assets.length) throw new Error('No current assets');
-          if (context.immutable_editorial_source.period_key !== '2026-08') throw new Error('Draft period missing');
+          const period = '2026-08';
+          const draft = JSON.parse(fs.readFileSync(`marketing/agent-outputs/${period}/campaign-draft.json`, 'utf8'));
+          const context = JSON.parse(fs.readFileSync(`marketing/agent-inputs/${period}/creative-context.json`, 'utf8'));
+          const source = context.current_assets.assets.find((asset) => asset.status === 'approved_current');
+          if (!source) throw new Error('No approved asset available for fixture');
+          const creativeMode = ['light', 'dark'].includes(source.mode) ? source.mode : 'dark';
+          const rendererLayout = context.renderer_capabilities.layouts.find((layout) => layout.status === 'executable' && layout.renderer_layout === 'storefront_feature_stage');
+          if (!rendererLayout) throw new Error('storefront_feature_stage is not declared as executable');
+
+          const jobs = draft.posts.flatMap((post) => post.asset_slots.map((slot) => {
+            const slide = post.carousel?.slides?.find((item) => item.asset_code === slot.asset_code);
+            return {
+              asset_code: slot.asset_code,
+              post_code: post.post_code,
+              asset_kind: slot.asset_kind,
+              ...(slot.slide_number === undefined ? {} : { slide_number: slot.slide_number }),
+              platform: post.platform,
+              format: post.format,
+              canvas: { width: 1080, height: 1080, aspect_ratio: '1:1', safe_area: 'Keep essential copy and logo inside central 940x940 safe area.' },
+              visible_copy: slide?.visible_copy ?? post.visible_copy_plan,
+              product_truth_anchor: slide?.product_truth_anchor ?? post.product_truth_anchor,
+              funnel_stage: post.funnel_stage,
+              source_assets: [source],
+              expected_output: {
+                filename: `${slot.asset_code}.png`,
+                local_staging_path: `marketing/agent-outputs/${period}/generated-assets/${slot.asset_code}.png`,
+                mime_type: 'image/png', width: 1080, height: 1080
+              },
+              creative_direction: {
+                status: 'ready_for_render',
+                visual_family: 'product_hero_scene',
+                layout_variant: rendererLayout.renderer_layout,
+                mode: creativeMode,
+                palette: creativeMode,
+                device_presentation: 'front',
+                wordmark_treatment: 'canonical_innerbloom_lockup',
+                composition_intent: 'Use one registered source asset with separated copy and product zones.',
+                selected_asset_keys: [source.asset_key],
+                focal_instruction: 'Keep exact visible copy dominant and the registered source legible.',
+                supporting_visual: { required: false },
+                supporting_treatment: 'none',
+                screen_fit: 'contain',
+                acceptance_criteria: [
+                  'Exact visible copy is preserved.',
+                  'Only registered source assets are used.',
+                  'The canonical Innerbloom lockup is present.',
+                  'No invented UI, metrics or product behavior appears.'
+                ]
+              }
+            };
+          }));
+
+          const campaign = {
+            schema_version: '1.0',
+            agent: 'innerbloom_creative_director',
+            period_key: period,
+            generated_at: '2026-07-25T12:00:00Z',
+            campaign: draft.campaign,
+            posts: draft.posts,
+            validation_profile: {
+              kind: 'derived_test',
+              minimum_unique_layouts: 1,
+              minimum_distinct_assets: 1,
+              carousel_minimum_unique_layouts: 1,
+              maximum_layout_share: 1
+            },
+            image_generation: { jobs }
+          };
+          fs.writeFileSync(`marketing/agent-outputs/${period}/campaign.json`, JSON.stringify(campaign, null, 2));
           NODE
+      - name: Validate Creative Director output schema
+        run: >-
+          npx tsx apps/api/scripts/validate-marketing-agent-json.ts
+          --schema=prompts/marketing/agent-system/schemas/creative-director-output-v1.schema.json
+          --input=marketing/agent-outputs/2026-08/campaign.json
+      - name: Validate existing renderer creative contract
+        run: node scripts/marketing/validate-creative-direction-v3.mjs marketing/agent-outputs/2026-08/campaign.json
+      - name: Validate exact draft preservation and renderer job ownership
+        run: >-
+          npx tsx apps/api/scripts/validate-creative-director-preservation.ts
+          --draft=marketing/agent-outputs/2026-08/campaign-draft.json
+          --campaign=marketing/agent-outputs/2026-08/campaign.json
+          --context=marketing/agent-inputs/2026-08/creative-context.json
+      - name: Prove legacy image_jobs shape fails closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const campaign = JSON.parse(fs.readFileSync('marketing/agent-outputs/2026-08/campaign.json', 'utf8'));
+          campaign.image_jobs = campaign.image_generation.jobs;
+          delete campaign.image_generation;
+          fs.writeFileSync('/tmp/invalid-creative-director-output.json', JSON.stringify(campaign));
+          NODE
+          if npx tsx apps/api/scripts/validate-marketing-agent-json.ts \
+            --schema=prompts/marketing/agent-system/schemas/creative-director-output-v1.schema.json \
+            --input=/tmp/invalid-creative-director-output.json; then
+            echo 'Expected legacy image_jobs output to fail.' >&2
+            exit 1
+          fi
