@@ -67,6 +67,7 @@ async function main(): Promise<void> {
       module: asset.module,
       mode: asset.mode,
       surface: asset.surface,
+      status: asset.status,
       composition_profile: asset.composition_profile ?? null,
       composition_slots: asset.composition_slots ?? null,
       allowed_operations: asset.allowed_operations ?? [],
