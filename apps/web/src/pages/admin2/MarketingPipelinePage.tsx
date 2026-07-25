@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp, RefreshCw } from '../../lib/lucide-react';
+import { ChevronDown, ChevronUp } from '../../lib/lucide-react';
 import {
   fetchMarketingPipelineRuns,
   type MarketingPipelineRunRecord,
@@ -76,7 +76,7 @@ export function MarketingPipelinePage() {
           {runs.length ? <select value={selectedRun?.id ?? ''} onChange={(event) => { setSelectedRunId(event.target.value); setExpandedStages(new Set()); }} className="rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-muted)] px-3 py-2 text-sm">
             {runs.map((run) => <option key={run.id} value={run.id}>{run.periodKey} · attempt {run.attempt}</option>)}
           </select> : null}
-          <button className="admin2-btn admin2-btn--ghost inline-flex items-center gap-2" onClick={() => void loadRuns()} disabled={loading}><RefreshCw size={16}/>{loading ? 'Loading' : 'Refresh'}</button>
+          <button className="admin2-btn admin2-btn--ghost" onClick={() => void loadRuns()} disabled={loading}>{loading ? 'Loading' : 'Refresh'}</button>
         </div>
       </div>
       {error ? <p className="mt-4 rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p> : null}
@@ -117,7 +117,7 @@ function StageRow({ stage, expanded, last, onToggle }: { stage: MarketingPipelin
     <button type="button" onClick={onToggle} disabled={!hasDetails} className="flex w-full items-center justify-between gap-4 rounded-xl px-3 py-4 text-left hover:bg-[color:var(--admin-hover)] disabled:cursor-default disabled:hover:bg-transparent">
       <div>
         <p className="font-semibold">{stageLabels[stage.stageKey] ?? stage.stageKey}</p>
-        <p className="mt-1 text-xs text-[color:var(--admin-muted)]">{stage.executionKind.replaceAll('_', ' ')} · attempt {stage.attempt}{stage.startedAt ? ` · ${formatDate(stage.startedAt)}` : ''}</p>
+        <p className="mt-1 text-xs text-[color:var(--admin-muted)]">{stage.executionKind.replace(/_/g, ' ')} · attempt {stage.attempt}{stage.startedAt ? ` · ${formatDate(stage.startedAt)}` : ''}</p>
       </div>
       <div className="flex items-center gap-3">
         <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${badgeClass(stage.status)}`}>{statusLabels[stage.status]}</span>
