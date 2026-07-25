@@ -4,6 +4,7 @@ import { CoreEnginePage } from '../../pages/admin2/CoreEnginePage';
 import { UserOpsPage } from '../../pages/admin2/UserOpsPage';
 import { NotificationsPage } from '../../pages/admin2/NotificationsPage';
 import { MarketingPageV2 } from '../../pages/admin2/MarketingPageV2';
+import { MarketingPipelinePage } from '../../pages/admin2/MarketingPipelinePage';
 import { AiTaskgenPage } from '../../pages/admin2/AiTaskgenPage';
 import { AdvancedPage } from '../../pages/admin2/AdvancedPage';
 import { TaskgenUserPage } from '../../pages/admin/TaskgenUserPage';
@@ -15,6 +16,7 @@ const NAV_ITEMS = [
   { to: '/admin/user-ops', label: 'User Ops' },
   { to: '/admin/notifications', label: 'Notifications' },
   { to: '/admin/marketing', label: 'Marketing' },
+  { to: '/admin/marketing-pipeline', label: 'Marketing Pipeline' },
   { to: '/admin/ai-taskgen', label: 'AI TaskGen' },
   { to: '/admin/advanced', label: 'Advanced' },
 ];
@@ -73,6 +75,7 @@ export function Admin2Shell() {
             <Route path="user-ops" element={<UserOpsPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="marketing" element={<MarketingPageV2 />} />
+            <Route path="marketing-pipeline" element={<MarketingPipelinePage />} />
             <Route path="ai-taskgen" element={<AiTaskgenPage />} />
             <Route path="advanced" element={<AdvancedPage />} />
             <Route path="users/:userId/taskgen" element={<TaskgenUserPage baseTaskgenPath="/admin/ai-taskgen" baseUserPath="/admin/users" />} />
