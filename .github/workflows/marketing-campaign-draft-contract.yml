@@ -3,6 +3,7 @@ name: Validate marketing campaign draft contract
 on:
   pull_request:
     paths:
+      - 'prompts/marketing/agent-system/schemas/cmo-output-v1.schema.json'
       - 'prompts/marketing/agent-system/schemas/campaign-draft-v1.schema.json'
       - 'prompts/marketing/agent-system/head-of-content/AGENTS.md'
       - 'prompts/marketing/head-of-content-v1.md'
@@ -34,6 +35,46 @@ jobs:
           npx tsx apps/api/scripts/validate-marketing-agent-json.ts
           --schema=prompts/marketing/agent-system/schemas/cmo-output-v1.schema.json
           --input=apps/api/scripts/fixtures/cmo-strategy-valid.json
+      - name: Prove incomplete CMO strategies fail closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          schema=prompts/marketing/agent-system/schemas/cmo-output-v1.schema.json
+          source=apps/api/scripts/fixtures/cmo-strategy-valid.json
+
+          expect_schema_failure() {
+            local file="$1"
+            if npx tsx apps/api/scripts/validate-marketing-agent-json.ts --schema="${schema}" --input="${file}"; then
+              echo "Expected ${file} to fail CMO schema validation." >&2
+              exit 1
+            fi
+          }
+
+          node - <<'NODE'
+          const fs = require('fs');
+          const source = JSON.parse(fs.readFileSync('apps/api/scripts/fixtures/cmo-strategy-valid.json', 'utf8'));
+
+          const missingPillarCode = structuredClone(source);
+          delete missingPillarCode.strategy.content_pillars[0].pillar_code;
+          fs.writeFileSync('/tmp/cmo-missing-pillar-code.json', JSON.stringify(missingPillarCode));
+
+          const missingExperimentCode = structuredClone(source);
+          delete missingExperimentCode.experiments[0].experiment_code;
+          fs.writeFileSync('/tmp/cmo-missing-experiment-code.json', JSON.stringify(missingExperimentCode));
+
+          const missingMetric = structuredClone(source);
+          delete missingMetric.experiments[0].primary_metric;
+          fs.writeFileSync('/tmp/cmo-missing-primary-metric.json', JSON.stringify(missingMetric));
+
+          const invalidObjective = structuredClone(source);
+          invalidObjective.strategy.primary_objective = 'Acquire qualified users';
+          fs.writeFileSync('/tmp/cmo-invalid-objective.json', JSON.stringify(invalidObjective));
+          NODE
+
+          expect_schema_failure /tmp/cmo-missing-pillar-code.json
+          expect_schema_failure /tmp/cmo-missing-experiment-code.json
+          expect_schema_failure /tmp/cmo-missing-primary-metric.json
+          expect_schema_failure /tmp/cmo-invalid-objective.json
       - name: Validate content context fixture schema
         run: >-
           npx tsx apps/api/scripts/validate-marketing-agent-json.ts
