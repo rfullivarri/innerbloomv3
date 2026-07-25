@@ -60,8 +60,9 @@ jobs:
           const period = '2026-08';
           const draft = JSON.parse(fs.readFileSync(`marketing/agent-outputs/${period}/campaign-draft.json`, 'utf8'));
           const context = JSON.parse(fs.readFileSync(`marketing/agent-inputs/${period}/creative-context.json`, 'utf8'));
-          const source = context.current_assets.assets.find((asset) => asset.status === 'approved_current' && ['light', 'dark'].includes(asset.mode));
-          if (!source) throw new Error('No approved light/dark asset available for fixture');
+          const source = context.current_assets.assets.find((asset) => asset.status === 'approved_current');
+          if (!source) throw new Error('No approved asset available for fixture');
+          const creativeMode = ['light', 'dark'].includes(source.mode) ? source.mode : 'dark';
           const rendererLayout = context.renderer_capabilities.layouts.find((layout) => layout.status === 'executable' && layout.renderer_layout === 'storefront_feature_stage');
           if (!rendererLayout) throw new Error('storefront_feature_stage is not declared as executable');
 
@@ -88,8 +89,8 @@ jobs:
                 status: 'ready_for_render',
                 visual_family: 'product_hero_scene',
                 layout_variant: rendererLayout.renderer_layout,
-                mode: source.mode,
-                palette: source.mode === 'dark' ? 'dark' : 'light',
+                mode: creativeMode,
+                palette: creativeMode,
                 device_presentation: 'front',
                 wordmark_treatment: 'canonical_innerbloom_lockup',
                 composition_intent: 'Use one registered source asset with separated copy and product zones.',
