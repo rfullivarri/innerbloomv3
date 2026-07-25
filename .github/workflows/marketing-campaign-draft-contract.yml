@@ -6,8 +6,11 @@ on:
       - 'prompts/marketing/agent-system/schemas/campaign-draft-v1.schema.json'
       - 'prompts/marketing/agent-system/head-of-content/AGENTS.md'
       - 'prompts/marketing/head-of-content-v1.md'
+      - 'apps/api/scripts/export-marketing-content-context.ts'
       - 'apps/api/scripts/validate-marketing-campaign-draft.ts'
       - 'apps/api/scripts/fixtures/campaign-draft-valid.json'
+      - 'apps/api/scripts/fixtures/content-context-valid.json'
+      - 'apps/api/scripts/fixtures/cmo-strategy-valid.json'
       - '.github/workflows/marketing-campaign-draft-contract.yml'
   workflow_dispatch:
 
@@ -26,26 +29,67 @@ jobs:
       - run: npm install --no-audit --no-fund
       - name: Typecheck API
         run: npm -w @innerbloom/api run typecheck
-      - name: Validate fixture schema
+      - name: Validate CMO fixture schema
+        run: >-
+          npx tsx apps/api/scripts/validate-marketing-agent-json.ts
+          --schema=prompts/marketing/agent-system/schemas/cmo-output-v1.schema.json
+          --input=apps/api/scripts/fixtures/cmo-strategy-valid.json
+      - name: Validate content context fixture schema
+        run: >-
+          npx tsx apps/api/scripts/validate-marketing-agent-json.ts
+          --schema=prompts/marketing/agent-system/schemas/head-of-content-input-v1.schema.json
+          --input=apps/api/scripts/fixtures/content-context-valid.json
+      - name: Validate campaign draft fixture schema
         run: >-
           npx tsx apps/api/scripts/validate-marketing-agent-json.ts
           --schema=prompts/marketing/agent-system/schemas/campaign-draft-v1.schema.json
           --input=apps/api/scripts/fixtures/campaign-draft-valid.json
-      - name: Validate fixture business rules
+      - name: Validate campaign draft strategy and product fidelity
         run: >-
           npx tsx apps/api/scripts/validate-marketing-campaign-draft.ts
           --input=apps/api/scripts/fixtures/campaign-draft-valid.json
-      - name: Prove renderer-owned fields fail closed
+          --content-context=apps/api/scripts/fixtures/content-context-valid.json
+          --cmo-strategy=apps/api/scripts/fixtures/cmo-strategy-valid.json
+      - name: Prove invalid strategy and product references fail closed
         shell: bash
         run: |
           set -euo pipefail
+          validate_failure() {
+            local file="$1"
+            local expected="$2"
+            if npx tsx apps/api/scripts/validate-marketing-campaign-draft.ts \
+              --input="${file}" \
+              --content-context=apps/api/scripts/fixtures/content-context-valid.json \
+              --cmo-strategy=apps/api/scripts/fixtures/cmo-strategy-valid.json > /tmp/validator.log 2>&1; then
+              echo "Expected ${file} to fail." >&2
+              exit 1
+            fi
+            grep -F "${expected}" /tmp/validator.log
+          }
+
           node - <<'NODE'
           const fs = require('fs');
-          const input = JSON.parse(fs.readFileSync('apps/api/scripts/fixtures/campaign-draft-valid.json', 'utf8'));
-          input.posts[0].visual_strategy.layout_variant = 'forbidden';
-          fs.writeFileSync('/tmp/campaign-draft-invalid.json', JSON.stringify(input));
+          const source = JSON.parse(fs.readFileSync('apps/api/scripts/fixtures/campaign-draft-valid.json', 'utf8'));
+
+          const badPillar = structuredClone(source);
+          badPillar.posts[0].content_pillar = 'invented_pillar';
+          badPillar.campaign_execution_summary.pillar_counts = { invented_pillar: 1 };
+          fs.writeFileSync('/tmp/campaign-draft-bad-pillar.json', JSON.stringify(badPillar));
+
+          const badExperiment = structuredClone(source);
+          badExperiment.posts[0].experiment_code = 'invented_experiment';
+          fs.writeFileSync('/tmp/campaign-draft-bad-experiment.json', JSON.stringify(badExperiment));
+
+          const badProduct = structuredClone(source);
+          badProduct.posts[0].visual_strategy.product_evidence = ['invented_product_capability'];
+          fs.writeFileSync('/tmp/campaign-draft-bad-product.json', JSON.stringify(badProduct));
+
+          const badRenderer = structuredClone(source);
+          badRenderer.posts[0].visual_strategy.layout_variant = 'forbidden';
+          fs.writeFileSync('/tmp/campaign-draft-bad-renderer.json', JSON.stringify(badRenderer));
           NODE
-          if npx tsx apps/api/scripts/validate-marketing-campaign-draft.ts --input=/tmp/campaign-draft-invalid.json; then
-            echo 'Expected forbidden renderer field validation to fail.' >&2
-            exit 1
-          fi
+
+          validate_failure /tmp/campaign-draft-bad-pillar.json 'references unknown CMO pillar'
+          validate_failure /tmp/campaign-draft-bad-experiment.json 'references unknown CMO experiment'
+          validate_failure /tmp/campaign-draft-bad-product.json 'references unknown product truth'
+          validate_failure /tmp/campaign-draft-bad-renderer.json 'renderer-owned field layout_variant is forbidden'

@@ -28,7 +28,7 @@
   "campaign_execution_summary": {
     "post_count": 1,
     "format_counts": {"static": 1},
-    "pillar_counts": {"Pain and friction": 1},
+    "pillar_counts": {"pain_and_friction": 1},
     "funnel_counts": {"awareness": 1},
     "asset_slot_count": 1,
     "notes": ["Contract fixture only."]
@@ -41,13 +41,13 @@
       "format": "static",
       "status": "needs_review",
       "scheduled_at": "2026-08-03T10:00:00+02:00",
-      "content_pillar": "Pain and friction",
+      "content_pillar": "pain_and_friction",
       "funnel_stage": "awareness",
       "experiment_code": "pain_first_hook",
       "audience_tension": "Rigid systems collapse during real weeks.",
       "product_truth_anchor": "Innerbloom presents progress against a selected rhythm without guaranteeing outcomes.",
       "hook": "Your routine should survive a difficult week.",
-      "caption": "A useful system leaves room for real life. Innerbloom explores visible progress and adjustable challenge without pretending every week is identical.",
+      "caption": "A useful system leaves room for real life. Innerbloom presents progress against a selected rhythm without pretending every week is identical.",
       "cta": {
         "label": "Explore Innerbloom",
         "intent": "traffic",
@@ -71,7 +71,7 @@
       "visual_strategy": {
         "visual_goal": "Communicate resilience without depicting unsupported automation.",
         "proof_type": "hybrid",
-        "product_evidence": ["dashboard progress overview"],
+        "product_evidence": ["cmo_proof_point_1"],
         "screenshot_requirement": "optional",
         "informational_hierarchy": ["headline", "product evidence", "supporting text", "brand"],
         "editorial_character": ["calm", "clear", "human"],

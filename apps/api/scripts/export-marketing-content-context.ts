@@ -21,6 +21,41 @@ async function loadJson(path: string): Promise<{ raw: string; value: any }> {
   return { raw, value: JSON.parse(raw) };
 }
 
+type ProductTruth = {
+  truth_ref: string;
+  source_type: 'cmo_core_message' | 'cmo_supporting_message' | 'cmo_proof_point' | 'product_change' | 'positioning';
+  text: string;
+};
+
+function buildApprovedProductTruths(context: any, strategy: any): ProductTruth[] {
+  const groups: Array<{ sourceType: ProductTruth['source_type']; prefix: string; values: unknown }> = [
+    { sourceType: 'cmo_core_message', prefix: 'cmo_core_message', values: strategy?.messaging_guidelines?.core_messages },
+    { sourceType: 'cmo_supporting_message', prefix: 'cmo_supporting_message', values: strategy?.messaging_guidelines?.supporting_messages },
+    { sourceType: 'cmo_proof_point', prefix: 'cmo_proof_point', values: strategy?.messaging_guidelines?.proof_points },
+    { sourceType: 'product_change', prefix: 'product_change', values: context?.business_context?.known_product_changes },
+    { sourceType: 'positioning', prefix: 'positioning', values: context?.strategy_memory?.current_positioning },
+  ];
+
+  const seen = new Set<string>();
+  const truths: ProductTruth[] = [];
+  for (const group of groups) {
+    const values = Array.isArray(group.values) ? group.values : [];
+    for (const value of values) {
+      if (typeof value !== 'string' || !value.trim()) continue;
+      const text = value.trim();
+      const normalized = text.toLocaleLowerCase('en').replace(/\s+/g, ' ');
+      if (seen.has(normalized)) continue;
+      seen.add(normalized);
+      truths.push({
+        truth_ref: `${group.prefix}_${truths.filter((item) => item.source_type === group.sourceType).length + 1}`,
+        source_type: group.sourceType,
+        text,
+      });
+    }
+  }
+  return truths;
+}
+
 async function main(): Promise<void> {
   const period = readArg('period');
   const force = hasFlag('force');
@@ -53,6 +88,8 @@ async function main(): Promise<void> {
   const supported = context.operational_constraints?.supported_formats ?? [];
   const formats = supported.map((value: string) => value.includes('carousel') ? 'carousel' : value.includes('static') ? 'static' : value);
   const primaryUrl = context.available_assets?.existing_visuals?.find((asset: any) => asset.label === 'primaryUrl')?.url ?? 'https://innerbloomjourney.org/';
+  const approvedProductTruths = buildApprovedProductTruths(context, strategy);
+  if (approvedProductTruths.length === 0) throw new Error('No approved product truths are available for Head of Content');
   const now = new Date().toISOString();
 
   const output = {
@@ -89,6 +126,7 @@ async function main(): Promise<void> {
       product_pages: context.analytics?.product_pages ?? [],
       product_totals: context.analytics?.product_totals ?? {},
       approved_claim_source: strategy.messaging_guidelines ?? {},
+      approved_product_truths: approvedProductTruths,
     },
     available_assets: context.available_assets ?? {},
     operational_constraints: {
@@ -120,7 +158,7 @@ async function main(): Promise<void> {
   const tempPath = `${outputPath}.tmp`;
   await writeFile(tempPath, `${JSON.stringify(output, null, 2)}\n`, 'utf8');
   await rename(tempPath, outputPath);
-  console.log(JSON.stringify({ status: 'written', outputPath, period, campaignCode, contextChecksum, strategyChecksum }, null, 2));
+  console.log(JSON.stringify({ status: 'written', outputPath, period, campaignCode, contextChecksum, strategyChecksum, approvedProductTruthCount: approvedProductTruths.length }, null, 2));
 }
 
 main().catch((error: unknown) => {
