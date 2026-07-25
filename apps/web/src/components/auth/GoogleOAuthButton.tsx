@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { useClerk, useSignIn, useSignUp } from '@clerk/clerk-react';
+import { useSignIn, useSignUp } from '@clerk/clerk-react';
 
 export type GoogleOAuthMode = 'sign-in' | 'sign-up';
 
@@ -8,6 +8,8 @@ export type GoogleOAuthRedirectOptions = {
   redirectUrl: string;
   redirectUrlComplete: string;
   oidcPrompt?: 'select_account';
+  continueSignIn?: boolean;
+  continueSignUp?: boolean;
 };
 
 type GoogleOAuthButtonProps = {
@@ -40,6 +42,11 @@ export function buildGoogleOAuthRedirectOptions(
     redirectUrl: SSO_CALLBACK_PATH,
     redirectUrlComplete,
     oidcPrompt: forceAccountSelection ? 'select_account' : undefined,
+    // Let Clerk create a new OAuth attempt atomically instead of reusing or
+    // manually resetting an in-progress resource. This keeps the redirect
+    // resource valid while still preventing stale account reuse.
+    continueSignIn: false,
+    continueSignUp: false,
   };
 }
 
@@ -173,7 +180,6 @@ export function GoogleOAuthButton({
   className = '',
   forceAccountSelection = false,
 }: GoogleOAuthButtonProps) {
-  const clerk = useClerk();
   const { isLoaded: isSignInLoaded, signIn } = useSignIn();
   const { isLoaded: isSignUpLoaded, signUp } = useSignUp();
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -215,34 +221,29 @@ export function GoogleOAuthButton({
     );
 
     try {
+      console.info('[auth] starting interactive Google OAuth', {
+        mode,
+        oauthMode,
+        accountSelection: shouldForceAccountSelection ? 'required' : 'default',
+        freshClerkAttempt: true,
+      });
+
       if (oauthMode === 'sign-up') {
         if (!signUp) {
           throw new Error('Clerk sign-up resource is not ready');
         }
-        clerk.client.resetSignUp();
-        console.info('[auth] starting interactive Google OAuth', {
-          mode,
-          oauthMode,
-          accountSelection: shouldForceAccountSelection ? 'required' : 'default',
-        });
         await signUp.authenticateWithRedirect(redirectOptions);
       } else {
         if (!signIn) {
           throw new Error('Clerk sign-in resource is not ready');
         }
-        clerk.client.resetSignIn();
-        console.info('[auth] starting interactive Google OAuth', {
-          mode,
-          oauthMode,
-          accountSelection: shouldForceAccountSelection ? 'required' : 'default',
-        });
         await signIn.authenticateWithRedirect(redirectOptions);
       }
     } catch (error) {
       console.error(`[auth] Google OAuth redirect failed ${JSON.stringify(describeClerkOAuthError(error))}`);
       setIsRedirecting(false);
     }
-  }, [clerk.client, isLoaded, isRedirecting, mode, oauthMode, redirectUrlComplete, shouldForceAccountSelection, signIn, signUp]);
+  }, [isLoaded, isRedirecting, mode, oauthMode, redirectUrlComplete, shouldForceAccountSelection, signIn, signUp]);
 
   return (
     <button
