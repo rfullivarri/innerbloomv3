@@ -1,0 +1,60 @@
+name: Validate marketing pipeline Admin foundation
+
+on:
+  pull_request:
+    paths:
+      - 'apps/api/src/db/migrations/202607250001_marketing_pipeline_observability.sql'
+      - 'apps/api/src/services/marketingPipelineService.ts'
+      - 'apps/api/src/modules/admin/admin.routes.ts'
+      - 'apps/web/src/lib/marketingPipeline.ts'
+      - 'apps/web/src/pages/admin2/MarketingPipelinePage.tsx'
+      - 'apps/web/src/components/admin2/Admin2Shell.tsx'
+      - 'Docs/marketing/manual-action-test-plan.md'
+      - '.github/workflows/marketing-pipeline-admin-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install --no-audit --no-fund
+      - name: Typecheck API
+        run: npm -w @innerbloom/api run typecheck
+      - name: Typecheck pipeline web modules
+        run: >-
+          npm -w @innerbloom/web exec tsc --
+          --noEmit
+          --jsx react-jsx
+          --target ES2022
+          --module ESNext
+          --moduleResolution Bundler
+          --types vite/client
+          --skipLibCheck
+          src/lib/marketingPipeline.ts
+          src/pages/admin2/MarketingPipelinePage.tsx
+      - name: Verify Admin route registration
+        shell: bash
+        run: |
+          set -euo pipefail
+          shell_file=apps/web/src/components/admin2/Admin2Shell.tsx
+          grep -F "import { MarketingPipelinePage }" "$shell_file"
+          grep -F "{ to: '/admin/marketing-pipeline', label: 'Marketing Pipeline' }" "$shell_file"
+          grep -F 'path="marketing-pipeline" element={<MarketingPipelinePage />}' "$shell_file"
+      - name: Validate migration contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          migration=apps/api/src/db/migrations/202607250001_marketing_pipeline_observability.sql
+          grep -F 'CREATE TABLE IF NOT EXISTS marketing_pipeline_runs' "$migration"
+          grep -F 'CREATE TABLE IF NOT EXISTS marketing_pipeline_stages' "$migration"
+          grep -F 'CREATE TABLE IF NOT EXISTS marketing_pipeline_events' "$migration"
+          grep -F "'full_render_admin'" "$migration"
+          grep -F "'failed'" "$migration"

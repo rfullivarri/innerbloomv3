@@ -4,6 +4,7 @@ import { authMiddleware } from '../../middlewares/auth-middleware.js';
 import { asyncHandler } from '../../lib/async-handler.js';
 import { validateMarketingR2AssetUrls } from '../../services/marketingR2AssetService.js';
 import { updateMarketingCampaignPostsBulk } from '../../services/marketingCampaignBulkUpdateService.js';
+import { listMarketingPipelineRuns } from '../../services/marketingPipelineService.js';
 import {
   exportAdminUserLogsCsv,
   getAdminMe,
@@ -73,9 +74,18 @@ const marketingCampaignBulkSaveSchema = z.object({
   })).min(1).max(100),
 });
 
+const marketingPipelineQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(24).default(12),
+});
+
 adminRouter.get('/me', getAdminMe);
 adminRouter.get('/users', getAdminUsers);
 adminRouter.get('/marketing/campaigns', getAdminMarketingCampaigns);
+adminRouter.get('/marketing/pipeline/runs', asyncHandler(async (req, res) => {
+  const query = marketingPipelineQuerySchema.parse(req.query);
+  const runs = await listMarketingPipelineRuns(query.limit);
+  res.json({ ok: true, runs });
+}));
 adminRouter.patch('/marketing/campaigns/:campaignCode/posts/:postCode', patchAdminMarketingPost);
 adminRouter.post('/marketing/campaigns/:campaignCode/posts/bulk-save', asyncHandler(async (req, res) => {
   const campaignCode = z.string().trim().min(1).max(120).parse(req.params.campaignCode);
