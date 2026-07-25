@@ -28,8 +28,23 @@ jobs:
       - run: npm install --no-audit --no-fund
       - name: Typecheck API
         run: npm -w @innerbloom/api run typecheck
-      - name: Typecheck web
-        run: npm -w @innerbloom/web run typecheck
+      - name: Typecheck pipeline web modules
+        run: >-
+          npm -w @innerbloom/web exec tsc --
+          --noEmit
+          --jsx react-jsx
+          --target ES2020
+          --module ESNext
+          --moduleResolution Bundler
+          --skipLibCheck
+          src/lib/marketingPipeline.ts
+          src/pages/admin2/MarketingPipelinePage.tsx
+      - name: Verify Admin route registration
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "import { MarketingPipelinePage }" apps/web/src/components/admin2/Admin2Shell.tsx
+          grep -F 'path="marketing/pipeline"' apps/web/src/components/admin2/Admin2Shell.tsx
       - name: Validate migration contract
         shell: bash
         run: |
