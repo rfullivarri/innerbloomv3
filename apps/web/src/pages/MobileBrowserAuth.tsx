@@ -387,17 +387,8 @@ export default function MobileBrowserAuthPage() {
     }
 
     googleRedirectStartedRef.current = true;
-    clerk.client.resetSignIn();
-    const freshSignIn = clerk.client.signIn;
     const redirectOptions = buildGoogleOAuthRedirectOptions(handoffUrl, true);
-    console.info('[mobile-auth-page] starting interactive Google OAuth', {
-      at: Date.now(),
-      mode,
-      provider: 'google',
-      accountSelection: 'required',
-      resetSignInAttempt: true,
-    });
-    void freshSignIn
+    void signIn
       .authenticateWithRedirect(redirectOptions)
       .catch((cause) => {
         googleRedirectStartedRef.current = false;
@@ -413,7 +404,6 @@ export default function MobileBrowserAuthPage() {
         );
       });
   }, [
-    clerk.client,
     createdSessionId,
     handoffUrl,
     isLoaded,
