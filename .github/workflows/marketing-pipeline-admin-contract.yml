@@ -33,7 +33,7 @@ jobs:
           npm -w @innerbloom/web exec tsc --
           --noEmit
           --jsx react-jsx
-          --target ES2020
+          --target ES2022
           --module ESNext
           --moduleResolution Bundler
           --types vite/client
