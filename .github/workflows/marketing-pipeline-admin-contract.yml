@@ -36,6 +36,7 @@ jobs:
           --target ES2020
           --module ESNext
           --moduleResolution Bundler
+          --types vite/client
           --skipLibCheck
           src/lib/marketingPipeline.ts
           src/pages/admin2/MarketingPipelinePage.tsx
