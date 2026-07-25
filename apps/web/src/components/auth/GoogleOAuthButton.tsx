@@ -8,6 +8,8 @@ export type GoogleOAuthRedirectOptions = {
   redirectUrl: string;
   redirectUrlComplete: string;
   oidcPrompt?: 'select_account';
+  continueSignIn?: boolean;
+  continueSignUp?: boolean;
 };
 
 type GoogleOAuthButtonProps = {
@@ -40,6 +42,8 @@ export function buildGoogleOAuthRedirectOptions(
     redirectUrl: SSO_CALLBACK_PATH,
     redirectUrlComplete,
     oidcPrompt: forceAccountSelection ? 'select_account' : undefined,
+    continueSignIn: false,
+    continueSignUp: false,
   };
 }
 
@@ -214,6 +218,13 @@ export function GoogleOAuthButton({
     );
 
     try {
+      console.info('[auth] starting interactive Google OAuth', {
+        mode,
+        oauthMode,
+        accountSelection: shouldForceAccountSelection ? 'required' : 'default',
+        freshClerkAttempt: true,
+      });
+
       if (oauthMode === 'sign-up') {
         if (!signUp) {
           throw new Error('Clerk sign-up resource is not ready');
