@@ -1,12 +1,19 @@
 # Creative Director Contract v1
 
-**Status:** proposed and frozen for Phase 1; agent and schemas are not yet implemented.
+**Status:** implemented foundation; context builder, input schema, agent prompt and preservation validator are active. Codex execution and production pilot remain pending.
 
 ## Classification
 
-Creative Director is an AI reasoning agent.
+Creative Director is an AI reasoning agent. It is not a GitHub Action because it makes non-deterministic creative decisions across the complete campaign. GitHub Actions only assemble its validated context and validate or route its output.
 
-It is not a GitHub Action because it must make non-deterministic creative decisions across the complete campaign. GitHub Actions only assemble its validated context and validate or route its output.
+## Canonical implementation
+
+- Builder: `apps/api/scripts/export-marketing-creative-context.ts`
+- Input schema: `prompts/marketing/agent-system/schemas/creative-director-input-v1.schema.json`
+- Prompt: `prompts/marketing/creative-director-v1.md`
+- Agent contract: `prompts/marketing/agent-system/creative-director/AGENTS.md`
+- Handoff workflow: `.github/workflows/marketing-creative-context.yml`
+- Preservation validator: `apps/api/scripts/validate-creative-director-preservation.ts`
 
 ## Input
 
@@ -14,15 +21,14 @@ Canonical path:
 
 `marketing/agent-inputs/<YYYY-MM>/creative-context.json`
 
-The deterministic context builder must include:
+The deterministic context builder includes:
 
-- validated `campaign-draft.json`;
-- validated CMO strategy;
+- validated `campaign-draft.json` as immutable editorial source;
+- validated CMO strategy and approved product truths;
 - current visual system;
-- registered current source assets and metadata;
-- supported renderer layouts, families and treatments;
+- current registered source assets and metadata;
+- supported renderer layouts, device poses and treatments;
 - creative validation thresholds;
-- product-surface compatibility rules;
 - output paths and provenance hashes.
 
 ## Output
@@ -39,11 +45,11 @@ Creative Director must:
 
 1. Preserve campaign strategy, copy, CTA, dates, tracking, hypotheses and post order exactly.
 2. Create one complete renderer job for every asset slot.
-3. Select only registered current assets or explicitly mark a missing-source requirement.
+3. Select only current registered assets or explicitly report a missing-source requirement.
 4. Select renderer-supported layout variants and visual families.
-5. Respect mobile, web and brand surface compatibility.
+5. Respect mobile, web, brand and product-surface compatibility.
 6. Define campaign-wide layout, module, mode and source diversity.
-7. Give each carousel a meaningful slide progression.
+7. Give each carousel a meaningful visual progression.
 8. Produce complete creative directions accepted by the production validator.
 9. Keep campaign status `review` and every post `needs_review`.
 10. Report blocking gaps rather than inventing assets, UI, data or capabilities.
@@ -106,32 +112,34 @@ If a source binary is genuinely missing:
 - allow independent jobs to remain valid;
 - stop before claiming the complete campaign is render-ready.
 
-Asset Producer is therefore conditional, not a mandatory fourth stage.
+Asset Producer is conditional, not a mandatory fourth stage.
 
 ## Validation
 
 A successful output must pass:
 
-- the future production campaign schema;
-- creative-direction validator v3 or its approved successor;
+- `scripts/marketing/validate-creative-direction-v3.mjs`;
+- `apps/api/scripts/validate-creative-director-preservation.ts`;
 - registered asset lookup;
 - layout and source diversity rules;
 - surface compatibility rules;
-- post/slide/job completeness checks;
-- preservation comparison against `campaign-draft.json`.
+- post, slide and job completeness checks.
 
 ## Provenance
 
-The output must record or be paired with:
+The creative context records:
 
-- `source_branch`;
-- `campaign_draft_sha256`;
-- `creative_context_sha256`;
-- visual system version;
-- renderer contract version;
+- source branch;
+- campaign draft SHA-256;
+- CMO strategy and content-context SHA-256;
+- visual system SHA-256;
+- asset registry SHA-256;
+- layout specification SHA-256;
 - Creative Director contract version;
 - generated timestamp.
 
 ## Completion boundary
 
-Successful completion means a validated `campaign.json` that can be passed directly to `Render campaign and send it to Admin` without manual enrichment.
+Foundation completion means the deterministic context and agent contract are ready for Codex configuration.
+
+Agent completion means a validated `campaign.json` that can be passed to a manual `preview_limit: 1` render pilot. Automatic full rendering remains outside this change.
