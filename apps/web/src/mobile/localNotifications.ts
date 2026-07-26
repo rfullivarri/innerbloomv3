@@ -276,14 +276,22 @@ export async function syncNativeDailyReminderNotification(
       return;
     }
 
-    const permissions = options?.requestPermissions
-      ? await ensureNativeDailyReminderNotificationPermissions()
-      : await plugin.checkPermissions().then((result) => ({ granted: result.display === 'granted' }));
+    const existingPermission = await plugin.checkPermissions();
+    const shouldRequestPermission =
+      options?.requestPermissions === true ||
+      existingPermission.display === 'prompt' ||
+      existingPermission.display === 'prompt-with-rationale';
+    const permissions = shouldRequestPermission
+      ? await ensureNativeDailyReminderNotificationPermissions({ requestExactAlarm: true })
+      : { granted: existingPermission.display === 'granted' };
 
     if (!permissions.granted) {
-      logNativeReminder('sync-permission-denied', { requestPermissions: options?.requestPermissions === true });
-      await cancelNativeDailyReminderNotification();
-      if (options?.requestPermissions) {
+      logNativeReminder('sync-permission-unavailable', {
+        display: existingPermission.display,
+        requestPermissions: shouldRequestPermission,
+        preservedExistingSchedule: true,
+      });
+      if (options?.requestPermissions || shouldRequestPermission) {
         throw new Error(tNotification('dailyQuest.mobile.permissionRequired'));
       }
       return;
@@ -319,7 +327,6 @@ export async function syncNativeDailyReminderNotification(
       channel: reminder?.channel ?? null,
     });
 
-    await cancelNativeDailyReminderNotification();
     await plugin.schedule({
       notifications: [
         {
@@ -344,11 +351,17 @@ export async function syncNativeDailyReminderNotification(
       logNativeReminder('sync-pending-check-failed', { error: error instanceof Error ? error.message : String(error) });
       return null;
     });
+    const pendingIds = pending?.notifications?.map((notification) => notification.id).filter(Boolean) ?? null;
+    const isConfirmedPending = pendingIds?.includes(DAILY_REMINDER_NOTIFICATION_ID) ?? false;
     logNativeReminder('sync-scheduled', {
       id: DAILY_REMINDER_NOTIFICATION_ID,
       pendingCount: pending?.notifications?.length ?? null,
-      pendingIds: pending?.notifications?.map((notification) => notification.id).filter(Boolean) ?? null,
+      pendingIds,
+      confirmed: isConfirmedPending,
     });
+    if (pending && !isConfirmedPending) {
+      throw new Error(tNotification('dailyQuest.mobile.permissionRequired'));
+    }
   } finally {
     isReminderSyncInProgress = false;
   }
