@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { getDailyReminderSettings } from '../lib/api';
 import {
   getCapacitorAppPlugin,
+  getCapacitorPlatform,
   isNativeCapacitorPlatform,
 } from './capacitor';
 import { syncNativeDailyReminderNotification } from './localNotifications';
@@ -14,6 +15,7 @@ import { writeMobileDebug } from './mobileDebug';
 
 const NATIVE_SESSION_REFRESH_WINDOW_MS = 15 * 60 * 1000;
 const NATIVE_RELIABILITY_COOLDOWN_MS = 30_000;
+const REMINDER_DIAGNOSTIC_BUILD = 'reminder-diagnostics-v1-2026-07-26';
 
 let maintenancePromise: Promise<void> | null = null;
 let lastMaintenanceStartedAt = 0;
@@ -106,16 +108,44 @@ async function runNativeReliabilityMaintenance(reason: string): Promise<void> {
   return maintenancePromise;
 }
 
+function isDailyReminderForm(target: EventTarget | null): target is HTMLFormElement {
+  return target instanceof HTMLFormElement
+    && target.classList.contains('reminder-scheduler-form');
+}
+
+function readReminderUiOutcome(): 'success' | 'error' | null {
+  const text = document.body?.innerText ?? '';
+  if (text.includes('Guardamos tus recordatorios.')) {
+    return 'success';
+  }
+  if (
+    text.includes('No pudimos guardar tus recordatorios.')
+    || text.includes('Necesitamos permiso para enviarte notificaciones')
+  ) {
+    return 'error';
+  }
+  return null;
+}
+
 export function NativeReliabilityBridge() {
   useEffect(() => {
     if (!isNativeCapacitorPlatform()) {
       return;
     }
 
+    writeMobileDebug('reminder-diagnostics:build', {
+      marker: REMINDER_DIAGNOSTIC_BUILD,
+      platform: getCapacitorPlatform(),
+      native: isNativeCapacitorPlatform(),
+      path: window.location.pathname,
+      at: Date.now(),
+    });
+
     void runNativeReliabilityMaintenance('mount');
 
     const app = getCapacitorAppPlugin();
     let appStateHandle: Awaited<ReturnType<NonNullable<typeof app>['addListener']>> | null = null;
+    let lastUiOutcome: 'success' | 'error' | null = null;
 
     if (app) {
       void Promise.resolve(app.addListener('appStateChange', ({ isActive }) => {
@@ -130,10 +160,73 @@ export function NativeReliabilityBridge() {
     const handleOnline = () => {
       void runNativeReliabilityMaintenance('online');
     };
+
+    const handleReminderSubmit = (event: SubmitEvent) => {
+      if (!isDailyReminderForm(event.target)) {
+        return;
+      }
+
+      lastUiOutcome = null;
+      writeMobileDebug('reminder-diagnostics:submit-captured', {
+        marker: REMINDER_DIAGNOSTIC_BUILD,
+        platform: getCapacitorPlatform(),
+        native: isNativeCapacitorPlatform(),
+        path: window.location.pathname,
+        submitterTag: event.submitter instanceof HTMLElement ? event.submitter.tagName : null,
+        at: Date.now(),
+      });
+    };
+
+    const handleWindowError = (event: ErrorEvent) => {
+      writeMobileDebug('reminder-diagnostics:window-error', {
+        marker: REMINDER_DIAGNOSTIC_BUILD,
+        message: event.message,
+        filename: event.filename || null,
+        line: event.lineno || null,
+        column: event.colno || null,
+        at: Date.now(),
+      });
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      const reason = event.reason;
+      writeMobileDebug('reminder-diagnostics:unhandled-rejection', {
+        marker: REMINDER_DIAGNOSTIC_BUILD,
+        error: reason instanceof Error ? reason.message : String(reason),
+        at: Date.now(),
+      });
+    };
+
+    const outcomeObserver = new MutationObserver(() => {
+      const outcome = readReminderUiOutcome();
+      if (!outcome || outcome === lastUiOutcome) {
+        return;
+      }
+      lastUiOutcome = outcome;
+      writeMobileDebug(`reminder-diagnostics:ui-${outcome}`, {
+        marker: REMINDER_DIAGNOSTIC_BUILD,
+        platform: getCapacitorPlatform(),
+        path: window.location.pathname,
+        at: Date.now(),
+      });
+    });
+
     window.addEventListener('online', handleOnline);
+    window.addEventListener('error', handleWindowError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    document.addEventListener('submit', handleReminderSubmit, true);
+    outcomeObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
 
     return () => {
       window.removeEventListener('online', handleOnline);
+      window.removeEventListener('error', handleWindowError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      document.removeEventListener('submit', handleReminderSubmit, true);
+      outcomeObserver.disconnect();
       void appStateHandle?.remove();
     };
   }, []);
