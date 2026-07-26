@@ -14,7 +14,6 @@ import { writeMobileDebug } from './mobileDebug';
 
 const NATIVE_SESSION_REFRESH_WINDOW_MS = 15 * 60 * 1000;
 const NATIVE_RELIABILITY_COOLDOWN_MS = 30_000;
-const REMINDER_SAVE_RECONCILE_DELAYS_MS = [750, 2_500];
 
 let maintenancePromise: Promise<void> | null = null;
 let lastMaintenanceStartedAt = 0;
@@ -30,10 +29,7 @@ export function shouldRefreshNativeSession(
   return expiresAt - now <= NATIVE_SESSION_REFRESH_WINDOW_MS;
 }
 
-async function runNativeReliabilityMaintenance(
-  reason: string,
-  options?: { force?: boolean },
-): Promise<void> {
+async function runNativeReliabilityMaintenance(reason: string): Promise<void> {
   if (!isNativeCapacitorPlatform() || shouldForceNativeWelcome()) {
     return;
   }
@@ -48,12 +44,7 @@ async function runNativeReliabilityMaintenance(
     return maintenancePromise;
   }
 
-  if (!options?.force && now - lastMaintenanceStartedAt < NATIVE_RELIABILITY_COOLDOWN_MS) {
-    writeMobileDebug('native-reliability:skipped-cooldown', {
-      reason,
-      elapsedMs: now - lastMaintenanceStartedAt,
-      at: now,
-    });
+  if (now - lastMaintenanceStartedAt < NATIVE_RELIABILITY_COOLDOWN_MS) {
     return;
   }
 
@@ -61,7 +52,6 @@ async function runNativeReliabilityMaintenance(
   maintenancePromise = (async () => {
     writeMobileDebug('native-reliability:start', {
       reason,
-      forced: options?.force === true,
       expiresAt: session.expiresAt,
       shouldRefresh: shouldRefreshNativeSession(session.expiresAt, now),
       at: now,
@@ -93,14 +83,9 @@ async function runNativeReliabilityMaintenance(
       }
 
       const reminder = await getDailyReminderSettings('notification');
-      await syncNativeDailyReminderNotification(reminder, {
-        requestPermissions: reason.startsWith('reminder-save'),
-      });
+      await syncNativeDailyReminderNotification(reminder);
       writeMobileDebug('native-reliability:reminder-resynced', {
         reason,
-        localTime: reminder?.local_time ?? reminder?.localTime ?? null,
-        status: reminder?.status ?? null,
-        enabled: reminder?.enabled ?? null,
         at: Date.now(),
       });
     } catch (error) {
@@ -121,11 +106,6 @@ async function runNativeReliabilityMaintenance(
   return maintenancePromise;
 }
 
-function isDailyReminderForm(target: EventTarget | null): target is HTMLFormElement {
-  return target instanceof HTMLFormElement
-    && target.classList.contains('reminder-scheduler-form');
-}
-
 export function NativeReliabilityBridge() {
   useEffect(() => {
     if (!isNativeCapacitorPlatform()) {
@@ -136,7 +116,6 @@ export function NativeReliabilityBridge() {
 
     const app = getCapacitorAppPlugin();
     let appStateHandle: Awaited<ReturnType<NonNullable<typeof app>['addListener']>> | null = null;
-    const reminderSaveTimeoutIds = new Set<number>();
 
     if (app) {
       void Promise.resolve(app.addListener('appStateChange', ({ isActive }) => {
@@ -151,37 +130,10 @@ export function NativeReliabilityBridge() {
     const handleOnline = () => {
       void runNativeReliabilityMaintenance('online');
     };
-
-    const handleReminderSubmit = (event: SubmitEvent) => {
-      if (!isDailyReminderForm(event.target)) {
-        return;
-      }
-
-      writeMobileDebug('native-reliability:reminder-save-detected', {
-        at: Date.now(),
-      });
-
-      for (const [index, delayMs] of REMINDER_SAVE_RECONCILE_DELAYS_MS.entries()) {
-        const timeoutId = window.setTimeout(() => {
-          reminderSaveTimeoutIds.delete(timeoutId);
-          void runNativeReliabilityMaintenance(`reminder-save-${index + 1}`, {
-            force: true,
-          });
-        }, delayMs);
-        reminderSaveTimeoutIds.add(timeoutId);
-      }
-    };
-
     window.addEventListener('online', handleOnline);
-    document.addEventListener('submit', handleReminderSubmit, true);
 
     return () => {
       window.removeEventListener('online', handleOnline);
-      document.removeEventListener('submit', handleReminderSubmit, true);
-      for (const timeoutId of reminderSaveTimeoutIds) {
-        window.clearTimeout(timeoutId);
-      }
-      reminderSaveTimeoutIds.clear();
       void appStateHandle?.remove();
     };
   }, []);
