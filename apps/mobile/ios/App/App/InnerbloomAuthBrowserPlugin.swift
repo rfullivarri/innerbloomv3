@@ -30,7 +30,19 @@ public class InnerbloomAuthBrowserPlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuth
         }
 
         let callbackScheme = call.getString("callbackScheme") ?? "innerbloom"
-        let prefersEphemeralSession = call.getBool("prefersEphemeralWebBrowserSession", false)
+        let requestedEphemeralSession = call.getBool("prefersEphemeralWebBrowserSession", false)
+        let authMode = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+            .queryItems?
+            .first(where: { $0.name == "mode" })?
+            .value
+        let prefersEphemeralSession = authMode == "refresh" ? false : requestedEphemeralSession
+
+        NSLog(
+            "[mobile-auth][ios] opening auth session mode=%@ requestedEphemeral=%@ effectiveEphemeral=%@",
+            authMode ?? "unknown",
+            requestedEphemeralSession.description,
+            prefersEphemeralSession.description
+        )
 
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
@@ -42,15 +54,22 @@ public class InnerbloomAuthBrowserPlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuth
                 self.activeSession = nil
 
                 if let callbackURL {
+                    NSLog("[mobile-auth][ios] auth callback received mode=%@", authMode ?? "unknown")
                     pendingCall?.resolve(["url": callbackURL.absoluteString])
                     return
                 }
 
                 if let authError = error as? ASWebAuthenticationSessionError, authError.code == .canceledLogin {
+                    NSLog("[mobile-auth][ios] auth session cancelled mode=%@", authMode ?? "unknown")
                     pendingCall?.reject("Authentication session was cancelled", "AUTH_CANCELLED", authError)
                     return
                 }
 
+                NSLog(
+                    "[mobile-auth][ios] auth session failed mode=%@ error=%@",
+                    authMode ?? "unknown",
+                    error?.localizedDescription ?? "unknown"
+                )
                 pendingCall?.reject(error?.localizedDescription ?? "Authentication session failed", "AUTH_FAILED", error)
             }
 
