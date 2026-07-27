@@ -13,6 +13,7 @@ import { writeMobileDebug } from './mobileDebug';
 
 const DAILY_REMINDER_NOTIFICATION_CHANNEL_ID = 'daily-quest-reminders';
 const DEFAULT_NOTIFICATION_SOUND = 'default';
+const IOS_INTERRUPTION_LEVEL = 'timeSensitive';
 
 export const DAILY_REMINDER_NOTIFICATION_ID = 41001;
 export const DAILY_REMINDER_TEST_NOTIFICATION_ID = 41999;
@@ -26,7 +27,18 @@ type DailyReminderNotificationPermissionResult = {
 const ONBOARDING_LANGUAGE_STORAGE_KEY = 'innerbloom.onboarding.language';
 let isReminderSyncInProgress = false;
 
-function withDefaultSound<T extends Record<string, unknown>>(notification: T): T & { sound: string } {
+function withNativeDeliveryOptions<T extends Record<string, unknown>>(
+  notification: T,
+): T & { sound: string; interruptionLevel?: string; relevanceScore?: number } {
+  if (getCapacitorPlatform() === 'ios') {
+    return {
+      ...notification,
+      sound: DEFAULT_NOTIFICATION_SOUND,
+      interruptionLevel: IOS_INTERRUPTION_LEVEL,
+      relevanceScore: 1,
+    };
+  }
+
   return { ...notification, sound: DEFAULT_NOTIFICATION_SOUND };
 }
 
@@ -203,7 +215,7 @@ export async function sendNativeDailyReminderTestNotification(): Promise<void> {
   await ensureAndroidReminderChannel();
   await plugin.cancel({ notifications: [{ id: DAILY_REMINDER_TEST_NOTIFICATION_ID }] });
   await plugin.schedule({
-    notifications: [withDefaultSound({
+    notifications: [withNativeDeliveryOptions({
       id: DAILY_REMINDER_TEST_NOTIFICATION_ID,
       title: tNotification('dailyQuest.mobile.testNotification.title'),
       body: tNotification('dailyQuest.mobile.testNotification.body'),
@@ -223,6 +235,7 @@ export async function sendNativeDailyReminderTestNotification(): Promise<void> {
   logNativeReminder('test-scheduled', {
     id: DAILY_REMINDER_TEST_NOTIFICATION_ID,
     sound: DEFAULT_NOTIFICATION_SOUND,
+    interruptionLevel: getCapacitorPlatform() === 'ios' ? IOS_INTERRUPTION_LEVEL : null,
     vibration: getCapacitorPlatform() === 'android',
     pendingIds: pending?.notifications?.map((notification) => notification.id).filter(Boolean) ?? null,
   });
@@ -287,6 +300,7 @@ export async function syncNativeDailyReminderNotification(
       second,
       platform: getCapacitorPlatform(),
       sound: DEFAULT_NOTIFICATION_SOUND,
+      interruptionLevel: getCapacitorPlatform() === 'ios' ? IOS_INTERRUPTION_LEVEL : null,
       vibration: getCapacitorPlatform() === 'android',
     });
 
@@ -294,7 +308,7 @@ export async function syncNativeDailyReminderNotification(
     logNativeReminder('sync-previous-cancelled', { id: DAILY_REMINDER_NOTIFICATION_ID });
 
     await plugin.schedule({
-      notifications: [withDefaultSound({
+      notifications: [withNativeDeliveryOptions({
         id: DAILY_REMINDER_NOTIFICATION_ID,
         title: tNotification('dailyQuest.mobile.notification.title'),
         body: tNotification('dailyQuest.mobile.notification.body'),
@@ -326,6 +340,7 @@ export async function syncNativeDailyReminderNotification(
       minute,
       second,
       sound: DEFAULT_NOTIFICATION_SOUND,
+      interruptionLevel: getCapacitorPlatform() === 'ios' ? IOS_INTERRUPTION_LEVEL : null,
       pendingIds,
       confirmed,
     });
