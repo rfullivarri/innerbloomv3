@@ -26,6 +26,10 @@ type DailyReminderNotificationPermissionResult = {
 const ONBOARDING_LANGUAGE_STORAGE_KEY = 'innerbloom.onboarding.language';
 let isReminderSyncInProgress = false;
 
+function withDefaultSound<T extends Record<string, unknown>>(notification: T): T & { sound: string } {
+  return { ...notification, sound: DEFAULT_NOTIFICATION_SOUND };
+}
+
 function normalizeLanguage(raw: string | null | undefined): PostLoginLanguage | null {
   if (!raw) return null;
   const normalized = raw.trim().toLowerCase();
@@ -199,12 +203,11 @@ export async function sendNativeDailyReminderTestNotification(): Promise<void> {
   await ensureAndroidReminderChannel();
   await plugin.cancel({ notifications: [{ id: DAILY_REMINDER_TEST_NOTIFICATION_ID }] });
   await plugin.schedule({
-    notifications: [{
+    notifications: [withDefaultSound({
       id: DAILY_REMINDER_TEST_NOTIFICATION_ID,
       title: tNotification('dailyQuest.mobile.testNotification.title'),
       body: tNotification('dailyQuest.mobile.testNotification.body'),
       channelId: DAILY_REMINDER_NOTIFICATION_CHANNEL_ID,
-      sound: DEFAULT_NOTIFICATION_SOUND,
       schedule: {
         at: new Date(Date.now() + 10_000),
         allowWhileIdle: true,
@@ -213,7 +216,7 @@ export async function sendNativeDailyReminderTestNotification(): Promise<void> {
         targetPath: DAILY_REMINDER_NOTIFICATION_TARGET_PATH,
         kind: 'daily-reminder-test',
       },
-    }],
+    })],
   });
 
   const pending = await plugin.getPending?.().catch(() => null);
@@ -287,20 +290,17 @@ export async function syncNativeDailyReminderNotification(
       vibration: getCapacitorPlatform() === 'android',
     });
 
-    // Explicitly remove the previous request before adding the same ID again.
-    // This guarantees a changed hour replaces the old native trigger on both platforms.
     await plugin.cancel({ notifications: [{ id: DAILY_REMINDER_NOTIFICATION_ID }] });
     logNativeReminder('sync-previous-cancelled', { id: DAILY_REMINDER_NOTIFICATION_ID });
 
     await plugin.schedule({
-      notifications: [{
+      notifications: [withDefaultSound({
         id: DAILY_REMINDER_NOTIFICATION_ID,
         title: tNotification('dailyQuest.mobile.notification.title'),
         body: tNotification('dailyQuest.mobile.notification.body'),
         channelId: DAILY_REMINDER_NOTIFICATION_CHANNEL_ID,
         smallIcon: 'ic_stat_innerbloom',
         iconColor: '#A855F7',
-        sound: DEFAULT_NOTIFICATION_SOUND,
         schedule: {
           on: { hour, minute, second },
           allowWhileIdle: true,
@@ -309,7 +309,7 @@ export async function syncNativeDailyReminderNotification(
           targetPath: DAILY_REMINDER_NOTIFICATION_TARGET_PATH,
           kind: 'daily-reminder',
         },
-      }],
+      })],
     });
 
     const pending = await plugin.getPending?.().catch((error) => {
