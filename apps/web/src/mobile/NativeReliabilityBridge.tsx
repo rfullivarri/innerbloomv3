@@ -15,7 +15,7 @@ import { writeMobileDebug } from './mobileDebug';
 
 const NATIVE_SESSION_REFRESH_WINDOW_MS = 15 * 60 * 1000;
 const NATIVE_RELIABILITY_COOLDOWN_MS = 30_000;
-const REMINDER_DIAGNOSTIC_BUILD = 'reminder-diagnostics-v1-2026-07-26';
+const REMINDER_DIAGNOSTIC_BUILD = 'reminder-post-save-resync-v2-2026-07-27';
 
 let maintenancePromise: Promise<void> | null = null;
 let lastMaintenanceStartedAt = 0;
@@ -31,7 +31,10 @@ export function shouldRefreshNativeSession(
   return expiresAt - now <= NATIVE_SESSION_REFRESH_WINDOW_MS;
 }
 
-async function runNativeReliabilityMaintenance(reason: string): Promise<void> {
+async function runNativeReliabilityMaintenance(
+  reason: string,
+  options?: { force?: boolean },
+): Promise<void> {
   if (!isNativeCapacitorPlatform() || shouldForceNativeWelcome()) {
     return;
   }
@@ -41,12 +44,15 @@ async function runNativeReliabilityMaintenance(reason: string): Promise<void> {
     return;
   }
 
-  const now = Date.now();
   if (maintenancePromise) {
-    return maintenancePromise;
+    await maintenancePromise;
+    if (!options?.force) {
+      return;
+    }
   }
 
-  if (now - lastMaintenanceStartedAt < NATIVE_RELIABILITY_COOLDOWN_MS) {
+  const now = Date.now();
+  if (!options?.force && now - lastMaintenanceStartedAt < NATIVE_RELIABILITY_COOLDOWN_MS) {
     return;
   }
 
@@ -54,6 +60,7 @@ async function runNativeReliabilityMaintenance(reason: string): Promise<void> {
   maintenancePromise = (async () => {
     writeMobileDebug('native-reliability:start', {
       reason,
+      forced: options?.force === true,
       expiresAt: session.expiresAt,
       shouldRefresh: shouldRefreshNativeSession(session.expiresAt, now),
       at: now,
@@ -84,10 +91,26 @@ async function runNativeReliabilityMaintenance(reason: string): Promise<void> {
         return;
       }
 
+      writeMobileDebug('native-reliability:reminder-fetch-start', {
+        reason,
+        forced: options?.force === true,
+        at: Date.now(),
+      });
       const reminder = await getDailyReminderSettings('notification');
+      writeMobileDebug('native-reliability:reminder-fetch-complete', {
+        reason,
+        forced: options?.force === true,
+        status: reminder?.status ?? null,
+        enabled: reminder?.enabled ?? null,
+        localTime: reminder?.local_time ?? reminder?.localTime ?? null,
+        timezone: reminder?.timezone ?? reminder?.timeZone ?? reminder?.time_zone ?? null,
+        at: Date.now(),
+      });
       await syncNativeDailyReminderNotification(reminder);
       writeMobileDebug('native-reliability:reminder-resynced', {
         reason,
+        forced: options?.force === true,
+        localTime: reminder?.local_time ?? reminder?.localTime ?? null,
         at: Date.now(),
       });
     } catch (error) {
@@ -97,6 +120,7 @@ async function runNativeReliabilityMaintenance(reason: string): Promise<void> {
       });
       writeMobileDebug('native-reliability:reminder-resync-failed', {
         reason,
+        forced: options?.force === true,
         error: error instanceof Error ? error.message : String(error),
         at: Date.now(),
       });
@@ -146,6 +170,7 @@ export function NativeReliabilityBridge() {
     const app = getCapacitorAppPlugin();
     let appStateHandle: Awaited<ReturnType<NonNullable<typeof app>['addListener']>> | null = null;
     let lastUiOutcome: 'success' | 'error' | null = null;
+    let reminderSubmitPending = false;
 
     if (app) {
       void Promise.resolve(app.addListener('appStateChange', ({ isActive }) => {
@@ -166,6 +191,7 @@ export function NativeReliabilityBridge() {
         return;
       }
 
+      reminderSubmitPending = true;
       lastUiOutcome = null;
       writeMobileDebug('reminder-diagnostics:submit-captured', {
         marker: REMINDER_DIAGNOSTIC_BUILD,
@@ -207,8 +233,22 @@ export function NativeReliabilityBridge() {
         marker: REMINDER_DIAGNOSTIC_BUILD,
         platform: getCapacitorPlatform(),
         path: window.location.pathname,
+        submitPending: reminderSubmitPending,
         at: Date.now(),
       });
+
+      if (outcome === 'success' && reminderSubmitPending) {
+        reminderSubmitPending = false;
+        writeMobileDebug('reminder-diagnostics:post-save-resync-start', {
+          marker: REMINDER_DIAGNOSTIC_BUILD,
+          platform: getCapacitorPlatform(),
+          path: window.location.pathname,
+          at: Date.now(),
+        });
+        void runNativeReliabilityMaintenance('reminder-save-success', { force: true });
+      } else if (outcome === 'error') {
+        reminderSubmitPending = false;
+      }
     });
 
     window.addEventListener('online', handleOnline);
