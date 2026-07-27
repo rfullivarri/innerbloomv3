@@ -16,6 +16,7 @@ const config: CapacitorConfig = {
     LocalNotifications: {
       smallIcon: 'ic_stat_innerbloom',
       iconColor: '#A855F7',
+      presentationOptions: ['badge', 'sound', 'alert'],
     },
   },
 };
