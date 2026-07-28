@@ -14,6 +14,7 @@ import { writeMobileDebug } from './mobileDebug';
 const DAILY_REMINDER_NOTIFICATION_CHANNEL_ID = 'daily-quest-reminders';
 const DEFAULT_NOTIFICATION_SOUND = 'default';
 const IOS_INTERRUPTION_LEVEL = 'timeSensitive';
+const USER_SAVE_LIFECYCLE_PROTECTION_MS = 90_000;
 
 export const DAILY_REMINDER_NOTIFICATION_ID = 41001;
 export const DAILY_REMINDER_TEST_NOTIFICATION_ID = 41999;
@@ -24,8 +25,18 @@ type DailyReminderNotificationPermissionResult = {
   exactAlarm?: 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied' | null;
 };
 
+type ReminderSyncSource = 'user-save' | 'lifecycle';
+
+type ReminderSyncOptions = {
+  requestPermissions?: boolean;
+  source?: ReminderSyncSource;
+};
+
 const ONBOARDING_LANGUAGE_STORAGE_KEY = 'innerbloom.onboarding.language';
 let isReminderSyncInProgress = false;
+let isUserSaveSyncInProgress = false;
+let lastUserSaveSyncStartedAt = 0;
+let reminderOperationQueue: Promise<void> = Promise.resolve();
 
 function withNativeDeliveryOptions<T extends Record<string, unknown>>(
   notification: T,
@@ -83,6 +94,32 @@ function isReminderEnabled(reminder: DailyReminderSettingsResponse | null | unde
   if (!reminder) return false;
   if (typeof reminder.enabled === 'boolean') return reminder.enabled;
   return reminder.status === 'active';
+}
+
+function enqueueReminderOperation(operation: () => Promise<void>): Promise<void> {
+  const next = reminderOperationQueue.then(operation, operation);
+  reminderOperationQueue = next.catch(() => undefined);
+  return next;
+}
+
+function isLifecycleSyncProtected(now = Date.now()): boolean {
+  return isUserSaveSyncInProgress || now - lastUserSaveSyncStartedAt < USER_SAVE_LIFECYCLE_PROTECTION_MS;
+}
+
+function describePendingReminder(
+  notifications: Array<Record<string, unknown>> | null | undefined,
+  id: number,
+): Record<string, unknown> | null {
+  const matching = notifications?.find((notification) => notification.id === id);
+  if (!matching) return null;
+
+  const schedule = matching.schedule;
+  return {
+    id: matching.id ?? null,
+    title: matching.title ?? null,
+    schedule: typeof schedule === 'object' && schedule !== null ? schedule : null,
+    extra: typeof matching.extra === 'object' && matching.extra !== null ? matching.extra : null,
+  };
 }
 
 async function readAndroidExactAlarmPermission(
@@ -157,7 +194,7 @@ export async function cancelNativeDailyReminderNotification(): Promise<void> {
   if (!isNativeCapacitorPlatform()) return;
 
   if (isReminderSyncInProgress || typeof window === 'undefined') {
-    await performNativeDailyReminderCancellation();
+    await enqueueReminderOperation(performNativeDailyReminderCancellation);
     return;
   }
 
@@ -167,7 +204,7 @@ export async function cancelNativeDailyReminderNotification(): Promise<void> {
       logNativeReminder('cancel-skipped-for-logout');
       return;
     }
-    void performNativeDailyReminderCancellation().catch((error) => {
+    void enqueueReminderOperation(performNativeDailyReminderCancellation).catch((error) => {
       logNativeReminder('cancel-failed', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -194,6 +231,24 @@ async function ensureAndroidReminderChannel(): Promise<void> {
   });
 }
 
+export async function clearNativeReminderDeliveryState(reason: string): Promise<void> {
+  if (!isNativeCapacitorPlatform()) return;
+  const plugin = getCapacitorLocalNotificationsPlugin();
+  if (!plugin) return;
+
+  const deliveredPlugin = plugin as typeof plugin & {
+    removeAllDeliveredNotifications?: () => Promise<void>;
+  };
+
+  await deliveredPlugin.removeAllDeliveredNotifications?.().catch((error) => {
+    logNativeReminder('delivered-clear-failed', {
+      reason,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  });
+  logNativeReminder('delivered-cleared', { reason });
+}
+
 export async function sendNativeDailyReminderTestNotification(): Promise<void> {
   if (!isNativeCapacitorPlatform()) {
     logNativeReminder('test-skip-not-native');
@@ -212,142 +267,183 @@ export async function sendNativeDailyReminderTestNotification(): Promise<void> {
     throw new Error(tNotification('dailyQuest.mobile.permissionRequired'));
   }
 
-  await ensureAndroidReminderChannel();
-  await plugin.cancel({ notifications: [{ id: DAILY_REMINDER_TEST_NOTIFICATION_ID }] });
-  await plugin.schedule({
-    notifications: [withNativeDeliveryOptions({
-      id: DAILY_REMINDER_TEST_NOTIFICATION_ID,
-      title: tNotification('dailyQuest.mobile.testNotification.title'),
-      body: tNotification('dailyQuest.mobile.testNotification.body'),
-      channelId: DAILY_REMINDER_NOTIFICATION_CHANNEL_ID,
-      schedule: {
-        at: new Date(Date.now() + 10_000),
-        allowWhileIdle: true,
-      },
-      extra: {
-        targetPath: DAILY_REMINDER_NOTIFICATION_TARGET_PATH,
-        kind: 'daily-reminder-test',
-      },
-    })],
-  });
+  await enqueueReminderOperation(async () => {
+    await ensureAndroidReminderChannel();
+    await plugin.cancel({ notifications: [{ id: DAILY_REMINDER_TEST_NOTIFICATION_ID }] });
+    await plugin.schedule({
+      notifications: [withNativeDeliveryOptions({
+        id: DAILY_REMINDER_TEST_NOTIFICATION_ID,
+        title: tNotification('dailyQuest.mobile.testNotification.title'),
+        body: tNotification('dailyQuest.mobile.testNotification.body'),
+        badge: 1,
+        channelId: DAILY_REMINDER_NOTIFICATION_CHANNEL_ID,
+        schedule: {
+          at: new Date(Date.now() + 10_000),
+          allowWhileIdle: true,
+        },
+        extra: {
+          targetPath: DAILY_REMINDER_NOTIFICATION_TARGET_PATH,
+          kind: 'daily-reminder-test',
+        },
+      })],
+    });
 
-  const pending = await plugin.getPending?.().catch(() => null);
-  logNativeReminder('test-scheduled', {
-    id: DAILY_REMINDER_TEST_NOTIFICATION_ID,
-    sound: DEFAULT_NOTIFICATION_SOUND,
-    interruptionLevel: getCapacitorPlatform() === 'ios' ? IOS_INTERRUPTION_LEVEL : null,
-    vibration: getCapacitorPlatform() === 'android',
-    pendingIds: pending?.notifications?.map((notification) => notification.id).filter(Boolean) ?? null,
+    const pending = await plugin.getPending?.().catch(() => null);
+    logNativeReminder('test-scheduled', {
+      id: DAILY_REMINDER_TEST_NOTIFICATION_ID,
+      sound: DEFAULT_NOTIFICATION_SOUND,
+      badge: 1,
+      interruptionLevel: getCapacitorPlatform() === 'ios' ? IOS_INTERRUPTION_LEVEL : null,
+      vibration: getCapacitorPlatform() === 'android',
+      pendingIds: pending?.notifications?.map((notification) => notification.id).filter(Boolean) ?? null,
+      pendingNotification: describePendingReminder(pending?.notifications, DAILY_REMINDER_TEST_NOTIFICATION_ID),
+    });
   });
 }
 
 export async function syncNativeDailyReminderNotification(
   reminder: DailyReminderSettingsResponse | null | undefined,
-  options?: { requestPermissions?: boolean },
+  options?: ReminderSyncOptions,
 ): Promise<void> {
   if (!isNativeCapacitorPlatform()) {
     logNativeReminder('sync-skip-not-native');
     return;
   }
 
-  const plugin = getCapacitorLocalNotificationsPlugin();
-  if (!plugin) {
-    logNativeReminder('sync-plugin-missing');
+  const source = options?.source ?? 'lifecycle';
+  if (source === 'lifecycle' && isLifecycleSyncProtected()) {
+    logNativeReminder('sync-lifecycle-skipped-after-user-save', {
+      protectionMs: USER_SAVE_LIFECYCLE_PROTECTION_MS,
+      userSaveInProgress: isUserSaveSyncInProgress,
+      elapsedSinceUserSaveMs: Date.now() - lastUserSaveSyncStartedAt,
+    });
     return;
   }
 
-  isReminderSyncInProgress = true;
+  if (source === 'user-save') {
+    isUserSaveSyncInProgress = true;
+    lastUserSaveSyncStartedAt = Date.now();
+  }
+
   try {
-    if (!isReminderEnabled(reminder)) {
-      logNativeReminder('sync-reminder-disabled', {
-        status: reminder?.status ?? null,
-        enabled: reminder?.enabled ?? null,
-      });
-      await performNativeDailyReminderCancellation();
-      return;
-    }
-
-    const existingPermission = await plugin.checkPermissions();
-    const shouldRequestPermission =
-      options?.requestPermissions === true ||
-      existingPermission.display === 'prompt' ||
-      existingPermission.display === 'prompt-with-rationale';
-    const permissions = shouldRequestPermission
-      ? await ensureNativeDailyReminderNotificationPermissions({ requestExactAlarm: true })
-      : { granted: existingPermission.display === 'granted' };
-
-    if (!permissions.granted) {
-      logNativeReminder('sync-permission-unavailable', {
-        display: existingPermission.display,
-        requestPermissions: shouldRequestPermission,
-      });
-      if (options?.requestPermissions || shouldRequestPermission) {
-        throw new Error(tNotification('dailyQuest.mobile.permissionRequired'));
+    await enqueueReminderOperation(async () => {
+      const plugin = getCapacitorLocalNotificationsPlugin();
+      if (!plugin) {
+        logNativeReminder('sync-plugin-missing');
+        return;
       }
-      return;
-    }
 
-    const { hour, minute, second } = normalizeLocalTimeParts(
-      reminder?.local_time ?? reminder?.localTime ?? '09:00:00',
-    );
+      isReminderSyncInProgress = true;
+      try {
+        if (!isReminderEnabled(reminder)) {
+          logNativeReminder('sync-reminder-disabled', {
+            source,
+            status: reminder?.status ?? null,
+            enabled: reminder?.enabled ?? null,
+          });
+          await performNativeDailyReminderCancellation();
+          return;
+        }
 
-    await ensureAndroidReminderChannel();
+        const existingPermission = await plugin.checkPermissions();
+        const shouldRequestPermission =
+          options?.requestPermissions === true ||
+          existingPermission.display === 'prompt' ||
+          existingPermission.display === 'prompt-with-rationale';
+        const permissions = shouldRequestPermission
+          ? await ensureNativeDailyReminderNotificationPermissions({ requestExactAlarm: true })
+          : { granted: existingPermission.display === 'granted' };
 
-    logNativeReminder('sync-replace-start', {
-      id: DAILY_REMINDER_NOTIFICATION_ID,
-      hour,
-      minute,
-      second,
-      platform: getCapacitorPlatform(),
-      sound: DEFAULT_NOTIFICATION_SOUND,
-      interruptionLevel: getCapacitorPlatform() === 'ios' ? IOS_INTERRUPTION_LEVEL : null,
-      vibration: getCapacitorPlatform() === 'android',
+        if (!permissions.granted) {
+          logNativeReminder('sync-permission-unavailable', {
+            source,
+            display: existingPermission.display,
+            requestPermissions: shouldRequestPermission,
+          });
+          if (options?.requestPermissions || shouldRequestPermission) {
+            throw new Error(tNotification('dailyQuest.mobile.permissionRequired'));
+          }
+          return;
+        }
+
+        const { hour, minute, second } = normalizeLocalTimeParts(
+          reminder?.local_time ?? reminder?.localTime ?? '09:00:00',
+        );
+
+        await ensureAndroidReminderChannel();
+
+        logNativeReminder('sync-replace-start', {
+          source,
+          id: DAILY_REMINDER_NOTIFICATION_ID,
+          hour,
+          minute,
+          second,
+          platform: getCapacitorPlatform(),
+          sound: DEFAULT_NOTIFICATION_SOUND,
+          badge: 1,
+          interruptionLevel: getCapacitorPlatform() === 'ios' ? IOS_INTERRUPTION_LEVEL : null,
+          vibration: getCapacitorPlatform() === 'android',
+        });
+
+        await plugin.cancel({ notifications: [{ id: DAILY_REMINDER_NOTIFICATION_ID }] });
+        logNativeReminder('sync-previous-cancelled', { source, id: DAILY_REMINDER_NOTIFICATION_ID });
+
+        await plugin.schedule({
+          notifications: [withNativeDeliveryOptions({
+            id: DAILY_REMINDER_NOTIFICATION_ID,
+            title: tNotification('dailyQuest.mobile.notification.title'),
+            body: tNotification('dailyQuest.mobile.notification.body'),
+            badge: 1,
+            channelId: DAILY_REMINDER_NOTIFICATION_CHANNEL_ID,
+            smallIcon: 'ic_stat_innerbloom',
+            iconColor: '#A855F7',
+            schedule: {
+              on: { hour, minute, second },
+              allowWhileIdle: true,
+            },
+            extra: {
+              targetPath: DAILY_REMINDER_NOTIFICATION_TARGET_PATH,
+              kind: 'daily-reminder',
+            },
+          })],
+        });
+
+        const pending = await plugin.getPending?.().catch((error) => {
+          logNativeReminder('sync-pending-check-failed', {
+            source,
+            error: error instanceof Error ? error.message : String(error),
+          });
+          return null;
+        });
+        const pendingIds = pending?.notifications?.map((notification) => notification.id).filter(Boolean) ?? null;
+        const confirmed = pendingIds?.includes(DAILY_REMINDER_NOTIFICATION_ID) ?? false;
+        const pendingNotification = describePendingReminder(
+          pending?.notifications,
+          DAILY_REMINDER_NOTIFICATION_ID,
+        );
+        logNativeReminder('sync-scheduled', {
+          source,
+          id: DAILY_REMINDER_NOTIFICATION_ID,
+          hour,
+          minute,
+          second,
+          sound: DEFAULT_NOTIFICATION_SOUND,
+          badge: 1,
+          interruptionLevel: getCapacitorPlatform() === 'ios' ? IOS_INTERRUPTION_LEVEL : null,
+          pendingIds,
+          pendingNotification,
+          confirmed,
+        });
+        if (pending && !confirmed) {
+          throw new Error(tNotification('dailyQuest.mobile.permissionRequired'));
+        }
+      } finally {
+        isReminderSyncInProgress = false;
+      }
     });
-
-    await plugin.cancel({ notifications: [{ id: DAILY_REMINDER_NOTIFICATION_ID }] });
-    logNativeReminder('sync-previous-cancelled', { id: DAILY_REMINDER_NOTIFICATION_ID });
-
-    await plugin.schedule({
-      notifications: [withNativeDeliveryOptions({
-        id: DAILY_REMINDER_NOTIFICATION_ID,
-        title: tNotification('dailyQuest.mobile.notification.title'),
-        body: tNotification('dailyQuest.mobile.notification.body'),
-        channelId: DAILY_REMINDER_NOTIFICATION_CHANNEL_ID,
-        smallIcon: 'ic_stat_innerbloom',
-        iconColor: '#A855F7',
-        schedule: {
-          on: { hour, minute, second },
-          allowWhileIdle: true,
-        },
-        extra: {
-          targetPath: DAILY_REMINDER_NOTIFICATION_TARGET_PATH,
-          kind: 'daily-reminder',
-        },
-      })],
-    });
-
-    const pending = await plugin.getPending?.().catch((error) => {
-      logNativeReminder('sync-pending-check-failed', {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return null;
-    });
-    const pendingIds = pending?.notifications?.map((notification) => notification.id).filter(Boolean) ?? null;
-    const confirmed = pendingIds?.includes(DAILY_REMINDER_NOTIFICATION_ID) ?? false;
-    logNativeReminder('sync-scheduled', {
-      id: DAILY_REMINDER_NOTIFICATION_ID,
-      hour,
-      minute,
-      second,
-      sound: DEFAULT_NOTIFICATION_SOUND,
-      interruptionLevel: getCapacitorPlatform() === 'ios' ? IOS_INTERRUPTION_LEVEL : null,
-      pendingIds,
-      confirmed,
-    });
-    if (pending && !confirmed) {
-      throw new Error(tNotification('dailyQuest.mobile.permissionRequired'));
-    }
   } finally {
-    isReminderSyncInProgress = false;
+    if (source === 'user-save') {
+      isUserSaveSyncInProgress = false;
+    }
   }
 }
