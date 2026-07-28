@@ -5,7 +5,10 @@ import {
   getCapacitorPlatform,
   isNativeCapacitorPlatform,
 } from './capacitor';
-import { syncNativeDailyReminderNotification } from './localNotifications';
+import {
+  clearNativeReminderDeliveryState,
+  syncNativeDailyReminderNotification,
+} from './localNotifications';
 import {
   ensureFreshMobileAuthSession,
   getMobileAuthSession,
@@ -15,10 +18,12 @@ import { writeMobileDebug } from './mobileDebug';
 
 const NATIVE_SESSION_REFRESH_WINDOW_MS = 15 * 60 * 1000;
 const NATIVE_RELIABILITY_COOLDOWN_MS = 30_000;
-const REMINDER_DIAGNOSTIC_BUILD = 'reminder-post-save-resync-v2-2026-07-27';
+const REMINDER_SAVE_PROTECTION_MS = 90_000;
+const REMINDER_DIAGNOSTIC_BUILD = 'reminder-authoritative-scheduler-v3-2026-07-28';
 
 let maintenancePromise: Promise<void> | null = null;
 let lastMaintenanceStartedAt = 0;
+let lastReminderSubmitAt = 0;
 
 export function shouldRefreshNativeSession(
   expiresAt: number | null | undefined,
@@ -29,6 +34,15 @@ export function shouldRefreshNativeSession(
   }
 
   return expiresAt - now <= NATIVE_SESSION_REFRESH_WINDOW_MS;
+}
+
+function isDailyReminderForm(target: EventTarget | null): target is HTMLFormElement {
+  return target instanceof HTMLFormElement
+    && target.classList.contains('reminder-scheduler-form');
+}
+
+function isReminderSaveProtected(now = Date.now()): boolean {
+  return lastReminderSubmitAt > 0 && now - lastReminderSubmitAt < REMINDER_SAVE_PROTECTION_MS;
 }
 
 async function runNativeReliabilityMaintenance(
@@ -63,6 +77,7 @@ async function runNativeReliabilityMaintenance(
       forced: options?.force === true,
       expiresAt: session.expiresAt,
       shouldRefresh: shouldRefreshNativeSession(session.expiresAt, now),
+      reminderSaveProtected: isReminderSaveProtected(now),
       at: now,
     });
 
@@ -83,6 +98,16 @@ async function runNativeReliabilityMaintenance(
         error: error instanceof Error ? error.message : String(error),
         at: Date.now(),
       });
+    }
+
+    if (isReminderSaveProtected()) {
+      writeMobileDebug('native-reliability:reminder-resync-skipped-after-submit', {
+        reason,
+        protectionMs: REMINDER_SAVE_PROTECTION_MS,
+        elapsedSinceSubmitMs: Date.now() - lastReminderSubmitAt,
+        at: Date.now(),
+      });
+      return;
     }
 
     try {
@@ -106,7 +131,18 @@ async function runNativeReliabilityMaintenance(
         timezone: reminder?.timezone ?? reminder?.timeZone ?? reminder?.time_zone ?? null,
         at: Date.now(),
       });
-      await syncNativeDailyReminderNotification(reminder);
+
+      if (isReminderSaveProtected()) {
+        writeMobileDebug('native-reliability:reminder-resync-discarded-after-fetch', {
+          reason,
+          localTime: reminder?.local_time ?? reminder?.localTime ?? null,
+          elapsedSinceSubmitMs: Date.now() - lastReminderSubmitAt,
+          at: Date.now(),
+        });
+        return;
+      }
+
+      await syncNativeDailyReminderNotification(reminder, { source: 'lifecycle' });
       writeMobileDebug('native-reliability:reminder-resynced', {
         reason,
         forced: options?.force === true,
@@ -132,25 +168,6 @@ async function runNativeReliabilityMaintenance(
   return maintenancePromise;
 }
 
-function isDailyReminderForm(target: EventTarget | null): target is HTMLFormElement {
-  return target instanceof HTMLFormElement
-    && target.classList.contains('reminder-scheduler-form');
-}
-
-function readReminderUiOutcome(): 'success' | 'error' | null {
-  const text = document.body?.innerText ?? '';
-  if (text.includes('Guardamos tus recordatorios.')) {
-    return 'success';
-  }
-  if (
-    text.includes('No pudimos guardar tus recordatorios.')
-    || text.includes('Necesitamos permiso para enviarte notificaciones')
-  ) {
-    return 'error';
-  }
-  return null;
-}
-
 export function NativeReliabilityBridge() {
   useEffect(() => {
     if (!isNativeCapacitorPlatform()) {
@@ -165,16 +182,16 @@ export function NativeReliabilityBridge() {
       at: Date.now(),
     });
 
+    void clearNativeReminderDeliveryState('bridge-mount');
     void runNativeReliabilityMaintenance('mount');
 
     const app = getCapacitorAppPlugin();
     let appStateHandle: Awaited<ReturnType<NonNullable<typeof app>['addListener']>> | null = null;
-    let lastUiOutcome: 'success' | 'error' | null = null;
-    let reminderSubmitPending = false;
 
     if (app) {
       void Promise.resolve(app.addListener('appStateChange', ({ isActive }) => {
         if (isActive) {
+          void clearNativeReminderDeliveryState('app-active');
           void runNativeReliabilityMaintenance('app-active');
         }
       })).then((handle) => {
@@ -191,15 +208,15 @@ export function NativeReliabilityBridge() {
         return;
       }
 
-      reminderSubmitPending = true;
-      lastUiOutcome = null;
+      lastReminderSubmitAt = Date.now();
       writeMobileDebug('reminder-diagnostics:submit-captured', {
         marker: REMINDER_DIAGNOSTIC_BUILD,
         platform: getCapacitorPlatform(),
         native: isNativeCapacitorPlatform(),
         path: window.location.pathname,
         submitterTag: event.submitter instanceof HTMLElement ? event.submitter.tagName : null,
-        at: Date.now(),
+        protectionMs: REMINDER_SAVE_PROTECTION_MS,
+        at: lastReminderSubmitAt,
       });
     };
 
@@ -223,50 +240,16 @@ export function NativeReliabilityBridge() {
       });
     };
 
-    const outcomeObserver = new MutationObserver(() => {
-      const outcome = readReminderUiOutcome();
-      if (!outcome || outcome === lastUiOutcome) {
-        return;
-      }
-      lastUiOutcome = outcome;
-      writeMobileDebug(`reminder-diagnostics:ui-${outcome}`, {
-        marker: REMINDER_DIAGNOSTIC_BUILD,
-        platform: getCapacitorPlatform(),
-        path: window.location.pathname,
-        submitPending: reminderSubmitPending,
-        at: Date.now(),
-      });
-
-      if (outcome === 'success' && reminderSubmitPending) {
-        reminderSubmitPending = false;
-        writeMobileDebug('reminder-diagnostics:post-save-resync-start', {
-          marker: REMINDER_DIAGNOSTIC_BUILD,
-          platform: getCapacitorPlatform(),
-          path: window.location.pathname,
-          at: Date.now(),
-        });
-        void runNativeReliabilityMaintenance('reminder-save-success', { force: true });
-      } else if (outcome === 'error') {
-        reminderSubmitPending = false;
-      }
-    });
-
     window.addEventListener('online', handleOnline);
     window.addEventListener('error', handleWindowError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
     document.addEventListener('submit', handleReminderSubmit, true);
-    outcomeObserver.observe(document.body, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    });
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('error', handleWindowError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
       document.removeEventListener('submit', handleReminderSubmit, true);
-      outcomeObserver.disconnect();
       void appStateHandle?.remove();
     };
   }, []);
