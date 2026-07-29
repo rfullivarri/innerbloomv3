@@ -89,6 +89,9 @@ type PillarMetrics = {
 
 type BalanceStatus = 'balanced' | 'bodyDominant' | 'mindDominant' | 'soulDominant';
 
+const BALANCED_TOP_PAIR_TOLERANCE_PERCENT = 10;
+const BALANCED_FULL_SPREAD_TOLERANCE_PERCENT = 15;
+
 function sanitizeTraitValue(value: string | null | undefined): string | null {
   if (!value) {
     return null;
@@ -259,11 +262,17 @@ function computePillarMetrics(axes: RadarAxis[]): PillarMetrics {
 }
 
 function computeBalanceStatus(metrics: PillarMetrics): BalanceStatus {
-  const points = PILLAR_ORDER.map((pillar) => metrics.percentages[pillar]);
-  const max = Math.max(...points);
-  const min = Math.min(...points);
+  const points = PILLAR_ORDER
+    .map((pillar) => metrics.percentages[pillar])
+    .sort((first, second) => second - first);
+  const max = points[0] ?? 0;
+  const second = points[1] ?? 0;
+  const min = points[points.length - 1] ?? 0;
 
-  if (max - min <= 15) {
+  if (
+    max - second <= BALANCED_TOP_PAIR_TOLERANCE_PERCENT ||
+    max - min <= BALANCED_FULL_SPREAD_TOLERANCE_PERCENT
+  ) {
     return 'balanced';
   }
 

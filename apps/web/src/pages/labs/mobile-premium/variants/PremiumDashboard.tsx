@@ -24,6 +24,8 @@ import { useMobilePremiumBasePath } from '../mobilePremiumRouting';
 import { usePostLoginLanguage } from '../../../../i18n/postLoginLanguage';
 
 const STREAK_PILLARS: StreakPanelPillar[] = ['Body', 'Mind', 'Soul'];
+const BALANCED_TOP_PAIR_TOLERANCE_PERCENT = 10;
+const BALANCED_FULL_SPREAD_TOLERANCE_PERCENT = 15;
 
 type DashboardTask = {
   id: string;
@@ -393,16 +395,20 @@ function PremiumBalanceCompact({ active, balance }: { active: boolean; balance: 
   }
 
   const bars = [balance.body, balance.mind, balance.soul];
-  const tone = balance.dominant.code === 'body'
-    ? 'var(--mp-body)'
-    : balance.dominant.code === 'mind'
-      ? 'var(--mp-violet)'
-      : 'var(--mp-amber)';
-  const softTone = balance.dominant.code === 'body'
-    ? 'var(--mp-body-soft)'
-    : balance.dominant.code === 'mind'
-      ? 'rgba(167,139,250,0.12)'
-      : 'rgba(245,197,107,0.11)';
+  const dominantTone =
+    balance.dominant.code === 'body'
+      ? 'var(--mp-body)'
+      : balance.dominant.code === 'mind'
+        ? 'var(--mp-violet)'
+        : 'var(--mp-amber)';
+  const dominantSoftTone =
+    balance.dominant.code === 'body'
+      ? 'var(--mp-body-soft)'
+      : balance.dominant.code === 'mind'
+        ? 'rgba(167,139,250,0.12)'
+        : 'rgba(245,197,107,0.11)';
+  const tone = balance.isBalanced ? 'var(--mp-body)' : dominantTone;
+  const softTone = balance.isBalanced ? 'var(--mp-body-soft)' : dominantSoftTone;
 
   return (
     <div className="mt-4">
@@ -414,7 +420,9 @@ function PremiumBalanceCompact({ active, balance }: { active: boolean; balance: 
           backgroundColor: softTone,
         }}
       >
-        {t('mobilePremium.dashboard.dominantPillar', { pillar: balance.dominant.label })}
+        {balance.isBalanced
+          ? t('mobilePremium.dashboard.balancedDistribution')
+          : t('mobilePremium.dashboard.dominantPillar', { pillar: balance.dominant.label })}
       </p>
       <div className="mt-4 flex items-baseline gap-2">
         <p className="text-[1.8rem] font-light tracking-tight" style={{ color: tone }}>
@@ -423,7 +431,9 @@ function PremiumBalanceCompact({ active, balance }: { active: boolean; balance: 
         <p className="text-sm text-[color:var(--mp-text)]">{t('mobilePremium.dashboard.gpOf')}</p>
       </div>
       <p className="text-xs text-[color:var(--mp-text-muted)]">
-        {t('mobilePremium.dashboard.pillarLeads', { pillar: balance.dominant.label })}
+        {balance.isBalanced
+          ? t('mobilePremium.dashboard.balanceSharedBy', { pillars: balance.leadingLabels })
+          : t('mobilePremium.dashboard.pillarLeads', { pillar: balance.dominant.label })}
       </p>
       <div className={`mp-balance-track ${active ? 'mp-balance-track-active' : ''} mt-5 flex h-2.5 overflow-hidden rounded-full bg-[color:var(--mp-track)]`} aria-hidden="true">
         {bars.map((bar, index) => (
@@ -433,7 +443,7 @@ function PremiumBalanceCompact({ active, balance }: { active: boolean; balance: 
             style={{
               animationDelay: `${index * 120}ms`,
               backgroundColor: bar.code === 'body' ? 'var(--mp-body)' : bar.code === 'mind' ? 'var(--mp-violet)' : 'var(--mp-amber)',
-              opacity: bar.code === balance.dominant.code ? 1 : 0.56,
+              opacity: balance.leadingCodes.includes(bar.code) ? 1 : 0.56,
               width: `${bar.percent}%`,
             }}
           />
@@ -441,7 +451,7 @@ function PremiumBalanceCompact({ active, balance }: { active: boolean; balance: 
       </div>
       <div className="mt-2 flex justify-between text-[10px] text-[color:var(--mp-text-secondary)]">
         {bars.map((bar) => (
-          <span key={bar.label} style={{ color: bar.code === balance.dominant.code ? tone : undefined }}>
+          <span key={bar.label} style={{ color: balance.leadingCodes.includes(bar.code) ? tone : undefined }}>
             {bar.label.slice(0, 1)} {bar.percent}%
           </span>
         ))}
@@ -991,8 +1001,21 @@ function buildBalanceSummary(
   const body = { code: 'body' as const, label: t('mobilePremium.pillar.body'), value: values.body, percent: Math.round((values.body / total) * 100) };
   const mind = { code: 'mind' as const, label: t('mobilePremium.pillar.mind'), value: values.mind, percent: Math.round((values.mind / total) * 100) };
   const soul = { code: 'soul' as const, label: t('mobilePremium.pillar.soul'), value: values.soul, percent: Math.max(0, 100 - body.percent - mind.percent) };
-  const dominant = [body, mind, soul].sort((a, b) => b.value - a.value)[0];
-  return { hasData: rawTotal > 0, body, mind, soul, dominant };
+  const ordered = [body, mind, soul].sort((a, b) => b.percent - a.percent);
+  const dominant = ordered[0];
+  const second = ordered[1];
+  const lowest = ordered[ordered.length - 1];
+  const isBalanced =
+    dominant.percent - second.percent <= BALANCED_TOP_PAIR_TOLERANCE_PERCENT ||
+    dominant.percent - lowest.percent <= BALANCED_FULL_SPREAD_TOLERANCE_PERCENT;
+  const leadingCodes = ordered
+    .filter((pillar) => dominant.percent - pillar.percent <= BALANCED_TOP_PAIR_TOLERANCE_PERCENT)
+    .map((pillar) => pillar.code);
+  const leadingLabels = ordered
+    .filter((pillar) => leadingCodes.includes(pillar.code))
+    .map((pillar) => pillar.label)
+    .join(' / ');
+  return { hasData: rawTotal > 0, body, mind, soul, dominant, isBalanced, leadingCodes, leadingLabels };
 }
 
 function buildEnergySummary(
