@@ -433,23 +433,31 @@ function ProductNotificationsSheet({ backendUserId, onClose }: { backendUserId: 
       <div className="space-y-4">
         <p className="text-sm leading-6 text-[color:var(--mp-text-secondary)]">{t('mobilePremium.productNotifications.body')}</p>
         <div className="divide-y divide-[color:var(--mp-border)] overflow-hidden rounded-[1rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)]">
-          {choices.map((choice) => (
-            <label className="flex min-h-20 cursor-pointer items-center gap-3 px-4 py-3" key={choice.key}>
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-violet-400/12 text-[color:var(--mp-violet)]"><BellIcon /></span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-[color:var(--mp-text)]">{choice.title}</span>
-                <span className="mt-1 block text-xs leading-5 text-[color:var(--mp-text-secondary)]">{choice.body}</span>
-              </span>
-              <input
-                aria-label={choice.title}
-                checked={Boolean(preferences[choice.key])}
-                className="h-5 w-5 accent-violet-500"
-                disabled={loading || saving}
-                onChange={(event) => setPreferences((current) => ({ ...current, [choice.key]: event.target.checked }))}
-                type="checkbox"
-              />
-            </label>
-          ))}
+          {choices.map((choice) => {
+            const checked = Boolean(preferences[choice.key]);
+            return (
+              <div className="flex min-h-20 items-center gap-3 px-4 py-3" key={choice.key}>
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-violet-400/12 text-[color:var(--mp-violet)]"><BellIcon /></span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-[color:var(--mp-text)]">{choice.title}</span>
+                  <span className="mt-1 block text-xs leading-5 text-[color:var(--mp-text-secondary)]">{choice.body}</span>
+                </span>
+                <button
+                  aria-label={choice.title}
+                  aria-checked={checked}
+                  className={`flex h-7 w-[3.25rem] shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300 ${
+                    checked ? 'bg-violet-500' : 'bg-white/15'
+                  }`}
+                  disabled={loading || saving}
+                  onClick={() => setPreferences((current) => ({ ...current, [choice.key]: !current[choice.key] }))}
+                  role="switch"
+                  type="button"
+                >
+                  <span className={`h-6 w-6 rounded-full bg-[#fffaf0] shadow-[0_1px_3px_rgba(0,0,0,0.45)] transition-transform duration-200 ${checked ? 'translate-x-6' : 'translate-x-0'}`} />
+                </button>
+              </div>
+            );
+          })}
         </div>
         {error ? <p className="text-sm text-[color:var(--mp-red)]">{error}</p> : null}
         <button className="min-h-12 w-full rounded-full bg-violet-500 px-5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50" disabled={loading || saving || !backendUserId} onClick={() => void handleSave()} type="button">
