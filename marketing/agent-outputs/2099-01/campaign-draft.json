@@ -1,0 +1,3181 @@
+{
+  "schema_version": "1.0",
+  "agent": "innerbloom_head_of_content",
+  "period_key": "2099-01",
+  "generated_at": "2026-07-29T21:00:00Z",
+  "provenance": {
+    "source_branch": "automation/marketing-cycle-2099-01",
+    "content_context_path": "marketing/agent-inputs/2099-01/content-context.json",
+    "content_context_sha256": "sha256:3f0d7086f5c97c0aecc304932761b4803cfe2dfbc6e11839cf5e06c8e4981162",
+    "cmo_strategy_path": "marketing/agent-outputs/2099-01/cmo-strategy.json",
+    "cmo_strategy_sha256": "sha256:d35c46d24a0ae690312301ec0b04dddc2c5a9a0e3bd8171619bf1126789efdbe",
+    "head_of_content_contract_version": "campaign-draft-v1"
+  },
+  "campaign": {
+    "campaign_code": "ib_209901",
+    "title": "Direction Through Real Weeks",
+    "objective": "new_users",
+    "status": "review",
+    "strategy_summary": "A 20-post Instagram sequence that moves from specific rigid-habit friction to source-backed adaptive mechanisms and transparent early-product invitations, while preserving three matched, attributable comparisons and distinct funnel reporting.",
+    "language": "English",
+    "platforms": [
+      "instagram"
+    ],
+    "formats": [
+      "static",
+      "carousel"
+    ],
+    "target_post_count": 20,
+    "timezone": "Europe/Madrid",
+    "publishing_start_date": "2099-01-01",
+    "publishing_end_date": "2099-01-31"
+  },
+  "campaign_execution_summary": {
+    "post_count": 20,
+    "format_counts": {
+      "static": 10,
+      "carousel": 10
+    },
+    "pillar_counts": {
+      "real_life_friction": 7,
+      "adaptive_mechanism": 6,
+      "return_without_shame": 4,
+      "early_adopter_loop": 3
+    },
+    "funnel_counts": {
+      "awareness": 9,
+      "consideration": 7,
+      "activation": 4
+    },
+    "asset_slot_count": 50,
+    "notes": [
+      "All posts remain subject to human review.",
+      "Experiment conclusions require the CMO-defined minimum evidence and verified instrumentation."
+    ]
+  },
+  "posts": [
+    {
+      "post_code": "post_001",
+      "sequence_number": 1,
+      "platform": "instagram",
+      "format": "static",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-01T18:00:00+01:00",
+      "content_pillar": "real_life_friction",
+      "funnel_stage": "awareness",
+      "experiment_code": "pain_frame_intent",
+      "audience_tension": "Rigid plans feel mismatched when schedules, stress, or energy change.",
+      "product_truth_anchor": "Habits should adapt to real life rather than demand identical days",
+      "hook": "A messy Monday does not make your plan meaningless.",
+      "caption": "A messy Monday can expose the limits of a plan built for identical days. Innerbloom approaches habits as something that can adapt to real life while keeping direction. This is a product approach, not a promise of results. Learn how Innerbloom approaches adaptive habits.",
+      "cta": {
+        "label": "Learn how Innerbloom approaches adaptive habits",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "For the provisional audience, posts framing plans that fail on messy weeks will produce a higher landing_cta_clicked rate per attributable landing session than posts framing broken-streak pressure.",
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions for each message variant",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_001&ib_post=post_001",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_001",
+        "ib_post": "post_001"
+      },
+      "visible_copy_plan": {
+        "headline": "A messy Monday does not make your plan meaningless.",
+        "supporting_text": "Habits should adapt to real life rather than demand identical days"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate messy Monday as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "cmo_core_message_1"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "A messy Monday does not make your plan meaningless.",
+          "Habits should adapt to real life rather than demand identical days",
+          "Learn how Innerbloom approaches adaptive habits"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about messy Monday: A messy Monday does not make your plan meaningless.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_001_asset_01",
+          "post_code": "post_001",
+          "asset_kind": "static",
+          "semantic_purpose": "One-frame editorial statement about messy Monday.",
+          "product_evidence_requirement": "Habits should adapt to real life rather than demand identical days",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "One-frame editorial statement about messy Monday.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ]
+        }
+      ]
+    },
+    {
+      "post_code": "post_002",
+      "sequence_number": 2,
+      "platform": "instagram",
+      "format": "carousel",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-03T18:00:00+01:00",
+      "content_pillar": "adaptive_mechanism",
+      "funnel_stage": "consideration",
+      "experiment_code": "proof_format_intent",
+      "audience_tension": "Adaptive language can sound vague without a concrete mechanism.",
+      "product_truth_anchor": "Adjusting intensity is different from abandoning direction",
+      "hook": "Adaptive does not have to mean unstructured.",
+      "caption": "Task Intensity makes adaptive habits more concrete: effort may change while direction remains clear. Innerbloom's early product includes named mechanisms such as task intensity, recalibration, and visible progress. We are testing whether this explanation helps people explore, not claiming effectiveness. Learn how Innerbloom approaches adaptive habits.",
+      "cta": {
+        "label": "Learn how Innerbloom approaches adaptive habits",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "A carousel that connects a real-life problem to a verified product mechanism will produce a higher landing_cta_clicked rate per attributable landing session than a static post using the same mechanism and CTA.",
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions by format",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_002&ib_post=post_002",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_002",
+        "ib_post": "post_002"
+      },
+      "visible_copy_plan": {
+        "headline": "Adaptive does not have to mean unstructured.",
+        "supporting_text": "Adjusting intensity is different from abandoning direction"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate task intensity as one specific step in the campaign narrative.",
+        "proof_type": "hybrid",
+        "product_evidence": [
+          "cmo_supporting_message_2"
+        ],
+        "screenshot_requirement": "required",
+        "informational_hierarchy": [
+          "Adaptive does not have to mean unstructured.",
+          "Adjusting intensity is different from abandoning direction",
+          "Learn how Innerbloom approaches adaptive habits"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "dark",
+        "truthful_transformations": [
+          "Crop an existing source for legibility without altering its product state."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about task intensity: Adaptive does not have to mean unstructured.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_002_slide_01",
+          "post_code": "post_002",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Recognition slide for the task intensity narrative.",
+          "product_evidence_requirement": "Adjusting intensity is different from abandoning direction",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Recognition slide for the task intensity narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 1
+        },
+        {
+          "asset_code": "post_002_slide_02",
+          "post_code": "post_002",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Tension slide for the task intensity narrative.",
+          "product_evidence_requirement": "Adjusting intensity is different from abandoning direction",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Tension slide for the task intensity narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 2
+        },
+        {
+          "asset_code": "post_002_slide_03",
+          "post_code": "post_002",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Product approach slide for the task intensity narrative.",
+          "product_evidence_requirement": "Adjusting intensity is different from abandoning direction",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [
+            "campaign-ib20-mvp-post-003-innerbloom-mobile-dailyquest-dark-tasks-selection-png"
+          ],
+          "new_binary_may_be_required": false,
+          "alt_text": "Product approach slide for the task intensity narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 3
+        },
+        {
+          "asset_code": "post_002_slide_04",
+          "post_code": "post_002",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Invitation slide for the task intensity narrative.",
+          "product_evidence_requirement": "Adjusting intensity is different from abandoning direction",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Invitation slide for the task intensity narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 4
+        }
+      ],
+      "carousel": {
+        "slide_count": 4,
+        "narrative_arc": "Move from recognition of task intensity, through the audience tension and supported product approach, to an approved invitation.",
+        "slides": [
+          {
+            "slide_number": 1,
+            "narrative_role": "Recognition",
+            "visible_copy": {
+              "headline": "Adaptive does not have to mean unstructured.",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "Adjusting intensity is different from abandoning direction",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_002_slide_01",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 2,
+            "narrative_role": "Tension",
+            "visible_copy": {
+              "headline": "Adaptive language can sound vague without a concrete mechanism.",
+              "supporting_text": "Keep the idea focused on one real-life decision."
+            },
+            "product_truth_anchor": "Adjusting intensity is different from abandoning direction",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_002_slide_02",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 3,
+            "narrative_role": "Product approach",
+            "visible_copy": {
+              "headline": "Adjusting intensity is different from abandoning direction",
+              "supporting_text": "A product approach, not a promised result."
+            },
+            "product_truth_anchor": "Adjusting intensity is different from abandoning direction",
+            "visual_proof_requirement": "Use the verified Daily Quest task-selection source.",
+            "asset_code": "post_002_slide_03",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 4,
+            "narrative_role": "Invitation",
+            "visible_copy": {
+              "headline": "Learn how Innerbloom approaches adaptive habits",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "Adjusting intensity is different from abandoning direction",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_002_slide_04",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "post_code": "post_003",
+      "sequence_number": 3,
+      "platform": "instagram",
+      "format": "static",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-04T18:00:00+01:00",
+      "content_pillar": "return_without_shame",
+      "funnel_stage": "awareness",
+      "experiment_code": "early_adopter_activation",
+      "audience_tension": "A disruption can feel like progress has been erased.",
+      "product_truth_anchor": "Returning is a skill worth designing for",
+      "hook": "Returning is part of the practice.",
+      "caption": "First Return reframes disruption as a moment to recalibrate rather than erase what came before. Innerbloom is designed around returning and visible progress without perfection pressure. The early version is available to explore without any promised outcome. Explore the early version.",
+      "cta": {
+        "label": "Explore the early version",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "An explicit early-adopter co-creation invitation will produce a higher auth_started rate per attributable landing session than a generic try-the-product invitation.",
+      "primary_metric": "auth_started events divided by attributable landing sessions for each CTA variant",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_003&ib_post=post_003",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_003",
+        "ib_post": "post_003"
+      },
+      "visible_copy_plan": {
+        "headline": "Returning is part of the practice.",
+        "supporting_text": "Returning is a skill worth designing for"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate first return as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "cmo_supporting_message_1"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "Returning is part of the practice.",
+          "Returning is a skill worth designing for",
+          "Explore the early version"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about first return: Returning is part of the practice.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_003_asset_01",
+          "post_code": "post_003",
+          "asset_kind": "static",
+          "semantic_purpose": "One-frame editorial statement about first return.",
+          "product_evidence_requirement": "Returning is a skill worth designing for",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "One-frame editorial statement about first return.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ]
+        }
+      ]
+    },
+    {
+      "post_code": "post_004",
+      "sequence_number": 4,
+      "platform": "instagram",
+      "format": "carousel",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-06T18:00:00+01:00",
+      "content_pillar": "real_life_friction",
+      "funnel_stage": "awareness",
+      "experiment_code": "pain_frame_intent",
+      "audience_tension": "Rigid plans feel mismatched when schedules, stress, or energy change.",
+      "product_truth_anchor": "Visible progress can matter without perfection pressure",
+      "hook": "One missed day is not the whole story.",
+      "caption": "A broken streak can expose the limits of a plan built for identical days. Innerbloom approaches habits as something that can adapt to real life while keeping direction. This is a product approach, not a promise of results. Learn how Innerbloom approaches adaptive habits.",
+      "cta": {
+        "label": "Learn how Innerbloom approaches adaptive habits",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "For the provisional audience, posts framing plans that fail on messy weeks will produce a higher landing_cta_clicked rate per attributable landing session than posts framing broken-streak pressure.",
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions for each message variant",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_004&ib_post=post_004",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_004",
+        "ib_post": "post_004"
+      },
+      "visible_copy_plan": {
+        "headline": "One missed day is not the whole story.",
+        "supporting_text": "Visible progress can matter without perfection pressure"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate broken streak as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "cmo_core_message_3"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "One missed day is not the whole story.",
+          "Visible progress can matter without perfection pressure",
+          "Learn how Innerbloom approaches adaptive habits"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about broken streak: One missed day is not the whole story.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_004_slide_01",
+          "post_code": "post_004",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Recognition slide for the broken streak narrative.",
+          "product_evidence_requirement": "Visible progress can matter without perfection pressure",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Recognition slide for the broken streak narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 1
+        },
+        {
+          "asset_code": "post_004_slide_02",
+          "post_code": "post_004",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Tension slide for the broken streak narrative.",
+          "product_evidence_requirement": "Visible progress can matter without perfection pressure",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Tension slide for the broken streak narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 2
+        },
+        {
+          "asset_code": "post_004_slide_03",
+          "post_code": "post_004",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Product approach slide for the broken streak narrative.",
+          "product_evidence_requirement": "Visible progress can matter without perfection pressure",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Product approach slide for the broken streak narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 3
+        },
+        {
+          "asset_code": "post_004_slide_04",
+          "post_code": "post_004",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Invitation slide for the broken streak narrative.",
+          "product_evidence_requirement": "Visible progress can matter without perfection pressure",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Invitation slide for the broken streak narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 4
+        }
+      ],
+      "carousel": {
+        "slide_count": 4,
+        "narrative_arc": "Move from recognition of broken streak, through the audience tension and supported product approach, to an approved invitation.",
+        "slides": [
+          {
+            "slide_number": 1,
+            "narrative_role": "Recognition",
+            "visible_copy": {
+              "headline": "One missed day is not the whole story.",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "Visible progress can matter without perfection pressure",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_004_slide_01",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 2,
+            "narrative_role": "Tension",
+            "visible_copy": {
+              "headline": "Rigid plans feel mismatched when schedules, stress, or energy change.",
+              "supporting_text": "Keep the idea focused on one real-life decision."
+            },
+            "product_truth_anchor": "Visible progress can matter without perfection pressure",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_004_slide_02",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 3,
+            "narrative_role": "Product approach",
+            "visible_copy": {
+              "headline": "Visible progress can matter without perfection pressure",
+              "supporting_text": "A product approach, not a promised result."
+            },
+            "product_truth_anchor": "Visible progress can matter without perfection pressure",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_004_slide_03",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 4,
+            "narrative_role": "Invitation",
+            "visible_copy": {
+              "headline": "Learn how Innerbloom approaches adaptive habits",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "Visible progress can matter without perfection pressure",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_004_slide_04",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "post_code": "post_005",
+      "sequence_number": 5,
+      "platform": "instagram",
+      "format": "static",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-07T18:00:00+01:00",
+      "content_pillar": "early_adopter_loop",
+      "funnel_stage": "activation",
+      "experiment_code": "early_adopter_activation",
+      "audience_tension": "An early product must earn exploration through clarity and honesty.",
+      "product_truth_anchor": "The early product is open to feedback from people who experience this problem",
+      "hook": "Rigid habit tools not working for you?",
+      "caption": "Transparent Invitation is an invitation for people who recognize the limits of rigid habit tools. Innerbloom is an early product, and feedback is welcome after real product exposure. The invitation does not imply established outcomes. Try the early version.",
+      "cta": {
+        "label": "Try the early version",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "An explicit early-adopter co-creation invitation will produce a higher auth_started rate per attributable landing session than a generic try-the-product invitation.",
+      "primary_metric": "auth_started events divided by attributable landing sessions for each CTA variant",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_005&ib_post=post_005",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_005",
+        "ib_post": "post_005"
+      },
+      "visible_copy_plan": {
+        "headline": "Rigid habit tools not working for you?",
+        "supporting_text": "The early product is open to feedback from people who experience this problem"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate transparent invitation as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "cmo_supporting_message_3"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "Rigid habit tools not working for you?",
+          "The early product is open to feedback from people who experience this problem",
+          "Try the early version"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about transparent invitation: Rigid habit tools not working for you?",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_005_asset_01",
+          "post_code": "post_005",
+          "asset_kind": "static",
+          "semantic_purpose": "One-frame editorial statement about transparent invitation.",
+          "product_evidence_requirement": "The early product is open to feedback from people who experience this problem",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "One-frame editorial statement about transparent invitation.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ]
+        }
+      ]
+    },
+    {
+      "post_code": "post_006",
+      "sequence_number": 6,
+      "platform": "instagram",
+      "format": "static",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-09T18:00:00+01:00",
+      "content_pillar": "adaptive_mechanism",
+      "funnel_stage": "consideration",
+      "experiment_code": "proof_format_intent",
+      "audience_tension": "Adaptive language can sound vague without a concrete mechanism.",
+      "product_truth_anchor": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+      "hook": "Task intensity can change without losing direction.",
+      "caption": "Daily Quest Selection makes adaptive habits more concrete: effort may change while direction remains clear. Innerbloom's early product includes named mechanisms such as task intensity, recalibration, and visible progress. We are testing whether this explanation helps people explore, not claiming effectiveness. Explore the early version.",
+      "cta": {
+        "label": "Explore the early version",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "A carousel that connects a real-life problem to a verified product mechanism will produce a higher landing_cta_clicked rate per attributable landing session than a static post using the same mechanism and CTA.",
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions by format",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_006&ib_post=post_006",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_006",
+        "ib_post": "post_006"
+      },
+      "visible_copy_plan": {
+        "headline": "Task intensity can change without losing direction.",
+        "supporting_text": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate Daily Quest selection as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "cmo_proof_point_2"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "Task intensity can change without losing direction.",
+          "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+          "Explore the early version"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about Daily Quest selection: Task intensity can change without losing direction.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_006_asset_01",
+          "post_code": "post_006",
+          "asset_kind": "static",
+          "semantic_purpose": "One-frame editorial statement about Daily Quest selection.",
+          "product_evidence_requirement": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "One-frame editorial statement about Daily Quest selection.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ]
+        }
+      ]
+    },
+    {
+      "post_code": "post_007",
+      "sequence_number": 7,
+      "platform": "instagram",
+      "format": "carousel",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-10T18:00:00+01:00",
+      "content_pillar": "real_life_friction",
+      "funnel_stage": "awareness",
+      "experiment_code": "pain_frame_intent",
+      "audience_tension": "Rigid plans feel mismatched when schedules, stress, or energy change.",
+      "product_truth_anchor": "Habits should adapt to real life rather than demand identical days",
+      "hook": "Your energy changed. Why should the plan pretend otherwise?",
+      "caption": "A energy change can expose the limits of a plan built for identical days. Innerbloom approaches habits as something that can adapt to real life while keeping direction. This is a product approach, not a promise of results. Learn how Innerbloom approaches adaptive habits.",
+      "cta": {
+        "label": "Learn how Innerbloom approaches adaptive habits",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "For the provisional audience, posts framing plans that fail on messy weeks will produce a higher landing_cta_clicked rate per attributable landing session than posts framing broken-streak pressure.",
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions for each message variant",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_007&ib_post=post_007",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_007",
+        "ib_post": "post_007"
+      },
+      "visible_copy_plan": {
+        "headline": "Your energy changed. Why should the plan pretend otherwise?",
+        "supporting_text": "Habits should adapt to real life rather than demand identical days"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate energy change as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "cmo_core_message_1"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "Your energy changed. Why should the plan pretend otherwise?",
+          "Habits should adapt to real life rather than demand identical days",
+          "Learn how Innerbloom approaches adaptive habits"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about energy change: Your energy changed. Why should the plan pretend otherwise?",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_007_slide_01",
+          "post_code": "post_007",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Recognition slide for the energy change narrative.",
+          "product_evidence_requirement": "Habits should adapt to real life rather than demand identical days",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Recognition slide for the energy change narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 1
+        },
+        {
+          "asset_code": "post_007_slide_02",
+          "post_code": "post_007",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Tension slide for the energy change narrative.",
+          "product_evidence_requirement": "Habits should adapt to real life rather than demand identical days",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Tension slide for the energy change narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 2
+        },
+        {
+          "asset_code": "post_007_slide_03",
+          "post_code": "post_007",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Product approach slide for the energy change narrative.",
+          "product_evidence_requirement": "Habits should adapt to real life rather than demand identical days",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Product approach slide for the energy change narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 3
+        },
+        {
+          "asset_code": "post_007_slide_04",
+          "post_code": "post_007",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Invitation slide for the energy change narrative.",
+          "product_evidence_requirement": "Habits should adapt to real life rather than demand identical days",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Invitation slide for the energy change narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 4
+        }
+      ],
+      "carousel": {
+        "slide_count": 4,
+        "narrative_arc": "Move from recognition of energy change, through the audience tension and supported product approach, to an approved invitation.",
+        "slides": [
+          {
+            "slide_number": 1,
+            "narrative_role": "Recognition",
+            "visible_copy": {
+              "headline": "Your energy changed. Why should the plan pretend otherwise?",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "Habits should adapt to real life rather than demand identical days",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_007_slide_01",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 2,
+            "narrative_role": "Tension",
+            "visible_copy": {
+              "headline": "Rigid plans feel mismatched when schedules, stress, or energy change.",
+              "supporting_text": "Keep the idea focused on one real-life decision."
+            },
+            "product_truth_anchor": "Habits should adapt to real life rather than demand identical days",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_007_slide_02",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 3,
+            "narrative_role": "Product approach",
+            "visible_copy": {
+              "headline": "Habits should adapt to real life rather than demand identical days",
+              "supporting_text": "A product approach, not a promised result."
+            },
+            "product_truth_anchor": "Habits should adapt to real life rather than demand identical days",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_007_slide_03",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 4,
+            "narrative_role": "Invitation",
+            "visible_copy": {
+              "headline": "Learn how Innerbloom approaches adaptive habits",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "Habits should adapt to real life rather than demand identical days",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_007_slide_04",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "post_code": "post_008",
+      "sequence_number": 8,
+      "platform": "instagram",
+      "format": "carousel",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-12T18:00:00+01:00",
+      "content_pillar": "return_without_shame",
+      "funnel_stage": "consideration",
+      "experiment_code": "early_adopter_activation",
+      "audience_tension": "A disruption can feel like progress has been erased.",
+      "product_truth_anchor": "Recalibration can preserve direction without pretending disruption did not happen",
+      "hook": "Recalibration is different from starting over.",
+      "caption": "Recalibrate Not Erase reframes disruption as a moment to recalibrate rather than erase what came before. Innerbloom is designed around returning and visible progress without perfection pressure. The early version is available to explore without any promised outcome. Explore the early version.",
+      "cta": {
+        "label": "Explore the early version",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "An explicit early-adopter co-creation invitation will produce a higher auth_started rate per attributable landing session than a generic try-the-product invitation.",
+      "primary_metric": "auth_started events divided by attributable landing sessions for each CTA variant",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_008&ib_post=post_008",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_008",
+        "ib_post": "post_008"
+      },
+      "visible_copy_plan": {
+        "headline": "Recalibration is different from starting over.",
+        "supporting_text": "Recalibration can preserve direction without pretending disruption did not happen"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate recalibrate not erase as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "cmo_core_message_2"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "Recalibration is different from starting over.",
+          "Recalibration can preserve direction without pretending disruption did not happen",
+          "Explore the early version"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about recalibrate not erase: Recalibration is different from starting over.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_008_slide_01",
+          "post_code": "post_008",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Recognition slide for the recalibrate not erase narrative.",
+          "product_evidence_requirement": "Recalibration can preserve direction without pretending disruption did not happen",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Recognition slide for the recalibrate not erase narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 1
+        },
+        {
+          "asset_code": "post_008_slide_02",
+          "post_code": "post_008",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Tension slide for the recalibrate not erase narrative.",
+          "product_evidence_requirement": "Recalibration can preserve direction without pretending disruption did not happen",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Tension slide for the recalibrate not erase narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 2
+        },
+        {
+          "asset_code": "post_008_slide_03",
+          "post_code": "post_008",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Product approach slide for the recalibrate not erase narrative.",
+          "product_evidence_requirement": "Recalibration can preserve direction without pretending disruption did not happen",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Product approach slide for the recalibrate not erase narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 3
+        },
+        {
+          "asset_code": "post_008_slide_04",
+          "post_code": "post_008",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Invitation slide for the recalibrate not erase narrative.",
+          "product_evidence_requirement": "Recalibration can preserve direction without pretending disruption did not happen",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Invitation slide for the recalibrate not erase narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 4
+        }
+      ],
+      "carousel": {
+        "slide_count": 4,
+        "narrative_arc": "Move from recognition of recalibrate not erase, through the audience tension and supported product approach, to an approved invitation.",
+        "slides": [
+          {
+            "slide_number": 1,
+            "narrative_role": "Recognition",
+            "visible_copy": {
+              "headline": "Recalibration is different from starting over.",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "Recalibration can preserve direction without pretending disruption did not happen",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_008_slide_01",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 2,
+            "narrative_role": "Tension",
+            "visible_copy": {
+              "headline": "A disruption can feel like progress has been erased.",
+              "supporting_text": "Keep the idea focused on one real-life decision."
+            },
+            "product_truth_anchor": "Recalibration can preserve direction without pretending disruption did not happen",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_008_slide_02",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 3,
+            "narrative_role": "Product approach",
+            "visible_copy": {
+              "headline": "Recalibration can preserve direction without pretending disruption did not happen",
+              "supporting_text": "A product approach, not a promised result."
+            },
+            "product_truth_anchor": "Recalibration can preserve direction without pretending disruption did not happen",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_008_slide_03",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 4,
+            "narrative_role": "Invitation",
+            "visible_copy": {
+              "headline": "Explore the early version",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "Recalibration can preserve direction without pretending disruption did not happen",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_008_slide_04",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "post_code": "post_009",
+      "sequence_number": 9,
+      "platform": "instagram",
+      "format": "carousel",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-13T18:00:00+01:00",
+      "content_pillar": "adaptive_mechanism",
+      "funnel_stage": "consideration",
+      "experiment_code": "proof_format_intent",
+      "audience_tension": "Adaptive language can sound vague without a concrete mechanism.",
+      "product_truth_anchor": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+      "hook": "A weekly review can keep direction visible.",
+      "caption": "Weekly Recalibration makes adaptive habits more concrete: effort may change while direction remains clear. Innerbloom's early product includes named mechanisms such as task intensity, recalibration, and visible progress. We are testing whether this explanation helps people explore, not claiming effectiveness. Learn how Innerbloom approaches adaptive habits.",
+      "cta": {
+        "label": "Learn how Innerbloom approaches adaptive habits",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "A carousel that connects a real-life problem to a verified product mechanism will produce a higher landing_cta_clicked rate per attributable landing session than a static post using the same mechanism and CTA.",
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions by format",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_009&ib_post=post_009",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_009",
+        "ib_post": "post_009"
+      },
+      "visible_copy_plan": {
+        "headline": "A weekly review can keep direction visible.",
+        "supporting_text": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate weekly recalibration as one specific step in the campaign narrative.",
+        "proof_type": "hybrid",
+        "product_evidence": [
+          "cmo_proof_point_2"
+        ],
+        "screenshot_requirement": "required",
+        "informational_hierarchy": [
+          "A weekly review can keep direction visible.",
+          "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+          "Learn how Innerbloom approaches adaptive habits"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "dark",
+        "truthful_transformations": [
+          "Crop an existing source for legibility without altering its product state."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about weekly recalibration: A weekly review can keep direction visible.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_009_slide_01",
+          "post_code": "post_009",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Recognition slide for the weekly recalibration narrative.",
+          "product_evidence_requirement": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Recognition slide for the weekly recalibration narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 1
+        },
+        {
+          "asset_code": "post_009_slide_02",
+          "post_code": "post_009",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Tension slide for the weekly recalibration narrative.",
+          "product_evidence_requirement": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Tension slide for the weekly recalibration narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 2
+        },
+        {
+          "asset_code": "post_009_slide_03",
+          "post_code": "post_009",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Product approach slide for the weekly recalibration narrative.",
+          "product_evidence_requirement": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [
+            "campaign-ib20-mvp-post-003-innerbloom-mobile-dailyquest-dark-tasks-selection-png"
+          ],
+          "new_binary_may_be_required": false,
+          "alt_text": "Product approach slide for the weekly recalibration narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 3
+        },
+        {
+          "asset_code": "post_009_slide_04",
+          "post_code": "post_009",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Invitation slide for the weekly recalibration narrative.",
+          "product_evidence_requirement": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Invitation slide for the weekly recalibration narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 4
+        }
+      ],
+      "carousel": {
+        "slide_count": 4,
+        "narrative_arc": "Move from recognition of weekly recalibration, through the audience tension and supported product approach, to an approved invitation.",
+        "slides": [
+          {
+            "slide_number": 1,
+            "narrative_role": "Recognition",
+            "visible_copy": {
+              "headline": "A weekly review can keep direction visible.",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_009_slide_01",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 2,
+            "narrative_role": "Tension",
+            "visible_copy": {
+              "headline": "Adaptive language can sound vague without a concrete mechanism.",
+              "supporting_text": "Keep the idea focused on one real-life decision."
+            },
+            "product_truth_anchor": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_009_slide_02",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 3,
+            "narrative_role": "Product approach",
+            "visible_copy": {
+              "headline": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+              "supporting_text": "A product approach, not a promised result."
+            },
+            "product_truth_anchor": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+            "visual_proof_requirement": "Use the verified Daily Quest task-selection source.",
+            "asset_code": "post_009_slide_03",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 4,
+            "narrative_role": "Invitation",
+            "visible_copy": {
+              "headline": "Learn how Innerbloom approaches adaptive habits",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_009_slide_04",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "post_code": "post_010",
+      "sequence_number": 10,
+      "platform": "instagram",
+      "format": "static",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-15T18:00:00+01:00",
+      "content_pillar": "real_life_friction",
+      "funnel_stage": "awareness",
+      "experiment_code": "pain_frame_intent",
+      "audience_tension": "Rigid plans feel mismatched when schedules, stress, or energy change.",
+      "product_truth_anchor": "real-life rhythm",
+      "hook": "Real weeks rarely match perfect calendars.",
+      "caption": "A calendar collision can expose the limits of a plan built for identical days. Innerbloom approaches habits as something that can adapt to real life while keeping direction. This is a product approach, not a promise of results. Learn how Innerbloom approaches adaptive habits.",
+      "cta": {
+        "label": "Learn how Innerbloom approaches adaptive habits",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "For the provisional audience, posts framing plans that fail on messy weeks will produce a higher landing_cta_clicked rate per attributable landing session than posts framing broken-streak pressure.",
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions for each message variant",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_010&ib_post=post_010",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_010",
+        "ib_post": "post_010"
+      },
+      "visible_copy_plan": {
+        "headline": "Real weeks rarely match perfect calendars.",
+        "supporting_text": "real-life rhythm"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate calendar collision as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "positioning_4"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "Real weeks rarely match perfect calendars.",
+          "real-life rhythm",
+          "Learn how Innerbloom approaches adaptive habits"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about calendar collision: Real weeks rarely match perfect calendars.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_010_asset_01",
+          "post_code": "post_010",
+          "asset_kind": "static",
+          "semantic_purpose": "One-frame editorial statement about calendar collision.",
+          "product_evidence_requirement": "real-life rhythm",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "One-frame editorial statement about calendar collision.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ]
+        }
+      ]
+    },
+    {
+      "post_code": "post_011",
+      "sequence_number": 11,
+      "platform": "instagram",
+      "format": "carousel",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-16T18:00:00+01:00",
+      "content_pillar": "early_adopter_loop",
+      "funnel_stage": "activation",
+      "experiment_code": "early_adopter_activation",
+      "audience_tension": "An early product must earn exploration through clarity and honesty.",
+      "product_truth_anchor": "The early product is open to feedback from people who experience this problem",
+      "hook": "Try an early product. Then tell us what felt useful.",
+      "caption": "Co-Creation Invitation is an invitation for people who recognize the limits of rigid habit tools. Innerbloom is an early product, and feedback is welcome after real product exposure. The invitation does not imply established outcomes. Share feedback after exploring the dashboard.",
+      "cta": {
+        "label": "Share feedback after exploring the dashboard",
+        "intent": "Visit the tracked Innerbloom landing page to share feedback after product exposure",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "An explicit early-adopter co-creation invitation will produce a higher auth_started rate per attributable landing session than a generic try-the-product invitation.",
+      "primary_metric": "auth_started events divided by attributable landing sessions for each CTA variant",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_011&ib_post=post_011",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_011",
+        "ib_post": "post_011"
+      },
+      "visible_copy_plan": {
+        "headline": "Try an early product. Then tell us what felt useful.",
+        "supporting_text": "The early product is open to feedback from people who experience this problem"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate co-creation invitation as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "cmo_supporting_message_3"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "Try an early product. Then tell us what felt useful.",
+          "The early product is open to feedback from people who experience this problem",
+          "Share feedback after exploring the dashboard"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about co-creation invitation: Try an early product. Then tell us what felt useful.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_011_slide_01",
+          "post_code": "post_011",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Recognition slide for the co-creation invitation narrative.",
+          "product_evidence_requirement": "The early product is open to feedback from people who experience this problem",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Recognition slide for the co-creation invitation narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 1
+        },
+        {
+          "asset_code": "post_011_slide_02",
+          "post_code": "post_011",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Tension slide for the co-creation invitation narrative.",
+          "product_evidence_requirement": "The early product is open to feedback from people who experience this problem",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Tension slide for the co-creation invitation narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 2
+        },
+        {
+          "asset_code": "post_011_slide_03",
+          "post_code": "post_011",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Product approach slide for the co-creation invitation narrative.",
+          "product_evidence_requirement": "The early product is open to feedback from people who experience this problem",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Product approach slide for the co-creation invitation narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 3
+        },
+        {
+          "asset_code": "post_011_slide_04",
+          "post_code": "post_011",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Invitation slide for the co-creation invitation narrative.",
+          "product_evidence_requirement": "The early product is open to feedback from people who experience this problem",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Invitation slide for the co-creation invitation narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 4
+        }
+      ],
+      "carousel": {
+        "slide_count": 4,
+        "narrative_arc": "Move from recognition of co-creation invitation, through the audience tension and supported product approach, to an approved invitation.",
+        "slides": [
+          {
+            "slide_number": 1,
+            "narrative_role": "Recognition",
+            "visible_copy": {
+              "headline": "Try an early product. Then tell us what felt useful.",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "The early product is open to feedback from people who experience this problem",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_011_slide_01",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 2,
+            "narrative_role": "Tension",
+            "visible_copy": {
+              "headline": "An early product must earn exploration through clarity and honesty.",
+              "supporting_text": "Keep the idea focused on one real-life decision."
+            },
+            "product_truth_anchor": "The early product is open to feedback from people who experience this problem",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_011_slide_02",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 3,
+            "narrative_role": "Product approach",
+            "visible_copy": {
+              "headline": "The early product is open to feedback from people who experience this problem",
+              "supporting_text": "A product approach, not a promised result."
+            },
+            "product_truth_anchor": "The early product is open to feedback from people who experience this problem",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_011_slide_03",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 4,
+            "narrative_role": "Invitation",
+            "visible_copy": {
+              "headline": "Share feedback after exploring the dashboard",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "The early product is open to feedback from people who experience this problem",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_011_slide_04",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "post_code": "post_012",
+      "sequence_number": 12,
+      "platform": "instagram",
+      "format": "static",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-18T18:00:00+01:00",
+      "content_pillar": "adaptive_mechanism",
+      "funnel_stage": "consideration",
+      "experiment_code": "proof_format_intent",
+      "audience_tension": "Adaptive language can sound vague without a concrete mechanism.",
+      "product_truth_anchor": "Visible progress can matter without perfection pressure",
+      "hook": "Progress can stay visible without demanding perfection.",
+      "caption": "Visible Momentum makes adaptive habits more concrete: effort may change while direction remains clear. Innerbloom's early product includes named mechanisms such as task intensity, recalibration, and visible progress. We are testing whether this explanation helps people explore, not claiming effectiveness. Explore the early version.",
+      "cta": {
+        "label": "Explore the early version",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "A carousel that connects a real-life problem to a verified product mechanism will produce a higher landing_cta_clicked rate per attributable landing session than a static post using the same mechanism and CTA.",
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions by format",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_012&ib_post=post_012",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_012",
+        "ib_post": "post_012"
+      },
+      "visible_copy_plan": {
+        "headline": "Progress can stay visible without demanding perfection.",
+        "supporting_text": "Visible progress can matter without perfection pressure"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate visible momentum as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "cmo_core_message_3"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "Progress can stay visible without demanding perfection.",
+          "Visible progress can matter without perfection pressure",
+          "Explore the early version"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about visible momentum: Progress can stay visible without demanding perfection.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_012_asset_01",
+          "post_code": "post_012",
+          "asset_kind": "static",
+          "semantic_purpose": "One-frame editorial statement about visible momentum.",
+          "product_evidence_requirement": "Visible progress can matter without perfection pressure",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "One-frame editorial statement about visible momentum.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ]
+        }
+      ]
+    },
+    {
+      "post_code": "post_013",
+      "sequence_number": 13,
+      "platform": "instagram",
+      "format": "carousel",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-19T18:00:00+01:00",
+      "content_pillar": "real_life_friction",
+      "funnel_stage": "awareness",
+      "experiment_code": "pain_frame_intent",
+      "audience_tension": "Rigid plans feel mismatched when schedules, stress, or energy change.",
+      "product_truth_anchor": "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity.",
+      "hook": "When the week bends, the habit plan can bend too.",
+      "caption": "A messy week comparison can expose the limits of a plan built for identical days. Innerbloom approaches habits as something that can adapt to real life while keeping direction. This is a product approach, not a promise of results. Learn how Innerbloom approaches adaptive habits.",
+      "cta": {
+        "label": "Learn how Innerbloom approaches adaptive habits",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "For the provisional audience, posts framing plans that fail on messy weeks will produce a higher landing_cta_clicked rate per attributable landing session than posts framing broken-streak pressure.",
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions for each message variant",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_013&ib_post=post_013",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_013",
+        "ib_post": "post_013"
+      },
+      "visible_copy_plan": {
+        "headline": "When the week bends, the habit plan can bend too.",
+        "supporting_text": "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity."
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate messy week comparison as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "positioning_1"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "When the week bends, the habit plan can bend too.",
+          "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity.",
+          "Learn how Innerbloom approaches adaptive habits"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about messy week comparison: When the week bends, the habit plan can bend too.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_013_slide_01",
+          "post_code": "post_013",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Recognition slide for the messy week comparison narrative.",
+          "product_evidence_requirement": "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity.",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Recognition slide for the messy week comparison narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 1
+        },
+        {
+          "asset_code": "post_013_slide_02",
+          "post_code": "post_013",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Tension slide for the messy week comparison narrative.",
+          "product_evidence_requirement": "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity.",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Tension slide for the messy week comparison narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 2
+        },
+        {
+          "asset_code": "post_013_slide_03",
+          "post_code": "post_013",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Product approach slide for the messy week comparison narrative.",
+          "product_evidence_requirement": "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity.",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Product approach slide for the messy week comparison narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 3
+        },
+        {
+          "asset_code": "post_013_slide_04",
+          "post_code": "post_013",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Invitation slide for the messy week comparison narrative.",
+          "product_evidence_requirement": "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity.",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Invitation slide for the messy week comparison narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 4
+        }
+      ],
+      "carousel": {
+        "slide_count": 4,
+        "narrative_arc": "Move from recognition of messy week comparison, through the audience tension and supported product approach, to an approved invitation.",
+        "slides": [
+          {
+            "slide_number": 1,
+            "narrative_role": "Recognition",
+            "visible_copy": {
+              "headline": "When the week bends, the habit plan can bend too.",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity.",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_013_slide_01",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 2,
+            "narrative_role": "Tension",
+            "visible_copy": {
+              "headline": "Rigid plans feel mismatched when schedules, stress, or energy change.",
+              "supporting_text": "Keep the idea focused on one real-life decision."
+            },
+            "product_truth_anchor": "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity.",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_013_slide_02",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 3,
+            "narrative_role": "Product approach",
+            "visible_copy": {
+              "headline": "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity.",
+              "supporting_text": "A product approach, not a promised result."
+            },
+            "product_truth_anchor": "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity.",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_013_slide_03",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 4,
+            "narrative_role": "Invitation",
+            "visible_copy": {
+              "headline": "Learn how Innerbloom approaches adaptive habits",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity.",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_013_slide_04",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "post_code": "post_014",
+      "sequence_number": 14,
+      "platform": "instagram",
+      "format": "static",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-21T18:00:00+01:00",
+      "content_pillar": "return_without_shame",
+      "funnel_stage": "awareness",
+      "experiment_code": "early_adopter_activation",
+      "audience_tension": "A disruption can feel like progress has been erased.",
+      "product_truth_anchor": "Returning is a skill worth designing for",
+      "hook": "You can return without calling everything a failure.",
+      "caption": "Gentler Restart reframes disruption as a moment to recalibrate rather than erase what came before. Innerbloom is designed around returning and visible progress without perfection pressure. The early version is available to explore without any promised outcome. Try the early version.",
+      "cta": {
+        "label": "Try the early version",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "An explicit early-adopter co-creation invitation will produce a higher auth_started rate per attributable landing session than a generic try-the-product invitation.",
+      "primary_metric": "auth_started events divided by attributable landing sessions for each CTA variant",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_014&ib_post=post_014",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_014",
+        "ib_post": "post_014"
+      },
+      "visible_copy_plan": {
+        "headline": "You can return without calling everything a failure.",
+        "supporting_text": "Returning is a skill worth designing for"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate gentler restart as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "cmo_supporting_message_1"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "You can return without calling everything a failure.",
+          "Returning is a skill worth designing for",
+          "Try the early version"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about gentler restart: You can return without calling everything a failure.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_014_asset_01",
+          "post_code": "post_014",
+          "asset_kind": "static",
+          "semantic_purpose": "One-frame editorial statement about gentler restart.",
+          "product_evidence_requirement": "Returning is a skill worth designing for",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "One-frame editorial statement about gentler restart.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ]
+        }
+      ]
+    },
+    {
+      "post_code": "post_015",
+      "sequence_number": 15,
+      "platform": "instagram",
+      "format": "carousel",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-22T18:00:00+01:00",
+      "content_pillar": "adaptive_mechanism",
+      "funnel_stage": "consideration",
+      "experiment_code": "proof_format_intent",
+      "audience_tension": "Adaptive language can sound vague without a concrete mechanism.",
+      "product_truth_anchor": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+      "hook": "Visible progress can support the next adjustment.",
+      "caption": "Dashboard Progress makes adaptive habits more concrete: effort may change while direction remains clear. Innerbloom's early product includes named mechanisms such as task intensity, recalibration, and visible progress. We are testing whether this explanation helps people explore, not claiming effectiveness. Explore the early version.",
+      "cta": {
+        "label": "Explore the early version",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "A carousel that connects a real-life problem to a verified product mechanism will produce a higher landing_cta_clicked rate per attributable landing session than a static post using the same mechanism and CTA.",
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions by format",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_015&ib_post=post_015",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_015",
+        "ib_post": "post_015"
+      },
+      "visible_copy_plan": {
+        "headline": "Visible progress can support the next adjustment.",
+        "supporting_text": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate dashboard progress as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "cmo_proof_point_2"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "Visible progress can support the next adjustment.",
+          "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+          "Explore the early version"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about dashboard progress: Visible progress can support the next adjustment.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_015_slide_01",
+          "post_code": "post_015",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Recognition slide for the dashboard progress narrative.",
+          "product_evidence_requirement": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Recognition slide for the dashboard progress narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 1
+        },
+        {
+          "asset_code": "post_015_slide_02",
+          "post_code": "post_015",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Tension slide for the dashboard progress narrative.",
+          "product_evidence_requirement": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Tension slide for the dashboard progress narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 2
+        },
+        {
+          "asset_code": "post_015_slide_03",
+          "post_code": "post_015",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Product approach slide for the dashboard progress narrative.",
+          "product_evidence_requirement": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Product approach slide for the dashboard progress narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 3
+        },
+        {
+          "asset_code": "post_015_slide_04",
+          "post_code": "post_015",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Invitation slide for the dashboard progress narrative.",
+          "product_evidence_requirement": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Invitation slide for the dashboard progress narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 4
+        }
+      ],
+      "carousel": {
+        "slide_count": 4,
+        "narrative_arc": "Move from recognition of dashboard progress, through the audience tension and supported product approach, to an approved invitation.",
+        "slides": [
+          {
+            "slide_number": 1,
+            "narrative_role": "Recognition",
+            "visible_copy": {
+              "headline": "Visible progress can support the next adjustment.",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_015_slide_01",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 2,
+            "narrative_role": "Tension",
+            "visible_copy": {
+              "headline": "Adaptive language can sound vague without a concrete mechanism.",
+              "supporting_text": "Keep the idea focused on one real-life decision."
+            },
+            "product_truth_anchor": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_015_slide_02",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 3,
+            "narrative_role": "Product approach",
+            "visible_copy": {
+              "headline": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+              "supporting_text": "A product approach, not a promised result."
+            },
+            "product_truth_anchor": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_015_slide_03",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 4,
+            "narrative_role": "Invitation",
+            "visible_copy": {
+              "headline": "Explore the early version",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_015_slide_04",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "post_code": "post_016",
+      "sequence_number": 16,
+      "platform": "instagram",
+      "format": "static",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-24T18:00:00+01:00",
+      "content_pillar": "real_life_friction",
+      "funnel_stage": "awareness",
+      "experiment_code": "pain_frame_intent",
+      "audience_tension": "Rigid plans feel mismatched when schedules, stress, or energy change.",
+      "product_truth_anchor": "Adjusting intensity is different from abandoning direction",
+      "hook": "The same effort every day is not the only structure.",
+      "caption": "A fixed effort can expose the limits of a plan built for identical days. Innerbloom approaches habits as something that can adapt to real life while keeping direction. This is a product approach, not a promise of results. Learn how Innerbloom approaches adaptive habits.",
+      "cta": {
+        "label": "Learn how Innerbloom approaches adaptive habits",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "For the provisional audience, posts framing plans that fail on messy weeks will produce a higher landing_cta_clicked rate per attributable landing session than posts framing broken-streak pressure.",
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions for each message variant",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_016&ib_post=post_016",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_016",
+        "ib_post": "post_016"
+      },
+      "visible_copy_plan": {
+        "headline": "The same effort every day is not the only structure.",
+        "supporting_text": "Adjusting intensity is different from abandoning direction"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate fixed effort as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "cmo_supporting_message_2"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "The same effort every day is not the only structure.",
+          "Adjusting intensity is different from abandoning direction",
+          "Learn how Innerbloom approaches adaptive habits"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about fixed effort: The same effort every day is not the only structure.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_016_asset_01",
+          "post_code": "post_016",
+          "asset_kind": "static",
+          "semantic_purpose": "One-frame editorial statement about fixed effort.",
+          "product_evidence_requirement": "Adjusting intensity is different from abandoning direction",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "One-frame editorial statement about fixed effort.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ]
+        }
+      ]
+    },
+    {
+      "post_code": "post_017",
+      "sequence_number": 17,
+      "platform": "instagram",
+      "format": "carousel",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-25T18:00:00+01:00",
+      "content_pillar": "early_adopter_loop",
+      "funnel_stage": "activation",
+      "experiment_code": "early_adopter_activation",
+      "audience_tension": "An early product must earn exploration through clarity and honesty.",
+      "product_truth_anchor": "early product, feedback welcome",
+      "hook": "Explore first. Share informed feedback second.",
+      "caption": "Feedback After Exposure is an invitation for people who recognize the limits of rigid habit tools. Innerbloom is an early product, and feedback is welcome after real product exposure. The invitation does not imply established outcomes. Share feedback after exploring the dashboard.",
+      "cta": {
+        "label": "Share feedback after exploring the dashboard",
+        "intent": "Visit the tracked Innerbloom landing page to share feedback after product exposure",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "An explicit early-adopter co-creation invitation will produce a higher auth_started rate per attributable landing session than a generic try-the-product invitation.",
+      "primary_metric": "auth_started events divided by attributable landing sessions for each CTA variant",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_017&ib_post=post_017",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_017",
+        "ib_post": "post_017"
+      },
+      "visible_copy_plan": {
+        "headline": "Explore first. Share informed feedback second.",
+        "supporting_text": "early product, feedback welcome"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate feedback after exposure as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "positioning_7"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "Explore first. Share informed feedback second.",
+          "early product, feedback welcome",
+          "Share feedback after exploring the dashboard"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about feedback after exposure: Explore first. Share informed feedback second.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_017_slide_01",
+          "post_code": "post_017",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Recognition slide for the feedback after exposure narrative.",
+          "product_evidence_requirement": "early product, feedback welcome",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Recognition slide for the feedback after exposure narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 1
+        },
+        {
+          "asset_code": "post_017_slide_02",
+          "post_code": "post_017",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Tension slide for the feedback after exposure narrative.",
+          "product_evidence_requirement": "early product, feedback welcome",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Tension slide for the feedback after exposure narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 2
+        },
+        {
+          "asset_code": "post_017_slide_03",
+          "post_code": "post_017",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Product approach slide for the feedback after exposure narrative.",
+          "product_evidence_requirement": "early product, feedback welcome",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Product approach slide for the feedback after exposure narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 3
+        },
+        {
+          "asset_code": "post_017_slide_04",
+          "post_code": "post_017",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Invitation slide for the feedback after exposure narrative.",
+          "product_evidence_requirement": "early product, feedback welcome",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Invitation slide for the feedback after exposure narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 4
+        }
+      ],
+      "carousel": {
+        "slide_count": 4,
+        "narrative_arc": "Move from recognition of feedback after exposure, through the audience tension and supported product approach, to an approved invitation.",
+        "slides": [
+          {
+            "slide_number": 1,
+            "narrative_role": "Recognition",
+            "visible_copy": {
+              "headline": "Explore first. Share informed feedback second.",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "early product, feedback welcome",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_017_slide_01",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 2,
+            "narrative_role": "Tension",
+            "visible_copy": {
+              "headline": "An early product must earn exploration through clarity and honesty.",
+              "supporting_text": "Keep the idea focused on one real-life decision."
+            },
+            "product_truth_anchor": "early product, feedback welcome",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_017_slide_02",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 3,
+            "narrative_role": "Product approach",
+            "visible_copy": {
+              "headline": "early product, feedback welcome",
+              "supporting_text": "A product approach, not a promised result."
+            },
+            "product_truth_anchor": "early product, feedback welcome",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_017_slide_03",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 4,
+            "narrative_role": "Invitation",
+            "visible_copy": {
+              "headline": "Share feedback after exploring the dashboard",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "early product, feedback welcome",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_017_slide_04",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "post_code": "post_018",
+      "sequence_number": 18,
+      "platform": "instagram",
+      "format": "static",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-27T18:00:00+01:00",
+      "content_pillar": "adaptive_mechanism",
+      "funnel_stage": "consideration",
+      "experiment_code": "proof_format_intent",
+      "audience_tension": "Adaptive language can sound vague without a concrete mechanism.",
+      "product_truth_anchor": "adaptive habits",
+      "hook": "A clear direction can include different intensities.",
+      "caption": "Adaptive Rhythm makes adaptive habits more concrete: effort may change while direction remains clear. Innerbloom's early product includes named mechanisms such as task intensity, recalibration, and visible progress. We are testing whether this explanation helps people explore, not claiming effectiveness. Try the early version.",
+      "cta": {
+        "label": "Try the early version",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "A carousel that connects a real-life problem to a verified product mechanism will produce a higher landing_cta_clicked rate per attributable landing session than a static post using the same mechanism and CTA.",
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions by format",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_018&ib_post=post_018",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_018",
+        "ib_post": "post_018"
+      },
+      "visible_copy_plan": {
+        "headline": "A clear direction can include different intensities.",
+        "supporting_text": "adaptive habits"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate adaptive rhythm as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "positioning_3"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "A clear direction can include different intensities.",
+          "adaptive habits",
+          "Try the early version"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about adaptive rhythm: A clear direction can include different intensities.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_018_asset_01",
+          "post_code": "post_018",
+          "asset_kind": "static",
+          "semantic_purpose": "One-frame editorial statement about adaptive rhythm.",
+          "product_evidence_requirement": "adaptive habits",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "One-frame editorial statement about adaptive rhythm.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ]
+        }
+      ]
+    },
+    {
+      "post_code": "post_019",
+      "sequence_number": 19,
+      "platform": "instagram",
+      "format": "carousel",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-29T18:00:00+01:00",
+      "content_pillar": "real_life_friction",
+      "funnel_stage": "awareness",
+      "experiment_code": "pain_frame_intent",
+      "audience_tension": "Rigid plans feel mismatched when schedules, stress, or energy change.",
+      "product_truth_anchor": "visible progress without perfection pressure",
+      "hook": "A broken streak does not erase visible progress.",
+      "caption": "A broken streak pressure can expose the limits of a plan built for identical days. Innerbloom approaches habits as something that can adapt to real life while keeping direction. This is a product approach, not a promise of results. Learn how Innerbloom approaches adaptive habits.",
+      "cta": {
+        "label": "Learn how Innerbloom approaches adaptive habits",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "For the provisional audience, posts framing plans that fail on messy weeks will produce a higher landing_cta_clicked rate per attributable landing session than posts framing broken-streak pressure.",
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions for each message variant",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_019&ib_post=post_019",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_019",
+        "ib_post": "post_019"
+      },
+      "visible_copy_plan": {
+        "headline": "A broken streak does not erase visible progress.",
+        "supporting_text": "visible progress without perfection pressure"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate broken streak pressure as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "positioning_6"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "A broken streak does not erase visible progress.",
+          "visible progress without perfection pressure",
+          "Learn how Innerbloom approaches adaptive habits"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about broken streak pressure: A broken streak does not erase visible progress.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_019_slide_01",
+          "post_code": "post_019",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Recognition slide for the broken streak pressure narrative.",
+          "product_evidence_requirement": "visible progress without perfection pressure",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Recognition slide for the broken streak pressure narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 1
+        },
+        {
+          "asset_code": "post_019_slide_02",
+          "post_code": "post_019",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Tension slide for the broken streak pressure narrative.",
+          "product_evidence_requirement": "visible progress without perfection pressure",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Tension slide for the broken streak pressure narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 2
+        },
+        {
+          "asset_code": "post_019_slide_03",
+          "post_code": "post_019",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Product approach slide for the broken streak pressure narrative.",
+          "product_evidence_requirement": "visible progress without perfection pressure",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Product approach slide for the broken streak pressure narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 3
+        },
+        {
+          "asset_code": "post_019_slide_04",
+          "post_code": "post_019",
+          "asset_kind": "carousel_slide",
+          "semantic_purpose": "Invitation slide for the broken streak pressure narrative.",
+          "product_evidence_requirement": "visible progress without perfection pressure",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "Invitation slide for the broken streak pressure narrative.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ],
+          "slide_number": 4
+        }
+      ],
+      "carousel": {
+        "slide_count": 4,
+        "narrative_arc": "Move from recognition of broken streak pressure, through the audience tension and supported product approach, to an approved invitation.",
+        "slides": [
+          {
+            "slide_number": 1,
+            "narrative_role": "Recognition",
+            "visible_copy": {
+              "headline": "A broken streak does not erase visible progress.",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "visible progress without perfection pressure",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_019_slide_01",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 2,
+            "narrative_role": "Tension",
+            "visible_copy": {
+              "headline": "Rigid plans feel mismatched when schedules, stress, or energy change.",
+              "supporting_text": "Keep the idea focused on one real-life decision."
+            },
+            "product_truth_anchor": "visible progress without perfection pressure",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_019_slide_02",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 3,
+            "narrative_role": "Product approach",
+            "visible_copy": {
+              "headline": "visible progress without perfection pressure",
+              "supporting_text": "A product approach, not a promised result."
+            },
+            "product_truth_anchor": "visible progress without perfection pressure",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_019_slide_03",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          },
+          {
+            "slide_number": 4,
+            "narrative_role": "Invitation",
+            "visible_copy": {
+              "headline": "Learn how Innerbloom approaches adaptive habits",
+              "supporting_text": null
+            },
+            "product_truth_anchor": "visible progress without perfection pressure",
+            "visual_proof_requirement": "Use editorial explanation grounded in the cited truth; no invented interface.",
+            "asset_code": "post_019_slide_04",
+            "acceptance_criteria": [
+              "One clear idea is readable on mobile.",
+              "The slide advances the ordered narrative without unsupported claims."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "post_code": "post_020",
+      "sequence_number": 20,
+      "platform": "instagram",
+      "format": "static",
+      "status": "needs_review",
+      "scheduled_at": "2099-01-31T18:00:00+01:00",
+      "content_pillar": "return_without_shame",
+      "funnel_stage": "activation",
+      "experiment_code": "early_adopter_activation",
+      "audience_tension": "A disruption can feel like progress has been erased.",
+      "product_truth_anchor": "recalibration instead of restart",
+      "hook": "Make the return a designed step, not a verdict.",
+      "caption": "Return Invitation reframes disruption as a moment to recalibrate rather than erase what came before. Innerbloom is designed around returning and visible progress without perfection pressure. The early version is available to explore without any promised outcome. Try the early version.",
+      "cta": {
+        "label": "Try the early version",
+        "intent": "Visit the tracked Innerbloom landing page to explore the stated adaptive-habit approach",
+        "destination": "https://innerbloomjourney.org/",
+        "truthfulness_note": "The CTA presents Innerbloom as an early product and does not promise an outcome."
+      },
+      "hypothesis": "An explicit early-adopter co-creation invitation will produce a higher auth_started rate per attributable landing session than a generic try-the-product invitation.",
+      "primary_metric": "auth_started events divided by attributable landing sessions for each CTA variant",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_209901&utm_content=post_020&ib_post=post_020",
+      "utm": {
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "ib_209901",
+        "utm_content": "post_020",
+        "ib_post": "post_020"
+      },
+      "visible_copy_plan": {
+        "headline": "Make the return a designed step, not a verdict.",
+        "supporting_text": "recalibration instead of restart"
+      },
+      "visual_strategy": {
+        "visual_goal": "Communicate return invitation as one specific step in the campaign narrative.",
+        "proof_type": "editorial",
+        "product_evidence": [
+          "positioning_5"
+        ],
+        "screenshot_requirement": "optional",
+        "informational_hierarchy": [
+          "Make the return a designed step, not a verdict.",
+          "recalibration instead of restart",
+          "Try the early version"
+        ],
+        "editorial_character": [
+          "calm",
+          "specific",
+          "non-judgmental"
+        ],
+        "preferred_mode": "either",
+        "truthful_transformations": [
+          "Use typographic emphasis without changing the meaning of the claim."
+        ],
+        "forbidden_uses": [
+          "Do not imply measured effectiveness or a universal result.",
+          "Do not invent product screens, states, or capabilities."
+        ],
+        "acceptance_criteria": [
+          "The central idea is understandable without the caption.",
+          "The evidence remains consistent with the cited approved truth.",
+          "The CTA is subordinate to the editorial idea."
+        ]
+      },
+      "accessibility": {
+        "alt_text": "Editorial visual about return invitation: Make the return a designed step, not a verdict.",
+        "readability_note": "Use short lines, high contrast, mobile-readable type, and non-color cues for every comparison."
+      },
+      "asset_slots": [
+        {
+          "asset_code": "post_020_asset_01",
+          "post_code": "post_020",
+          "asset_kind": "static",
+          "semantic_purpose": "One-frame editorial statement about return invitation.",
+          "product_evidence_requirement": "recalibration instead of restart",
+          "existing_sources_preferred": true,
+          "semantic_source_references": [],
+          "new_binary_may_be_required": true,
+          "alt_text": "One-frame editorial statement about return invitation.",
+          "acceptance_criteria": [
+            "Readable on a mobile viewport with high contrast.",
+            "Communicates the cited product truth without implying an outcome.",
+            "Does not rely on color alone."
+          ]
+        }
+      ]
+    }
+  ],
+  "asset_requirements": [
+    {
+      "requirement_code": "req_reuse_daily_quest",
+      "kind": "reuse_existing_source",
+      "related_asset_codes": [
+        "post_002_slide_03",
+        "post_009_slide_03"
+      ],
+      "related_post_codes": [
+        "post_002",
+        "post_009"
+      ],
+      "priority": "high",
+      "semantic_source_references": [
+        "campaign-ib20-mvp-post-003-innerbloom-mobile-dailyquest-dark-tasks-selection-png"
+      ],
+      "production_brief": "Reuse the verified Daily Quest task-selection screenshot only where task selection supports the mechanism; retain truthful current-state content.",
+      "truthfulness_constraints": [
+        "Do not alter UI state or imply automation.",
+        "Do not present the screen as evidence for unrelated mechanisms."
+      ],
+      "acceptance_criteria": [
+        "The registered source remains traceable.",
+        "Any crop preserves the relevant task-selection evidence."
+      ]
+    },
+    {
+      "requirement_code": "req_editorial_sources",
+      "kind": "new_source_required",
+      "related_asset_codes": [
+        "post_001_asset_01",
+        "post_002_slide_01",
+        "post_002_slide_02",
+        "post_002_slide_04",
+        "post_003_asset_01",
+        "post_004_slide_01",
+        "post_004_slide_02",
+        "post_004_slide_03",
+        "post_004_slide_04",
+        "post_005_asset_01",
+        "post_006_asset_01",
+        "post_007_slide_01",
+        "post_007_slide_02",
+        "post_007_slide_03",
+        "post_007_slide_04",
+        "post_008_slide_01",
+        "post_008_slide_02",
+        "post_008_slide_03",
+        "post_008_slide_04",
+        "post_009_slide_01",
+        "post_009_slide_02",
+        "post_009_slide_04",
+        "post_010_asset_01",
+        "post_011_slide_01",
+        "post_011_slide_02",
+        "post_011_slide_03",
+        "post_011_slide_04",
+        "post_012_asset_01",
+        "post_013_slide_01",
+        "post_013_slide_02",
+        "post_013_slide_03",
+        "post_013_slide_04",
+        "post_014_asset_01",
+        "post_015_slide_01",
+        "post_015_slide_02",
+        "post_015_slide_03",
+        "post_015_slide_04",
+        "post_016_asset_01",
+        "post_017_slide_01",
+        "post_017_slide_02",
+        "post_017_slide_03",
+        "post_017_slide_04",
+        "post_018_asset_01",
+        "post_019_slide_01",
+        "post_019_slide_02",
+        "post_019_slide_03",
+        "post_019_slide_04",
+        "post_020_asset_01"
+      ],
+      "related_post_codes": [
+        "post_001",
+        "post_002",
+        "post_003",
+        "post_004",
+        "post_005",
+        "post_006",
+        "post_007",
+        "post_008",
+        "post_009",
+        "post_010",
+        "post_011",
+        "post_012",
+        "post_013",
+        "post_014",
+        "post_015",
+        "post_016",
+        "post_017",
+        "post_018",
+        "post_019",
+        "post_020"
+      ],
+      "priority": "medium",
+      "semantic_source_references": [],
+      "production_brief": "Provide accessible editorial source visuals for slots not supported by a verified product screenshot; each should express its semantic purpose without generic lifestyle claims.",
+      "truthfulness_constraints": [
+        "A requirement is not evidence that a binary exists.",
+        "Do not fabricate interfaces, users, results, or testimonials."
+      ],
+      "acceptance_criteria": [
+        "Every final source is documented and human-reviewed before use.",
+        "Each source supports its owning slot and approved truth."
+      ]
+    }
+  ],
+  "campaign_quality_report": {
+    "schema_ready": true,
+    "strategy_fidelity": true,
+    "claim_safety": true,
+    "tracking_integrity": true,
+    "calendar_integrity": true,
+    "editorial_diversity": true,
+    "visual_brief_completeness": true,
+    "known_risks": [
+      "No matched December 2098 performance data is available.",
+      "The audience definition remains provisional.",
+      "Authentication and cohort instrumentation must be verified before activation interpretation.",
+      "Most final visual sources remain conditional and require human-reviewed production."
+    ]
+  },
+  "source_manifest": [
+    {
+      "source_type": "repo_file",
+      "source_path_or_id": "/home/runner/work/innerbloomv3/innerbloomv3/Docs/marketing/strategy-memory.md",
+      "captured_at": "2026-07-29T19:13:38.178Z",
+      "checksum": "sha256:8212bd0c401b2fae6c52b2fbcee08f98657c95b2b21f768797fd59e550e76e9d"
+    },
+    {
+      "source_type": "analytics_sync",
+      "source_path_or_id": "marketing-2026-06-03-2026-06-30-3335db68-368b-473a-b9f3-45225f6170ab",
+      "captured_at": "2026-07-01 09:52:58.21955+00",
+      "checksum": "sha256:6f5194cb01b02e370e01ce9db505daef6a59a581147db07da5d085f578310e84"
+    },
+    {
+      "source_type": "database_snapshot",
+      "source_path_or_id": "marketing_campaigns_recent_limit_12",
+      "captured_at": "2026-07-29T19:14:44.304Z",
+      "checksum": "sha256:828e34c73bf47812b2439e63d35ec02082985fd294b4cd5f25fcb245971dce92"
+    },
+    {
+      "source_type": "asset_manifest",
+      "source_path_or_id": "Docs/marketing; apps/web/public/marketing; assest visuales",
+      "captured_at": "2026-07-29T19:13:38.178Z",
+      "checksum": "sha256:e3755ccf0a8013175e64ab950ced2727e25f77919a03c4768acfa5c1296bc001"
+    },
+    {
+      "source_type": "manual_input",
+      "source_path_or_id": "marketing_cmo_context_service.defaults",
+      "captured_at": "2026-06-30T00:00:00.000Z",
+      "checksum": "sha256:3bc14a6f4b3354f813a644b080f5768b13c54b5de8fef7e9ffba867bcf9396d6"
+    },
+    {
+      "source_type": "repo_file",
+      "source_path_or_id": "marketing/agent-inputs/2099-01/cmo-context.json",
+      "captured_at": "2026-07-29T20:26:02.635Z",
+      "checksum": "sha256:5e1ced6a763ee23490b31eaa988c18e1083a02341c4b12aa4ec2fbf3eb2a006c"
+    },
+    {
+      "source_type": "cmo_strategy",
+      "source_path_or_id": "marketing/agent-outputs/2099-01/cmo-strategy.json",
+      "captured_at": "2026-07-29T20:26:02.635Z",
+      "checksum": "sha256:d35c46d24a0ae690312301ec0b04dddc2c5a9a0e3bd8171619bf1126789efdbe"
+    },
+    {
+      "source_type": "pipeline_handoff",
+      "source_path_or_id": "automated_marketing_pipeline:cmo_to_head_of_content",
+      "captured_at": "2026-07-29T20:26:02.635Z",
+      "checksum": "sha256:58e0776a63f10c2356515fced0370379dc59f191ca1e11af006cbf32bc1f1ab1"
+    }
+  ]
+}
