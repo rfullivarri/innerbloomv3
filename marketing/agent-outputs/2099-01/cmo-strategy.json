@@ -1,0 +1,602 @@
+{
+  "schema_version": "1.0",
+  "agent": "innerbloom_cmo",
+  "period": "2099-01",
+  "generated_at": "2026-07-29T20:00:00Z",
+  "review_status": "draft",
+  "executive_summary": "January 2099 should use 20 English-language Instagram posts to learn which combination of real-life habit pain, concrete adaptive-product evidence, and early-adopter invitation produces attributable landing and activation behavior. The available analytics are historical fallback data rather than evidence from December 2098, and prior campaigns have no measured post results, so the plan preserves the established positioning but treats performance conclusions as unresolved. Execution should prioritize three measurable comparisons, reuse traceable square static and carousel assets, require human review, and keep acquisition, registration, activation, and product usage distinct.",
+  "input_assessment": {
+    "data_quality": "low",
+    "available_inputs": [
+      "Canonical 2099-01 context and 20-post target",
+      "Strategy memory and current positioning",
+      "Historical GA4 snapshot for 2026-06-03 through 2026-06-30",
+      "Registered-user aggregate with internal users excluded",
+      "Three prior campaign records with post statuses and tracking URLs",
+      "Manifest of product screenshots and existing campaign visuals",
+      "Instagram, format, storage, publishing, and human-review constraints"
+    ],
+    "data_gaps": [
+      "No analytics exist for the requested 2098-12 analysis window; the supplied snapshot is a declared 2026 fallback",
+      "No explicit structured audience definition is present",
+      "No Metricool post-level reach, impressions, engagement, clicks, or publication results are present",
+      "No prior campaign contains measured results, decision notes, or rejection reasons",
+      "The funnel snapshot omits auth_completed, so end-to-end activation conversion cannot be calculated",
+      "No cohort linkage connects acquisition source, registration, dashboard activation, and subsequent product usage",
+      "No brand assets or reusable templates are classified in their dedicated input collections; only existing visuals and two references to one product screenshot are available",
+      "Search Console contains only three total impressions across two queries and cannot support an organic-search decision"
+    ],
+    "tracking_issues": [
+      "The analytics window does not match 2098-12 and must not be treated as previous-period performance",
+      "page_view is an aggregate event count and cannot substitute for landing views without page filtering",
+      "GA4 active users are anonymous device/cookie-based users and are not registered users",
+      "Product totals may reflect repeated activity from a very small user set and are not an acquisition measure",
+      "auth_completed is absent from the supplied funnel events",
+      "Post-level outcomes are unavailable even though historical URLs contain UTM and ib_post parameters",
+      "Auth redirects and internal/admin activity can contaminate unfiltered source and page reporting"
+    ],
+    "assumptions": [
+      "The target audience is treated as a provisional segment derived from positioning: English-speaking Instagram users frustrated by rigid habit systems; this must be validated rather than presented as established research",
+      "The supported schema formats 'static' and 'carousel' map to the operational square static and square carousel formats",
+      "Stable existing asset IDs may be reused without downloading or duplicating binaries",
+      "The landing and listed funnel events will remain instrumented in January 2099; if not verified before scheduling, activation experiments must pause",
+      "All final posts remain subject to human review and Metricool CSV export does not itself publish"
+    ]
+  },
+  "previous_period_analysis": {
+    "what_was_attempted": [
+      "No campaign for 2098-12 is supplied",
+      "Historical ib20_mvp tested adaptive-rhythm and anti-perfect-day positioning in three Instagram posts",
+      "Historical ib_202607 planned 20 posts across pain, mechanism, belief, and early-adopter CTA themes",
+      "Historical ib_202608_test contains two approved creative test posts"
+    ],
+    "observed_results": [
+      "No prior campaign includes measured post results, so creative or message winners cannot be identified",
+      "The fallback analytics recorded 14 marketing active users, 55 marketing sessions, 81 marketing page views, and 256 marketing events during 2026-06-03 through 2026-06-30",
+      "The fallback funnel recorded 13 landing_cta_clicked, 12 auth_started, and 38 dashboard_view events, but no auth_completed event and no reliable post-level attribution",
+      "The fallback registered-user aggregate reports 23 total, 3 new in that historical window, and 2 internal users excluded",
+      "Instagram/ib20_mvp appears in clean sources with 7 active users, 17 sessions, and 78 screen page views; this is historical acquisition correlation, not proof of campaign causality"
+    ],
+    "human_decisions": [
+      "Historical records show 19 of 20 ib_202607 posts approved and one needing review",
+      "Both ib_202608_test posts were approved",
+      "Two of three ib20_mvp posts were approved and one needed review",
+      "No decision notes, explicit rejection reasons, or measured-period approval conclusions were supplied",
+      "Human review remains mandatory before publishing"
+    ],
+    "operational_issues": [
+      "The requested previous-period window is unavailable and replaced by test-period analytics",
+      "Metricool performance data requires manual export",
+      "Campaign records have tracking URLs but no results",
+      "Monthly draft automation and backend post persistence were unresolved in strategy memory",
+      "The dedicated reusable-template and brand-asset lists are empty"
+    ],
+    "performance_summary": "Operational feasibility is better supported than marketing effectiveness: historical records demonstrate an approved, UTM-tagged Instagram workflow and reusable visuals, while the absence of matched-window and post-level results prevents judging message, format, acquisition, registration, activation, or usage performance for 2098-12."
+  },
+  "learnings": [
+    {
+      "learning": "The Instagram-to-Metricool workflow and traceable public asset pattern are operationally usable.",
+      "evidence": [
+        "Strategy memory states that Metricool CSV import worked",
+        "Strategy memory states that Instagram posts published successfully from generated CSV",
+        "Existing campaign assets include stable R2 or repository URLs and asset IDs"
+      ],
+      "confidence": "strong_signal",
+      "implication": "Reuse the established delivery and asset-traceability rules rather than introducing a new publishing path."
+    },
+    {
+      "learning": "Adaptive habits, recalibration, and progress without perfection are consistent positioning territories, but their relative acquisition power is unproven.",
+      "evidence": [
+        "The positioning repeats these themes across strategy memory and historical campaigns",
+        "Prior campaigns contain no measured post results"
+      ],
+      "confidence": "moderate_signal",
+      "implication": "Keep the territory stable while comparing specific pain framings with consistent tracking."
+    },
+    {
+      "learning": "Historical Instagram traffic reached the site, but it cannot be attributed to a winning post or causal message.",
+      "evidence": [
+        "Clean sources list instagram/social/ib20_mvp with 17 sessions and 78 screen page views",
+        "No post-level Metricool or campaign results are supplied",
+        "The snapshot is outside the requested previous-period window"
+      ],
+      "confidence": "weak_signal",
+      "implication": "Treat Instagram as an available acquisition channel, not a proven growth engine; require post-level UTM reporting."
+    },
+    {
+      "learning": "Product-page activity cannot be interpreted as new-user activation or marketing success.",
+      "evidence": [
+        "Fallback product totals show 805 page views while several product pages show only one or two active users",
+        "dashboard_view has 38 events but auth_completed is absent",
+        "GA4 users and registered users use different identities"
+      ],
+      "confidence": "strong_signal",
+      "implication": "Report landing acquisition, registration, activation events, and product usage in separate sections and avoid conversion claims without linked denominators."
+    },
+    {
+      "learning": "No format winner, CTA winner, or audience winner is currently established.",
+      "evidence": [
+        "Prior campaigns contain no results",
+        "No structured audience section exists",
+        "Both static and carousel posts were approved, but approval is not performance"
+      ],
+      "confidence": "insufficient_evidence",
+      "implication": "Use balanced, controlled comparisons and do not label any creative route as a benchmark winner."
+    }
+  ],
+  "strategic_diagnosis": {
+    "primary_problem": "Innerbloom has a coherent positioning and an operational content pipeline but lacks matched-period, post-attributed evidence showing which message moves a defined audience from Instagram to landing intent and activation.",
+    "supporting_problems": [
+      "The priority audience is inferred rather than researched",
+      "The activation funnel is incomplete because auth_completed is missing",
+      "Prior approvals are available but performance and decision notes are not",
+      "Existing product proof is concentrated in one Daily Quest screenshot"
+    ],
+    "why_it_matters": "Without disciplined attribution and distinct funnel reporting, producing 20 posts would add volume without revealing whether pain, mechanism, or early-adopter participation improves acquisition or activation.",
+    "decision_needed_after_this_period": "Decide which pain-to-proof message pair deserves the next period's majority allocation, whether static or carousel is more efficient for attributable landing intent, and whether the early-adopter feedback invitation produces activation signals strong enough to retain."
+  },
+  "strategy": {
+    "primary_objective": "new_users",
+    "secondary_objectives": [
+      "Validate attributable landing intent by message and format",
+      "Observe activation progression separately from acquisition"
+    ],
+    "priority_audience": {
+      "description": "Provisional English-speaking Instagram users who want sustainable habits but feel alienated by streak pressure, perfect-day plans, or all-or-nothing restarts.",
+      "main_pains": [
+        "Plans collapse during messy weeks",
+        "A missed day feels like lost progress",
+        "Rigid systems demand the same effort regardless of energy or schedule"
+      ],
+      "main_desires": [
+        "A habit rhythm that can flex without losing direction",
+        "Visible progress without shame",
+        "A practical way to return after disruption"
+      ],
+      "objections": [
+        "This may be generic motivational advice",
+        "Adaptive may mean vague or unstructured",
+        "An early-stage product may not yet be useful enough"
+      ],
+      "current_awareness_level": "Problem-aware and solution-curious; awareness of Innerbloom is not established."
+    },
+    "core_value_proposition": "Innerbloom helps people keep direction by adapting habit effort to real life, making recalibration and visible progress more useful than rigid streak perfection.",
+    "period_narrative": "A sustainable habit is not one that demands perfect days; it is one that gives you a clear way to adapt, see progress, and return.",
+    "strategic_priorities": [
+      "Turn familiar rigid-habit pain into attributable landing intent",
+      "Make the adaptive mechanism concrete with available product evidence",
+      "Invite qualified early adopters into a measurable try-and-feedback loop"
+    ],
+    "content_pillars": [
+      {
+        "pillar_code": "real_life_friction",
+        "name": "Real-life friction",
+        "purpose": "Create recognition among people failed by rigid habit systems.",
+        "audience_problem": "Streaks and fixed plans collapse when energy, stress, or schedules change.",
+        "message": "The system, not the person, may be mismatched to real life.",
+        "proof_or_mechanism": "Contrast rigid same-output expectations with the need for adjustable intensity; frame as a problem hypothesis, not a proven universal claim.",
+        "recommended_formats": [
+          "static",
+          "carousel"
+        ],
+        "recommended_post_count": 7
+      },
+      {
+        "pillar_code": "adaptive_mechanism",
+        "name": "Adaptive mechanism",
+        "purpose": "Explain how Innerbloom's adaptive promise becomes concrete.",
+        "audience_problem": "Adaptive habit language can sound vague without a visible mechanism.",
+        "message": "Recalibration, task intensity, Daily Quest, dashboard progress, and review can preserve direction through changing days.",
+        "proof_or_mechanism": "Use only verified product screens and capabilities represented in supplied context or assets; show the Daily Quest screenshot where relevant.",
+        "recommended_formats": [
+          "carousel",
+          "static"
+        ],
+        "recommended_post_count": 6
+      },
+      {
+        "pillar_code": "return_without_shame",
+        "name": "Return without shame",
+        "purpose": "Differentiate Innerbloom from all-or-nothing habit narratives.",
+        "audience_problem": "Missing a day can trigger guilt and a restart-from-zero response.",
+        "message": "Returning and recalibrating are part of sustainable consistency; perfection is not the requirement.",
+        "proof_or_mechanism": "Use conceptual contrasts and visible-progress language without promising outcomes.",
+        "recommended_formats": [
+          "static",
+          "carousel"
+        ],
+        "recommended_post_count": 4
+      },
+      {
+        "pillar_code": "early_adopter_loop",
+        "name": "Early-adopter loop",
+        "purpose": "Convert qualified curiosity into a try-and-feedback action.",
+        "audience_problem": "An early product needs a clear reason to try now despite uncertainty.",
+        "message": "People dissatisfied with rigid habit tools can try the early version and help evaluate whether adaptive habits feel useful.",
+        "proof_or_mechanism": "Be transparent that the product is early, direct users to the tracked landing path, and ask for feedback only after product exposure.",
+        "recommended_formats": [
+          "static",
+          "carousel"
+        ],
+        "recommended_post_count": 3
+      }
+    ],
+    "content_mix": {
+      "total_posts": 20,
+      "by_pillar": {
+        "real_life_friction": 7,
+        "adaptive_mechanism": 6,
+        "return_without_shame": 4,
+        "early_adopter_loop": 3
+      },
+      "by_format": {
+        "static": 10,
+        "carousel": 10
+      },
+      "by_funnel_stage": {
+        "awareness": 9,
+        "consideration": 7,
+        "activation": 4
+      }
+    }
+  },
+  "experiments": [
+    {
+      "experiment_code": "pain_frame_intent",
+      "name": "Pain framing and landing intent",
+      "hypothesis": "For the provisional audience, posts framing plans that fail on messy weeks will produce a higher landing_cta_clicked rate per attributable landing session than posts framing broken-streak pressure.",
+      "variable_being_tested": "Messy-week planning pain versus broken-streak pressure, holding format, CTA family, publishing window, and destination consistent.",
+      "control_or_baseline": "Broken-streak framing is the comparison baseline; no historical winner is assumed.",
+      "target_audience": "Problem-aware Instagram users frustrated by rigid habit systems.",
+      "content_pillars": [
+        "real_life_friction"
+      ],
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions for each message variant",
+      "secondary_metrics": [
+        "Attributable landing sessions by utm_content",
+        "auth_started events by variant if attribution is retained"
+      ],
+      "success_criteria": "Select a direction only if each variant has at least 30 attributable landing sessions and one variant's CTA-click rate is at least 25% higher than the other.",
+      "failure_criteria": "Neither variant reaches 30 attributable landing sessions, tracking cannot retain variant attribution, or the rate difference is below 25%.",
+      "minimum_evidence_needed": "At least two posts per pain frame, matched across one static and one carousel where possible, and 30 attributable landing sessions per variant.",
+      "decision_enabled": "Choose the dominant pain frame for the next period or repeat the test unchanged if evidence is insufficient."
+    },
+    {
+      "experiment_code": "proof_format_intent",
+      "name": "Product proof format",
+      "hypothesis": "A carousel that connects a real-life problem to a verified product mechanism will produce a higher landing_cta_clicked rate per attributable landing session than a static post using the same mechanism and CTA.",
+      "variable_being_tested": "Carousel versus static presentation of the same product mechanism.",
+      "control_or_baseline": "Static product-proof post; no historical format winner is assumed.",
+      "target_audience": "Solution-curious users who need evidence that adaptive habits are concrete.",
+      "content_pillars": [
+        "adaptive_mechanism"
+      ],
+      "primary_metric": "landing_cta_clicked events divided by attributable landing sessions by format",
+      "secondary_metrics": [
+        "Attributable landing sessions by utm_content",
+        "auth_started events by format",
+        "Instagram reach and saves if manually imported from Metricool"
+      ],
+      "success_criteria": "Prefer a format only if each cell has at least 30 attributable landing sessions and its CTA-click rate exceeds the other by at least 25%.",
+      "failure_criteria": "Insufficient sessions, unequal destination or CTA, missing UTM attribution, or less than 25% rate separation.",
+      "minimum_evidence_needed": "At least two matched static/carousel pairs using verified mechanisms and 30 attributable landing sessions per format.",
+      "decision_enabled": "Allocate more next-period product-proof posts to the more efficient format, or preserve a balanced mix if inconclusive."
+    },
+    {
+      "experiment_code": "early_adopter_activation",
+      "name": "Try versus co-creation invitation",
+      "hypothesis": "An explicit early-adopter co-creation invitation will produce a higher auth_started rate per attributable landing session than a generic try-the-product invitation.",
+      "variable_being_tested": "Transparent co-creation/feedback CTA versus generic try CTA.",
+      "control_or_baseline": "Generic try-the-product invitation.",
+      "target_audience": "Users who recognize rigid-habit pain and accept an early-stage product.",
+      "content_pillars": [
+        "early_adopter_loop",
+        "return_without_shame"
+      ],
+      "primary_metric": "auth_started events divided by attributable landing sessions for each CTA variant",
+      "secondary_metrics": [
+        "landing_cta_clicked rate",
+        "auth_completed events if tracking is restored",
+        "dashboard_view events after auth completion if cohort attribution is available"
+      ],
+      "success_criteria": "Retain the co-creation CTA if each variant reaches at least 30 attributable landing sessions and its auth-start rate is at least 25% higher than control, with no tracking break between landing and auth.",
+      "failure_criteria": "Minimum traffic is not reached, auth attribution is unavailable, or co-creation does not exceed control by 25%.",
+      "minimum_evidence_needed": "At least two posts per CTA variant and 30 attributable landing sessions per variant; verify auth_started instrumentation before launch.",
+      "decision_enabled": "Choose the activation invitation for the next cycle or record the result as inconclusive without claiming a winner."
+    }
+  ],
+  "messaging_guidelines": {
+    "core_messages": [
+      "Habits should adapt to real life rather than demand identical days",
+      "Recalibration can preserve direction without pretending disruption did not happen",
+      "Visible progress can matter without perfection pressure"
+    ],
+    "supporting_messages": [
+      "Returning is a skill worth designing for",
+      "Adjusting intensity is different from abandoning direction",
+      "The early product is open to feedback from people who experience this problem"
+    ],
+    "proof_points": [
+      "Use the supplied Daily Quest task-selection screenshot as concrete visual evidence when the concept matches",
+      "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+      "Operational proof may state that users can try the early version; do not imply measured effectiveness"
+    ],
+    "approved_ctas": [
+      "Learn how Innerbloom approaches adaptive habits",
+      "Explore the early version",
+      "Try the early version",
+      "Share feedback after exploring the dashboard"
+    ],
+    "messages_to_avoid": [
+      "Generic motivation detached from a hypothesis",
+      "Blaming users for inconsistency",
+      "Declaring streaks universally harmful",
+      "Suggesting that adjustment means doing nothing"
+    ],
+    "claims_to_avoid": [
+      "Guaranteed habit formation or retention",
+      "Claims that Innerbloom has proven outcomes",
+      "Testimonials or user counts not supplied in context",
+      "Claims that a post, format, or message is a winner before minimum evidence",
+      "Equating GA4 active users with registered or activated users"
+    ],
+    "tone": [
+      "Empathetic",
+      "Clear",
+      "Non-judgmental",
+      "Specific",
+      "Curious rather than triumphant",
+      "Transparent about early-stage status"
+    ],
+    "language_rules": [
+      "Write final content in English",
+      "Use short mobile-readable sentences",
+      "Prefer concrete real-week situations over productivity jargon",
+      "Use 'may' or hypothesis language when evidence is not established",
+      "Do not write final captions or scripts in this strategy"
+    ]
+  },
+  "visual_direction": {
+    "general_direction": "Use a calm, product-grounded system that contrasts real-life variability with clear adaptive next steps. Prioritize mobile readability and traceable existing assets over decorative lifestyle imagery.",
+    "preferred_assets": [
+      "The supplied Daily Quest dark-mode product screenshot when the post discusses task selection",
+      "Existing ib_202607 static and carousel visual patterns with traceable asset IDs",
+      "Existing ib20_mvp real-life rhythm and perfect-day visuals when their message matches the assigned experiment"
+    ],
+    "reuse_rules": [
+      "Reference stable asset IDs and existing R2 or repository paths; do not download or duplicate binaries",
+      "Reuse only when the visual meaning matches the pillar and tested variable",
+      "Do not reuse historical final copy verbatim; assets may support new concepts without carrying old performance assumptions",
+      "Keep experiment pairs visually comparable except for the declared variable",
+      "Do not claim both dark and light product evidence is available; the manifest explicitly identifies only the Daily Quest dark screenshot"
+    ],
+    "new_asset_requirements": [
+      "Create a new visual only when no existing traceable asset can express a required mechanism",
+      "Any new mechanism image must come from a verified current product screen and receive human review",
+      "Document the source and stable asset ID before Metricool export"
+    ],
+    "accessibility_rules": [
+      "Maintain high text/background contrast",
+      "Keep type readable on a mobile viewport",
+      "Limit each carousel slide to one clear idea",
+      "Include meaningful alt-text guidance in the post plan",
+      "Do not rely on color alone to communicate state or comparison"
+    ],
+    "visual_patterns_to_avoid": [
+      "Generic aspirational lifestyle photography",
+      "Dense dashboard collages",
+      "Tiny UI screenshots without crops or annotations",
+      "Unverified light-mode mockups",
+      "Streak-shaming red failure imagery"
+    ]
+  },
+  "head_of_content_brief": {
+    "mission": "Translate this draft into a 20-post English Instagram plan that runs the three declared comparisons without changing their variables, claims, totals, or measurement logic.",
+    "non_negotiables": [
+      "Do not publish, schedule, or self-approve",
+      "Keep exactly 20 posts and the specified pillar, format, and funnel totals",
+      "Use only static and carousel formats",
+      "Do not invent product capabilities, metrics, users, testimonials, or outcomes",
+      "Keep acquisition, registration, activation, and product usage distinct",
+      "Do not turn this brief into final captions until the appropriate later workflow and human review"
+    ],
+    "execution_steps": [
+      "Assign every post one pillar, funnel stage, format, experiment code where applicable, and message variant",
+      "Construct matched experiment cells before filling non-experiment posts",
+      "Select an existing stable asset ID first; request a new verified product asset only if necessary",
+      "Create unique UTM and ib_post values for every post",
+      "Verify event instrumentation before activation posts are approved",
+      "Submit the complete plan for human review"
+    ],
+    "required_post_fields": [
+      "post_code",
+      "pillar_code",
+      "funnel_stage",
+      "format",
+      "strategic angle",
+      "audience pain",
+      "hypothesis or experiment_code",
+      "declared variant",
+      "approved CTA",
+      "tracking URL",
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_content",
+      "ib_post",
+      "asset_id or documented asset requirement",
+      "alt-text guidance",
+      "human review status"
+    ],
+    "calendar_rules": [
+      "Distribute experiment variants across the month rather than publishing one variant in a single cluster",
+      "Match comparison posts by day-of-week and publishing window where feasible",
+      "Do not schedule a CTA comparison before its landing and auth tracking check",
+      "Avoid consecutive posts that repeat the same pillar and format when this would create fatigue",
+      "Preserve four activation-stage slots exactly"
+    ],
+    "format_rules": [
+      "Use 10 static and 10 carousel posts",
+      "For carousels, give each slide one conceptual role and maintain mobile legibility",
+      "For statics, communicate one problem or mechanism without compressing multiple claims",
+      "Do not introduce reels or stories"
+    ],
+    "asset_rules": [
+      "Prefer the verified Daily Quest screenshot for relevant mechanism posts",
+      "Use stable existing asset IDs and public URLs intended for export",
+      "Do not duplicate or download binaries",
+      "Do not fabricate missing light-mode product screens",
+      "Escalate any product visual whose current-state accuracy is uncertain"
+    ],
+    "tracking_rules": [
+      "Use utm_source=instagram and utm_medium=social",
+      "Use one January campaign value consistently and a unique utm_content plus ib_post per post",
+      "Record the experiment and variant alongside utm_content",
+      "Verify page_view filtering, landing_cta_clicked, auth_started, auth_completed, and dashboard_view before interpreting the funnel",
+      "Request Metricool manual performance export for reach and engagement context",
+      "Exclude auth redirects and internal/admin activity from decision reporting"
+    ],
+    "approval_criteria": [
+      "Matches an approved pillar and narrative",
+      "Uses only supported format and traceable assets",
+      "Contains no unsupported claim",
+      "Has a unique valid tracking URL",
+      "Preserves the declared test variable and matched control",
+      "Is readable on mobile and includes accessibility guidance",
+      "Has explicit human approval"
+    ],
+    "rejection_criteria": [
+      "Generic motivation without a strategic hypothesis",
+      "Invented outcome, testimonial, capability, or audience fact",
+      "Missing or duplicated post attribution",
+      "Uncontrolled experiment variant",
+      "Final copy that shames inconsistency or promises guaranteed results",
+      "Unverified product screenshot or non-traceable asset",
+      "Any attempt to publish or schedule without human approval"
+    ],
+    "quality_checklist": [
+      "20 total posts",
+      "7/6/4/3 pillar allocation",
+      "10 static and 10 carousel",
+      "9 awareness, 7 consideration, 4 activation",
+      "Three experiments represented with matched cells",
+      "Every CTA belongs to the approved list",
+      "Every post has unique attribution",
+      "Every asset is traceable",
+      "Every claim is supported or explicitly framed as hypothesis",
+      "Human review state is visible"
+    ]
+  },
+  "measurement_plan": {
+    "primary_kpis": [
+      "Attributable landing sessions by utm_content and ib_post",
+      "landing_cta_clicked rate per attributable landing session",
+      "auth_started rate per attributable landing session"
+    ],
+    "secondary_kpis": [
+      "auth_completed rate from auth_started if the event is restored",
+      "dashboard_view after auth_completed if cohort linkage is available",
+      "New registered users excluding internal accounts, reported separately and only when attribution is valid",
+      "Metricool reach, impressions, saves, and link activity as manually imported context",
+      "Product-page views as a usage proxy, never as new-user acquisition"
+    ],
+    "funnel_events": [
+      "page_view on the landing page",
+      "landing_cta_clicked",
+      "auth_started",
+      "auth_completed",
+      "dashboard_view"
+    ],
+    "utm_rules": [
+      "utm_source=instagram",
+      "utm_medium=social",
+      "Use a single January 2099 campaign identifier",
+      "utm_content must uniquely map to post_code and declared experiment variant",
+      "ib_post must uniquely match post_code",
+      "Do not aggregate a test until duplicate and missing parameters are checked"
+    ],
+    "reporting_requirements": [
+      "Report acquisition, registration, activation, and product usage in separate tables",
+      "State the analytics window and flag any fallback window",
+      "Show raw denominators and counts beside rates",
+      "Report every experiment cell, including zero-result and underpowered cells",
+      "Attach manual Metricool export status and publication status",
+      "Record human approval, rejection, and decision notes",
+      "Classify conclusions using the schema confidence vocabulary"
+    ],
+    "interpretation_warnings": [
+      "Do not use the 2026 fallback snapshot as a December 2098 baseline",
+      "Do not infer causation from source-level correlation",
+      "Do not equate active users, registered users, dashboard events, or product page views",
+      "Do not calculate an end-to-end activation rate while auth_completed is missing",
+      "Do not choose a winner below the experiment's minimum evidence",
+      "Approval and publication status are not performance outcomes"
+    ]
+  },
+  "strategy_memory_update": {
+    "keep": [
+      "Adaptive habits, real-life rhythm, recalibration, and progress without perfection positioning",
+      "Human approval before publishing",
+      "Metricool CSV plus traceable R2/repository asset workflow",
+      "Separation of acquisition, registration, activation, and usage",
+      "Preference for existing mobile-readable assets"
+    ],
+    "change": [
+      "Move from thematic volume to matched, post-attributed comparisons",
+      "Define the priority audience provisionally and seek evidence rather than treating it as known",
+      "Require results and human decision notes to be written back for every campaign",
+      "Restore and verify auth_completed before making end-to-end activation claims"
+    ],
+    "stop": [
+      "Treating technical workflow success as strategic performance",
+      "Repeating generic motivational posts without measurable hypotheses",
+      "Using unmatched historical analytics as the previous-period result",
+      "Inferring format winners from approval status"
+    ],
+    "test_next": [
+      "Messy-week pain versus broken-streak pain",
+      "Carousel versus static for the same verified mechanism",
+      "Co-creation invitation versus generic try CTA"
+    ],
+    "open_questions": [
+      "Which provisional audience descriptors are supported by actual responders?",
+      "Which pain frame produces qualified landing intent?",
+      "Does concrete product proof improve intent relative to problem framing?",
+      "Can auth_completed and cohort attribution be made reliable?",
+      "Which CTA yields activation rather than only landing clicks?",
+      "Are more current light-mode product screenshots available and verified?"
+    ]
+  },
+  "source_manifest": [
+    {
+      "source_type": "repo_file",
+      "source_path_or_id": "/home/runner/work/innerbloomv3/innerbloomv3/Docs/marketing/strategy-memory.md",
+      "captured_at": "2026-07-29T19:13:38.178Z",
+      "checksum": "sha256:8212bd0c401b2fae6c52b2fbcee08f98657c95b2b21f768797fd59e550e76e9d"
+    },
+    {
+      "source_type": "analytics_sync",
+      "source_path_or_id": "marketing-2026-06-03-2026-06-30-3335db68-368b-473a-b9f3-45225f6170ab",
+      "captured_at": "2026-07-01 09:52:58.21955+00",
+      "checksum": "sha256:6f5194cb01b02e370e01ce9db505daef6a59a581147db07da5d085f578310e84"
+    },
+    {
+      "source_type": "database_snapshot",
+      "source_path_or_id": "marketing_campaigns_recent_limit_12",
+      "captured_at": "2026-07-29T19:14:44.304Z",
+      "checksum": "sha256:828e34c73bf47812b2439e63d35ec02082985fd294b4cd5f25fcb245971dce92"
+    },
+    {
+      "source_type": "asset_manifest",
+      "source_path_or_id": "Docs/marketing; apps/web/public/marketing; assest visuales",
+      "captured_at": "2026-07-29T19:13:38.178Z",
+      "checksum": "sha256:e3755ccf0a8013175e64ab950ced2727e25f77919a03c4768acfa5c1296bc001"
+    },
+    {
+      "source_type": "manual_input",
+      "source_path_or_id": "marketing_cmo_context_service.defaults",
+      "captured_at": "2026-06-30T00:00:00.000Z",
+      "checksum": "sha256:3bc14a6f4b3354f813a644b080f5768b13c54b5de8fef7e9ffba867bcf9396d6"
+    }
+  ]
+}
