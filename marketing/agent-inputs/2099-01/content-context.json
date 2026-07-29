@@ -1,0 +1,1854 @@
+{
+  "schema_version": "1.0",
+  "period": {
+    "period_key": "2099-01",
+    "campaign_code": "ib_209901",
+    "timezone": "Europe/Madrid",
+    "target_post_count": 20,
+    "publishing_start_date": "2099-01-01",
+    "publishing_end_date": "2099-01-31"
+  },
+  "strategy": {
+    "handoff_status": "validated",
+    "handoff_authority": "automated_marketing_pipeline",
+    "handoff_recorded_at": "2026-07-29T20:26:02.635Z",
+    "original_cmo_review_status": "draft",
+    "cmo_context_path": "marketing/agent-inputs/2099-01/cmo-context.json",
+    "cmo_context_checksum": "sha256:5e1ced6a763ee23490b31eaa988c18e1083a02341c4b12aa4ec2fbf3eb2a006c",
+    "cmo_output_path": "marketing/agent-outputs/2099-01/cmo-strategy.json",
+    "cmo_output_checksum": "sha256:d35c46d24a0ae690312301ec0b04dddc2c5a9a0e3bd8171619bf1126789efdbe",
+    "cmo_output": {
+      "schema_version": "1.0",
+      "agent": "innerbloom_cmo",
+      "period": "2099-01",
+      "generated_at": "2026-07-29T20:00:00Z",
+      "review_status": "draft",
+      "executive_summary": "January 2099 should use 20 English-language Instagram posts to learn which combination of real-life habit pain, concrete adaptive-product evidence, and early-adopter invitation produces attributable landing and activation behavior. The available analytics are historical fallback data rather than evidence from December 2098, and prior campaigns have no measured post results, so the plan preserves the established positioning but treats performance conclusions as unresolved. Execution should prioritize three measurable comparisons, reuse traceable square static and carousel assets, require human review, and keep acquisition, registration, activation, and product usage distinct.",
+      "input_assessment": {
+        "data_quality": "low",
+        "available_inputs": [
+          "Canonical 2099-01 context and 20-post target",
+          "Strategy memory and current positioning",
+          "Historical GA4 snapshot for 2026-06-03 through 2026-06-30",
+          "Registered-user aggregate with internal users excluded",
+          "Three prior campaign records with post statuses and tracking URLs",
+          "Manifest of product screenshots and existing campaign visuals",
+          "Instagram, format, storage, publishing, and human-review constraints"
+        ],
+        "data_gaps": [
+          "No analytics exist for the requested 2098-12 analysis window; the supplied snapshot is a declared 2026 fallback",
+          "No explicit structured audience definition is present",
+          "No Metricool post-level reach, impressions, engagement, clicks, or publication results are present",
+          "No prior campaign contains measured results, decision notes, or rejection reasons",
+          "The funnel snapshot omits auth_completed, so end-to-end activation conversion cannot be calculated",
+          "No cohort linkage connects acquisition source, registration, dashboard activation, and subsequent product usage",
+          "No brand assets or reusable templates are classified in their dedicated input collections; only existing visuals and two references to one product screenshot are available",
+          "Search Console contains only three total impressions across two queries and cannot support an organic-search decision"
+        ],
+        "tracking_issues": [
+          "The analytics window does not match 2098-12 and must not be treated as previous-period performance",
+          "page_view is an aggregate event count and cannot substitute for landing views without page filtering",
+          "GA4 active users are anonymous device/cookie-based users and are not registered users",
+          "Product totals may reflect repeated activity from a very small user set and are not an acquisition measure",
+          "auth_completed is absent from the supplied funnel events",
+          "Post-level outcomes are unavailable even though historical URLs contain UTM and ib_post parameters",
+          "Auth redirects and internal/admin activity can contaminate unfiltered source and page reporting"
+        ],
+        "assumptions": [
+          "The target audience is treated as a provisional segment derived from positioning: English-speaking Instagram users frustrated by rigid habit systems; this must be validated rather than presented as established research",
+          "The supported schema formats 'static' and 'carousel' map to the operational square static and square carousel formats",
+          "Stable existing asset IDs may be reused without downloading or duplicating binaries",
+          "The landing and listed funnel events will remain instrumented in January 2099; if not verified before scheduling, activation experiments must pause",
+          "All final posts remain subject to human review and Metricool CSV export does not itself publish"
+        ]
+      },
+      "previous_period_analysis": {
+        "what_was_attempted": [
+          "No campaign for 2098-12 is supplied",
+          "Historical ib20_mvp tested adaptive-rhythm and anti-perfect-day positioning in three Instagram posts",
+          "Historical ib_202607 planned 20 posts across pain, mechanism, belief, and early-adopter CTA themes",
+          "Historical ib_202608_test contains two approved creative test posts"
+        ],
+        "observed_results": [
+          "No prior campaign includes measured post results, so creative or message winners cannot be identified",
+          "The fallback analytics recorded 14 marketing active users, 55 marketing sessions, 81 marketing page views, and 256 marketing events during 2026-06-03 through 2026-06-30",
+          "The fallback funnel recorded 13 landing_cta_clicked, 12 auth_started, and 38 dashboard_view events, but no auth_completed event and no reliable post-level attribution",
+          "The fallback registered-user aggregate reports 23 total, 3 new in that historical window, and 2 internal users excluded",
+          "Instagram/ib20_mvp appears in clean sources with 7 active users, 17 sessions, and 78 screen page views; this is historical acquisition correlation, not proof of campaign causality"
+        ],
+        "human_decisions": [
+          "Historical records show 19 of 20 ib_202607 posts approved and one needing review",
+          "Both ib_202608_test posts were approved",
+          "Two of three ib20_mvp posts were approved and one needed review",
+          "No decision notes, explicit rejection reasons, or measured-period approval conclusions were supplied",
+          "Human review remains mandatory before publishing"
+        ],
+        "operational_issues": [
+          "The requested previous-period window is unavailable and replaced by test-period analytics",
+          "Metricool performance data requires manual export",
+          "Campaign records have tracking URLs but no results",
+          "Monthly draft automation and backend post persistence were unresolved in strategy memory",
+          "The dedicated reusable-template and brand-asset lists are empty"
+        ],
+        "performance_summary": "Operational feasibility is better supported than marketing effectiveness: historical records demonstrate an approved, UTM-tagged Instagram workflow and reusable visuals, while the absence of matched-window and post-level results prevents judging message, format, acquisition, registration, activation, or usage performance for 2098-12."
+      },
+      "learnings": [
+        {
+          "learning": "The Instagram-to-Metricool workflow and traceable public asset pattern are operationally usable.",
+          "evidence": [
+            "Strategy memory states that Metricool CSV import worked",
+            "Strategy memory states that Instagram posts published successfully from generated CSV",
+            "Existing campaign assets include stable R2 or repository URLs and asset IDs"
+          ],
+          "confidence": "strong_signal",
+          "implication": "Reuse the established delivery and asset-traceability rules rather than introducing a new publishing path."
+        },
+        {
+          "learning": "Adaptive habits, recalibration, and progress without perfection are consistent positioning territories, but their relative acquisition power is unproven.",
+          "evidence": [
+            "The positioning repeats these themes across strategy memory and historical campaigns",
+            "Prior campaigns contain no measured post results"
+          ],
+          "confidence": "moderate_signal",
+          "implication": "Keep the territory stable while comparing specific pain framings with consistent tracking."
+        },
+        {
+          "learning": "Historical Instagram traffic reached the site, but it cannot be attributed to a winning post or causal message.",
+          "evidence": [
+            "Clean sources list instagram/social/ib20_mvp with 17 sessions and 78 screen page views",
+            "No post-level Metricool or campaign results are supplied",
+            "The snapshot is outside the requested previous-period window"
+          ],
+          "confidence": "weak_signal",
+          "implication": "Treat Instagram as an available acquisition channel, not a proven growth engine; require post-level UTM reporting."
+        },
+        {
+          "learning": "Product-page activity cannot be interpreted as new-user activation or marketing success.",
+          "evidence": [
+            "Fallback product totals show 805 page views while several product pages show only one or two active users",
+            "dashboard_view has 38 events but auth_completed is absent",
+            "GA4 users and registered users use different identities"
+          ],
+          "confidence": "strong_signal",
+          "implication": "Report landing acquisition, registration, activation events, and product usage in separate sections and avoid conversion claims without linked denominators."
+        },
+        {
+          "learning": "No format winner, CTA winner, or audience winner is currently established.",
+          "evidence": [
+            "Prior campaigns contain no results",
+            "No structured audience section exists",
+            "Both static and carousel posts were approved, but approval is not performance"
+          ],
+          "confidence": "insufficient_evidence",
+          "implication": "Use balanced, controlled comparisons and do not label any creative route as a benchmark winner."
+        }
+      ],
+      "strategic_diagnosis": {
+        "primary_problem": "Innerbloom has a coherent positioning and an operational content pipeline but lacks matched-period, post-attributed evidence showing which message moves a defined audience from Instagram to landing intent and activation.",
+        "supporting_problems": [
+          "The priority audience is inferred rather than researched",
+          "The activation funnel is incomplete because auth_completed is missing",
+          "Prior approvals are available but performance and decision notes are not",
+          "Existing product proof is concentrated in one Daily Quest screenshot"
+        ],
+        "why_it_matters": "Without disciplined attribution and distinct funnel reporting, producing 20 posts would add volume without revealing whether pain, mechanism, or early-adopter participation improves acquisition or activation.",
+        "decision_needed_after_this_period": "Decide which pain-to-proof message pair deserves the next period's majority allocation, whether static or carousel is more efficient for attributable landing intent, and whether the early-adopter feedback invitation produces activation signals strong enough to retain."
+      },
+      "strategy": {
+        "primary_objective": "new_users",
+        "secondary_objectives": [
+          "Validate attributable landing intent by message and format",
+          "Observe activation progression separately from acquisition"
+        ],
+        "priority_audience": {
+          "description": "Provisional English-speaking Instagram users who want sustainable habits but feel alienated by streak pressure, perfect-day plans, or all-or-nothing restarts.",
+          "main_pains": [
+            "Plans collapse during messy weeks",
+            "A missed day feels like lost progress",
+            "Rigid systems demand the same effort regardless of energy or schedule"
+          ],
+          "main_desires": [
+            "A habit rhythm that can flex without losing direction",
+            "Visible progress without shame",
+            "A practical way to return after disruption"
+          ],
+          "objections": [
+            "This may be generic motivational advice",
+            "Adaptive may mean vague or unstructured",
+            "An early-stage product may not yet be useful enough"
+          ],
+          "current_awareness_level": "Problem-aware and solution-curious; awareness of Innerbloom is not established."
+        },
+        "core_value_proposition": "Innerbloom helps people keep direction by adapting habit effort to real life, making recalibration and visible progress more useful than rigid streak perfection.",
+        "period_narrative": "A sustainable habit is not one that demands perfect days; it is one that gives you a clear way to adapt, see progress, and return.",
+        "strategic_priorities": [
+          "Turn familiar rigid-habit pain into attributable landing intent",
+          "Make the adaptive mechanism concrete with available product evidence",
+          "Invite qualified early adopters into a measurable try-and-feedback loop"
+        ],
+        "content_pillars": [
+          {
+            "pillar_code": "real_life_friction",
+            "name": "Real-life friction",
+            "purpose": "Create recognition among people failed by rigid habit systems.",
+            "audience_problem": "Streaks and fixed plans collapse when energy, stress, or schedules change.",
+            "message": "The system, not the person, may be mismatched to real life.",
+            "proof_or_mechanism": "Contrast rigid same-output expectations with the need for adjustable intensity; frame as a problem hypothesis, not a proven universal claim.",
+            "recommended_formats": [
+              "static",
+              "carousel"
+            ],
+            "recommended_post_count": 7
+          },
+          {
+            "pillar_code": "adaptive_mechanism",
+            "name": "Adaptive mechanism",
+            "purpose": "Explain how Innerbloom's adaptive promise becomes concrete.",
+            "audience_problem": "Adaptive habit language can sound vague without a visible mechanism.",
+            "message": "Recalibration, task intensity, Daily Quest, dashboard progress, and review can preserve direction through changing days.",
+            "proof_or_mechanism": "Use only verified product screens and capabilities represented in supplied context or assets; show the Daily Quest screenshot where relevant.",
+            "recommended_formats": [
+              "carousel",
+              "static"
+            ],
+            "recommended_post_count": 6
+          },
+          {
+            "pillar_code": "return_without_shame",
+            "name": "Return without shame",
+            "purpose": "Differentiate Innerbloom from all-or-nothing habit narratives.",
+            "audience_problem": "Missing a day can trigger guilt and a restart-from-zero response.",
+            "message": "Returning and recalibrating are part of sustainable consistency; perfection is not the requirement.",
+            "proof_or_mechanism": "Use conceptual contrasts and visible-progress language without promising outcomes.",
+            "recommended_formats": [
+              "static",
+              "carousel"
+            ],
+            "recommended_post_count": 4
+          },
+          {
+            "pillar_code": "early_adopter_loop",
+            "name": "Early-adopter loop",
+            "purpose": "Convert qualified curiosity into a try-and-feedback action.",
+            "audience_problem": "An early product needs a clear reason to try now despite uncertainty.",
+            "message": "People dissatisfied with rigid habit tools can try the early version and help evaluate whether adaptive habits feel useful.",
+            "proof_or_mechanism": "Be transparent that the product is early, direct users to the tracked landing path, and ask for feedback only after product exposure.",
+            "recommended_formats": [
+              "static",
+              "carousel"
+            ],
+            "recommended_post_count": 3
+          }
+        ],
+        "content_mix": {
+          "total_posts": 20,
+          "by_pillar": {
+            "real_life_friction": 7,
+            "adaptive_mechanism": 6,
+            "return_without_shame": 4,
+            "early_adopter_loop": 3
+          },
+          "by_format": {
+            "static": 10,
+            "carousel": 10
+          },
+          "by_funnel_stage": {
+            "awareness": 9,
+            "consideration": 7,
+            "activation": 4
+          }
+        }
+      },
+      "experiments": [
+        {
+          "experiment_code": "pain_frame_intent",
+          "name": "Pain framing and landing intent",
+          "hypothesis": "For the provisional audience, posts framing plans that fail on messy weeks will produce a higher landing_cta_clicked rate per attributable landing session than posts framing broken-streak pressure.",
+          "variable_being_tested": "Messy-week planning pain versus broken-streak pressure, holding format, CTA family, publishing window, and destination consistent.",
+          "control_or_baseline": "Broken-streak framing is the comparison baseline; no historical winner is assumed.",
+          "target_audience": "Problem-aware Instagram users frustrated by rigid habit systems.",
+          "content_pillars": [
+            "real_life_friction"
+          ],
+          "primary_metric": "landing_cta_clicked events divided by attributable landing sessions for each message variant",
+          "secondary_metrics": [
+            "Attributable landing sessions by utm_content",
+            "auth_started events by variant if attribution is retained"
+          ],
+          "success_criteria": "Select a direction only if each variant has at least 30 attributable landing sessions and one variant's CTA-click rate is at least 25% higher than the other.",
+          "failure_criteria": "Neither variant reaches 30 attributable landing sessions, tracking cannot retain variant attribution, or the rate difference is below 25%.",
+          "minimum_evidence_needed": "At least two posts per pain frame, matched across one static and one carousel where possible, and 30 attributable landing sessions per variant.",
+          "decision_enabled": "Choose the dominant pain frame for the next period or repeat the test unchanged if evidence is insufficient."
+        },
+        {
+          "experiment_code": "proof_format_intent",
+          "name": "Product proof format",
+          "hypothesis": "A carousel that connects a real-life problem to a verified product mechanism will produce a higher landing_cta_clicked rate per attributable landing session than a static post using the same mechanism and CTA.",
+          "variable_being_tested": "Carousel versus static presentation of the same product mechanism.",
+          "control_or_baseline": "Static product-proof post; no historical format winner is assumed.",
+          "target_audience": "Solution-curious users who need evidence that adaptive habits are concrete.",
+          "content_pillars": [
+            "adaptive_mechanism"
+          ],
+          "primary_metric": "landing_cta_clicked events divided by attributable landing sessions by format",
+          "secondary_metrics": [
+            "Attributable landing sessions by utm_content",
+            "auth_started events by format",
+            "Instagram reach and saves if manually imported from Metricool"
+          ],
+          "success_criteria": "Prefer a format only if each cell has at least 30 attributable landing sessions and its CTA-click rate exceeds the other by at least 25%.",
+          "failure_criteria": "Insufficient sessions, unequal destination or CTA, missing UTM attribution, or less than 25% rate separation.",
+          "minimum_evidence_needed": "At least two matched static/carousel pairs using verified mechanisms and 30 attributable landing sessions per format.",
+          "decision_enabled": "Allocate more next-period product-proof posts to the more efficient format, or preserve a balanced mix if inconclusive."
+        },
+        {
+          "experiment_code": "early_adopter_activation",
+          "name": "Try versus co-creation invitation",
+          "hypothesis": "An explicit early-adopter co-creation invitation will produce a higher auth_started rate per attributable landing session than a generic try-the-product invitation.",
+          "variable_being_tested": "Transparent co-creation/feedback CTA versus generic try CTA.",
+          "control_or_baseline": "Generic try-the-product invitation.",
+          "target_audience": "Users who recognize rigid-habit pain and accept an early-stage product.",
+          "content_pillars": [
+            "early_adopter_loop",
+            "return_without_shame"
+          ],
+          "primary_metric": "auth_started events divided by attributable landing sessions for each CTA variant",
+          "secondary_metrics": [
+            "landing_cta_clicked rate",
+            "auth_completed events if tracking is restored",
+            "dashboard_view events after auth completion if cohort attribution is available"
+          ],
+          "success_criteria": "Retain the co-creation CTA if each variant reaches at least 30 attributable landing sessions and its auth-start rate is at least 25% higher than control, with no tracking break between landing and auth.",
+          "failure_criteria": "Minimum traffic is not reached, auth attribution is unavailable, or co-creation does not exceed control by 25%.",
+          "minimum_evidence_needed": "At least two posts per CTA variant and 30 attributable landing sessions per variant; verify auth_started instrumentation before launch.",
+          "decision_enabled": "Choose the activation invitation for the next cycle or record the result as inconclusive without claiming a winner."
+        }
+      ],
+      "messaging_guidelines": {
+        "core_messages": [
+          "Habits should adapt to real life rather than demand identical days",
+          "Recalibration can preserve direction without pretending disruption did not happen",
+          "Visible progress can matter without perfection pressure"
+        ],
+        "supporting_messages": [
+          "Returning is a skill worth designing for",
+          "Adjusting intensity is different from abandoning direction",
+          "The early product is open to feedback from people who experience this problem"
+        ],
+        "proof_points": [
+          "Use the supplied Daily Quest task-selection screenshot as concrete visual evidence when the concept matches",
+          "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+          "Operational proof may state that users can try the early version; do not imply measured effectiveness"
+        ],
+        "approved_ctas": [
+          "Learn how Innerbloom approaches adaptive habits",
+          "Explore the early version",
+          "Try the early version",
+          "Share feedback after exploring the dashboard"
+        ],
+        "messages_to_avoid": [
+          "Generic motivation detached from a hypothesis",
+          "Blaming users for inconsistency",
+          "Declaring streaks universally harmful",
+          "Suggesting that adjustment means doing nothing"
+        ],
+        "claims_to_avoid": [
+          "Guaranteed habit formation or retention",
+          "Claims that Innerbloom has proven outcomes",
+          "Testimonials or user counts not supplied in context",
+          "Claims that a post, format, or message is a winner before minimum evidence",
+          "Equating GA4 active users with registered or activated users"
+        ],
+        "tone": [
+          "Empathetic",
+          "Clear",
+          "Non-judgmental",
+          "Specific",
+          "Curious rather than triumphant",
+          "Transparent about early-stage status"
+        ],
+        "language_rules": [
+          "Write final content in English",
+          "Use short mobile-readable sentences",
+          "Prefer concrete real-week situations over productivity jargon",
+          "Use 'may' or hypothesis language when evidence is not established",
+          "Do not write final captions or scripts in this strategy"
+        ]
+      },
+      "visual_direction": {
+        "general_direction": "Use a calm, product-grounded system that contrasts real-life variability with clear adaptive next steps. Prioritize mobile readability and traceable existing assets over decorative lifestyle imagery.",
+        "preferred_assets": [
+          "The supplied Daily Quest dark-mode product screenshot when the post discusses task selection",
+          "Existing ib_202607 static and carousel visual patterns with traceable asset IDs",
+          "Existing ib20_mvp real-life rhythm and perfect-day visuals when their message matches the assigned experiment"
+        ],
+        "reuse_rules": [
+          "Reference stable asset IDs and existing R2 or repository paths; do not download or duplicate binaries",
+          "Reuse only when the visual meaning matches the pillar and tested variable",
+          "Do not reuse historical final copy verbatim; assets may support new concepts without carrying old performance assumptions",
+          "Keep experiment pairs visually comparable except for the declared variable",
+          "Do not claim both dark and light product evidence is available; the manifest explicitly identifies only the Daily Quest dark screenshot"
+        ],
+        "new_asset_requirements": [
+          "Create a new visual only when no existing traceable asset can express a required mechanism",
+          "Any new mechanism image must come from a verified current product screen and receive human review",
+          "Document the source and stable asset ID before Metricool export"
+        ],
+        "accessibility_rules": [
+          "Maintain high text/background contrast",
+          "Keep type readable on a mobile viewport",
+          "Limit each carousel slide to one clear idea",
+          "Include meaningful alt-text guidance in the post plan",
+          "Do not rely on color alone to communicate state or comparison"
+        ],
+        "visual_patterns_to_avoid": [
+          "Generic aspirational lifestyle photography",
+          "Dense dashboard collages",
+          "Tiny UI screenshots without crops or annotations",
+          "Unverified light-mode mockups",
+          "Streak-shaming red failure imagery"
+        ]
+      },
+      "head_of_content_brief": {
+        "mission": "Translate this draft into a 20-post English Instagram plan that runs the three declared comparisons without changing their variables, claims, totals, or measurement logic.",
+        "non_negotiables": [
+          "Do not publish, schedule, or self-approve",
+          "Keep exactly 20 posts and the specified pillar, format, and funnel totals",
+          "Use only static and carousel formats",
+          "Do not invent product capabilities, metrics, users, testimonials, or outcomes",
+          "Keep acquisition, registration, activation, and product usage distinct",
+          "Do not turn this brief into final captions until the appropriate later workflow and human review"
+        ],
+        "execution_steps": [
+          "Assign every post one pillar, funnel stage, format, experiment code where applicable, and message variant",
+          "Construct matched experiment cells before filling non-experiment posts",
+          "Select an existing stable asset ID first; request a new verified product asset only if necessary",
+          "Create unique UTM and ib_post values for every post",
+          "Verify event instrumentation before activation posts are approved",
+          "Submit the complete plan for human review"
+        ],
+        "required_post_fields": [
+          "post_code",
+          "pillar_code",
+          "funnel_stage",
+          "format",
+          "strategic angle",
+          "audience pain",
+          "hypothesis or experiment_code",
+          "declared variant",
+          "approved CTA",
+          "tracking URL",
+          "utm_source",
+          "utm_medium",
+          "utm_campaign",
+          "utm_content",
+          "ib_post",
+          "asset_id or documented asset requirement",
+          "alt-text guidance",
+          "human review status"
+        ],
+        "calendar_rules": [
+          "Distribute experiment variants across the month rather than publishing one variant in a single cluster",
+          "Match comparison posts by day-of-week and publishing window where feasible",
+          "Do not schedule a CTA comparison before its landing and auth tracking check",
+          "Avoid consecutive posts that repeat the same pillar and format when this would create fatigue",
+          "Preserve four activation-stage slots exactly"
+        ],
+        "format_rules": [
+          "Use 10 static and 10 carousel posts",
+          "For carousels, give each slide one conceptual role and maintain mobile legibility",
+          "For statics, communicate one problem or mechanism without compressing multiple claims",
+          "Do not introduce reels or stories"
+        ],
+        "asset_rules": [
+          "Prefer the verified Daily Quest screenshot for relevant mechanism posts",
+          "Use stable existing asset IDs and public URLs intended for export",
+          "Do not duplicate or download binaries",
+          "Do not fabricate missing light-mode product screens",
+          "Escalate any product visual whose current-state accuracy is uncertain"
+        ],
+        "tracking_rules": [
+          "Use utm_source=instagram and utm_medium=social",
+          "Use one January campaign value consistently and a unique utm_content plus ib_post per post",
+          "Record the experiment and variant alongside utm_content",
+          "Verify page_view filtering, landing_cta_clicked, auth_started, auth_completed, and dashboard_view before interpreting the funnel",
+          "Request Metricool manual performance export for reach and engagement context",
+          "Exclude auth redirects and internal/admin activity from decision reporting"
+        ],
+        "approval_criteria": [
+          "Matches an approved pillar and narrative",
+          "Uses only supported format and traceable assets",
+          "Contains no unsupported claim",
+          "Has a unique valid tracking URL",
+          "Preserves the declared test variable and matched control",
+          "Is readable on mobile and includes accessibility guidance",
+          "Has explicit human approval"
+        ],
+        "rejection_criteria": [
+          "Generic motivation without a strategic hypothesis",
+          "Invented outcome, testimonial, capability, or audience fact",
+          "Missing or duplicated post attribution",
+          "Uncontrolled experiment variant",
+          "Final copy that shames inconsistency or promises guaranteed results",
+          "Unverified product screenshot or non-traceable asset",
+          "Any attempt to publish or schedule without human approval"
+        ],
+        "quality_checklist": [
+          "20 total posts",
+          "7/6/4/3 pillar allocation",
+          "10 static and 10 carousel",
+          "9 awareness, 7 consideration, 4 activation",
+          "Three experiments represented with matched cells",
+          "Every CTA belongs to the approved list",
+          "Every post has unique attribution",
+          "Every asset is traceable",
+          "Every claim is supported or explicitly framed as hypothesis",
+          "Human review state is visible"
+        ]
+      },
+      "measurement_plan": {
+        "primary_kpis": [
+          "Attributable landing sessions by utm_content and ib_post",
+          "landing_cta_clicked rate per attributable landing session",
+          "auth_started rate per attributable landing session"
+        ],
+        "secondary_kpis": [
+          "auth_completed rate from auth_started if the event is restored",
+          "dashboard_view after auth_completed if cohort linkage is available",
+          "New registered users excluding internal accounts, reported separately and only when attribution is valid",
+          "Metricool reach, impressions, saves, and link activity as manually imported context",
+          "Product-page views as a usage proxy, never as new-user acquisition"
+        ],
+        "funnel_events": [
+          "page_view on the landing page",
+          "landing_cta_clicked",
+          "auth_started",
+          "auth_completed",
+          "dashboard_view"
+        ],
+        "utm_rules": [
+          "utm_source=instagram",
+          "utm_medium=social",
+          "Use a single January 2099 campaign identifier",
+          "utm_content must uniquely map to post_code and declared experiment variant",
+          "ib_post must uniquely match post_code",
+          "Do not aggregate a test until duplicate and missing parameters are checked"
+        ],
+        "reporting_requirements": [
+          "Report acquisition, registration, activation, and product usage in separate tables",
+          "State the analytics window and flag any fallback window",
+          "Show raw denominators and counts beside rates",
+          "Report every experiment cell, including zero-result and underpowered cells",
+          "Attach manual Metricool export status and publication status",
+          "Record human approval, rejection, and decision notes",
+          "Classify conclusions using the schema confidence vocabulary"
+        ],
+        "interpretation_warnings": [
+          "Do not use the 2026 fallback snapshot as a December 2098 baseline",
+          "Do not infer causation from source-level correlation",
+          "Do not equate active users, registered users, dashboard events, or product page views",
+          "Do not calculate an end-to-end activation rate while auth_completed is missing",
+          "Do not choose a winner below the experiment's minimum evidence",
+          "Approval and publication status are not performance outcomes"
+        ]
+      },
+      "strategy_memory_update": {
+        "keep": [
+          "Adaptive habits, real-life rhythm, recalibration, and progress without perfection positioning",
+          "Human approval before publishing",
+          "Metricool CSV plus traceable R2/repository asset workflow",
+          "Separation of acquisition, registration, activation, and usage",
+          "Preference for existing mobile-readable assets"
+        ],
+        "change": [
+          "Move from thematic volume to matched, post-attributed comparisons",
+          "Define the priority audience provisionally and seek evidence rather than treating it as known",
+          "Require results and human decision notes to be written back for every campaign",
+          "Restore and verify auth_completed before making end-to-end activation claims"
+        ],
+        "stop": [
+          "Treating technical workflow success as strategic performance",
+          "Repeating generic motivational posts without measurable hypotheses",
+          "Using unmatched historical analytics as the previous-period result",
+          "Inferring format winners from approval status"
+        ],
+        "test_next": [
+          "Messy-week pain versus broken-streak pain",
+          "Carousel versus static for the same verified mechanism",
+          "Co-creation invitation versus generic try CTA"
+        ],
+        "open_questions": [
+          "Which provisional audience descriptors are supported by actual responders?",
+          "Which pain frame produces qualified landing intent?",
+          "Does concrete product proof improve intent relative to problem framing?",
+          "Can auth_completed and cohort attribution be made reliable?",
+          "Which CTA yields activation rather than only landing clicks?",
+          "Are more current light-mode product screenshots available and verified?"
+        ]
+      },
+      "source_manifest": [
+        {
+          "source_type": "repo_file",
+          "source_path_or_id": "/home/runner/work/innerbloomv3/innerbloomv3/Docs/marketing/strategy-memory.md",
+          "captured_at": "2026-07-29T19:13:38.178Z",
+          "checksum": "sha256:8212bd0c401b2fae6c52b2fbcee08f98657c95b2b21f768797fd59e550e76e9d"
+        },
+        {
+          "source_type": "analytics_sync",
+          "source_path_or_id": "marketing-2026-06-03-2026-06-30-3335db68-368b-473a-b9f3-45225f6170ab",
+          "captured_at": "2026-07-01 09:52:58.21955+00",
+          "checksum": "sha256:6f5194cb01b02e370e01ce9db505daef6a59a581147db07da5d085f578310e84"
+        },
+        {
+          "source_type": "database_snapshot",
+          "source_path_or_id": "marketing_campaigns_recent_limit_12",
+          "captured_at": "2026-07-29T19:14:44.304Z",
+          "checksum": "sha256:828e34c73bf47812b2439e63d35ec02082985fd294b4cd5f25fcb245971dce92"
+        },
+        {
+          "source_type": "asset_manifest",
+          "source_path_or_id": "Docs/marketing; apps/web/public/marketing; assest visuales",
+          "captured_at": "2026-07-29T19:13:38.178Z",
+          "checksum": "sha256:e3755ccf0a8013175e64ab950ced2727e25f77919a03c4768acfa5c1296bc001"
+        },
+        {
+          "source_type": "manual_input",
+          "source_path_or_id": "marketing_cmo_context_service.defaults",
+          "captured_at": "2026-06-30T00:00:00.000Z",
+          "checksum": "sha256:3bc14a6f4b3354f813a644b080f5768b13c54b5de8fef7e9ffba867bcf9396d6"
+        }
+      ]
+    }
+  },
+  "brand": {
+    "objective": "Acquire early adopter users for Innerbloom 2.0 with lightweight, measurable social content. The system should minimize manual marketing operations while keeping final approval under human control.",
+    "positioning": [
+      "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity.",
+      "Core message:",
+      "adaptive habits",
+      "real-life rhythm",
+      "recalibration instead of restart",
+      "visible progress without perfection pressure",
+      "early product, feedback welcome"
+    ],
+    "content_rules": [
+      "GA4 active users are anonymous, cookie/device-based users. They are not the same as registered users in Neon.",
+      "For marketing decisions:",
+      "Treat landing page views as acquisition signal.",
+      "Treat `/innerbloom2/...` pages as product usage signal.",
+      "Exclude auth redirects such as `accounts.google.com`.",
+      "Exclude internal/admin emails before reading registered-user growth.",
+      "Search Console is sparse until Google has more impressions.",
+      "This is the first real monthly plan once draft generation is wired.",
+      "Planned mix:",
+      "8 pain/friction posts: streak pressure, perfect-day planning, restarting from zero, habits collapsing during messy weeks.",
+      "5 product mechanism/demo posts: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum.",
+      "4 belief/differentiation posts: real weeks over perfect calendars, progress without shame, sustainable habit design, anti-all-or-nothing routines.",
+      "3 early-adopter CTA posts: try the early version, help shape the product, give feedback after using the dashboard.",
+      "Creative rules:",
+      "Prefer real Innerbloom 2.0 screenshots over generic lifestyle imagery.",
+      "Use both dark-mode and light-mode product assets when available.",
+      "Keep carousel slides readable on mobile.",
+      "Use R2 URLs in Metricool CSV output.",
+      "Store source assets and planning context in Google Drive for browsing.",
+      "Measurement:",
+      "Primary acquisition: landing views and CTA events from UTM-tagged links.",
+      "Primary activation: `auth_started -> auth_completed -> dashboard_view`.",
+      "Product-interest proxy: views of `/innerbloom2/dashboard`, `/innerbloom2/tareas`, `/innerbloom2/task-detail`, and `/innerbloom2/logros`.",
+      "For the next monthly run:",
+      "Keep the number of configurable knobs small.",
+      "Prefer strong hooks and measurable hypotheses over generic motivational posts.",
+      "Reuse visual patterns that remain readable on mobile.",
+      "Generate only new visuals when the existing asset library cannot support the post.",
+      "Preserve every decision and result in this strategy memory."
+    ],
+    "language": "English",
+    "human_approval": false
+  },
+  "product_context": {
+    "stage": "early-stage MVP",
+    "known_product_changes": [
+      "Metricool CSV import works.",
+      "Metricool can ingest image URLs from Cloudflare R2 URLs.",
+      "Instagram posts published successfully from the generated CSV.",
+      "Cloudflare R2 is now the publishing asset store for CSV exports.",
+      "Google Drive remains the human-readable marketing library.",
+      "GA4 and Search Console snapshots can be synced into Neon and shown in `/admin/marketing`."
+    ],
+    "product_pages": [
+      {
+        "page_path": "/innerbloom2/dashboard",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 74,
+        "screen_page_views": 237,
+        "event_count": 363
+      },
+      {
+        "page_path": "/innerbloom2/logros",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 63,
+        "screen_page_views": 146,
+        "event_count": 268
+      },
+      {
+        "page_path": "/innerbloom2/tareas",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 56,
+        "screen_page_views": 146,
+        "event_count": 175
+      },
+      {
+        "page_path": "/innerbloom2/task-detail",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 31,
+        "screen_page_views": 69,
+        "event_count": 83
+      },
+      {
+        "page_path": "/innerbloom2/emotion-chart",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 28,
+        "screen_page_views": 44,
+        "event_count": 47
+      },
+      {
+        "page_path": "/dashboard-v3",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 19,
+        "screen_page_views": 31,
+        "event_count": 135
+      },
+      {
+        "page_path": "/innerbloom2/dquest",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 27,
+        "screen_page_views": 28,
+        "event_count": 29
+      },
+      {
+        "page_path": "/innerbloom2/vision-general",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 17,
+        "screen_page_views": 23,
+        "event_count": 28
+      },
+      {
+        "page_path": "/innerbloom2/balance",
+        "page_title": "Innerbloom",
+        "active_users": 2,
+        "sessions": 14,
+        "screen_page_views": 17,
+        "event_count": 18
+      },
+      {
+        "page_path": "/dashboard-v3/rewards",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 5,
+        "screen_page_views": 11,
+        "event_count": 40
+      },
+      {
+        "page_path": "/innerbloom2/dashboard",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 2,
+        "sessions": 5,
+        "screen_page_views": 9,
+        "event_count": 14
+      },
+      {
+        "page_path": "/innerbloom2/dashboard",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 8,
+        "event_count": 9
+      },
+      {
+        "page_path": "/innerbloom2/tareas",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 6,
+        "event_count": 7
+      },
+      {
+        "page_path": "/dashboard-v3",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 2,
+        "sessions": 2,
+        "screen_page_views": 5,
+        "event_count": 18
+      },
+      {
+        "page_path": "/innerbloom2/tareas",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 4,
+        "event_count": 4
+      },
+      {
+        "page_path": "/innerbloom2/dquest",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 2,
+        "sessions": 3,
+        "screen_page_views": 3,
+        "event_count": 3
+      },
+      {
+        "page_path": "/innerbloom2/task-detail",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 2,
+        "event_count": 2
+      },
+      {
+        "page_path": "/innerbloom2/logros",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 2,
+        "event_count": 2
+      },
+      {
+        "page_path": "/innerbloom2/logros",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/dashboard",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/dashboard-v3",
+        "page_title": "Floración interior",
+        "active_users": 1,
+        "sessions": 3,
+        "screen_page_views": 1,
+        "event_count": 5
+      },
+      {
+        "page_path": "/dashboard-v3/dquest",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 4
+      },
+      {
+        "page_path": "/dashboard-v3/misiones",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 2
+      },
+      {
+        "page_path": "/dashboard-v3/rewards",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 3
+      },
+      {
+        "page_path": "/editor",
+        "page_title": "Innerbloom",
+        "active_users": 1,
+        "sessions": 2,
+        "screen_page_views": 1,
+        "event_count": 3
+      },
+      {
+        "page_path": "/editor",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 2
+      },
+      {
+        "page_path": "/innerbloom2/balance",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/dquest",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/emotion-chart",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/emotion-chart",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/task-detail",
+        "page_title": "Innerbloom Onboarding · Crea tu base",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/innerbloom2/vision-general",
+        "page_title": "Innerbloom — App de hábitos adaptativa",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 1,
+        "event_count": 1
+      },
+      {
+        "page_path": "/dashboard-v3",
+        "page_title": "Innerbloom Guided Demo",
+        "active_users": 1,
+        "sessions": 1,
+        "screen_page_views": 0,
+        "event_count": 1
+      }
+    ],
+    "product_totals": {
+      "activeUsers": 45,
+      "sessions": 370,
+      "pageViews": 805,
+      "events": 1273
+    },
+    "approved_claim_source": {
+      "core_messages": [
+        "Habits should adapt to real life rather than demand identical days",
+        "Recalibration can preserve direction without pretending disruption did not happen",
+        "Visible progress can matter without perfection pressure"
+      ],
+      "supporting_messages": [
+        "Returning is a skill worth designing for",
+        "Adjusting intensity is different from abandoning direction",
+        "The early product is open to feedback from people who experience this problem"
+      ],
+      "proof_points": [
+        "Use the supplied Daily Quest task-selection screenshot as concrete visual evidence when the concept matches",
+        "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum",
+        "Operational proof may state that users can try the early version; do not imply measured effectiveness"
+      ],
+      "approved_ctas": [
+        "Learn how Innerbloom approaches adaptive habits",
+        "Explore the early version",
+        "Try the early version",
+        "Share feedback after exploring the dashboard"
+      ],
+      "messages_to_avoid": [
+        "Generic motivation detached from a hypothesis",
+        "Blaming users for inconsistency",
+        "Declaring streaks universally harmful",
+        "Suggesting that adjustment means doing nothing"
+      ],
+      "claims_to_avoid": [
+        "Guaranteed habit formation or retention",
+        "Claims that Innerbloom has proven outcomes",
+        "Testimonials or user counts not supplied in context",
+        "Claims that a post, format, or message is a winner before minimum evidence",
+        "Equating GA4 active users with registered or activated users"
+      ],
+      "tone": [
+        "Empathetic",
+        "Clear",
+        "Non-judgmental",
+        "Specific",
+        "Curious rather than triumphant",
+        "Transparent about early-stage status"
+      ],
+      "language_rules": [
+        "Write final content in English",
+        "Use short mobile-readable sentences",
+        "Prefer concrete real-week situations over productivity jargon",
+        "Use 'may' or hypothesis language when evidence is not established",
+        "Do not write final captions or scripts in this strategy"
+      ]
+    },
+    "approved_product_truths": [
+      {
+        "truth_ref": "cmo_core_message_1",
+        "source_type": "cmo_core_message",
+        "text": "Habits should adapt to real life rather than demand identical days"
+      },
+      {
+        "truth_ref": "cmo_core_message_2",
+        "source_type": "cmo_core_message",
+        "text": "Recalibration can preserve direction without pretending disruption did not happen"
+      },
+      {
+        "truth_ref": "cmo_core_message_3",
+        "source_type": "cmo_core_message",
+        "text": "Visible progress can matter without perfection pressure"
+      },
+      {
+        "truth_ref": "cmo_supporting_message_1",
+        "source_type": "cmo_supporting_message",
+        "text": "Returning is a skill worth designing for"
+      },
+      {
+        "truth_ref": "cmo_supporting_message_2",
+        "source_type": "cmo_supporting_message",
+        "text": "Adjusting intensity is different from abandoning direction"
+      },
+      {
+        "truth_ref": "cmo_supporting_message_3",
+        "source_type": "cmo_supporting_message",
+        "text": "The early product is open to feedback from people who experience this problem"
+      },
+      {
+        "truth_ref": "cmo_proof_point_1",
+        "source_type": "cmo_proof_point",
+        "text": "Use the supplied Daily Quest task-selection screenshot as concrete visual evidence when the concept matches"
+      },
+      {
+        "truth_ref": "cmo_proof_point_2",
+        "source_type": "cmo_proof_point",
+        "text": "Use only product mechanisms named in the canonical context: adaptive rhythm, weekly recalibration, dashboard progress, task intensity, visible momentum"
+      },
+      {
+        "truth_ref": "cmo_proof_point_3",
+        "source_type": "cmo_proof_point",
+        "text": "Operational proof may state that users can try the early version; do not imply measured effectiveness"
+      },
+      {
+        "truth_ref": "product_change_1",
+        "source_type": "product_change",
+        "text": "Metricool CSV import works."
+      },
+      {
+        "truth_ref": "product_change_2",
+        "source_type": "product_change",
+        "text": "Metricool can ingest image URLs from Cloudflare R2 URLs."
+      },
+      {
+        "truth_ref": "product_change_3",
+        "source_type": "product_change",
+        "text": "Instagram posts published successfully from the generated CSV."
+      },
+      {
+        "truth_ref": "product_change_4",
+        "source_type": "product_change",
+        "text": "Cloudflare R2 is now the publishing asset store for CSV exports."
+      },
+      {
+        "truth_ref": "product_change_5",
+        "source_type": "product_change",
+        "text": "Google Drive remains the human-readable marketing library."
+      },
+      {
+        "truth_ref": "product_change_6",
+        "source_type": "product_change",
+        "text": "GA4 and Search Console snapshots can be synced into Neon and shown in `/admin/marketing`."
+      },
+      {
+        "truth_ref": "positioning_1",
+        "source_type": "positioning",
+        "text": "Innerbloom helps people build sustainable habits that adapt to real life instead of forcing rigid streaks or perfect-day productivity."
+      },
+      {
+        "truth_ref": "positioning_2",
+        "source_type": "positioning",
+        "text": "Core message:"
+      },
+      {
+        "truth_ref": "positioning_3",
+        "source_type": "positioning",
+        "text": "adaptive habits"
+      },
+      {
+        "truth_ref": "positioning_4",
+        "source_type": "positioning",
+        "text": "real-life rhythm"
+      },
+      {
+        "truth_ref": "positioning_5",
+        "source_type": "positioning",
+        "text": "recalibration instead of restart"
+      },
+      {
+        "truth_ref": "positioning_6",
+        "source_type": "positioning",
+        "text": "visible progress without perfection pressure"
+      },
+      {
+        "truth_ref": "positioning_7",
+        "source_type": "positioning",
+        "text": "early product, feedback welcome"
+      }
+    ]
+  },
+  "available_assets": {
+    "product_screenshots": [
+      {
+        "asset_id": "campaign-ib20-mvp-post-003-innerbloom-mobile-dailyquest-dark-tasks-selection-png",
+        "source": "campaign_post_asset",
+        "kind": "product_screenshot",
+        "label": "Daily Quest task selection screen",
+        "url": "https://raw.githubusercontent.com/rfullivarri/innerbloomv3/codex/marketing-post3-public-asset/Docs/marketing/campaigns/2026-06-mvp/assets/innerbloom_mobile_dailyquest_dark_tasks_selection.png",
+        "file_path": "innerbloom_mobile_dailyquest_dark_tasks_selection.png",
+        "campaign_code": "ib20_mvp",
+        "post_code": "post_003"
+      },
+      {
+        "asset_id": "repo-docs-marketing-campaigns-2026-06-mvp-assets-innerbloom-mobile-dailyquest-dark-tasks-selection-png",
+        "source": "repository_asset",
+        "kind": "product_screenshot",
+        "label": "innerbloom_mobile_dailyquest_dark_tasks_selection.png",
+        "file_path": "Docs/marketing/campaigns/2026-06-mvp/assets/innerbloom_mobile_dailyquest_dark_tasks_selection.png"
+      }
+    ],
+    "brand_assets": [],
+    "reusable_templates": [],
+    "existing_visuals": [
+      {
+        "asset_id": "campaign-ib-202607-post-001-post-001-manual-1784834191517-chatgpt-image-23-jul-2026-12-29-13-1-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "ChatGPT Image 23 jul 2026, 12_29_13 (1)",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_001/post_001-manual-1784834191517-chatgpt-image-23-jul-2026-12_29_13-1-.png",
+        "file_path": "post_001-manual-1784834191517-chatgpt-image-23-jul-2026-12_29_13-1-.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_001"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-002-asset-post-002-01-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Your plan should not depend on perfect days.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_002/asset_post_002_01.png?v=1784845144034",
+        "file_path": "asset_post_002_01.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_002"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-002-asset-post-002-02-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Your plan should not depend on perfect days.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_002/asset_post_002_02.png?v=1784845144034",
+        "file_path": "asset_post_002_02.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_002"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-002-asset-post-002-03-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Your plan should not depend on perfect days.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_002/asset_post_002_03.png?v=1784845144034",
+        "file_path": "asset_post_002_03.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_002"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-002-asset-post-002-04-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Your plan should not depend on perfect days.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_002/asset_post_002_04.png?v=1784845144034",
+        "file_path": "asset_post_002_04.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_002"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-002-asset-post-002-05-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Your plan should not depend on perfect days.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_002/asset_post_002_05.png?v=1784845144034",
+        "file_path": "asset_post_002_05.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_002"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-003-asset-post-003-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Consistency is not doing the same thing every day.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_003/asset_post_003.png?v=1784845144034",
+        "file_path": "asset_post_003.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_003"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-004-asset-post-004-01-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Daily Quest starts with the day you actually had.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_004/asset_post_004_01.png?v=1784845144034",
+        "file_path": "asset_post_004_01.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_004"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-004-asset-post-004-02-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Daily Quest starts with the day you actually had.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_004/asset_post_004_02.png?v=1784845144034",
+        "file_path": "asset_post_004_02.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_004"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-004-asset-post-004-03-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Daily Quest starts with the day you actually had.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_004/asset_post_004_03.png?v=1784845144034",
+        "file_path": "asset_post_004_03.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_004"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-004-asset-post-004-04-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Daily Quest starts with the day you actually had.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_004/asset_post_004_04.png?v=1784845144034",
+        "file_path": "asset_post_004_04.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_004"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-004-asset-post-004-05-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Daily Quest starts with the day you actually had.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_004/asset_post_004_05.png?v=1784845144034",
+        "file_path": "asset_post_004_05.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_004"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-005-asset-post-005-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "You do not need to restart every Monday.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_005/asset_post_005.png?v=1784845144034",
+        "file_path": "asset_post_005.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_005"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-006-post-006-manual-1784841213567-chatgpt-image-23-jul-2026-12-29-16-7-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "ChatGPT Image 23 jul 2026, 12_29_16 (7)",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_006/post_006-manual-1784841213567-chatgpt-image-23-jul-2026-12_29_16-7-.png",
+        "file_path": "post_006-manual-1784841213567-chatgpt-image-23-jul-2026-12_29_16-7-.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_006"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-007-asset-post-007-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Visible progress does not require perfection.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_007/asset_post_007.png?v=1784845144034",
+        "file_path": "asset_post_007.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_007"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-008-asset-post-008-01-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Real life counts as context.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_008/asset_post_008_01.png?v=1784845144034",
+        "file_path": "asset_post_008_01.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_008"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-008-asset-post-008-02-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Real life counts as context.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_008/asset_post_008_02.png?v=1784845144034",
+        "file_path": "asset_post_008_02.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_008"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-008-asset-post-008-03-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Real life counts as context.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_008/asset_post_008_03.png?v=1784845144034",
+        "file_path": "asset_post_008_03.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_008"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-008-asset-post-008-04-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Real life counts as context.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_008/asset_post_008_04.png?v=1784845144034",
+        "file_path": "asset_post_008_04.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_008"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-008-asset-post-008-05-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Real life counts as context.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_008/asset_post_008_05.png?v=1784845144034",
+        "file_path": "asset_post_008_05.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_008"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-009-asset-post-009-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Breaking a streak does not erase your direction.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_009/asset_post_009.png?v=1784845144034",
+        "file_path": "asset_post_009.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_009"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-010-asset-post-010-01-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Adjust the task, do not abandon the habit.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_010/asset_post_010_01.png?v=1784845144034",
+        "file_path": "asset_post_010_01.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_010"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-010-asset-post-010-03-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Adjust the task, do not abandon the habit.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_010/asset_post_010_03.png?v=1784845144034",
+        "file_path": "asset_post_010_03.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_010"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-010-asset-post-010-04-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Adjust the task, do not abandon the habit.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_010/asset_post_010_04.png?v=1784845144034",
+        "file_path": "asset_post_010_04.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_010"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-010-asset-post-010-05-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Adjust the task, do not abandon the habit.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_010/asset_post_010_05.png?v=1784845144034",
+        "file_path": "asset_post_010_05.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_010"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-011-asset-post-011-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Your momentum changes. Your system should notice.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_011/asset_post_011.png?v=1784845144034",
+        "file_path": "asset_post_011.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_011"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-012-asset-post-012-01-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Help us design less rigid habits.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_012/asset_post_012_01.png?v=1784845144034",
+        "file_path": "asset_post_012_01.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_012"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-012-asset-post-012-02-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Help us design less rigid habits.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_012/asset_post_012_02.png?v=1784845144034",
+        "file_path": "asset_post_012_02.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_012"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-012-asset-post-012-04-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Help us design less rigid habits.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_012/asset_post_012_04.png?v=1784845144034",
+        "file_path": "asset_post_012_04.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_012"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-012-asset-post-012-05-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Help us design less rigid habits.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_012/asset_post_012_05.png?v=1784845144034",
+        "file_path": "asset_post_012_05.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_012"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-013-asset-post-013-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Less guilt. More recalibration.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_013/asset_post_013.png?v=1784845144034",
+        "file_path": "asset_post_013.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_013"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-014-asset-post-014-03-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "When everything changes, the habit needs margin.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_014/asset_post_014_03.png?v=1784845144034",
+        "file_path": "asset_post_014_03.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_014"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-014-asset-post-014-04-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "When everything changes, the habit needs margin.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_014/asset_post_014_04.png?v=1784845144034",
+        "file_path": "asset_post_014_04.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_014"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-014-asset-post-014-05-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "When everything changes, the habit needs margin.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_014/asset_post_014_05.png?v=1784845144034",
+        "file_path": "asset_post_014_05.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_014"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-015-asset-post-015-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Daily Quest turns yesterday into a clear next signal.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_015/asset_post_015.png?v=1784845144034",
+        "file_path": "asset_post_015.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_015"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-016-asset-post-016-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "One hard day should not define the whole month.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_016/asset_post_016.png?v=1784845144034",
+        "file_path": "asset_post_016.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_016"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-017-asset-post-017-02-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "The goal is not perfection. It is returning.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_017/asset_post_017_02.png?v=1784845144034",
+        "file_path": "asset_post_017_02.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_017"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-017-asset-post-017-03-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "The goal is not perfection. It is returning.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_017/asset_post_017_03.png?v=1784845144034",
+        "file_path": "asset_post_017_03.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_017"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-017-asset-post-017-04-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "The goal is not perfection. It is returning.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_017/asset_post_017_04.png?v=1784845144034",
+        "file_path": "asset_post_017_04.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_017"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-017-asset-post-017-05-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "The goal is not perfection. It is returning.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_017/asset_post_017_05.png?v=1784845144034",
+        "file_path": "asset_post_017_05.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_017"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-018-asset-post-018-03-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Look at the rhythm before asking for more.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_018/asset_post_018_03.png?v=1784845144034",
+        "file_path": "asset_post_018_03.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_018"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-018-asset-post-018-04-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Look at the rhythm before asking for more.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_018/asset_post_018_04.png?v=1784845144034",
+        "file_path": "asset_post_018_04.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_018"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-018-asset-post-018-05-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Look at the rhythm before asking for more.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_018/asset_post_018_05.png?v=1784845144034",
+        "file_path": "asset_post_018_05.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_018"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-019-asset-post-019-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "The habit that survives is the one that adapts.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_019/asset_post_019.png?v=1784845144034",
+        "file_path": "asset_post_019.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_019"
+      },
+      {
+        "asset_id": "campaign-ib-202607-post-020-asset-post-020-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "If this sounds familiar, we want to learn with you.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib_202607/post_020/asset_post_020.png?v=1784845144034",
+        "file_path": "asset_post_020.png",
+        "campaign_code": "ib_202607",
+        "post_code": "post_020"
+      },
+      {
+        "asset_id": "campaign-ib-202608-test-post-001-asset-post-001-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "If your streak breaks, you are not the problem.",
+        "url": "https://assets.innerbloomjourney.org/marketing-renders/ib_202608_test/30087623994/post_001/asset_post_001.png?v=673bdb855d8e9a5f",
+        "file_path": "asset_post_001.png",
+        "campaign_code": "ib_202608_test",
+        "post_code": "post_001"
+      },
+      {
+        "asset_id": "campaign-ib-202608-test-post-002-asset-post-002-01-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Your plan should not depend on perfect days.",
+        "url": "https://assets.innerbloomjourney.org/marketing-renders/ib_202608_test/30087623994/post_002/asset_post_002_01.png?v=02f9cde7d23b0f5b",
+        "file_path": "asset_post_002_01.png",
+        "campaign_code": "ib_202608_test",
+        "post_code": "post_002"
+      },
+      {
+        "asset_id": "campaign-ib-202608-test-post-002-asset-post-002-02-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Your plan should not depend on perfect days.",
+        "url": "https://assets.innerbloomjourney.org/marketing-renders/ib_202608_test/30087623994/post_002/asset_post_002_02.png?v=c12f94c7b04b44cf",
+        "file_path": "asset_post_002_02.png",
+        "campaign_code": "ib_202608_test",
+        "post_code": "post_002"
+      },
+      {
+        "asset_id": "campaign-ib-202608-test-post-002-asset-post-002-03-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Your plan should not depend on perfect days.",
+        "url": "https://assets.innerbloomjourney.org/marketing-renders/ib_202608_test/30087623994/post_002/asset_post_002_03.png?v=4467e8fc15337d36",
+        "file_path": "asset_post_002_03.png",
+        "campaign_code": "ib_202608_test",
+        "post_code": "post_002"
+      },
+      {
+        "asset_id": "campaign-ib-202608-test-post-002-asset-post-002-04-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Your plan should not depend on perfect days.",
+        "url": "https://assets.innerbloomjourney.org/marketing-renders/ib_202608_test/30087623994/post_002/asset_post_002_04.png?v=0e9d6a8bc1df3e98",
+        "file_path": "asset_post_002_04.png",
+        "campaign_code": "ib_202608_test",
+        "post_code": "post_002"
+      },
+      {
+        "asset_id": "campaign-ib-202608-test-post-002-asset-post-002-05-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Your plan should not depend on perfect days.",
+        "url": "https://assets.innerbloomjourney.org/marketing-renders/ib_202608_test/30087623994/post_002/asset_post_002_05.png?v=88ccebf429f76f37",
+        "file_path": "asset_post_002_05.png",
+        "campaign_code": "ib_202608_test",
+        "post_code": "post_002"
+      },
+      {
+        "asset_id": "campaign-ib20-mvp-post-001-post-001-carousel-01-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Your habits should adapt to your real life.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_001/post-001-carousel-01.png",
+        "file_path": "post-001-carousel-01.png",
+        "campaign_code": "ib20_mvp",
+        "post_code": "post_001"
+      },
+      {
+        "asset_id": "campaign-ib20-mvp-post-001-post-001-carousel-02-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Most habit apps assume every day is the same.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_001/post-001-carousel-02.png",
+        "file_path": "post-001-carousel-02.png",
+        "campaign_code": "ib20_mvp",
+        "post_code": "post_001"
+      },
+      {
+        "asset_id": "campaign-ib20-mvp-post-001-post-001-carousel-03-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Lower the intensity. Keep the direction.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_001/post-001-carousel-03.png",
+        "file_path": "post-001-carousel-03.png",
+        "campaign_code": "ib20_mvp",
+        "post_code": "post_001"
+      },
+      {
+        "asset_id": "campaign-ib20-mvp-post-001-post-001-carousel-04-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "Build a Journey that can survive real weeks.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_001/post-001-carousel-04.png",
+        "file_path": "post-001-carousel-04.png",
+        "campaign_code": "ib20_mvp",
+        "post_code": "post_001"
+      },
+      {
+        "asset_id": "campaign-ib20-mvp-post-002-post-002-static-pain-proposal-png",
+        "source": "campaign_post_asset",
+        "kind": "existing_visual",
+        "label": "If your plan only works on perfect days, it is not a plan.",
+        "url": "https://assets.innerbloomjourney.org/campaigns/ib20_mvp/post_002/post-002-static-pain-proposal.png",
+        "file_path": "post-002-static-pain-proposal.png",
+        "campaign_code": "ib20_mvp",
+        "post_code": "post_002"
+      },
+      {
+        "asset_id": "campaign-source-ib20-mvp-assetsfolderurl-https-drive-google-com-drive-folders-1fplcaovdgla9p73fa7-piqh16d0nsueg",
+        "source": "drive_url",
+        "kind": "existing_visual",
+        "label": "assetsFolderUrl",
+        "url": "https://drive.google.com/drive/folders/1FplCAOvdgLA9p73fA7-piQH16d0nSuEg",
+        "campaign_code": "ib20_mvp"
+      },
+      {
+        "asset_id": "campaign-source-ib20-mvp-campaignsfolderurl-https-drive-google-com-drive-folders-1s3j3afgtd1np7mjbkgbpn1w5xuyugyuh",
+        "source": "drive_url",
+        "kind": "existing_visual",
+        "label": "campaignsFolderUrl",
+        "url": "https://drive.google.com/drive/folders/1S3J3aFgtd1np7mjBKGBpN1w5xuyuGyuH",
+        "campaign_code": "ib20_mvp"
+      },
+      {
+        "asset_id": "campaign-source-ib20-mvp-driverooturl-https-drive-google-com-drive-folders-1oms5zzpqcx9db9rjpa7j-xl5h1b5v9cz",
+        "source": "drive_url",
+        "kind": "existing_visual",
+        "label": "driveRootUrl",
+        "url": "https://drive.google.com/drive/folders/1OMs5zzPQcx9Db9RjpA7J-xL5h1b5V9cZ",
+        "campaign_code": "ib20_mvp"
+      },
+      {
+        "asset_id": "campaign-source-ib20-mvp-primaryurl-https-innerbloomjourney-org",
+        "source": "campaign_source_url",
+        "kind": "existing_visual",
+        "label": "primaryUrl",
+        "url": "https://innerbloomjourney.org/",
+        "campaign_code": "ib20_mvp"
+      },
+      {
+        "asset_id": "campaign-source-ib20-mvp-strategymemoryurl-https-drive-google-com-file-d-1fgqpoj1gp0a7-ynbpdmkhgdop89gres-view-usp-drivesdk",
+        "source": "drive_url",
+        "kind": "existing_visual",
+        "label": "strategyMemoryUrl",
+        "url": "https://drive.google.com/file/d/1FGQPOJ1Gp0A7--yNbPDMKhgdOP89Gres/view?usp=drivesdk",
+        "campaign_code": "ib20_mvp"
+      },
+      {
+        "asset_id": "repo-docs-marketing-campaigns-2026-06-mvp-assets-post-001-carousel-01-png",
+        "source": "repository_asset",
+        "kind": "existing_visual",
+        "label": "post-001-carousel-01.png",
+        "file_path": "Docs/marketing/campaigns/2026-06-mvp/assets/post-001-carousel-01.png"
+      },
+      {
+        "asset_id": "repo-docs-marketing-campaigns-2026-06-mvp-assets-post-001-carousel-02-png",
+        "source": "repository_asset",
+        "kind": "existing_visual",
+        "label": "post-001-carousel-02.png",
+        "file_path": "Docs/marketing/campaigns/2026-06-mvp/assets/post-001-carousel-02.png"
+      },
+      {
+        "asset_id": "repo-docs-marketing-campaigns-2026-06-mvp-assets-post-001-carousel-03-png",
+        "source": "repository_asset",
+        "kind": "existing_visual",
+        "label": "post-001-carousel-03.png",
+        "file_path": "Docs/marketing/campaigns/2026-06-mvp/assets/post-001-carousel-03.png"
+      },
+      {
+        "asset_id": "repo-docs-marketing-campaigns-2026-06-mvp-assets-post-001-carousel-04-png",
+        "source": "repository_asset",
+        "kind": "existing_visual",
+        "label": "post-001-carousel-04.png",
+        "file_path": "Docs/marketing/campaigns/2026-06-mvp/assets/post-001-carousel-04.png"
+      },
+      {
+        "asset_id": "repo-docs-marketing-campaigns-2026-06-mvp-assets-post-002-static-pain-proposal-png",
+        "source": "repository_asset",
+        "kind": "existing_visual",
+        "label": "post-002-static-pain-proposal.png",
+        "file_path": "Docs/marketing/campaigns/2026-06-mvp/assets/post-002-static-pain-proposal.png"
+      }
+    ],
+    "missing_assets": []
+  },
+  "operational_constraints": {
+    "platforms": [
+      "instagram"
+    ],
+    "formats": [
+      "static",
+      "carousel"
+    ],
+    "max_carousel_slides": 10,
+    "max_assets_per_post": 10,
+    "publishing_method": "Approved posts are exported to Metricool CSV; this exporter does not publish content.",
+    "public_asset_store": "Public marketing files can be served from R2 or repository public assets; this exporter does not upload binaries.",
+    "review_required": true,
+    "calendar_rules": [
+      "Use dates inside the publishing window",
+      "Use contiguous sequence numbers",
+      "Do not publish or approve posts"
+    ]
+  },
+  "tracking": {
+    "base_url": "https://innerbloomjourney.org/",
+    "utm_source": "instagram",
+    "utm_medium": "social",
+    "campaign_code": "ib_209901",
+    "additional_parameters": {
+      "utm_content": "post_code",
+      "ib_post": "sequence_number"
+    }
+  },
+  "source_manifest": [
+    {
+      "source_type": "repo_file",
+      "source_path_or_id": "/home/runner/work/innerbloomv3/innerbloomv3/Docs/marketing/strategy-memory.md",
+      "captured_at": "2026-07-29T19:13:38.178Z",
+      "checksum": "sha256:8212bd0c401b2fae6c52b2fbcee08f98657c95b2b21f768797fd59e550e76e9d"
+    },
+    {
+      "source_type": "analytics_sync",
+      "source_path_or_id": "marketing-2026-06-03-2026-06-30-3335db68-368b-473a-b9f3-45225f6170ab",
+      "captured_at": "2026-07-01 09:52:58.21955+00",
+      "checksum": "sha256:6f5194cb01b02e370e01ce9db505daef6a59a581147db07da5d085f578310e84"
+    },
+    {
+      "source_type": "database_snapshot",
+      "source_path_or_id": "marketing_campaigns_recent_limit_12",
+      "captured_at": "2026-07-29T19:14:44.304Z",
+      "checksum": "sha256:828e34c73bf47812b2439e63d35ec02082985fd294b4cd5f25fcb245971dce92"
+    },
+    {
+      "source_type": "asset_manifest",
+      "source_path_or_id": "Docs/marketing; apps/web/public/marketing; assest visuales",
+      "captured_at": "2026-07-29T19:13:38.178Z",
+      "checksum": "sha256:e3755ccf0a8013175e64ab950ced2727e25f77919a03c4768acfa5c1296bc001"
+    },
+    {
+      "source_type": "manual_input",
+      "source_path_or_id": "marketing_cmo_context_service.defaults",
+      "captured_at": "2026-06-30T00:00:00.000Z",
+      "checksum": "sha256:3bc14a6f4b3354f813a644b080f5768b13c54b5de8fef7e9ffba867bcf9396d6"
+    },
+    {
+      "source_type": "repo_file",
+      "source_path_or_id": "marketing/agent-inputs/2099-01/cmo-context.json",
+      "captured_at": "2026-07-29T20:26:02.635Z",
+      "checksum": "sha256:5e1ced6a763ee23490b31eaa988c18e1083a02341c4b12aa4ec2fbf3eb2a006c"
+    },
+    {
+      "source_type": "cmo_strategy",
+      "source_path_or_id": "marketing/agent-outputs/2099-01/cmo-strategy.json",
+      "captured_at": "2026-07-29T20:26:02.635Z",
+      "checksum": "sha256:d35c46d24a0ae690312301ec0b04dddc2c5a9a0e3bd8171619bf1126789efdbe"
+    },
+    {
+      "source_type": "pipeline_handoff",
+      "source_path_or_id": "automated_marketing_pipeline:cmo_to_head_of_content",
+      "captured_at": "2026-07-29T20:26:02.635Z",
+      "checksum": "sha256:58e0776a63f10c2356515fced0370379dc59f191ca1e11af006cbf32bc1f1ab1"
+    }
+  ]
+}
