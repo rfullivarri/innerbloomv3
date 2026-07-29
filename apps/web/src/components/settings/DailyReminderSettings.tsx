@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useId, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useId, useMemo, useState } from "react";
 import { useRequest } from "../../hooks/useRequest";
 import {
   DailyReminderSettingsResponse,
@@ -14,10 +14,8 @@ import {
 import { isNativeCapacitorPlatform } from "../../mobile/capacitor";
 import {
   ensureNativeDailyReminderNotificationPermissions,
-  sendNativeDailyReminderTestNotification,
   syncNativeDailyReminderNotification,
 } from "../../mobile/localNotifications";
-import { SHOW_NATIVE_TEST_NOTIFICATION } from "../../config/releaseFlags";
 import { Skeleton } from "../common/Skeleton";
 import { ToastBanner } from "../common/ToastBanner";
 import { TimezoneCombobox } from "../common/TimezoneCombobox";
@@ -29,7 +27,6 @@ const LOAD_STALE_MESSAGE =
 const SAVE_ERROR_MESSAGE =
   "No pudimos guardar tus recordatorios. Intentá nuevamente.";
 const SAVE_SUCCESS_MESSAGE = "Guardamos tus recordatorios.";
-const TIME_OPTIONS = buildTimeOptions();
 const INNERBLOOM_GRADIENT_CLASS =
   "bg-[linear-gradient(90deg,#a770ef_0%,#cf8bf3_52%,#fdb99b_100%)]";
 
@@ -48,7 +45,6 @@ type ReminderLoadResult = {
 };
 
 type SubmitStatus = "idle" | "saving" | "success" | "error";
-type TestNotificationStatus = "idle" | "sending" | "success" | "error";
 
 interface DailyReminderSettingsProps {
   onSaveSuccess?: (response: DailyReminderSettingsResponse) => void;
@@ -90,25 +86,14 @@ function DeliveryModeIcon({ channel }: { channel: "email" | "notification" }) {
   );
 }
 
-function buildTimeOptions(): string[] {
-  const options: string[] = [];
-  for (let hour = 0; hour < 24; hour += 1) {
-    for (const minute of [0, 30]) {
-      const value = `${String(hour).padStart(2, "0")}:${minute === 0 ? "00" : "30"}`;
-      options.push(value);
-    }
-  }
-  return options;
-}
-
 function normalizeLocalTime(value?: string | null): string {
   if (!value) {
     return DEFAULT_TIME;
   }
   const [hoursRaw, minutesRaw] = value.split(":");
   const hours = Math.min(23, Math.max(0, Number(hoursRaw ?? 0)));
-  const minutes = Number(minutesRaw ?? 0) >= 30 ? "30" : "00";
-  return `${String(hours).padStart(2, "0")}:${minutes}`;
+  const minutes = Math.min(59, Math.max(0, Number(minutesRaw ?? 0)));
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
 function normalizeReminderResponse(
@@ -238,7 +223,6 @@ export function DailyReminderSettings({
   const defaultTimezone = useMemo(() => resolveDefaultTimezone(), []);
   const timeFieldId = useId();
   const timezoneFieldId = useId();
-  const timePickerRef = useRef<HTMLDivElement | null>(null);
   const [formState, setFormState] = useState<ReminderFormState>({
     enabled: false,
     localTime: DEFAULT_TIME,
@@ -250,10 +234,6 @@ export function DailyReminderSettings({
   );
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [testNotificationStatus, setTestNotificationStatus] =
-    useState<TestNotificationStatus>("idle");
-  const [testNotificationError, setTestNotificationError] = useState<string | null>(null);
-  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
   const { data, status, error, reload } = useRequest(
     async (): Promise<ReminderLoadResult> => {
       if (isNativeApp) {
@@ -292,57 +272,10 @@ export function DailyReminderSettings({
     return () => window.clearTimeout(timeoutId);
   }, [submitStatus]);
 
-  useEffect(() => {
-    if (testNotificationStatus !== "success") {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setTestNotificationStatus("idle");
-    }, 3200);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [testNotificationStatus]);
-
-  useEffect(() => {
-    if (!isTimePickerOpen) {
-      return;
-    }
-
-    const handlePointerDown = (event: PointerEvent) => {
-      const target = event.target;
-      if (target instanceof Node && timePickerRef.current?.contains(target)) {
-        return;
-      }
-      setIsTimePickerOpen(false);
-    };
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsTimePickerOpen(false);
-      }
-    };
-    const frame = window.requestAnimationFrame(() => {
-      timePickerRef.current
-        ?.querySelector(`[data-time-option="${formState.localTime}"]`)
-        ?.scrollIntoView({ block: "center" });
-    });
-
-    document.addEventListener("pointerdown", handlePointerDown, true);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-      document.removeEventListener("pointerdown", handlePointerDown, true);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [formState.localTime, isTimePickerOpen]);
-
   const isInitialLoading =
     (status === "idle" || status === "loading") && !data && !error;
   const hasBlockingError = status === "error" && !data;
   const isSaving = submitStatus === "saving";
-  const isSendingTestNotification = testNotificationStatus === "sending";
-  const shouldShowNativeTestNotification = false && (isNativeApp || SHOW_NATIVE_TEST_NOTIFICATION);
   const canSubmit =
     !isInitialLoading &&
     !isSaving &&
@@ -437,16 +370,26 @@ export function DailyReminderSettings({
           ),
         ]);
 
-        await syncNativeDailyReminderNotification(
-          {
-            ...notificationResponse,
-            status: formState.enabled && wantsNotification ? "active" : "paused",
-            enabled: formState.enabled && wantsNotification,
-            local_time: payload.local_time,
-            timezone: payload.timezone,
-          },
-          { requestPermissions: false },
-        );
+        const nativeReminder = {
+          ...notificationResponse,
+          status: formState.enabled && wantsNotification ? "active" : "paused",
+          enabled: formState.enabled && wantsNotification,
+          local_time: payload.local_time,
+          timezone: payload.timezone,
+        };
+        console.info("[mobile-reminder] user-save-sync-start", {
+          localTime: nativeReminder.local_time,
+          enabled: nativeReminder.enabled,
+          at: Date.now(),
+        });
+        await syncNativeDailyReminderNotification(nativeReminder, {
+          requestPermissions: false,
+          source: "user-save",
+        });
+        console.info("[mobile-reminder] user-save-sync-complete", {
+          localTime: nativeReminder.local_time,
+          at: Date.now(),
+        });
 
         normalized = normalizeReminderLoadResult(
           {
@@ -488,28 +431,6 @@ export function DailyReminderSettings({
           ? submitException.message
           : SAVE_ERROR_MESSAGE;
       setSubmitError(friendlyMessage);
-    }
-  };
-
-  const handleSendTestNotification = async () => {
-    if (!isNativeApp || isInitialLoading || isSaving || isSendingTestNotification) {
-      return;
-    }
-
-    setTestNotificationStatus("sending");
-    setTestNotificationError(null);
-
-    try {
-      await sendNativeDailyReminderTestNotification();
-      setTestNotificationStatus("success");
-    } catch (testException) {
-      console.error("Failed to send test notification", testException);
-      setTestNotificationStatus("error");
-      setTestNotificationError(
-        testException instanceof Error && testException.message
-          ? testException.message
-          : "No pudimos enviar la notificación de prueba.",
-      );
     }
   };
 
@@ -622,99 +543,24 @@ export function DailyReminderSettings({
       {submitStatus === "success" ? (
         <ToastBanner tone="success" message={SAVE_SUCCESS_MESSAGE} />
       ) : null}
-      {shouldShowNativeTestNotification && testNotificationStatus === "error" && testNotificationError ? (
-        <ToastBanner tone="error" message={testNotificationError} />
-      ) : null}
-      {shouldShowNativeTestNotification && testNotificationStatus === "success" ? (
-        <ToastBanner
-          tone="success"
-          message="Enviamos una notificación de prueba. Debería aparecer en 10 segundos."
-        />
-      ) : null}
-
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2 text-sm" htmlFor={timeFieldId}>
           <span className="reminder-scheduler-form__field-label block text-xs uppercase tracking-[0.3em] text-text-subtle">
             Hora local
           </span>
-          {isNativeApp ? (
-            <div ref={timePickerRef} className="relative">
-              <button
-                id={timeFieldId}
-                type="button"
-                disabled={isSaving}
-                aria-haspopup="listbox"
-                aria-expanded={isTimePickerOpen}
-                onClick={() => setIsTimePickerOpen((previous) => !previous)}
-                className={combine(
-                  "reminder-scheduler-form__control reminder-scheduler-form__time-trigger flex w-full items-center justify-between rounded-2xl border border-white/12 bg-white/[0.055] px-4 py-3 text-left text-base text-white outline-none transition focus:border-violet-200/45 focus:bg-white/[0.075] focus-visible:ring-2 focus-visible:ring-violet-200/35",
-                  isSaving && "cursor-not-allowed opacity-60",
-                )}
-              >
-                <span>{formState.localTime}</span>
-                <span aria-hidden="true" className="text-white/45">⌄</span>
-              </button>
-              {isTimePickerOpen ? (
-                <div
-                  role="listbox"
-                  aria-labelledby={timeFieldId}
-                  className="reminder-scheduler-form__time-list absolute left-0 right-0 top-[calc(100%+0.5rem)] z-[90] max-h-72 overflow-y-auto rounded-2xl border border-white/12 bg-[#101a2f] p-1 shadow-[0_22px_60px_rgba(2,6,23,0.55)]"
-                >
-                  {TIME_OPTIONS.map((time) => {
-                    const selected = formState.localTime === time;
-                    return (
-                      <button
-                        key={time}
-                        type="button"
-                        role="option"
-                        aria-selected={selected}
-                        data-time-option={time}
-                        onClick={() => {
-                          setFormState((previous) => ({
-                            ...previous,
-                            localTime: time,
-                          }));
-                          setIsTimePickerOpen(false);
-                        }}
-                        className={combine(
-                          "flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-base font-semibold transition",
-                          selected
-                            ? "bg-emerald-400/18 text-emerald-100"
-                            : "text-white hover:bg-white/8",
-                        )}
-                      >
-                        <span>{time}</span>
-                        {selected ? <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-emerald-300" /> : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : null}
-            </div>
-          ) : (
-            <select
-              id={timeFieldId}
-              value={formState.localTime}
-              onChange={(event) =>
-                setFormState((previous) => ({
-                  ...previous,
-                  localTime: event.target.value,
-                }))
-              }
-              disabled={isSaving}
-              className="reminder-scheduler-form__control reminder-scheduler-form__time-select w-full rounded-2xl border border-white/12 bg-white/[0.055] px-4 py-3 text-base text-white outline-none transition focus:border-violet-200/45 focus:bg-white/[0.075]"
-            >
-              {TIME_OPTIONS.map((time) => (
-                <option
-                  key={time}
-                  value={time}
-                  className="reminder-scheduler-form__time-option"
-                >
-                  {time}
-                </option>
-              ))}
-            </select>
-          )}
+          <input
+            id={timeFieldId}
+            type="time"
+            value={formState.localTime}
+            onChange={(event) =>
+              setFormState((previous) => ({
+                ...previous,
+                localTime: event.target.value,
+              }))
+            }
+            disabled={isSaving}
+            className="reminder-scheduler-form__control w-full rounded-2xl border border-white/12 bg-white/[0.055] px-4 py-3 text-base text-white outline-none transition focus:border-violet-200/45 focus:bg-white/[0.075]"
+          />
         </label>
 
         <label className="space-y-2 text-sm" htmlFor={timezoneFieldId}>
@@ -735,22 +581,6 @@ export function DailyReminderSettings({
 
       {status === "error" && data ? (
         <ToastBanner tone="error" message={LOAD_STALE_MESSAGE} />
-      ) : null}
-
-      {shouldShowNativeTestNotification ? (
-        <button
-          type="button"
-          disabled={isSendingTestNotification || isSaving}
-          onClick={handleSendTestNotification}
-          className={combine(
-            "reminder-scheduler-form__test-button inline-flex w-full items-center justify-center rounded-full border px-5 py-3 text-xs font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
-            isSendingTestNotification || isSaving
-              ? "cursor-not-allowed border-white/10 bg-white/5 text-text-subtle"
-              : "border-cyan-200/60 bg-cyan-400/10 text-cyan-100 shadow-[0_12px_30px_rgba(34,211,238,0.16)] hover:border-cyan-200/90 hover:bg-cyan-400/20",
-          )}
-        >
-          {isSendingTestNotification ? "Probando…" : "Probar notificación"}
-        </button>
       ) : null}
 
       <div className="reminder-scheduler-form__footer flex flex-wrap items-center justify-between gap-4 border-t border-white/5 pt-4 text-sm text-text-subtle">

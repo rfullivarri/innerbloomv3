@@ -3159,6 +3159,38 @@ export type DailyReminderSettingsResponse = {
 
 export type DailyReminderChannel = 'email' | 'notification';
 
+export type ProductNotificationPreferences = {
+  weeklyWrappedEnabled: boolean;
+  growthCalibrationEnabled: boolean;
+  monthlyWrappedEnabled: boolean;
+  habitAchievementEnabled: boolean;
+  updatedAt?: string | null;
+};
+
+export async function getProductNotificationPreferences(): Promise<ProductNotificationPreferences> {
+  return getAuthorizedJson<ProductNotificationPreferences>('/me/product-notification-preferences');
+}
+
+export async function updateProductNotificationPreferences(
+  preferences: ProductNotificationPreferences,
+): Promise<ProductNotificationPreferences> {
+  const url = buildUrl('/me/product-notification-preferences');
+  const token = await resolveAuthToken();
+  return apiRequest<ProductNotificationPreferences>(url, applyAuthorization({
+    method: 'PUT',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      weekly_wrapped_enabled: preferences.weeklyWrappedEnabled,
+      growth_calibration_enabled: preferences.growthCalibrationEnabled,
+      monthly_wrapped_enabled: preferences.monthlyWrappedEnabled,
+      habit_achievement_enabled: preferences.habitAchievementEnabled,
+    }),
+  }, token));
+}
+
 export type UpdateDailyReminderSettingsPayload = {
   status: 'active' | 'paused';
   local_time: string;

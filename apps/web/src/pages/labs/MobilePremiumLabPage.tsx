@@ -11,6 +11,7 @@ import {
   getDailyQuestDefinition,
   getDailyQuestStatus,
   getEmotions,
+  getProductNotificationPreferences,
   getGameModeUpgradeSuggestion,
   getDevUserOverride,
   getModerationState,
@@ -85,7 +86,7 @@ import {
   useMobilePremiumBasePath,
 } from './mobile-premium/mobilePremiumRouting';
 import { buildNativeMobileAuthUrl, clearMobileAuthSession, setForceNativeWelcome, useMobileAuthSession } from '../../mobile/mobileAuthSession';
-import { cancelNativeDailyReminderNotification } from '../../mobile/localNotifications';
+import { cancelNativeDailyReminderNotification, syncNativeProductNotifications } from '../../mobile/localNotifications';
 import { isNativeCapacitorPlatform, openUrlInCapacitorBrowser } from '../../mobile/capacitor';
 import { setApiAuthTokenProvider } from '../../lib/api';
 
@@ -552,6 +553,30 @@ function MobilePremiumLabPageInner() {
   const handleOpenAccountSettings = useCallback(() => {
     clerk.openUserProfile();
   }, [clerk]);
+
+  useEffect(() => {
+    if (!effectiveBackendUserId || !isNativeCapacitorPlatform()) {
+      return;
+    }
+
+    let cancelled = false;
+    void Promise.all([
+      getProductNotificationPreferences(),
+      getRewardsHistory(effectiveBackendUserId),
+    ])
+      .then(([preferences, rewards]) => {
+        if (!cancelled) {
+          return syncNativeProductNotifications(preferences, rewards);
+        }
+        return undefined;
+      })
+      .catch((error) => console.warn('[mobile-premium] product notification resync failed', error));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [effectiveBackendUserId]);
+
   const moderationRequest = useRequest(() => getModerationState(), [effectiveBackendUserId], {
     enabled: Boolean(effectiveBackendUserId),
   });
@@ -2533,22 +2558,87 @@ function EmotionChartPanel({
 
 function BalancePanel({
   backendUserId,
+  gameMode,
   localSnapshot,
+  weeklyTarget,
 }: {
   backendUserId: string | null;
   gameMode: string | null;
   localSnapshot?: LocalOnboardingSnapshot | null;
   weeklyTarget: number | null;
 }) {
+  const weeklyGoal = Math.max(1, Math.round(weeklyTarget ?? 3));
+  const { data: groups } = useRequest(
+    async () => {
+      if (!backendUserId) return null;
+      return Promise.all(
+        STREAK_PILLARS.map(async (pillar) => ({
+          pillar,
+          response: await getUserStreakPanel(backendUserId, {
+            pillar,
+            range: 'month',
+            mode: gameMode ?? undefined,
+          }),
+        })),
+      );
+    },
+    [backendUserId, gameMode],
+    { enabled: Boolean(backendUserId) },
+  );
+  const taskRows = useMemo(
+    () => (
+      localSnapshot
+        ? buildPremiumRowsFromLocalOnboarding(localSnapshot, weeklyGoal)
+        : groups
+          ? normalizePremiumTaskRows(groups, weeklyGoal)
+          : backendUserId
+            ? []
+            : FALLBACK_PREMIUM_TASK_ROWS
+    ),
+    [backendUserId, groups, localSnapshot, weeklyGoal],
+  );
+
   return (
     <section className="space-y-3">
       <LabBackHeader />
       <PremiumBalanceCard
         backendUserId={backendUserId}
         localTraits={localSnapshot ? buildTraitXpFromLocalOnboarding(localSnapshot) : undefined}
+        taskHighlights={buildBalanceTaskHighlights(taskRows, weeklyGoal)}
       />
     </section>
   );
+}
+
+function buildBalanceTaskHighlights(rows: PremiumTaskRow[], weeklyGoal: number) {
+  const scoreFor = (row: PremiumTaskRow) => row.monthlyXp ?? row.monthlyCount ?? row.weeklyDone * weeklyGoal;
+  const sorted = [...rows].sort((first, second) => scoreFor(second) - scoreFor(first));
+  const topTask = sorted[0] ?? null;
+  const growthTask = [...rows]
+    .filter((row) => row.latestRecalibrationAction === 'up')
+    .sort((first, second) => scoreFor(second) - scoreFor(first))[0] ?? sorted.find((row) => row.streakDays > 0) ?? null;
+  const byPillar = STREAK_PILLARS.flatMap((pillar) => {
+    const task = sorted.find((row) => row.pillar === pillar);
+    return task ? [{ pillar, task }] : [];
+  });
+
+  return {
+    topTask: topTask ? balanceTaskHighlightFromRow(topTask, scoreFor(topTask)) : null,
+    growthTask: growthTask ? balanceTaskHighlightFromRow(growthTask, scoreFor(growthTask)) : null,
+    byPillar: byPillar.map(({ task }) => balanceTaskHighlightFromRow(task, scoreFor(task))),
+  };
+}
+
+function balanceTaskHighlightFromRow(row: PremiumTaskRow, score: number) {
+  return {
+    id: row.id,
+    name: row.name,
+    stat: row.stat,
+    pillar: row.pillar,
+    score,
+    monthlyCount: row.monthlyCount ?? row.weeklyDone,
+    streakDays: row.streakDays,
+  };
 }
 
 function VisionPanel({

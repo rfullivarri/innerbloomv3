@@ -155,8 +155,8 @@ importers:
         specifier: ^8.0.2
         version: 8.0.2(@capacitor/core@8.3.0)
       '@capacitor/local-notifications':
-        specifier: ^8.0.2
-        version: 8.0.2(@capacitor/core@8.3.0)
+        specifier: 8.1.0
+        version: 8.1.0(@capacitor/core@8.3.0)
       '@capacitor/preferences':
         specifier: ^8.0.1
         version: 8.0.1(@capacitor/core@8.3.0)
@@ -170,18 +170,21 @@ importers:
 
   apps/web:
     dependencies:
-      '@fontsource/manrope':
-        specifier: 5.3.0
-        version: 5.3.0
-      '@fontsource/sora':
-        specifier: 5.3.0
-        version: 5.3.0
+      '@capacitor/core':
+        specifier: ^8.3.0
+        version: 8.3.0
       '@clerk/clerk-react':
         specifier: ^5.8.1
         version: 5.59.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@clerk/types':
         specifier: ^4.27.0
         version: 4.101.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@fontsource/manrope':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/sora':
+        specifier: 5.3.0
+        version: 5.3.0
       '@innerbloom/missions-v2-contracts':
         specifier: file:../../packages/missions-v2-contracts
         version: link:../../packages/missions-v2-contracts
@@ -259,12 +262,6 @@ importers:
   packages/missions-v2-contracts: {}
 
 packages:
-
-  '@fontsource/manrope@5.3.0':
-    resolution: {integrity: sha512-obJ1Dv3+uCA6HlHgW8u4BGYxJR9In2HW7gjJhlflEvkrj1X1iSEwu0fToL+JYGC/FEKFfIz1sBuPduvcL2gIAA==}
-
-  '@fontsource/sora@5.3.0':
-    resolution: {integrity: sha512-SqW3OpKxxfKvxDLPlbdrWf2KooPfbd+W3jaYn483o+Y/JrmU87vjFPNptDqwP428c3vY+gnranLhjcbRaXB0Jw==}
 
   '@adobe/css-tools@4.4.4':
     resolution: {integrity: sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==}
@@ -506,8 +503,8 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/local-notifications@8.0.2':
-    resolution: {integrity: sha512-X7KE/I4ZutMTGVHNUyTjIugYcQEcHJRLks+TsPnOriuS+lo0geSTuaRln6zAZlJSSXSoVMSSzHexdSbIjR/8iw==}
+  '@capacitor/local-notifications@8.1.0':
+    resolution: {integrity: sha512-rc1vWw7G7LXLL9AOoi6DKA740UMDEVpBbRBFByI4KVPV4wJi30gtr5k2D3/WwiwwYvjm55eD1k03QhOrGYf9cA==}
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
@@ -930,6 +927,12 @@ packages:
 
   '@fastify/proxy-addr@5.1.0':
     resolution: {integrity: sha512-INS+6gh91cLUjB+PVHfu1UqcB76Sqtpyp7bnL+FYojhjygvOPA9ctiD/JDKsyD9Xgu4hUhCSJBPig/w7duNajw==}
+
+  '@fontsource/manrope@5.3.0':
+    resolution: {integrity: sha512-obJ1Dv3+uCA6HlHgW8u4BGYxJR9In2HW7gjJhlflEvkrj1X1iSEwu0fToL+JYGC/FEKFfIz1sBuPduvcL2gIAA==}
+
+  '@fontsource/sora@5.3.0':
+    resolution: {integrity: sha512-SqW3OpKxxfKvxDLPlbdrWf2KooPfbd+W3jaYn483o+Y/JrmU87vjFPNptDqwP428c3vY+gnranLhjcbRaXB0Jw==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -4115,10 +4118,6 @@ packages:
 
 snapshots:
 
-  '@fontsource/manrope@5.3.0': {}
-
-  '@fontsource/sora@5.3.0': {}
-
   '@adobe/css-tools@4.4.4': {}
 
   '@alloc/quick-lru@5.2.0': {}
@@ -4527,7 +4526,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.3.0
 
-  '@capacitor/local-notifications@8.0.2(@capacitor/core@8.3.0)':
+  '@capacitor/local-notifications@8.1.0(@capacitor/core@8.3.0)':
     dependencies:
       '@capacitor/core': 8.3.0
 
@@ -4811,6 +4810,10 @@ snapshots:
     dependencies:
       '@fastify/forwarded': 3.0.1
       ipaddr.js: 2.3.0
+
+  '@fontsource/manrope@5.3.0': {}
+
+  '@fontsource/sora@5.3.0': {}
 
   '@humanfs/core@0.19.1': {}
 

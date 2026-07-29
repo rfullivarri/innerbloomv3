@@ -1,10 +1,11 @@
-import type { DailyReminderSettingsResponse } from '../lib/api';
+import type { DailyReminderSettingsResponse, ProductNotificationPreferences, RewardsHistorySummary } from '../lib/api';
 import { resolvePostLoginTranslation } from '../i18n/post-login';
 import { type PostLoginLanguage, POSTLOGIN_LANGUAGE_STORAGE_KEY, detectDeviceLanguage } from '../i18n/postLoginLanguage';
 import { AUTH_LANGUAGE_STORAGE_KEY } from '../lib/authLanguage';
-import { INNERBLOOM2_DAILY_QUEST_PATH } from '../config/auth';
+import { INNERBLOOM2_ACHIEVEMENTS_PATH, INNERBLOOM2_DAILY_QUEST_PATH } from '../config/auth';
 import {
   consumeNativeLogoutReminderPreservation,
+  getInnerbloomNotificationsPlugin,
   getCapacitorLocalNotificationsPlugin,
   getCapacitorPlatform,
   isNativeCapacitorPlatform,
@@ -19,6 +20,21 @@ const USER_SAVE_LIFECYCLE_PROTECTION_MS = 90_000;
 export const DAILY_REMINDER_NOTIFICATION_ID = 41001;
 export const DAILY_REMINDER_TEST_NOTIFICATION_ID = 41999;
 export const DAILY_REMINDER_NOTIFICATION_TARGET_PATH = INNERBLOOM2_DAILY_QUEST_PATH;
+const DAILY_REMINDER_SCHEDULED_DAYS = 30;
+const PRODUCT_NOTIFICATION_ID = 42001;
+const PRODUCT_NOTIFICATION_COUNT = 8;
+const PRODUCT_WEEKLY_NOTIFICATION_COUNT = 5;
+const PRODUCT_NOTIFICATION_CHANNEL_ID = 'innerbloom-updates';
+
+export type ProductNotificationKind = 'weekly-wrapped' | 'growth-calibration' | 'monthly-wrapped' | 'habit-achievement';
+
+export type ProductNotificationSchedule = {
+  id: number;
+  kind: ProductNotificationKind;
+  title: string;
+  body: string;
+  at: Date;
+};
 
 type DailyReminderNotificationPermissionResult = {
   granted: boolean;
@@ -51,6 +67,32 @@ function withNativeDeliveryOptions<T extends Record<string, unknown>>(
   }
 
   return { ...notification, sound: DEFAULT_NOTIFICATION_SOUND };
+}
+
+async function scheduleNativeNotifications(
+  notifications: Array<{
+    id: number;
+    title: string;
+    body: string;
+    badge?: number;
+    channelId?: string;
+    smallIcon?: string;
+    iconColor?: string;
+    sound?: string;
+    interruptionLevel?: string;
+    relevanceScore?: number;
+    schedule: { at: Date; allowWhileIdle?: boolean };
+    extra?: Record<string, unknown>;
+  }>,
+): Promise<void> {
+  const iosNotifications = getInnerbloomNotificationsPlugin();
+  if (iosNotifications) {
+    await iosNotifications.schedule({ notifications });
+    return;
+  }
+
+  const plugin = getCapacitorLocalNotificationsPlugin();
+  await plugin?.schedule({ notifications });
 }
 
 function normalizeLanguage(raw: string | null | undefined): PostLoginLanguage | null {
@@ -88,6 +130,121 @@ function normalizeLocalTimeParts(value?: string | null): { hour: number; minute:
     minute: Math.min(59, Math.max(0, Number.parseInt(rawMinute, 10) || 0)),
     second: Math.min(59, Math.max(0, Number.parseInt(rawSecond, 10) || 0)),
   };
+}
+
+export function buildDailyReminderSchedule(
+  localTime: string | null | undefined,
+  now = new Date(),
+  days = DAILY_REMINDER_SCHEDULED_DAYS,
+): Array<{ id: number; at: Date }> {
+  const { hour, minute, second } = normalizeLocalTimeParts(localTime);
+  const first = new Date(now);
+  first.setHours(hour, minute, second, 0);
+  if (first.getTime() <= now.getTime()) {
+    first.setDate(first.getDate() + 1);
+  }
+
+  return Array.from({ length: days }, (_, index) => {
+    const at = new Date(first);
+    at.setDate(first.getDate() + index);
+    return { id: DAILY_REMINDER_NOTIFICATION_ID + index, at };
+  });
+}
+
+function dailyReminderNotificationIds(): Array<{ id: number }> {
+  return Array.from(
+    { length: DAILY_REMINDER_SCHEDULED_DAYS },
+    (_, index) => ({ id: DAILY_REMINDER_NOTIFICATION_ID + index }),
+  );
+}
+
+function productNotificationIds(): Array<{ id: number }> {
+  return Array.from({ length: PRODUCT_NOTIFICATION_COUNT }, (_, index) => ({ id: PRODUCT_NOTIFICATION_ID + index }));
+}
+
+function atLocalTime(reference: Date, hour: number, minute = 0): Date {
+  const next = new Date(reference);
+  next.setHours(hour, minute, 0, 0);
+  return next;
+}
+
+function nextMondayMorning(now: Date): Date {
+  const next = atLocalTime(now, 9);
+  const daysUntilMonday = (8 - now.getDay()) % 7;
+  next.setDate(next.getDate() + daysUntilMonday);
+  if (next.getTime() <= now.getTime()) next.setDate(next.getDate() + 7);
+  return next;
+}
+
+function upcomingMondayMornings(now: Date): Date[] {
+  const first = nextMondayMorning(now);
+  return Array.from({ length: PRODUCT_WEEKLY_NOTIFICATION_COUNT }, (_, index) => {
+    const at = new Date(first);
+    at.setDate(first.getDate() + (index * 7));
+    return at;
+  });
+}
+
+function nextMonthMorning(now: Date): Date {
+  const next = atLocalTime(now, 9);
+  next.setDate(1);
+  next.setMonth(next.getMonth() + 1);
+  return next;
+}
+
+export function buildProductNotificationSchedule(
+  preferences: ProductNotificationPreferences,
+  rewards: Pick<RewardsHistorySummary, 'growthCalibration' | 'habitAchievements'>,
+  now = new Date(),
+): ProductNotificationSchedule[] {
+  const schedule: ProductNotificationSchedule[] = [];
+
+  if (preferences.weeklyWrappedEnabled) {
+    schedule.push(...upcomingMondayMornings(now).map((at, index) => ({
+      id: PRODUCT_NOTIFICATION_ID + index,
+      kind: 'weekly-wrapped' as const,
+      title: 'Weekly Wrapped',
+      body: 'Your week is ready. Complete your Daily Quest and review your progress.',
+      at,
+    })));
+  }
+
+  if (preferences.growthCalibrationEnabled) {
+    const at = atLocalTime(now, 9);
+    at.setDate(at.getDate() + Math.max(0, rewards.growthCalibration.countdownDays));
+    if (at.getTime() <= now.getTime()) at.setTime(now.getTime() + 60_000);
+    schedule.push({
+      id: PRODUCT_NOTIFICATION_ID + PRODUCT_WEEKLY_NOTIFICATION_COUNT,
+      kind: 'growth-calibration',
+      title: 'Growth Calibration',
+      body: 'Your monthly calibration is ready. Review your habit adjustments.',
+      at,
+    });
+  }
+
+  if (preferences.monthlyWrappedEnabled) {
+    schedule.push({
+      id: PRODUCT_NOTIFICATION_ID + PRODUCT_WEEKLY_NOTIFICATION_COUNT + 1,
+      kind: 'monthly-wrapped',
+      title: 'Monthly Wrapped',
+      body: 'Your month is ready to review. See the progress you built.',
+      at: nextMonthMorning(now),
+    });
+  }
+
+  if (preferences.habitAchievementEnabled && rewards.habitAchievements.pendingCount > 0) {
+    const at = atLocalTime(now, 18);
+    if (at.getTime() <= now.getTime()) at.setDate(at.getDate() + 1);
+    schedule.push({
+      id: PRODUCT_NOTIFICATION_ID + PRODUCT_WEEKLY_NOTIFICATION_COUNT + 2,
+      kind: 'habit-achievement',
+      title: 'Habit achievement',
+      body: 'You have a habit achievement ready to review.',
+      at,
+    });
+  }
+
+  return schedule;
 }
 
 function isReminderEnabled(reminder: DailyReminderSettingsResponse | null | undefined): boolean {
@@ -185,9 +342,9 @@ async function performNativeDailyReminderCancellation(): Promise<void> {
     logNativeReminder('cancel-plugin-missing');
     return;
   }
-  const notifications = [{ id: DAILY_REMINDER_NOTIFICATION_ID }];
+  const notifications = dailyReminderNotificationIds();
   await plugin.cancel({ notifications });
-  logNativeReminder('cancel-scheduled', { ids: [DAILY_REMINDER_NOTIFICATION_ID] });
+  logNativeReminder('cancel-scheduled', { ids: notifications.map(({ id }) => id) });
 }
 
 export async function cancelNativeDailyReminderNotification(): Promise<void> {
@@ -231,6 +388,81 @@ async function ensureAndroidReminderChannel(): Promise<void> {
   });
 }
 
+async function ensureAndroidProductNotificationChannel(): Promise<void> {
+  if (getCapacitorPlatform() !== 'android') return;
+  const plugin = getCapacitorLocalNotificationsPlugin();
+  await plugin?.createChannel?.({
+    id: PRODUCT_NOTIFICATION_CHANNEL_ID,
+    name: 'Innerbloom updates',
+    description: 'Weekly, monthly, and achievement updates from Innerbloom.',
+    importance: 4,
+    visibility: 1,
+    lights: true,
+    vibration: true,
+  });
+}
+
+export async function syncNativeProductNotifications(
+  preferences: ProductNotificationPreferences,
+  rewards: Pick<RewardsHistorySummary, 'growthCalibration' | 'habitAchievements'>,
+  options?: { requestPermissions?: boolean },
+): Promise<void> {
+  if (!isNativeCapacitorPlatform()) return;
+
+  await enqueueReminderOperation(async () => {
+    const plugin = getCapacitorLocalNotificationsPlugin();
+    if (!plugin) return;
+
+    const enabled = preferences.weeklyWrappedEnabled
+      || preferences.growthCalibrationEnabled
+      || preferences.monthlyWrappedEnabled
+      || preferences.habitAchievementEnabled;
+    if (!enabled) {
+      await plugin.cancel({ notifications: productNotificationIds() });
+      logNativeReminder('product-notifications-cancelled');
+      return;
+    }
+
+    const existingPermission = await plugin.checkPermissions();
+    const shouldRequestPermission = options?.requestPermissions === true
+      || existingPermission.display === 'prompt'
+      || existingPermission.display === 'prompt-with-rationale';
+    const permissions = shouldRequestPermission
+      ? await ensureNativeDailyReminderNotificationPermissions({ requestExactAlarm: true })
+      : { granted: existingPermission.display === 'granted' };
+
+    if (!permissions.granted) {
+      if (options?.requestPermissions && enabled) {
+        throw new Error(tNotification('dailyQuest.mobile.permissionRequired'));
+      }
+      return;
+    }
+
+    await plugin.cancel({ notifications: productNotificationIds() });
+
+    await ensureAndroidProductNotificationChannel();
+    const schedule = buildProductNotificationSchedule(preferences, rewards);
+    await scheduleNativeNotifications(schedule.map((item) => withNativeDeliveryOptions({
+      id: item.id,
+      title: item.title,
+      body: item.body,
+      badge: 1,
+      channelId: PRODUCT_NOTIFICATION_CHANNEL_ID,
+      smallIcon: 'ic_stat_innerbloom',
+      iconColor: '#A855F7',
+      schedule: { at: item.at, allowWhileIdle: true },
+      extra: {
+        targetPath: INNERBLOOM2_ACHIEVEMENTS_PATH,
+        kind: item.kind,
+      },
+    })));
+    logNativeReminder('product-notifications-scheduled', {
+      enabled,
+      scheduled: schedule.map((item) => ({ id: item.id, kind: item.kind, at: item.at.toISOString() })),
+    });
+  });
+}
+
 export async function clearNativeReminderDeliveryState(reason: string): Promise<void> {
   if (!isNativeCapacitorPlatform()) return;
   const plugin = getCapacitorLocalNotificationsPlugin();
@@ -270,8 +502,8 @@ export async function sendNativeDailyReminderTestNotification(): Promise<void> {
   await enqueueReminderOperation(async () => {
     await ensureAndroidReminderChannel();
     await plugin.cancel({ notifications: [{ id: DAILY_REMINDER_TEST_NOTIFICATION_ID }] });
-    await plugin.schedule({
-      notifications: [withNativeDeliveryOptions({
+    await scheduleNativeNotifications([
+      withNativeDeliveryOptions({
         id: DAILY_REMINDER_TEST_NOTIFICATION_ID,
         title: tNotification('dailyQuest.mobile.testNotification.title'),
         body: tNotification('dailyQuest.mobile.testNotification.body'),
@@ -285,8 +517,8 @@ export async function sendNativeDailyReminderTestNotification(): Promise<void> {
           targetPath: DAILY_REMINDER_NOTIFICATION_TARGET_PATH,
           kind: 'daily-reminder-test',
         },
-      })],
-    });
+      }),
+    ]);
 
     const pending = await plugin.getPending?.().catch(() => null);
     logNativeReminder('test-scheduled', {
@@ -374,7 +606,7 @@ export async function syncNativeDailyReminderNotification(
 
         logNativeReminder('sync-replace-start', {
           source,
-          id: DAILY_REMINDER_NOTIFICATION_ID,
+          ids: dailyReminderNotificationIds().map(({ id }) => id),
           hour,
           minute,
           second,
@@ -385,12 +617,19 @@ export async function syncNativeDailyReminderNotification(
           vibration: getCapacitorPlatform() === 'android',
         });
 
-        await plugin.cancel({ notifications: [{ id: DAILY_REMINDER_NOTIFICATION_ID }] });
-        logNativeReminder('sync-previous-cancelled', { source, id: DAILY_REMINDER_NOTIFICATION_ID });
+        await plugin.cancel({ notifications: dailyReminderNotificationIds() });
+        logNativeReminder('sync-previous-cancelled', {
+          source,
+          ids: dailyReminderNotificationIds().map(({ id }) => id),
+        });
 
-        await plugin.schedule({
-          notifications: [withNativeDeliveryOptions({
-            id: DAILY_REMINDER_NOTIFICATION_ID,
+        const schedule = buildDailyReminderSchedule(
+          reminder?.local_time ?? reminder?.localTime ?? '09:00:00',
+        );
+
+        await scheduleNativeNotifications(
+          schedule.map(({ id, at }) => withNativeDeliveryOptions({
+            id,
             title: tNotification('dailyQuest.mobile.notification.title'),
             body: tNotification('dailyQuest.mobile.notification.body'),
             badge: 1,
@@ -398,15 +637,15 @@ export async function syncNativeDailyReminderNotification(
             smallIcon: 'ic_stat_innerbloom',
             iconColor: '#A855F7',
             schedule: {
-              on: { hour, minute, second },
+              at,
               allowWhileIdle: true,
             },
             extra: {
               targetPath: DAILY_REMINDER_NOTIFICATION_TARGET_PATH,
               kind: 'daily-reminder',
             },
-          })],
-        });
+          })),
+        );
 
         const pending = await plugin.getPending?.().catch((error) => {
           logNativeReminder('sync-pending-check-failed', {
@@ -433,6 +672,8 @@ export async function syncNativeDailyReminderNotification(
           pendingIds,
           pendingNotification,
           confirmed,
+          scheduledCount: schedule.length,
+          firstScheduledAt: schedule[0]?.at.toISOString() ?? null,
         });
         if (pending && !confirmed) {
           throw new Error(tNotification('dailyQuest.mobile.permissionRequired'));

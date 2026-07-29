@@ -89,6 +89,7 @@ import {
   getMarketingCmoContextStatus,
 } from '../../services/marketingCmoContextService.js';
 import { pool } from '../../db.js';
+import { getProductNotificationPreferenceSummary } from '../../repositories/user-product-notification-preferences.repository.js';
 
 const taskgenForceRunRequestSchema = z
   .object({
@@ -139,6 +140,10 @@ export const getAdminUsers = asyncHandler(async (req: Request, res: Response) =>
   const query = listUsersQuerySchema.parse(req.query);
   const result = await listUsers(query);
   res.json(result);
+});
+
+export const getAdminProductNotificationPreferences = asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ ok: true, summary: await getProductNotificationPreferenceSummary() });
 });
 
 export const getAdminMarketingR2Status = asyncHandler(async (_req: Request, res: Response) => {

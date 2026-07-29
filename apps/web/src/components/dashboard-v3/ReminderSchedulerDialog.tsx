@@ -13,8 +13,6 @@ import { createPortal } from "react-dom";
 import type { RefObject } from "react";
 import { DailyReminderSettings } from "../settings/DailyReminderSettings";
 import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
-import { isNativeCapacitorPlatform } from "../../mobile/capacitor";
-import { sendNativeDailyReminderTestNotification } from "../../mobile/localNotifications";
 
 export type ReminderSchedulerDialogHandle = {
   open: () => void;
@@ -27,8 +25,6 @@ interface ReminderSchedulerDialogProps {
   onScheduled?: (metadata: { wasFirstScheduleCompletion: boolean }) => void | Promise<void>;
 }
 
-type TestNotificationStatus = "idle" | "sending" | "scheduled" | "error";
-
 export const ReminderSchedulerDialog = forwardRef<
   ReminderSchedulerDialogHandle,
   ReminderSchedulerDialogProps
@@ -37,13 +33,11 @@ export const ReminderSchedulerDialog = forwardRef<
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [portalNode, setPortalNode] = useState<Element | null>(null);
-  const [testNotificationStatus, setTestNotificationStatus] = useState<TestNotificationStatus>("idle");
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const titleId = useMemo(
     () => `reminder-dialog-${Math.random().toString(36).slice(2, 8)}`,
     [],
   );
-  const isNativeApp = isNativeCapacitorPlatform();
 
   const open = useCallback(() => {
     if (!enabled) {
@@ -54,28 +48,12 @@ export const ReminderSchedulerDialog = forwardRef<
 
   const close = useCallback(() => {
     setIsOpen(false);
-    setTestNotificationStatus("idle");
     if (returnFocusRef?.current) {
       requestAnimationFrame(() => {
         returnFocusRef.current?.focus({ preventScroll: true });
       });
     }
   }, [returnFocusRef]);
-
-  const handleTestNotification = useCallback(async () => {
-    if (!isNativeApp || testNotificationStatus === "sending") {
-      return;
-    }
-
-    setTestNotificationStatus("sending");
-    try {
-      await sendNativeDailyReminderTestNotification();
-      setTestNotificationStatus("scheduled");
-    } catch (error) {
-      console.error("Failed to schedule native test notification", error);
-      setTestNotificationStatus("error");
-    }
-  }, [isNativeApp, testNotificationStatus]);
 
   useImperativeHandle(ref, () => ({ open, close }), [open, close]);
 
@@ -189,31 +167,6 @@ export const ReminderSchedulerDialog = forwardRef<
                   response.wasFirstScheduleCompletion === true;
                 void onScheduled?.({ wasFirstScheduleCompletion });
               }} />
-
-              {isNativeApp ? (
-                <div className="mt-5 border-t border-white/10 pt-5">
-                  <button
-                    type="button"
-                    onClick={() => void handleTestNotification()}
-                    disabled={testNotificationStatus === "sending"}
-                    className="w-full rounded-full border border-violet-400/70 bg-violet-500/10 px-5 py-3 text-sm font-semibold text-violet-200 transition hover:bg-violet-500/20 disabled:cursor-wait disabled:opacity-60"
-                  >
-                    {testNotificationStatus === "sending"
-                      ? "Scheduling test…"
-                      : "Test notification in 10 seconds"}
-                  </button>
-                  {testNotificationStatus === "scheduled" ? (
-                    <p className="mt-2 text-center text-xs text-emerald-300">
-                      Test scheduled. You can repeat it as many times as needed.
-                    </p>
-                  ) : null}
-                  {testNotificationStatus === "error" ? (
-                    <p className="mt-2 text-center text-xs text-rose-300">
-                      The test could not be scheduled. Check the native logs.
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
             </div>
           </motion.div>
         </motion.div>

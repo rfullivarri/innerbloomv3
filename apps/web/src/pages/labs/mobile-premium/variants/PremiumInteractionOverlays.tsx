@@ -1,11 +1,17 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { ModerationTrackerIcon, moderationTrackerMeta } from '../../../../components/moderation/trackerMeta';
-import { classifyUserTask, deleteCurrentAccount, getDailyReminderSettings, updateDailyReminderSettings, type GameModeUpgradeSuggestion, type ModerationTracker, type ModerationTrackerType, type SubmitDailyQuestFeedbackEvent, type SubmitDailyQuestResponse, type UserTaskClassification } from '../../../../lib/api';
+import { classifyUserTask, deleteCurrentAccount, getDailyReminderSettings, getProductNotificationPreferences, getRewardsHistory, updateDailyReminderSettings, updateProductNotificationPreferences, type GameModeUpgradeSuggestion, type ModerationTracker, type ModerationTrackerType, type ProductNotificationPreferences, type SubmitDailyQuestFeedbackEvent, type SubmitDailyQuestResponse, type UserTaskClassification } from '../../../../lib/api';
 import { useDifficulties } from '../../../../hooks/useCatalogs';
 import { useCreateTask } from '../../../../hooks/useUserTasks';
 import { TimezoneCombobox } from '../../../../components/common/TimezoneCombobox';
 import { getTimezoneCatalog, resolveDefaultTimezone } from '../../../../lib/timezones';
 import { usePostLoginLanguage } from '../../../../i18n/postLoginLanguage';
+import { isNativeCapacitorPlatform } from '../../../../mobile/capacitor';
+import {
+  ensureNativeDailyReminderNotificationPermissions,
+  syncNativeProductNotifications,
+  syncNativeDailyReminderNotification,
+} from '../../../../mobile/localNotifications';
 import { TraitIcon } from '../MobilePremiumPrimitives';
 import type { MobilePremiumTheme } from '../mobilePremiumTokens';
 import {
@@ -20,6 +26,7 @@ export type PremiumOverlayKind =
   | 'dquest-completed'
   | 'streak-feedback'
   | 'reminders'
+  | 'product-notifications'
   | 'ai-task'
   | 'profile'
   | 'delete-account'
@@ -126,8 +133,9 @@ export function PremiumInteractionOverlays({
       {activeOverlay === 'reminders' ? <ReminderSheet backendUserId={backendUserId ?? null} onClose={onClose} onSaved={onReminderSaved} /> : null}
       {activeOverlay === 'ai-task' ? <AiTaskSheet backendUserId={backendUserId ?? null} onClose={onClose} /> : null}
       {activeOverlay === 'profile' ? (
-        <ProfileSheet imageUrl={userImageUrl ?? null} onClose={onClose} onDelete={() => onOpen('delete-account')} onOpenUserProfile={onOpenUserProfile} userEmail={userEmail} userName={userName} />
+        <ProfileSheet backendUserId={backendUserId ?? null} imageUrl={userImageUrl ?? null} onClose={onClose} onDelete={() => onOpen('delete-account')} onOpenNotifications={() => onOpen('product-notifications')} onOpenUserProfile={onOpenUserProfile} userEmail={userEmail} userName={userName} />
       ) : null}
+      {activeOverlay === 'product-notifications' ? <ProductNotificationsSheet backendUserId={backendUserId ?? null} onClose={() => onOpen('profile')} /> : null}
       {activeOverlay === 'delete-account' ? <DeleteAccountSheet onCancel={() => onOpen('profile')} onClose={onClose} onDeleted={onSignOut ?? onClose} /> : null}
       {activeOverlay === 'rhythm' && hasActivePremiumRhythmSuggestion(rhythmSuggestion ?? null) && rhythmSuggestion ? (
         <PremiumRhythmRecommendationSheet
@@ -286,16 +294,20 @@ function PremiumMenuSheet({
 }
 
 function ProfileSheet({
+  backendUserId,
   imageUrl,
   onClose,
   onDelete,
+  onOpenNotifications,
   onOpenUserProfile,
   userEmail,
   userName,
 }: {
+  backendUserId: string | null;
   imageUrl: string | null;
   onClose: () => void;
   onDelete: () => void;
+  onOpenNotifications: () => void;
   onOpenUserProfile?: () => void;
   userEmail: string | null;
   userName: string;
@@ -323,6 +335,13 @@ function ProfileSheet({
           <span className="min-w-0 flex-1 text-base font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.profile.settings')}</span>
           <span className="text-2xl text-[color:var(--mp-text-muted)]">›</span>
         </button>
+        <button className="flex min-h-14 w-full items-center gap-4 px-4 text-left" disabled={!backendUserId} onClick={onOpenNotifications} type="button">
+          <span className="grid h-8 w-8 shrink-0 place-items-center text-[color:var(--mp-violet)]">
+            <BellIcon />
+          </span>
+          <span className="min-w-0 flex-1 text-base font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.productNotifications.label')}</span>
+          <span className="text-2xl text-[color:var(--mp-text-muted)]">›</span>
+        </button>
       </div>
 
       <button
@@ -333,6 +352,110 @@ function ProfileSheet({
         <TrashIcon />
         {t('mobilePremium.profile.deleteAccount')}
       </button>
+    </PremiumSheet>
+  );
+}
+
+const DEFAULT_PRODUCT_NOTIFICATION_PREFERENCES: ProductNotificationPreferences = {
+  weeklyWrappedEnabled: false,
+  growthCalibrationEnabled: false,
+  monthlyWrappedEnabled: false,
+  habitAchievementEnabled: false,
+};
+
+type ProductNotificationPreferenceKey = keyof Pick<
+  ProductNotificationPreferences,
+  'weeklyWrappedEnabled' | 'growthCalibrationEnabled' | 'monthlyWrappedEnabled' | 'habitAchievementEnabled'
+>;
+
+function ProductNotificationsSheet({ backendUserId, onClose }: { backendUserId: string | null; onClose: () => void }) {
+  const { t } = usePostLoginLanguage();
+  const [preferences, setPreferences] = useState<ProductNotificationPreferences>(DEFAULT_PRODUCT_NOTIFICATION_PREFERENCES);
+  const [loading, setLoading] = useState(Boolean(backendUserId));
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!backendUserId) return;
+    let cancelled = false;
+    void getProductNotificationPreferences()
+      .then((value) => {
+        if (!cancelled) setPreferences(value);
+      })
+      .catch((loadError) => {
+        console.error('[mobile-premium] failed to load product notification preferences', loadError);
+        if (!cancelled) setError(t('mobilePremium.productNotifications.error'));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [backendUserId, t]);
+
+  const choices: Array<{ key: ProductNotificationPreferenceKey; title: string; body: string }> = [
+    { key: 'weeklyWrappedEnabled', title: t('mobilePremium.productNotifications.weeklyTitle'), body: t('mobilePremium.productNotifications.weeklyBody') },
+    { key: 'growthCalibrationEnabled', title: t('mobilePremium.productNotifications.calibrationTitle'), body: t('mobilePremium.productNotifications.calibrationBody') },
+    { key: 'monthlyWrappedEnabled', title: t('mobilePremium.productNotifications.monthlyTitle'), body: t('mobilePremium.productNotifications.monthlyBody') },
+    { key: 'habitAchievementEnabled', title: t('mobilePremium.productNotifications.habitTitle'), body: t('mobilePremium.productNotifications.habitBody') },
+  ];
+
+  async function handleSave() {
+    if (!backendUserId || saving) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const enabled = preferences.weeklyWrappedEnabled
+        || preferences.growthCalibrationEnabled
+        || preferences.monthlyWrappedEnabled
+        || preferences.habitAchievementEnabled;
+      if (enabled && isNativeCapacitorPlatform()) {
+        const permission = await ensureNativeDailyReminderNotificationPermissions({ requestExactAlarm: true });
+        if (!permission.granted) throw new Error('Native notification permission was not granted.');
+      }
+      const [savedPreferences, rewards] = await Promise.all([
+        updateProductNotificationPreferences(preferences),
+        getRewardsHistory(backendUserId),
+      ]);
+      if (isNativeCapacitorPlatform()) {
+        await syncNativeProductNotifications(savedPreferences, rewards, { requestPermissions: false });
+      }
+      onClose();
+    } catch (saveError) {
+      console.error('[mobile-premium] failed to save product notification preferences', saveError);
+      setError(t('mobilePremium.productNotifications.error'));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <PremiumSheet eyebrow={t('mobilePremium.productNotifications.eyebrow')} onClose={onClose} title={t('mobilePremium.productNotifications.title')}>
+      <div className="space-y-4">
+        <p className="text-sm leading-6 text-[color:var(--mp-text-secondary)]">{t('mobilePremium.productNotifications.body')}</p>
+        <div className="divide-y divide-[color:var(--mp-border)] overflow-hidden rounded-[1rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)]">
+          {choices.map((choice) => (
+            <label className="flex min-h-20 cursor-pointer items-center gap-3 px-4 py-3" key={choice.key}>
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-violet-400/12 text-[color:var(--mp-violet)]"><BellIcon /></span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-[color:var(--mp-text)]">{choice.title}</span>
+                <span className="mt-1 block text-xs leading-5 text-[color:var(--mp-text-secondary)]">{choice.body}</span>
+              </span>
+              <input
+                aria-label={choice.title}
+                checked={Boolean(preferences[choice.key])}
+                className="h-5 w-5 accent-violet-500"
+                disabled={loading || saving}
+                onChange={(event) => setPreferences((current) => ({ ...current, [choice.key]: event.target.checked }))}
+                type="checkbox"
+              />
+            </label>
+          ))}
+        </div>
+        {error ? <p className="text-sm text-[color:var(--mp-red)]">{error}</p> : null}
+        <button className="min-h-12 w-full rounded-full bg-violet-500 px-5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50" disabled={loading || saving || !backendUserId} onClick={() => void handleSave()} type="button">
+          {saving ? t('mobilePremium.productNotifications.saving') : t('mobilePremium.productNotifications.save')}
+        </button>
+      </div>
     </PremiumSheet>
   );
 }
@@ -867,12 +990,50 @@ function ReminderSheet({
     try {
       if (backendUserId) {
         const timezone = automaticTimezone ? detectedTimezone : manualTimezone;
-        const activeChannels = (Object.keys(channels) as Array<keyof typeof channels>).filter((channel) => channels[channel]);
-        await Promise.all(activeChannels.map((channel) => updateDailyReminderSettings({
-          local_time: time,
-          status: 'active',
-          timezone,
-        }, channel)));
+        const isNativeApp = isNativeCapacitorPlatform();
+
+        if (isNativeApp && channels.notification) {
+          const permission = await ensureNativeDailyReminderNotificationPermissions({ requestExactAlarm: true });
+          if (!permission.granted) {
+            throw new Error('Native notification permission was not granted.');
+          }
+        }
+
+        const [, notificationResponse] = await Promise.all([
+          updateDailyReminderSettings({
+            local_time: time,
+            status: channels.email ? 'active' : 'paused',
+            timezone,
+          }, 'email'),
+          updateDailyReminderSettings({
+            local_time: time,
+            status: channels.notification ? 'active' : 'paused',
+            timezone,
+          }, 'notification'),
+        ]);
+
+        if (isNativeApp) {
+          const nativeReminder = {
+            ...notificationResponse,
+            status: channels.notification ? 'active' as const : 'paused' as const,
+            enabled: channels.notification,
+            local_time: time,
+            timezone,
+          };
+          console.info('[mobile-premium] reminder-native-sync-start', {
+            localTime: time,
+            notificationEnabled: channels.notification,
+          });
+          await syncNativeDailyReminderNotification(nativeReminder, {
+            requestPermissions: false,
+            source: 'user-save',
+          });
+          console.info('[mobile-premium] reminder-native-sync-complete', {
+            localTime: time,
+            notificationEnabled: channels.notification,
+            notificationReminderId: notificationResponse.user_daily_reminder_id ?? notificationResponse.reminder_id ?? null,
+          });
+        }
       }
       await onSaved?.();
       onClose();

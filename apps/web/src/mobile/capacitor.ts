@@ -25,6 +25,21 @@ type InnerbloomAuthBrowserPlugin = {
   }) => Promise<{ url?: string } | undefined>;
 };
 
+type InnerbloomNotificationsPlugin = {
+  schedule: (options: {
+    notifications: Array<{
+      id: number;
+      title: string;
+      body: string;
+      badge?: number;
+      interruptionLevel?: string;
+      relevanceScore?: number;
+      schedule: { at: Date };
+      extra?: Record<string, unknown>;
+    }>;
+  }) => Promise<void>;
+};
+
 type CapacitorHttpPlugin = {
   request: (options: {
     url: string;
@@ -78,6 +93,7 @@ type CapacitorLocalNotificationsPlugin = {
       channelId?: string;
       smallIcon?: string;
       iconColor?: string;
+      badge?: number;
       schedule?: {
         at?: Date;
         on?: {
@@ -105,6 +121,7 @@ type CapacitorGlobal = {
 };
 
 const innerbloomAuthBrowserPlugin = registerPlugin<InnerbloomAuthBrowserPlugin>('InnerbloomAuthBrowser');
+const innerbloomNotificationsPlugin = registerPlugin<InnerbloomNotificationsPlugin>('InnerbloomNotifications');
 
 export const CAPACITOR_APP_SCHEME = 'innerbloom';
 export const CAPACITOR_APP_HOST = 'localhost';
@@ -166,6 +183,14 @@ export function getInnerbloomAuthBrowserPlugin(): InnerbloomAuthBrowserPlugin | 
   }
 
   return innerbloomAuthBrowserPlugin;
+}
+
+export function getInnerbloomNotificationsPlugin(): InnerbloomNotificationsPlugin | null {
+  if (getCapacitorPlatform() !== 'ios') {
+    return null;
+  }
+
+  return innerbloomNotificationsPlugin;
 }
 
 export function getCapacitorHttpPlugin(): CapacitorHttpPlugin | null {

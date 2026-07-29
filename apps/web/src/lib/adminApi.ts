@@ -66,6 +66,18 @@ type UpdateTaskPayload = {
   notes?: string;
 };
 
+export type AdminProductNotificationPreferenceSummary = {
+  configuredUsers: number;
+  weeklyWrappedEnabled: number;
+  growthCalibrationEnabled: number;
+  monthlyWrappedEnabled: number;
+  habitAchievementEnabled: number;
+};
+
+export async function fetchAdminProductNotificationPreferenceSummary() {
+  return apiAuthorizedGet<{ ok: true; summary: AdminProductNotificationPreferenceSummary }>('/admin/product-notification-preferences');
+}
+
 export async function searchAdminUsers(params: UserSearchParams = {}) {
   return apiAuthorizedGet<PaginatedResponse<AdminUser>>('/admin/users', params);
 }

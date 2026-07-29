@@ -21,6 +21,7 @@ final class InnerbloomBridgeViewController: CAPBridgeViewController {
 
     override public func capacitorDidLoad() {
         bridge?.registerPluginInstance(InnerbloomAuthBrowserPlugin())
+        bridge?.registerPluginInstance(InnerbloomNotificationsPlugin())
     }
 
     @objc private func applicationDidBecomeActive() {

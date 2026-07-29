@@ -15,6 +15,7 @@ import {
   getAdminUserModeUpgradeAnalysis,
   getAdminUserTasks,
   getAdminUsers,
+  getAdminProductNotificationPreferences,
   getTaskgenJobLogsHandler,
   getTaskgenJobs,
   getTaskgenUserOverviewHandler,
@@ -80,6 +81,7 @@ const marketingPipelineQuerySchema = z.object({
 
 adminRouter.get('/me', getAdminMe);
 adminRouter.get('/users', getAdminUsers);
+adminRouter.get('/product-notification-preferences', getAdminProductNotificationPreferences);
 adminRouter.get('/marketing/campaigns', getAdminMarketingCampaigns);
 adminRouter.get('/marketing/pipeline/runs', asyncHandler(async (req, res) => {
   const query = marketingPipelineQuerySchema.parse(req.query);

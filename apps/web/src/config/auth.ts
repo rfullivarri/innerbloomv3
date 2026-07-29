@@ -7,6 +7,7 @@ export const INNERBLOOM2_DASHBOARD_PATH = `${INNERBLOOM2_BASE_PATH}/dashboard`;
 export const INNERBLOOM2_INTRO_JOURNEY_PATH = '/intro-journey2';
 export const INNERBLOOM2_ONBOARDING_PATH = '/onboarding2';
 export const INNERBLOOM2_DAILY_QUEST_PATH = `${INNERBLOOM2_BASE_PATH}/dquest`;
+export const INNERBLOOM2_ACHIEVEMENTS_PATH = `${INNERBLOOM2_BASE_PATH}/logros`;
 
 export const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;

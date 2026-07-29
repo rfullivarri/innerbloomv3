@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { DailyReminderSettings } from "./DailyReminderSettings";
@@ -55,8 +55,8 @@ describe("DailyReminderSettings", () => {
       expect(switchControl).toHaveAttribute("aria-checked", "true"),
     );
 
-    const timeSelect = screen.getByLabelText(/hora local/i);
-    await user.selectOptions(timeSelect, "10:00");
+    const timeInput = screen.getByLabelText(/hora local/i);
+    fireEvent.change(timeInput, { target: { value: "10:00" } });
     await user.click(switchControl);
 
     const timezoneCombobox = screen.getByRole("combobox", {
@@ -102,8 +102,8 @@ describe("DailyReminderSettings", () => {
     const switchControl = await screen.findByRole("switch", {
       name: /daily quest/i,
     });
-    const timeSelect = screen.getByLabelText(/hora local/i);
-    await user.selectOptions(timeSelect, "10:00");
+    const timeInput = screen.getByLabelText(/hora local/i);
+    fireEvent.change(timeInput, { target: { value: "10:00" } });
     await user.click(switchControl);
 
     const submitButton = screen.getByRole("button", { name: /guardar/i });
