@@ -10,6 +10,7 @@ type LoaderParams = {
   periodStart: string;
   periodEnd: string;
   dbPool: DbPool;
+  useLatestCompletedRun?: boolean;
 };
 
 type RunRow = {
@@ -22,6 +23,7 @@ export async function getBestAvailableMarketingAnalyticsContextForPeriod({
   periodStart,
   periodEnd,
   dbPool,
+  useLatestCompletedRun = false,
 }: LoaderParams): Promise<PersistedMarketingAnalyticsContext> {
   let exactError: unknown;
 
@@ -46,7 +48,21 @@ export async function getBestAvailableMarketingAnalyticsContextForPeriod({
     [periodStart, periodEnd],
   );
 
-  const run = fallback.rows[0];
+  let run = fallback.rows[0];
+  let fallbackIssue = 'Partial analytics coverage';
+
+  if (!run && useLatestCompletedRun) {
+    const latest = await dbPool.query<RunRow>(
+      `SELECT run_id, period_start, period_end
+         FROM marketing_analytics_sync_runs
+        WHERE status = 'completed'
+        ORDER BY completed_at DESC NULLS LAST, started_at DESC
+        LIMIT 1`,
+    );
+    run = latest.rows[0];
+    fallbackIssue = 'Test-period analytics fallback';
+  }
+
   if (!run) {
     throw exactError;
   }
@@ -66,7 +82,7 @@ export async function getBestAvailableMarketingAnalyticsContextForPeriod({
       data_quality: {
         status: 'warning',
         issues: [
-          `Partial analytics coverage: requested ${periodStart} -> ${periodEnd}; using ${actualStart} -> ${actualEnd}. No unavailable dates were inferred.`,
+          `${fallbackIssue}: requested ${periodStart} -> ${periodEnd}; using ${actualStart} -> ${actualEnd}. No unavailable dates were inferred.`,
           ...result.context.data_quality.issues,
         ],
       },
