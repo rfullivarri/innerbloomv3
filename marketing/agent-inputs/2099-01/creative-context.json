@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "context_type": "innerbloom_creative_director_input",
   "period_key": "2099-01",
-  "generated_at": "2026-07-29T21:08:18.209Z",
+  "generated_at": "2026-07-30T13:46:32.321Z",
   "provenance": {
     "source_branch": "automation/marketing-cycle-2099-01",
     "campaign_draft_path": "marketing/agent-outputs/2099-01/campaign-draft.json",
@@ -16,7 +16,7 @@
     "asset_registry_path": "marketing/asset-registry/innerbloom-drive-assets-v1.json",
     "asset_registry_sha256": "sha256:09a365a018e7c9b4a00e4f19b0d0df101b7c48c2e11afa35566d2e3c1e014836",
     "layout_spec_path": "marketing/layout-references/innerbloom-layout-specifications-v1.json",
-    "layout_spec_sha256": "sha256:bf51383234fa94a0122d24d244f3024f6a2b02d015018523b1a94845e2c28be1",
+    "layout_spec_sha256": "sha256:d76e2a07417376d26a91106bcb32820555f99cab3df487c4ef5e876551e38e45",
     "creative_director_contract_version": "creative-director-v1"
   },
   "immutable_editorial_source": {
@@ -4390,76 +4390,6 @@
           "right_center"
         ]
       },
-      "diagonal_flat_lay": {
-        "rotation_deg": [
-          -32,
-          -18
-        ],
-        "perspective": "top_down_shallow",
-        "scale": [
-          0.78,
-          0.98
-        ],
-        "crop": "large_diagonal",
-        "grounding": "surface_contact",
-        "preferred_product_zones": [
-          "center",
-          "upper_right"
-        ]
-      },
-      "front_grid_mixed_scale": {
-        "rotation_deg": [
-          -3,
-          3
-        ],
-        "perspective": "front",
-        "scale": [
-          0.34,
-          0.63
-        ],
-        "device_count": [
-          4,
-          5
-        ],
-        "hierarchy": "one_primary_rest_secondary",
-        "preferred_product_zones": [
-          "right_grid",
-          "full_canvas_grid"
-        ]
-      },
-      "handheld_dark_three_quarter": {
-        "rotation_deg": [
-          -8,
-          8
-        ],
-        "perspective": "handheld_three_quarter",
-        "scale": [
-          0.64,
-          0.84
-        ],
-        "crop": "hand_and_device",
-        "grounding": "handheld",
-        "preferred_product_zones": [
-          "center",
-          "lower_center"
-        ]
-      },
-      "handheld_warm_three_quarter": {
-        "rotation_deg": [
-          -6,
-          9
-        ],
-        "perspective": "handheld_three_quarter",
-        "scale": [
-          0.68,
-          0.88
-        ],
-        "crop": "hand_and_device",
-        "grounding": "handheld",
-        "preferred_product_zones": [
-          "right_center"
-        ]
-      },
       "front_right": {
         "rotation_deg": [
           -2,
@@ -4474,6 +4404,22 @@
         "grounding": "floating_soft_shadow",
         "preferred_product_zones": [
           "right_center"
+        ]
+      },
+      "front_left": {
+        "rotation_deg": [
+          -2,
+          2
+        ],
+        "perspective": "front",
+        "scale": [
+          0.62,
+          0.78
+        ],
+        "crop": "full",
+        "grounding": "floating_soft_shadow",
+        "preferred_product_zones": [
+          "left_center"
         ]
       },
       "front_centered": {
@@ -4493,20 +4439,57 @@
           "lower_center"
         ]
       },
-      "edge_crop_right": {
+      "diagonal_soft": {
         "rotation_deg": [
-          -2,
+          -18,
+          -8
+        ],
+        "perspective": "soft_three_quarter",
+        "scale": [
+          0.72,
+          0.92
+        ],
+        "crop": "soft_edge",
+        "grounding": "floating_soft_shadow",
+        "preferred_product_zones": [
+          "center",
+          "right_center"
+        ]
+      },
+      "macro_crop": {
+        "rotation_deg": [
+          -3,
+          3
+        ],
+        "perspective": "front",
+        "scale": [
+          0.9,
+          1.2
+        ],
+        "crop": "module_focus",
+        "grounding": "none",
+        "preferred_product_zones": [
+          "center"
+        ]
+      },
+      "multi_front": {
+        "rotation_deg": [
+          -4,
           4
         ],
-        "perspective": "near_front",
+        "perspective": "front",
         "scale": [
-          0.82,
-          1.08
+          0.42,
+          0.68
         ],
-        "crop": "right_edge",
-        "grounding": "surface_or_soft_shadow",
+        "device_count": [
+          2,
+          3
+        ],
+        "hierarchy": "one_primary_rest_secondary",
         "preferred_product_zones": [
-          "right_edge"
+          "center",
+          "right_grid"
         ]
       }
     },
@@ -4535,80 +4518,258 @@
         ]
       },
       {
-        "layout_key": "flat_lay_patterns",
+        "layout_key": "split_device_right",
         "status": "executable",
-        "renderer_layout": "flat_lay_product",
-        "copy_role": "product_led",
-        "copy_zone": "lower_left",
-        "product_zone": "center",
-        "device_pose": "diagonal_flat_lay",
+        "renderer_layout": "split_device_right",
+        "copy_role": "copy_led",
+        "copy_zone": "left",
+        "product_zone": "right_center",
+        "device_pose": "front_right",
         "min_mobile_assets": 1,
         "max_mobile_assets": 1,
         "min_module_assets": 0,
-        "allowed_backgrounds": [
-          "scene_ivory_plaster_steps_01"
-        ],
+        "allowed_backgrounds": [],
         "required_support_assets": [],
         "fallback_layouts": [
           "storefront_feature_stage"
         ]
       },
       {
-        "layout_key": "multi_device_mood_grid",
+        "layout_key": "split_device_left",
         "status": "executable",
-        "renderer_layout": "multi_device_grid",
-        "copy_role": "system_led",
-        "copy_zone": "left",
-        "product_zone": "right_grid",
-        "device_pose": "front_grid_mixed_scale",
-        "min_mobile_assets": 4,
-        "max_mobile_assets": 5,
+        "renderer_layout": "split_device_left",
+        "copy_role": "copy_led",
+        "copy_zone": "right",
+        "product_zone": "left_center",
+        "device_pose": "front_left",
+        "min_mobile_assets": 1,
+        "max_mobile_assets": 1,
         "min_module_assets": 0,
         "allowed_backgrounds": [],
         "required_support_assets": [],
         "fallback_layouts": [
-          "storefront_feature_stage",
-          "carousel_proof_focus"
+          "storefront_feature_stage"
         ]
       },
       {
-        "layout_key": "hand_hero_dark",
-        "status": "experimental_requires_asset",
-        "renderer_layout": "hand_hero",
+        "layout_key": "cinematic_device_center",
+        "status": "executable",
+        "renderer_layout": "cinematic_device_center",
         "copy_role": "balanced",
-        "copy_zone": "top",
+        "copy_zone": "top_center",
         "product_zone": "center",
-        "device_pose": "handheld_dark_three_quarter",
+        "device_pose": "front_centered",
         "min_mobile_assets": 1,
         "max_mobile_assets": 1,
         "min_module_assets": 0,
         "allowed_backgrounds": [],
-        "required_support_assets": [
-          "hand_mask_dark_v1"
-        ],
+        "required_support_assets": [],
         "fallback_layouts": [
-          "editorial_material_scene",
-          "centered_product_hero"
+          "storefront_feature_stage"
         ]
       },
       {
-        "layout_key": "hand_hero_warm",
-        "status": "experimental_requires_asset",
-        "renderer_layout": "hand_hero",
+        "layout_key": "device_diagonal_crop",
+        "status": "executable",
+        "renderer_layout": "device_diagonal_crop",
+        "copy_role": "product_led",
+        "copy_zone": "lower_left",
+        "product_zone": "center",
+        "device_pose": "diagonal_soft",
+        "min_mobile_assets": 1,
+        "max_mobile_assets": 1,
+        "min_module_assets": 0,
+        "allowed_backgrounds": [],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "split_device_right"
+        ]
+      },
+      {
+        "layout_key": "layered_product_depth",
+        "status": "executable",
+        "renderer_layout": "layered_product_depth",
+        "copy_role": "product_led",
+        "copy_zone": "top_left",
+        "product_zone": "center",
+        "device_pose": "multi_front",
+        "min_mobile_assets": 2,
+        "max_mobile_assets": 3,
+        "min_module_assets": 0,
+        "allowed_backgrounds": [],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "storefront_dual_device"
+        ]
+      },
+      {
+        "layout_key": "floating_device_orbit",
+        "status": "executable",
+        "renderer_layout": "floating_device_orbit",
         "copy_role": "balanced",
+        "copy_zone": "top_center",
+        "product_zone": "center",
+        "device_pose": "multi_front",
+        "min_mobile_assets": 2,
+        "max_mobile_assets": 3,
+        "min_module_assets": 0,
+        "allowed_backgrounds": [],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "cinematic_device_center"
+        ]
+      },
+      {
+        "layout_key": "module_macro_crop",
+        "status": "executable",
+        "renderer_layout": "module_macro_crop",
+        "copy_role": "highlight_led",
+        "copy_zone": "top_left",
+        "product_zone": "center",
+        "device_pose": "macro_crop",
+        "min_mobile_assets": 0,
+        "max_mobile_assets": 1,
+        "min_module_assets": 1,
+        "allowed_backgrounds": [],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "storefront_module_spotlight"
+        ]
+      },
+      {
+        "layout_key": "bento_product_proof",
+        "status": "executable",
+        "renderer_layout": "bento_product_proof",
+        "copy_role": "system_led",
+        "copy_zone": "top_left",
+        "product_zone": "full_canvas_grid",
+        "device_pose": "multi_front",
+        "min_mobile_assets": 2,
+        "max_mobile_assets": 3,
+        "min_module_assets": 1,
+        "allowed_backgrounds": [],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "storefront_product_cards"
+        ]
+      },
+      {
+        "layout_key": "editorial_type_monument",
+        "status": "executable",
+        "renderer_layout": "editorial_type_monument",
+        "copy_role": "copy_led",
+        "copy_zone": "center",
+        "product_zone": "lower_right",
+        "device_pose": "front_right",
+        "min_mobile_assets": 0,
+        "max_mobile_assets": 1,
+        "min_module_assets": 0,
+        "allowed_backgrounds": [],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "editorial_material_scene"
+        ]
+      },
+      {
+        "layout_key": "editorial_signal_line",
+        "status": "executable",
+        "renderer_layout": "editorial_signal_line",
+        "copy_role": "copy_led",
+        "copy_zone": "left",
+        "product_zone": "lower_right",
+        "device_pose": "front_right",
+        "min_mobile_assets": 0,
+        "max_mobile_assets": 1,
+        "min_module_assets": 0,
+        "allowed_backgrounds": [],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "editorial_type_monument"
+        ]
+      },
+      {
+        "layout_key": "editorial_numbered_steps",
+        "status": "executable",
+        "renderer_layout": "editorial_numbered_steps",
+        "copy_role": "system_led",
         "copy_zone": "left",
         "product_zone": "right_center",
-        "device_pose": "handheld_warm_three_quarter",
+        "device_pose": "front_right",
+        "min_mobile_assets": 0,
+        "max_mobile_assets": 1,
+        "min_module_assets": 0,
+        "allowed_backgrounds": [],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "editorial_signal_line"
+        ]
+      },
+      {
+        "layout_key": "carousel_chapter_cover",
+        "status": "executable",
+        "renderer_layout": "carousel_chapter_cover",
+        "copy_role": "copy_led",
+        "copy_zone": "center",
+        "product_zone": "lower_center",
+        "device_pose": "front_centered",
+        "min_mobile_assets": 0,
+        "max_mobile_assets": 1,
+        "min_module_assets": 0,
+        "allowed_backgrounds": [],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "editorial_type_monument"
+        ]
+      },
+      {
+        "layout_key": "carousel_proof_focus",
+        "status": "executable",
+        "renderer_layout": "carousel_proof_focus",
+        "copy_role": "product_led",
+        "copy_zone": "top_left",
+        "product_zone": "center",
+        "device_pose": "macro_crop",
         "min_mobile_assets": 1,
         "max_mobile_assets": 1,
         "min_module_assets": 0,
         "allowed_backgrounds": [],
-        "required_support_assets": [
-          "hand_mask_warm_v1"
-        ],
+        "required_support_assets": [],
         "fallback_layouts": [
-          "edge_crop_storefront_ad",
-          "split_device_right"
+          "storefront_feature_stage"
+        ]
+      },
+      {
+        "layout_key": "carousel_transition",
+        "status": "executable",
+        "renderer_layout": "carousel_transition",
+        "copy_role": "balanced",
+        "copy_zone": "center",
+        "product_zone": "lower_center",
+        "device_pose": "front_centered",
+        "min_mobile_assets": 0,
+        "max_mobile_assets": 1,
+        "min_module_assets": 0,
+        "allowed_backgrounds": [],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "editorial_signal_line"
+        ]
+      },
+      {
+        "layout_key": "carousel_cta_close",
+        "status": "executable",
+        "renderer_layout": "carousel_cta_close",
+        "copy_role": "copy_led",
+        "copy_zone": "center",
+        "product_zone": "lower_center",
+        "device_pose": "front_centered",
+        "min_mobile_assets": 0,
+        "max_mobile_assets": 1,
+        "min_module_assets": 0,
+        "allowed_backgrounds": [],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "editorial_type_monument"
         ]
       },
       {
@@ -4646,20 +4807,90 @@
         ]
       },
       {
-        "layout_key": "edge_crop_storefront_ad",
+        "layout_key": "storefront_dual_device",
         "status": "executable",
-        "renderer_layout": "edge_crop_storefront_ad",
+        "renderer_layout": "storefront_dual_device",
+        "copy_role": "product_led",
+        "copy_zone": "left",
+        "product_zone": "right_grid",
+        "device_pose": "multi_front",
+        "min_mobile_assets": 2,
+        "max_mobile_assets": 2,
+        "min_module_assets": 0,
+        "allowed_backgrounds": [],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "layered_product_depth"
+        ]
+      },
+      {
+        "layout_key": "storefront_product_cards",
+        "status": "executable",
+        "renderer_layout": "storefront_product_cards",
+        "copy_role": "system_led",
+        "copy_zone": "top_left",
+        "product_zone": "full_canvas_grid",
+        "device_pose": "multi_front",
+        "min_mobile_assets": 2,
+        "max_mobile_assets": 3,
+        "min_module_assets": 0,
+        "allowed_backgrounds": [],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "bento_product_proof"
+        ]
+      },
+      {
+        "layout_key": "storefront_dark_monolith",
+        "status": "executable",
+        "renderer_layout": "storefront_dark_monolith",
+        "copy_role": "balanced",
+        "copy_zone": "top",
+        "product_zone": "center",
+        "device_pose": "front_centered",
+        "min_mobile_assets": 1,
+        "max_mobile_assets": 1,
+        "min_module_assets": 0,
+        "allowed_backgrounds": [
+          "scene_aubergine_pedestal_01"
+        ],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "cinematic_device_center"
+        ]
+      },
+      {
+        "layout_key": "storefront_module_spotlight",
+        "status": "executable",
+        "renderer_layout": "storefront_module_spotlight",
+        "copy_role": "highlight_led",
+        "copy_zone": "left",
+        "product_zone": "right_center",
+        "device_pose": "macro_crop",
+        "min_mobile_assets": 1,
+        "max_mobile_assets": 1,
+        "min_module_assets": 1,
+        "allowed_backgrounds": [],
+        "required_support_assets": [],
+        "fallback_layouts": [
+          "module_macro_crop"
+        ]
+      },
+      {
+        "layout_key": "storefront_edge_editorial",
+        "status": "executable",
+        "renderer_layout": "storefront_edge_editorial",
         "copy_role": "copy_led",
         "copy_zone": "left",
-        "product_zone": "right_edge",
-        "device_pose": "edge_crop_right",
+        "product_zone": "right_center",
+        "device_pose": "front_right",
         "min_mobile_assets": 1,
         "max_mobile_assets": 1,
         "min_module_assets": 0,
         "allowed_backgrounds": [],
         "required_support_assets": [],
         "fallback_layouts": [
-          "storefront_feature_stage"
+          "split_device_right"
         ]
       }
     ],
