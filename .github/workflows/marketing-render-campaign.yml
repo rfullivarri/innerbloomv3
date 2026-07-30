@@ -36,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: automation/marketing-cycle-${{ inputs.period_key }}
           fetch-depth: 1
 
       - uses: actions/setup-node@v4
@@ -59,6 +59,15 @@ jobs:
       - name: Install Chromium for deterministic rendering
         run: npm -w @innerbloom/web exec playwright install --with-deps chromium
 
+      - name: Choose isolated output
+        shell: bash
+        run: |
+          if [[ "${{ inputs.preview_limit }}" == "0" ]]; then
+            echo "RENDER_OUTPUT_DIR=marketing/generated/${{ inputs.period_key }}/rendered-${{ github.run_id }}" >> "${GITHUB_ENV}"
+          else
+            echo "RENDER_OUTPUT_DIR=marketing/generated/${{ inputs.period_key }}/pilot-${{ github.run_id }}" >> "${GITHUB_ENV}"
+          fi
+
       - name: Prepare configured derived test campaign
         shell: bash
         run: |
@@ -71,15 +80,6 @@ jobs:
           if [[ ! -f "${campaign}" ]]; then
             echo "No campaign.json or test-campaign.config.json found for ${{ inputs.period_key }}" >&2
             exit 1
-          fi
-
-      - name: Choose isolated output
-        shell: bash
-        run: |
-          if [[ "${{ inputs.preview_limit }}" == "0" ]]; then
-            echo "RENDER_OUTPUT_DIR=marketing/generated/${{ inputs.period_key }}/rendered-${{ github.run_id }}" >> "${GITHUB_ENV}"
-          else
-            echo "RENDER_OUTPUT_DIR=marketing/generated/${{ inputs.period_key }}/pilot-${{ github.run_id }}" >> "${GITHUB_ENV}"
           fi
 
       - name: Validate semantic creative contract
@@ -132,6 +132,7 @@ jobs:
         with:
           name: innerbloom-marketing-${{ inputs.period_key }}-run-${{ github.run_id }}
           path: ${{ env.RENDER_OUTPUT_DIR }}
+          if-no-files-found: warn
           retention-days: 30
 
       - name: Report next step
