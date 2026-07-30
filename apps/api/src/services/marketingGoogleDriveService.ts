@@ -15,22 +15,41 @@ export type DriveFile = {
 };
 
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
+const DRIVE_DOWNLOAD_ATTEMPTS = 3;
+const DRIVE_DOWNLOAD_TIMEOUT_MS = 60_000;
 
 export async function downloadDriveFile(fileId: string) {
-  const token = await getAccessToken();
-  const response = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?alt=media`, {
-    headers: { Authorization: `Bearer ${token}` },
-    signal: AbortSignal.timeout(30_000),
-  });
+  let lastError: unknown;
 
-  if (!response.ok) {
-    throw new Error(`Google Drive download failed for ${fileId} (HTTP ${response.status})`);
+  for (let attempt = 1; attempt <= DRIVE_DOWNLOAD_ATTEMPTS; attempt += 1) {
+    try {
+      const token = await getAccessToken();
+      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?alt=media`, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(DRIVE_DOWNLOAD_TIMEOUT_MS),
+      });
+
+      if (!response.ok) {
+        const error = new Error(`Google Drive download failed for ${fileId} (HTTP ${response.status})`);
+        if (response.status < 500 && response.status !== 429) throw error;
+        lastError = error;
+      } else {
+        return {
+          bytes: Buffer.from(await response.arrayBuffer()),
+          contentType: response.headers.get('content-type') ?? 'application/octet-stream',
+        };
+      }
+    } catch (error) {
+      lastError = error;
+    }
+
+    if (attempt < DRIVE_DOWNLOAD_ATTEMPTS) {
+      await new Promise(resolve => setTimeout(resolve, attempt * 2_000));
+    }
   }
 
-  return {
-    bytes: Buffer.from(await response.arrayBuffer()),
-    contentType: response.headers.get('content-type') ?? 'application/octet-stream',
-  };
+  const reason = lastError instanceof Error ? lastError.message : String(lastError ?? 'unknown error');
+  throw new Error(`Google Drive download failed for ${fileId} after ${DRIVE_DOWNLOAD_ATTEMPTS} attempts: ${reason}`);
 }
 
 export async function uploadDriveImage(input: {
@@ -103,7 +122,7 @@ async function getAccessToken() {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      grant_type: 'urn:ietf:params:oauth-type:jwt-bearer',
       assertion,
     }),
     signal: AbortSignal.timeout(15_000),
