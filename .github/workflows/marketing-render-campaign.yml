@@ -36,8 +36,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: automation/marketing-cycle-${{ inputs.period_key }}
+          ref: main
           fetch-depth: 1
+
+      - name: Load monthly campaign input
+        shell: bash
+        run: |
+          set -euo pipefail
+          period="${{ inputs.period_key }}"
+          branch="automation/marketing-cycle-${period}"
+          campaign_path="marketing/agent-outputs/${period}/campaign.json"
+          config_path="marketing/agent-outputs/${period}/test-campaign.config.json"
+
+          git fetch --depth=1 origin "${branch}"
+          mkdir -p "$(dirname "${campaign_path}")"
+
+          if ! git show "FETCH_HEAD:${campaign_path}" > "${campaign_path}"; then
+            echo "No campaign.json found on ${branch} for ${period}" >&2
+            exit 1
+          fi
+
+          if git cat-file -e "FETCH_HEAD:${config_path}" 2>/dev/null; then
+            git show "FETCH_HEAD:${config_path}" > "${config_path}"
+          else
+            rm -f "${config_path}"
+          fi
 
       - uses: actions/setup-node@v4
         with:
