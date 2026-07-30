@@ -22,6 +22,16 @@ function postKey(job){return job.post_code||job.asset_code;}
 function allRegisteredMobileKeys(jobs){return unique(jobs.flatMap(job=>(job.source_assets||[]).map(asset=>asset.asset_key).filter(isMobile).concat((job.creative_direction?.selected_asset_keys||[]).filter(isMobile))));}
 function representativeIndexes(jobs){const seen=new Set(),indexes=[];jobs.forEach((job,index)=>{const key=postKey(job);if(!seen.has(key)){seen.add(key);indexes.push(index);}});return indexes;}
 function chooseCompatible(specifications,key){return specifications.layouts.get(key)||null;}
+function chooseRequestedLayout(specifications,job){
+ const direction=job.creative_direction||{};
+ if(direction.layout_reference_key){
+  const exact=specifications.layouts.get(direction.layout_reference_key);
+  if(exact)return exact;
+ }
+ const requested=direction.layout_variant;
+ if(!requested)return null;
+ return [...specifications.layouts.values()].find(layout=>layout.renderer_layout===requested&&(layout.status==="executable"||layout.status==="executable_with_approximation"))||null;
+}
 
 async function main(){
  const campaignPath=path.resolve(campaignArg);const specificationPath=path.resolve(arg("--layout-spec",defaultSpecPath));const specifications=await loadLayoutSpecifications(specificationPath);const campaign=JSON.parse(await fs.readFile(campaignPath,"utf8"));const jobs=campaign.image_generation?.jobs||[];if(!jobs.length)throw new Error("Campaign has no image jobs");
@@ -35,6 +45,10 @@ async function main(){
   const cloned=structuredClone(job);cloned.visible_copy=structuredClone(job.visible_copy||{});
   let selected=null;
   if(referencePilot&&representativeSet.has(index)&&representativeOrder<pilotSequence.length){selected=chooseCompatible(specifications,pilotSequence[representativeOrder]);representativeOrder+=1;}
+  if(!selected&&!referencePilot){
+   selected=chooseRequestedLayout(specifications,job);
+   if(!selected)throw new Error(`${job.asset_code}: no executable layout specification matches requested layout ${job.creative_direction?.layout_variant||"<missing>"}`);
+  }
   if(!selected){const candidates=resolveReferenceCandidates(job,specifications);selected=[...candidates].sort((a,b)=>((usage.get(a.layout_key)||0)-(usage.get(b.layout_key)||0))||a.layout_key.localeCompare(b.layout_key))[0]||null;}
   if(!selected)return cloned;
   const pose=specifications.poses.get(selected.device_pose)||null;cloned.creative_direction=applyReferenceSpecification(job.creative_direction,selected,pose);
