@@ -83,7 +83,8 @@ try {
   const campaignId = campaignResult.rows[0].marketing_campaign_id;
 
   for (const post of campaign.posts) {
-    const postAssets = (post.assets ?? []).map((planned: any) => {
+    const plannedAssets = getPlannedAssets(post);
+    const postAssets = plannedAssets.map((planned: any) => {
       const filename = planned.asset_code ? `${planned.asset_code}.png` : planned.filename;
       const stored = assetByFile.get(filename);
       if (!stored) throw new Error(`Verified R2 asset missing for ${post.post_code}: ${filename}`);
@@ -145,6 +146,14 @@ try {
   await endPool();
 }
 
+function getPlannedAssets(post: Record<string, any>) {
+  const planned = post.asset_slots ?? post.assets ?? [];
+  if (!Array.isArray(planned) || planned.length === 0) {
+    throw new Error(`Campaign post ${post.post_code ?? 'unknown'} has no asset_slots or legacy assets`);
+  }
+  return planned;
+}
+
 function validateManifest(campaignDocument: Campaign, r2Manifest: R2Manifest) {
   if (r2Manifest.schema_version !== '1.0') throw new Error(`Unsupported R2 manifest schema: ${r2Manifest.schema_version}`);
   if (r2Manifest.storage_provider !== 'cloudflare_r2') throw new Error('R2 manifest storage_provider must be cloudflare_r2');
@@ -167,7 +176,7 @@ function validateManifest(campaignDocument: Campaign, r2Manifest: R2Manifest) {
   }
 
   const plannedFiles = campaignDocument.posts.flatMap((post) =>
-    (post.assets ?? []).map((planned: any) => planned.asset_code ? `${planned.asset_code}.png` : planned.filename),
+    getPlannedAssets(post).map((planned: any) => planned.asset_code ? `${planned.asset_code}.png` : planned.filename),
   );
   const missing = plannedFiles.filter((file) => !seenFiles.has(file));
   const unexpected = [...seenFiles].filter((file) => !plannedFiles.includes(file));
