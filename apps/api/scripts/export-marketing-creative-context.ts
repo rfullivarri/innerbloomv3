@@ -11,6 +11,33 @@ const readArg = (name: string): string | null => {
 const hasFlag = (name: string): boolean => process.argv.slice(2).includes(`--${name}`);
 const sha256 = (value: string): string => `sha256:${createHash('sha256').update(value).digest('hex')}`;
 
+const rendererSupportedLayouts = new Set([
+  'split_device_right',
+  'split_device_left',
+  'cinematic_device_center',
+  'device_diagonal_crop',
+  'layered_product_depth',
+  'floating_device_orbit',
+  'module_macro_crop',
+  'bento_product_proof',
+  'editorial_type_monument',
+  'editorial_signal_line',
+  'editorial_numbered_steps',
+  'editorial_quote_frame',
+  'carousel_chapter_cover',
+  'carousel_proof_focus',
+  'carousel_transition',
+  'carousel_cta_close',
+  'storefront_feature_stage',
+  'storefront_dual_device',
+  'storefront_metric_overlay',
+  'storefront_edge_editorial',
+  'storefront_product_cards',
+  'storefront_dark_monolith',
+  'storefront_module_spotlight',
+  'editorial_material_scene',
+]);
+
 async function loadJson(path: string): Promise<{ raw: string; value: any }> {
   const raw = await readFile(path, 'utf8');
   return { raw, value: JSON.parse(raw) };
@@ -57,7 +84,10 @@ async function main(): Promise<void> {
   assert(strategy.value?.period === period, 'CMO strategy period mismatch');
   assert(contentContext.value?.period?.period_key === period, 'Content context period mismatch');
   assert(draft.value?.campaign?.status === 'review', 'Campaign draft must remain review');
-  assert(Array.isArray(draft.value?.posts) && draft.value.posts.length === draft.value.campaign.target_post_count, 'Campaign draft post count mismatch');
+  assert(
+    Array.isArray(draft.value?.posts) && draft.value.posts.length === draft.value.campaign.target_post_count,
+    'Campaign draft post count mismatch',
+  );
 
   const approvedAssets = (Array.isArray(assetRegistry.value?.assets) ? assetRegistry.value.assets : [])
     .filter((asset: any) => asset?.status === 'approved_current')
@@ -73,24 +103,40 @@ async function main(): Promise<void> {
       allowed_operations: asset.allowed_operations ?? [],
     }));
 
-  const layouts = (Array.isArray(layoutSpec.value?.layouts) ? layoutSpec.value.layouts : []).map((layout: any) => ({
-    layout_key: layout.layout_key,
-    status: layout.status,
-    renderer_layout: layout.renderer_layout,
-    copy_role: layout.copy_role,
-    copy_zone: layout.copy_zone,
-    product_zone: layout.product_zone,
-    device_pose: layout.device_pose,
-    min_mobile_assets: layout.min_mobile_assets ?? 0,
-    max_mobile_assets: layout.max_mobile_assets ?? 0,
-    min_module_assets: layout.min_module_assets ?? 0,
-    allowed_backgrounds: layout.allowed_backgrounds ?? [],
-    required_support_assets: layout.required_support_assets ?? [],
-    fallback_layouts: layout.fallback_layouts ?? [],
-  }));
+  const approvedAssetKeys = new Set(approvedAssets.map((asset: any) => asset.asset_key));
+  const declaredLayouts = Array.isArray(layoutSpec.value?.layouts) ? layoutSpec.value.layouts : [];
+
+  const layouts = declaredLayouts
+    .filter((layout: any) => {
+      if (layout?.status !== 'executable') return false;
+      if (!rendererSupportedLayouts.has(layout?.renderer_layout)) return false;
+      const requiredSupportAssets = Array.isArray(layout?.required_support_assets) ? layout.required_support_assets : [];
+      return requiredSupportAssets.every((assetKey: string) => approvedAssetKeys.has(assetKey));
+    })
+    .map((layout: any) => ({
+      layout_key: layout.layout_key,
+      status: layout.status,
+      renderer_layout: layout.renderer_layout,
+      copy_role: layout.copy_role,
+      copy_zone: layout.copy_zone,
+      product_zone: layout.product_zone,
+      device_pose: layout.device_pose,
+      min_mobile_assets: layout.min_mobile_assets ?? 0,
+      max_mobile_assets: layout.max_mobile_assets ?? 0,
+      min_module_assets: layout.min_module_assets ?? 0,
+      allowed_backgrounds: layout.allowed_backgrounds ?? [],
+      required_support_assets: layout.required_support_assets ?? [],
+      fallback_layouts: (layout.fallback_layouts ?? []).filter((fallback: string) => rendererSupportedLayouts.has(fallback)),
+    }));
+
+  const uniqueRendererLayouts = new Set(layouts.map((layout: any) => layout.renderer_layout));
+  const minimumUniqueLayouts = 12;
 
   assert(approvedAssets.length > 0, 'No approved current assets are available');
-  assert(layouts.some((layout: any) => layout.status === 'executable'), 'No executable renderer layouts are available');
+  assert(
+    uniqueRendererLayouts.size >= minimumUniqueLayouts,
+    `Creative context requires at least ${minimumUniqueLayouts} compatible executable renderer layouts; found ${uniqueRendererLayouts.size}`,
+  );
 
   const generatedAt = new Date().toISOString();
   const output = {
@@ -143,7 +189,7 @@ async function main(): Promise<void> {
       post_status: 'needs_review',
       renderer_validator: 'scripts/marketing/validate-creative-direction-v3.mjs',
       diversity_rules: {
-        minimum_unique_layouts_full_campaign: 12,
+        minimum_unique_layouts_full_campaign: minimumUniqueLayouts,
         minimum_distinct_source_assets_full_campaign: 14,
         minimum_unique_layouts_per_carousel: 4,
         maximum_layout_share_percent: 20,
@@ -155,7 +201,19 @@ async function main(): Promise<void> {
   const tempPath = `${outputPath}.tmp`;
   await writeFile(tempPath, `${JSON.stringify(output, null, 2)}\n`, 'utf8');
   await rename(tempPath, outputPath);
-  console.log(JSON.stringify({ status: 'written', outputPath, period, approvedAssetCount: approvedAssets.length, layoutCount: layouts.length }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        status: 'written',
+        outputPath,
+        period,
+        approvedAssetCount: approvedAssets.length,
+        compatibleLayoutCount: uniqueRendererLayouts.size,
+      },
+      null,
+      2,
+    ),
+  );
 }
 
 main().catch((error: unknown) => {
