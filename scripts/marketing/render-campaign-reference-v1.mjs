@@ -25,26 +25,30 @@ function chooseCompatible(specifications,key){return specifications.layouts.get(
 
 async function main(){
  const campaignPath=path.resolve(campaignArg);const specificationPath=path.resolve(arg("--layout-spec",defaultSpecPath));const specifications=await loadLayoutSpecifications(specificationPath);const campaign=JSON.parse(await fs.readFile(campaignPath,"utf8"));const jobs=campaign.image_generation?.jobs||[];if(!jobs.length)throw new Error("Campaign has no image jobs");
- const mobileCatalog=allRegisteredMobileKeys(jobs);const usage=new Map();const referencePilot=has("--reference-pilot");const representativeSet=new Set(representativeIndexes(jobs));const pilotSequence=["editorial_scene_3q","flat_lay_patterns","multi_device_mood_grid","feature_callout_card","centered_product_hero","edge_crop_storefront_ad"];
+ const mobileCatalog=allRegisteredMobileKeys(jobs);const usage=new Map();const referencePilot=has("--reference-pilot");const representativeSet=new Set(representativeIndexes(jobs));const pilotSequence=["editorial_scene_3q","flat_lay_product","multi_device_grid","feature_callout_card","centered_product_hero","storefront_edge_editorial"];
+ if(referencePilot){
+  const missing=pilotSequence.filter(key=>!specifications.layouts.has(key));
+  if(missing.length)throw new Error(`Reference pilot layout catalog mismatch: missing ${missing.join(", ")}`);
+ }
  let representativeOrder=0;
  const compiledJobs=jobs.map((job,index)=>{
-   const cloned=structuredClone(job);cloned.visible_copy=structuredClone(job.visible_copy||{});
-   let selected=null;
-   if(referencePilot&&representativeSet.has(index)&&representativeOrder<pilotSequence.length){selected=chooseCompatible(specifications,pilotSequence[representativeOrder]);representativeOrder+=1;}
-   if(!selected){const candidates=resolveReferenceCandidates(job,specifications);selected=[...candidates].sort((a,b)=>((usage.get(a.layout_key)||0)-(usage.get(b.layout_key)||0))||a.layout_key.localeCompare(b.layout_key))[0]||null;}
-   if(!selected)return cloned;
-   const pose=specifications.poses.get(selected.device_pose)||null;cloned.creative_direction=applyReferenceSpecification(job.creative_direction,selected,pose);
-   if(selected.layout_key==="multi_device_mood_grid"){
-     const existing=(cloned.creative_direction.selected_asset_keys||[]).filter(isMobile);cloned.creative_direction.selected_asset_keys=unique([...existing,...mobileCatalog]).slice(0,5);
-     if(cloned.creative_direction.selected_asset_keys.length<4){const fallback=specifications.layouts.get("centered_product_hero");cloned.creative_direction=applyReferenceSpecification(job.creative_direction,fallback,specifications.poses.get(fallback.device_pose));selected=fallback;}
-   }
-   if(selected.layout_key==="flat_lay_patterns"){
-     cloned.creative_direction.art_direction={...(cloned.creative_direction.art_direction||{}),scene_asset_key:"scene_ivory_plaster_steps_01",readability_veil:"none"};
-   }
-   if(selected.layout_key==="edge_crop_storefront_ad")cloned.creative_direction.cta_label="Explore Innerbloom";
-   usage.set(selected.layout_key,(usage.get(selected.layout_key)||0)+1);
-   cloned.creative_direction.reference_contract={specification_version:specifications.document.schema_version,layout_key:selected.layout_key,reference_key:selected.reference_key,status:selected.status,copy_locked:true,real_ui_required:true};
-   return cloned;
+  const cloned=structuredClone(job);cloned.visible_copy=structuredClone(job.visible_copy||{});
+  let selected=null;
+  if(referencePilot&&representativeSet.has(index)&&representativeOrder<pilotSequence.length){selected=chooseCompatible(specifications,pilotSequence[representativeOrder]);representativeOrder+=1;}
+  if(!selected){const candidates=resolveReferenceCandidates(job,specifications);selected=[...candidates].sort((a,b)=>((usage.get(a.layout_key)||0)-(usage.get(b.layout_key)||0))||a.layout_key.localeCompare(b.layout_key))[0]||null;}
+  if(!selected)return cloned;
+  const pose=specifications.poses.get(selected.device_pose)||null;cloned.creative_direction=applyReferenceSpecification(job.creative_direction,selected,pose);
+  if(selected.layout_key==="multi_device_grid"){
+   const existing=(cloned.creative_direction.selected_asset_keys||[]).filter(isMobile);cloned.creative_direction.selected_asset_keys=unique([...existing,...mobileCatalog]).slice(0,5);
+   if(cloned.creative_direction.selected_asset_keys.length<4){throw new Error("Reference pilot requires at least four registered mobile assets for multi_device_grid");}
+  }
+  if(selected.layout_key==="flat_lay_product"){
+   cloned.creative_direction.art_direction={...(cloned.creative_direction.art_direction||{}),scene_asset_key:"scene_ivory_plaster_steps_01",readability_veil:"none"};
+  }
+  if(selected.layout_key==="storefront_edge_editorial")cloned.creative_direction.cta_label="Explore Innerbloom";
+  usage.set(selected.layout_key,(usage.get(selected.layout_key)||0)+1);
+  cloned.creative_direction.reference_contract={specification_version:specifications.document.schema_version,layout_key:selected.layout_key,reference_key:selected.reference_key,status:selected.status,copy_locked:true,real_ui_required:true};
+  return cloned;
  });
  const compiledCampaign={...campaign,image_generation:{...(campaign.image_generation||{}),jobs:compiledJobs},layout_reference_plan:{specification_key:specifications.document.spec_key,specification_path:path.relative(repoRoot,specificationPath),compiled_at:new Date().toISOString(),copy_preserved:true,real_innerbloom_assets_only:true,reference_pilot:referencePilot,selected_layout_counts:Object.fromEntries(usage)}};
  const tempDir=await fs.mkdtemp(path.join(os.tmpdir(),"innerbloom-layout-reference-"));const tempCampaignPath=path.join(tempDir,"campaign.reference-compiled.json");
