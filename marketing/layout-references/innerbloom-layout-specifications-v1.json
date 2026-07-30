@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "spec_key": "innerbloom_layout_specifications_v1",
   "reference_pack_key": "innerbloom_layout_reference_pack_v1",
   "policy": {
@@ -17,11 +17,15 @@
     "front_left": {"rotation_deg":[-2,2],"perspective":"front","scale":[0.62,0.78],"crop":"full","grounding":"floating_soft_shadow","preferred_product_zones":["left_center"]},
     "front_centered": {"rotation_deg":[0,0],"perspective":"front","scale":[0.55,0.72],"crop":"full_or_bottom_edge","grounding":"centered_soft_shadow","preferred_product_zones":["center","lower_center"]},
     "diagonal_soft": {"rotation_deg":[-18,-8],"perspective":"soft_three_quarter","scale":[0.72,0.92],"crop":"soft_edge","grounding":"floating_soft_shadow","preferred_product_zones":["center","right_center"]},
+    "diagonal_flat_lay": {"rotation_deg":[-32,-18],"perspective":"top_down_shallow","scale":[0.78,0.98],"crop":"large_diagonal","grounding":"surface_contact","preferred_product_zones":["center","upper_right"]},
+    "front_grid_mixed_scale": {"rotation_deg":[-3,3],"perspective":"front","scale":[0.34,0.63],"device_count":[4,5],"hierarchy":"one_primary_rest_secondary","preferred_product_zones":["right_grid","full_canvas_grid"]},
     "macro_crop": {"rotation_deg":[-3,3],"perspective":"front","scale":[0.9,1.2],"crop":"module_focus","grounding":"none","preferred_product_zones":["center"]},
     "multi_front": {"rotation_deg":[-4,4],"perspective":"front","scale":[0.42,0.68],"device_count":[2,3],"hierarchy":"one_primary_rest_secondary","preferred_product_zones":["center","right_grid"]}
   },
   "layouts": [
     {"layout_key":"editorial_scene_3q","reference_key":"layout_ref_editorial_scene_3q_v1","status":"executable","renderer_layout":"editorial_material_scene","copy_role":"copy_led","copy_zone":"left","product_zone":"lower_right","device_pose":"three_quarter_resting","min_mobile_assets":1,"max_mobile_assets":1,"allowed_backgrounds":["scene_material_warm_textile_lavender_01","scene_ivory_plaster_steps_01","scene_aubergine_pedestal_01","scene_frosted_glass_mist_01"],"fallback_layouts":["split_device_right","split_device_left"]},
+    {"layout_key":"flat_lay_product","reference_key":"layout_ref_flat_lay_patterns_v1","status":"executable","renderer_layout":"flat_lay_product","copy_role":"product_led","copy_zone":"lower_left","product_zone":"center","device_pose":"diagonal_flat_lay","min_mobile_assets":1,"max_mobile_assets":1,"allowed_backgrounds":["scene_ivory_plaster_steps_01"],"fallback_layouts":["storefront_feature_stage"]},
+    {"layout_key":"multi_device_grid","reference_key":"layout_ref_multi_device_mood_grid_v1","status":"executable","renderer_layout":"multi_device_grid","copy_role":"system_led","copy_zone":"left","product_zone":"right_grid","device_pose":"front_grid_mixed_scale","min_mobile_assets":4,"max_mobile_assets":5,"asset_selection_rule":"related_real_screens_only","fallback_layouts":["storefront_feature_stage","carousel_proof_focus"]},
     {"layout_key":"split_device_right","status":"executable","renderer_layout":"split_device_right","copy_role":"copy_led","copy_zone":"left","product_zone":"right_center","device_pose":"front_right","min_mobile_assets":1,"max_mobile_assets":1,"fallback_layouts":["storefront_feature_stage"]},
     {"layout_key":"split_device_left","status":"executable","renderer_layout":"split_device_left","copy_role":"copy_led","copy_zone":"right","product_zone":"left_center","device_pose":"front_left","min_mobile_assets":1,"max_mobile_assets":1,"fallback_layouts":["storefront_feature_stage"]},
     {"layout_key":"cinematic_device_center","status":"executable","renderer_layout":"cinematic_device_center","copy_role":"balanced","copy_zone":"top_center","product_zone":"center","device_pose":"front_centered","min_mobile_assets":1,"max_mobile_assets":1,"fallback_layouts":["storefront_feature_stage"]},
