@@ -17,7 +17,6 @@ function readArgs(argv: string[]): { periodKey: string; force: boolean } {
 
 async function main(): Promise<void> {
   const args = readArgs(process.argv.slice(2));
-  const useLatestCompletedRun = args.periodKey.startsWith('2099-');
   const result = await buildMarketingCmoContextWithDeps(
     {
       periodKey: args.periodKey,
@@ -28,7 +27,7 @@ async function main(): Promise<void> {
       analyticsLoader: (params) =>
         getBestAvailableMarketingAnalyticsContextForPeriod({
           ...params,
-          useLatestCompletedRun,
+          useLatestCompletedRun: true,
         }),
     },
   );
