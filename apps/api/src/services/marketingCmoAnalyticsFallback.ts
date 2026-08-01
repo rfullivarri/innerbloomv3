@@ -60,7 +60,7 @@ export async function getBestAvailableMarketingAnalyticsContextForPeriod({
         LIMIT 1`,
     );
     run = latest.rows[0];
-    fallbackIssue = 'Test-period analytics fallback';
+    fallbackIssue = 'Latest completed analytics fallback';
   }
 
   if (!run) {
