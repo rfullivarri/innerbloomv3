@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { createPortal } from "react-dom";
 import { Sparkles } from "lucide-react";
 import { Card } from "../ui/Card";
@@ -972,6 +972,12 @@ function AchievedShelf({
   const [maintainPendingHabitId, setMaintainPendingHabitId] = useState<
     string | null
   >(null);
+  const [isGridView, setIsGridView] = useState(false);
+  const [gridHabitId, setGridHabitId] = useState<string | null>(null);
+  const [gridShowBack, setGridShowBack] = useState(false);
+  const gridScrollTopRef = useRef(0);
+  const gridTriggerRefs = useRef(new Map<string, HTMLButtonElement>());
+  const gridFlipTimerRef = useRef<number | null>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
   const normalizedGroups = useMemo(() => {
     const byCode = new Map(
@@ -1024,6 +1030,71 @@ function AchievedShelf({
   const isDemoExperience = Boolean(demoStepId);
   const useCompactLockedPreview = demoStepId?.startsWith("logros-") ?? false;
   const isCarouselView = viewMode === "carousel";
+
+  const closeGridDetail = useCallback(() => {
+    if (gridFlipTimerRef.current != null) {
+      window.clearTimeout(gridFlipTimerRef.current);
+      gridFlipTimerRef.current = null;
+    }
+    const closingId = gridHabitId;
+    setGridShowBack(false);
+    window.setTimeout(() => {
+      setGridHabitId(null);
+      window.scrollTo({ top: gridScrollTopRef.current, behavior: "auto" });
+      gridTriggerRefs.current.get(closingId ?? "")?.focus({ preventScroll: true });
+    }, prefersReducedMotion ? 0 : 260);
+  }, [gridHabitId, prefersReducedMotion]);
+
+  const closeGrid = useCallback(() => {
+    if (gridHabitId) {
+      closeGridDetail();
+      return;
+    }
+    setIsGridView(false);
+  }, [closeGridDetail, gridHabitId]);
+
+  const openGridDetail = useCallback((habit: HabitAchievementShelfItem) => {
+    if (gridHabitId) return;
+    gridScrollTopRef.current = window.scrollY;
+    setGridHabitId(habit.id);
+    setGridShowBack(prefersReducedMotion);
+    if (!prefersReducedMotion) {
+      gridFlipTimerRef.current = window.setTimeout(() => {
+        setGridShowBack(true);
+        gridFlipTimerRef.current = null;
+      }, 420);
+    }
+  }, [gridHabitId, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!isGridView) return;
+    const previousOverflow = document.body.style.overflowX;
+    document.body.style.overflowX = "hidden";
+    const onPopState = () => closeGrid();
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      document.body.style.overflowX = previousOverflow;
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [closeGrid, isGridView]);
+
+  useEffect(() => {
+    if (!gridHabitId) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeGridDetail();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [closeGridDetail, gridHabitId]);
+
+  useEffect(() => () => {
+    if (gridFlipTimerRef.current != null) window.clearTimeout(gridFlipTimerRef.current);
+  }, []);
 
   useEffect(() => {
     if (viewMode !== "shelves") {
@@ -1396,7 +1467,39 @@ function AchievedShelf({
   };
 
   return (
-    <div className="space-y-3" data-demo-anchor={demoAnchors?.shelves}>
+    <LayoutGroup id="all-achievements">
+    <div className="space-y-3 overflow-x-clip" data-demo-anchor={demoAnchors?.shelves}>
+      <div className="flex min-h-11 items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-[color:var(--color-text-strong)]">
+          {isGridView
+            ? language === "es" ? "Todos los logros" : "All Achievements"
+            : language === "es" ? "Hábitos logrados" : "Achieved habits"}
+        </h2>
+        {isGridView ? (
+          <button
+            type="button"
+            onClick={() => window.history.back()}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card)] px-3 text-xs font-semibold text-[color:var(--color-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400"
+            aria-label={language === "es" ? "Volver a Logros" : "Back to Achievements"}
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="m15 18-6-6 6-6" /></svg>
+            {language === "es" ? "Volver" : "Back"}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              window.history.pushState({ innerbloomAchievementsGrid: true }, "");
+              setIsGridView(true);
+            }}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--ib-surface-card)] text-[color:var(--color-text)] transition hover:bg-[color:var(--ib-surface-card-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400"
+            aria-label={language === "es" ? "Abrir vista en grilla de todos los logros" : "Open all achievements grid view"}
+            aria-pressed={isGridView}
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>
+          </button>
+        )}
+      </div>
       {!isCarouselView && isShelfFocusStep ? (
         <div
           data-demo-anchor="logros-shelves-pillars"
@@ -1416,7 +1519,62 @@ function AchievedShelf({
           </div>
         </div>
       ) : null}
-      {isCarouselView ? (
+      {isGridView ? (
+        <div className="space-y-7 pb-[calc(env(safe-area-inset-bottom)+5rem)]" data-achievement-view="grid">
+          {normalizedGroups.map((group) => {
+            const achievedCount = group.habits.filter((habit) => habit.status !== "not_achieved").length;
+            return (
+              <section key={`grid-${group.pillar.code}`} className="space-y-3" aria-labelledby={`achievement-grid-${group.pillar.code}`}>
+                <div className="flex items-baseline justify-between gap-3 border-b border-[color:var(--color-border-subtle)] pb-2">
+                  <h3 id={`achievement-grid-${group.pillar.code}`} className="text-sm font-semibold text-[color:var(--color-text-strong)]">
+                    {resolvePillarHeader(group.pillar, language)}
+                  </h3>
+                  <p className="shrink-0 text-[11px] font-semibold text-[color:var(--color-text-dim)]">
+                    {achievedCount} / {group.habits.length} {language === "es" ? "logrados" : "achieved"}
+                  </p>
+                </div>
+                {group.habits.length ? (
+                  <div className="grid grid-cols-3 gap-x-2 gap-y-4 min-[370px]:grid-cols-4">
+                    {group.habits.map((habit) => {
+                      const achieved = habit.status !== "not_achieved";
+                      return (
+                        <button
+                          key={habit.id}
+                          ref={(node) => { if (node) gridTriggerRefs.current.set(habit.id, node); else gridTriggerRefs.current.delete(habit.id); }}
+                          type="button"
+                          onClick={() => {
+                            window.history.pushState({ innerbloomAchievementDetail: habit.id }, "");
+                            openGridDetail(habit);
+                          }}
+                          disabled={Boolean(gridHabitId)}
+                          aria-label={`${habit.taskName}, ${achieved ? (language === "es" ? "logrado" : "achieved") : (language === "es" ? "no logrado" : "not achieved")}`}
+                          className="group flex min-h-24 min-w-0 flex-col items-center justify-start rounded-xl px-1 py-1 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 disabled:pointer-events-none"
+                        >
+                          <motion.span layoutId={`achievement-${habit.id}`} className="flex h-[4.25rem] w-[4.25rem] items-center justify-center min-[390px]:h-[4.75rem] min-[390px]:w-[4.75rem]">
+                            <HabitAchievementSeal
+                              pillar={habit.pillar ?? group.pillar.code}
+                              traitCode={habit.trait?.code}
+                              traitName={habit.trait?.name}
+                              alt={`${habit.taskName} seal`}
+                              disabled={!achieved}
+                              className={`h-full w-full overflow-hidden rounded-full ${achieved ? "" : "opacity-55"}`}
+                              imgClassName="h-full w-full object-contain"
+                              fallback={<span className="text-xs font-semibold text-[color:var(--color-text-dim)]">{getSealBadge(habit)}</span>}
+                            />
+                          </motion.span>
+                          <span className="mt-1 line-clamp-2 w-full text-[11px] font-medium leading-tight text-[color:var(--color-text-muted)]">{habit.taskName}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="py-4 text-sm text-[color:var(--color-text-muted)]">{language === "es" ? "Sin tareas seguidas en este pilar todavía." : "No tracked tasks in this pillar yet."}</p>
+                )}
+              </section>
+            );
+          })}
+        </div>
+      ) : isCarouselView ? (
         <div
           className="space-y-3"
           data-demo-anchor={demoAnchors?.carouselStructure}
@@ -1800,7 +1958,109 @@ function AchievedShelf({
           />
         </>
       ) : null}
+      <AnimatePresence>
+        {isGridView && gridHabitId && habitsById.get(gridHabitId) ? (
+          <AchievementGridOverlay
+            key={gridHabitId}
+            habit={habitsById.get(gridHabitId)!}
+            language={language}
+            showBack={gridShowBack}
+            prefersReducedMotion={prefersReducedMotion}
+            disableRemote={disableRemote}
+            mockPreviewAchievementByTaskId={mockPreviewAchievementByTaskId}
+            maintainPendingHabitId={maintainPendingHabitId}
+            onToggleMaintained={handleToggleMaintained}
+            onClose={() => window.history.back()}
+          />
+        ) : null}
+      </AnimatePresence>
     </div>
+    </LayoutGroup>
+  );
+}
+
+function AchievementGridOverlay({
+  habit,
+  language,
+  showBack,
+  prefersReducedMotion,
+  disableRemote,
+  mockPreviewAchievementByTaskId,
+  maintainPendingHabitId,
+  onToggleMaintained,
+  onClose,
+}: {
+  habit: HabitAchievementShelfItem;
+  language: "es" | "en";
+  showBack: boolean;
+  prefersReducedMotion: boolean;
+  disableRemote: boolean;
+  mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse["previewAchievement"]>>;
+  maintainPendingHabitId: string | null;
+  onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>;
+  onClose: () => void;
+}) {
+  if (typeof document === "undefined") return null;
+  const achieved = habit.status !== "not_achieved";
+
+  return createPortal(
+    <motion.div
+      className="fixed inset-0 z-[230] flex items-center justify-center overflow-hidden bg-slate-950/70 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[calc(env(safe-area-inset-top)+1rem)]"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: prefersReducedMotion ? 0.1 : 0.25 }}
+      onClick={onClose}
+      data-achievement-overlay="grid-card"
+    >
+      <motion.div
+        layoutId={`achievement-${habit.id}`}
+        className="relative h-[min(78dvh,30rem)] min-h-[22rem] w-full max-w-sm [perspective:1200px]"
+        transition={prefersReducedMotion ? { duration: 0.1 } : { type: "spring", stiffness: 240, damping: 27 }}
+        onClick={(event) => { event.stopPropagation(); onClose(); }}
+      >
+        <motion.div
+          className="relative h-full w-full [transform-style:preserve-3d]"
+          animate={{ rotateY: showBack || prefersReducedMotion ? 180 : 0 }}
+          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.65, ease: [0.2, 0.82, 0.2, 1] }}
+          data-achievement-grid-flip={showBack ? "back" : "front"}
+        >
+          <div className={`ib-card-contour-shadow absolute inset-0 flex flex-col items-center justify-center gap-4 overflow-hidden rounded-[1.9rem] border bg-[color:var(--color-surface-elevated)] p-5 text-center [backface-visibility:hidden] ${achieved ? "border-amber-400/80" : "border-dashed border-[color:var(--color-border-strong)]"}`}>
+            <HabitAchievementSeal
+              pillar={habit.pillar}
+              traitCode={habit.trait?.code}
+              traitName={habit.trait?.name}
+              alt={`${habit.taskName} seal`}
+              disabled={!achieved}
+              className={`h-[min(60vw,16rem)] w-[min(60vw,16rem)] overflow-hidden rounded-full ${achieved ? "" : "opacity-55"}`}
+              imgClassName="h-full w-full object-contain"
+              fallback={<span className="text-4xl text-[color:var(--color-text-muted)]">{(habit.pillar ?? "X").slice(0, 1)}-{habit.trait?.code?.slice(0, 3) ?? "---"}</span>}
+            />
+            <p className="text-lg font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</p>
+          </div>
+          <div className={`ib-card-contour-shadow absolute inset-0 flex h-full flex-col overflow-hidden rounded-[1.9rem] border p-4 text-left [backface-visibility:hidden] [transform:rotateY(180deg)] ${achieved ? "border-amber-400/85 bg-[radial-gradient(circle_at_50%_18%,rgba(251,191,36,0.12),transparent_46%),var(--color-surface-elevated)]" : "border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)]"}`}>
+            {showBack || prefersReducedMotion ? achieved ? (
+              <>
+                <AchievedHabitBackContent habit={habit} language={language} disableRemote={disableRemote} maintainPendingHabitId={maintainPendingHabitId} onToggleMaintainedWithPending={onToggleMaintained} compact />
+                <p className="mt-auto text-xs text-[color:var(--color-text-dim)]">{language === "es" ? "Toca para volver" : "Tap to go back"}</p>
+              </>
+            ) : (
+              <>
+                <div className="space-y-0.5">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-text-dim)]">{language === "es" ? "Logro bloqueado" : "Achievement locked"}</p>
+                  <h3 className="text-base font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</h3>
+                </div>
+                <div className="min-h-0 flex-1">
+                  <LockedAchievementHabitDevelopment habit={habit} language={language} disableRemote={disableRemote} mockPreviewAchievementByTaskId={mockPreviewAchievementByTaskId} loadOnVisible compact embedded />
+                </div>
+                <p className="text-xs text-[color:var(--color-text-dim)]">{language === "es" ? "Toca para volver" : "Tap to go back"}</p>
+              </>
+            ) : null}
+          </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>,
+    document.body,
   );
 }
 

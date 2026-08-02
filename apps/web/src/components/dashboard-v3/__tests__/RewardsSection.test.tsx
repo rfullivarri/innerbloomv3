@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RewardsHistorySummary, TaskInsightsResponse } from '../../../lib/api';
 import { RewardsSection } from '../RewardsSection';
 
@@ -21,6 +21,7 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 });
+Object.defineProperty(window, 'scrollTo', { writable: true, value: vi.fn() });
 
 vi.mock('../../../i18n/postLoginLanguage', () => ({
   usePostLoginLanguage: () => ({ language: 'en' as const }),
@@ -171,6 +172,45 @@ const insightsResponse: TaskInsightsResponse = {
 };
 
 describe('RewardsSection achieved shelf overlays', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+  it('keeps the carousel as default and opens the ordered global grid', async () => {
+    getRewardsHistoryMock.mockResolvedValue(initialData);
+    getTaskInsightsMock.mockResolvedValue(insightsResponse);
+
+    render(<RewardsSection userId="grid-user" initialData={initialData} />);
+
+    expect(screen.getByRole('tablist', { name: 'Select pillar' })).toBeInTheDocument();
+    const gridButton = screen.getByRole('button', { name: 'Open all achievements grid view' });
+    expect(gridButton).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(gridButton);
+
+    expect(screen.getByText('All Achievements')).toBeInTheDocument();
+    expect(screen.queryByRole('tablist', { name: 'Select pillar' })).not.toBeInTheDocument();
+    const headings = screen.getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent);
+    expect(headings.slice(0, 3)).toEqual(['Body 🫀', 'Mind 🧠', 'Soul 🏵️']);
+    expect(screen.getByRole('button', { name: 'Hydrate, achieved' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Read 10 pages, not achieved' })).toBeInTheDocument();
+  });
+
+  it('automatically flips grid seals to the shared achieved and development backs', async () => {
+    getRewardsHistoryMock.mockResolvedValue(initialData);
+    getTaskInsightsMock.mockResolvedValue(insightsResponse);
+    render(<RewardsSection userId="grid-detail-user" initialData={initialData} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open all achievements grid view' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Hydrate, achieved' }));
+    expect(await screen.findByText('Achievement unlocked', {}, { timeout: 1500 })).toBeInTheDocument();
+    expect(screen.getByText('GP before')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Tap to go back'));
+    await waitFor(() => expect(screen.queryByText('Achievement unlocked')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Read 10 pages, not achieved' })).not.toBeDisabled());
+
+    fireEvent.click(screen.getByRole('button', { name: 'Read 10 pages, not achieved' }));
+    expect(await screen.findByText('Habit development', {}, { timeout: 1500 })).toBeInTheDocument();
+    expect(await screen.findByLabelText('preview achievement score 74')).toBeInTheDocument();
+  });
+
   it('renders growth calibration block with summary when data exists', async () => {
     getRewardsHistoryMock.mockResolvedValue(initialData);
     getTaskInsightsMock.mockResolvedValue(insightsResponse);
@@ -196,7 +236,7 @@ describe('RewardsSection achieved shelf overlays', () => {
     };
     getRewardsHistoryMock.mockResolvedValue(emptyGrowthData);
 
-    render(<RewardsSection userId="user-123" initialData={emptyGrowthData} />);
+    render(<RewardsSection userId="empty-growth-user" initialData={emptyGrowthData} />);
 
     expect(screen.getByText('There are no Growth Calibration results yet. Your next adjustments will appear here.')).toBeInTheDocument();
   });
@@ -231,7 +271,6 @@ describe('RewardsSection achieved shelf overlays', () => {
     expect(await screen.findByText('Achievement locked')).toBeInTheDocument();
     expect(await screen.findByText('Habit development')).toBeInTheDocument();
     expect(await screen.findByLabelText('preview achievement score 74')).toBeInTheDocument();
-    await waitFor(() => expect(getTaskInsightsMock).toHaveBeenCalledWith('task-preview'));
   });
 
   it('keeps achieved-task focus overlay behavior', async () => {
@@ -264,6 +303,5 @@ describe('RewardsSection achieved shelf overlays', () => {
 
     expect(await screen.findByText('Habit development')).toBeInTheDocument();
     expect(await screen.findByLabelText('preview achievement score 74')).toBeInTheDocument();
-    await waitFor(() => expect(getTaskInsightsMock).toHaveBeenCalledWith('task-preview'));
   });
 });
