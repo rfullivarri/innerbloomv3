@@ -14,6 +14,7 @@ import {
   type SubmitDailyQuestLogger,
 } from '../services/dailyQuestService.js';
 import { markOnboardingProgressStep } from '../services/onboardingProgressService.js';
+import { runMonthlyMaintenanceWatchdog } from '../services/monthlyMaintenanceWatchdog.js';
 
 const router = Router();
 
@@ -124,6 +125,19 @@ router.post(
 
     try {
       const result = await submitDailyQuest(user.id, payload, { requestId: reqId, log });
+
+      // The first Daily Quest submitted in a new month is the user-facing fallback
+      // for a missed cron/watchdog interval. Awaiting this idempotent check means
+      // a closed month is settled before Logros and Wrapped are rendered again.
+      try {
+        await runMonthlyMaintenanceWatchdog(new Date());
+      } catch (error) {
+        log('warn', 'Monthly maintenance check failed after daily quest submit', {
+          userId: user.id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
       await markOnboardingProgressStep(user.id, 'first_daily_quest_completed', {
         source: { trigger: 'daily_quest_submit' },
       });
