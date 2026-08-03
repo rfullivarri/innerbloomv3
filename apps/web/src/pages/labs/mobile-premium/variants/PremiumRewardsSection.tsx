@@ -744,23 +744,23 @@ function AllAchievementsGrid({
 }
 
 function AchievementGridOverlay({ backendUserId, habit, maintainPending, onClose, onToggleMaintained, reducedMotion, showBack }: { backendUserId: string | null; habit: HabitAchievementShelfItem; maintainPending: boolean; onClose: () => void; onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>; reducedMotion: boolean; showBack: boolean }) {
-  const achieved = isHabitAchieved(habit);
   return renderStoryPortal(
     <motion.div animate={{ opacity: 1 }} className="fixed inset-0 z-[9999] flex h-[100dvh] items-center justify-center overflow-hidden bg-black/92 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[calc(env(safe-area-inset-top)+1rem)] backdrop-blur-sm" data-mp-achievement-overlay="grid-card" exit={{ opacity: 0 }} initial={{ opacity: 0 }} onClick={onClose} transition={{ duration: reducedMotion ? 0.1 : 0.24 }}>
-      <motion.div className="relative h-[min(76dvh,31rem)] min-h-[21rem] w-full max-w-[23rem] [perspective:1100px]" layoutId={`mp-achievement-${habit.id}`} onClick={(event) => event.stopPropagation()} transition={reducedMotion ? { duration: 0.1 } : { type: 'spring', stiffness: 250, damping: 28 }}>
-        <motion.div animate={{ rotateY: showBack || reducedMotion ? 180 : 0 }} className="relative h-full w-full [transform-style:preserve-3d]" data-mp-achievement-flip={showBack ? 'back' : 'front'} transition={reducedMotion ? { duration: 0 } : { duration: 0.58, ease: [0.2, 0.82, 0.2, 1] }}>
-          <div className={`absolute inset-0 rounded-[1.55rem] border bg-[color:var(--mp-surface)] p-5 text-center [backface-visibility:hidden] ${achieved ? 'border-violet-300/65' : 'border-amber-300/55 opacity-70 grayscale'}`}>
-            <AchievementFrontFace habit={habit} isActive onShareAchievement={() => undefined} />
-          </div>
-          <div className={`absolute inset-0 rounded-[1.55rem] border bg-[color:var(--mp-surface)] p-4 [backface-visibility:hidden] [transform:rotateY(180deg)] ${achieved ? 'border-violet-300/65' : 'border-amber-300/55'}`}>
-            {showBack || reducedMotion ? achieved ? <AchievementBackFace habit={habit} maintainPending={maintainPending} onToggleMaintained={onToggleMaintained} /> : <LockedHabitBackFace backendUserId={backendUserId} habit={habit} isFlipped /> : null}
-          </div>
-        </motion.div>
+      <motion.div className="relative flex h-[min(76dvh,31rem)] min-h-[21rem] w-full max-w-[23rem] items-center justify-center" layoutId={`mp-achievement-${habit.id}`} onClick={(event) => event.stopPropagation()} transition={reducedMotion ? { duration: 0.1 } : { type: 'spring', stiffness: 250, damping: 28 }}>
+        <AchievementCarouselCard
+          backendUserId={backendUserId}
+          habit={habit}
+          isActive
+          isFlipped={showBack || reducedMotion}
+          maintainPending={maintainPending}
+          onClick={onClose}
+          onShareAchievement={() => undefined}
+          onToggleMaintained={onToggleMaintained}
+        />
       </motion.div>
     </motion.div>,
   );
 }
-
 function renderStoryPortal(children: ReactNode) {
   if (typeof document === 'undefined') return children;
   return createPortal(children, document.body);
