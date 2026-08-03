@@ -276,8 +276,7 @@ export function PremiumRewardsSection({
     { enabled: Boolean(backendUserId) },
   );
   const previewRewards = onboardingPreview && localSnapshot ? buildLocalPreviewRewards(localSnapshot) : EMPTY_REWARDS_HISTORY;
-  const rewards = localRewards ?? data ?? (onboardingPreview ? previewRewards : FALLBACK_REWARDS_HISTORY);
-  const hasRealRewards = Boolean(localRewards ?? data) || onboardingPreview;
+  const rewards = localRewards ?? data ?? (onboardingPreview ? previewRewards : EMPTY_REWARDS_HISTORY);
   const groups = normalizeRewardGroups(rewards.habitAchievements.achievedByPillar);
   const activeGroup = groups.find((group) => group.pillar.code === activePillar) ?? groups[0];
   const habits = activeGroup?.habits ?? [];
@@ -286,12 +285,8 @@ export function PremiumRewardsSection({
   const currentPendingReview = pendingReviewItems[pendingDecisionIndex] ?? pendingReviewItems[0] ?? null;
   const safeActiveIndex = Math.min(Math.max(activeIndex, 0), Math.max(habits.length - 1, 0));
   const growth = rewards.growthCalibration;
-  const weeklyItems = rewards.weeklyWrapups.length
-    ? rewards.weeklyWrapups.slice(0, 2)
-    : hasRealRewards
-      ? []
-      : FALLBACK_REWARDS_HISTORY.weeklyWrapups.slice(0, 2);
-  const monthly = rewards.monthlyWrapups[0] ?? (hasRealRewards ? null : FALLBACK_REWARDS_HISTORY.monthlyWrapups[0]);
+  const weeklyItems = rewards.weeklyWrapups.slice(0, 2);
+  const monthly = rewards.monthlyWrapups[0] ?? null;
 
   useEffect(() => {
     const initialIndex = Math.min(1, Math.max(0, habits.length - 1));
@@ -751,8 +746,8 @@ function AllAchievementsGrid({
 function AchievementGridOverlay({ backendUserId, habit, maintainPending, onClose, onToggleMaintained, reducedMotion, showBack }: { backendUserId: string | null; habit: HabitAchievementShelfItem; maintainPending: boolean; onClose: () => void; onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>; reducedMotion: boolean; showBack: boolean }) {
   const achieved = isHabitAchieved(habit);
   return renderStoryPortal(
-    <motion.div animate={{ opacity: 1 }} className="fixed inset-0 z-[9999] flex h-[100dvh] items-center justify-center overflow-hidden bg-black/70 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[calc(env(safe-area-inset-top)+1rem)]" data-mp-achievement-overlay="grid-card" exit={{ opacity: 0 }} initial={{ opacity: 0 }} onClick={onClose} transition={{ duration: reducedMotion ? 0.1 : 0.24 }}>
-      <motion.div className="relative h-[min(76dvh,31rem)] min-h-[21rem] w-full max-w-[23rem] [perspective:1100px]" layoutId={`mp-achievement-${habit.id}`} onClick={(event) => { event.stopPropagation(); onClose(); }} transition={reducedMotion ? { duration: 0.1 } : { type: 'spring', stiffness: 250, damping: 28 }}>
+    <motion.div animate={{ opacity: 1 }} className="fixed inset-0 z-[9999] flex h-[100dvh] items-center justify-center overflow-hidden bg-black/92 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[calc(env(safe-area-inset-top)+1rem)] backdrop-blur-sm" data-mp-achievement-overlay="grid-card" exit={{ opacity: 0 }} initial={{ opacity: 0 }} onClick={onClose} transition={{ duration: reducedMotion ? 0.1 : 0.24 }}>
+      <motion.div className="relative h-[min(76dvh,31rem)] min-h-[21rem] w-full max-w-[23rem] [perspective:1100px]" layoutId={`mp-achievement-${habit.id}`} onClick={(event) => event.stopPropagation()} transition={reducedMotion ? { duration: 0.1 } : { type: 'spring', stiffness: 250, damping: 28 }}>
         <motion.div animate={{ rotateY: showBack || reducedMotion ? 180 : 0 }} className="relative h-full w-full [transform-style:preserve-3d]" data-mp-achievement-flip={showBack ? 'back' : 'front'} transition={reducedMotion ? { duration: 0 } : { duration: 0.58, ease: [0.2, 0.82, 0.2, 1] }}>
           <div className={`absolute inset-0 rounded-[1.55rem] border bg-[color:var(--mp-surface)] p-5 text-center [backface-visibility:hidden] ${achieved ? 'border-violet-300/65' : 'border-amber-300/55 opacity-70 grayscale'}`}>
             <AchievementFrontFace habit={habit} isActive onShareAchievement={() => undefined} />
@@ -5439,15 +5434,24 @@ function resolveMonthlyHabitProgress(
       return !rowPeriod || rowPeriod === currentPeriod || rowPeriod === rewards.growthCalibration.latestPeriodLabel?.slice(0, 7);
     });
   const periodWindow = buildMonthlyPeriodWindow(currentPeriod);
-  const unlockedHabits = rows
-    .filter((row) => clampMonthlyScore(row.completionRatePct) >= 100)
-    .sort((a, b) => a.taskTitle.localeCompare(b.taskTitle, 'es', { sensitivity: 'base' }))
+  const unlockedHabits = rewards.habitAchievements.achievedByPillar
+    .flatMap((group) =>
+      group.habits.map((habit) => ({
+        habit,
+        pillar: group.pillar.name ?? group.pillar.code ?? 'Tarea',
+      })),
+    )
+    .filter(({ habit }) =>
+      (habit.status === 'maintained' || habit.status === 'stored') &&
+      habit.achievedAt?.slice(0, 7) === currentPeriod,
+    )
+    .sort((a, b) => a.habit.taskName.localeCompare(b.habit.taskName, 'es', { sensitivity: 'base' }))
     .slice(0, 2)
-    .map((row) => ({
-      label: row.pillar ?? 'Tarea',
-      monthLabel: formatMonthFromPeriod(row.evaluationMonthLabel) ?? formatMonthFromPeriod(currentPeriod) ?? 'Mes',
+    .map(({ habit, pillar }) => ({
+      label: pillar,
+      monthLabel: formatMonthFromPeriod(currentPeriod) ?? 'Mes',
       percent: 100,
-      title: row.taskTitle,
+      title: habit.taskName,
     }));
   const nearHabits = rows
     .filter((row) => {
