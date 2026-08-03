@@ -1,0 +1,97 @@
+name: Apply Innerbloom 2.0 task delete flow fix
+
+on:
+  push:
+    branches:
+      - agent/innerbloom2-task-delete-flow
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/innerbloom2-task-delete-flow
+          fetch-depth: 0
+
+      - name: Patch task deletion UX
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          editor_path = Path('apps/web/src/pages/editor/index.tsx')
+          editor = editor_path.read_text()
+
+          old = '''    try {
+              await deleteTask(backendUserId, taskToDelete.id);
+              setTaskToDelete(null);
+            } catch (error) {
+          '''
+          new = '''    const deletedTaskId = taskToDelete.id;
+
+            try {
+              await deleteTask(backendUserId, deletedTaskId);
+              setTaskToDelete(null);
+              setTaskToEdit(null);
+              setEditGroupKey(null);
+              setPageToast({
+                type: "success",
+                text: t("editor.toast.delete.success"),
+              });
+              window.dispatchEvent(
+                new CustomEvent("innerbloom:tasks-updated", {
+                  detail: {
+                    type: "deleted",
+                    taskId: deletedTaskId,
+                    userId: backendUserId,
+                  },
+                }),
+              );
+              await reloadTasks();
+            } catch (error) {
+          '''
+          if old not in editor:
+              raise SystemExit('Delete handler success block not found')
+          editor = editor.replace(old, new, 1)
+
+          old_deps = '''  }, [backendUserId, deleteTask, publicDemo, t, taskToDelete]);'''
+          new_deps = '''  }, [backendUserId, deleteTask, publicDemo, reloadTasks, t, taskToDelete]);'''
+          if old_deps not in editor:
+              raise SystemExit('Delete handler dependency list not found')
+          editor = editor.replace(old_deps, new_deps, 1)
+          editor_path.write_text(editor)
+
+          translations_path = Path('apps/web/src/i18n/post-login/editor.ts')
+          translations = translations_path.read_text()
+          old_translation = '''  'editor.toast.delete.error': { es: 'No se pudo eliminar la tarea.', en: 'Could not delete task.' },'''
+          new_translation = '''  'editor.toast.delete.success': { es: 'Tarea eliminada.', en: 'Task deleted.' },
+            'editor.toast.delete.error': { es: 'No se pudo eliminar la tarea.', en: 'Could not delete task.' },'''
+          if old_translation not in translations:
+              raise SystemExit('Delete toast translation insertion point not found')
+          translations = translations.replace(old_translation, new_translation, 1)
+          translations_path.write_text(translations)
+          PY
+
+      - name: Verify patch
+        shell: bash
+        run: |
+          grep -q 'editor.toast.delete.success' apps/web/src/pages/editor/index.tsx
+          grep -q 'setTaskToEdit(null)' apps/web/src/pages/editor/index.tsx
+          grep -q 'setEditGroupKey(null)' apps/web/src/pages/editor/index.tsx
+          grep -q 'innerbloom:tasks-updated' apps/web/src/pages/editor/index.tsx
+          grep -q "'editor.toast.delete.success'" apps/web/src/i18n/post-login/editor.ts
+
+      - name: Commit fix and remove temporary workflow
+        shell: bash
+        run: |
+          rm .github/workflows/apply-innerbloom2-task-delete-flow.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/src/pages/editor/index.tsx apps/web/src/i18n/post-login/editor.ts .github/workflows/apply-innerbloom2-task-delete-flow.yml
+          git commit -m "fix Innerbloom 2.0 task deletion flow"
+          git push origin HEAD:agent/innerbloom2-task-delete-flow
