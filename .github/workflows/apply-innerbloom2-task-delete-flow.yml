@@ -27,44 +27,52 @@ jobs:
         run: |
           python3 <<'PY'
           from pathlib import Path
+          import re
 
           editor_path = Path('apps/web/src/pages/editor/index.tsx')
           editor = editor_path.read_text()
 
-          old = '''    try {
-              await deleteTask(backendUserId, taskToDelete.id);
-              setTaskToDelete(null);
-            } catch (error) {
-          '''
-          new = '''    const deletedTaskId = taskToDelete.id;
+          pattern = re.compile(
+              r'^(?P<indent>[ \t]*)try \{\n'
+              r'(?P=indent)[ \t]+await deleteTask\(backendUserId, taskToDelete\.id\);\n'
+              r'(?P=indent)[ \t]+setTaskToDelete\(null\);\n'
+              r'(?P=indent)\} catch \(error\) \{',
+              re.MULTILINE,
+          )
 
-            try {
-              await deleteTask(backendUserId, deletedTaskId);
-              setTaskToDelete(null);
-              setTaskToEdit(null);
-              setEditGroupKey(null);
-              setPageToast({
-                type: "success",
-                text: t("editor.toast.delete.success"),
-              });
-              window.dispatchEvent(
-                new CustomEvent("innerbloom:tasks-updated", {
-                  detail: {
-                    type: "deleted",
-                    taskId: deletedTaskId,
-                    userId: backendUserId,
-                  },
-                }),
-              );
-              await reloadTasks();
-            } catch (error) {
-          '''
-          if old not in editor:
-              raise SystemExit('Delete handler success block not found')
-          editor = editor.replace(old, new, 1)
+          def replace_delete_block(match):
+              indent = match.group('indent')
+              inner = indent + '  '
+              return (
+                  f'{indent}const deletedTaskId = taskToDelete.id;\n\n'
+                  f'{indent}try {{\n'
+                  f'{inner}await deleteTask(backendUserId, deletedTaskId);\n'
+                  f'{inner}setTaskToDelete(null);\n'
+                  f'{inner}setTaskToEdit(null);\n'
+                  f'{inner}setEditGroupKey(null);\n'
+                  f'{inner}setPageToast({{\n'
+                  f'{inner}  type: "success",\n'
+                  f'{inner}  text: t("editor.toast.delete.success"),\n'
+                  f'{inner}}});\n'
+                  f'{inner}window.dispatchEvent(\n'
+                  f'{inner}  new CustomEvent("innerbloom:tasks-updated", {{\n'
+                  f'{inner}    detail: {{\n'
+                  f'{inner}      type: "deleted",\n'
+                  f'{inner}      taskId: deletedTaskId,\n'
+                  f'{inner}      userId: backendUserId,\n'
+                  f'{inner}    }},\n'
+                  f'{inner}  }}),\n'
+                  f'{inner});\n'
+                  f'{inner}await reloadTasks();\n'
+                  f'{indent}}} catch (error) {{'
+              )
 
-          old_deps = '''  }, [backendUserId, deleteTask, publicDemo, t, taskToDelete]);'''
-          new_deps = '''  }, [backendUserId, deleteTask, publicDemo, reloadTasks, t, taskToDelete]);'''
+          editor, replacement_count = pattern.subn(replace_delete_block, editor, count=1)
+          if replacement_count != 1:
+              raise SystemExit(f'Expected one delete handler block, found {replacement_count}')
+
+          old_deps = '  }, [backendUserId, deleteTask, publicDemo, t, taskToDelete]);'
+          new_deps = '  }, [backendUserId, deleteTask, publicDemo, reloadTasks, t, taskToDelete]);'
           if old_deps not in editor:
               raise SystemExit('Delete handler dependency list not found')
           editor = editor.replace(old_deps, new_deps, 1)
@@ -72,9 +80,11 @@ jobs:
 
           translations_path = Path('apps/web/src/i18n/post-login/editor.ts')
           translations = translations_path.read_text()
-          old_translation = '''  'editor.toast.delete.error': { es: 'No se pudo eliminar la tarea.', en: 'Could not delete task.' },'''
-          new_translation = '''  'editor.toast.delete.success': { es: 'Tarea eliminada.', en: 'Task deleted.' },
-            'editor.toast.delete.error': { es: 'No se pudo eliminar la tarea.', en: 'Could not delete task.' },'''
+          old_translation = "  'editor.toast.delete.error': { es: 'No se pudo eliminar la tarea.', en: 'Could not delete task.' },"
+          new_translation = (
+              "  'editor.toast.delete.success': { es: 'Tarea eliminada.', en: 'Task deleted.' },\n"
+              "  'editor.toast.delete.error': { es: 'No se pudo eliminar la tarea.', en: 'Could not delete task.' },"
+          )
           if old_translation not in translations:
               raise SystemExit('Delete toast translation insertion point not found')
           translations = translations.replace(old_translation, new_translation, 1)
@@ -88,6 +98,7 @@ jobs:
           grep -q 'setTaskToEdit(null)' apps/web/src/pages/editor/index.tsx
           grep -q 'setEditGroupKey(null)' apps/web/src/pages/editor/index.tsx
           grep -q 'innerbloom:tasks-updated' apps/web/src/pages/editor/index.tsx
+          grep -q 'await reloadTasks()' apps/web/src/pages/editor/index.tsx
           grep -q "'editor.toast.delete.success'" apps/web/src/i18n/post-login/editor.ts
 
       - name: Commit fix and remove temporary workflow
