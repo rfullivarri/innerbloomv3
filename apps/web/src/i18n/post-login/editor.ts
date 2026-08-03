@@ -196,6 +196,7 @@ export const editorTranslations = {
   'editor.toast.create.error': { es: 'No se pudo crear la tarea.', en: 'Could not create task.' },
   'editor.toast.update.success': { es: 'Tarea actualizada correctamente.', en: 'Task updated successfully.' },
   'editor.toast.update.error': { es: 'No se pudo actualizar la tarea.', en: 'Could not update task.' },
+  'editor.toast.delete.success': { es: 'Tarea eliminada.', en: 'Task deleted.' },
   'editor.toast.delete.error': { es: 'No se pudo eliminar la tarea.', en: 'Could not delete task.' },
   'editor.toast.duplicate.success': { es: 'Tarea duplicada correctamente.', en: 'Task duplicated successfully.' },
   'editor.toast.duplicate.error': { es: 'No se pudo duplicar la tarea.', en: 'Could not duplicate task.' },
