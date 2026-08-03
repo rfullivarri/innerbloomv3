@@ -744,6 +744,14 @@ function AllAchievementsGrid({
 }
 
 function AchievementGridOverlay({ backendUserId, habit, maintainPending, onClose, onToggleMaintained, reducedMotion, showBack }: { backendUserId: string | null; habit: HabitAchievementShelfItem; maintainPending: boolean; onClose: () => void; onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>; reducedMotion: boolean; showBack: boolean }) {
+  const [isBackVisible, setIsBackVisible] = useState(showBack || reducedMotion);
+
+  useEffect(() => {
+    if (showBack || reducedMotion) {
+      setIsBackVisible(true);
+    }
+  }, [reducedMotion, showBack]);
+
   return renderStoryPortal(
     <motion.div animate={{ opacity: 1 }} className="fixed inset-0 z-[9999] flex h-[100dvh] items-center justify-center overflow-hidden bg-black/92 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[calc(env(safe-area-inset-top)+1rem)] backdrop-blur-sm" data-mp-achievement-overlay="grid-card" exit={{ opacity: 0 }} initial={{ opacity: 0 }} onClick={onClose} transition={{ duration: reducedMotion ? 0.1 : 0.24 }}>
       <motion.div className="relative flex h-[min(76dvh,31rem)] min-h-[21rem] w-full max-w-[23rem] items-center justify-center" layoutId={`mp-achievement-${habit.id}`} onClick={(event) => event.stopPropagation()} transition={reducedMotion ? { duration: 0.1 } : { type: 'spring', stiffness: 250, damping: 28 }}>
@@ -751,9 +759,9 @@ function AchievementGridOverlay({ backendUserId, habit, maintainPending, onClose
           backendUserId={backendUserId}
           habit={habit}
           isActive
-          isFlipped={showBack || reducedMotion}
+          isFlipped={isBackVisible}
           maintainPending={maintainPending}
-          onClick={onClose}
+          onClick={() => setIsBackVisible((current) => !current)}
           onShareAchievement={() => undefined}
           onToggleMaintained={onToggleMaintained}
         />
