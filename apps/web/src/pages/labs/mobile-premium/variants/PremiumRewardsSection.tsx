@@ -1,5 +1,6 @@
-import { forwardRef, type CSSProperties, type MutableRefObject, type ReactNode, useEffect, useId, useRef, useState } from 'react';
+import { forwardRef, type CSSProperties, type MutableRefObject, type ReactNode, useCallback, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import { decideTaskHabitAchievement, getRewardsHistory, getTaskInsights, getUserXpByTrait, toggleTaskHabitAchievementMaintained, type HabitAchievementPillarGroup, type HabitAchievementShelfItem, type MonthlyWrappedRecord, type RewardsGrowthCalibrationRow, type RewardsHistorySummary, type TaskInsightsResponse, type TraitXpEntry, type WeeklyWrappedRecord } from '../../../../lib/api';
 import { useRequest } from '../../../../hooks/useRequest';
 import { HabitAchievementSeal } from '../../../../components/dashboard-v3/HabitAchievementSeal';
@@ -261,6 +262,7 @@ export function PremiumRewardsSection({
   const [activeWeeklyWrapped, setActiveWeeklyWrapped] = useState<WeeklyWrappedRecord | null>(null);
   const [activeMonthlyWrapped, setActiveMonthlyWrapped] = useState<MonthlyWrappedRecord | null>(null);
   const [selectedAchievementForShare, setSelectedAchievementForShare] = useState<HabitAchievementShelfItem | null>(null);
+  const [showAllAchievements, setShowAllAchievements] = useState(false);
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const scrollFrameRef = useRef<number | null>(null);
   const { data, reload } = useRequest(
@@ -422,6 +424,18 @@ export function PremiumRewardsSection({
     );
   }
 
+  if (showAllAchievements) {
+    return (
+      <AllAchievementsGrid
+        backendUserId={backendUserId}
+        groups={groups}
+        maintainActionHabitId={maintainActionHabitId}
+        onClose={() => setShowAllAchievements(false)}
+        onToggleMaintained={handleToggleMaintained}
+      />
+    );
+  }
+
   return (
     <section className="space-y-7">
       <style>
@@ -462,7 +476,18 @@ export function PremiumRewardsSection({
       </div>
 
       <section className="space-y-4">
-        <h2 className="text-[1.35rem] font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.rewards.habitsAchieved')}</h2>
+        <div className="flex min-h-11 items-center justify-between gap-3">
+          <h2 className="text-[1.35rem] font-semibold text-[color:var(--mp-text)]">{t('mobilePremium.rewards.habitsAchieved')}</h2>
+          <button
+            aria-label={language === 'es' ? 'Abrir todos los logros en grilla' : 'Open all achievements grid'}
+            aria-pressed={false}
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-[color:var(--mp-text-secondary)] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--mp-violet)]"
+            onClick={() => setShowAllAchievements(true)}
+            type="button"
+          >
+            <svg aria-hidden="true" className="h-[1.1rem] w-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect height="7" rx="1" width="7" x="3" y="3" /><rect height="7" rx="1" width="7" x="14" y="3" /><rect height="7" rx="1" width="7" x="3" y="14" /><rect height="7" rx="1" width="7" x="14" y="14" /></svg>
+          </button>
+        </div>
         {habits.length ? (
           <div className="space-y-4">
             <div
@@ -575,6 +600,169 @@ export function PremiumRewardsSection({
         />
       ) : null}
     </section>
+  );
+}
+
+function usePremiumReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReduced(query.matches);
+    update();
+    query.addEventListener?.('change', update);
+    return () => query.removeEventListener?.('change', update);
+  }, []);
+  return reduced;
+}
+
+function AllAchievementsGrid({
+  backendUserId,
+  groups,
+  maintainActionHabitId,
+  onClose,
+  onToggleMaintained,
+}: {
+  backendUserId: string | null;
+  groups: HabitAchievementPillarGroup[];
+  maintainActionHabitId: string | null;
+  onClose: () => void;
+  onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>;
+}) {
+  const { language, t } = usePostLoginLanguage();
+  const reducedMotion = usePremiumReducedMotion();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showBack, setShowBack] = useState(false);
+  const triggers = useRef(new Map<string, HTMLButtonElement>());
+  const scrollTop = useRef(0);
+  const flipTimer = useRef<number | null>(null);
+  const selectedHabit = groups.flatMap((group) => group.habits).find((habit) => habit.id === selectedId) ?? null;
+
+  const closeDetail = useCallback(() => {
+    if (flipTimer.current !== null) window.clearTimeout(flipTimer.current);
+    const closingId = selectedId;
+    setShowBack(false);
+    window.setTimeout(() => {
+      setSelectedId(null);
+      window.scrollTo({ top: scrollTop.current, behavior: 'auto' });
+      triggers.current.get(closingId ?? '')?.focus({ preventScroll: true });
+    }, reducedMotion ? 0 : 240);
+  }, [reducedMotion, selectedId]);
+
+  useEffect(() => {
+    window.history.pushState({ innerbloomAllAchievements: true }, '');
+  }, []);
+
+  useEffect(() => {
+    const handleBack = () => selectedId ? closeDetail() : onClose();
+    window.addEventListener('popstate', handleBack);
+    return () => window.removeEventListener('popstate', handleBack);
+  }, [closeDetail, onClose, selectedId]);
+
+  useEffect(() => {
+    const previousX = document.body.style.overflowX;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflowX = 'hidden';
+    if (selectedId) document.body.style.overflow = 'hidden';
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') window.history.back();
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => {
+      document.body.style.overflowX = previousX;
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [selectedId]);
+
+  useEffect(() => () => {
+    if (flipTimer.current !== null) window.clearTimeout(flipTimer.current);
+  }, []);
+
+  const openDetail = (habit: HabitAchievementShelfItem) => {
+    if (selectedId) return;
+    scrollTop.current = window.scrollY;
+    window.history.pushState({ innerbloomAchievementDetail: habit.id }, '');
+    setSelectedId(habit.id);
+    setShowBack(reducedMotion);
+    if (!reducedMotion) {
+      flipTimer.current = window.setTimeout(() => {
+        setShowBack(true);
+        flipTimer.current = null;
+      }, 400);
+    }
+  };
+
+  return (
+    <LayoutGroup id="mp-all-achievements">
+      <section className="min-w-0 space-y-7 overflow-x-clip pb-[calc(env(safe-area-inset-bottom)+5.5rem)]" data-mp-achievement-view="grid">
+        <header className="flex min-h-12 items-center justify-between gap-3">
+          <h2 className="text-[1.55rem] font-semibold text-[color:var(--mp-text)]">{language === 'es' ? 'Todos los logros' : 'All Achievements'}</h2>
+          <button aria-label={language === 'es' ? 'Volver a Logros' : 'Back to Achievements'} className="grid h-11 w-11 place-items-center rounded-full border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] text-[color:var(--mp-text-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--mp-violet)]" onClick={() => window.history.back()} type="button">
+            <svg aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" /></svg>
+          </button>
+        </header>
+
+        {groups.map((group) => {
+          const code = group.pillar.code as RewardsPillarCode;
+          const achievedCount = group.habits.filter(isHabitAchieved).length;
+          return (
+            <section className="space-y-4" key={code}>
+              <div className="flex items-baseline justify-between gap-3 border-b border-[color:var(--mp-border)] pb-2.5">
+                <h3 className="text-lg font-semibold text-[color:var(--mp-text)]">{resolveRewardsPillarLabel(code, t)}</h3>
+                <p className="text-xs font-medium text-[color:var(--mp-text-muted)]">{achievedCount} / {group.habits.length} {language === 'es' ? 'logrados' : 'achieved'}</p>
+              </div>
+              {group.habits.length ? (
+                <div className="grid grid-cols-3 gap-x-2 gap-y-5 min-[370px]:grid-cols-4">
+                  {group.habits.map((habit) => {
+                    const achieved = isHabitAchieved(habit);
+                    return (
+                      <button
+                        aria-label={`${habit.taskName}, ${achieved ? (language === 'es' ? 'logrado' : 'achieved') : (language === 'es' ? 'no logrado' : 'not achieved')}`}
+                        className="flex min-h-24 min-w-0 flex-col items-center rounded-xl px-1 py-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--mp-violet)] disabled:pointer-events-none"
+                        disabled={Boolean(selectedId)}
+                        key={habit.id}
+                        onClick={() => openDetail(habit)}
+                        ref={(node) => { if (node) triggers.current.set(habit.id, node); else triggers.current.delete(habit.id); }}
+                        type="button"
+                      >
+                        <motion.span className="grid h-[4.25rem] w-[4.25rem] place-items-center min-[390px]:h-[4.75rem] min-[390px]:w-[4.75rem]" layoutId={`mp-achievement-${habit.id}`}>
+                          <HabitAchievementSeal alt={`${habit.taskName} seal`} className={`h-full w-full ${achieved ? '' : 'opacity-50 grayscale'}`} disabled={!achieved} fallback={<TraitIcon size={64} trait={habit.trait?.name} />} imgClassName="h-full w-full object-contain" pillar={habit.pillar} traitCode={habit.trait?.code} traitName={habit.trait?.name} />
+                        </motion.span>
+                        <span className="mt-1.5 line-clamp-2 text-[11px] font-medium leading-tight text-[color:var(--mp-text-secondary)]">{habit.taskName}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : <p className="py-4 text-sm text-[color:var(--mp-text-secondary)]">{t('mobilePremium.rewards.noHabits')}</p>}
+            </section>
+          );
+        })}
+      </section>
+
+      <AnimatePresence>
+        {selectedHabit ? (
+          <AchievementGridOverlay backendUserId={backendUserId} habit={selectedHabit} maintainPending={maintainActionHabitId === selectedHabit.id} onClose={() => window.history.back()} onToggleMaintained={onToggleMaintained} reducedMotion={reducedMotion} showBack={showBack} />
+        ) : null}
+      </AnimatePresence>
+    </LayoutGroup>
+  );
+}
+
+function AchievementGridOverlay({ backendUserId, habit, maintainPending, onClose, onToggleMaintained, reducedMotion, showBack }: { backendUserId: string | null; habit: HabitAchievementShelfItem; maintainPending: boolean; onClose: () => void; onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>; reducedMotion: boolean; showBack: boolean }) {
+  const achieved = isHabitAchieved(habit);
+  return renderStoryPortal(
+    <motion.div animate={{ opacity: 1 }} className="fixed inset-0 z-[9999] flex h-[100dvh] items-center justify-center overflow-hidden bg-black/70 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[calc(env(safe-area-inset-top)+1rem)]" data-mp-achievement-overlay="grid-card" exit={{ opacity: 0 }} initial={{ opacity: 0 }} onClick={onClose} transition={{ duration: reducedMotion ? 0.1 : 0.24 }}>
+      <motion.div className="relative h-[min(76dvh,31rem)] min-h-[21rem] w-full max-w-[23rem] [perspective:1100px]" layoutId={`mp-achievement-${habit.id}`} onClick={(event) => { event.stopPropagation(); onClose(); }} transition={reducedMotion ? { duration: 0.1 } : { type: 'spring', stiffness: 250, damping: 28 }}>
+        <motion.div animate={{ rotateY: showBack || reducedMotion ? 180 : 0 }} className="relative h-full w-full [transform-style:preserve-3d]" data-mp-achievement-flip={showBack ? 'back' : 'front'} transition={reducedMotion ? { duration: 0 } : { duration: 0.58, ease: [0.2, 0.82, 0.2, 1] }}>
+          <div className={`absolute inset-0 rounded-[1.55rem] border bg-[color:var(--mp-surface)] p-5 text-center [backface-visibility:hidden] ${achieved ? 'border-violet-300/65' : 'border-amber-300/55 opacity-70 grayscale'}`}>
+            <AchievementFrontFace habit={habit} isActive onShareAchievement={() => undefined} />
+          </div>
+          <div className={`absolute inset-0 rounded-[1.55rem] border bg-[color:var(--mp-surface)] p-4 [backface-visibility:hidden] [transform:rotateY(180deg)] ${achieved ? 'border-violet-300/65' : 'border-amber-300/55'}`}>
+            {showBack || reducedMotion ? achieved ? <AchievementBackFace habit={habit} maintainPending={maintainPending} onToggleMaintained={onToggleMaintained} /> : <LockedHabitBackFace backendUserId={backendUserId} habit={habit} isFlipped /> : null}
+          </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>,
   );
 }
 
