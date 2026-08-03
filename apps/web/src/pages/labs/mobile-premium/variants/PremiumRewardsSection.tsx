@@ -752,7 +752,7 @@ function AchievementGridOverlay({ backendUserId, habit, maintainPending, onClose
     }
   }, [reducedMotion, showBack]);
 
-  return renderStoryPortal(
+  return (
     <motion.div animate={{ opacity: 1 }} className="fixed inset-0 z-[9999] flex h-[100dvh] items-center justify-center overflow-hidden bg-black/92 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[calc(env(safe-area-inset-top)+1rem)] backdrop-blur-sm" data-mp-achievement-overlay="grid-card" exit={{ opacity: 0 }} initial={{ opacity: 0 }} onClick={onClose} transition={{ duration: reducedMotion ? 0.1 : 0.24 }}>
       <motion.div className="relative flex h-[min(76dvh,31rem)] min-h-[21rem] w-full max-w-[23rem] items-center justify-center" layoutId={`mp-achievement-${habit.id}`} onClick={(event) => event.stopPropagation()} transition={reducedMotion ? { duration: 0.1 } : { type: 'spring', stiffness: 250, damping: 28 }}>
         <AchievementCarouselCard
@@ -764,10 +764,9 @@ function AchievementGridOverlay({ backendUserId, habit, maintainPending, onClose
           onClick={() => setIsBackVisible((current) => !current)}
           onShareAchievement={() => undefined}
           onToggleMaintained={onToggleMaintained}
-          solidSurface
         />
       </motion.div>
-    </motion.div>,
+    </motion.div>
   );
 }
 function renderStoryPortal(children: ReactNode) {
@@ -802,7 +801,6 @@ function AchievementCarouselCard({
   onClick,
   onShareAchievement,
   onToggleMaintained,
-  solidSurface = false,
 }: {
   backendUserId: string | null;
   habit: HabitAchievementShelfItem;
@@ -812,7 +810,6 @@ function AchievementCarouselCard({
   onClick: () => void;
   onShareAchievement: (habit: HabitAchievementShelfItem) => void;
   onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>;
-  solidSurface?: boolean;
 }) {
   const achieved = isHabitAchieved(habit);
   const sizeClass = 'w-[15.25rem] min-h-[21rem]';
@@ -843,12 +840,10 @@ function AchievementCarouselCard({
       <div
         className={`relative h-full min-h-[21rem] rounded-[1.55rem] transition-transform duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
       >
-        <div className={`absolute inset-0 rounded-[1.55rem] border p-4 text-center [backface-visibility:hidden] ${borderClass} ${achieved ? '' : 'opacity-70 grayscale'}`}
-          style={solidSurface ? { backgroundColor: '#121214' } : undefined}>
+        <div className={`absolute inset-0 rounded-[1.55rem] border p-4 text-center [backface-visibility:hidden] ${borderClass} ${achieved ? '' : 'opacity-70 grayscale'}`}>
           <AchievementFrontFace habit={habit} isActive={isActive} onShareAchievement={onShareAchievement} />
         </div>
-        <div className={`absolute inset-0 rounded-[1.55rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-4 [backface-visibility:hidden] [transform:rotateY(180deg)] ${achieved ? '' : 'border-amber-300/55'}`}
-          style={solidSurface ? { backgroundColor: '#121214' } : undefined}>
+        <div className={`absolute inset-0 rounded-[1.55rem] border border-[color:var(--mp-border)] bg-[color:var(--mp-surface)] p-4 [backface-visibility:hidden] [transform:rotateY(180deg)] ${achieved ? '' : 'border-amber-300/55'}`}>
           {achieved ? (
             <AchievementBackFace
               habit={habit}
