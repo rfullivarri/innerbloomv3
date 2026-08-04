@@ -6599,8 +6599,8 @@
   animation: v3-task-selected 3.2s ease-in-out infinite;
 }
 
-.landing.landing--v3-conversion[data-theme-mode="dark"] .v3-quickstart-tasks-preview .space-y-3 > :nth-child(4) .quickstart-task-row,
-.landing.landing--v3-conversion[data-theme-mode="dark"] .v3-quickstart-tasks-preview .space-y-3 > :nth-child(4) .quickstart-task-row__back {
+.landing.landing--v3-conversion[data-theme-mode="dark"] .v3-quickstart-tasks-preview .quickstart-premium-card > div > :nth-child(4) .quickstart-task-row,
+.landing.landing--v3-conversion[data-theme-mode="dark"] .v3-quickstart-tasks-preview .quickstart-premium-card > div > :nth-child(4) .quickstart-task-row__back {
   border-color: rgba(139, 92, 246, 0.12) !important;
   background: rgba(18, 18, 23, 0.82) !important;
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.16) !important;
