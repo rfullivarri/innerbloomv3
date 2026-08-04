@@ -14,6 +14,32 @@ export type DriveFile = {
   thumbnailLink?: string;
 };
 
+/** Lists only direct image children.  Folder traversal is deliberately not recursive. */
+export async function listDriveFolderImages(folderId: string): Promise<DriveFile[]> {
+  const token = await getAccessToken();
+  const files: DriveFile[] = [];
+  let pageToken = '';
+  do {
+    const params = new URLSearchParams({
+      q: `'${folderId.replace(/'/g, "\\'")}' in parents and trashed = false and mimeType contains 'image/'`,
+      fields: 'nextPageToken,files(id,name,mimeType,webViewLink,thumbnailLink)',
+      orderBy: 'name_natural',
+      pageSize: '100',
+      supportsAllDrives: 'true',
+      includeItemsFromAllDrives: 'true',
+    });
+    if (pageToken) params.set('pageToken', pageToken);
+    const response = await fetch(`https://www.googleapis.com/drive/v3/files?${params}`, {
+      headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30_000),
+    });
+    if (!response.ok) throw new Error(`Google Drive folder listing failed (HTTP ${response.status})`);
+    const payload = await response.json() as { files?: DriveFile[]; nextPageToken?: string };
+    files.push(...(payload.files ?? []));
+    pageToken = payload.nextPageToken ?? '';
+  } while (pageToken);
+  return files;
+}
+
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
 const DRIVE_DOWNLOAD_ATTEMPTS = 3;
 const DRIVE_DOWNLOAD_TIMEOUT_MS = 60_000;

@@ -1,0 +1,37 @@
+name: Preview supplied Innerbloom Stories
+on:
+  pull_request:
+    paths: ["marketing/supplied-campaigns/**"]
+  push:
+    branches: [main]
+    paths: ["marketing/supplied-campaigns/**"]
+  workflow_dispatch:
+    inputs:
+      campaign_code: { description: "Campaign code", required: true, type: string }
+permissions: { contents: read }
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - run: npm install --no-audit --no-fund
+      - run: npm -w @innerbloom/web exec playwright install --with-deps chromium
+      - name: Resolve campaign
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then changed="marketing/supplied-campaigns/${{ inputs.campaign_code }}/campaign.json"; elif [[ "${{ github.event_name }}" == "pull_request" ]]; then changed=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" | grep '/campaign.json$' | head -1); else changed=$(git diff --name-only HEAD^ HEAD | grep '/campaign.json$' | head -1); fi; test -n "$changed"; echo "CAMPAIGN=$changed" >> "$GITHUB_ENV"
+      - run: node scripts/marketing/validate-supplied-asset-campaign-v1.mjs ${{ env.CAMPAIGN }}
+      - run: npm -w @innerbloom/api exec tsx scripts/stage-supplied-marketing-drive-assets.ts ../../${{ env.CAMPAIGN }} ../../marketing/generated/supplied-source-${{ github.run_id }}
+      - run: node scripts/marketing/render-supplied-asset-story-v1.mjs ${{ env.CAMPAIGN }} --asset-dir marketing/generated/supplied-source-${{ github.run_id }} --out marketing/generated/supplied-preview-${{ github.run_id }}
+      - run: node scripts/marketing/quality-gate-supplied-story-v1.mjs marketing/generated/supplied-preview-${{ github.run_id }}/render-manifest-supplied-story-v1.json
+      - uses: actions/upload-artifact@v4
+        with: { name: supplied-story-preview, path: marketing/generated/supplied-preview-${{ github.run_id }} }
+      - name: Import merged campaign for Admin review
+        if: ${{ github.event_name == 'push' }}
+        run: npm -w @innerbloom/api exec tsx scripts/import-supplied-story-campaign.ts ../../${{ env.CAMPAIGN }}
