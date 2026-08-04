@@ -690,16 +690,34 @@ export default function TaskEditorPage({ publicDemo = false }: TaskEditorPagePro
 
     setDeleteErrorMessage(null);
 
+    const deletedTaskId = taskToDelete.id;
+
     try {
-      await deleteTask(backendUserId, taskToDelete.id);
+      await deleteTask(backendUserId, deletedTaskId);
       setTaskToDelete(null);
+      setTaskToEdit(null);
+      setEditGroupKey(null);
+      setPageToast({
+        type: "success",
+        text: t("editor.toast.delete.success"),
+      });
+      window.dispatchEvent(
+        new CustomEvent("innerbloom:tasks-updated", {
+          detail: {
+            type: "deleted",
+            taskId: deletedTaskId,
+            userId: backendUserId,
+          },
+        }),
+      );
+      await reloadTasks();
     } catch (error) {
       const message =
         error instanceof Error ? error.message : t("editor.toast.delete.error");
       setDeleteErrorMessage(message);
       setPageToast({ type: "error", text: message });
     }
-  }, [backendUserId, deleteTask, publicDemo, t, taskToDelete]);
+  }, [backendUserId, deleteTask, publicDemo, reloadTasks, t, taskToDelete]);
 
   useEffect(() => {
     if (!pageToast) {
