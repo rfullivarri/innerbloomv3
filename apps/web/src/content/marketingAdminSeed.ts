@@ -12,7 +12,7 @@ export type MarketingPostSeed = {
   id: string;
   number: string;
   platform: 'instagram';
-  format: 'carousel' | 'static';
+  format: 'carousel' | 'static' | 'story' | 'reel';
   status: MarketingPostStatus;
   scheduledDate: string;
   scheduledTime: string;

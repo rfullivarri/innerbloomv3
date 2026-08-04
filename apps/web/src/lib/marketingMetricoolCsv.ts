@@ -59,7 +59,7 @@ export function buildMetricoolCalendarCsv(posts: MarketingPostSeed[]) {
     row.Threads = 'FALSE';
     row.Bluesky = 'FALSE';
     row.Shortener = 'FALSE';
-    row['Instagram Post Type'] = 'POST';
+    row['Instagram Post Type'] = post.format === 'story' ? 'STORY' : post.format === 'reel' ? 'REEL' : 'POST';
 
     post.assets.slice(0, PICTURE_LIMIT).forEach((asset, index) => {
       row[`Picture Url ${index + 1}`] = asset.url;

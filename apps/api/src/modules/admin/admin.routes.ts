@@ -5,6 +5,7 @@ import { asyncHandler } from '../../lib/async-handler.js';
 import { validateMarketingR2AssetUrls } from '../../services/marketingR2AssetService.js';
 import { updateMarketingCampaignPostsBulk } from '../../services/marketingCampaignBulkUpdateService.js';
 import { listMarketingPipelineRuns } from '../../services/marketingPipelineService.js';
+import { listDriveFolderImages } from '../../services/marketingGoogleDriveService.js';
 import {
   exportAdminUserLogsCsv,
   getAdminMe,
@@ -78,11 +79,17 @@ const marketingCampaignBulkSaveSchema = z.object({
 const marketingPipelineQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(24).default(12),
 });
+const suppliedAssetFolderSchema = z.object({ folderId: z.string().trim().min(10).max(200) });
 
 adminRouter.get('/me', getAdminMe);
 adminRouter.get('/users', getAdminUsers);
 adminRouter.get('/product-notification-preferences', getAdminProductNotificationPreferences);
 adminRouter.get('/marketing/campaigns', getAdminMarketingCampaigns);
+adminRouter.post('/marketing/supplied-assets/inspect', asyncHandler(async (req, res) => {
+  const { folderId } = suppliedAssetFolderSchema.parse(req.body ?? {});
+  const assets = await listDriveFolderImages(folderId);
+  res.json({ ok: true, assets });
+}));
 adminRouter.get('/marketing/pipeline/runs', asyncHandler(async (req, res) => {
   const query = marketingPipelineQuerySchema.parse(req.query);
   const runs = await listMarketingPipelineRuns(query.limit);

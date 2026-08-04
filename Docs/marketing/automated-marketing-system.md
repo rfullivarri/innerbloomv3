@@ -1,7 +1,7 @@
 # Innerbloom automated marketing system
 
 **Status:** living architecture document  
-**Last verified:** 2026-07-24  
+**Last verified:** 2026-08-04
 **Scope:** strategy/context generation, campaign production, rendering, R2, Neon, Admin review and Metricool export.
 
 This document is the source of truth for how the marketing system works. Any PR that changes a marketing workflow, agent, campaign schema, renderer, R2 storage, Neon import, Admin review or CSV export must update this document in the same PR.
@@ -32,6 +32,12 @@ Everything before the Admin review should be automatable. The human approval bou
 | **Human** | A person reviews content, resolves exceptions or authorizes publication. |
 
 A GitHub Action being started with `workflow_dispatch` is **currently manual**, but it is not inherently a human decision. It can usually be chained or scheduled.
+
+## Supplied visual-base Story campaigns
+
+For mini campaigns built from already-created visual bases, Admin Marketing accepts a Google Drive folder and a reference campaign. It lists image files and copies a self-contained task for Codex Cloud; it does not invoke an OpenAI API or claim that Codex is running inside Admin. The supplied-asset Codex contract writes only `marketing/supplied-campaigns/<campaign-code>/campaign.json`, reusing the selected campaign's strategy snapshot and mapping one Drive base to one 1080×1920 Story.
+
+The PR workflow stages the Drive bases and canonical logo, renders a deterministic Story preview and runs the Story quality gate. Once merged, it imports the Story campaign into Admin as `needs_review`, using the Drive source reference; it does not upload to R2. Admin review remains the human publication gate: after the final asset is uploaded and approved there, its public R2 URL is validated and the Metricool CSV is enabled. Metricool rows map `story` to Instagram `STORY` (static and carousel remain `POST`; reel is `REEL`).
 
 ## 3. Current production flow
 
