@@ -581,7 +581,7 @@ export function LandingV3MethodVisual({
             </p>
             <LandingV3RhythmPickerPreview language={language} />
           </div>
-          <div className="v3-quickstart-tasks-preview">
+          <div className="v3-quickstart-tasks-preview onboarding2-premium-root">
             <p className="v3-quickstart-phase-title v3-quickstart-phase-title--tasks">
               {language === "es" ? "Customizá tus tareas" : "Customize your tasks"}
             </p>
@@ -590,10 +590,11 @@ export function LandingV3MethodVisual({
               pillar="Body"
               tasks={tasks}
               selectedIds={tasks.slice(0, 3).map((task) => task.id)}
-              inputValues={{ "Body-ENERGIA": animatedMinutes, "Body-SUENO": "7" }}
+              inputValues={{ "Body-ENERGIA": animatedMinutes, "Body-NUTRICION": "3", "Body-SUENO": "7" }}
               minimum={1}
               gameMode="FLOW"
               balancedBonusActive={false}
+              variant="onboarding2"
               onToggleTask={() => undefined}
               onInputChange={() => undefined}
               onBack={() => undefined}
