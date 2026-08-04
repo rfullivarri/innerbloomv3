@@ -199,7 +199,10 @@ export function MarketingPageV2() {
     setInspectingAssets(true); setError(null); setTaskCopied(false);
     try {
       const response = await apiAuthorizedFetch('/admin/marketing/supplied-assets/inspect', { method: 'POST', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify({ folderId }) });
-      if (!response.ok) throw new Error(`Unable to inspect Drive folder (HTTP ${response.status}).`);
+      if (!response.ok) {
+        const body = await response.json().catch(() => null) as { message?: string } | null;
+        throw new Error(body?.message || `Unable to inspect Drive folder (HTTP ${response.status}).`);
+      }
       const body = await response.json() as { assets: SuppliedDriveAsset[] };
       setSuppliedAssets(body.assets); setMessage(`${body.assets.length} image base${body.assets.length === 1 ? '' : 's'} found. Ready to copy the Codex task.`);
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to inspect Drive folder.'); } finally { setInspectingAssets(false); }

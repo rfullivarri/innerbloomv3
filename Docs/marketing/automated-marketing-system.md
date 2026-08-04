@@ -39,6 +39,8 @@ For mini campaigns built from already-created visual bases, Admin Marketing acce
 
 The PR workflow stages the Drive bases and canonical logo, renders a deterministic Story preview and runs the Story quality gate. Once merged, it imports the Story campaign into Admin as `needs_review`, using the Drive source reference; it does not upload to R2. Admin review remains the human publication gate: after the final asset is uploaded and approved there, its public R2 URL is validated and the Metricool CSV is enabled. Metricool rows map `story` to Instagram `STORY` (static and carousel remain `POST`; reel is `REEL`).
 
+The running API must have `GOOGLE_SERVICE_ACCOUNT_JSON_BASE64` (or `GOOGLE_SERVICE_ACCOUNT_JSON`) configured in Railway. The service account must be shared on the selected Drive folder. If either requirement is missing, Admin reports that concrete configuration error instead of a generic 500 response.
+
 ## 3. Current production flow
 
 ```mermaid
