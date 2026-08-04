@@ -14,6 +14,14 @@ export type DriveFile = {
   thumbnailLink?: string;
 };
 
+export function assertMarketingDriveConfigured() {
+  const rawJson = String(process.env.GOOGLE_SERVICE_ACCOUNT_JSON ?? '').trim();
+  const legacyBase64 = String(process.env.GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 ?? '').trim();
+  if (!rawJson && !legacyBase64) {
+    throw new Error('Marketing Drive is not configured on this API service. Set GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 (or GOOGLE_SERVICE_ACCOUNT_JSON) in Railway, then redeploy.');
+  }
+}
+
 /** Lists only direct image children.  Folder traversal is deliberately not recursive. */
 export async function listDriveFolderImages(folderId: string): Promise<DriveFile[]> {
   const token = await getAccessToken();
@@ -119,9 +127,7 @@ export async function uploadDriveImage(input: {
 async function getAccessToken() {
   const rawJson = String(process.env.GOOGLE_SERVICE_ACCOUNT_JSON ?? '').trim();
   const legacyBase64 = String(process.env.GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 ?? '').trim();
-  if (!rawJson && !legacyBase64) {
-    throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON is required for the Drive staging step.');
-  }
+  assertMarketingDriveConfigured();
 
   let serviceAccount: ServiceAccount;
   try {
