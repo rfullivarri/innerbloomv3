@@ -5,7 +5,7 @@ import { asyncHandler } from '../../lib/async-handler.js';
 import { validateMarketingR2AssetUrls } from '../../services/marketingR2AssetService.js';
 import { updateMarketingCampaignPostsBulk } from '../../services/marketingCampaignBulkUpdateService.js';
 import { listMarketingPipelineRuns } from '../../services/marketingPipelineService.js';
-import { listDriveFolderImages } from '../../services/marketingGoogleDriveService.js';
+import { listDriveFolderImages, MarketingDriveError } from '../../services/marketingGoogleDriveService.js';
 import { HttpError } from '../../lib/http-error.js';
 import {
   exportAdminUserLogsCsv,
@@ -93,11 +93,14 @@ adminRouter.post('/marketing/supplied-assets/inspect', asyncHandler(async (req, 
     assets = await listDriveFolderImages(folderId);
   } catch (error) {
     const reason = error instanceof Error ? error.message : 'Unknown Google Drive error';
+    const detail = error instanceof MarketingDriveError ? { googleStatus: error.status, googleReason: error.reason, folderId } : { folderId };
+    console.error('Supplied marketing Drive inspection failed', { ...detail, error: reason });
     const configured = !reason.includes('not configured');
     throw new HttpError(
       configured ? 502 : 503,
       configured ? 'marketing_drive_unavailable' : 'marketing_drive_not_configured',
-      configured ? 'Unable to list this Google Drive folder. Confirm the folder is shared with the Innerbloom marketing service account.' : reason,
+      configured ? reason : reason,
+      detail,
     );
   }
   res.json({ ok: true, assets });
