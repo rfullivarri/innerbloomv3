@@ -3,6 +3,8 @@
   "campaign": {
     "campaign_code": "ib_202608_stories",
     "title": "Real weeks, adaptive rhythm — supplied Stories",
+    "period_key": "2026-08",
+    "objective": "new_users",
     "source_drive_folder_id": "1HfaReMeCOX7vazqXzbjMF2QSurRXB1Mr",
     "source_campaign_code": "ib_202607",
     "brand_logo_drive_file_id": "1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0"
