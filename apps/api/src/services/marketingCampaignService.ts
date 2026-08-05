@@ -1,5 +1,6 @@
 import { pool } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
+import { syncSuppliedStoryCampaignsFromRepository } from './marketingSuppliedStoryCampaignImportService.js';
 
 export type MarketingPostStatus =
   | 'draft'
@@ -184,6 +185,7 @@ const DEFAULT_CAMPAIGN = {
 };
 
 export async function listMarketingCampaigns(): Promise<MarketingCampaignPayload[]> {
+  await syncSuppliedStoryCampaignsFromRepository();
   await ensureDefaultCampaign();
 
   const campaigns = await pool.query<CampaignRow>(
