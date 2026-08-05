@@ -1,0 +1,312 @@
+{
+  "schema_version": "1.0-supplied-asset-story",
+  "campaign": {
+    "campaign_code": "ib_202608_stories",
+    "title": "Real weeks, adaptive rhythm — supplied Stories",
+    "source_drive_folder_id": "1HfaReMeCOX7vazqXzbjMF2QSurRXB1Mr",
+    "source_campaign_code": "ib_202607",
+    "brand_logo_drive_file_id": "1s7psZ57aam7Azg9eOqy-jQkfwIkNWYH0"
+  },
+  "stories": [
+    {
+      "post_code": "post_001",
+      "format": "story",
+      "source_drive_file_id": "1nckoTSU7aVpELSSNByUaHv-S06sxKZt6",
+      "source_file_name": "innerbloom-product-dashboard-3d-base-01.png",
+      "visible_copy": {
+        "headline": "If your streak breaks, you are not the problem.",
+        "cta": "See the early flow"
+      },
+      "caption": "The point is not to pretend interruptions never happen. Use this Story as a reminder that visible direction can survive a missed day, then visit Innerbloom to see the early rhythm-led approach.",
+      "scheduled_at": "2026-08-05T15:00:00Z",
+      "hypothesis": "Pain/friction posts will produce a higher landing CTA rate than product mechanism posts because the audience problem is easier to recognize than the product solution.",
+      "target_metric": "Landing page sessions/page views from UTM-tagged Instagram posts",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_001&ib_post=post_001"
+    },
+    {
+      "post_code": "post_002",
+      "format": "story",
+      "source_drive_file_id": "1Qs08jBvsdIoCZlCL6r8m4S4gfT05aX8Q",
+      "source_file_name": "innerbloom-product-dashboard-3d-base-02.png",
+      "visible_copy": {
+        "headline": "Your plan should not depend on perfect days.",
+        "cta": "Try a softer system"
+      },
+      "caption": "If your week only works when every day is ideal, the system is too brittle. This Story names the tension and points toward selected rhythm as a softer structure to try.",
+      "scheduled_at": "2026-08-06T15:00:00Z",
+      "hypothesis": "Carousels will improve scroll/engagement and CTA intent for explanatory concepts compared with static statements.",
+      "target_metric": "Landing page sessions/page views from UTM-tagged Instagram posts",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_002&ib_post=post_002"
+    },
+    {
+      "post_code": "post_003",
+      "format": "story",
+      "source_drive_file_id": "1baj50pltBj1J3hb6mwZxn2oPuUFYnxRM",
+      "source_file_name": "innerbloom-product-dashboard-3d-base-03.png",
+      "visible_copy": {
+        "headline": "Consistency is not doing the same thing every day.",
+        "cta": "Find your rhythm"
+      },
+      "caption": "Consistency can mean returning with context, not copying yesterday exactly. Innerbloom keeps rhythm visible so the next action is easier to choose.",
+      "scheduled_at": "2026-08-07T15:00:00Z",
+      "hypothesis": "Carousels will improve scroll/engagement and CTA intent for explanatory concepts compared with static statements.",
+      "target_metric": "Landing page sessions/page views from UTM-tagged Instagram posts",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_003&ib_post=post_003"
+    },
+    {
+      "post_code": "post_004",
+      "format": "story",
+      "source_drive_file_id": "1f6dsZFpM0MNX6gJXH3oQtfBhXqCvtTwK",
+      "source_file_name": "innerbloom-product-dashboard-3d-base-04.png",
+      "visible_copy": {
+        "headline": "Daily Quest starts with the day you actually had.",
+        "cta": "Review yesterday"
+      },
+      "caption": "Daily Quest is retrospective: it starts from the day you actually had. This Story shows how yesterday can become a clearer signal without turning into a same-day planner.",
+      "scheduled_at": "2026-08-08T15:00:00Z",
+      "hypothesis": "Using the available Daily Quest screenshot will make the adaptive habit mechanism more concrete and increase landing CTA clicks versus abstract product mechanism visuals.",
+      "target_metric": "landing_cta_clicked events by ib_post/utm_content",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_004&ib_post=post_004"
+    },
+    {
+      "post_code": "post_005",
+      "format": "story",
+      "source_drive_file_id": "1cFpNfCPxSk10xIvOqlbZaBTSo_q1tlcH",
+      "source_file_name": "innerbloom-product-dashboard-3d-base-05.png",
+      "visible_copy": {
+        "headline": "You do not need to restart every Monday.",
+        "cta": "Keep continuity"
+      },
+      "caption": "Monday resets can feel tidy until real life interrupts again. Innerbloom is exploring habit progress that keeps continuity visible across uneven weeks.",
+      "scheduled_at": "2026-08-09T15:00:00Z",
+      "hypothesis": "Pain/friction posts will produce a higher landing CTA rate than product mechanism posts because the audience problem is easier to recognize than the product solution.",
+      "target_metric": "Landing page sessions/page views from UTM-tagged Instagram posts",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_005&ib_post=post_005"
+    },
+    {
+      "post_code": "post_006",
+      "format": "story",
+      "source_drive_file_id": "1wTkOPy4b3yYNPDLH0XdSM8hK9lSZM56G",
+      "source_file_name": "innerbloom-product-dashboard-light-3d-base-01.png",
+      "visible_copy": {
+        "headline": "Try the early version and tell us what is missing.",
+        "cta": "Try it early"
+      },
+      "caption": "This is an early product, so the invitation is honest: try the flow, notice what helps or confuses you, and tell us what would make adaptive habits clearer.",
+      "scheduled_at": "2026-08-10T15:00:00Z",
+      "hypothesis": "Posts that explicitly say the product is early and feedback is welcome will generate more auth_started events per landing session than generic try-it CTAs.",
+      "target_metric": "landing_cta_clicked events by ib_post/utm_content",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_006&ib_post=post_006"
+    },
+    {
+      "post_code": "post_007",
+      "format": "story",
+      "source_drive_file_id": "1c_WwYWIM5zODgVDiqi8llbxrgsAr0l39",
+      "source_file_name": "innerbloom-product-dashboard-light-3d-base-02.png",
+      "visible_copy": {
+        "headline": "Visible progress does not require perfection.",
+        "cta": "See your progress"
+      },
+      "caption": "Progress should be visible even when the path is imperfect. This Story connects the habit view to a simple CTA: see whether Innerbloom’s early approach fits your rhythm.",
+      "scheduled_at": "2026-08-11T15:00:00Z",
+      "hypothesis": "Pain/friction posts will produce a higher landing CTA rate than product mechanism posts because the audience problem is easier to recognize than the product solution.",
+      "target_metric": "dashboard_view events as activation proxy, interpreted separately from acquisition",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_007&ib_post=post_007"
+    },
+    {
+      "post_code": "post_008",
+      "format": "story",
+      "source_drive_file_id": "1iuPW0s0QQUlvg4kjPgYUisG_t_kP96cc",
+      "source_file_name": "innerbloom-product-dashboard-light-3d-base-03.png",
+      "visible_copy": {
+        "headline": "Real life counts as context.",
+        "cta": "Make room for life"
+      },
+      "caption": "Context matters because people are not machines. This Story separates real-life variation from failure, then shows how Innerbloom can hold a chosen rhythm in view.",
+      "scheduled_at": "2026-08-12T15:00:00Z",
+      "hypothesis": "Carousels will improve scroll/engagement and CTA intent for explanatory concepts compared with static statements.",
+      "target_metric": "Landing page sessions/page views from UTM-tagged Instagram posts",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_008&ib_post=post_008"
+    },
+    {
+      "post_code": "post_009",
+      "format": "story",
+      "source_drive_file_id": "1zRHxujfKALq7gfT1z3JuSeOY7UE2Ejiv",
+      "source_file_name": "innerbloom-product-dashboard-light-3d-base-04.png",
+      "visible_copy": {
+        "headline": "Breaking a streak does not erase your direction.",
+        "cta": "Return with context"
+      },
+      "caption": "A broken streak can be information without becoming a verdict. Innerbloom’s habit views are designed around direction and recalibration, not shame.",
+      "scheduled_at": "2026-08-13T15:00:00Z",
+      "hypothesis": "Pain/friction posts will produce a higher landing CTA rate than product mechanism posts because the audience problem is easier to recognize than the product solution.",
+      "target_metric": "Landing page sessions/page views from UTM-tagged Instagram posts",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_009&ib_post=post_009"
+    },
+    {
+      "post_code": "post_010",
+      "format": "story",
+      "source_drive_file_id": "1PO8Zq7Ue7cLdzFUIQJ_63Os55EhE9sEN",
+      "source_file_name": "innerbloom-product-dashboard-light-3d-base-05.png",
+      "visible_copy": {
+        "headline": "Adjust the task, do not abandon the habit.",
+        "cta": "Adjust, do not quit"
+      },
+      "caption": "When a task stops fitting, abandonment is not the only option. This Story shows the mechanism: adjust the task carefully while preserving the underlying habit truth.",
+      "scheduled_at": "2026-08-14T15:00:00Z",
+      "hypothesis": "Carousels will improve scroll/engagement and CTA intent for explanatory concepts compared with static statements.",
+      "target_metric": "dashboard_view events as activation proxy, interpreted separately from acquisition",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_010&ib_post=post_010"
+    },
+    {
+      "post_code": "post_011",
+      "format": "story",
+      "source_drive_file_id": "1V56UrDde8S9tAatHtfV-MRUWwmRgKhwO",
+      "source_file_name": "innerbloom-product-tasks-3d-base-01.png",
+      "visible_copy": {
+        "headline": "Your momentum changes. Your system should notice.",
+        "cta": "Notice the pattern"
+      },
+      "caption": "Momentum changes over a month. Innerbloom uses signals like Daily Energy as context, not a diagnosis or a promise, so you can review your rhythm with less guesswork.",
+      "scheduled_at": "2026-08-15T15:00:00Z",
+      "hypothesis": "Pain/friction posts will produce a higher landing CTA rate than product mechanism posts because the audience problem is easier to recognize than the product solution.",
+      "target_metric": "Landing page sessions/page views from UTM-tagged Instagram posts",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_011&ib_post=post_011"
+    },
+    {
+      "post_code": "post_012",
+      "format": "story",
+      "source_drive_file_id": "1BGL89mhX46oRM8Kr4l63AS8VMvmpeu79",
+      "source_file_name": "innerbloom-product-tasks-3d-base-02.png",
+      "visible_copy": {
+        "headline": "Help us design less rigid habits.",
+        "cta": "Share feedback"
+      },
+      "caption": "Early adopters can shape whether this feels genuinely less rigid. This Story asks for feedback on adaptive habit language and the product moments that make it believable.",
+      "scheduled_at": "2026-08-16T15:00:00Z",
+      "hypothesis": "Posts that explicitly say the product is early and feedback is welcome will generate more auth_started events per landing session than generic try-it CTAs.",
+      "target_metric": "landing_cta_clicked events by ib_post/utm_content",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_012&ib_post=post_012"
+    },
+    {
+      "post_code": "post_013",
+      "format": "story",
+      "source_drive_file_id": "1KdkkGjPl9RmfkoBykBN3pXiFsCLx3N0M",
+      "source_file_name": "innerbloom-product-tasks-3d-base-03.png",
+      "visible_copy": {
+        "headline": "Less guilt. More recalibration.",
+        "cta": "Try recalibration"
+      },
+      "caption": "Less guilt does not mean lower standards; it means making recalibration part of the system. Innerbloom invites you to try a habit flow built for returning.",
+      "scheduled_at": "2026-08-17T15:00:00Z",
+      "hypothesis": "Pain/friction posts will produce a higher landing CTA rate than product mechanism posts because the audience problem is easier to recognize than the product solution.",
+      "target_metric": "Landing page sessions/page views from UTM-tagged Instagram posts",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_013&ib_post=post_013"
+    },
+    {
+      "post_code": "post_014",
+      "format": "story",
+      "source_drive_file_id": "1M9k7qRRl1HWsNd0AnmVmjeAFYGptCeDS",
+      "source_file_name": "innerbloom-product-tasks-3d-base-04.png",
+      "visible_copy": {
+        "headline": "When everything changes, the habit needs margin.",
+        "cta": "Build in margin"
+      },
+      "caption": "Some weeks need margin more than motivation. This Story turns that tension into a practical belief: a habit can bend and still remain visible.",
+      "scheduled_at": "2026-08-18T15:00:00Z",
+      "hypothesis": "Carousels will improve scroll/engagement and CTA intent for explanatory concepts compared with static statements.",
+      "target_metric": "Landing page sessions/page views from UTM-tagged Instagram posts",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_014&ib_post=post_014"
+    },
+    {
+      "post_code": "post_015",
+      "format": "story",
+      "source_drive_file_id": "1T6pdyef5zl0fRFO2MgaBxinqz4MYFLBz",
+      "source_file_name": "innerbloom-product-tasks-3d-base-05.png",
+      "visible_copy": {
+        "headline": "Daily Quest turns yesterday into a clear next signal.",
+        "cta": "Try Daily Quest"
+      },
+      "caption": "Daily Quest reviews the previous day so the next signal is grounded in reality. If that kind of review sounds useful, visit Innerbloom and try the early flow.",
+      "scheduled_at": "2026-08-19T15:00:00Z",
+      "hypothesis": "Using the available Daily Quest screenshot will make the adaptive habit mechanism more concrete and increase landing CTA clicks versus abstract product mechanism visuals.",
+      "target_metric": "landing_cta_clicked events by ib_post/utm_content",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_015&ib_post=post_015"
+    },
+    {
+      "post_code": "post_016",
+      "format": "story",
+      "source_drive_file_id": "1FN7630U9AyXr9Jg3KEQfQjUWtHtUY5DV",
+      "source_file_name": "innerbloom-product-tasks-light-3d-base-01.png",
+      "visible_copy": {
+        "headline": "One hard day should not define the whole month.",
+        "cta": "Review the month"
+      },
+      "caption": "One hard day can distort the story of a whole month. Innerbloom’s calibration concept gives that story a place to be reviewed without promising automatic fixes.",
+      "scheduled_at": "2026-08-20T15:00:00Z",
+      "hypothesis": "Pain/friction posts will produce a higher landing CTA rate than product mechanism posts because the audience problem is easier to recognize than the product solution.",
+      "target_metric": "Landing page sessions/page views from UTM-tagged Instagram posts",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_016&ib_post=post_016"
+    },
+    {
+      "post_code": "post_017",
+      "format": "story",
+      "source_drive_file_id": "1BNda0OgYA1VQq_1MBQXXmpqy7ooMFMaP",
+      "source_file_name": "innerbloom-product-tasks-light-3d-base-02.png",
+      "visible_copy": {
+        "headline": "The goal is not perfection. It is returning.",
+        "cta": "Practice returning"
+      },
+      "caption": "Returning is a different skill than never missing. This Story uses that distinction to explain why Innerbloom focuses on rhythm, review, and calibration.",
+      "scheduled_at": "2026-08-21T15:00:00Z",
+      "hypothesis": "Carousels will improve scroll/engagement and CTA intent for explanatory concepts compared with static statements.",
+      "target_metric": "Landing page sessions/page views from UTM-tagged Instagram posts",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_017&ib_post=post_017"
+    },
+    {
+      "post_code": "post_018",
+      "format": "story",
+      "source_drive_file_id": "12ujOnHACgP6aCO7ER0iDrVjAy8hcTYtg",
+      "source_file_name": "innerbloom-product-tasks-light-3d-base-03.png",
+      "visible_copy": {
+        "headline": "Look at the rhythm before asking for more.",
+        "cta": "Look first"
+      },
+      "caption": "Before adding pressure, look at the rhythm you selected. This Story shows how rhythm can frame progress without pretending the app chooses your life for you.",
+      "scheduled_at": "2026-08-22T15:00:00Z",
+      "hypothesis": "Using the available Daily Quest screenshot will make the adaptive habit mechanism more concrete and increase landing CTA clicks versus abstract product mechanism visuals.",
+      "target_metric": "dashboard_view events as activation proxy, interpreted separately from acquisition",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_018&ib_post=post_018"
+    },
+    {
+      "post_code": "post_019",
+      "format": "story",
+      "source_drive_file_id": "11KZXGQZYDGc3Iclnn5itxpg1oLGiXKZu",
+      "source_file_name": "innerbloom-product-tasks-light-3d-base-04.png",
+      "visible_copy": {
+        "headline": "The habit that survives is the one that adapts.",
+        "cta": "Adapt with care"
+      },
+      "caption": "The durable habit is often the adjustable one. Innerbloom’s early product makes that belief concrete through visible progress and review moments.",
+      "scheduled_at": "2026-08-23T15:00:00Z",
+      "hypothesis": "Pain/friction posts will produce a higher landing CTA rate than product mechanism posts because the audience problem is easier to recognize than the product solution.",
+      "target_metric": "Landing page sessions/page views from UTM-tagged Instagram posts",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_019&ib_post=post_019"
+    },
+    {
+      "post_code": "post_020",
+      "format": "story",
+      "source_drive_file_id": "1szunIgjQiv0ekyOSHbb6tr5U96c5UCi-",
+      "source_file_name": "innerbloom-product-tasks-light-3d-base-05.png",
+      "visible_copy": {
+        "headline": "If this sounds familiar, we want to learn with you.",
+        "cta": "Learn with us"
+      },
+      "caption": "If rigid habit advice has never quite fit, your feedback is useful here. Try Innerbloom’s early version and help us learn what adaptive habits should become.",
+      "scheduled_at": "2026-08-24T15:00:00Z",
+      "hypothesis": "Posts that explicitly say the product is early and feedback is welcome will generate more auth_started events per landing session than generic try-it CTAs.",
+      "target_metric": "landing_cta_clicked events by ib_post/utm_content",
+      "tracking_url": "https://innerbloomjourney.org/?utm_source=instagram&utm_medium=social&utm_campaign=ib_202608_stories&utm_content=post_020&ib_post=post_020"
+    }
+  ]
+}
