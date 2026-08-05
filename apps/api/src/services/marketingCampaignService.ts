@@ -1,5 +1,6 @@
 import { pool } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
+import { syncSuppliedStoryCampaignsFromRepository } from './marketingSuppliedStoryCampaignImportService.js';
 
 export type MarketingPostStatus =
   | 'draft'
@@ -184,6 +185,7 @@ const DEFAULT_CAMPAIGN = {
 };
 
 export async function listMarketingCampaigns(): Promise<MarketingCampaignPayload[]> {
+  await syncSuppliedStoryCampaignsFromRepository();
   await ensureDefaultCampaign();
 
   const campaigns = await pool.query<CampaignRow>(
@@ -516,62 +518,3 @@ function resolveMarketingAssetPreviewUrl(
 ) {
   if (previewUrl?.trim()) {
     return previewUrl.trim();
-  }
-
-  const sourceDriveId = extractDriveFileId(String(sourceUrl ?? ''));
-  if (sourceDriveId) {
-    return `https://drive.google.com/thumbnail?id=${sourceDriveId}&sz=w1200`;
-  }
-
-  return resolveMarketingAssetUrl(file, url);
-}
-
-function resolveMarketingAssetUrl(file: string, url: string | undefined) {
-  const trimmedUrl = String(url ?? '').trim();
-  const driveId = extractDriveFileId(trimmedUrl);
-  if (driveId) {
-    return `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`;
-  }
-
-  if (trimmedUrl) {
-    return trimmedUrl;
-  }
-
-  if (/^post-\d{3}-.+\.png$/i.test(file)) {
-    return `${CAMPAIGN_ASSET_BASE_URL}/${encodeURIComponent(file)}`;
-  }
-
-  const campaignAssetUrl = CAMPAIGN_ASSET_URLS[file.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '')];
-  return campaignAssetUrl || undefined;
-}
-
-function extractDriveFileId(url: string) {
-  if (!url.includes('drive.google.com')) {
-    return null;
-  }
-
-  return url.match(/\/d\/([^/]+)/)?.[1] ?? url.match(/[?&]id=([^&]+)/)?.[1] ?? null;
-}
-
-function normalizeRecord(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return {};
-  }
-  return value as Record<string, unknown>;
-}
-
-function toIso(value: string | Date): string {
-  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
-}
-
-function toIsoOrNull(value: string | Date | null): string | null {
-  return value ? toIso(value) : null;
-}
-
-function toDateOnly(value: string | Date): string {
-  if (value instanceof Date) {
-    return value.toISOString().slice(0, 10);
-  }
-
-  return String(value).slice(0, 10);
-}
