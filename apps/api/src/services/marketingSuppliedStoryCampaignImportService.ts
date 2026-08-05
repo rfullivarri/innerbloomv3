@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { pool } from '../db.js';
 
 type SuppliedStory = {
@@ -170,7 +171,10 @@ export async function importSuppliedStoryCampaign(
 }
 
 async function findSuppliedCampaignDirectory(): Promise<string | null> {
+  const moduleDirectory = path.dirname(fileURLToPath(import.meta.url));
   const candidates = [
+    // Production build: copied by copy-taskgen-assets.mjs into apps/api/dist.
+    path.resolve(moduleDirectory, '..', 'marketing', 'supplied-campaigns'),
     path.resolve(process.cwd(), 'marketing', 'supplied-campaigns'),
     path.resolve(process.cwd(), '..', '..', 'marketing', 'supplied-campaigns'),
   ];
