@@ -14,6 +14,17 @@ export type DriveFile = {
   thumbnailLink?: string;
 };
 
+export class MarketingDriveError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number | null = null,
+    public readonly reason: string | null = null,
+  ) {
+    super(message);
+    this.name = 'MarketingDriveError';
+  }
+}
+
 export function assertMarketingDriveConfigured() {
   const rawJson = String(process.env.GOOGLE_SERVICE_ACCOUNT_JSON ?? '').trim();
   const legacyBase64 = String(process.env.GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 ?? '').trim();
@@ -33,6 +44,8 @@ export async function listDriveFolderImages(folderId: string): Promise<DriveFile
       fields: 'nextPageToken,files(id,name,mimeType,webViewLink,thumbnailLink)',
       orderBy: 'name_natural',
       pageSize: '100',
+      corpora: 'allDrives',
+      spaces: 'drive',
       supportsAllDrives: 'true',
       includeItemsFromAllDrives: 'true',
     });
@@ -40,12 +53,28 @@ export async function listDriveFolderImages(folderId: string): Promise<DriveFile
     const response = await fetch(`https://www.googleapis.com/drive/v3/files?${params}`, {
       headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30_000),
     });
-    if (!response.ok) throw new Error(`Google Drive folder listing failed (HTTP ${response.status})`);
+    if (!response.ok) {
+      const detail = await safeGoogleError(response);
+      throw new MarketingDriveError(
+        `Google Drive rejected the folder listing (HTTP ${response.status})${detail.message ? `: ${detail.message}` : ''}`,
+        response.status,
+        detail.reason,
+      );
+    }
     const payload = await response.json() as { files?: DriveFile[]; nextPageToken?: string };
     files.push(...(payload.files ?? []));
     pageToken = payload.nextPageToken ?? '';
   } while (pageToken);
   return files;
+}
+
+async function safeGoogleError(response: Response) {
+  try {
+    const body = await response.json() as { error?: { message?: string; errors?: Array<{ reason?: string }> } };
+    return { message: body.error?.message?.slice(0, 500) ?? null, reason: body.error?.errors?.[0]?.reason?.slice(0, 120) ?? null };
+  } catch {
+    return { message: null, reason: null };
+  }
 }
 
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
@@ -161,7 +190,8 @@ async function getAccessToken() {
   });
 
   if (!response.ok) {
-    throw new Error(`Google OAuth token request failed (HTTP ${response.status})`);
+    const detail = await safeGoogleError(response);
+    throw new MarketingDriveError(`Google OAuth token request failed (HTTP ${response.status})${detail.message ? `: ${detail.message}` : ''}`, response.status, detail.reason);
   }
 
   const payload = (await response.json()) as { access_token?: string };
