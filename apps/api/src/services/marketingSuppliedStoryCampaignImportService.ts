@@ -14,12 +14,15 @@ type SuppliedStory = {
   scheduled_at: string;
 };
 
+const CAMPAIGN_OBJECTIVES = ['new_users', 'leads', 'activation', 'awareness', 'retention'] as const;
+type CampaignObjective = (typeof CAMPAIGN_OBJECTIVES)[number];
+
 export type SuppliedStoryCampaign = {
   campaign: {
     campaign_code: string;
     title: string;
-    period_key?: string;
-    objective?: string;
+    period_key: string;
+    objective: CampaignObjective;
     strategy_summary?: string;
     source_campaign_code: string;
     source_drive_folder_id: string;
@@ -75,7 +78,14 @@ export async function syncSuppliedStoryCampaignsFromRepository(): Promise<void> 
 
 export async function readSuppliedStoryCampaign(campaignPath: string): Promise<SuppliedStoryCampaign> {
   const parsed = JSON.parse(await fs.readFile(campaignPath, 'utf8')) as SuppliedStoryCampaign;
-  if (!parsed.campaign?.campaign_code || !parsed.campaign.title || !Array.isArray(parsed.stories) || parsed.stories.length === 0) {
+  if (
+    !parsed.campaign?.campaign_code ||
+    !parsed.campaign.title ||
+    !/^\d{4}-(0[1-9]|1[0-2])$/.test(parsed.campaign.period_key) ||
+    !CAMPAIGN_OBJECTIVES.includes(parsed.campaign.objective) ||
+    !Array.isArray(parsed.stories) ||
+    parsed.stories.length === 0
+  ) {
     throw new Error('Invalid supplied Story campaign configuration.');
   }
   return parsed;
@@ -93,7 +103,7 @@ export async function importSuppliedStoryCampaign(
     const campaignResult = await client.query<{ marketing_campaign_id: string }>(
       `INSERT INTO marketing_campaigns
         (period_key, campaign_code, title, objective, status, strategy_summary, source_context)
-       VALUES ($1, $2, $3, $4, 'needs_review', $5, $6::jsonb)
+       VALUES ($1, $2, $3, $4, 'review', $5, $6::jsonb)
        ON CONFLICT (campaign_code) ${options.preserveExisting ? 'DO NOTHING' : `DO UPDATE SET
          title = EXCLUDED.title,
          objective = EXCLUDED.objective,
@@ -103,10 +113,10 @@ export async function importSuppliedStoryCampaign(
          updated_at = now()`}
        RETURNING marketing_campaign_id`,
       [
-        campaign.period_key ?? new Date().toISOString().slice(0, 7),
+        campaign.period_key,
         campaign.campaign_code,
         campaign.title,
-        campaign.objective ?? 'Supplied visual-base Story campaign',
+        campaign.objective,
         campaign.strategy_summary ?? '',
         JSON.stringify({
           pipeline_kind: 'supplied_asset_campaign',
