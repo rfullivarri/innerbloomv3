@@ -12,6 +12,8 @@ const snapshotSampleSource = path.resolve(scriptDir, '../db-snapshot.sample.json
 const snapshotSampleDest = path.resolve(distDir, 'db-snapshot.sample.json'); // #REMOVE_ME_DEBUG_BYPASS
 const fixturesSource = path.resolve(scriptDir, '../fixtures'); // #REMOVE_ME_DEBUG_BYPASS
 const fixturesDest = path.resolve(distDir, 'fixtures'); // #REMOVE_ME_DEBUG_BYPASS
+const suppliedCampaignsSource = path.resolve(scriptDir, '../../../marketing/supplied-campaigns');
+const suppliedCampaignsDest = path.resolve(scriptDir, '../dist/marketing/supplied-campaigns');
 
 if (!existsSync(taskgenSource)) {
   throw new Error(`Task generation CLI not found at ${taskgenSource}`);
@@ -31,4 +33,11 @@ if (existsSync(snapshotSampleSource)) {
 if (existsSync(fixturesSource)) {
   rmSync(fixturesDest, { recursive: true, force: true }); // #REMOVE_ME_DEBUG_BYPASS
   cpSync(fixturesSource, fixturesDest, { recursive: true }); // #REMOVE_ME_DEBUG_BYPASS
+}
+// Supplied Story configurations are created at repository level by Codex Cloud.
+// Copy them into the API build output so Railway can import them at runtime.
+rmSync(suppliedCampaignsDest, { recursive: true, force: true });
+if (existsSync(suppliedCampaignsSource)) {
+  mkdirSync(path.dirname(suppliedCampaignsDest), { recursive: true });
+  cpSync(suppliedCampaignsSource, suppliedCampaignsDest, { recursive: true });
 }
