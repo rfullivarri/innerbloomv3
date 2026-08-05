@@ -70,7 +70,7 @@ export async function listDriveFolderImages(folderId: string): Promise<DriveFile
 
 async function safeGoogleError(response: Response) {
   try {
-    const body = await response.json() as { error?: { message?: string; errors?: Array<{ reason?: string }> } };
+    const body = await response.json() as { error?: { message?: string; errors?: { reason?: string }[] } };
     return { message: body.error?.message?.slice(0, 500) ?? null, reason: body.error?.errors?.[0]?.reason?.slice(0, 120) ?? null };
   } catch {
     return { message: null, reason: null };
