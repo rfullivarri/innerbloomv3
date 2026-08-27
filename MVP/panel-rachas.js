@@ -246,18 +246,53 @@
           transform:none;               /* nada de translate raro */
         }
         
-        /* ====== chip de modo, más chico y no “parecido a botón” ====== */
-        .chip.mode{
-          border-radius:10px;                /* más rectangular */
-          font-size:12px; padding:5px 10px;
-          background:color-mix(in srgb, var(--mcolor, #5aa0ff) 12%, #0c1124);
-          border:1px solid color-mix(in srgb, var(--mcolor, #5aa0ff) 40%, #2a3560);
-          box-shadow:0 0 0 1px color-mix(in srgb, var(--mcolor, #5aa0ff) 25%, transparent) inset;
+        /* ====== chip de modo (pill oscuro con halo animado) ====== */
+        [data-role="modeChip"].chip.mode{
+          --mcolor:#1f7aff;
+          position:relative;
+          isolation:isolate;
+          border-radius:999px;
+          font-size:12px;
+          line-height:1.2;
+          font-weight:800;
+          letter-spacing:.02em;
+          padding:6px 12px;
+          color:#eff4ff;
+          background:linear-gradient(160deg,
+            color-mix(in srgb, var(--mcolor) 20%, #060a18) 0%,
+            #070d1c 55%,
+            #0b1428 100%);
+          border:1px solid color-mix(in srgb, var(--mcolor) 34%, #2a365d);
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.07),
+            inset 0 -1px 0 rgba(0,0,0,.35),
+            0 6px 14px rgba(0,0,0,.35);
+          text-shadow:0 1px 1px rgba(0,0,0,.6);
         }
-        .chip.mode.low    { --mcolor:#ff6b6b; }   /* Low = rojo   */
-        .chip.mode.chill  { --mcolor:#20d3b0; }   /* Chill = verde */
-        .chip.mode.flow   { --mcolor:#1f7aff; }   /* Flow = azul  */
-        .chip.mode.evolve { --mcolor:#a77bff; }   /* Evolve = lila*/
+        [data-role="modeChip"].chip.mode::after{
+          content:"";
+          position:absolute;
+          inset:-1px;
+          border-radius:inherit;
+          padding:1px;
+          background:conic-gradient(from 0deg,
+            color-mix(in srgb, var(--mcolor) 75%, #fff) 0deg,
+            transparent 80deg,
+            color-mix(in srgb, var(--mcolor) 55%, #fff) 190deg,
+            transparent 320deg,
+            color-mix(in srgb, var(--mcolor) 75%, #fff) 360deg);
+          -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          -webkit-mask-composite:xor;
+          mask-composite:exclude;
+          opacity:.68;
+          pointer-events:none;
+          animation:modeChipHaloSpin 7s linear infinite;
+        }
+        @keyframes modeChipHaloSpin{ to{ transform:rotate(1turn); } }
+        [data-role="modeChip"].chip.mode.low    { --mcolor:#ff6b6b; }   /* Low = rojo   */
+        [data-role="modeChip"].chip.mode.chill  { --mcolor:#20d3b0; }   /* Chill = verde */
+        [data-role="modeChip"].chip.mode.flow   { --mcolor:#1f7aff; }   /* Flow = azul  */
+        [data-role="modeChip"].chip.mode.evolve { --mcolor:#a77bff; }   /* Evolve = lila*/
         
         /* ====== tabs Sem/Mes/3M reubicados y centrados ====== */
         .seg.is-range{ width:100%; justify-content:center; gap:8px; }
@@ -336,7 +371,7 @@
         /* Ajustes responsivos para que sigan entrando en móviles estrechos */
         @media (max-width: 390px){
           .seg-pillars button{ padding:6px 10px; font-size:13px; }
-          .chip.mode{ font-size:11px; padding:4px 8px; }
+          [data-role="modeChip"].chip.mode{ font-size:11px; padding:5px 10px; }
         }
 
 
@@ -392,7 +427,7 @@
         /* Un toque de responsivo por si el ancho es MUY chico */
         @media (max-width: 390px){
           .seg-pillars button{ padding:6px 10px; font-size:13px; }
-          .chip.mode{ font-size:11px; padding:4px 8px; }
+          [data-role="modeChip"].chip.mode{ font-size:11px; padding:5px 10px; }
         }
         /* Fila del rango (Sem/Mes/3M): centrada geométricamente con ℹ️ a la derecha */
         .box .row:has([data-role="range"]){
