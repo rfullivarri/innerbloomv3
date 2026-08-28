@@ -5,6 +5,7 @@ import { TraitIcon } from '../MobilePremiumPrimitives';
 import { DEFAULT_MOBILE_PREMIUM_BASE, normalizeMobilePremiumBasePath, useMobilePremiumBasePath } from '../mobilePremiumRouting';
 
 const LAB_BASE = DEFAULT_MOBILE_PREMIUM_BASE;
+export const ONBOARDING_WELCOME_VISIBLE_MS = 8000;
 
 export type OnboardingBanner = {
   accent: 'violet' | 'green' | 'amber' | 'red' | 'blue';
@@ -155,9 +156,7 @@ export function PremiumOnboardingBannersLab({
 }) {
   const labBase = useMobilePremiumBasePath();
   const effectiveBanners = banners.map((banner) => withOnboardingBannerBase(banner, labBase));
-  const [welcomeVisible, setWelcomeVisible] = useState(() => (
-    !welcomeStorageKey || typeof window === 'undefined' || window.localStorage.getItem(welcomeStorageKey) !== '1'
-  ));
+  const [welcomeVisible, setWelcomeVisible] = useState(true);
   const hasWelcome = effectiveBanners.some((banner) => banner.variant === 'welcome');
 
   useEffect(() => {
@@ -166,13 +165,27 @@ export function PremiumOnboardingBannersLab({
       return undefined;
     }
     if (welcomeStorageKey) {
-      if (window.localStorage.getItem(welcomeStorageKey) === '1') {
+      const storedValue = window.localStorage.getItem(welcomeStorageKey);
+      if (storedValue === '1') {
         setWelcomeVisible(false);
         return undefined;
       }
-      window.localStorage.setItem(welcomeStorageKey, '1');
+
+      const storedStartedAt = Number(storedValue);
+      const startedAt = Number.isFinite(storedStartedAt) && storedStartedAt > 0 ? storedStartedAt : Date.now();
+      const remainingMs = ONBOARDING_WELCOME_VISIBLE_MS - (Date.now() - startedAt);
+      if (remainingMs <= 0) {
+        setWelcomeVisible(false);
+        return undefined;
+      }
+
+      window.localStorage.setItem(welcomeStorageKey, String(startedAt));
+      setWelcomeVisible(true);
+      const timer = window.setTimeout(() => setWelcomeVisible(false), remainingMs);
+      return () => window.clearTimeout(timer);
     }
-    const timer = window.setTimeout(() => setWelcomeVisible(false), 8000);
+    setWelcomeVisible(true);
+    const timer = window.setTimeout(() => setWelcomeVisible(false), ONBOARDING_WELCOME_VISIBLE_MS);
     return () => window.clearTimeout(timer);
   }, [hasWelcome, welcomeStorageKey]);
 
@@ -182,18 +195,16 @@ export function PremiumOnboardingBannersLab({
     <section className={`space-y-7 ${compact ? '' : 'pb-24'}`}>
       <style>{`
         @keyframes mpOnboardingSpin { to { transform: rotate(360deg); } }
-        @keyframes mpOnboardingShimmer { 0% { transform: translateX(-120%) skewX(-16deg); } 100% { transform: translateX(220%) skewX(-16deg); } }
         @keyframes mpOnboardingSpark { 0%,100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.12); opacity: 1; } }
         @keyframes mpOnboardingCtaPulse {
           0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(139,92,246,.18), 0 0 20px rgba(139,92,246,.14); }
           50% { transform: scale(1.045); box-shadow: 0 0 0 7px rgba(139,92,246,0), 0 0 30px rgba(139,92,246,.28); }
         }
         .mp-onboarding-spinner { animation: mpOnboardingSpin 1s linear infinite; }
-        .mp-onboarding-welcome-shine { animation: mpOnboardingShimmer 2.6s ease-in-out infinite; }
         .mp-onboarding-spark { animation: mpOnboardingSpark 1.8s ease-in-out infinite; }
         .mp-onboarding-cta { animation: mpOnboardingCtaPulse 1.55s ease-in-out infinite; }
         @media (prefers-reduced-motion: reduce) {
-          .mp-onboarding-spinner, .mp-onboarding-welcome-shine, .mp-onboarding-spark, .mp-onboarding-cta { animation: none !important; }
+          .mp-onboarding-spinner, .mp-onboarding-spark, .mp-onboarding-cta { animation: none !important; }
         }
       `}</style>
       {!compact ? (
@@ -262,15 +273,15 @@ function BannerIcon({ banner }: { banner: OnboardingBanner }) {
 
 function WelcomeBanner({ banner }: { banner: OnboardingBanner }) {
   return (
-    <article className="relative overflow-hidden rounded-[1.55rem] border border-white/18 bg-gradient-to-r from-[#8b5cf6] via-[#d946ef] to-[#f5c56b] p-4 text-[#12091d] shadow-[0_26px_70px_rgba(167,139,250,0.28)]">
-      <span className="mp-onboarding-welcome-shine pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-white/24 blur-xl" aria-hidden="true" />
+    <article className="relative overflow-hidden rounded-[1.55rem] border border-violet-300/20 bg-[radial-gradient(circle_at_34%_16%,rgba(196,181,253,0.34),transparent_42%),linear-gradient(105deg,#4c1d95_0%,#6d28d9_38%,#a855f7_72%,#c65bbd_100%)] p-4 text-[#fff8ec] shadow-[0_24px_64px_rgba(139,92,246,0.3)]">
+      <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.03),transparent_48%)]" aria-hidden="true" />
       <div className="relative grid grid-cols-[52px_minmax(0,1fr)] items-center gap-4">
-        <div className="grid h-13 w-13 place-items-center rounded-[1.15rem] border border-black/12 bg-white/28 shadow-[0_14px_38px_rgba(15,23,42,0.14)]">
-          <span className="mp-onboarding-spark text-2xl leading-none" aria-hidden="true">✦</span>
+        <div className="grid h-13 w-13 place-items-center rounded-[1.15rem] border border-violet-200/20 bg-[rgba(36,17,63,0.72)] text-violet-200 shadow-[0_14px_34px_rgba(30,12,52,0.3)] backdrop-blur-sm">
+          <span className="mp-onboarding-spark text-2xl leading-none drop-shadow-[0_0_14px_rgba(221,214,254,0.7)]" aria-hidden="true">✦</span>
         </div>
         <div className="min-w-0">
-          <p className="text-[0.68rem] font-black uppercase tracking-[0.24em] text-black/62">{banner.label}</p>
-          <h2 className="mt-1 text-[1.45rem] font-black leading-tight text-black">{banner.title}</h2>
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-violet-50/80">{banner.label}</p>
+          <h2 className="mt-1 text-[1.45rem] font-bold leading-tight text-[#fff8ec]">{banner.title}</h2>
         </div>
       </div>
     </article>
