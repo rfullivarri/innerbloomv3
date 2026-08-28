@@ -84,6 +84,7 @@ export const mobilePremiumTranslations = {
   'mobilePremium.reminder.channel': { es: 'Canal', en: 'Channel' },
   'mobilePremium.reminder.email': { es: 'Email', en: 'Email' },
   'mobilePremium.reminder.notification': { es: 'Notificación', en: 'Notification' },
+  'mobilePremium.reminder.disabledHint': { es: 'No se enviarán recordatorios por email ni notificaciones.', en: 'No email or notification reminders will be sent.' },
   'mobilePremium.reminder.timezone': { es: 'Zona horaria', en: 'Time zone' },
   'mobilePremium.reminder.automatic': { es: 'Automática', en: 'Automatic' },
   'mobilePremium.reminder.manual': { es: 'Manual', en: 'Manual' },
@@ -91,6 +92,7 @@ export const mobilePremiumTranslations = {
   'mobilePremium.reminder.error': { es: 'No se pudo guardar el recordatorio. Probá de nuevo.', en: 'Could not save the reminder. Try again.' },
   'mobilePremium.reminder.saving': { es: 'Guardando...', en: 'Saving...' },
   'mobilePremium.reminder.save': { es: 'Guardar recordatorio', en: 'Save reminder' },
+  'mobilePremium.reminder.disable': { es: 'Desactivar recordatorios', en: 'Turn off reminders' },
 
   'mobilePremium.rhythm.eyebrow': { es: 'Ritmo', en: 'Rhythm' },
   'mobilePremium.rhythm.title': { es: 'Elegí tu ritmo', en: 'Choose your rhythm' },
