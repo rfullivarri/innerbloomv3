@@ -85,6 +85,7 @@ import {
   normalizeMobilePremiumBasePath,
   useMobilePremiumBasePath,
 } from './mobile-premium/mobilePremiumRouting';
+import { useOnboardingWelcome } from './mobile-premium/useOnboardingWelcome';
 import { buildNativeMobileAuthUrl, clearMobileAuthSession, setForceNativeWelcome, useMobileAuthSession } from '../../mobile/mobileAuthSession';
 import { cancelNativeDailyReminderNotification, syncNativeProductNotifications } from '../../mobile/localNotifications';
 import { isNativeCapacitorPlatform, openUrlInCapacitorBrowser } from '../../mobile/capacitor';
@@ -673,6 +674,12 @@ function MobilePremiumLabPageInner() {
     effectiveOnboardingProgress?.onboarding_started_at ||
     effectiveOnboardingProgress?.tasks_generated_at,
   );
+  const onboardingWelcome = useOnboardingWelcome(effectiveOnboardingProgress, effectiveBackendUserId);
+  const activeOnboardingBanners = effectiveOnboardingProgress
+    ? buildActiveOnboardingBanners(effectiveOnboardingProgress, labBase).filter(
+        (banner) => banner.variant !== 'welcome' || onboardingWelcome.shouldShowWelcome,
+      )
+    : [];
 
   useEffect(() => {
     if (
@@ -969,15 +976,11 @@ function MobilePremiumLabPageInner() {
       title={resolveRouteLabel(route, t)}
     >
       <section className="space-y-7">
-        {shouldShowOnboardingGuide && effectiveOnboardingProgress && ['dashboard', 'tareas', 'logros'].includes(route) ? (
+        {shouldShowOnboardingGuide && activeOnboardingBanners.length > 0 && ['dashboard', 'tareas', 'logros'].includes(route) ? (
           <PremiumOnboardingBannersLab
-            banners={buildActiveOnboardingBanners(effectiveOnboardingProgress, labBase)}
+            banners={activeOnboardingBanners}
             compact
-            welcomeStorageKey={
-              onboardingPreview && effectiveOnboardingProgress.onboarding_session_id
-                ? `innerbloom.mobilePremiumLab.welcomeSeen:${effectiveOnboardingProgress.onboarding_session_id}`
-                : undefined
-            }
+            welcomeStorageKey={onboardingWelcome.storageKey}
           />
         ) : null}
         {route === 'dashboard' ? (
