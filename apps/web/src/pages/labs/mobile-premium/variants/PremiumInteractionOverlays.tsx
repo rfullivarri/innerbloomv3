@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { ModerationTrackerIcon, moderationTrackerMeta } from '../../../../components/moderation/trackerMeta';
-import { classifyUserTask, deleteCurrentAccount, getDailyReminderSettings, getProductNotificationPreferences, getRewardsHistory, updateDailyReminderSettings, updateProductNotificationPreferences, type GameModeUpgradeSuggestion, type ModerationTracker, type ModerationTrackerType, type ProductNotificationPreferences, type SubmitDailyQuestFeedbackEvent, type SubmitDailyQuestResponse, type UserTaskClassification } from '../../../../lib/api';
+import { classifyUserTask, deleteCurrentAccount, getDailyReminderSettings, getProductNotificationPreferences, getRewardsHistory, updateDailyReminderSettings, updateProductNotificationPreferences, type DailyReminderSettingsResponse, type GameModeUpgradeSuggestion, type ModerationTracker, type ModerationTrackerType, type ProductNotificationPreferences, type SubmitDailyQuestFeedbackEvent, type SubmitDailyQuestResponse, type UserTaskClassification } from '../../../../lib/api';
 import { useDifficulties } from '../../../../hooks/useCatalogs';
 import { useCreateTask } from '../../../../hooks/useUserTasks';
 import { TimezoneCombobox } from '../../../../components/common/TimezoneCombobox';
@@ -969,15 +969,23 @@ function ReminderSheet({
   const timezoneCatalog = useMemo(() => getTimezoneCatalog(), []);
   const [savePending, setSavePending] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const remindersDisabled = !channels.email && !channels.notification;
 
   useEffect(() => {
     if (!backendUserId) return;
     let cancelled = false;
-    void getDailyReminderSettings()
-      .then((settings) => {
+    void Promise.all([
+      getDailyReminderSettings('email'),
+      getDailyReminderSettings('notification'),
+    ])
+      .then(([emailSettings, notificationSettings]) => {
         if (cancelled) return;
-        const savedTime = settings.local_time ?? settings.localTime;
-        const savedTimezone = settings.timezone ?? settings.timeZone ?? settings.time_zone;
+        const emailEnabled = isReminderChannelEnabled(emailSettings);
+        const notificationEnabled = isReminderChannelEnabled(notificationSettings);
+        const preferredSettings = !emailEnabled && notificationEnabled ? notificationSettings : emailSettings;
+        const savedTime = preferredSettings.local_time ?? preferredSettings.localTime;
+        const savedTimezone = preferredSettings.timezone ?? preferredSettings.timeZone ?? preferredSettings.time_zone;
+        setChannels({ email: emailEnabled, notification: notificationEnabled });
         if (savedTime) setTime(savedTime.slice(0, 5));
         if (savedTimezone) setManualTimezone(savedTimezone);
       })
@@ -992,7 +1000,7 @@ function ReminderSheet({
   }
 
   async function handleSave() {
-    if (savePending || (!channels.email && !channels.notification)) return;
+    if (savePending) return;
     setSavePending(true);
     setSaveError(null);
     try {
@@ -1100,6 +1108,11 @@ function ReminderSheet({
             </button>
           ))}
           </div>
+          {remindersDisabled ? (
+            <p className="mt-3 text-sm text-[color:var(--mp-text-secondary)]" role="status">
+              {t('mobilePremium.reminder.disabledHint')}
+            </p>
+          ) : null}
         </div>
         <div>
           <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--mp-text-muted)]">{t('mobilePremium.reminder.timezone')}</p>
@@ -1138,15 +1151,26 @@ function ReminderSheet({
         {saveError ? <p className="text-sm text-[color:var(--mp-red)]">{saveError}</p> : null}
         <button
           className="min-h-12 w-full rounded-full bg-violet-500 px-5 text-sm font-semibold text-white shadow-[0_16px_38px_rgba(139,92,246,0.24)] disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={savePending || (!channels.email && !channels.notification)}
+          disabled={savePending}
           onClick={() => void handleSave()}
           type="button"
         >
-          {savePending ? t('mobilePremium.reminder.saving') : t('mobilePremium.reminder.save')}
+          {savePending
+            ? t('mobilePremium.reminder.saving')
+            : remindersDisabled
+              ? t('mobilePremium.reminder.disable')
+              : t('mobilePremium.reminder.save')}
         </button>
       </div>
     </PremiumSheet>
   );
+}
+
+function isReminderChannelEnabled(settings: DailyReminderSettingsResponse): boolean {
+  if (settings.status) {
+    return settings.status === 'active';
+  }
+  return settings.enabled === true;
 }
 
 function AiTaskSheet({ backendUserId, onClose }: { backendUserId: string | null; onClose: () => void }) {
