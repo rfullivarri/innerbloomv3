@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type RefObject, type SVGProps } f
 import { Link } from 'react-router-dom';
 import { useRequest } from '../../../../hooks/useRequest';
 import {
+  getDailyQuestStatus,
   getEmotions,
   getUserDailyEnergy,
   getUserLevel,
@@ -84,6 +85,34 @@ export function PremiumDashboard({
   const { language, t } = usePostLoginLanguage();
   const labBase = useMobilePremiumBasePath();
   const weeklyGoal = Math.max(1, Math.round(weeklyTarget ?? 3));
+  const dailyQuestStatus = useRequest(
+    () => getDailyQuestStatus(),
+    [backendUserId],
+    { enabled: Boolean(backendUserId) && !onboardingPreview },
+  );
+  const [previewDay, setPreviewDay] = useState(() => formatDateKey(new Date()));
+
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState === 'hidden') return;
+      setPreviewDay(formatDateKey(new Date()));
+      if (backendUserId && !onboardingPreview) void dailyQuestStatus.reload();
+    };
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    const interval = window.setInterval(refresh, 5 * 60 * 1000);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+      window.clearInterval(interval);
+    };
+  }, [backendUserId, onboardingPreview, dailyQuestStatus.reload]);
+
+  const showDailyQuestPrompt = onboardingPreview
+    ? !localSnapshot?.dquestHistory.some((record) => record.date === previewDay)
+    : backendUserId
+      ? dailyQuestStatus.data?.submitted === false
+      : true;
   const { data: streakData } = useRequest(
     async () => {
       if (!backendUserId) return null;
@@ -182,7 +211,7 @@ export function PremiumDashboard({
     <section className="space-y-8">
       <DashboardMotionStyles />
       <section className="border-b border-[color:var(--mp-border)] pb-6">
-        <div className="grid grid-cols-[minmax(0,1fr)_92px] items-center gap-4">
+        {showDailyQuestPrompt ? <div className="grid grid-cols-[minmax(0,1fr)_92px] items-center gap-4">
           <div>
             <p className="text-[1.28rem] font-medium leading-tight text-[color:var(--mp-text)]">{t('mobilePremium.dashboard.dquestTitle')}</p>
             <p className="mt-2 max-w-[17rem] text-sm leading-5 text-[color:var(--mp-text-secondary)]">
@@ -201,8 +230,8 @@ export function PremiumDashboard({
             <span className="absolute right-5 top-7 h-10 w-10 rounded-full border border-violet-200/24" />
             <span className="absolute bottom-5 right-3 h-5 w-5 rounded-full bg-violet-300/35 blur-[1px]" />
           </div>
-        </div>
-        <div className="mt-6 border-t border-[color:var(--mp-border)] pt-4">
+        </div> : null}
+        <div className={showDailyQuestPrompt ? 'mt-6 border-t border-[color:var(--mp-border)] pt-4' : ''}>
           <div className="flex items-baseline justify-between gap-3 text-xs text-[color:var(--mp-text-secondary)]">
             <p><span className="text-[color:var(--mp-text)]">{t('mobilePremium.dashboard.level', { level: level.current_level })}</span> · {formatNumber(level.xp_total)} GP</p>
             <p>{t('mobilePremium.dashboard.gpRemaining', { gp: level.xp_to_next ?? 0 })}</p>
